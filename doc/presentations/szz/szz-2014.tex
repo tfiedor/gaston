@@ -1,0 +1,168 @@
+\documentclass{beamer}
+
+% Used packages
+
+\usepackage[czech]{babel}
+\usepackage[utf8]{inputenc}
+\usepackage{multirow}
+\usepackage{graphicx}
+\usepackage{amsmath,bm,times}
+\usepackage{tikz}
+\usepackage{verbatim}
+\usepackage{listings}
+\usepackage{color}
+
+\useoutertheme{infolines}
+\usetheme{Copenhagen}
+\mode<presentation>
+
+% informace pouzite pro titulky
+
+\title[Rozhodovací procedura pro logiku WS$k$S]{Rozhodovací procedura pro logiku
+WS$k$S}
+\subtitle{Státní zavěřečná zkouška}
+\author[T. Fiedor]{bc. Tomáš Fiedor}
+\date{??. květen 2014}
+\institute[vedoucí: Lengál]{pod vedením Ing. Ondřeje Lengála}
+
+\begin{document}
+
+\setbeamertemplate{footline}[infolines theme]
+
+  \begin{frame}[plain]
+    \titlepage
+  \end{frame}
+	
+	\section{WS$k$S}
+	\subsection{Úvod}
+	\begin{frame}{WS$k$S logika}
+     \begin{itemize}
+       \item Logiky = vhodný prostředek pro specifikaci systému
+       \item WS$k$S je logika
+       \begin{itemize}
+         \pause
+         \item \emph{druhého řádu} $\Rightarrow$ možnost kvantifikace přes
+         relace;
+         \pause
+         \item \emph{monadická} $\Rightarrow$ relace jsou unární, tzn. množiny a
+         nikoliv např. funkce;
+         \pause
+         \item \emph{slabá} $\Rightarrow$ tyto množiny jsou konečné;
+         \pause
+         \item \emph{s $k$ následníky} $\Rightarrow$ možnost vyjádření stromových
+         struktur.
+         \pause
+       \end{itemize}
+       \item Příklad formule: $\forall x. x \in Z \Leftrightarrow (x \in X
+       \wedge x \in Y)$
+       \pause
+       \item Proč WS$k$S?
+       \pause
+       \begin{itemize}
+         \item Dobrá vyjadřovací síla;
+         \pause
+         \item Je rozhodnutelná. 
+       \end{itemize}
+         \pause
+         \item Složitost problému splnitelnosti WS$k$S formule je ve třídě
+         NONELEMENTARY.
+         \pause
+         \begin{itemize}
+           \item[$\Rightarrow$] nutnost použití heuristik pro praktické řešení
+           problému.
+         \end{itemize}
+     \end{itemize}
+	\end{frame}
+	
+	\subsection{Rozhodovací procedura}
+	\begin{frame}{Rozhodování WS$k$S pomocí stromových automatů}
+	 \begin{itemize}
+	   \item Rozhodovací procedura = je formule $\phi$ \textcolor{blue}{platná},
+	   \textcolor{magenta}{neplatná, ale splnitelná}, nebo
+	   \textcolor{red}{nesplnitelná}?
+	 \end{itemize}
+	 \begin{enumerate}
+	   \pause
+	   \item Převod $\phi$ do zjednodušené syntaxe
+	   \begin{itemize}
+	     \item[$\Rightarrow$] $\vee, \neg, \exists X, Sing, \subseteq, =$
+	   \end{itemize}
+	   \pause
+	   \item Indukcí nad strukturou formule $\phi$:
+	   \begin{enumerate}
+	   \pause
+	     \item Konstrukce elementárních automatů pro atomické podformule $\phi$
+	   \pause
+	     \item Indukční krok:
+	     \begin{itemize}
+	   \pause
+	       \item $\phi_1 \vee \phi_2 \Rightarrow$ sjednocení automatů
+	       $\mathcal{A}_{\phi_1}$ a $\mathcal{A}_{\phi_2}$
+	   \pause
+	       \item $\phi = \neg\phi_1 \Rightarrow$ komplementace automatu
+	       $\mathcal{A}_{\phi_1}$
+	   \pause
+	       \item $\phi = \exists X_i.\phi_1 \Rightarrow$ $i$-tá projekce automatu
+	       $\mathcal{A}_{\phi_1}$
+	   \pause
+	     \end{itemize}
+	   \end{enumerate}
+	   \item Testování jazyka $L_{\mathcal{A}_\phi}$
+	 \end{enumerate}
+	\end{frame}
+	
+	\begin{frame}{MONA}
+	 \begin{itemize}
+	  \item Implementace rozhodovací procedury pro WS1S a WS2S
+	  \item Využívá deterministické automaty
+	  \item Implementace řady heuristik
+	  \begin{itemize}
+	   \pause
+	    \item[$\Rightarrow$] Reprezentace přechodové relace pomocí
+	    \textcolor{blue}{binarních rozhodovacích diagramu} (BDD)
+	   \pause
+	    \item[$\Rightarrow$] Reprezentace formule pomocí
+	    \textcolor{blue}{orientovaných acyklických grafů} (DAG)
+	   \pause
+	    \item[$\Rightarrow$] Redukce formule
+	   \pause
+	    \item[$\Rightarrow$] Cachování 
+	  \end{itemize}
+	   \pause
+	   \item Nevýhoda nástroje MONA:
+	   \begin{itemize}
+	  \item Při zavedení nedeterminismu nastává okamžitá determinizace
+	  \begin{itemize}
+	    \pause
+	    \item[$\Rightarrow$] ztráta informací o původních stavech
+	  \end{itemize}
+	  \end{itemize}
+	 \end{itemize}
+	\end{frame}
+	
+	\section{Náplň práce}
+	\begin{frame}{Náplň práce}
+	 \begin{itemize}
+	   \item Návrh a implementace rozhodovací procedury založené na
+	   nedeterministických automatech
+	   \pause
+	   \item Hledání (ne)přijímajících stavů za běhu
+	   \begin{itemize}
+	     \item Využití algoritmu založeného na anti-chainech
+	   \pause
+	   \end{itemize}
+	   \item Efektivní manipulace se stromovými automaty = knihovna VATA
+	   \pause
+	   \item Tvorba hierarchické rodiny automatů
+	 \end{itemize}
+	\end{frame}
+	
+    \begin{frame}{Pokračování práce}
+    \begin{enumerate}
+      \item Navržení rozhodovací procedury pro WS$k$S založené na NTA
+      \item Důkaz korektnosti této procedury
+      \item Implementace navržené metody
+      \item Srovnání výkonu s nástrojem MONA
+    \end{enumerate}
+  \end{frame}
+\end{document}

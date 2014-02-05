@@ -1,0 +1,146 @@
+%============================================================================
+% tento soubor pouzijte jako zaklad
+% (c) 2008 Michal Bidlo
+% E-mail: bidlom AT fit vutbr cz
+%============================================================================
+% kodovaní: iso-8859-2 (zmena prikazem iconv, recode nebo cstocs)
+%----------------------------------------------------------------------------
+% zpracování: make, make pdf, make desky, make clean
+% pøipomínky posílejte na e-mail: bidlom AT fit.vutbr.cz
+% vim: set syntax=tex encoding=latin2:
+%============================================================================
+%\documentclass[cover]{fitthesis} % odevzdani do wisu - odkazy, na ktere se da klikat
+%\documentclass[cover,print]{fitthesis} % pro tisk - na odkazy se neda klikat
+%\documentclass[english]{fitthesis}
+\documentclass[english,cover,print]{fitthesis} % pro tisk - na odkazy se neda klikat
+%      \documentclass[english]{fitthesis}
+% * Je-li prace psana v anglickem jazyce, je zapotrebi u tridy pouzit 
+%   parametr english nasledovne:
+%      \documentclass[english]{fitthesis}
+% * Neprejete-li si vysazet na prvni strane dokumentu desky, zruste 
+%   parametr cover
+
+% zde zvolime kodovani, ve kterem je napsan text prace
+% "latin2" pro iso8859-2 nebo "cp1250" pro windows-1250, "utf8" pro "utf-8"
+%\usepackage{ucs}
+\usepackage[latin2]{inputenc}
+\usepackage[T1, IL2]{fontenc}
+\usepackage{url}
+\usepackage{color}
+\DeclareUrlCommand\url{\def\UrlLeft{<}\def\UrlRight{>} \urlstyle{tt}}
+
+%zde muzeme vlozit vlastni balicky      
+\usepackage{amssymb}
+\usepackage{amsthm}
+\usepackage{amsmath}
+\usepackage{mathdots}
+\usepackage{dsfont}
+\usepackage{textcomp}   
+\usepackage[ruled,noline]{algorithm2e}
+\newtheorem{prop}{Proposition}[chapter]
+\newtheorem{theorem}{Theorem}[chapter]
+\newtheorem{lemma}{Lemma}[chapter]
+\newtheorem{defz}{Definition}[chapter]
+\newtheorem{proofz}{Proof}
+
+% =======================================================================
+% balíèek "hyperref" vytváøí klikací odkazy v pdf, pokud tedy pou¾ijeme pdflatex
+% problém je, ¾e balíèek hyperref musí být uveden jako poslední, tak¾e nemù¾e
+% být v ¹ablonì
+\ifWis
+\ifx\pdfoutput\undefined % nejedeme pod pdflatexem
+\else
+  \usepackage{color}
+  \usepackage[unicode,colorlinks,hyperindex,plainpages=false,pdftex]{hyperref}
+  \definecolor{links}{rgb}{0.4,0.5,0}
+  \definecolor{anchors}{rgb}{1,0,0}
+  \def\AnchorColor{anchors}
+  \def\LinkColor{links}
+  \def\pdfBorderAttrs{/Border [0 0 0] }  % bez okrajù kolem odkazù
+  \pdfcompresslevel=9
+\fi
+\fi
+
+%Informace o praci/projektu
+%---------------------------------------------------------------------------
+\projectinfo{
+  %Prace
+  project=DP,            %typ prace BP/SP/DP/DR
+  year=2014,             %rok
+  date=\today,           %datum odevzdani
+  %Nazev prace
+  title.cs={Rozhodovací procedura pro logiku WSkS},  %nazev prace v cestine
+  title.en={A Decision Procedure for the WSkS Logic}, %nazev prace v anglictine
+  %Autor
+  author={Tomá¹ Fiedor},   %jmeno prijmeni autora
+  author.title.p=Bc., %titul pred jmenem (nepovinne)
+  %author.title.a=PhD, %titul za jmenem (nepovinne)
+  %Ustav
+  department=UITS, % doplnte prislusnou zkratku: UPSY/UIFS/UITS/UPGM
+  %Skolitel
+  supervisor= Ondøej Lengál, %jmeno prijmeni skolitele
+  supervisor.title.p=Ing.,   %titul pred jmenem (nepovinne)
+  %supervisor.title.a={Ph.D.},    %titul za jmenem (nepovinne)
+  %Klicova slova, abstrakty, prohlaseni a podekovani je mozne definovat 
+  %bud pomoci nasledujicich parametru nebo pomoci vyhrazenych maker (viz dale)
+  %===========================================================================
+  %Klicova slova
+  keywords.cs={formální verifikace, stromové automaty, WSkS, rozhodovací procedury}, %klicova slova v ceskem jazyce
+  keywords.en={formal verification, tree automata, WSkS, decision procedures}, %klicova slova v anglickem jazyce
+  %Abstract
+  abstract.cs={Rùzné typy logik se èasto pou¾ívají jako prostøedky pro formální specifikaci systémù. Slabá monadická logika druhého øádu s $k$ následníky (WS$k$S) je jednou z nich s pomìrnì velkou vyjadøovací silou a pøesto je rozhodnutelnou. Aèkoliv slo¾itost testování rozhodnutelnosti WS$k$S formule není ani ve tøídì ELEMENTARY, tak existují pøístupy k tomuto problému zalo¾ené na deterministických stromových automatech, které jsou v praxi výkonné. Cílem práce je vyu¾ít nedávno vyvinutých technik pro efektní manipulaci s nedeterministickými stromovými automaty (jako je napøíklad testování universality jazyka pomocí pøístupu zalo¾eného na antichainech) a navrhnout a implementovat rozhodovací proceduru pro WS$k$S vyu¾ívající nedeterministické automaty.}, % abstrakt v ceskem jazyce
+  abstract.en={Various types of logics are often used as a means for formal specification of systems. The weak monadic second-order logic with $k$ successors (WS$k$S) is one of these logics with quite high expressivity, yet still decidable. Although the complexity of checking satisfiability of WS$k$S formula is not even in ELEMENTARY class, there are approaches to this problem based on deterministic tree automata that perform well in practice. The main goal of this work is to exploit recently developed techniques for efficient manipulation of non-deterministic tree automata (such as the antichains algorithm for testing universality) and design and implement a decision procedure for WS$k$S based on non-deterministic tree automata.}, % abstrakt v anglickem jazyce
+  %Prohlaseni
+  declaration={Prohla¹uji, ¾e jsem tuto semestrální práci vypracoval samostatnì pod vedením pana in¾enýra Ondøeje Lengála. Uvedl jsem v¹echny literární prameny a publikace, ze kterých jsem èerpal.},
+  %Podekovani (nepovinne)
+  acknowledgment={Dìkuji vedoucímu práce, Ing. Ondøeji Lengálovi, za odborné vedení, ochotu konzultovat, motivaci a pøedev¹ím za trpìlivost. Dále bych chtìl podìkovat Prof. Ing. Tomá¹i Vojnarovi, Ph. D. a Mgr. Luká¹i Holíkovi, Ph. D. za poskytnuté konzultace a sezení. Rovnì¾ bych chtìl podìkovat bratrovi Ing. Janu Fiedorovi za ve¹keré diskuze a rodinì za podporu ve studiu.} % nepovinne
+}
+
+%Abstrakt (cesky, anglicky)
+%\abstract[cs]{Do tohoto odstavce bude zapsán výtah (abstrakt) práce v èeském jazyce.}
+%\abstract[en]{Do tohoto odstavce bude zapsán výtah (abstrakt) práce v anglickém jazyce.}
+
+%Klicova slova (cesky, anglicky)
+%\keywords[cs]{Sem budou zapsána jednotlivá klíèová slova v èeském jazyce, oddìlená èárkami.}
+%\keywords[en]{Sem budou zapsána jednotlivá klíèová slova v anglickém jazyce, oddìlená èárkami.}
+
+%Prohlaseni
+%\declaration{Prohla¹uji, ¾e jsem tuto bakaláøskou práci vypracoval samostatnì pod vedením pana X...
+%Dal¹í informace mi poskytli...
+%Uvedl jsem v¹echny literární prameny a publikace, ze kterých jsem èerpal.}
+
+%Podekovani (nepovinne)
+%\acknowledgment{V této sekci je mo¾no uvést podìkování vedoucímu práce a tìm, kteøí poskytli odbornou pomoc
+%(externí zadavatel, konzultant, apod.).}
+
+\begin{document}
+  % Vysazeni titulnich stran
+  % ----------------------------------------------
+  \maketitle
+  % Obsah
+  % ----------------------------------------------
+  \tableofcontents
+  
+  % Seznam obrazku a tabulek (pokud prace obsahuje velke mnozstvi obrazku, tak se to hodi)
+  % \listoffigures
+  % \listoftables 
+
+  % Text prace
+  % ----------------------------------------------
+  \input{obsah} % viz. obsah.tex
+
+  % Pouzita literatura
+  % ----------------------------------------------
+\ifczech
+  \bibliographystyle{czechiso}
+\else 
+  \bibliographystyle{plain}
+%  \bibliographystyle{alpha}
+\fi
+  \begin{flushleft}
+  \bibliography{literatura} % viz. literatura.bib
+  \end{flushleft}
+  \appendix
+  
+  \input{prilohy} % viz. prilohy.tex
+\end{document}
