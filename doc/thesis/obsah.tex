@@ -11,7 +11,9 @@ from the universe of discourse has $k$ successors. This properties open ways for
 
 There has been several attempts to implement a decision procedure for WSkS, like \cite{nfa} for $k = 1$. Currently the best one is the tool \textsc{MONA} \cite{mona}, an implementation of an automaton-based decision procedure which is quite fast and uses finite word and deterministic binary bottom-up tree automata for deciding WS1S and WS2S formulae respectively. The authors of \textsc{MONA} have developed a number of heuristics, such as the use of binary decision diagrams for a representation of transition functions of automata or cache-friendly implementation of hash tables that made \textsc{MONA} perform well on many practical examples in spite of the terrifying worst-case complexity. 
 
-Recently, there has been a major advance in the algorithms manipulating non-deterministic automata (like \cite{vata}). Even problems with high worst-case complexity like testing universality or language inclusion of automaton, can now be solved efficiently in many practical cases using algorithms that heuristically prune the search space, such as algorithms based on antichains or on the simulation relations among states of automata.
+Recently, there has been a major advance in the algorithms manipulating
+non-deter\-mi\-ni\-stic automata (like \cite{vata}). Even problems with high
+worst-case complexity like testing universality or language inclusion of automaton, can now be solved efficiently in many practical cases using algorithms that heuristically prune the search space, such as algorithms based on antichains or on the simulation relations among states of automata.
 
 The main goal of this work is the design and implementation of a decision procedure for WS2S that uses no-deterministic tree automata while exploiting the techniques for their manipulation to achieve better performance.
 
@@ -358,7 +360,9 @@ Decision procedure of WSkS makes use of close link of WSkS formulae and automata
  A set $L$ of tuples of finite sets of words is \emph{definable in WSkS} if there is a formula $\psi$ of WSkS with free variables $X_1,\ldots,X_n$ such that $$(S_1,\ldots,S_n) \in L \text{ if and only if } S_1,\ldots,S_n \vDash \psi.$$
 \end{defz}
 
-Each tuple of finite sets of words $S_1,\ldots,S_n \subseteq \{1,\ldots,k\}^*$ is identified to a tree $(S_1,\ldots,S_n)^\sim$ over the alphabet $\{0,1,\bot\}^n$ where any string containing 0 or 1 is $k$-ary and $\bot^n$ is a constant symbol, such that
+Each tuple of finite sets of words $S_1,\ldots,S_n \subseteq \{1,\ldots,k\}^*$
+is then identified to a tree $(S_1,\ldots,S_n)^\sim$ over the alphabet
+$\{0,1,\bot\}^n$ where any string containing 0 or 1 is $k$-ary and $\bot^n$ is a constant symbol, such that
  \begin{equation}
   dom((S_1,\ldots,S_n)^\sim) \overset{def}{=} \{\epsilon\} \cup \left\{ pi\ |\ \exists p' \in \bigcup_{j = 1}^n S_j.p \leq p', 1 \leq i \leq k\right\}
  \end{equation}
@@ -563,7 +567,7 @@ The principle of optimized universality checking for tree automata is similar to
 
 The algorithm is very similar to Algorithm \ref{universality} and therefore we are going to refer to source \cite{tacas}.
 
-\section{Main idea of deciding WS$k$S with NFA}\label{our}
+\section{Main idea of deciding WS$k$S with NFA}
 
 Given a formula $\phi$ in $\exists$PNF form (defined in Section \ref{restricted}), suppose there are $m$ negations in the prefix of $\phi$. We will create a hierarchical family of WS$k$S formulae $\Phi = \{\phi_0,\ldots,\phi_m\}$, where $\phi_0 = \phi$ and $\phi_{i+1} = \neg\exists\mathcal{X}_{i+1}.\phi_i$, $1 \leq i \leq m-1$ , and construct a family of automata accepting representations of models of the corresponding formulas.
 
