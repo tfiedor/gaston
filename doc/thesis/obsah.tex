@@ -1,6 +1,3 @@
-%=========================================================================
-% (c) Michal Bidlo, Bohuslav K�ena, 2008
-
 \chapter{Introduction}
  
 The use of logic has always had an important place in various sciences, especially in computer science and, in particular, formal verification. The expressiveness of logics allows to specify verified systems in a very natural and intuitive way without the need of deep knowledge of verification procedures at all. The logic used range from plain predicate logic through all kinds of first-order logics like Presburger arithmetic \cite{presburger}, separation logic, and all the way to the more complex monadic second-order logics, like WSkS \cite{wsks}. However, with great expressiveness comes great complexity, ranging from NP-complete for propositional logic, through PSPACE-complete for quantified Boolean formulae, with some stronger logics not being decidable at all.
@@ -17,13 +14,13 @@ worst-case complexity like testing universality or language inclusion of automat
 
 The main goal of this work is the design and implementation of a decision procedure for WS2S that uses no-deterministic tree automata while exploiting the techniques for their manipulation to achieve better performance.
 
-The rest of this thesis is organized as follows. In Chapter \ref{preli} all necessary preliminaries are defined. A short introduction to theory of formal languages will describe finite word and tree automata, as well as some properties of their languages. Another structure that will be defined there will be Binary Decision Diagrams, or BDDs for short, and their extensions. Chapter \ref{wsks} defines the syntax and semantics of the WSkS logic and its restricted forms. Brief description of a decision procedure for WSkS also appear there. Chapter \ref{monachap} describes the approach of \textsc{MONA} and all the tweaks and secrets that were discovered during its development. In Chapter \ref{our} our approach to  a decision procedure for the WSkS logic using non-deterministic automata and its anti-chain based principle will be outlined. A short introduction to anti-chain based procedures and universality testing of finite word and tree automata is described there as well. Chapter \ref{summary} summarizes this thesis.
+The rest of this thesis is organized as follows. In Chapter \ref{preli} all necessary preliminaries are defined. A~short introduction to theory of formal languages will describe finite word and tree automata, as well as some properties of their languages. Another structure that will be defined there will be Binary Decision Diagrams, or BDDs for short, and their extensions. Chapter \ref{wsks} defines the syntax and semantics of the WSkS logic and its restricted forms. Brief description of a decision procedure for WSkS also appear there. Chapter \ref{monachap} describes the approach of \textsc{MONA} and all the tweaks and secrets that were discovered during its development. In Chapter \ref{our} our approach to  a decision procedure for the WSkS logic using non-deterministic automata and its anti-chain based principle will be outlined. A~short introduction to anti-chain based procedures and universality testing of finite word and tree automata is described there as well. Chapter \ref{summary} summarizes this thesis.
 
 \chapter{Preliminaries}\label{preli}
 
  \section{Formal Languages}
 
- We define an \emph{alphabet} as a finite non-empty set of elements called \emph{symbols}. A \emph{word} over the alphabet $\Sigma$ is a finite sequence $a_1a_2\ldots a_n$, such that $a_i \in \Sigma$, $1 \leq i \leq n$. The \emph{empty sequence} of symbols, i.e. a sequence  which does not contain any symbols, is denoted as $\epsilon$. 
+ We define an \emph{alphabet} as a finite non-empty set of elements called \emph{symbols}. A~\emph{word} over the alphabet $\Sigma$ is a finite sequence $a_1a_2\ldots a_n$, such that $a_i \in \Sigma$, $1 \leq i \leq n$. The \emph{empty sequence} of symbols, i.e. a sequence  which does not contain any symbols, is denoted as $\epsilon$. 
 
 Let $x = a_1a_2\ldots a_n$ and $y = b_1b_2\ldots b_m$ be words over the alphabet $\Sigma$, for some $n, m \in \mathbb{N}$. The \emph{concatenation} of words $x$ and $y$ is defined as the word $xy = a_1a_2\ldots a_nb_1b_2\ldots b_m$ over the alphabet $\Sigma$. Note that $\epsilon x = x \epsilon = x$. 
 
@@ -31,7 +28,7 @@ Let $\Sigma$ be an alphabet. We denote the set of all words over $\Sigma$ as $\S
 
  \section{Finite Automata}
 
- A \emph{non-deterministic finite} (word) \emph{automaton} (further abbreviated as FA) is a quintuple $\mathcal{A} = (Q, \Sigma, \delta, I, F)$, where
+ A~\emph{non-deterministic finite} (word) \emph{automaton} (further abbreviated as FA) is a quintuple $\mathcal{A} = (Q, \Sigma, \delta, I, F)$, where
   \begin{itemize}
 	 \item[$Q$] is a finite set of \emph{states},
 	 \item[$I$] $ \subseteq Q$ is the set of \emph{initial states},
@@ -40,11 +37,13 @@ Let $\Sigma$ be an alphabet. We denote the set of all words over $\Sigma$ as $\S
 	 \item[$\delta$] $ \subseteq Q \times\Sigma\times Q$ is the transition relation. We use $p \overset{a}{\longrightarrow} q$, for $p, q \in Q$ and $a \in \Sigma$ to denote, that $(p, a, q) \in \delta$.
 	\end{itemize}
 	
-		Let $\mathcal{A} = (Q, \Sigma, \delta, I, F)$ be a FA. A \emph{run} of $\mathcal{A}$ over the word $w = a_1a_2\ldots a_n \in \Sigma^*$ from the state $p \in Q$ to the state $r \in Q$ is a sequence of states $q_0q_1\ldots q_n$, such that $q_0 = p, q_n = r$ and for all $1 \leq i \leq n$ there is a transition $q_{i-1} \overset{a_i}{\longrightarrow} q_i$. We write $p \overset{w}{\Longrightarrow} r$ to denote that there exists a run from the state $p$ to the state $r$ over the word $w$.
+		Let $\mathcal{A} = (Q, \Sigma, \delta, I, F)$ be a FA. A~\emph{run} of
+		$\mathcal{A}$ over the word $w = a_1a_2\ldots a_n \in \Sigma^*$ from the state
+		$p \in Q$ to the state $r \in Q$ is a sequence of states $q_0q_1\ldots q_n$, such that $q_0 = p, q_n = r$ and for all $1 \leq i \leq n$ there is a transition $q_{i-1} \overset{a_i}{\longrightarrow} q_i$. We write $p \overset{w}{\Longrightarrow} r$ to denote that there exists a~run from the state $p$ to the state $r$ over the word $w$.
 	
 	The \emph{language} accepted by a state $q \in Q$ is defined as $L_{\mathcal{A}}(q) = \{w\ |\ q \overset{w}{\Longrightarrow} q_f, q_f \in F\}$. If it is clear which FA $\mathcal{A}$ we are referring to, we can simplify $L_{\mathcal{A}}$ to $L$. The language accepted by a set of states $S \subseteq Q$ is further defined as $L_{\mathcal{A}}(S) = \bigcup_{q \in S} L_{\mathcal{A}}(q)$ and the language accepted by the automaton $\mathcal{A}$ is defined as $L(\mathcal{A}) = L_{\mathcal{A}}(I)$.
 	
-	A \emph{deterministic finite automaton} is a FA $\mathcal{A}$ where $\forall q \in Q, \forall a \in \Sigma: |\{ r \in Q\ |\ q \overset{a}{\longrightarrow} r\}| \leq 1$, i.e. $\delta$ is a partial function $\delta : Q \times \Sigma \longrightarrow Q$. If $\delta$ is total, i.e. $\forall q \in Q, \forall a \in \Sigma : |\delta(q, a)| = 1$, we call $\mathcal{A}$ to be a \emph{complete deterministic finite automaton}. It can be shown that for every deterministic FA there exists a language equivalent complete deterministic FA, by adding new non-final sink state.
+	A~\emph{deterministic finite automaton} is a FA $\mathcal{A}$ where $\forall q \in Q, \forall a \in \Sigma: |\{ r \in Q\ |\ q \overset{a}{\longrightarrow} r\}| \leq 1$, i.e. $\delta$ is a partial function $\delta : Q \times \Sigma \longrightarrow Q$. If $\delta$ is total, i.e. $\forall q \in Q, \forall a \in \Sigma : |\delta(q, a)| = 1$, we call $\mathcal{A}$ to be a \emph{complete deterministic finite automaton}. It can be shown that for every deterministic FA there exists a language equivalent complete deterministic FA, by adding new non-final sink state.
 	
 	\begin{lemma}
 	 For every non-deterministic finite automata $\mathcal{A}$, there exists a deterministic finite automata $\mathcal{A}'$ such that $L(\mathcal{A}) = L(\mathcal{A}')$.
@@ -54,7 +53,7 @@ Let $\Sigma$ be an alphabet. We denote the set of all words over $\Sigma$ as $\S
 	\begin{eqnarray*}
 	 Q' & = & 2^Q\\
 	 I' & = & I\\
-	 F' & = & \{S \in 2^Q\ |\ S \cap F \neq \emptyset\}\\
+	 F' & = & \{S \in 2^Q\ |\ S~\cap F \neq \emptyset\}\\
 	 \delta'(S, a) & = & \{r \in Q\ |\ q \overset{a}{\longrightarrow} r\}
 	\end{eqnarray*}
 	
@@ -102,7 +101,7 @@ Let $\Sigma$ be an alphabet. We denote the set of all words over $\Sigma$ as $\S
 
  \section{Tree Automata}
 
- A \emph{ranked alphabet} $\Sigma$ is a finite set of symbols together with a ranking function $\#: \Sigma \to \mathbb{N}$, denoting $\#a$ as \emph{rank} of $a$. For any $n \geq 0$, we denote by $\Sigma_n$ the set of all symbols of rank $n$ from $\Sigma$, with $\epsilon$ denoting the empty sequence.
+ A~\emph{ranked alphabet} $\Sigma$ is a finite set of symbols together with a ranking function $\#: \Sigma \to \mathbb{N}$, denoting $\#a$ as \emph{rank} of $a$. For any $n \geq 0$, we denote by $\Sigma_n$ the set of all symbols of rank $n$ from $\Sigma$, with $\epsilon$ denoting the empty sequence.
 
 Then a \emph{tree} $t$ over a ranked alphabet $\Sigma$ is defined as a partial mapping $t : \mathbb{N}^* \to \Sigma$, that satisfies the following conditions:
  \begin{enumerate}
@@ -110,9 +109,9 @@ Then a \emph{tree} $t$ over a ranked alphabet $\Sigma$ is defined as a partial m
 	\item for every $v \in dom(t)$, called a \emph{node} of $t$, the following holds: $(\#t(v) = n \geq 0) \Longrightarrow \{i\ |\ vi \in dom(t)\} = \{1,\ldots,n\}$. 
  \end{enumerate}
 
-For a node $v$, the $i$-th \emph{child} of $v$ is the node $vi$, and the $i$-th \emph{subtree} of $v$ is the tree $t'$ such that for all $v' \in \mathbb{N}^*$ $t'(v') = t(viv')$. A Node $v$ which does not have any children is called a \emph{leaf} of the tree $t$. Set of all trees over the alphabet $\Sigma$ is denoted as $T_\Sigma$.
+For a node $v$, the $i$-th \emph{child} of $v$ is the node $vi$, and the $i$-th \emph{subtree} of $v$ is the tree $t'$ such that for all $v' \in \mathbb{N}^*$ $t'(v') = t(viv')$. A~Node $v$ which does not have any children is called a \emph{leaf} of the tree $t$. Set of all trees over the alphabet $\Sigma$ is denoted as $T_\Sigma$.
 
-A (finite, non-deterministic) \emph{tree automaton} (further abbreviated as TA) is a quadruple $\mathcal{A} = (Q, \Sigma, \delta, F)$, where:
+A~(finite, non-deterministic) \emph{tree automaton} (further abbreviated as TA) is a quadruple $\mathcal{A} = (Q, \Sigma, \delta, F)$, where:
  \begin{itemize}
   \item[$Q$] is a finite set of \emph{states},
 	\item[$F$] $ \subseteq Q$ is the set of \emph{final states},
@@ -122,12 +121,12 @@ A (finite, non-deterministic) \emph{tree automaton} (further abbreviated as TA) 
 
 Each transition is defined as a triple $((q_1,\ldots,q_n), a, q)$, where $q_1,\ldots,q_n,q \in Q, a \in \Sigma$ and $\#a = n$. We use equivalently $(q_1,\ldots,q_n) \overset{a}{\longrightarrow} q$ and $q \overset{a}{\longrightarrow}  (q_1,\ldots,q_n)$ to denote that $((q_1,\ldots,q_n), a, q) \in \delta$, for \emph{bottom-up} and \emph{top-down} representation respectively. In the special case where $n = 0$, we speak about the so-called \emph{leaf rules} that can be abbreviated as $\overset{a}{\longrightarrow}  q$ or $q \overset{a}{\longrightarrow} $.
 
-Let $\mathcal{A} = (Q, \Sigma, \delta, F)$ be a TA. We define a \emph{run} of $\mathcal{A}$ over a tree $t \in T_\Sigma$ as a mapping $\varphi: dom(t) \to Q$ such that for each node $v \in dom(t)$ of rank $\#t(v) = n$, where $\varphi(v) = q$, if $\varphi(vi) = q_i$ for $1 \leq i \leq n$, then $(q_1,\ldots,q_n) \overset{t(v)}{\longrightarrow} q$. We write $t \overset{\varphi}{\Longrightarrow} q$ to denote that $\varphi$ is a run of $\mathcal{A}$ over $t$ such that $\varphi(\epsilon) = q$. We will write $t \Longrightarrow q$ to denote that there exists a run $\varphi$ for which $t \overset{\varphi}{\Longrightarrow} q$.
+Let $\mathcal{A} = (Q, \Sigma, \delta, F)$ be a TA. We define a \emph{run} of $\mathcal{A}$ over a tree $t \in T_\Sigma$ as a mapping $\varphi: dom(t) \to Q$ such that for each node $v \in dom(t)$ of rank $\#t(v) = n$, where $\varphi(v) = q$, if $\varphi(vi) = q_i$ for $1 \leq i \leq n$, then $(q_1,\ldots,q_n) \overset{t(v)}{\longrightarrow} q$. We write $t \overset{\varphi}{\Longrightarrow} q$ to denote that $\varphi$ is a~run of $\mathcal{A}$ over $t$ such that $\varphi(\epsilon) = q$. We will write $t \Longrightarrow q$ to denote that there exists a run $\varphi$ for which $t \overset{\varphi}{\Longrightarrow} q$.
 
 The \emph{language} accepted by a state $q$ is defined as $L_{\mathcal{A}}(q) = \{t\ |\ t \Rightarrow q\}$. For a set of states $S \subseteq Q$ we define the language accepted by this set as $L_{\mathcal{A}}(S) = \bigcup_{q \in S} L_{\mathcal{A}}(q)$. Similarly to FA, if it is clear which TA $\mathcal{A}$ we are referring to, we only write $L(q)$ or $L(S)$. Then language of $\mathcal{A}$ is defined as $L(\mathcal{A}) = L(F)$.
 
 \begin{defz}
-A \emph{deterministic finite tree automaton} (abbreviated as DFTA) is a non-deterministic finite tree automaton such as there are no two rules with the same left-hand side (and no $\varepsilon$-rules, i.e. rules where symbol is $\varepsilon$) in $\delta$.
+A~\emph{deterministic finite tree automaton} (abbreviated as DFTA) is a non-deterministic finite tree automaton such as there are no two rules with the same left-hand side (and no $\varepsilon$-rules, i.e. rules where symbol is $\varepsilon$) in $\delta$.
 \end{defz}
 
 Note that the expressive power of bottom-up and top-down NFTA is the same. However, top-down DFTA are strictly less powerful than top-down NFTA. See \cite{tata} for more details.
@@ -177,7 +176,7 @@ For non-deterministic tree automata, determinization is applied first before the
 
  \subsection{Relations on Trees}
 
-Given a ranked alphabet $\Sigma$ and $n \geq 0$, let $(T_\Sigma)^n$ be the \emph{Cartesian product} $T_\Sigma \times (T_\Sigma)^{n-1}$ with the ground case $(T_\Sigma)^0 = \{\top\}$, where $\{\top\}$ is a neutral element w.r.t. Cartesian product. A subset of $(T_\Sigma)^n$ is an $n$-ary relation on $T_\Sigma$. Further, let $\Sigma^n_\bot$ be the \emph{compound alphabet} $\Sigma_\bot^n = (\Sigma \cup \{\bot\})^n$ where $\bot$ is a new symbol, where $\bot \notin \Sigma$, such that $\#\bot = 0$. We write the symbol $(f_1,\ldots,f_n)$ of $\Sigma_\bot^n$ as $f_1\ldots f_n$. Arities of symbols in $\Sigma_\bot^n$ are defined as $\#(f_1\ldots f_n) = \text{max}(\#f_1,\ldots,\#f_n)$.
+Given a ranked alphabet $\Sigma$ and $n \geq 0$, let $(T_\Sigma)^n$ be the \emph{Cartesian product} $T_\Sigma \times (T_\Sigma)^{n-1}$ with the ground case $(T_\Sigma)^0 = \{\top\}$, where $\{\top\}$ is a neutral element w.r.t. Cartesian product. A~subset of $(T_\Sigma)^n$ is an $n$-ary relation on $T_\Sigma$. Further, let $\Sigma^n_\bot$ be the \emph{compound alphabet} $\Sigma_\bot^n = (\Sigma \cup \{\bot\})^n$ where $\bot$ is a new symbol, where $\bot \notin \Sigma$, such that $\#\bot = 0$. We write the symbol $(f_1,\ldots,f_n)$ of $\Sigma_\bot^n$ as $f_1\ldots f_n$. Arities of symbols in $\Sigma_\bot^n$ are defined as $\#(f_1\ldots f_n) = \text{max}(\#f_1,\ldots,\#f_n)$.
 
 Let $[\cdot]$ be a function that maps $n$-tuples of trees over $T_\Sigma$ to trees over $T_{\Sigma_\bot^n}$:
 \begin{equation}
@@ -232,7 +231,7 @@ Rec is closed under cylindrification.
 
  \section{Binary Decision Diagrams}\label{bdd}
 
-We define a \emph{Boolean function} of \emph{arity} $k$ as a function $f : \{0,1\}^k \longrightarrow \{0,1\}$. We can further extend the notion of these function to an arbitrary nonempty set $S$ to functions over a domain set $S$, $f : \{0,1\}^k \longrightarrow S$.
+We define a \emph{Boolean function} of \emph{arity} $k$ as a function $f : \{0,1\}^k \longrightarrow \{0,1\}$. We can further extend the notion of these function to an arbitrary nonempty set $S$ to functions over a~domain set $S$, $f : \{0,1\}^k \longrightarrow S$.
 
 The \emph{reduced ordered binary decision diagram} (abbreviated as ROBDD or just BDDs) $r$ over a set of $n$ Boolean variables $X = \{x_1,\ldots,x_n\}$ is a connected directed acyclic graph with a single \emph{source node} called \emph{root} and at least one of the two sink nodes 0 and 1. Nodes, that are not sink nodes are called \emph{internal nodes}. Assignment of Boolean variables to each of the internal nodes is done by function $var$, w.r.t. the total ordering $x_1 < x_2 < \ldots < x_n$. For every internal node $v$, there exists two outgoing edges labeled as $low$ and $high$, such that $var(v) < var(v.low) \wedge var(v) < var(v.high)$; and $v.low \neq v.high$ as well (since otherwise it could be further reduced).
 
@@ -251,7 +250,7 @@ The notion of ROBDDs can be further generalized to the \emph{multi-terminal bina
 \emph{Shared} MTBDD $s$ is a MTBDD with multiple source nodes (or roots) that represent a mapping of every element of the set of roots $R$ to a function induced by the MTBDD corresponding to the given root.
 
 \subsection[Usage of MTBDDs with TA]{Using shared MTBDDs for encoding of Transition Function of Tree Automata}
-Let $\mathcal{A} = (Q, \Sigma, \delta, F)$ be a tree automaton. Let us also assume, that input alphabet $\Sigma$ is the set of all $n$-bit binary numbers, i.e. $\Sigma = \{0,1\}^n$, for some $n$. Each bit is then assigned a Boolean variable from the set $X = \{x_1,\ldots,x_n\}$. We use $Q^\#$ to denote the set of all tuples of states from $Q$ with up to the maximum arity that some symbol in $\Sigma$ has.
+Let $\mathcal{A} = (Q, \Sigma, \delta, F)$ be a tree automaton. Let us also assume, that input alphabet $\Sigma$ is the set of all $n$-bit binary numbers, i.e. $\Sigma = \{0,1\}^n$, for some $n$. Each bit is then assigned a~Boolean variable from the set $X = \{x_1,\ldots,x_n\}$. We use $Q^\#$ to denote the set of all tuples of states from $Q$ with up to the maximum arity that some symbol in $\Sigma$ has.
 
 The \emph{bottom-up} representation of the transition function $\delta$ of the TA $\mathcal{A}$ uses a shared MTBDD $\delta^{bu}$ over $\Sigma$, where the set of roots $R = Q^\#$, and the domain set of sink nodes is $2^Q$. So MTBDD $\delta^{bu}$ represents a function \textlbrackdbl $\delta^{bu}$ \textrbrackdbl $: Q^\# \rightarrow (\Sigma \rightarrow 2^Q)$ where
  $$\text{\textlbrackdbl} \delta^{bu} \text{\textrbrackdbl} = \lambda (q_1,\ldots,q_p) a . \{q\ |\ (q_1,\ldots,q_p) \overset{a}{\longrightarrow} q\} $$
@@ -262,7 +261,7 @@ The \emph{top-down} representation of transition function $\delta$ of the TA $\m
 The abbreviation WSkS stands for \emph{weak second-order monadic logic of $k$ successors}. This means that it is a logic that allows quantification over set variable (second-order), which can only represent \emph{finite} sets (weak) of elements and \emph{not functions} (monadic), over a universe of discourse where every element has $k$ successors and can therefore express a tree structure (for $k \geq 2$).
  
  \section{Syntax}
- A WSkS \emph{term} is an empty constant $\epsilon$, a first-order variable symbol written in lower-case letters (e.g. \emph{x, y, z,
+ A~WSkS \emph{term} is an empty constant $\epsilon$, a first-order variable symbol written in lower-case letters (e.g. \emph{x, y, z,
  \ldots}) or a unary symbol from $\{1,\ldots,n\}$ written in postfix notation. For example, $x1123$ or $\epsilon2111$ are terms, where the latter can be shortened to $2111$.
 
 The \emph{Atomic formulae} are defined as follows:
@@ -320,9 +319,9 @@ The set of \emph{free variables} of a formula $\psi$ is defined as usual.
 	The converse translation is $T'$ will be defined similarly \cite{tata}.
 	\end{proof}
 	
-	We will further restrict the syntax of WSkS. A WSkS formula $\phi$ is in the \emph{prenex normal form} (abbreviated as PNF) if and only if it is of the form $$\phi = Q_1X_1Q_2X_2\ldots Q_nX_n\ .\ \psi(\mathds{X})$$ where  $Q_i \in \{\exists,\forall\}$, $1 \leq i \leq n$, and $\psi$ is a quantifier-free formula in the restricted syntax as defined above. We denote $Q_1X_1Q_2X_2\ldots Q_nX_n$ as the \emph{prefix} of $\phi$ and $\psi(\mathds{X})$ as the \emph{matrix} of $\phi$.
+	We will further restrict the syntax of WSkS. A~WSkS formula $\phi$ is in the \emph{prenex normal form} (abbreviated as PNF) if and only if it is of the form $$\phi = Q_1X_1Q_2X_2\ldots Q_nX_n\ .\ \psi(\mathds{X})$$ where  $Q_i \in \{\exists,\forall\}$, $1 \leq i \leq n$, and $\psi$ is a quantifier-free formula in the restricted syntax as defined above. We denote $Q_1X_1Q_2X_2\ldots Q_nX_n$ as the \emph{prefix} of $\phi$ and $\psi(\mathds{X})$ as the \emph{matrix} of $\phi$.
 	
-	A WSkS formula $\rho$ is in the \emph{existentially-quantified prenex normal form} (abbreviated as $\exists$PNF), if and only if $$\rho = \exists \mathcal{X}_{m+1}\neg\exists \mathcal{X}_m\ldots\neg\exists \mathcal{X}_2\neg\exists \mathcal{X}_1.\psi(\mathds{X})$$ where $\exists\mathcal{X}_i$, for $\mathcal{X}_i \subseteq \mathds{X}$, is a (possibly empty) sequence $\exists X_a\ldots\exists X_b$ of consecutive existential quantifications and $\psi$ is again a quantifier-free formula in the restricted syntax over $\mathds{X}$.
+	A~WSkS formula $\rho$ is in the \emph{existentially-quantified prenex normal form} (abbreviated as $\exists$PNF), if and only if $$\rho = \exists \mathcal{X}_{m+1}\neg\exists \mathcal{X}_m\ldots\neg\exists \mathcal{X}_2\neg\exists \mathcal{X}_1.\psi(\mathds{X})$$ where $\exists\mathcal{X}_i$, for $\mathcal{X}_i \subseteq \mathds{X}$, is a (possibly empty) sequence $\exists X_a\ldots\exists X_b$ of consecutive existential quantifications and $\psi$ is again a quantifier-free formula in the restricted syntax over $\mathds{X}$.
 	
 	\begin{prop}
 	 There is a translation from WSkS formulas in the restricted syntax to the equivalent formulas in $\exists$PNF. 
@@ -349,7 +348,7 @@ The set of \emph{free variables} of a formula $\psi$ is defined as usual.
 	
 \section{Deciding WSkS}\label{classical}
 
-A decision procedure is an algorithm that given a formula $\phi$ returns VALID if $\phi$ is valid, SAT if $\phi$ is invalid but satisfiable (additionally yielding two assignments $\mathcal{M}_{true}$ and $\mathcal{M}_{false}$ such that $\mathcal{M}_{true} \vDash \phi$ and $\mathcal{M}_{false} \not\vDash \phi$) and UNSAT if $\phi$ is unsatisfiable.
+A~decision procedure is an algorithm that given a formula $\phi$ returns VALID if $\phi$ is valid, SAT if $\phi$ is invalid but satisfiable (additionally yielding two assignments $\mathcal{M}_{true}$ and $\mathcal{M}_{false}$ such that $\mathcal{M}_{true} \vDash \phi$ and $\mathcal{M}_{false} \not\vDash \phi$) and UNSAT if $\phi$ is unsatisfiable.
 
 Some properties of verified systems can be checked by being modeled by set of WSkS formulae and then deciding if given formulae hold for all variable assignments, therefore the checked system being valid, or either look for a non-satisfying assignment which leads to violation of specified system.
 
@@ -357,7 +356,7 @@ Decision procedure of WSkS makes use of close link of WSkS formulae and automata
 
  \subsubsection{Definable Sets are Recognizable Sets}
 \begin{defz}
- A set $L$ of tuples of finite sets of words is \emph{definable in WSkS} if there is a formula $\psi$ of WSkS with free variables $X_1,\ldots,X_n$ such that $$(S_1,\ldots,S_n) \in L \text{ if and only if } S_1,\ldots,S_n \vDash \psi.$$
+ A~set $L$ of tuples of finite sets of words is \emph{definable in WSkS} if there is a~formula $\psi$ of WSkS with free variables $X_1,\ldots,X_n$ such that $$(S_1,\ldots,S_n) \in L \text{ if and only if } S_1,\ldots,S_n \vDash \psi.$$
 \end{defz}
 
 Each tuple of finite sets of words $S_1,\ldots,S_n \subseteq \{1,\ldots,k\}^*$
@@ -477,7 +476,7 @@ Since formulas are translated to the restricted syntax that uses only second-ord
 
 The nature of these problems are solved by using a three-valued logic. So for a restricted subformula $\phi$ we associate a restriction $\phi_R$. And if for some valuation $\phi_R$ does not hold, then the formulas containing $\phi$ are assigned the third value \emph{dont-care}.
 
-A special operation converts the rejecting states to dont-cares for the restriction formulas and other automaton operations are modified so these nonacceptance of restrictions are propagated properly. 
+A~special operation converts the rejecting states to dont-cares for the restriction formulas and other automaton operations are modified so these nonacceptance of restrictions are propagated properly. 
 
 \subsection{Formula reductions}
 Various optimizations of formulas takes place in the DAG specified in Section \ref{dag} before the final translation to automata. Reductions are based on syntactic analysis that tries to identify valid subformulas and equivalences among them. 
@@ -508,7 +507,7 @@ Here we propose to use the similar principle of antichains \cite{tacas}, as defi
 We will give a brief introduction to universality testing of non-deterministic finite word automata and tree automata by algorithm that uses a combination of the simulation-based and the antichain-based approach \cite{tacas}.
 
 \begin{defz}
-A \emph{simulation} on finite automata $\mathcal{A} = (Q, \Sigma, \delta, I, F)$  is a relation $\preceq \subseteq Q \times Q$ such that $p \preceq r$ only if (i) $p \in F \Rightarrow r \in F$ and (ii) for every transition $p \overset{a}{\longrightarrow} p'$, there exists a transition $r \overset{a}{\longrightarrow} r'$ such that $p' \preceq r'$.
+A~\emph{simulation} on finite automata $\mathcal{A} = (Q, \Sigma, \delta, I, F)$  is a relation $\preceq \subseteq Q \times Q$ such that $p \preceq r$ only if (i) $p \in F \Rightarrow r \in F$ and (ii) for every transition $p \overset{a}{\longrightarrow} p'$, there exists a transition $r \overset{a}{\longrightarrow} r'$ such that $p' \preceq r'$.
 \end{defz}
 
 Further we call a set of states in $\mathcal{A}$, i.e. a subset of $Q$, a \emph{macro-state} and we use $A^{\subseteq}$ to denote a set of relations over the states of $\mathcal{A}$, that imply language inclusion. 
@@ -521,9 +520,10 @@ Given a simulation $\preceq$ on a NFA $\mathcal{A}$, $p \preceq r \Rightarrow L_
 
 The universality problem for a NFA $\mathcal{A} = (Q, \Sigma, \delta, I, F)$ is to decide whether $L(\mathcal{A}) = \Sigma^*$. The problem is PSPACE-complete.
 
-The naive algorithm performs determinization using a subset construction to obtain a deterministic automaton $\mathcal{A}_D$, then complements it to obtain $\overline{\mathcal{A}}_D$ and finally checks that there is no reachable accepting state in $\overline{\mathcal{A}}_D$.
+The naive algorithm performs determinization using a subset construction to
+obtain a~deterministic automaton $\mathcal{A}_D$, then complements it to obtain $\overline{\mathcal{A}}_D$ and finally checks that there is no reachable accepting state in $\overline{\mathcal{A}}_D$.
 
-Proposed algorithm \cite{tacas} runs the subset construction procedure on-the-fly, avoiding explicit construction of $\overline{\mathcal{A}}_D$, and checks if any rejecting macro-state is reachable. However this procedure is further augmented with two optimizations. We define post-image of a state as $Post(P) = \{p'\ |\ \exists a \in \Sigma: (p, a, p') \in \delta\}$.
+Proposed algorithm \cite{tacas} runs the subset construction procedure on-the-fly, avoiding explicit construction of $\overline{\mathcal{A}}_D$, and checks if any rejecting macro-state is reachable. However this procedure is further augmented with two optimizations. We define post-image of a~state as $Post(P) = \{p'\ |\ \exists a \in \Sigma: (p, a, p') \in \delta\}$.
 
 The first optimization is based on the following lemma.
 
@@ -538,17 +538,17 @@ The second optimization is based on the observation that $L_\mathcal{A}(P) = L_\
 \begin{algorithm}[hb!]
 		\SetKwFor{For}{foreach}{do}{}
 		\SetKwRepeat{Repeat}{repeat}{until}
-		\KwIn{A NFA $\mathcal{A} = (Q, \Sigma, \delta, I, F)$, a relation $\preceq \in \mathcal{A}^\subseteq$}
+		\KwIn{A~NFA $\mathcal{A} = (Q, \Sigma, \delta, I, F)$, a relation $\preceq \in \mathcal{A}^\subseteq$}
 		\KwOut{\textsc{TRUE} if $\mathcal{A}$ is \emph{universal}, otherwise \textsc{FALSE}}
 		\BlankLine
-    \lIf{I is rejecting}{\textbf{return} \textsc{FALSE}}
+    \lIf{I~is rejecting}{\textbf{return} \textsc{FALSE}}
 		$Processed := \emptyset$\;
 		$Next := \{Minimise(I)\}$\;
 		\While{$Next \neq \emptyset$}{
 		  Pick and remove a macro-state $R$ from $Next$ and move it to $Processed$\;
 			\For{$P \in \{Minimize(R')\ |\ R' \in Post(R)\}$}{
 			 \lIf{P is rejecting}{\textbf{return} \textsc{FALSE}}
-			 \uIf{$\neg\exists S \in Processed \cup Next$ s.t. $S \preceq^{\forall\exists} P$}{
+			 \uIf{$\neg\exists S~\in Processed \cup Next$ s.t. $S \preceq^{\forall\exists} P$}{
 			  Remove all $S$ from $Processed \cup Next$ s.t. $P \preceq^{\forall\exists} S$\;
 				Add $P$ to $Next$\;
 			 }

@@ -12,7 +12,7 @@ pdf: $(CO).pdf
 $(CO).ps: $(CO).dvi
 	dvips $(CO)
 
-$(CO).pdf: clean
+$(CO).pdf: obsah.tex
 	pdflatex $(CO)
 	bibtex $(CO)
 	pdflatex $(CO)
@@ -23,6 +23,10 @@ $(CO).dvi: $(CO).tex $(CO).bib
 	bibtex $(CO)
 	latex $(CO)
 	latex $(CO)
+
+vlna:
+	vlna -l -m -n $(CO).tex
+	vlna -l -m -n obsah.tex
 
 desky:
 #	latex desky
