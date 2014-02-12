@@ -253,9 +253,16 @@ The notion of ROBDDs can be further generalized to the \emph{multi-terminal bina
 Let $\mathcal{A} = (Q, \Sigma, \delta, F)$ be a tree automaton. Let us also assume, that input alphabet $\Sigma$ is the set of all $n$-bit binary numbers, i.e. $\Sigma = \{0,1\}^n$, for some $n$. Each bit is then assigned a~Boolean variable from the set $X = \{x_1,\ldots,x_n\}$. We use $Q^\#$ to denote the set of all tuples of states from $Q$ with up to the maximum arity that some symbol in $\Sigma$ has.
 
 The \emph{bottom-up} representation of the transition function $\delta$ of the TA $\mathcal{A}$ uses a shared MTBDD $\delta^{bu}$ over $\Sigma$, where the set of roots $R = Q^\#$, and the domain set of sink nodes is $2^Q$. So MTBDD $\delta^{bu}$ represents a function \textlbrackdbl $\delta^{bu}$ \textrbrackdbl $: Q^\# \rightarrow (\Sigma \rightarrow 2^Q)$ where
- $$\text{\textlbrackdbl} \delta^{bu} \text{\textrbrackdbl} = \lambda (q_1,\ldots,q_p) a . \{q\ |\ (q_1,\ldots,q_p) \overset{a}{\longrightarrow} q\} $$
+ \begin{equation}
+  \text{\textlbrackdbl} \delta^{bu} \text{\textrbrackdbl} =
+ \lambda (q_1,\ldots,q_p) a . \{q\ |\ (q_1,\ldots,q_p) \overset{a}{\longrightarrow} q\}
+ \end{equation}
 
-The \emph{top-down} representation of transition function $\delta$ of the TA $\mathcal{A}$ uses a shared MTBDD $\delta^{td}$ over $\Sigma$, where the set of roots $R = Q$ and the domain of labels of sink nodes is $2^{Q^\#}$. The MTBDD $\delta^{td}$ then represents a function \textlbrackdbl $\delta^{td}$ \textrbrackdbl $: Q \rightarrow (\Sigma \rightarrow 2^{Q^\#}$ where $$\text{\textlbrackdbl} \delta^{td} \text{\textrbrackdbl} = \lambda q a . \{(q_1,\ldots,q_p)\ |\ q \overset{a}{\longrightarrow} (q_1,\ldots,q_p)\}$$
+The \emph{top-down} representation of transition function $\delta$ of the TA $\mathcal{A}$ uses a shared MTBDD $\delta^{td}$ over $\Sigma$, where the set of roots $R = Q$ and the domain of labels of sink nodes is $2^{Q^\#}$. The MTBDD $\delta^{td}$ then represents a function \textlbrackdbl $\delta^{td}$ \textrbrackdbl $: Q \rightarrow (\Sigma \rightarrow 2^{Q^\#}$ where 
+\begin{equation} \text{\textlbrackdbl} \delta^{td} \text{\textrbrackdbl} =
+\lambda q a .
+\{(q_1,\ldots,q_p)\ |\ q \overset{a}{\longrightarrow} (q_1,\ldots,q_p)\}
+\end{equation}
 
 \chapter{The WS$k$S Logic}\label{wsks}
 The abbreviation WSkS stands for \emph{weak second-order monadic logic of $k$ successors}. This means that it is a logic that allows quantification over set variable (second-order), which can only represent \emph{finite} sets (weak) of elements and \emph{not functions} (monadic), over a universe of discourse where every element has $k$ successors and can therefore express a tree structure (for $k \geq 2$).

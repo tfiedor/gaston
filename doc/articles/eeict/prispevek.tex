@@ -1,0 +1,194 @@
+%--------------------------------------------------------------------------------
+%
+% Text pøíspìvku do sborníku EEICT
+%
+% Vytvoøil:  Martin Drahanskı
+% Datum:     26.02.2007
+% E-mail:    drahan@fit.vutbr.cz
+%
+%--------------------------------------------------------------------------------
+%
+% Pøeloení: pdflatex prispevek.tex
+%
+% Optimální zpùsob pouití = pøepište jen vlastní text
+%
+\documentclass{eeict}
+\inputencoding{cp1250}
+\usepackage[bf]{caption2}
+%--------------------------------------------------------------------------------
+
+\title{TITLE OF THE PAPER - IN ENGLISH}
+\author{Name Surname - BEZ TITULU}
+\programme{Bachelor/Master/Doctoral Degree Programme (roèník), FIT BUT nebo FEEC BUT}
+\emails{xcosi00@stud.fit.vutbr.cz}
+
+\supervisor{Name Surname - BEZ TITULU}
+\emailv{surname@fit.vutbr.cz}
+
+\abstract{The abstract is placed here. It shoud be approximately 50-100 words long.
+The purpose of the abstract is to summarize the important ideas of the paper. It
+must be written in English. Please ask your supervisor to check the abstract. 
+Below the abstract there are keywords there, also written in English.}
+\keywords{EEICT, template, guide}
+
+\begin{document}
+% -- Hlavièka práce --
+
+\maketitle
+
+%-------------------------------------------------------------------------------
+\selectlanguage{czech}
+\section{Úvod}
+
+Tady u se koneènì mùete vyjádøit. Patrnì bude vhodné nìjakı úvod napsat,
+aby se ètenáø lehce vpravil do problematiky. Rozhodnì ale není vhodné se
+zde nìjak pøíliš široce rozepisovat. Nezapomeòte, e pro kadı pøíspìvek
+jsou ve sborníku vyhrazeny maximálnì 3 stránky pro Bc. a Mgr. studenty,
+5 stran pro studenty PhD.
+
+Kdy u se nám zdá, e toho bylo dost, pøejdeme k vìci (v další kapitole).
+
+
+\section{Pokyny k psaní textu}
+
+Pokud ke psaní textu nevyuijete šablonu, pak dodrujte následující typografické
+zásady.
+
+Velikost stránky je A4, okraje jsou 2,5~cm, pouze dolní okraj má 3,2~cm.
+
+Hlavièka se skládá z názvu pøíspìvku, jména autora, studijního programu, školy, 
+emailu, jména školitele, emailu školitele, abstraktu a klíèovıch slov, a celá je
+psána anglicky!
+
+Název pøíspìvku: písmo Times New Roman, velikost 16~b., tuènì, všechna písmena
+velká, mezera za odstavcem 24~b., zarovnat na støed.
+
+Jméno autora: písmo Times New Roman, velikost 12~b., tuènì, zarovnat na støed,
+mezera za odstavcem 6~b. POZOR! Jméno autora uvádìjte BEZ TITULÙ!!!
+                      
+Studijní program, škola, a emaily: písmo Times New Roman, velikost 9~b.,
+zarovnat na støed, mezera za odstavcem 6~b.Studijní program je buï 
+Bachelor Degree Programme, Master Degree Programme nebo Doctoral Degree 
+Programme. Èíslo v závorce udává roèník, kterı studujete. Za èárkou následuje
+ANGLICKÁ zkratka školy, kterou studujete (tedy FEEC~BUT nebo FIT~BUT).
+Studenti støedních škol uvedou anglickı název školy a do závorky roèník,
+kterı studují.
+
+Jméno školitele: písmo Times New Roman, velikost 12~b., zarovnat na støed, 
+mezera pøed odstavcem 18~b. POZOR! Jméno školitele uvádìjte BEZ TITULÙ!!!
+
+Abstrakt: písmo Times New Roman, velikost 11~b., zarovnat do bloku, odsazení 
+odstavce 5~mm,  mezera pøed odstavcem 18~b. a za odstavcem 6~b., první slovo je 
+„Abstract“ a je psáno tuènì, následuje abstrakt v angliètinì.
+
+Klíèová slova: písmo Times New Roman, velikost 11~b., zarovnat do bloku, 
+odsazení odstavce 5~mm, mezera za odstavcem 6~b., první slovo je „Keywords“ a je
+psáno tuènì, následuje seznam klíèovıch slov v angliètinì.
+
+Text pište fontem Times New Roman, velikost 11~b., za odstavec vkládejte 
+mezeru 6~b., odsazení odstavce je 5~mm, zarovnání do bloku, øádkování jednoduché
+a povolte dìlení slov.
+
+Nadpisy úrovnì 1: písmo Times New Roman, velikost 11~b., tuèné, všechna písmena
+velká, zarovnat doleva, mezera pøed odstavcem 24~b., za odstavcem 6~b.
+
+Nadpisy úrovnì 2: písmo Times New Roman, velikost 11~b., tuèné, kapitálky, 
+zarovnat doleva, mezera pøed odstavcem 12~b., za odstavcem 6~b.
+
+\subsection{Upozornìní}
+
+Není vhodné (a ani pøípustné) pokoušet se o zanoøení vìtší úrovnì, ne je
+tato. Pøíspìvky, které tuto (a další podmínky) nesplní, budou autorùm
+vráceny k~pøepracování.
+
+\subsection{Rovnice}
+%----------
+% Pøíklad pouití rovnice na samostatném øádku + odkazu z textu
+%
+Takto $y=ax+b$ vypadá rovnice v~textu. Dùleité rovnice je ovšem vhodné
+napsat na samostatnı øádek:
+
+\begin{equation} \label{rovnice}
+ y = px + q
+\end{equation}
+
+V~rovnici (\ref{rovnice}) jsme ukázali, e zítra nebude pršet.
+
+\subsection{Tabulky}
+%----------
+% Pøíklad pouití tabulky
+Obèas se mùe vyskytnout potøeba prezentovat nìjaká data uspoøádaná
+do tabulky. I~to je samozøejmì moné.
+
+\begin{table}[h]
+\begin{center}
+  \begin{tabular}{|l|r|}
+    \hline
+    X     &   Y      \\
+    \hline
+    10    &  100,1   \\
+    20    &  102,1   \\
+    30    & $-$103,5 \\
+    \hline
+  \end{tabular}
+  \caption{
+      \rm{
+      \hspace{0.1cm} Závislost velièiny X na velièinì Y}}
+  \label{tabulka_1}
+\end{center}
+\end{table}
+
+V~tabulce \ref{tabulka_1} je uvedena závislost velièiny X na velièinì Y.
+
+\subsection{Obrázek}
+
+No, a obèas se mùe v~textu samozøejmì také vyskytnout
+nìjakı ten odkaz na obrázek. Obrázek \ref{bozka_ss.jpg} ukazuje
+nìco, co jste ještì nevidìli.
+
+%------------
+% Pøíklad vloení obrázku do dokumentu.
+\begin{figure}[bht]
+\begin{center}
+  \includegraphics[width=6cm,keepaspectratio]{bozka_ss}
+  \caption{
+      \rm{
+      \hspace{0.1cm} Obrázek Boetìchovy.}}
+  \label{bozka_ss.jpg}
+\end{center}
+\end{figure}
+
+\section{Závìr}
+Tìko øíct, co sem ještì tak asi napsat. Doufám, e tato šablonka nìkomu usnadní
+splnìní zostøenıch poadavkù, které jsou kladeny na pøíspìvky pro konferenci
+EEICT. Pokud bude mít nìkdo jakékoliv pøipomínky a námìty, nech neváhá a
+pošle e–mail:
+
+\begin{center}
+orsag@fit.vutbr.cz\\
+drahan@fit.vutbr.cz
+\end{center}
+
+%------------
+% Podìkování
+%
+\section*{Podìkování (anglicky = Acknowledgement)}
+Tento pøíspìvek vznikl za podpory grantu GAÈR 111/22/3333 a vızkumného
+zámìru XXX: J55/66:12345678 (nìkdo samozøejmì nemusí øešit grant nebo
+nìco takového, take tuhle sekci nebudou mít ve svém pøíspìvku všichni.)
+
+%------------
+% Citace
+%
+\begin{thebibliography}{9}
+  \bibitem{rybicka} Rybièka, J.: \LaTeX pro zaèáteèníky, Brno, Konvoj 1999,
+            ISBN 80-85615-77-0
+  \bibitem{orsag} Orság, F.: Vision für die Zukunft. Biometrie, Kreutztal,
+            DE, b-Quadrat, 2004, s. 131-145, ISBN 3-933609-02-X
+  \bibitem{drahansky} Drahanskı, M., Orság, F.: Biometric Security Systems:
+    Robustness of the Finger-print and Speech Technologies. In: BT 2004 - 
+    International Workshop on Biometric Technologies, Calgary, CA, 2004,
+    s. 99-103
+\end{thebibliography}
+
+\end{document}
