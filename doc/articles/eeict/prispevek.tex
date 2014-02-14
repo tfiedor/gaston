@@ -1,194 +1,81 @@
-%--------------------------------------------------------------------------------
-%
-% Text pøíspìvku do sborníku EEICT
-%
-% Vytvoøil:  Martin Drahanskı
-% Datum:     26.02.2007
-% E-mail:    drahan@fit.vutbr.cz
-%
-%--------------------------------------------------------------------------------
-%
-% Pøeloení: pdflatex prispevek.tex
-%
-% Optimální zpùsob pouití = pøepište jen vlastní text
-%
 \documentclass{eeict}
-\inputencoding{cp1250}
+\inputencoding{utf8}
 \usepackage[bf]{caption2}
+
+
+\newtheorem{example}{Example}[section]
 %--------------------------------------------------------------------------------
 
-\title{TITLE OF THE PAPER - IN ENGLISH}
-\author{Name Surname - BEZ TITULU}
-\programme{Bachelor/Master/Doctoral Degree Programme (roèník), FIT BUT nebo FEEC BUT}
-\emails{xcosi00@stud.fit.vutbr.cz}
+\title{Decision procedure for WS$k$S}
+\author{TomÃ¡Å¡ Fiedor}
+\programme{Master Degree Programme 2, FIT BUT}
+\emails{xfiedo01@stud.fit.vutbr.cz}
 
-\supervisor{Name Surname - BEZ TITULU}
-\emailv{surname@fit.vutbr.cz}
+\supervisor{OndÅ™ej LengÃ¡l}
+\emailv{ilengal@fit.vutbr.cz}
 
-\abstract{The abstract is placed here. It shoud be approximately 50-100 words long.
-The purpose of the abstract is to summarize the important ideas of the paper. It
-must be written in English. Please ask your supervisor to check the abstract. 
-Below the abstract there are keywords there, also written in English.}
-\keywords{EEICT, template, guide}
+\abstract{Various types of logics are often used as means for a formal
+specification of systems. The weak monadic second-order logic with $k$
+successors (WS$k$S) is one of these logics with quite high expressivity, yet
+still is decidable. Although the complexity of checking satisfiability of
+WS$k$S formula is not even in ELEMENTARY class, there are some approaches to
+this problem that perform well in practice. With a recently developed
+techniques for efficient manipulation of non-deterministic tree auotomata we
+want to design and implement a decision procedure for WS$k$S based on
+non-deterministic tree automata.}
+\keywords{formal verification, tree automata, WS$k$S, decision procedures}
 
 \begin{document}
-% -- Hlavièka práce --
 
 \maketitle
 
 %-------------------------------------------------------------------------------
-\selectlanguage{czech}
-\section{Úvod}
+\selectlanguage{english}
+\section{Introduction}
 
-Tady u se koneènì mùete vyjádøit. Patrnì bude vhodné nìjakı úvod napsat,
-aby se ètenáø lehce vpravil do problematiky. Rozhodnì ale není vhodné se
-zde nìjak pøíliš široce rozepisovat. Nezapomeòte, e pro kadı pøíspìvek
-jsou ve sborníku vyhrazeny maximálnì 3 stránky pro Bc. a Mgr. studenty,
-5 stran pro studenty PhD.
+\section{WS$k$S}
 
-Kdy u se nám zdá, e toho bylo dost, pøejdeme k vìci (v další kapitole).
+The abbreviation WS$k$S stands for \emph{weak second-order monadic logic of $k$
+successors}. This means that it is a logic that allows quantification over set
+variables (second-order), which can only represent \emph{finite} sets (weak) of
+elements and \emph{not functions} (monadic) over a universe of discourse where
+every element has $k$ successors and can therefore express a tree structure
+(for $k \geq 2$).
 
+A WS$k$S \emph{term} is either an empty constant $\epsilon$, a first-order
+variable symbol written in lower-case letters (e.g. $x$, $y$, \ldots) or an
+unary symbol from $\{1,\ldots,n\}$ written in postfix notation. 
 
-\section{Pokyny k psaní textu}
+Then \emph{atomic formulae}, for terms $s$ and $t$ are either the equality $s =
+t$, inequalities $s \leq t$ and $s \geq t$ or the membership constaint $t \in
+X$, for some second-order variable $X$.
 
-Pokud ke psaní textu nevyuijete šablonu, pak dodrujte následující typografické
-zásady.
+The WS$k$S \emph{formula} is then built out of these atomic formulae using the
+classical logical connectives $\wedge, \vee, \neg, \Leftarrow, \Leftrightarrow$
+and quantifiers $\exists x, \forall x$ and $\exists X, \forall X$ for
+quantification over first-order variables and second-order variables
+respectively.
 
-Velikost stránky je A4, okraje jsou 2,5~cm, pouze dolní okraj má 3,2~cm.
+\begin{example} Simple WS$k$S formula denoting that for every element of set $X$
+there exists its successor in $X$ $$ \forall x. \exists y. x \in X \wedge (x = y
++ 1 \Rightarrow y \in X) $$
+\end{example}
 
-Hlavièka se skládá z názvu pøíspìvku, jména autora, studijního programu, školy, 
-emailu, jména školitele, emailu školitele, abstraktu a klíèovıch slov, a celá je
-psána anglicky!
+We say that WS$k$S formula $\phi$ is in \emph{restricted syntax} if it does not
+contain any first-order variables and it is build only over formulae $X
+\subseteq Y$, $Sing(X)$, $X = Yi$ and $X = \epsilon$ using logical connectives
+$\vee$, $\neg$ and $\exists$. For every WS$k$S formulae there exists a
+translation to equivalent formula in restricted syntax \cite{tata}.
 
-Název pøíspìvku: písmo Times New Roman, velikost 16~b., tuènì, všechna písmena
-velká, mezera za odstavcem 24~b., zarovnat na støed.
+\section{Deciding WS$k$S}
 
-Jméno autora: písmo Times New Roman, velikost 12~b., tuènì, zarovnat na støed,
-mezera za odstavcem 6~b. POZOR! Jméno autora uvádìjte BEZ TITULÙ!!!
-                      
-Studijní program, škola, a emaily: písmo Times New Roman, velikost 9~b.,
-zarovnat na støed, mezera za odstavcem 6~b.Studijní program je buï 
-Bachelor Degree Programme, Master Degree Programme nebo Doctoral Degree 
-Programme. Èíslo v závorce udává roèník, kterı studujete. Za èárkou následuje
-ANGLICKÁ zkratka školy, kterou studujete (tedy FEEC~BUT nebo FIT~BUT).
-Studenti støedních škol uvedou anglickı název školy a do závorky roèník,
-kterı studují.
-
-Jméno školitele: písmo Times New Roman, velikost 12~b., zarovnat na støed, 
-mezera pøed odstavcem 18~b. POZOR! Jméno školitele uvádìjte BEZ TITULÙ!!!
-
-Abstrakt: písmo Times New Roman, velikost 11~b., zarovnat do bloku, odsazení 
-odstavce 5~mm,  mezera pøed odstavcem 18~b. a za odstavcem 6~b., první slovo je 
-„Abstract“ a je psáno tuènì, následuje abstrakt v angliètinì.
-
-Klíèová slova: písmo Times New Roman, velikost 11~b., zarovnat do bloku, 
-odsazení odstavce 5~mm, mezera za odstavcem 6~b., první slovo je „Keywords“ a je
-psáno tuènì, následuje seznam klíèovıch slov v angliètinì.
-
-Text pište fontem Times New Roman, velikost 11~b., za odstavec vkládejte 
-mezeru 6~b., odsazení odstavce je 5~mm, zarovnání do bloku, øádkování jednoduché
-a povolte dìlení slov.
-
-Nadpisy úrovnì 1: písmo Times New Roman, velikost 11~b., tuèné, všechna písmena
-velká, zarovnat doleva, mezera pøed odstavcem 24~b., za odstavcem 6~b.
-
-Nadpisy úrovnì 2: písmo Times New Roman, velikost 11~b., tuèné, kapitálky, 
-zarovnat doleva, mezera pøed odstavcem 12~b., za odstavcem 6~b.
-
-\subsection{Upozornìní}
-
-Není vhodné (a ani pøípustné) pokoušet se o zanoøení vìtší úrovnì, ne je
-tato. Pøíspìvky, které tuto (a další podmínky) nesplní, budou autorùm
-vráceny k~pøepracování.
-
-\subsection{Rovnice}
-%----------
-% Pøíklad pouití rovnice na samostatném øádku + odkazu z textu
-%
-Takto $y=ax+b$ vypadá rovnice v~textu. Dùleité rovnice je ovšem vhodné
-napsat na samostatnı øádek:
-
-\begin{equation} \label{rovnice}
- y = px + q
-\end{equation}
-
-V~rovnici (\ref{rovnice}) jsme ukázali, e zítra nebude pršet.
-
-\subsection{Tabulky}
-%----------
-% Pøíklad pouití tabulky
-Obèas se mùe vyskytnout potøeba prezentovat nìjaká data uspoøádaná
-do tabulky. I~to je samozøejmì moné.
-
-\begin{table}[h]
-\begin{center}
-  \begin{tabular}{|l|r|}
-    \hline
-    X     &   Y      \\
-    \hline
-    10    &  100,1   \\
-    20    &  102,1   \\
-    30    & $-$103,5 \\
-    \hline
-  \end{tabular}
-  \caption{
-      \rm{
-      \hspace{0.1cm} Závislost velièiny X na velièinì Y}}
-  \label{tabulka_1}
-\end{center}
-\end{table}
-
-V~tabulce \ref{tabulka_1} je uvedena závislost velièiny X na velièinì Y.
-
-\subsection{Obrázek}
-
-No, a obèas se mùe v~textu samozøejmì také vyskytnout
-nìjakı ten odkaz na obrázek. Obrázek \ref{bozka_ss.jpg} ukazuje
-nìco, co jste ještì nevidìli.
-
-%------------
-% Pøíklad vloení obrázku do dokumentu.
-\begin{figure}[bht]
-\begin{center}
-  \includegraphics[width=6cm,keepaspectratio]{bozka_ss}
-  \caption{
-      \rm{
-      \hspace{0.1cm} Obrázek Boetìchovy.}}
-  \label{bozka_ss.jpg}
-\end{center}
-\end{figure}
-
-\section{Závìr}
-Tìko øíct, co sem ještì tak asi napsat. Doufám, e tato šablonka nìkomu usnadní
-splnìní zostøenıch poadavkù, které jsou kladeny na pøíspìvky pro konferenci
-EEICT. Pokud bude mít nìkdo jakékoliv pøipomínky a námìty, nech neváhá a
-pošle e–mail:
-
-\begin{center}
-orsag@fit.vutbr.cz\\
-drahan@fit.vutbr.cz
-\end{center}
-
-%------------
-% Podìkování
-%
-\section*{Podìkování (anglicky = Acknowledgement)}
-Tento pøíspìvek vznikl za podpory grantu GAÈR 111/22/3333 a vızkumného
-zámìru XXX: J55/66:12345678 (nìkdo samozøejmì nemusí øešit grant nebo
-nìco takového, take tuhle sekci nebudou mít ve svém pøíspìvku všichni.)
+\section{Conclussion}
 
 %------------
 % Citace
 %
 \begin{thebibliography}{9}
-  \bibitem{rybicka} Rybièka, J.: \LaTeX pro zaèáteèníky, Brno, Konvoj 1999,
-            ISBN 80-85615-77-0
-  \bibitem{orsag} Orság, F.: Vision für die Zukunft. Biometrie, Kreutztal,
-            DE, b-Quadrat, 2004, s. 131-145, ISBN 3-933609-02-X
-  \bibitem{drahansky} Drahanskı, M., Orság, F.: Biometric Security Systems:
-    Robustness of the Finger-print and Speech Technologies. In: BT 2004 - 
-    International Workshop on Biometric Technologies, Calgary, CA, 2004,
-    s. 99-103
+  \bibitem{tata}
 \end{thebibliography}
 
 \end{document}

@@ -265,11 +265,13 @@ The \emph{top-down} representation of transition function $\delta$ of the TA $\m
 \end{equation}
 
 \chapter{The WS$k$S Logic}\label{wsks}
-The abbreviation WSkS stands for \emph{weak second-order monadic logic of $k$ successors}. This means that it is a logic that allows quantification over set variable (second-order), which can only represent \emph{finite} sets (weak) of elements and \emph{not functions} (monadic), over a universe of discourse where every element has $k$ successors and can therefore express a tree structure (for $k \geq 2$).
+The abbreviation WS$k$S stands for \emph{weak second-order monadic logic of $k$
+successors}. This means that it is a logic that allows quantification over set variable (second-order), which can only represent \emph{finite} sets (weak) of elements and \emph{not functions} (monadic), over a universe of discourse where every element has $k$ successors and can therefore express a tree structure (for $k \geq 2$).
  
  \section{Syntax}
- A~WSkS \emph{term} is an empty constant $\epsilon$, a first-order variable symbol written in lower-case letters (e.g. \emph{x, y, z,
- \ldots}) or a unary symbol from $\{1,\ldots,n\}$ written in postfix notation. For example, $x1123$ or $\epsilon2111$ are terms, where the latter can be shortened to $2111$.
+ A~WS$k$S \emph{term} is an empty constant $\epsilon$, a first-order variable symbol written in lower-case letters (e.g. \emph{x, y, z,
+ \ldots}) or an unary symbol from $\{1,\ldots,n\}$ written in postfix notation.
+ For example, $x1123$ or $\epsilon2111$ are terms, where the latter can be shortened to $2111$.
 
 The \emph{Atomic formulae} are defined as follows:
  \begin{enumerate}
@@ -278,7 +280,7 @@ The \emph{Atomic formulae} are defined as follows:
 	\item For a term $t$ and a second-order variable $X$, the membership constraint $t \in X$ is atomic an formula.
  \end{enumerate}
 
-The WS$k$S \emph{formula} is then built out of atomic formulas using the classical logical connectives $\wedge, \vee, \neg, \Leftarrow, \Rightarrow, \Leftrightarrow$ and quantifiers $\exists x, \forall x$ and $\exists X, \forall X$ for quantification over the first-order variables and second-order variables respectively.
+The WS$k$S \emph{formula} is then built out of atomic formulae using the classical logical connectives $\wedge, \vee, \neg, \Leftarrow, \Rightarrow, \Leftrightarrow$ and quantifiers $\exists x, \forall x$ and $\exists X, \forall X$ for quantification over the first-order variables and second-order variables respectively.
 
 Syntax can be further restricted to only subset of logical connectives and atomic formulas without harm to expressive power of formulae. This will be further explained in Section \ref{restricted}.
 
@@ -291,7 +293,7 @@ The set of \emph{free variables} of a formula $\psi$ is defined as usual.
 	Let $t_1,\ldots,t_n \in \{1,\ldots,k\}^*$ and $S_1,\ldots,S_n$ be finite subsets of $\{1,\ldots,k\}^*$. Given a formula $\psi(x_1,\ldots,x_n,X_1,\ldots,X_m)$ with free variables $x_1,\ldots,x_n$, $X_n,\ldots,X_m$, the assignment $\delta = \{ x_1 \mapsto t_1,\ldots x_n \mapsto t_n, X_1 \mapsto S_1,\ldots, X_m \mapsto S_m\}$ \emph{satisfies} $\psi$ written as $\delta \vDash \psi$ (or also $t_1,\ldots, t_n, S_1,\ldots,S_m \vDash \psi$) if replacing the variables with their corresponding values, the formula holds in the above model.
 	
   \section{Restricting Syntax}\label{restricted}
-	We are going to restrict the WSkS syntax to use only second-order variables. This can be done by considering every first-order variable as a singleton set and transform every formula to an equivalent one which does not contain any first-order variables. We will consider only following atomic formulas, where $X$ and $Y$ are second-order variables, and build formulas over them:
+	We are going to restrict the WSkS syntax to use only second-order variables. This can be done by considering every first-order variable as a singleton set and transform every formula to an equivalent one which does not contain any first-order variables. We will consider only following atomic formulas, where $X$ and $Y$ are second-order variables, and build formulae over them:
 	\begin{itemize}
 	 \item $X \subseteq Y$,
 	 \item $\text{Sing}(X)$\,--\,holds true, when $X$ is a singleton set,
@@ -418,7 +420,8 @@ As induction base, with assumption that $k = 2$ (works for arbitrary $k$), for e
  00 (q'', q) & \rightarrow & q''
 \end{eqnarray*}
 Note that the automaton for $X = Y2$ is obtained similarly.
- \item[-] The automaton $\mathcal{A}_{X = \epsilon} = (\{q, q'\}, \{0, 1, \bot\}, \{q'\}$ where $\delta$) is defined as following:
+ \item[-] The automaton $\mathcal{A}_{X = \epsilon} = (\{q, q'\}, \{0, 1,
+ \bot\}, \{q'\}, \delta$), where $\delta$ is efined as following:
 \begin{eqnarray*}
  \bot & \rightarrow & q\\
  1 (q, q) & \rightarrow & q'
