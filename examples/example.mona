@@ -1,0 +1,5 @@
+# Most simple example, there could be;
+
+var2 U, Y;
+
+U sub Y => U = U \ Y;
