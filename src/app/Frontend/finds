@@ -1,0 +1,28 @@
+1045193    4 drwxr-xr-x   2 root     root         4096 Oct 17  2012 /lib/modules/3.5.0-17-generic/kernel/net/core
+916421    4 drwxr-xr-x   4 root     root         4096 Oct 17  2012 /lib/modules/3.5.0-17-generic/kernel/sound/core
+914619    4 drwxr-xr-x   2 root     root         4096 Oct 17  2012 /lib/modules/3.5.0-17-generic/kernel/drivers/memstick/core
+913725    4 drwxr-xr-x   2 root     root         4096 Oct 17  2012 /lib/modules/3.5.0-17-generic/kernel/drivers/infiniband/core
+926287    4 drwxr-xr-x   2 root     root         4096 Sep 16 16:38 /lib/modules/3.5.0-40-generic/kernel/net/core
+928748    4 drwxr-xr-x   4 root     root         4096 Sep 16 16:38 /lib/modules/3.5.0-40-generic/kernel/sound/core
+1065415    4 drwxr-xr-x   2 root     root         4096 Sep 16 16:41 /lib/modules/3.5.0-40-generic/kernel/drivers/memstick/core
+928969    4 drwxr-xr-x   2 root     root         4096 Sep 16 16:41 /lib/modules/3.5.0-40-generic/kernel/drivers/infiniband/core
+ 36191    4 drwxr-xr-x   2 root     root         4096 Oct 17  2012 /usr/src/linux-headers-3.5.0-17-generic/include/config/serial/core
+ 36490    4 drwxr-xr-x   2 root     root         4096 Oct 17  2012 /usr/src/linux-headers-3.5.0-17-generic/include/config/sound/oss/core
+521444    4 drwxr-xr-x   2 root     root         4096 Sep 16 16:41 /usr/src/linux-headers-3.5.0-40/net/core
+539639    4 drwxr-xr-x   2 root     root         4096 Sep 16 16:41 /usr/src/linux-headers-3.5.0-40/sound/aoa/core
+539244    4 drwxr-xr-x   4 root     root         4096 Sep 16 16:41 /usr/src/linux-headers-3.5.0-40/sound/core
+1069276    4 drwxr-xr-x   2 root     root         4096 Sep 16 16:41 /usr/src/linux-headers-3.5.0-40/drivers/memstick/core
+1173830    4 drwxr-xr-x   2 root     root         4096 Sep 16 16:41 /usr/src/linux-headers-3.5.0-40/drivers/infiniband/core
+1069218    4 drwxr-xr-x   2 root     root         4096 Sep 16 16:41 /usr/src/linux-headers-3.5.0-40/drivers/mmc/core
+1177464    4 drwxr-xr-x   2 root     root         4096 Sep 16 16:41 /usr/src/linux-headers-3.5.0-40/drivers/usb/core
+791480    4 drwxr-xr-x   2 root     root         4096 Oct 17  2012 /usr/src/linux-headers-3.5.0-17/net/core
+928279    4 drwxr-xr-x   2 root     root         4096 Oct 17  2012 /usr/src/linux-headers-3.5.0-17/sound/aoa/core
+928274    4 drwxr-xr-x   4 root     root         4096 Oct 17  2012 /usr/src/linux-headers-3.5.0-17/sound/core
+669408    4 drwxr-xr-x   2 root     root         4096 Oct 17  2012 /usr/src/linux-headers-3.5.0-17/drivers/memstick/core
+669310    4 drwxr-xr-x   2 root     root         4096 Oct 17  2012 /usr/src/linux-headers-3.5.0-17/drivers/infiniband/core
+791057    4 drwxr-xr-x   2 root     root         4096 Oct 17  2012 /usr/src/linux-headers-3.5.0-17/drivers/mmc/core
+791418    4 drwxr-xr-x   2 root     root         4096 Oct 17  2012 /usr/src/linux-headers-3.5.0-17/drivers/usb/core
+806112    4 drwxr-xr-x   2 root     root         4096 Sep 16 16:41 /usr/src/linux-headers-3.5.0-40-generic/include/config/serial/core
+145291    4 drwxrwxr-x   2 ubuntu   ubuntu       4096 Oct 31  2012 /home/ubuntu/work/stp/src/sat/core
+  6196    0 lrwxrwxrwx   1 root     root           11 Sep 19 15:43 /dev/core -> /proc/kcore
+ 17165    0 dr-xr-xr-x   1 root     root            0 Sep 19 18:21 /proc/sys/net/core
