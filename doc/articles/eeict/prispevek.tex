@@ -1,6 +1,9 @@
 \documentclass{eeict}
 \inputencoding{utf8}
 \usepackage[bf]{caption2}
+\usepackage{amssymb}
+\usepackage{amsmath}
+\usepackage{dsfont}
 
 
 \newtheorem{example}{Example}[section]
@@ -35,8 +38,8 @@ non-deterministic tree automata.}
 
 \section{WS$k$S}
 
-The abbreviation WS$k$S stands for \emph{weak second-order monadic logic of $k$
-successors}. This means that it is a logic that allows quantification over set
+The abbreviation WS$k$S \cite{wsks} stands for \emph{weak second-order monadic
+logic of $k$ successors}. This means that it is a logic that allows quantification over set
 variables (second-order), which can only represent \emph{finite} sets (weak) of
 elements and \emph{not functions} (monadic) over a universe of discourse where
 every element has $k$ successors and can therefore express a tree structure
@@ -69,15 +72,78 @@ translation to equivalent formula in restricted syntax \cite{tata}.
 
 \section{Deciding WS$k$S}
 
+A decision procedure is an algorithm that given a formula $\phi$ returns VALID
+if $\phi$ is valid, SAT if $\phi$ is invalid but satisfiable (additionally
+yielding two assignemnts $\mathcal{M}_{true}$ and $\mathcal{M}_{false}$ such
+that $\mathcal{M}_{true} \vDash \phi$ and $\mathcal{M}_{false}\not\nvDash \phi$)
+and UNSAT if $\phi$ is unsatisfiable.
 
+Decision procedures for WS$k$S make use of close link of formulae and automata,
+i.e. given formula is transformed to correspondent automata and its language is
+further examined.
 
-\section{Conclussion}
+\subsection{Deciding WS$k$S using deterministic automata}
+
+One of the tools for deciding WS$k$S, MONA \cite{mona}, constructs automaton
+$\mathcal{A}_\phi$ for given formula $\phi$	by structural induction of formula.
+For each atomic subformulae we construct a correspondent automaton. Then as an
+induction step, by considering only logical connectives from restricted syntax,
+we construct for $\vee$, $\neg$ and $\exists$, union of automata, complement of
+automaton and $i$-th projection of automaton respectively.
+
+\begin{figure}
+ \begin{center}
+  
+ \end{center}
+ \caption{Automaton corresponding to example formula $\phi$}
+\end{figure}
+
+\subsection{Deciding WS$k$S using non-determinsitic automata}
+
+Despite having good computational results in practice, due to using of
+determinsitic automata every time a non-determinism is introduced then automaton
+is determinised and thus information about the original states is forgotten.
+
+So such an aproach has issues with extensive usage of automaton complementation
+and since currently there is no known tree automaton complementation technique
+better than bottom-up determinization of automaton with complementation of the
+final states heavy optimizations and heuristics had to be used in MONA for
+achieving good results.
+
+We propose that it is not necessary to construct the automaton representing all
+models of $\phi$. Instead the automaton and search for an accepting or
+non-accepting state can be done \emph{on-the-fly} and exploit recent development
+in algorithms using non-deterministic automata instead of deterministic ones. 
+
+Technique used for deciding WS$k$S is similar to principle of antichains.
+
+Given a WS$k$S formula $\phi$ we transform it to the formula in 
+\emph{existantially-quantified prenex normal form} $\psi =
+\exists\mathcal{X}_{m+1}\neg\exists\mathcal{X}_m\ldots\neg\exists\mathcal{X}_2\neg\exists\mathcal{X}_1.\pi(\mathds{X})$.
+We then create a hierarchical family of WS$k$S formulae $\Phi =
+\{\phi_0,\ldots,\phi_m\}$ where $\phi_0 = \pi$ and for all $0 \leq i \leq m-1$
+it holds that $\phi_{i+1} = \neg\exists\mathcal{X}_{i+1}\phi_i$. 
+
+\section{Conclusion}
+
+We proposed a new decision procedure of WS$k$S logic that uses non-deterministic
+automata instead of deterministic ones used in classical aproach, f.e. in tool
+MONA \cite{mona}. This different approach makes use of a recent developments in
+fields of non-deterministic automata algorithms like universality checking or
+language inclusion, allowing us to search for a rejecting or accepting states
+on-the-fly without constructing automaton corresponding to the given formula at
+all, possible yielding better computational results for some types of formulae.
 
 %------------
 % Citace
-%
+%------------
 \begin{thebibliography}{9}
-  \bibitem{tata}
+  \bibitem{mona} MONA: Web pages of MONA. [online] Available on:
+  http://www.brics.dk/mona/, Last Visited January 2014.
+  \bibitem{tata}Comon, H. et al.: Tree automata techniques and applications.
+  2007, release October, 12th 2007.
+  \bibitem{wsks}Büchi, J. R.: Weak second-order arithmetic and finite automata.
+  \emph{Mathematical Logic Quarterly}, 6(1-6):66-92, 1960.
 \end{thebibliography}
 
 \end{document}
