@@ -1,9 +1,16 @@
 cmake_minimum_required(VERSION 2.8)
 project(dip2014)
+
+set(REQUIRED_G++_VERSION 4.8.0)
+# forcing 4.8 compilers
+set(CMAKE_C_COMPILER "gcc-4.8")
+set(CMAKE_CXX_COMPILER "g++-4.8")
+
 include_directories(src)
 include_directories(src/app)
 include_directories(src/app/Frontend)
-include_directories(libs)
+include_directories(include)
+
 add_executable(dip
 	src/app/main.cpp
 	src/app/Frontend/ast.cpp
@@ -38,8 +45,8 @@ target_link_libraries(dip ${CMAKE_SOURCE_DIR}/src/libs/libmonamem.so)
 target_link_libraries(dip ${CMAKE_SOURCE_DIR}/src/libs/libvata.a)
 
 if (UNIX)
-	message(status "Setting G++ flags")
-	set(CMAKE_C++_FLAGS "${CMAKE_C++_FLAGS} -DHAVE_CONFIG_H -I. -I.. -O2 -g -O3")
+	message(STATUS "Setting G++ flags")
+	set(CMAKE_CXX_FLAGS "${CMAKE_C++_FLAGS} -std=c++0x -DHAVE_CONFIG_H -I. -I.. -I../include -O2 -g -O3")
 else()
 	message(fatal_error "Not supported yet")
 endif()

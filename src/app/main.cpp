@@ -6,6 +6,13 @@
 #include <sys/resource.h>
 #include <signal.h>
 
+// VATA headers
+#include <vata/bdd_bu_tree_aut.hh>
+#include <vata/parsing/timbuk_parser.hh>
+#include <vata/serialization/timbuk_serializer.hh>
+#include <vata/util/binary_relation.hh>
+
+// MONA Frontend headers
 #include "Frontend/env.h"
 #include "Frontend/untyped.h"
 #include "Frontend/predlib.h"
@@ -20,6 +27,8 @@
 #include "Frontend/offsets.h"
 
 using std::cout;
+
+using Automaton = VATA::BDDBottomUpTreeAut;
 
 Options options;
 MonaUntypedAST *untypedAST;
@@ -274,6 +283,25 @@ main(int argc, char *argv[])
   if (options.mode == TREE && (options.dump || options.whole) && 
       !options.externalWhole)
     printGuide();
+
+  ///////// Conversion to Tree Automata ////////
+
+  /* For now, only example of vata is added here */
+  Automaton aut1;
+  aut1.SetStateFinal(1);
+
+  aut1.AddTransition(
+		  Automaton::StateTuple(),
+		  Automaton::SymbolType("0000"),
+		  0);
+  aut1.AddTransition(
+		  Automaton::StateTuple({0, 0}),
+		  Automaton::SymbolType("11X0"),
+		  1);
+
+  VATA::Serialization::AbstrSerializer* serializer =
+		  new VATA::Serialization::TimbukSerializer();
+  std::cout << aut1.DumpToString(*serializer);
 
   ///////// CLEAN UP ///////////////////////////////////////////////////////
 
