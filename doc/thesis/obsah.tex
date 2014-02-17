@@ -293,7 +293,11 @@ The set of \emph{free variables} of a formula $\psi$ is defined as usual.
 	Let $t_1,\ldots,t_n \in \{1,\ldots,k\}^*$ and $S_1,\ldots,S_n$ be finite subsets of $\{1,\ldots,k\}^*$. Given a formula $\psi(x_1,\ldots,x_n,X_1,\ldots,X_m)$ with free variables $x_1,\ldots,x_n$, $X_n,\ldots,X_m$, the assignment $\delta = \{ x_1 \mapsto t_1,\ldots x_n \mapsto t_n, X_1 \mapsto S_1,\ldots, X_m \mapsto S_m\}$ \emph{satisfies} $\psi$ written as $\delta \vDash \psi$ (or also $t_1,\ldots, t_n, S_1,\ldots,S_m \vDash \psi$) if replacing the variables with their corresponding values, the formula holds in the above model.
 	
   \section{Restricting Syntax}\label{restricted}
-	We are going to restrict the WSkS syntax to use only second-order variables. This can be done by considering every first-order variable as a singleton set and transform every formula to an equivalent one which does not contain any first-order variables. We will consider only following atomic formulas, where $X$ and $Y$ are second-order variables, and build formulae over them:
+	We are going to restrict the WSkS syntax to use only second-order variables.
+	This can be done by considering every first-order variable as a singleton set
+	and transform every formula to an equivalent one which does not contain any
+	first-order variables. We will consider only following atomic formulas, where
+	$X$ and $Y$ are second-order variables, and build formulae over them:
 	\begin{itemize}
 	 \item $X \subseteq Y$,
 	 \item $\text{Sing}(X)$\,--\,holds true, when $X$ is a singleton set,
@@ -301,7 +305,11 @@ The set of \emph{free variables} of a formula $\psi$ is defined as usual.
 	 \item $X = \epsilon$.
 	\end{itemize}
 	
-	This syntax will be called the \emph{restricted syntax} and its satisfaction relation will be denoted as $\vDash_2$.
+	We can also further simplify the syntax of WS$k$S formulae by restricting
+	logical connectives used to build the formulae to only $\exists$, $\vee$ and $\neg$.
+	
+	 This syntax will be called
+	the \emph{restricted syntax} and its satisfaction relation will be denoted as $\vDash_2$.
 	
 	\begin{prop}
 	There is a translation T from WS$k$S formulae to the restricted syntax such that $$s_1,\ldots,s_n,S_1,\ldots,S_m \vDash \psi(x_1,\ldots,x_n,X_1,\ldots,X_m)$$ if and only if $$\{s_1\},\ldots,\{s_n\},S_1,\ldots,S_m \vDash_2 T(\psi)(X_{x_1},\ldots,X_{x_n}, X_1,\ldots,X_m)$$ Conversely, there is a translation $T'$ from the restricted syntax to WSkS such that $$S_1,\ldots,S_m \vDash T'(\psi)(X_1,\ldots,X_m)$$ if and only if $$S_1,\ldots,S_m \vDash_2 \psi(X_1,\ldots,X_m)$$
@@ -386,7 +394,10 @@ If a set of tuples of finite subsets of $\{1,\ldots,k\}^*$ is definable in WSkS,
 \end{lemma}
 
 \begin{proof}
- We have shown in Section \ref{restricted} that every formula in WSkS can be translated into an equivalent formula in the restricted syntax. We can now prove the lemma induction on the structure of the formula $\psi$ which defines language $L$. 
+ We have shown in Section \ref{restricted} that every formula in WSkS can be
+ translated into an equivalent formula in the restricted syntax. We can now
+ prove the lemma by induction on the structure of the formula $\psi$ which
+ defines language $L$.
 
 Let us assume that all variables in $\psi$ are bound at most once in the formula and also that there is a fixed total ordering $\leq$ on the variables.
 
