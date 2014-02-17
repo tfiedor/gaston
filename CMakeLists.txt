@@ -35,6 +35,7 @@ target_link_libraries(dip ${CMAKE_SOURCE_DIR}/src/libs/libmonabdd.so)
 target_link_libraries(dip ${CMAKE_SOURCE_DIR}/src/libs/libmonadfa.so)
 target_link_libraries(dip ${CMAKE_SOURCE_DIR}/src/libs/libmonagta.so)
 target_link_libraries(dip ${CMAKE_SOURCE_DIR}/src/libs/libmonamem.so)
+target_link_libraries(dip ${CMAKE_SOURCE_DIR}/src/libs/libvata.a)
 
 if (UNIX)
 	message(status "Setting G++ flags")
