@@ -1,7 +1,7 @@
 % Automaton corresponding to the formula phi = exists P. (Sing(P) and not P
 % \subseteq X)
 
-\documentclass{article}
+\documentclass{standalone}
 
 \usepackage{pgf}
 \usepackage{tikz}
@@ -9,8 +9,8 @@
 \usetikzlibrary{arrows,automata}
 \usepackage[latin1]{inputenc}
 \begin{document}
-\begin{figure}
- \begin{center}
+%\begin{figure}
+% \begin{center}
 \begin{tikzpicture}[->,>=stealth',shorten >=1pt,auto,node distance=2.8cm,
                     semithick]
   \tikzstyle{every state}=[fill=none,draw=black,text=black]
@@ -33,8 +33,8 @@
             edge [loop below] node {X: 0\textbar 1} (D)
         (E) edge [loop below] node {X: 0\textbar 1} (E);
 \end{tikzpicture}
- \end{center}
- \caption{Automaton $\mathcal{A}_\phi$ corresponding to the formula $\phi =
- \exists P. (Sing(P) \wedge \neg P \subseteq X)$}
-\end{figure}
+% \end{center}
+% \caption{Automaton $\mathcal{A}_\phi$ corresponding to the formula $\phi =
+% \exists P. (Sing(P) \wedge \neg P \subseteq X)$}
+%\end{figure}
 \end{document}
