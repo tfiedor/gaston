@@ -24,6 +24,9 @@
 #include "ident.h"
 #include "codetable.h"
 #include "printline.h"
+#include <vata/bdd_bu_tree_aut.hh>
+
+using Automaton = VATA::BDDBottomUpTreeAut;
 
 ////////// Bit list ///////////////////////////////////////////////////////////
 
@@ -36,7 +39,6 @@ public:
   BitList(char *str);
 
   void dump();
-  void cdump();
 };
 
 ////////// ASTTermCode ////////////////////////////////////////////////////////
@@ -94,7 +96,6 @@ public:
 
   virtual void freeVars(IdentList*, IdentList*) {};
   virtual void dump() {};
-  virtual void cdump() {};
 
   ASTOrder order;
   ASTKind kind;
@@ -104,7 +105,6 @@ public:
 class ASTList: public DequeGC<AST*> {
 public:
   void dump();
-  void cdump();
 };
 
 class ASTTerm: public AST {
@@ -113,8 +113,7 @@ public:
     AST(o, kind, p) {}
 
   virtual ASTTermCode *makeCode(SubstCode *subst = NULL) = 0;
-  void dump() = 0; 
-  void cdump() = 0;
+  void dump() = 0;
 };
 
 class ASTTerm1: public ASTTerm {
@@ -124,7 +123,6 @@ public:
 
   ASTTermCode *makeCode(SubstCode *subst = NULL) = 0;
   void dump() = 0; 
-  void cdump() = 0;
 };
 
 class Term1List: public DequeGC<ASTTerm1*> {};
@@ -136,7 +134,6 @@ public:
 
   ASTTermCode *makeCode(SubstCode *subst = NULL) = 0;
   void dump() = 0; 
-  void cdump() = 0;
 };
 
 class Term2List: public DequeGC<ASTTerm2*> {};
@@ -148,7 +145,6 @@ public:
 
  virtual VarCode makeCode(SubstCode *subst = NULL) = 0;
   void dump() = 0;
-  void cdump() = 0; 
 
   // Function for cloning formulae
   virtual ASTForm* clone() { return this; }
@@ -158,8 +154,13 @@ public:
   virtual ASTForm* toPrenexNormalForm() { return this; }
   virtual ASTForm* removeUniversalQuantifier() { return this; }
   virtual ASTForm* unfoldNegations() { return this; }
+  virtual ASTForm* flatten() { return this;}
 
   ASTForm* toExistentionalPNF();
+
+  // Conversion of AST representation of formula to Automaton
+  virtual Automaton* toUnaryAutomaton() { return 0; }
+  virtual Automaton* toBinaryAutomaton() { return 0; }
 };
 
 class FormList: public DequeGC<ASTForm*> {};
@@ -170,7 +171,6 @@ public:
     AST(oUniv, aUniv, p), u(univ) {}
 
   void dump();
-  void cdump();
 
   Ident u;
 };
@@ -182,7 +182,6 @@ public:
   ~ASTComponent() {delete path;}
 
   void dump();
-  void cdump();
 
   char *name;
   char *type;
@@ -193,7 +192,6 @@ public:
 class ASTComponentList: public DequeGC<ASTComponent*> {
 public: 
   void dump();
-  void cdump();
 };
 
 class ASTVariant {
@@ -203,7 +201,6 @@ public:
   ~ASTVariant() {delete components; delete path;}
 
   void dump();
-  void cdump();
 
   char *name;
   ASTComponentList *components;
@@ -214,7 +211,6 @@ public:
 class ASTVariantList: public DequeGC<ASTVariant*> {
 public:
   void dump();
-  void cdump();
 };
 
 ////////// Abstract classes ///////////////////////////////////////////////////
@@ -457,7 +453,6 @@ public:
   void freeVars(IdentList*, IdentList*);
   ASTTermCode *makeCode(SubstCode *subst = NULL);
   void dump();
-  void cdump();
 };
 
 class ASTTerm1_Dot: public ASTTerm1_t {
@@ -468,7 +463,6 @@ public:
 
   ASTTermCode *makeCode(SubstCode *subst = NULL);
   void dump();
-  void cdump();
 
 protected:
   BitList *bits;
@@ -481,7 +475,6 @@ public:
 
   ASTTermCode *makeCode(SubstCode *subst = NULL);
   void dump();
-  void cdump();
 }; 
 
 class ASTTerm1_Root: public ASTTerm1 {
@@ -491,7 +484,6 @@ public:
   
   ASTTermCode *makeCode(SubstCode *subst = NULL);
   void dump();
-  void cdump();
 
 protected:
   Ident univ;
@@ -506,7 +498,6 @@ public:
   int value();
   ASTTermCode *makeCode(SubstCode *subst = NULL);
   void dump();
-  void cdump();
 }; 
 
 class ASTTerm1_Plus: public ASTTerm1_tn {
@@ -516,7 +507,6 @@ public:
 
   ASTTermCode *makeCode(SubstCode *subst = NULL);
   void dump();
-  void cdump();
 }; 
 
 class ASTTerm1_Minus: public ASTTerm1_tn {
@@ -527,7 +517,6 @@ public:
   ASTTermCode *makeCode(SubstCode *subst = NULL);
   VarCode unfold(int v1, int v2, int n, SubstCode *subst, Pos pos);
   void dump();
-  void cdump();
 }; 
 
 class ASTTerm1_PlusModulo: public ASTTerm1_tnt {
@@ -538,7 +527,6 @@ public:
   ASTTermCode *makeCode(SubstCode *subst = NULL);
   VarCode unfold(int v1, int v2, int n, int v3, SubstCode *subst, Pos pos);
   void dump();
-  void cdump();
 }; 
 
 class ASTTerm1_MinusModulo: public ASTTerm1_tnt {
@@ -549,7 +537,6 @@ public:
   ASTTermCode *makeCode(SubstCode *subst = NULL);
   VarCode unfold(int v1, int v2, int n, int v3, SubstCode *subst, Pos pos);
   void dump();
-  void cdump();
 }; 
 
 class ASTTerm1_Min: public ASTTerm1_T {
@@ -559,7 +546,6 @@ public:
 
   ASTTermCode *makeCode(SubstCode *subst = NULL);
   void dump();
-  void cdump();
 };
 
 class ASTTerm1_Max: public ASTTerm1_T {
@@ -569,7 +555,6 @@ public:
 
   ASTTermCode *makeCode(SubstCode *subst = NULL);
   void dump();
-  void cdump();
 };
 
 class ASTTerm1_TreeRoot: public ASTTerm1_T {
@@ -579,7 +564,6 @@ public:
 
   ASTTermCode *makeCode(SubstCode *subst = NULL);
   void dump();
-  void cdump();
 };
 
 ////////// Syntactical categories of ASTTerm2 /////////////////////////////////
@@ -593,7 +577,6 @@ public:
   ASTTermCode *makeCode(SubstCode *subst = NULL);
   Ident getVar() {return n;};
   void dump();
-  void cdump();
 
 protected:
   int n;
@@ -608,7 +591,6 @@ public:
   ASTTermCode *makeCode(SubstCode *subst = NULL);
   Ident getVar() {return n;};
   void dump();
-  void cdump();
 
 protected:
   int n;
@@ -623,7 +605,6 @@ public:
   void freeVars(IdentList*, IdentList*);
   ASTTermCode *makeCode(SubstCode *subst = NULL);
   void dump();
-  void cdump();
 
 protected:
   BitList *bits;
@@ -639,7 +620,6 @@ public:
   ASTTermCode *makeCode(SubstCode *subst = NULL);
   void freeVars(IdentList*, IdentList*);
   void dump();
-  void cdump();
 
 protected:
   ASTTerm2 *T;
@@ -652,7 +632,6 @@ public:
 
   ASTTermCode *makeCode(SubstCode *subst = NULL);
   void dump();
-  void cdump();
 }; 
 
 class ASTTerm2_Union: public ASTTerm2_TT {
@@ -662,7 +641,6 @@ public:
   
   ASTTermCode *makeCode(SubstCode *subst = NULL);
   void dump();
-  void cdump();
 };
 
 class ASTTerm2_Inter: public ASTTerm2_TT {
@@ -672,7 +650,6 @@ public:
   
   ASTTermCode *makeCode(SubstCode *subst = NULL);
   void dump();
-  void cdump();
 };
 
 class ASTTerm2_Setminus: public ASTTerm2_TT {
@@ -682,7 +659,6 @@ public:
   
   ASTTermCode *makeCode(SubstCode *subst = NULL);
   void dump();
-  void cdump();
 };
 
 class ASTTerm2_Set: public ASTTerm2 {
@@ -694,7 +670,6 @@ public:
   void freeVars(IdentList*, IdentList*);
   ASTTermCode *makeCode(SubstCode *subst = NULL);
   void dump();
-  void cdump();
 
 protected:
   ASTList *elements;
@@ -708,7 +683,6 @@ public:
   ASTTermCode *makeCode(SubstCode *subst = NULL);
   VarCode unfold(int v1, int v2, int n, SubstCode *subst, Pos pos);
   void dump();
-  void cdump();
 }; 
 
 class ASTTerm2_Minus: public ASTTerm2_Tn {
@@ -719,7 +693,6 @@ public:
   ASTTermCode *makeCode(SubstCode *subst = NULL);
   VarCode unfold(int v1, int v2, int n, SubstCode *subst, Pos pos);
   void dump();
-  void cdump();
 }; 
 
 class ASTTerm2_Interval: public ASTTerm2 {
@@ -731,7 +704,6 @@ public:
   void freeVars(IdentList*, IdentList*);
   ASTTermCode *makeCode(SubstCode *subst = NULL);
   void dump();
-  void cdump();
 
 protected:
   ASTTerm1 *t1;
@@ -745,7 +717,6 @@ public:
 
   ASTTermCode *makeCode(SubstCode *subst = NULL);
   void dump();
-  void cdump();
 
 protected:
   int value;
@@ -760,7 +731,6 @@ public:
   void freeVars(IdentList*, IdentList*);
   ASTTermCode *makeCode(SubstCode *subst = NULL);
   void dump();
-  void cdump();
 
 protected:
   Ident fresh;
@@ -777,7 +747,6 @@ public:
   void freeVars(IdentList*, IdentList*);
   VarCode makeCode(SubstCode *subst = NULL);
   void dump();
-  void cdump();
   ASTForm* clone() { return new ASTForm_Var0(*this); }
 
 protected:
@@ -791,7 +760,6 @@ public:
 
   VarCode makeCode(SubstCode *subst = NULL);
   void dump();
-  void cdump();
   ASTForm* clone() { return new ASTForm_True(*this); }
 };
 
@@ -802,7 +770,6 @@ public:
 
   VarCode makeCode(SubstCode *subst = NULL);
   void dump();
-  void cdump();
   ASTForm* clone() { return new ASTForm_False(*this); }
 };
 
@@ -813,7 +780,6 @@ public:
 
   VarCode makeCode(SubstCode *subst = NULL);
   void dump();
-  void cdump();
   ASTForm* clone() { return new ASTForm_In(*this); }
 };
 
@@ -824,7 +790,6 @@ public:
 
   VarCode makeCode(SubstCode *subst = NULL);
   void dump();
-  void cdump();
   ASTForm* clone() { return new ASTForm_Notin(*this); }
 };
 
@@ -837,7 +802,6 @@ public:
   void freeVars(IdentList*, IdentList*);
   VarCode makeCode(SubstCode *subst = NULL);
   void dump();
-  void cdump();
   ASTForm* clone() { return new ASTForm_RootPred(*this); }
 
 protected:
@@ -852,7 +816,6 @@ public:
 
   VarCode makeCode(SubstCode *subst = NULL);
   void dump();
-  void cdump();
   ASTForm* clone() { return new ASTForm_EmptyPred(*this); }
 };
 
@@ -865,7 +828,6 @@ public:
   VarCode makeCode(SubstCode *subst = NULL);
   void freeVars(IdentList*, IdentList*);
   void dump();
-  void cdump();
   ASTForm* clone() { return new ASTForm_FirstOrder(*this); }
 
 protected:
@@ -879,7 +841,6 @@ public:
 
   VarCode makeCode(SubstCode *subst = NULL);
   void dump();
-  void cdump();
   ASTForm* clone() { return new ASTForm_Sub(*this); }
 
 };
@@ -891,7 +852,6 @@ public:
 
   VarCode makeCode(SubstCode *subst = NULL);
   void dump();
-  void cdump();
   ASTForm* clone() { return new ASTForm_Equal1(*this); }
 };
 
@@ -902,7 +862,6 @@ public:
 
   VarCode makeCode(SubstCode *subst = NULL);
   void dump();
-  void cdump();
   ASTForm* clone() { return new ASTForm_Equal2(*this); }
 };
 
@@ -913,7 +872,6 @@ public:
 
   VarCode makeCode(SubstCode *subst = NULL);
   void dump();
-  void cdump();
   ASTForm* clone() { return new ASTForm_NotEqual1(*this); }
 };
 
@@ -924,7 +882,6 @@ public:
 
   VarCode makeCode(SubstCode *subst = NULL);
   void dump();
-  void cdump();
   ASTForm* clone() { return new ASTForm_NotEqual2(*this); }
 };
 
@@ -935,7 +892,6 @@ public:
 
   VarCode makeCode(SubstCode *subst = NULL);
   void dump();
-  void cdump();
   ASTForm* clone() { return new ASTForm_Less(*this); }
 };
 
@@ -946,7 +902,6 @@ public:
 
   VarCode makeCode(SubstCode *subst = NULL);
   void dump();
-  void cdump();
   ASTForm* clone() { return new ASTForm_LessEq(*this); }
 };
 
@@ -957,7 +912,6 @@ public:
 
   VarCode makeCode(SubstCode *subst = NULL);
   void dump();
-  void cdump();
   ASTForm* clone() { return new ASTForm_WellFormedTree(*this); }
 };
 
@@ -968,7 +922,6 @@ public:
 
   VarCode makeCode(SubstCode *subst = NULL);
   void dump();
-  void cdump();
   ASTForm* clone() { return new ASTForm_Impl(*this); }
 
   ASTForm* toRestrictedSyntax();
@@ -981,7 +934,6 @@ public:
 
   VarCode makeCode(SubstCode *subst = NULL);
   void dump();
-  void cdump();
   ASTForm* clone() { return new ASTForm_Biimpl(*this); }
 
   ASTForm* toRestrictedSyntax();
@@ -994,7 +946,6 @@ public:
 
   VarCode makeCode(SubstCode *subst = NULL);
   void dump();
-  void cdump();
   ASTForm* clone() { return new ASTForm_And(*this); }
 
   ASTForm* toRestrictedSyntax();
@@ -1007,7 +958,6 @@ public:
 
   VarCode makeCode(SubstCode *subst = NULL);
   void dump();
-  void cdump();
   ASTForm* clone() { return new ASTForm_IdLeft(*this); }
 
   ASTForm* toRestrictedSyntax();
@@ -1020,7 +970,6 @@ public:
 
   VarCode makeCode(SubstCode *subst = NULL);
   void dump();
-  void cdump();
   ASTForm* clone() { return new ASTForm_Or(*this); }
 
   ASTForm* toRestrictedSyntax();
@@ -1035,7 +984,6 @@ public:
   void freeVars(IdentList*, IdentList*);
   VarCode makeCode(SubstCode *subst = NULL);
   void dump();
-  void cdump();
   ASTForm* clone() { return new ASTForm_Not(*this); }
 
   ASTForm* toRestrictedSyntax();
@@ -1053,7 +1001,6 @@ public:
 
   VarCode makeCode(SubstCode *subst = NULL);
   void dump();
-  void cdump();
   ASTForm* clone() { return new ASTForm_Ex0(*this); }
 
   ASTForm* toRestrictedSyntax();
@@ -1066,7 +1013,6 @@ public:
 
   VarCode makeCode(SubstCode *subst = NULL);
   void dump();
-  void cdump();
   ASTForm* clone() { return new ASTForm_Ex1(*this); }
 
   ASTForm* toRestrictedSyntax();
@@ -1079,7 +1025,6 @@ public:
 
   VarCode makeCode(SubstCode *subst = NULL);
   void dump();
-  void cdump();
   ASTForm* clone() { return new ASTForm_Ex2(*this); }
 
   ASTForm* toRestrictedSyntax();
@@ -1092,7 +1037,6 @@ public:
 
   VarCode makeCode(SubstCode *subst = NULL);
   void dump();
-  void cdump();
   ASTForm* clone() { return new ASTForm_All0(*this); }
 
   ASTForm* toRestrictedSyntax();
@@ -1106,7 +1050,6 @@ public:
 
   VarCode makeCode(SubstCode *subst = NULL);
   void dump();
-  void cdump();
   ASTForm* clone() { return new ASTForm_All1(*this); }
   
   ASTForm* toRestrictedSyntax();
@@ -1120,7 +1063,6 @@ public:
 
   VarCode makeCode(SubstCode *subst = NULL);
   void dump();
-  void cdump();
   ASTForm* clone() { return new ASTForm_All2(*this); }
 
   ASTForm* toRestrictedSyntax();
@@ -1136,7 +1078,6 @@ public:
   void freeVars(IdentList*, IdentList*);
   VarCode makeCode(SubstCode *subst = NULL);
   void dump();
-  void cdump();
   ASTForm* clone() { return new ASTForm_Let0(*this); }
 
 protected:
@@ -1154,7 +1095,6 @@ public:
   void freeVars(IdentList*, IdentList*);
   VarCode makeCode(SubstCode *subst = NULL);
   void dump();
-  void cdump();
   ASTForm* clone() { return new ASTForm_Let1(*this); }
 
 protected:
@@ -1172,7 +1112,6 @@ public:
   void freeVars(IdentList*, IdentList*);
   VarCode makeCode(SubstCode *subst = NULL);
   void dump();
-  void cdump();
   ASTForm* clone() { return new ASTForm_Let2(*this); }
 
 protected:
@@ -1190,7 +1129,6 @@ public:
   void freeVars(IdentList*, IdentList*);
   VarCode makeCode(SubstCode *subst = NULL);
   void dump();
-  void cdump();
   ASTForm* clone() { return new ASTForm_Call(*this); }
 
 protected:
@@ -1210,7 +1148,6 @@ public:
   void freeVars(IdentList*, IdentList*);
   VarCode makeCode(SubstCode *subst = NULL);
   void dump();
-  void cdump();
   ASTForm* clone() { return new ASTForm_Import(*this); }
   
 protected:
@@ -1226,7 +1163,6 @@ public:
   
   VarCode makeCode(SubstCode *subst = NULL);
   void dump();
-  void cdump();
   ASTForm* clone() { return new ASTForm_Export(*this); }
   
 protected:
@@ -1240,7 +1176,6 @@ public:
   
   VarCode makeCode(SubstCode *subst = NULL);
   void dump();
-  void cdump();
   ASTForm* clone() { return new ASTForm_Prefix(*this); }
 };
 
@@ -1251,7 +1186,6 @@ public:
   
   VarCode makeCode(SubstCode *subst = NULL);
   void dump();
-  void cdump();
   ASTForm* clone() { return new ASTForm_Restrict(*this); }
 };
 
@@ -1264,7 +1198,6 @@ public:
   void freeVars(IdentList*, IdentList*);
   VarCode makeCode(SubstCode *subst = NULL);
   void dump();
-  void cdump();
   ASTForm* clone() { return new ASTForm_InStateSpace1(*this); }
   
 protected:
@@ -1281,7 +1214,6 @@ public:
   void freeVars(IdentList*, IdentList*);
   VarCode makeCode(SubstCode *subst = NULL);
   void dump();
-  void cdump();
   ASTForm* clone() { return new ASTForm_InStateSpace2(*this); }
   
 protected:
@@ -1298,7 +1230,6 @@ public:
   void freeVars(IdentList*, IdentList*);
   VarCode makeCode(SubstCode *subst = NULL);
   void dump();
-  void cdump();
   ASTForm* clone() { return new ASTForm_SomeType(*this); }
   
 protected:

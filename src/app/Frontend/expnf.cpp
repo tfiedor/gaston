@@ -27,543 +27,23 @@ using std::cout;
 
 extern SymbolTable symbolTable;
 
-void 
-ASTComponent::cdump()
-{
-  cout << name;
-  if (path)
-    path->dump();
-  else
-    cout << "[?]";
-  cout << ":" << type;
-}
 
-void
-ASTComponentList::cdump()
-{
-  for (iterator i = begin(); i != end(); i++) {
-    if (i != begin())
-      cout << ",";
-    (*i)->cdump();
-  }
-}
-
-void
-ASTVariant::cdump()
-{
-  cout << name;
-  if (path)
-    path->cdump();
-  else
-    cout << "[?]";
-  cout << "(";
-  if (components)
-    components->cdump();
-  cout << ")";
-}
-
-void
-ASTVariantList::cdump()
-{
-  for (iterator i = begin(); i != end(); i++) {
-    if (i != begin())
-      cout << ",";
-    (*i)->cdump();
-  }
-}
-
-void
-BitList::cdump()
-{
-  cout << "[";
-  for (iterator i = begin(); i != end(); i++)
-    if (*i == Zero)
-      cout << "0";
-    else
-      cout << "1";
-  cout << "]";
-}
-
-void 
-ASTList::cdump()
-{
-  iterator i;
-  for (i = begin(); i != end(); i++) {
-    cout << ","; (*i)->cdump();
-  }
-}
-
-void 
-ASTUniv::cdump()
-{
-  cout << symbolTable.lookupSymbol(u);
-}
-
-void 
-ASTTerm1_Var1::cdump()
-{
-  cout << "Var1 " << symbolTable.lookupSymbol(n);
-}
-  
-void 
-ASTTerm1_Dot::cdump()
-{
-  cout << "Dot("; t->dump(); cout << ",";
-  BitList::iterator i;
-  for (i = bits->begin(); i != bits->end(); i++)
-    if (*i == Zero)
-      cout << "0";
-    else
-      cout << "1";
-  cout << ")";
-}
-    
-void 
-ASTTerm1_Up::cdump()
-{
-  cout << "Up("; t->cdump(); cout << ")";
-}
-    
-void
-ASTTerm1_Root::cdump()
-{
-  if (univ == -1)
-    cout << "Root";
-  else
-    cout << "Root(" << symbolTable.lookupSymbol(univ) << ")";
-}
-
-void 
-ASTTerm1_Int::cdump()
-{
-  cout << "Int " << n;
-}
-    
-void 
-ASTTerm1_Plus::cdump()
-{
-  cout << "Plus1("; t->cdump(); cout << "," << n << ")";
-}
-    
-void 
-ASTTerm1_Minus::cdump()
-{
-  cout << "Minus1("; t->cdump(); cout << "," << n << ")";
-}
-    
-void 
-ASTTerm1_PlusModulo::cdump()
-{
-  cout << "PlusModulo1("; t1->cdump(); cout << ","  << n << ",";
-  t2->cdump(); cout << ")";
-}
-    
-void 
-ASTTerm1_MinusModulo::cdump()
-{
-  cout << "MinusModulo1("; t1->cdump(); cout << "," << n << ",";
-  t2->cdump(); cout << ")";
-}
-    
-void 
-ASTTerm1_Min::cdump()
-{
-  cout << "Min("; T->cdump(); cout << ")";
-}
-    
-void 
-ASTTerm1_Max::cdump()
-{
-  cout << "Max("; T->cdump(); cout << ")";
-}
-    
-void 
-ASTTerm1_TreeRoot::cdump()
-{
-  cout << "TreeRoot("; T->cdump(); cout << ")";
-}
-    
-void 
-ASTTerm2_Var2::cdump()
-{
-  cout << "Var2 " << symbolTable.lookupSymbol(n);
-}
-    
-void 
-ASTTerm2_VarTree::cdump()
-{
-  cout << "Tree " << symbolTable.lookupSymbol(n);
-}
-    
-void 
-ASTTerm2_Dot::cdump()
-{
-  cout << "Dot("; T->dump(); cout << ",";
-  BitList::iterator i;
-  for (i = bits->begin(); i != bits->end(); i++)
-    if (*i == Zero)
-      cout << "0";
-    else
-      cout << "1";
-  cout << ")";
-}
-    
-void 
-ASTTerm2_Up::cdump()
-{
-  cout << "Up("; T->cdump(); cout << ")";
-}
-    
-void 
-ASTTerm2_Empty::cdump()
-{
-  cout << "Empty";
-}
-    
-void 
-ASTTerm2_Union::cdump()
-{
-  cout << "Union("; T1->cdump(); cout << ","; T2->cdump(); cout << ")";
-}
-    
-void 
-ASTTerm2_Inter::cdump()
-{
-  cout << "Inter("; T1->cdump(); cout << ","; T2->cdump(); cout << ")";
-}
-    
-void 
-ASTTerm2_Setminus::cdump()
-{
-  cout << "Setminus("; T1->cdump(); cout << ","; T2->cdump(); cout << ")";
-}
-    
-void 
-ASTTerm2_Set::cdump()
-{
-  ASTList::iterator i;
-  cout << "Set(";
-  for (i = elements->begin(); i != elements->end();) {
-    (*i)->cdump();
-    if (++i != elements->end()) 
-      cout << ",";
-  }
-  cout << ")";
-}
-    
-void 
-ASTTerm2_Plus::cdump()
-{
-  cout << "Plus2("; T->cdump(); cout << "," << n << ")";
-}
-    
-void 
-ASTTerm2_Minus::cdump()
-{
-  cout << "Minus2("; T->cdump(); cout << "," << n << ")";
-}
-    
-void 
-ASTTerm2_Interval::cdump()
-{
-  cout << "Interval("; t1->cdump(); cout << ","; t2->cdump(); cout << ")";
-}
-    
-void 
-ASTTerm2_PresbConst::cdump()
-{
-  cout << "PresbConst(" << value << ")"; 
-}
-
-void 
-ASTTerm2_Formula::cdump()
-{
-  cout << "Term2Formula(" << symbolTable.lookupSymbol(fresh) << ",";
-  f->cdump(); cout << ")";
-}
-
-void 
-ASTForm_Var0::cdump()
-{
-  cout << "Var0 " << symbolTable.lookupSymbol(n);
-}
-    
-void 
-ASTForm_True::cdump()
-{
-  cout << "True";
-}
-    
-void 
-ASTForm_False::cdump()
-{
-  cout << "False";
-}
-    
-void 
-ASTForm_In::cdump()
-{
-  cout << "In("; t1->cdump(); cout << ","; T2->cdump(); cout << ")";
-}
-    
-void 
-ASTForm_Notin::cdump()
-{
-  cout << "Notin("; t1->cdump(); cout << ","; T2->cdump(); cout << ")";
-}
-    
-void
-ASTForm_RootPred::cdump()
-{
-  cout << "Root("; t->cdump(); cout << ",["; ul->dump(); cout << ")"; 
-}
-
-void 
-ASTForm_EmptyPred::cdump()
-{
-  cout << "EmptyPred("; T->dump(); cout << ")";
-}
-    
-void 
-ASTForm_FirstOrder::cdump()
-{
-  cout << "FirstOrder("; t->cdump(); cout << ")";
-}
-    
-void 
-ASTForm_Sub::cdump()
-{
-  cout << "Sub("; T1->cdump(); cout << ","; T2->cdump(); cout << ")";
-}
-    
-void 
-ASTForm_Equal1::cdump()
-{
-  cout << "Equal1("; t1->cdump(); cout << ","; t2->cdump(); cout << ")";
-}
-    
-void 
-ASTForm_Equal2::cdump()
-{
-  cout << "Equal2("; T1->cdump(); cout << ","; T2->cdump(); cout << ")";
-}
-    
-void 
-ASTForm_NotEqual1::cdump()
-{
-  cout << "NotEqual1("; t1->cdump(); cout << ","; t2->cdump(); cout << ")";
-}
-    
-void 
-ASTForm_NotEqual2::cdump()
-{
-  cout << "NotEqual2("; T1->cdump(); cout << ","; T2->cdump(); cout << ")";
-}
-    
-void 
-ASTForm_Less::cdump()
-{
-  cout << "Less("; t1->cdump(); cout << ","; t2->cdump(); cout << ")";
-}
-    
-void 
-ASTForm_LessEq::cdump()
-{
-  cout << "LessEq("; t1->cdump(); cout << ","; t2->cdump(); cout << ")";
-}
-    
-void 
-ASTForm_WellFormedTree::cdump()
-{
-  cout << "WellFormedTree("; T->cdump(); cout << ")";
-}
-    
-void 
-ASTForm_Impl::cdump()
-{
-  cout << "Impl("; f1->cdump(); cout << ","; f2->cdump(); cout << ")";
-}
-    
-void 
-ASTForm_Biimpl::cdump()
-{
-  cout << "Biimpl("; f1->cdump(); cout << ","; f2->cdump(); cout << ")";
-}
-    
-void 
-ASTForm_And::cdump()
-{
-  cout << "And("; f1->cdump(); cout << ","; f2->cdump(); cout << ")";
-}
-    
-void 
-ASTForm_IdLeft::cdump()
-{
-  cout << "IdLeft("; f1->cdump(); cout << ","; f2->cdump(); cout << ")";
-}
-    
-void 
-ASTForm_Or::cdump()
-{
-  cout << "Or("; f1->cdump(); cout << ","; f2->cdump(); cout << ")";
-}
-    
-void 
-ASTForm_Not::cdump()
-{
-  cout << "Not("; f->cdump(); cout << ")";
-}
-    
-void 
-ASTForm_Ex0::cdump()
-{
-  cout << "Ex0("; vl->dump(); cout << ","; f->cdump(); cout << ")";
-}
-    
-void 
-ASTForm_Ex1::cdump()
-{
-
-  cout << "Ex1("; vl->dump(); cout << ","; f->cdump(); cout << ")";
-}
-    
-void 
-ASTForm_Ex2::cdump()
-{
-  cout << "Ex2("; vl->dump(); cout << ","; f->cdump(); cout << ")";
-}
-    
-void 
-ASTForm_All0::cdump()
-{
-  cout << "All0("; vl->dump(); cout << ","; f->cdump(); cout << ")";
-}
-    
-void 
-ASTForm_All1::cdump()
-{
-  cout << "All1("; vl->dump(); cout << ","; f->cdump(); cout << ")";
-}
-    
-void 
-ASTForm_All2::cdump()
-{
-  cout << "All2("; vl->dump(); cout << ","; f->cdump(); cout << ")";
-}
-    
-void 
-ASTForm_Let0::cdump()
-{
-  IdentList::iterator ident;
-  FormList::iterator form;
-
-  cout << "Let0(";
-
-  for (ident = defIdents->begin(), form = defForms->begin(); 
-       ident != defIdents->end(); ident++, form++) {
-    cout << "(Var0 " << symbolTable.lookupSymbol(*ident) 
-	 << ","; (*form)->cdump(); cout << "),";
-  }
-
-  f->cdump(); cout << ")";
-}
-    
-void 
-ASTForm_Let1::cdump()
-{
-  IdentList::iterator ident;
-  Term1List::iterator term;
-
-  cout << "Let1(";
-
-  for (ident = defIdents->begin(), term = defTerms->begin(); 
-       ident != defIdents->end(); ident++, term++) {
-    cout << "(Var1 " << symbolTable.lookupSymbol(*ident) 
-      << ","; (*term)->cdump(); cout << "),";
-  }
-
-  f->cdump(); cout << ")";
-}
-    
-void 
-ASTForm_Let2::cdump()
-{
-  IdentList::iterator ident;
-  Term2List::iterator term;
-
-  cout << "Let2(";
-
-  for (ident = defIdents->begin(), term = defTerms->begin(); 
-       ident != defIdents->end(); ident++, term++) {
-    cout << "(Var2 " << symbolTable.lookupSymbol(*ident) 
-      << ","; (*term)->cdump(); cout << "),";
-  }
-
-  f->cdump(); cout << ")";
-}
-    
-void 
-ASTForm_Call::cdump()
-{
-  cout << "Call(" << symbolTable.lookupSymbol(n);
-  args->cdump();
-  cout << ")";
-}
-
-void 
-ASTForm_Import::cdump()
-{
-  cout << "Import(\"" << file << "\"";
-  Deque<char *>::iterator i;
-  IdentList::iterator j;
-  for (i = fileVars->begin(), j = idents->begin(); 
-       i != fileVars->end(); i++, j++)
-    cout << ",(" << *i << "," << symbolTable.lookupSymbol(*j) << ")";
-  cout << ")";
-}
-
-void 
-ASTForm_Export::cdump()
-{
-  cout << "Export(\"" << file << "\","; f->cdump(); cout << ")";
-}
-
-void 
-ASTForm_Prefix::cdump()
-{
-  cout << "Prefix("; f->cdump(); cout << ")";
-}
-
-void 
-ASTForm_Restrict::cdump()
-{
-  cout << "Restrict("; f->cdump(); cout << ")";
-}
-
-void 
-ASTForm_InStateSpace1::cdump()
-{
-  cout << "InStateSpace1("; t->cdump(); 
-  cout << ","; ss->dump(); cout << ")";
-}
-
-void 
-ASTForm_InStateSpace2::cdump()
-{
-  cout << "InStateSpace2("; T->cdump(); 
-  cout << ","; ss->dump(); cout << ")";
-}
-
-void 
-ASTForm_SomeType::cdump()
-{
-  cout << "SomeType("; t->cdump(); cout << ")";
-}
+/**
+ * Set of functions used for conversion of input formula to the restricted
+ * syntax as defined in diploma thesis. Restricted syntax takes only few
+ * types of atomic formulae (thanks to flattening) and only uses logical
+ * connectives &, |, ~ and Exists.
+ */
 
 
-/* Transformation to restricted syntax - removal of implication and equivalence */
-
-// Transformation: A -> B = ~A | B
+/**
+ * Transformation of formula to the restricted syntax, according to the
+ * rules for transformation to restricted syntax.
+ *
+ * Rule: A -> B ~= ~ A | B
+ *
+ * @return: AST Formula in restricted syntax
+ */
 ASTForm* ASTForm_Impl::toRestrictedSyntax() {
    f1 = f1->toRestrictedSyntax();
    f2 = f2->toRestrictedSyntax();
@@ -572,7 +52,15 @@ ASTForm* ASTForm_Impl::toRestrictedSyntax() {
    return (ASTForm*) new ASTForm_Or(not_f1, f2, pos);
 }
 
-// Transformation: A <-> B = (~A | B) & (A | ~B)
+/**
+ * Transformation of formula to the restricted syntax, according to the
+ * rules for transformation to restricted syntax.
+ * TODO: Cloning does somehow segfault, should repair this
+ *
+ * Rule: A <-> B = (~A | B) & (A | ~B)
+ *
+ * @return: AST Formula in restricted syntax
+ */
 ASTForm* ASTForm_Biimpl::toRestrictedSyntax() {
    f1 = f1->toRestrictedSyntax();
    f2 = f2->toRestrictedSyntax();
@@ -587,54 +75,118 @@ ASTForm* ASTForm_Biimpl::toRestrictedSyntax() {
    return (ASTForm*) new ASTForm_And(impl1, impl2, pos);
 }
 
+/**
+ * Transformation of formula to the restricted syntax, according to the
+ * rules for transformation to restricted syntax.
+ *
+ * @return: AST Formula in restricted syntax
+ */
 ASTForm* ASTForm_IdLeft::toRestrictedSyntax() {
    f1 = f1->toRestrictedSyntax();
    f2 = f2->toRestrictedSyntax();
    return this;
 }
 
+/**
+ * Transformation of formula to the restricted syntax, according to the
+ * rules for transformation to restricted syntax. Or is left as it is,
+ * as it is one of the valid logical connectives.
+ *
+ * @return: AST Formula in restricted syntax
+ */
 ASTForm* ASTForm_Or::toRestrictedSyntax() {
    f1 = f1->toRestrictedSyntax();
    f2 = f2->toRestrictedSyntax();
    return this;
 }
 
+/**
+ * Transformation of formula to the restricted syntax, according to the
+ * rules for transformation to restricted syntax. And is also used in
+ * restricted syntax, as with this, we can get negation straight to the
+ * atoms and thus not needing complementation of automaton.
+ *
+ * @return: AST Formula in restricted syntax
+ */
 ASTForm* ASTForm_And::toRestrictedSyntax() {
    f1 = f1->toRestrictedSyntax();
    f2 = f2->toRestrictedSyntax();
    return this;
 }
 
+/**
+ * Transformation of formula to the restricted syntax, according to the
+ * rules for transformation to restricted syntax.
+ *
+ * @return: AST Formula in restricted syntax
+ */
 ASTForm* ASTForm_Ex0::toRestrictedSyntax() {
    f = f->toRestrictedSyntax();
    return this;
 }
 
+/**
+ * Transformation of formula to the restricted syntax, according to the
+ * rules for transformation to restricted syntax.
+ * TODO: This shouldn't be needed, as first order should be flattened
+ *
+ * @return: AST Formula in restricted syntax
+ */
 ASTForm* ASTForm_Ex1::toRestrictedSyntax() {
    f = f->toRestrictedSyntax();
    return this;
 }
 
+/**
+ * Transformation of formula to the restricted syntax, according to the
+ * rules for transformation to restricted syntax.
+ *
+ * @return: AST Formula in restricted syntax
+ */
 ASTForm* ASTForm_Ex2::toRestrictedSyntax() {
    f = f->toRestrictedSyntax();
    return this;
 }
 
+/**
+ * Transformation of formula to the restricted syntax, according to the
+ * rules for transformation to restricted syntax.
+ *
+ * @return: AST Formula in restricted syntax
+ */
 ASTForm* ASTForm_All0::toRestrictedSyntax() {
    f = f->toRestrictedSyntax();
    return this;
 }
 
+/**
+ * Transformation of formula to the restricted syntax, according to the
+ * rules for transformation to restricted syntax.
+ *
+ * @return: AST Formula in restricted syntax
+ */
 ASTForm* ASTForm_All1::toRestrictedSyntax() {
    f = f->toRestrictedSyntax();
    return this;
 }
 
+/**
+ * Transformation of formula to the restricted syntax, according to the
+ * rules for transformation to restricted syntax.
+ *
+ * @return: AST Formula in restricted syntax
+ */
 ASTForm* ASTForm_All2::toRestrictedSyntax() {
    f = f->toRestrictedSyntax();
    return this;
 }
 
+/**
+ * Transformation of formula to the restricted syntax, according to the
+ * rules for transformation to restricted syntax.
+ *
+ * @return: AST Formula in restricted syntax
+ */
 ASTForm* ASTForm_Not::toRestrictedSyntax() {
    f = f->toRestrictedSyntax();
    return this;
@@ -851,6 +403,14 @@ ASTForm* ASTForm_uvf::unfoldNegations() {
     return this;
 } 
 
+/**
+ * Given AST tree for formula phi, it is first transformed to restricted syntax
+ * then to Prenex Normal Form, moving all quantifiers to the leftmost of
+ * formula. All universal quantifiers are transformed to existentional and
+ * negation is shifted to atoms.
+ *
+ * @return: AST representation of formula in Existentional Normal Form
+ */
 ASTForm* ASTForm::toExistentionalPNF() {
    ASTForm* temp;
    temp = this->toRestrictedSyntax();

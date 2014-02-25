@@ -175,6 +175,48 @@ ParseArguments(int argc, char *argv[])
   return true;
 }
 
+/**
+ * Splits input formula into prefix and matrix, i.e. chain of quantifiers
+ * followed by quantifier free formula. Matrix is used for conversion to
+ * automaton and prefix is used for on-the-fly construction.
+ *
+ * @param formula: Input WSkS formula, that will be split
+ * @param matrix: output part of the formula - matrix, i.e. quantifier free
+ * 		formula
+ * @param prefix: output part of the formula - prefix, i.e. chain of quantifiers
+ */
+void splitMatrixAndPrefix(MonaAST* formula, ASTForm* &matrix, ASTForm* &prefix) {
+	ASTForm* formIter = formula->formula;
+	ASTForm* previous = 0;
+
+	matrix = formula->formula;
+	prefix = formula->formula;
+
+	while(true) {
+		if(formIter->kind == aEx2) {
+			previous = formIter;
+			formIter = ((ASTForm_Ex2*) formIter)->f;
+		} else if (formIter->kind == aNot && (((ASTForm_Not*)formIter)->f)->kind == aEx2) {
+			previous = formIter;
+			formIter = ((ASTForm_Not*) formIter)->f;
+		} else {
+			if (previous != 0) {
+				if (previous->kind == aEx2) {
+					ASTForm_Ex2* q = (ASTForm_Ex2*) previous;
+					q->f = new ASTForm_True(q->pos);
+				} else {
+					ASTForm_Not* q = (ASTForm_Not*) previous;
+					q->f = new ASTForm_True(q->pos);
+				}
+			} else {
+				prefix = previous;
+			}
+			matrix = formIter;
+			break;
+		}
+	}
+}
+
 int 
 main(int argc, char *argv[])
 {
@@ -285,6 +327,18 @@ main(int argc, char *argv[])
     printGuide();
 
   ///////// Conversion to Tree Automata ////////
+
+  // First formula in AST representation is split into matrix and prefix part.
+  ASTForm* matrix;
+  ASTForm* prefix;
+  splitMatrixAndPrefix(ast, matrix, prefix);
+
+
+  cout << "Prefix of formula: ";
+  prefix->dump();
+  cout << "\n" << "Matrix of formula: ";
+  matrix->dump();
+  cout << "\n";
 
   /* For now, only example of vata is added here */
   Automaton aut1;
