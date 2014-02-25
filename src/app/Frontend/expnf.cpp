@@ -196,11 +196,39 @@ ASTForm* ASTForm_Not::toRestrictedSyntax() {
 //  1) childs are transformed to prenex normal form 
 //  2) While, there exists a child node with prenex 
 
+/**
+ * Transformation of formula to Prenex Normal Form.
+ *
+ * Formula is in Prenex Normal Form, if every quantifiers is at the leftmost
+ * point of the formula, i.e. it can be broken to prefix (chain of quantifiers)
+ * and matrix (quantifier free formula).
+ *
+ * Several transformations take place
+ *  - Childs are transformed into prenex normal form and then according
+ *    to the rules of the logic, quantifiers from childs are moved up at the
+ *    formula
+ */
+
+/**
+ * Tests whether formula, child, has any quantifier
+ *
+ * @param child: child of the formula
+ * @return: true if childs has quantifier, i.e. forall or exists.
+ */
 bool hasQuantifier(ASTForm* child) {
    return (child->kind == aEx0) | (child->kind == aEx1) | (child->kind == aEx2) |
           (child->kind == aAll0) | (child->kind == aAll1) | (child->kind == aAll2);  
 }
 
+/**
+ * Moves quantifier up, i.e. quantifier is moved from being child to
+ * being a parent of its parent.
+ *
+ *	@param quantifier: node with quantifier
+ *	@param current: current node, that is processed
+ *	@param parent: parent, that is switched with quantifier
+ *	@return: formula with switched quantifier
+ */
 ASTForm* switchNodeWithQuantifier(ASTForm_vf* quantifier, ASTForm* & current, ASTForm* parent) {
     ASTForm* formula;
     formula = quantifier->f;
@@ -212,6 +240,15 @@ ASTForm* switchNodeWithQuantifier(ASTForm_vf* quantifier, ASTForm* & current, AS
     return formula;
 }
 
+/**
+ * Moves quantifier up, i.e. quantifier is moved from being child to
+ * being a parent of its parent.
+ *
+ *	@param quantifier: node with quantifier
+ *	@param current: current node, that is processed
+ *	@param parent: parent, that is switched with quantifier
+ *	@return: formula with switched quantifier
+ */
 ASTForm *switchNodeWithQuantifier(ASTForm_uvf* quantifier, ASTForm* & current, ASTForm* parent) {
     ASTForm* formula;
     formula = quantifier->f;
@@ -223,7 +260,14 @@ ASTForm *switchNodeWithQuantifier(ASTForm_uvf* quantifier, ASTForm* & current, A
     return formula;
 }
 
-// Binary node, does not expect implication or biimplication there!
+/**
+ * Expects, that given formula is not biimplication or implication! Changes
+ * the formula in form of "phi op quant psi" to "quant phi op2 psi". Its
+ * children are first changed to PNF form and then they are processed by
+ * moving the quantifiers to the left, i.e. up its parents
+ *
+ * @return: formula in PNF
+ */
 ASTForm* ASTForm_ff::toPrenexNormalForm() {
    bool leftHasQuantifier, rightHasQuantifier;
    f1 = f1->toPrenexNormalForm();
@@ -255,6 +299,13 @@ ASTForm* ASTForm_ff::toPrenexNormalForm() {
    return (root == 0) ? this : root;
 }
 
+/**
+ * Moves quantifier through the negation, so exists is transformed to forall
+ * and vice versa.
+ *
+ * @param node: input AST node representing negation formula
+ * @return: formula with negated quantifier
+ */
 ASTForm* negateQuantifier(ASTForm_Not* node) {
     ASTForm* formula, *q;
     q = node->f;
@@ -287,29 +338,52 @@ ASTForm* negateQuantifier(ASTForm_Not* node) {
             return node;
     }
 }
-// Application of following transformations:
-// not(ex fi) = all(not fi)
-// not(all fi) = ex(not fi)
 
+/**
+ * Quantifier is moved through negation according to the rules:
+ * not(ex fi) = all(not fi)
+ * not(all fi) = ex(not fi)
+ *
+ * @return: formula in PNF
+ */
 ASTForm* ASTForm_Not::toPrenexNormalForm() {
     f = f->toPrenexNormalForm();
     ASTForm* temp;
     return negateQuantifier(this);
 }
 
-
+/**
+ * Generic transform of wide range of formulae to PNF
+ *
+ * @return: formula in PNF
+ */
 ASTForm* ASTForm_vf::toPrenexNormalForm() {
     f = f->toPrenexNormalForm();
     return this;
 }
 
+/**
+ * Generic transform of wide range of formulae to PNF
+ *
+ * @return: formula in PNF
+ */
 ASTForm* ASTForm_uvf::toPrenexNormalForm() {
     f = f->toPrenexNormalForm();
     return this;
 }
 
-/* Transformation - Removal of universal quantifier */
-// Aplication of following transformation: forall fi = not exists not fi
+/**
+ * Transformation to Existentional form that uses only existential quantifier
+ * and not universal
+ */
+
+/**
+ * Transforms universal quantifier to the existential quantifier according to
+ * the rule:
+ * forall fi = not exists not fi
+ *
+ * @return: formula in existentional form
+ */
 ASTForm* ASTForm_All0::removeUniversalQuantifier() {
     f = f->removeUniversalQuantifier();
     ASTForm *negFi, *exNegFi, *formula;
@@ -319,6 +393,13 @@ ASTForm* ASTForm_All0::removeUniversalQuantifier() {
     return formula;
 }
 
+/**
+ * Transforms universal quantifier to the existential quantifier according to
+ * the rule:
+ * forall fi = not exists not fi
+ *
+ * @return: formula in existentional form
+ */
 ASTForm* ASTForm_All1::removeUniversalQuantifier() {
     f = f->removeUniversalQuantifier();
     ASTForm *negFi, *exNegFi, *formula;
@@ -328,6 +409,13 @@ ASTForm* ASTForm_All1::removeUniversalQuantifier() {
     return formula;
 }
 
+/**
+ * Transforms universal quantifier to the existential quantifier according to
+ * the rule:
+ * forall fi = not exists not fi
+ *
+ * @return: formula in existentional form
+ */
 ASTForm* ASTForm_All2::removeUniversalQuantifier() {
     f = f->removeUniversalQuantifier();
     ASTForm *negFi, *exNegFi, *formula;
@@ -337,29 +425,52 @@ ASTForm* ASTForm_All2::removeUniversalQuantifier() {
     return formula;
 }
 
+/**
+ * Generic transformation for wide range of formulae
+ *
+ * @return: formula in existentional form
+ */
 ASTForm* ASTForm_Not::removeUniversalQuantifier() {
     f = f->removeUniversalQuantifier();
     return this;
 }
 
+/**
+ * Generic transformation for wide range of formulae
+ *
+ * @return: formula in existentional form
+ */
 ASTForm* ASTForm_ff::removeUniversalQuantifier() {
     f1 = f1->removeUniversalQuantifier();
     f2 = f2->removeUniversalQuantifier();
     return this;
 }
 
+/**
+ * Generic transformation for wide range of formulae
+ *
+ * @return: formula in existentional form
+ */
 ASTForm* ASTForm_vf::removeUniversalQuantifier() {
     f = f->removeUniversalQuantifier();
     return this;
 }
 
+/**
+ * Generic transformation for wide range of formulae
+ *
+ * @return: formula in existentional form
+ */
 ASTForm* ASTForm_uvf::removeUniversalQuantifier() {
     f = f->removeUniversalQuantifier();
     return this;
 }
 
-/* Transformation: Unfolding negations */
-// Following trasnformations are applied:
+/**
+ * Unfolds negations to the atomic formulae and shift them to the atoms
+ *
+ * @return: Formula with negations in atomic formulae
+ */
 ASTForm* ASTForm_Not::unfoldNegations() {
     f = f->unfoldNegations();
     switch(f->kind) {
@@ -373,7 +484,7 @@ ASTForm* ASTForm_Not::unfoldNegations() {
             child1 = (ASTForm_Or*) f;
             l1 = (ASTForm*) new ASTForm_Not(child1->f1, pos);
             r1 = (ASTForm*) new ASTForm_Not(child1->f2, pos);
-            return new ASTForm_And(l1, r1, pos);
+            return new ASTForm_And(l1->unfoldNegations(), r1->unfoldNegations(), pos);
     //  not (A and B) = not A or not B
         case aAnd:
             ASTForm_And *child2;
@@ -381,23 +492,38 @@ ASTForm* ASTForm_Not::unfoldNegations() {
             child2 = (ASTForm_And*) f;
             l2 = (ASTForm*) new ASTForm_Not(child2->f1, pos);
             r2 = (ASTForm*) new ASTForm_Not(child2->f2, pos);
-            return new ASTForm_Or(l2, r2, pos);
+            return new ASTForm_Or(l2->unfoldNegations(), r2->unfoldNegations(), pos);
 	default:
 	    return this;
     }
 }
 
+/**
+ * Generic function for wide range of formulas
+ *
+ * @return: formula with unfolded negations
+ */
 ASTForm* ASTForm_ff::unfoldNegations() {
     f1 = f1->unfoldNegations();
     f2 = f2->unfoldNegations();
     return this;
 }
 
+/**
+ * Generic function for wide range of formulas
+ *
+ * @return: formula with unfolded negations
+ */
 ASTForm* ASTForm_vf::unfoldNegations() {
     f = f->unfoldNegations();
     return this;
 }
 
+/**
+ * Generic function for wide range of formulas
+ *
+ * @return: formula with unfolded negations
+ */
 ASTForm* ASTForm_uvf::unfoldNegations() {
     f = f->unfoldNegations();
     return this;
