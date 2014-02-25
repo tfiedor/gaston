@@ -20,7 +20,7 @@
   \node[state,accepting] (B) [right of=A]	{$2$};
   \node[state] (C) [right of=B]				{$\bot$};
   
-  \node[initial,state,accepting] (D) [below of=B] 	{$3$};
+  \node[initial,state] (D) [below of=B] 	{$3$};
   \node[state,accepting] (E) [below of=C]			{$\bot$};
   
   \path (A) edge [loop above] node {P: 0} (A)
@@ -34,6 +34,14 @@
   		    edge 			  node {\makecell[l]{P: 0\textbar 0\\ X:
   		    0\textbar 1}} 
   	    (E) (E) edge [loop below] node {$\Sigma$} (E);
+  \node [below=4.7cm, align=flush center,text width=3cm] at (A)
+        {
+            \Large b) $\mathcal{A}_{P \not\subseteq X}$
+        };
+  \node [below=0.5cm, align=flush center,text width=3cm] at (A)
+        {
+            \Large a) $\mathcal{A}_{Sing(P)}$
+        };
 \end{tikzpicture}
 % \end{center}
 % \caption{Automaton $\mathcal{A}_\phi$ corresponding to the formula $\phi =
