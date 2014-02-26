@@ -666,6 +666,54 @@ src/app/Frontend/untyped.cpp.s:
 	$(MAKE) -f CMakeFiles/dip.dir/build.make CMakeFiles/dip.dir/src/app/Frontend/untyped.cpp.s
 .PHONY : src/app/Frontend/untyped.cpp.s
 
+src/app/Frontend/ws1s-formula-to-automaton.o: src/app/Frontend/ws1s-formula-to-automaton.cpp.o
+.PHONY : src/app/Frontend/ws1s-formula-to-automaton.o
+
+# target to build an object file
+src/app/Frontend/ws1s-formula-to-automaton.cpp.o:
+	$(MAKE) -f CMakeFiles/dip.dir/build.make CMakeFiles/dip.dir/src/app/Frontend/ws1s-formula-to-automaton.cpp.o
+.PHONY : src/app/Frontend/ws1s-formula-to-automaton.cpp.o
+
+src/app/Frontend/ws1s-formula-to-automaton.i: src/app/Frontend/ws1s-formula-to-automaton.cpp.i
+.PHONY : src/app/Frontend/ws1s-formula-to-automaton.i
+
+# target to preprocess a source file
+src/app/Frontend/ws1s-formula-to-automaton.cpp.i:
+	$(MAKE) -f CMakeFiles/dip.dir/build.make CMakeFiles/dip.dir/src/app/Frontend/ws1s-formula-to-automaton.cpp.i
+.PHONY : src/app/Frontend/ws1s-formula-to-automaton.cpp.i
+
+src/app/Frontend/ws1s-formula-to-automaton.s: src/app/Frontend/ws1s-formula-to-automaton.cpp.s
+.PHONY : src/app/Frontend/ws1s-formula-to-automaton.s
+
+# target to generate assembly for a file
+src/app/Frontend/ws1s-formula-to-automaton.cpp.s:
+	$(MAKE) -f CMakeFiles/dip.dir/build.make CMakeFiles/dip.dir/src/app/Frontend/ws1s-formula-to-automaton.cpp.s
+.PHONY : src/app/Frontend/ws1s-formula-to-automaton.cpp.s
+
+src/app/Frontend/ws2s-formula-to-automaton.o: src/app/Frontend/ws2s-formula-to-automaton.cpp.o
+.PHONY : src/app/Frontend/ws2s-formula-to-automaton.o
+
+# target to build an object file
+src/app/Frontend/ws2s-formula-to-automaton.cpp.o:
+	$(MAKE) -f CMakeFiles/dip.dir/build.make CMakeFiles/dip.dir/src/app/Frontend/ws2s-formula-to-automaton.cpp.o
+.PHONY : src/app/Frontend/ws2s-formula-to-automaton.cpp.o
+
+src/app/Frontend/ws2s-formula-to-automaton.i: src/app/Frontend/ws2s-formula-to-automaton.cpp.i
+.PHONY : src/app/Frontend/ws2s-formula-to-automaton.i
+
+# target to preprocess a source file
+src/app/Frontend/ws2s-formula-to-automaton.cpp.i:
+	$(MAKE) -f CMakeFiles/dip.dir/build.make CMakeFiles/dip.dir/src/app/Frontend/ws2s-formula-to-automaton.cpp.i
+.PHONY : src/app/Frontend/ws2s-formula-to-automaton.cpp.i
+
+src/app/Frontend/ws2s-formula-to-automaton.s: src/app/Frontend/ws2s-formula-to-automaton.cpp.s
+.PHONY : src/app/Frontend/ws2s-formula-to-automaton.s
+
+# target to generate assembly for a file
+src/app/Frontend/ws2s-formula-to-automaton.cpp.s:
+	$(MAKE) -f CMakeFiles/dip.dir/build.make CMakeFiles/dip.dir/src/app/Frontend/ws2s-formula-to-automaton.cpp.s
+.PHONY : src/app/Frontend/ws2s-formula-to-automaton.cpp.s
+
 src/app/main.o: src/app/main.cpp.o
 .PHONY : src/app/main.o
 
@@ -768,6 +816,12 @@ help:
 	@echo "... src/app/Frontend/untyped.o"
 	@echo "... src/app/Frontend/untyped.i"
 	@echo "... src/app/Frontend/untyped.s"
+	@echo "... src/app/Frontend/ws1s-formula-to-automaton.o"
+	@echo "... src/app/Frontend/ws1s-formula-to-automaton.i"
+	@echo "... src/app/Frontend/ws1s-formula-to-automaton.s"
+	@echo "... src/app/Frontend/ws2s-formula-to-automaton.o"
+	@echo "... src/app/Frontend/ws2s-formula-to-automaton.i"
+	@echo "... src/app/Frontend/ws2s-formula-to-automaton.s"
 	@echo "... src/app/main.o"
 	@echo "... src/app/main.i"
 	@echo "... src/app/main.s"

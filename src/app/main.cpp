@@ -253,6 +253,10 @@ main(int argc, char *argv[])
     cout << "Main formula:\n";
     (ast->formula)->dump();
 
+    cout << "\nFlattening of the formula:\n";
+    ast->formula = (ASTForm*) (ast->formula)->flatten();
+    (ast->formula)->dump();
+
     // Transform AST to existentional Prenex Normal Form
     ast->formula = (ASTForm*) (ast->formula)->toExistentionalPNF();
     cout << "\nAfter transformation:\n";
@@ -339,6 +343,17 @@ main(int argc, char *argv[])
   cout << "\n" << "Matrix of formula: ";
   matrix->dump();
   cout << "\n";
+
+  Automaton* aut;
+  // WS1S formula is transformed to unary NTA
+  if(options.mode != TREE) {
+	  aut = matrix->toUnaryAutomaton();
+  // WS2S formula is transformed to binary NTA
+  } else {
+	  aut = matrix->toBinaryAutomaton();
+  }
+  ASTForm_False* f = new ASTForm_False(Pos());
+  aut = f->toUnaryAutomaton();
 
   /* For now, only example of vata is added here */
   Automaton aut1;

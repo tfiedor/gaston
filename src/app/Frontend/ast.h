@@ -25,6 +25,7 @@
 #include "codetable.h"
 #include "printline.h"
 #include <vata/bdd_bu_tree_aut.hh>
+#include <cstring>
 
 using Automaton = VATA::BDDBottomUpTreeAut;
 
@@ -159,8 +160,8 @@ public:
   ASTForm* toExistentionalPNF();
 
   // Conversion of AST representation of formula to Automaton
-  virtual Automaton* toUnaryAutomaton() { return 0; }
-  virtual Automaton* toBinaryAutomaton() { return 0; }
+  virtual Automaton* toUnaryAutomaton() { std::cout << "Converting formula to unary automaton \n"; return 0; }
+  virtual Automaton* toBinaryAutomaton() { std::cout << "Converting formula to binary automaton \n"; return 0; }
 };
 
 class FormList: public DequeGC<ASTForm*> {};
@@ -761,6 +762,10 @@ public:
   VarCode makeCode(SubstCode *subst = NULL);
   void dump();
   ASTForm* clone() { return new ASTForm_True(*this); }
+
+  // Conversion of AST representation of formula to Automaton
+  Automaton* toUnaryAutomaton();
+  Automaton* toBinaryAutomaton();
 };
 
 class ASTForm_False: public ASTForm {
@@ -771,6 +776,10 @@ public:
   VarCode makeCode(SubstCode *subst = NULL);
   void dump();
   ASTForm* clone() { return new ASTForm_False(*this); }
+
+  // Conversion of AST representation of formula to Automaton
+  Automaton* toUnaryAutomaton();
+  Automaton* toBinaryAutomaton();
 };
 
 class ASTForm_In: public ASTForm_tT {
@@ -949,6 +958,9 @@ public:
   ASTForm* clone() { return new ASTForm_And(*this); }
 
   ASTForm* toRestrictedSyntax();
+
+  Automaton* toUnaryAutomaton();
+  Automaton* toBinaryAutomaton();
 };
 
 class ASTForm_IdLeft: public ASTForm_ff {
@@ -973,6 +985,9 @@ public:
   ASTForm* clone() { return new ASTForm_Or(*this); }
 
   ASTForm* toRestrictedSyntax();
+
+  Automaton* toUnaryAutomaton();
+  Automaton* toBinaryAutomaton();
 };
 
 class ASTForm_Not: public ASTForm {
@@ -990,6 +1005,9 @@ public:
   ASTForm* toPrenexNormalForm();
   ASTForm* unfoldNegations();
   ASTForm* removeUniversalQuantifier();
+
+  Automaton* toUnaryAutomaton();
+  Automaton* toBinaryAutomaton();
 
   ASTForm *f;
 };
