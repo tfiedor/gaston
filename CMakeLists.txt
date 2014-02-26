@@ -38,6 +38,7 @@ add_executable(dip
 	src/app/Frontend/untyped.cpp
 	src/app/Frontend/ws1s-formula-to-automaton.cpp
 	src/app/Frontend/ws2s-formula-to-automaton.cpp
+	src/app/Frontend/formula-flatten.cpp
 )
 link_directories(${CMAKE_SOURCE_DIR}/src/libs/)
 target_link_libraries(dip ${CMAKE_SOURCE_DIR}/src/libs/libmonabdd.so)

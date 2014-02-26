@@ -1,0 +1,9 @@
+# WSkS syntax examples formula
+# Atomic formula: =
+# Desc: Simple equality with two succesors
+#
+# Atomic formula: x = y11;
+
+var1 x, y;
+
+x = y + 1 + 1;

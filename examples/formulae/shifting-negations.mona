@@ -1,0 +1,6 @@
+# Most simple example, there could be;
+
+var2 U, Z, Y;
+
+~((U sub Y & Z = U \ Y) | true);
+

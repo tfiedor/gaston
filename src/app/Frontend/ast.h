@@ -386,6 +386,7 @@ public:
   ~ASTForm_f() {delete f;}
 
   void freeVars(IdentList*, IdentList*);
+  ASTForm* flatten();
 
 protected:
   ASTForm *f;
@@ -401,6 +402,7 @@ public:
   ASTForm* toPrenexNormalForm();
   ASTForm* removeUniversalQuantifier();
   ASTForm* unfoldNegations();
+  ASTForm* flatten();
 
   ASTForm *f1;
   ASTForm *f2;
@@ -425,6 +427,7 @@ public:
   ASTForm* toPrenexNormalForm();
   ASTForm* removeUniversalQuantifier();
   ASTForm* unfoldNegations();
+  ASTForm* flatten();
 
   IdentList *vl;
 };
@@ -439,6 +442,7 @@ public:
   ASTForm* toPrenexNormalForm();
   ASTForm* removeUniversalQuantifier();
   ASTForm* unfoldNegations();
+  ASTForm* flatten();
 
   IdentList *ul;
   IdentList *vl;
@@ -862,6 +866,7 @@ public:
   VarCode makeCode(SubstCode *subst = NULL);
   void dump();
   ASTForm* clone() { return new ASTForm_Equal1(*this); }
+  ASTForm* flatten();
 };
 
 class ASTForm_Equal2: public ASTForm_TT {

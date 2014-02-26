@@ -282,6 +282,30 @@ src/app/Frontend/expnf.cpp.s:
 	$(MAKE) -f CMakeFiles/dip.dir/build.make CMakeFiles/dip.dir/src/app/Frontend/expnf.cpp.s
 .PHONY : src/app/Frontend/expnf.cpp.s
 
+src/app/Frontend/formula-flatten.o: src/app/Frontend/formula-flatten.cpp.o
+.PHONY : src/app/Frontend/formula-flatten.o
+
+# target to build an object file
+src/app/Frontend/formula-flatten.cpp.o:
+	$(MAKE) -f CMakeFiles/dip.dir/build.make CMakeFiles/dip.dir/src/app/Frontend/formula-flatten.cpp.o
+.PHONY : src/app/Frontend/formula-flatten.cpp.o
+
+src/app/Frontend/formula-flatten.i: src/app/Frontend/formula-flatten.cpp.i
+.PHONY : src/app/Frontend/formula-flatten.i
+
+# target to preprocess a source file
+src/app/Frontend/formula-flatten.cpp.i:
+	$(MAKE) -f CMakeFiles/dip.dir/build.make CMakeFiles/dip.dir/src/app/Frontend/formula-flatten.cpp.i
+.PHONY : src/app/Frontend/formula-flatten.cpp.i
+
+src/app/Frontend/formula-flatten.s: src/app/Frontend/formula-flatten.cpp.s
+.PHONY : src/app/Frontend/formula-flatten.s
+
+# target to generate assembly for a file
+src/app/Frontend/formula-flatten.cpp.s:
+	$(MAKE) -f CMakeFiles/dip.dir/build.make CMakeFiles/dip.dir/src/app/Frontend/formula-flatten.cpp.s
+.PHONY : src/app/Frontend/formula-flatten.cpp.s
+
 src/app/Frontend/freevars.o: src/app/Frontend/freevars.cpp.o
 .PHONY : src/app/Frontend/freevars.o
 
@@ -768,6 +792,9 @@ help:
 	@echo "... src/app/Frontend/expnf.o"
 	@echo "... src/app/Frontend/expnf.i"
 	@echo "... src/app/Frontend/expnf.s"
+	@echo "... src/app/Frontend/formula-flatten.o"
+	@echo "... src/app/Frontend/formula-flatten.i"
+	@echo "... src/app/Frontend/formula-flatten.s"
 	@echo "... src/app/Frontend/freevars.o"
 	@echo "... src/app/Frontend/freevars.i"
 	@echo "... src/app/Frontend/freevars.s"

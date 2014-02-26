@@ -1,0 +1,7 @@
+# WSkS syntax examples formula
+# Connective: Not
+# Desc: Simplest not that can there be
+#
+# Formula: phi = not true;
+
+~true;
