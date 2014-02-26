@@ -209,7 +209,7 @@ void splitMatrixAndPrefix(MonaAST* formula, ASTForm* &matrix, ASTForm* &prefix) 
 					q->f = new ASTForm_True(q->pos);
 				}
 			} else {
-				prefix = previous;
+				prefix = new ASTForm_True(Pos());
 			}
 			matrix = formIter;
 			break;

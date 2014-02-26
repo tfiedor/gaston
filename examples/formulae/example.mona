@@ -2,4 +2,4 @@
 
 var2 U;
 
-all2 Y: ex2 Z: U sub Y => Z = U \ Y;
+all2 Z: ex2 Y: U sub Y => Z = U \ Y;
