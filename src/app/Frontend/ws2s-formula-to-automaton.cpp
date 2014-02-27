@@ -81,3 +81,29 @@ Automaton* ASTForm_Or::toBinaryAutomaton() {
 	Automaton *autF2 = this->f2->toBinaryAutomaton();
 	return 0;
 }
+
+/**
+ * Constructs automaton for atomic formula T1 = T2, according to its structure:
+ *  1) T1 = T2
+ *  2) X = Y1
+ *  3) X = e
+ *
+ *  Constructs template automaton, that does acceptance of the formula
+ *
+ *  @return Automaton corresponding to the formula phi or psi
+ */
+Automaton* ASTForm_Equal2::toBinaryAutomaton() {
+	cout << "Eq2 -> automaton\n";
+	return 0;
+}
+
+/**
+ * Constructs automaton for atomic formula T1 ~= T2, first constructs automaton
+ * T1 = T2 and then flip the states
+ *
+ * @return Automaton corresponding to the formula T1 ~= T2
+ */
+Automaton* ASTForm_NotEqual2::toBinaryAutomaton() {
+	cout << "Neq2 -> automaton\n";
+	return 0;
+}

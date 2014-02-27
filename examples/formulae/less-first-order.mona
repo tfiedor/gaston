@@ -1,0 +1,9 @@
+# WSkS syntax examples formula
+# Atomic formula: <
+# Desc: Simple formula with less, that will be flattened
+#
+# Atomic formula: x < y;
+
+var1 x, y;
+
+x < y;

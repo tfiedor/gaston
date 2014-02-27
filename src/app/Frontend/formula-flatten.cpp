@@ -25,6 +25,45 @@ ASTForm* ASTForm_Equal1::flatten() {
 }
 
 /**
+ * Flattens formula to second-order variables and restricted syntax so it uses
+ * only certain atomic formulae
+ *
+ * x ~= y  -> not x = y
+ *
+ * @return: flattened formula
+ */
+ASTForm* ASTForm_NotEqual1::flatten() {
+	cout << "Flatting formula NotEqual1\n";
+	return this;
+}
+
+/**
+ * Flattens formula to second-order variables and restricted syntax so it uses
+ * only certain atomic formulae
+ *
+ * x < y  -> x ~= y & x <= y
+ *
+ * @return: flattened formula
+ */
+ASTForm* ASTForm_Less::flatten() {
+	cout << "Flattening formula Less\n";
+	return this;
+}
+
+/**
+ * Flattens formula to second-order variables and restricted syntax so it uses
+ * only certain atomic formulae. Is variable according to the ws1s and ws2s
+ *
+ * x <= y  -> forall X: (y in X & (forall Z: z1 in X | z2 in X) => z in X) => x in X
+ *
+ * @return: flattened formula
+ */
+ASTForm* ASTForm_LessEq::flatten() {
+	cout << "Flattening formula LessEq\n";
+	return this;
+}
+
+/**
  * Generic transformation for wide range of formulae
  *
  * @return: flattened formula

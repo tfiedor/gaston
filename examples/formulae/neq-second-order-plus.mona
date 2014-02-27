@@ -1,0 +1,9 @@
+# WSkS syntax examples formula
+# Atomic formula: ~=
+# Desc: Simple nonequality with successor
+#
+# Atomic formula: X ~= Y;
+
+var2 X, Y;
+
+X ~= Y + 1;

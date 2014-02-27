@@ -877,6 +877,10 @@ public:
   VarCode makeCode(SubstCode *subst = NULL);
   void dump();
   ASTForm* clone() { return new ASTForm_Equal2(*this); }
+
+  // Conversion of AST representation of formula to Automaton
+  Automaton* toUnaryAutomaton();
+  Automaton* toBinaryAutomaton();
 };
 
 class ASTForm_NotEqual1: public ASTForm_tt {
@@ -887,6 +891,7 @@ public:
   VarCode makeCode(SubstCode *subst = NULL);
   void dump();
   ASTForm* clone() { return new ASTForm_NotEqual1(*this); }
+  ASTForm* flatten();
 };
 
 class ASTForm_NotEqual2: public ASTForm_TT {
@@ -897,6 +902,10 @@ public:
   VarCode makeCode(SubstCode *subst = NULL);
   void dump();
   ASTForm* clone() { return new ASTForm_NotEqual2(*this); }
+
+  // Conversion of AST representation of formula to Automaton
+  Automaton* toUnaryAutomaton();
+  Automaton* toBinaryAutomaton();
 };
 
 class ASTForm_Less: public ASTForm_tt {
@@ -907,6 +916,7 @@ public:
   VarCode makeCode(SubstCode *subst = NULL);
   void dump();
   ASTForm* clone() { return new ASTForm_Less(*this); }
+  ASTForm* flatten();
 };
 
 class ASTForm_LessEq: public ASTForm_tt {
@@ -917,6 +927,7 @@ public:
   VarCode makeCode(SubstCode *subst = NULL);
   void dump();
   ASTForm* clone() { return new ASTForm_LessEq(*this); }
+  ASTForm* flatten();
 };
 
 class ASTForm_WellFormedTree: public ASTForm_T {
