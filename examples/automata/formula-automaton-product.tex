@@ -24,20 +24,20 @@
 
   \path (A) edge              node {\makecell[l]{P: 1\\X: 1}} (B) 
             edge [loop above] node {\makecell[l]{P: 0\textbar 0\\X: 0\textbar1}} (A)
-            edge              node {\makecell[l]{P: 1\\X: 0}}   (D)
+            edge [below left]             node {\makecell[l]{P: 1\\X: 0}}   (D)
         (B) edge              node {\makecell[l]{P: 1\\X: 1}}   (C)
             edge [loop above] node {\makecell[l]{P: 0\textbar 0\\X: 0\textbar1}} (B)
-            edge              node {\makecell[l]{P: 1\\X: 0}}   (E)
+            edge [below left]            node {\makecell[l]{P: 1\\X: 0}}   (E)
         (C) edge [loop above] node {\makecell[l]{P: 0\textbar 0\textbar 1\\X:
         0\textbar 1\textbar 1}} (C) 
             edge              node {\makecell[l]{P: 1\\X: 0}}   (E)
-        (D) edge              node {\makecell[l]{P: 1\textbar 1\\X: 0\textbar1}} (E)
-            edge [loop below] node {\makecell[l]{P: 0\textbar 0\\X: 0\textbar1}} (D)
+        (D) edge [below]             node {\makecell[l]{P: 1\textbar 1\\X:
+        0\textbar1}} (E) edge [loop below] node {\makecell[l]{P: 0\textbar 0\\X: 0\textbar1}} (D)
         (E) edge [loop below] node {$\Sigma$} (E);
         
-  \node [below=4.5cm, align=flush center,text width=5cm] at (A)
+  \node [below=5.5cm, align=flush center,text width=5cm] at (B)
         {
-            \Large c) $\mathcal{A}_{Sing(P) \wedge P \not\subseteq X}$
+            \LARGE c) $\mathcal{A}_{Sing(P) \wedge P \not\subseteq X}$
         };
 \end{tikzpicture}
 % \end{center}

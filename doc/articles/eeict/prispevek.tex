@@ -4,6 +4,8 @@
 \usepackage{amssymb}
 \usepackage{amsmath}
 \usepackage{dsfont}
+\usepackage{graphicx}
+\usepackage{multirow}
 
 
 \newtheorem{example}{Example}[section]
@@ -17,16 +19,16 @@
 \supervisor{Ondřej Lengál}
 \emailv{ilengal@fit.vutbr.cz}
 
-\abstract{Various types of logics are often used as a mean for a formal
+\abstract{Various types of logics are often used as a means for a formal
 specification of systems. The weak monadic second-order logic with $k$
 successors (WS$k$S) is one of these logics with quite high expressivity, yet
-still is decidable. Although the complexity of checking satisfiability of
+still decidable. Although the complexity of checking satisfiability of
 a WS$k$S formula is not even in the ELEMENTARY class, there are some approaches
 to this problem that perform well in practice. The currently existing
 implementations of a WS$k$S decision procedures are based on the use of
-deterministic automata. The aim of this work is to exploit the recently
+deterministic tree automata. The aim of this work is to exploit the recently
 developed techniques for efficient manipulation of non-deterministic tree
-automata and implement an efficient decision procedure based on those.}
+automata and implement an efficient WS$k$S decision procedure based on those.}
 \keywords{formal verification, tree automata, WS$k$S, decision procedures}
 
 \begin{document}
@@ -39,19 +41,20 @@ automata and implement an efficient decision procedure based on those.}
 
 In formal verification, logics are often used for a specification of the
 verified systems in a very natural and intuitive way. The \emph{weak monadic
-second-order logic of $k$ successors} (WS$k$S) \cite{wsks} is a fragment of a
+second-order logic of $k$ successors} (WS$k$S) \cite{wsks} is a fragment of the
 second order monadic logic that allows to quantify over finite set variables
 where every element from the universe of discourse has $k$ successors. This way
 various $k$-ary tree structures, e.g.
 heaps or binary trees, and linear structures, e.g. linked lists, can be expressed.
 
-However with great expressiveness comes great complexity. There is a
-one-to-one correspondence between WS$k$S formulae and automata. There has
-already been several attempts to implement a~decision procedure for WS$k$S using
-deterministic automata \cite{mona}. However, with recent developments in
-algorithms for manipulation with non-deterministic automata the aim of this work
-is to exploit these ideas in an implementation of a WS$k$S decision procedure
-based on non-deterministic automata.
+There has been established a
+one-to-one correspondence between WS$k$S formulae and tree automata. Based
+on this there has already been several attempts to implement a~decision
+procedure for WS$k$S using deterministic tree automata \cite{mona}. However,
+with the recent development in algorithms for manipulation of
+non-deterministic tree automata, the aim of this work is to exploit these ideas
+in an implementation of a WS$k$S decision procedure based on non-deterministic
+tree automata.
 
 \section{WS$k$S syntax}
 
@@ -59,14 +62,13 @@ A WS$k$S \emph{term} is either an empty constant $\epsilon$, a first-order
 variable symbol written in lower-case letters (e.g. $x$, $y$, \ldots) or an
 unary symbol from $\{1,\ldots,k\}$ written in postfix notation. For example
 $x1123$ or $\epsilon2111$ are terms. An \emph{atomic formula}, for some
-second-order variable sets $X$ and $Y$, is either the subset constraint $X
-\subseteq Y$, singleton predicate $Sing(X)$, successor predicate $X = Yi$, for some $1 \leq i
-\leq k$ or empty set predicate $X = \epsilon$. A WS$k$S \emph{formula in
-restricted syntax} is then built out of these atomic formulae using only the
-logical connectives $\wedge, \vee, \neg$ and quantifier $\exists X$ for
-quantification over second-order variables. This syntax is called
-\emph{restricted} and its formulae are equivalent to the WS$k$S formulae
-\cite{tata}.
+second-order variables $X$ and $Y$, is either the subset predicate $X
+\subseteq Y$, the singleton predicate $Sing(X)$, the successor predicate $X =
+Yi$, for some $1 \leq i \leq k$, or the set containing $\epsilon$ predicate $X
+= \epsilon$.
+A WS$k$S \emph{formula} is then built out of these atomic formulae using only the
+logical connectives $\wedge, \vee, \neg$ and the existential quantifier $\exists
+X$ for quantification over second-order variables.
 
 \begin{example} The following example WS$k$S formula $\varphi$ denotes that there
 exists a singleton set which is not a subset of the set $X$.
@@ -86,21 +88,24 @@ and examining its language.
 \subsection{Deciding WS$k$S using deterministic automata}
 
 One of the tools for deciding WS$k$S, MONA \cite{mona}, constructs a
-deterministic automaton $\mathcal{A}_\varphi$ for the given formula
+deterministic tree automaton $\mathcal{A}_\varphi$ for the given formula
 $\varphi$ recursively on the structure of the formula. As a base, each atomic
 subformula is transformed to a corresponding automaton.
-By considering only logical connectives from
-the restricted syntax \cite{tata}, we construct for connectives $\vee$,
-$\wedge$, $\neg$ and $\exists$, union of automata, intersection of automata, complement of automaton
-and $i$-th projection of automaton respectively.
+Further it constructs for connectives $\phi \vee
+\psi$, $\phi \wedge \psi$, $\neg \phi$ and $\exists X. \phi$, union of
+$\mathcal{A}_\phi$ and $\mathcal{A}_\psi$, intersection of $\mathcal{A}_\phi$
+and $\mathcal{A}_\psi$, complement of $\mathcal{A}_\phi$ and projection on the
+track of $X$ of $\mathcal{A}_\phi$ respectively, such an automaton then
+represents all models of formula $\varphi$.
+
 
 \begin{figure}
  \begin{center}
-  \scalebox{0.6}{\includegraphics{formula-singleton-and-subset.pdf}}
-  \scalebox{0.6}{\includegraphics{formula-automaton-product.pdf}}
-  \scalebox{0.6}{\includegraphics{formula-automaton.pdf}}
+  \scalebox{0.55}{\includegraphics{formula-singleton-and-subset.pdf}}
+  \scalebox{0.55}{\includegraphics{formula-automaton-product.pdf}}
+  \scalebox{0.55}{\includegraphics{formula-automaton.pdf}}
  \end{center}
- \caption{A finite automata corresponding to the subformulae of example formula
+ \caption{Finite automata corresponding to the subformulae of the formula
  $\varphi \overset{\mathit{def}}{=} \exists P:
  Sing(P) \wedge\neg P \subseteq X$}\label{example}
 \end{figure}
@@ -109,20 +114,21 @@ and $i$-th projection of automaton respectively.
 
 Although this approach yields good results in many practical examples, every
 time non-determinism is introduced the automaton is determinised and the
-information about the original states is forgotten. So such an approach has
-issues with extensive usage of automaton complementation and since currently there is no known tree automaton complementation technique
-better than bottom-up determinization of automaton with complementation of the
-final states, heavy optimizations and heuristics had to be used in MONA to
-achieve good results.
+information about the original states is forgotten. Therefore such an approach
+has issues with extensive use of automaton complementation and since currently
+there is no known tree automaton complementation technique better than bottom-up determinization of automaton with complementation of the
+set of final states, heavy optimizations and heuristics had to be used in MONA
+to achieve good results.
 
 We propose that it is not necessary to construct the automaton representing all
 models of $\varphi$. Instead construction of the automaton and the search for an
 accepting or a non-accepting state can be done \emph{on-the-fly} and we can further exploit
-recent development in algorithms using non-deterministic automata. Given a
-WS$k$S formula $\varphi$ we transform it to the formula in the \emph{existentially-quantified prenex normal form} $\psi \overset{\mathit{def}}{=}
+recent development in algorithms for manipulating non-deterministic
+tree automata.
+Given a WS$k$S formula $\varphi$ we transform it to the formula in the \emph{existentially-quantified prenex normal form} $\psi \overset{\mathit{def}}{=}
 \exists\mathcal{X}_{m+1}\neg\exists\mathcal{X}_m\ldots\neg\exists\mathcal{X}_2\neg\exists\mathcal{X}_1.\pi(\mathds{X})$,
 where $\mathcal{X}_i$ denotes a set of second order variables.
-We then create a hierarchical family of WS$k$S formulae $\Phi =
+We then create a hierarchical family of formulae $\Phi =
 \{\varphi_0,\ldots,\varphi_m\}$ where $\varphi_0 \overset{\mathit{def}}{=} \pi$ and for all $0 \leq i \leq
 m-1$ it holds that $\varphi_{i+1} \overset{\mathit{def}}{=}
 \neg\exists\mathcal{X}_{i+1}.\,\varphi_i$.
@@ -132,23 +138,23 @@ $\omega_{\mathcal{X}}$ over the set of variables $\mathcal{X}$, we define the
 family of automata $\mathds{A} = \{\mathcal{A}_0,\ldots,\mathcal{A}_m\}$ as follows:
 \begin{eqnarray}
  \mathcal{A}_0 & = & \mathcal{A}_\pi\\
- \mathcal{A}_{i+1} & = & \gamma(\omega_{\mathcal{X}_{i+1}} (\mathcal{A}_i)), 0 <
- i < m - 1
+ \mathcal{A}_{i+1} & = & \gamma(\omega_{\mathcal{X}_{i+1}} (\mathcal{A}_i))
 \end{eqnarray}
 
 Language of the automaton $\mathcal{A}_\psi$ is further tested for universality.
-The classical naive approach performs determinization using a subset construction to obtain
-a deterministic automaton, which is further complemented and finally being
-checked whether there is no reachable final state in this automaton. Proposed
-algorithm \cite{anti} runs the subset construction on-the-fly and checks if any rejecting macro-state, i.e. a subset of states $Q$ of automaton,
-is reachable. Macro-states $S$ are gradually expanded, unless there exists some
-other already expanded macro-state $R$ such that for all states in $S$ there
-exists some state in $R$ in $\preceq$ relation, where $\preceq \subseteq Q
-\times Q$ is a relation implying inclusion over languages accepted from states.
+The classical naive approach performs determinization using subset construction
+to obtain a deterministic automaton, which is further complemented and finally
+checked whether it contains reachable final state. Antichain based
+algorithm \cite{anti} runs the subset construction and looks for rejecting
+state on-the-fly. Given relation implying inclusion over languages accepted from
+states $\preceq \subseteq Q \times Q$, f.e. identity for antichain approach,
+and two macro-states $R$ and $S$, i.e. subsets of $Q$, if $\forall r \in
+R:\,\exists s \in S:\,r \preceq s$ then it
+holds that $L_\mathcal{A}(R) \subseteq L_\mathcal{A}(S)$, i.e. we don't have to
+expand macro-state $S$, when searching for rejecting state.
 
-Let us take the automaton for our example Formula \ref{varphi} depicted in
-Figure \ref{example}. By the classical approach 7 states are generated as shown
-in Figure \ref{compare}. If we use the antichain based approach then
+Now let us take the automaton for negation of our example Formula \ref{varphi}.
+By the classical approach 7 states are generated as shown in Figure \ref{compare}. If we use the antichain based approach then
 macro-states $\{1, 4\}$ and $\{1, 2\}$ are simulated by the initial state
 $\{1\}$, so we don't expand these states any further and the construction of automaton
 ends.
@@ -159,21 +165,21 @@ automaton $\mathcal{A}_\varphi$ is not universal and formula is thus not valid.
  \begin{center}
   \scalebox{0.5}{\includegraphics{antichain-meets-projection.pdf}}
  \end{center}
- \caption{Comparison of antichain based (grey nodes) and classical approach to
- universality checking of the automaton $\mathcal{A}_\varphi$
- corresponding to the formula $\varphi \overset{\mathit{def}}{=} \exists P:
+ \caption{Comparison of the antichain based (grey nodes) and the classical
+ approach to universality checking of the automaton $\mathcal{A}_\psi$
+ corresponding to the formula $\psi \overset{\mathit{def}}{=} \neg\exists P:
  Sing(P) \wedge\neg P \subseteq X$}\label{compare}
 \end{figure}
 
 \section{Conclusion}
 
 We proposed a new decision procedure of WS$k$S logic that uses non-deterministic
-automata instead of deterministic ones used in classical approach, e.g. in tool
+automata instead of deterministic ones used, e.g. in tool
 MONA \cite{mona}. This different approach makes use of recent developments in
-fields of non-deterministic automata algorithms such as universality checking or
-language inclusion checking, allowing us to search for a rejecting or accepting
-states on-the-fly without constructing automaton corresponding to the given formula at
-all, possibly yielding a~faster decision procedure for some types of formulae.
+the field of non-deterministic automata algorithms such as universality
+checking or language inclusion checking, allowing us to search for a rejecting or accepting
+states on-the-fly without constructing the automaton corresponding to the given
+formula at all, possibly yielding a~faster decision procedure for some class of formulae.
 
 %------------
 % Citace
@@ -184,7 +190,7 @@ all, possibly yielding a~faster decision procedure for some types of formulae.
 %  checking language inclusion on nondeterministic finite (tree) automata). In
 %  \emph{Tools and Algorithms for Construction and Analysis of Systems}, LNCS
 %  6015, pages 158-174, Springer Verlag, 2010.
-\bibitem{anti}Abdulla, Parosh Aziz et. al.: When simulation meets
+\bibitem{anti}Abdulla, Parosh Aziz et al.: When simulation meets
 antichains (on checking language inclusion on nondeterministic finite (tree) automata). In
   \emph{Tools and Algorithms for Construction and Analysis of Systems}, LNCS
   6015, pages 158--174, Springer Verlag, 2010.
@@ -193,7 +199,7 @@ antichains (on checking language inclusion on nondeterministic finite (tree) aut
   [online] Available on:
   http://www.brics.dk/mona/.
   \bibitem{tata}Comon, H. et al.: Tree automata techniques and applications.
-  2007, release October, 12th, 2007.
+  2007, release October 12th, 2007.
   \bibitem{wsks}Büchi, J. R.: Weak second-order arithmetic and finite automata.
   \emph{Mathematical Logic Quarterly}, 6(1--6):66--92, 1960.
 \end{thebibliography}

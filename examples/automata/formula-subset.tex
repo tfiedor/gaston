@@ -1,0 +1,41 @@
+% Automaton corresponding to the formulas (Sing(P) and not P
+% \subseteq X)
+
+\documentclass{standalone}
+
+\usepackage{pgf}
+\usepackage{tikz}
+\usepackage{amssymb}
+\usepackage{makecell}
+\usetikzlibrary{arrows,automata}
+\usepackage[latin1]{inputenc}
+\begin{document}
+%\begin{figure}
+% \begin{center}
+\begin{tikzpicture}[->,>=stealth',shorten >=1pt,auto,node distance=2.8cm,
+                    semithick,initial text={}]
+  \tikzstyle{every state}=[fill=none,draw=black,text=black]
+
+ 
+  \node[initial,state] (D) 	{$3$};
+  \node[state,accepting] (E) [right of=D]			{$\bot$};
+  
+  \path (D) edge [loop below] node {\makecell[l]{P: 0\textbar 0\textbar 1\\ X:
+  		0\textbar 1\textbar 1}} (D)
+  		    edge 			  node {\makecell[l]{P: 1\\ X:
+  		    0}} 
+  	    (E) (E) edge [loop below] node {$\Sigma$} (E);
+%  \node [below=4.7cm, align=flush center,text width=3cm] at (A)
+%        {
+%            \Large b) $\mathcal{A}_{P \not\subseteq X}$
+%        };
+%  \node [below=0.5cm, align=flush center,text width=3cm] at (A)
+%        {
+%            \Large a) $\mathcal{A}_{Sing(P)}$
+%        };
+\end{tikzpicture}
+% \end{center}
+% \caption{Automaton $\mathcal{A}_\phi$ corresponding to the formula $\phi =
+% \exists P. (Sing(P) \wedge \neg P \subseteq X)$}
+%\end{figure}
+\end{document}

@@ -20,28 +20,19 @@
   \node[state,accepting] (B) [right of=A]	{$2$};
   \node[state] (C) [right of=B]				{$\bot$};
   
-  \node[initial,state] (D) [below of=B] 	{$3$};
-  \node[state,accepting] (E) [below of=C]			{$\bot$};
-  
   \path (A) edge [loop above] node {P: 0} (A)
   			edge 			  node {P: 1} (B)
   		(B) edge [loop above] node {P: 0} (B)
   		    edge			  node {P: 1} (C)
-  		(C) edge [loop above] node {P: 0\textbar 1} (C)
-  		
-  		(D) edge [loop below] node {\makecell[l]{P: 0\textbar 0\textbar 1\\ X:
-  		0\textbar 1\textbar 1}} (D)
-  		    edge [below]			  node {\makecell[l]{P: 1\\ X:
-  		    0}} 
-  	    (E) (E) edge [loop below] node {$\Sigma$} (E);
-  \node [below=5.5cm, align=flush center,text width=3cm] at (B)
-        {
-            \LARGE b) $\mathcal{A}_{P \not\subseteq X}$
-        };
-  \node [below=0.5cm, align=flush center,text width=3cm] at (B)
-        {
-            \LARGE a) $\mathcal{A}_{Sing(P)}$
-        };
+  		(C) edge [loop above] node {P: 0\textbar 1} (C);
+%  \node [below=4.7cm, align=flush center,text width=3cm] at (A)
+%        {
+%            \Large b) $\mathcal{A}_{P \not\subseteq X}$
+%        };
+%  \node [below=0.5cm, align=flush center,text width=3cm] at (A)
+%        {
+%            \Large a) $\mathcal{A}_{Sing(P)}$
+%        };
 \end{tikzpicture}
 % \end{center}
 % \caption{Automaton $\mathcal{A}_\phi$ corresponding to the formula $\phi =

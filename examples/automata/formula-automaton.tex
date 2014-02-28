@@ -23,19 +23,19 @@
 
   \path (A) edge              node {X: 1}   (B)
             edge [loop above] node {X: 0\textbar 1} (A)
-            edge              node {X: 0}   (D)
+            edge [below left]             node {X: 0}   (D)
         (B) edge              node {X: 1}   (C)
             edge [loop above] node {X: 0\textbar 1} (B)
-            edge              node {X: 0}   (E)
+            edge [below left]            node {X: 0}   (E)
         (C) edge [loop above] node {X: 0\textbar 1} (C)
             edge              node {X: 0}   (E)
-        (D) edge              node {X: 0\textbar 1} (E)
+        (D) edge [below]             node {X: 0\textbar 1} (E)
             edge [loop below] node {X: 0\textbar 1} (D)
         (E) edge [loop below] node {X: 0\textbar 1} (E);
         
-    \node [below=4.5cm, align=flush center,text width=3cm] at (A)
+    \node [below=5.5cm, align=flush center,text width=3cm] at (B)
         {
-            \Large d) $\mathcal{A}_\varphi$
+            \LARGE d) $\mathcal{A}_\varphi$
         };
 \end{tikzpicture}
 % \end{center}
