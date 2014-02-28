@@ -49,7 +49,6 @@ Automaton* ASTForm_Not::toBinaryAutomaton() {
 	return 0;
 }
 
-
 /**
  * Constructs automaton for formula phi and psi
  *
@@ -105,5 +104,16 @@ Automaton* ASTForm_Equal2::toBinaryAutomaton() {
  */
 Automaton* ASTForm_NotEqual2::toBinaryAutomaton() {
 	cout << "Neq2 -> automaton\n";
+	return 0;
+}
+
+
+/**
+ * Constructs automaton for atomic formula T1 sub T2
+ *
+ * @return Automaton corresponding to the formula T1 sub T2
+ */
+Automaton* ASTForm_Sub::toBinaryAutomaton() {
+	cout << "Sub -> automaton\n";
 	return 0;
 }

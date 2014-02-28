@@ -794,6 +794,8 @@ public:
   VarCode makeCode(SubstCode *subst = NULL);
   void dump();
   ASTForm* clone() { return new ASTForm_In(*this); }
+
+  ASTForm* flatten();
 };
 
 class ASTForm_Notin: public ASTForm_tT {
@@ -804,6 +806,8 @@ public:
   VarCode makeCode(SubstCode *subst = NULL);
   void dump();
   ASTForm* clone() { return new ASTForm_Notin(*this); }
+
+  ASTForm* flatten();
 };
 
 class ASTForm_RootPred: public ASTForm {
@@ -856,6 +860,9 @@ public:
   void dump();
   ASTForm* clone() { return new ASTForm_Sub(*this); }
 
+  // Conversion of AST representation of formula to Automaton
+  Automaton* toUnaryAutomaton();
+  Automaton* toBinaryAutomaton();
 };
 
 class ASTForm_Equal1: public ASTForm_tt {

@@ -106,3 +106,13 @@ Automaton* ASTForm_NotEqual2::toUnaryAutomaton() {
 	cout << "Neq2 -> automaton\n";
 	return 0;
 }
+
+/**
+ * Constructs automaton for atomic formula T1 sub T2
+ *
+ * @return Automaton corresponding to the formula T1 sub T2
+ */
+Automaton* ASTForm_Sub::toUnaryAutomaton() {
+	cout << "Sub -> automaton\n";
+	return 0;
+}

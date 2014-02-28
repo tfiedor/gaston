@@ -1,6 +1,5 @@
 #include "ast.h"
 #include "symboltable.h"
-
 #include <cstring>
 
 using std::cout;
@@ -60,6 +59,30 @@ ASTForm* ASTForm_Less::flatten() {
  */
 ASTForm* ASTForm_LessEq::flatten() {
 	cout << "Flattening formula LessEq\n";
+	return this;
+}
+
+/**
+ * Flattens formula to second-order variables and restricted sytnax.
+ *
+ * t in X -> Xy subseteq X
+ *
+ * @return: flattened formula
+ */
+ASTForm* ASTForm_In::flatten() {
+	cout << "Flattening formula In\n";
+	return this;
+}
+
+/**
+ * Flattens formula to second-order variables and restricted sytnax.
+ *
+ * t notin X -> not Xy subseteq X
+ *
+ * @return: flattened formula
+ */
+ASTForm* ASTForm_Notin::flatten() {
+	cout << "Flattening formula Notin\n";
 	return this;
 }
 
