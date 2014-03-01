@@ -158,6 +158,7 @@ public:
   virtual ASTForm* flatten() { return this;}
 
   ASTForm* toExistentionalPNF();
+  ASTForm* toSecondOrder();
 
   // Conversion of AST representation of formula to Automaton
   virtual Automaton* toUnaryAutomaton() { std::cout << "Converting formula to unary automaton \n"; return 0; }
@@ -221,7 +222,6 @@ public:
   ASTTerm1_n(ASTKind kind, int c, Pos p) :
     ASTTerm1(kind, p), n(c) {}
 
-protected:
   int n;
 }; 
 
@@ -233,7 +233,6 @@ public:
 
   void freeVars(IdentList*, IdentList*);
 
-protected:
   ASTTerm2 *T;
 };
 
@@ -245,7 +244,6 @@ public:
 
   void freeVars(IdentList*, IdentList*);
 
-protected:
   ASTTerm1 *t;
 };
 
@@ -257,7 +255,6 @@ public:
 
   void freeVars(IdentList*, IdentList*);
 
-protected:
   ASTTerm1 *t;
   int n;
 }; 
@@ -270,7 +267,6 @@ public:
 
   void freeVars(IdentList*, IdentList*);
 
-protected:
   ASTTerm1 *t1;
   ASTTerm1 *t2;
   int n;
@@ -283,8 +279,7 @@ public:
   ~ASTTerm2_TT() {delete T1; delete T2;}
 
   void freeVars(IdentList*, IdentList*);
-  
-protected:
+
   ASTTerm2 *T1;
   ASTTerm2 *T2;
 };
@@ -296,8 +291,7 @@ public:
   ~ASTTerm2_Tn() {delete T;}
 
   void freeVars(IdentList*, IdentList*);
-  
-protected:
+
   ASTTerm2 *T;
   int n;
 };
@@ -310,7 +304,6 @@ public:
 
   void freeVars(IdentList*, IdentList*);
 
-protected:
   ASTTerm1 *t1; 
   ASTTerm2 *T2;
 };
@@ -323,7 +316,6 @@ public:
     
   void freeVars(IdentList*, IdentList*);
 
-protected:
   ASTTerm2 *T;
 };
 
@@ -335,7 +327,6 @@ public:
 
   void freeVars(IdentList*, IdentList*);
 
-protected:
   ASTTerm2 *T1;
   ASTTerm2 *T2;
 };
@@ -348,7 +339,6 @@ public:
 
   void freeVars(IdentList*, IdentList*);
 
-protected:
   ASTTerm1 *t1;
   ASTTerm1 *t2;
 };
@@ -361,7 +351,6 @@ public:
 
   void freeVars(IdentList*, IdentList*);
 
-protected:
   int n;
   ASTTerm1 *t;
 };
@@ -374,7 +363,6 @@ public:
 
   void freeVars(IdentList*, IdentList*);
 
-protected:
   int n;
   ASTTerm2 *T;
 };
@@ -388,7 +376,6 @@ public:
   void freeVars(IdentList*, IdentList*);
   ASTForm* flatten();
 
-protected:
   ASTForm *f;
 };
 
@@ -457,6 +444,7 @@ public:
 
   void freeVars(IdentList*, IdentList*);
   ASTTermCode *makeCode(SubstCode *subst = NULL);
+  Ident getVar() {return n;};
   void dump();
 };
 
@@ -846,6 +834,10 @@ public:
   void freeVars(IdentList*, IdentList*);
   void dump();
   ASTForm* clone() { return new ASTForm_FirstOrder(*this); }
+
+  // Conversion of AST representation of formula to Automaton
+  Automaton* toUnaryAutomaton();
+  Automaton* toBinaryAutomaton();
 
 protected:
   ASTTerm1 *t;

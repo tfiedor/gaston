@@ -58,14 +58,14 @@ tree automata.
 
 \section{WS$k$S syntax}
 
-A WS$k$S \emph{term} is either an empty constant $\epsilon$, a first-order
+A WS$k$S \emph{term} is either the empty constant $\epsilon$, a first-order
 variable symbol written in lower-case letters (e.g. $x$, $y$, \ldots) or an
 unary symbol from $\{1,\ldots,k\}$ written in postfix notation. For example
 $x1123$ or $\epsilon2111$ are terms. An \emph{atomic formula}, for some
 second-order variables $X$ and $Y$, is either the subset predicate $X
 \subseteq Y$, the singleton predicate $Sing(X)$, the successor predicate $X =
-Yi$, for some $1 \leq i \leq k$, or the set containing $\epsilon$ predicate $X
-= \epsilon$.
+Yi$, for some $1 \leq i \leq k$, or predicate $X
+= \epsilon$ denoting that $X$ is a singleton set $\{\epsilon\}$.
 A WS$k$S \emph{formula} is then built out of these atomic formulae using only the
 logical connectives $\wedge, \vee, \neg$ and the existential quantifier $\exists
 X$ for quantification over second-order variables.
@@ -73,7 +73,8 @@ X$ for quantification over second-order variables.
 \begin{example} The following example WS$k$S formula $\varphi$ denotes that there
 exists a singleton set which is not a subset of the set $X$.
 \begin{equation}
- \varphi \overset{\mathit{def}}{=} \exists P: Sing(P) \wedge\neg P \subseteq X
+ \psi \overset{\mathit{def}}{=} \neg\exists P: Sing(P) \wedge P
+ \not\subseteq X
  \label{varphi}
 \end{equation}
 \end{example}
@@ -107,7 +108,7 @@ represents all models of formula $\varphi$.
  \end{center}
  \caption{Finite automata corresponding to the subformulae of the formula
  $\varphi \overset{\mathit{def}}{=} \exists P:
- Sing(P) \wedge\neg P \subseteq X$}\label{example}
+ Sing(P) \wedge P \not\subseteq X$}\label{example}
 \end{figure}
 
 \subsection{Deciding WS$k$S using non-deterministic automata}
@@ -140,32 +141,36 @@ family of automata $\mathds{A} = \{\mathcal{A}_0,\ldots,\mathcal{A}_m\}$ as foll
  \mathcal{A}_0 & = & \mathcal{A}_\pi\\
  \mathcal{A}_{i+1} & = & \gamma(\omega_{\mathcal{X}_{i+1}} (\mathcal{A}_i))
 \end{eqnarray}
+such that there is a correspondence between $\mathcal{A}_i$ and $\varphi_i$ for
+all $0 \leq i \leq m$.
 
-Language of the automaton $\mathcal{A}_\psi$ is further tested for universality.
+The Language of the automaton $\mathcal{A}_\psi$ is further tested for
+universality.
 The classical naive approach performs determinization using subset construction
-to obtain a deterministic automaton, which is further complemented and finally
-checked whether it contains reachable final state. Antichain based
-algorithm \cite{anti} runs the subset construction and looks for rejecting
-state on-the-fly. Given relation implying inclusion over languages accepted from
-states $\preceq \subseteq Q \times Q$, f.e. identity for antichain approach,
-and two macro-states $R$ and $S$, i.e. subsets of $Q$, if $\forall r \in
-R:\,\exists s \in S:\,r \preceq s$ then it
-holds that $L_\mathcal{A}(R) \subseteq L_\mathcal{A}(S)$, i.e. we don't have to
-expand macro-state $S$, when searching for rejecting state.
-
-Now let us take the automaton for negation of our example Formula \ref{varphi}.
-By the classical approach 7 states are generated as shown in Figure \ref{compare}. If we use the antichain based approach then
-macro-states $\{1, 4\}$ and $\{1, 2\}$ are simulated by the initial state
-$\{1\}$, so we don't expand these states any further and the construction of automaton
-ends.
-Since we did not reach any accepting state, we can conclude that language of
-automaton $\mathcal{A}_\varphi$ is not universal and formula is thus not valid.
+to obtain a deterministic automaton, which is further complemented by
+swapping final and non-final states and finally checked whether it contains
+reachable final state. In our approach we wish to exploit the ideas from the
+Antichains algorithm \cite{anti} and check universality of $\mathcal{A}_\psi$
+without explicitly constructing it, but rather using a search of the state space
+over powers of the state set of $\mathcal{A}_0$. To illustrate this on an
+example, consider the example formula $\psi \overset{\mathit{def}}{=}
+\neg\exists P:
+ Sing(P) \wedge\neg P \subseteq X$ and the automaton
+$\mathcal{A}_\varphi$ from Figure 1 corresponding to the formula $\varphi
+\overset{\mathit{def}}{=} \exists P:
+ Sing(P) \wedge\neg P \subseteq X$, i.e. $\psi \overset{\mathit{def}}{=} \neg
+ \phi$. We can search for a non-accepting state of $\mathcal{A}_\psi$ by
+ searching for a reachable set of states of $\mathcal{A}_\varphi$ that does not
+ contain a final state. Further, by using the antichains principle, if we
+ encounter a set of states $P$ and later a set of states $R$, s.t. $P \subseteq
+ R$, we do not need to explore $R$ as $P$ is smaller and therefore has a bigger
+ chance of reaching a non-accepting set of states.
 
 \begin{figure}
  \begin{center}
   \scalebox{0.5}{\includegraphics{antichain-meets-projection.pdf}}
  \end{center}
- \caption{Comparison of the antichain based (grey nodes) and the classical
+ \caption{Comparison of the antichain-based (grey nodes) and the classical
  approach to universality checking of the automaton $\mathcal{A}_\psi$
  corresponding to the formula $\psi \overset{\mathit{def}}{=} \neg\exists P:
  Sing(P) \wedge\neg P \subseteq X$}\label{compare}

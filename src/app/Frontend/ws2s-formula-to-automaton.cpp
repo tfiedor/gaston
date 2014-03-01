@@ -117,3 +117,14 @@ Automaton* ASTForm_Sub::toBinaryAutomaton() {
 	cout << "Sub -> automaton\n";
 	return 0;
 }
+
+
+/**
+ * Constructs automaton for formula denoting, that set is a singleton
+ *
+ * @return Automaton corresponding to the formula Singleton(X)
+ */
+Automaton* ASTForm_FirstOrder::toBinaryAutomaton() {
+	cout << "Sing -> automaton\n";
+	return 0;
+}

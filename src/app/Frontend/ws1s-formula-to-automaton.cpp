@@ -16,13 +16,49 @@ extern SymbolTable symbolTable;
 using Automaton = VATA::BDDBottomUpTreeAut;
 
 /**
+ * Constructs universal track X^k according to the number of variables used
+ * in formula, i.e. in symbol table
+ *
+ * @return: universal track for transition
+ */
+void constructUniversalTrack() {
+	unsigned int trackLen = symbolTable.noIdents;
+
+}
+
+/**
  * Constructs automaton for unary automaton True
  * @return: Automaton corresponding to the formula True
  */
 Automaton* ASTForm_True::toUnaryAutomaton() {
-    cout << "True -> automaton\n";
-	return 0;
+    /*cout << "True -> automaton\n";
+    Automaton trueAutomaton;
+
+    trueAutomaton.SetStateFinal(0);
+    trueAutomaton.AddTransition(
+    		Automaton::StateTuple(),
+    		Automaton::SymbolType(),
+    		0);
+
+
+	return 0;*/
 }
+
+/*  Automaton aut1;
+  aut1.SetStateFinal(1);
+
+  aut1.AddTransition(
+		  Automaton::StateTuple(),
+		  Automaton::SymbolType("0000"),
+		  0);
+  aut1.AddTransition(
+		  Automaton::StateTuple({0, 0}),
+		  Automaton::SymbolType("11X0"),
+		  1);
+
+  VATA::Serialization::AbstrSerializer* serializer =
+		  new VATA::Serialization::TimbukSerializer();
+  std::cout << aut1.DumpToString(*serializer);*/
 
 /**
  * Constructs automaton for unary automaton False
@@ -114,5 +150,15 @@ Automaton* ASTForm_NotEqual2::toUnaryAutomaton() {
  */
 Automaton* ASTForm_Sub::toUnaryAutomaton() {
 	cout << "Sub -> automaton\n";
+	return 0;
+}
+
+/**
+ * Constructs automaton for formula denoting, that set is a singleton
+ *
+ * @return Automaton corresponding to the formula Singleton(X)
+ */
+Automaton* ASTForm_FirstOrder::toUnaryAutomaton() {
+	cout << "Sing -> automaton\n";
 	return 0;
 }

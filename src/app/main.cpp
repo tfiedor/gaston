@@ -25,6 +25,7 @@
 #include "Frontend/printline.h"
 #include "Frontend/config.h"
 #include "Frontend/offsets.h"
+#include "Frontend/ident.h"
 
 using std::cout;
 
@@ -217,6 +218,17 @@ void splitMatrixAndPrefix(MonaAST* formula, ASTForm* &matrix, ASTForm* &prefix) 
 	}
 }
 
+/**
+ * Implementation is not sure at the moment, but should reorder the symbol
+ * table or BDD track, so it is optimized for using of projection during
+ * the decision procedure process. It should consider the structure of prefix
+ * of given formula, so BDD used in transitions of automata can be better
+ * reordered
+ */
+void reorder() {
+
+}
+
 int 
 main(int argc, char *argv[])
 {
@@ -254,7 +266,7 @@ main(int argc, char *argv[])
     (ast->formula)->dump();
 
     cout << "\nFlattening of the formula:\n";
-    ast->formula = (ASTForm*) (ast->formula)->flatten();
+    ast->formula = (ASTForm*) (ast->formula)->toSecondOrder();
     (ast->formula)->dump();
 
     // Transform AST to existentional Prenex Normal Form
@@ -333,44 +345,25 @@ main(int argc, char *argv[])
   ///////// Conversion to Tree Automata ////////
 
   // First formula in AST representation is split into matrix and prefix part.
-  ASTForm* matrix;
-  ASTForm* prefix;
+  ASTForm *matrix, *prefix;
   splitMatrixAndPrefix(ast, matrix, prefix);
+  // Table or BDD tracks are reordered
+  reorder();
 
-
-  cout << "Prefix of formula: ";
-  prefix->dump();
-  cout << "\n" << "Matrix of formula: ";
-  matrix->dump();
-  cout << "\n";
-
-  Automaton* aut;
+  Automaton* formulaAutomaton;
   // WS1S formula is transformed to unary NTA
   if(options.mode != TREE) {
-	  aut = matrix->toUnaryAutomaton();
+	  formulaAutomaton = matrix->toUnaryAutomaton();
   // WS2S formula is transformed to binary NTA
   } else {
-	  aut = matrix->toBinaryAutomaton();
+	  formulaAutomaton = matrix->toBinaryAutomaton();
   }
-  ASTForm_False* f = new ASTForm_False(Pos());
-  aut = f->toUnaryAutomaton();
-
-  /* For now, only example of vata is added here */
-  Automaton aut1;
-  aut1.SetStateFinal(1);
-
-  aut1.AddTransition(
-		  Automaton::StateTuple(),
-		  Automaton::SymbolType("0000"),
-		  0);
-  aut1.AddTransition(
-		  Automaton::StateTuple({0, 0}),
-		  Automaton::SymbolType("11X0"),
-		  1);
 
   VATA::Serialization::AbstrSerializer* serializer =
 		  new VATA::Serialization::TimbukSerializer();
-  std::cout << aut1.DumpToString(*serializer);
+  //std::cout << formulaAutomaton->DumpToString(*serializer);
+
+  symbolTable.dump();
 
   ///////// CLEAN UP ///////////////////////////////////////////////////////
 

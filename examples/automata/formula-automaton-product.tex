@@ -16,11 +16,11 @@
                     semithick,initial text={}]
   \tikzstyle{every state}=[fill=none,draw=black,text=black]
 
-  \node[initial,state,accepting] (A)                    {$\{1, 3\}$};
-  \node[state]         (B) [right of=A]       {$\{2, 3\}$};
-  \node[state]         (C) [right of=B]       {$\{\bot, 3\}$};
-  \node[state,accepting]         (D) [below of=B]       {$\{2, \bot\}$};
-  \node[state]         (E) [below of=C]       {$\{\bot, \bot\}$};
+  \node[initial,state,accepting] (A)                    {$(1, 3)$};
+  \node[state]         (B) [right of=A]       {$(2, 3)$};
+  \node[state]         (C) [right of=B]       {$(\bot, 3)$};
+  \node[state,accepting]         (D) [below of=B]       {$(2, \bot)$};
+  \node[state]         (E) [below of=C]       {$(\bot, \bot)$};
 
   \path (A) edge              node {\makecell[l]{P: 1\\X: 1}} (B) 
             edge [loop above] node {\makecell[l]{P: 0\textbar 0\\X: 0\textbar1}} (A)
