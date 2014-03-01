@@ -2,6 +2,7 @@
 #include "symboltable.h"
 #include "env.h"
 #include <cstring>
+#include <deque>
 
 using std::cout;
 
@@ -17,6 +18,20 @@ extern Options options;
  */
 ASTForm* ASTForm::toSecondOrder() {
 	ASTForm* flattenedFormula = (ASTForm*) this->flatten();
+
+	// For all used first-order variables FirstOrder(x) is appended to formulae
+	IdentList free, bound;
+	ASTForm_FirstOrder* singleton;
+	this->freeVars(&free, &bound);
+	IdentList *allVars = ident_union(&free, &bound);
+	IdentList::iterator it = allVars->begin();
+	while(it != allVars->end()) {
+		if (symbolTable.lookupType(*it) == Varname1) {
+			singleton = new ASTForm_FirstOrder(new ASTTerm1_Var1((*it), Pos()), Pos());
+			flattenedFormula = new ASTForm_And(singleton, flattenedFormula, Pos());
+		}
+		++it;
+	}
 	return flattenedFormula;
 }
 
@@ -245,8 +260,8 @@ ASTForm* ASTForm_In::flatten() {
 	if (this->t1->kind != aVar1) {
 		return substituteFreshIn(this->t1, this->T2);
 	} else {
-		ASTTerm2_Var2* Y = generateFreshSecondOrder();
-		return new ASTForm_Sub(Y, this->T2, Pos());
+		ASTTerm2_Var2 *secondOrderX = new ASTTerm2_Var2(((ASTTerm1_Var1*)this->t1)->n, Pos());
+		return new ASTForm_Sub(secondOrderX, this->T2, Pos());
 	}
 	return this;
 }
