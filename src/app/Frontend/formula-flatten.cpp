@@ -264,6 +264,26 @@ ASTForm* ASTForm_Notin::flatten() {
 }
 
 /**
+ * Flattens formula to second-order
+ *
+ * @return: flattened formula
+ */
+ASTForm* ASTForm_Ex1::flatten() {
+	this->f = this->f->flatten();
+	return new ASTForm_Ex2(this->ul, this->vl, this->f, this->pos);
+}
+
+/**
+ * Flattens formula to second-order
+ *
+ * @return: flattened formula
+ */
+ASTForm* ASTForm_All1::flatten() {
+	this->f = this->f->flatten();
+	return new ASTForm_All2(this->ul, this->vl, this->f, this->pos);
+}
+
+/**
  * Generic transformation for wide range of formulae
  *
  * @return: flattened formula

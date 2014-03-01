@@ -1049,6 +1049,7 @@ public:
   ASTForm* clone() { return new ASTForm_Ex1(*this); }
 
   ASTForm* toRestrictedSyntax();
+  ASTForm* flatten();
 };
 
 class ASTForm_Ex2: public ASTForm_uvf {
@@ -1087,6 +1088,7 @@ public:
   
   ASTForm* toRestrictedSyntax();
   ASTForm* removeUniversalQuantifier();
+  ASTForm* flatten();
 };
 
 class ASTForm_All2: public ASTForm_uvf {
