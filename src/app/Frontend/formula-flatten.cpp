@@ -24,13 +24,15 @@ ASTForm* ASTForm::toSecondOrder() {
 	ASTForm_FirstOrder* singleton;
 	this->freeVars(&free, &bound);
 	IdentList *allVars = ident_union(&free, &bound);
-	IdentList::iterator it = allVars->begin();
-	while(it != allVars->end()) {
-		if (symbolTable.lookupType(*it) == Varname1) {
-			singleton = new ASTForm_FirstOrder(new ASTTerm1_Var1((*it), Pos()), Pos());
-			flattenedFormula = new ASTForm_And(singleton, flattenedFormula, Pos());
+	if (allVars != 0) {
+		Ident* it = allVars->begin();
+		while(it != allVars->end()) {
+			if (symbolTable.lookupType(*it) == Varname1) {
+				singleton = new ASTForm_FirstOrder(new ASTTerm1_Var1((*it), Pos()), Pos());
+				flattenedFormula = new ASTForm_And(singleton, flattenedFormula, Pos());
+			}
+			++it;
 		}
-		++it;
 	}
 	return flattenedFormula;
 }
