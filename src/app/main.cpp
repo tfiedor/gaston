@@ -350,18 +350,22 @@ main(int argc, char *argv[])
   // Table or BDD tracks are reordered
   reorder();
 
-  Automaton* formulaAutomaton;
+  Automaton formulaAutomaton;
   // WS1S formula is transformed to unary NTA
   if(options.mode != TREE) {
-	  formulaAutomaton = matrix->toUnaryAutomaton();
+	  //matrix->toUnaryAutomaton(formulaAutomaton, false);
   // WS2S formula is transformed to binary NTA
   } else {
-	  formulaAutomaton = matrix->toBinaryAutomaton();
+	  //formulaAutomaton = matrix->toBinaryAutomaton();
   }
+  ASTForm_True* form1 = new ASTForm_True(Pos());
+  ASTForm_True* form2 = new ASTForm_True(Pos());
+  ASTForm_And* form = new ASTForm_And(form1, form2, Pos());
+  form->toUnaryAutomaton(formulaAutomaton, false);
 
   VATA::Serialization::AbstrSerializer* serializer =
 		  new VATA::Serialization::TimbukSerializer();
-  //std::cout << formulaAutomaton->DumpToString(*serializer);
+  std::cout << formulaAutomaton.DumpToString(*serializer);
 
   symbolTable.dump();
 

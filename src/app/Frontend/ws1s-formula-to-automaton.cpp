@@ -21,52 +21,63 @@ using Automaton = VATA::BDDBottomUpTreeAut;
  *
  * @return: universal track for transition
  */
-void constructUniversalTrack() {
+Automaton::SymbolType constructUniversalTrack() {
 	unsigned int trackLen = symbolTable.noIdents;
+	Automaton::SymbolType transitionTrack;
+	transitionTrack.AddVariablesUpTo(trackLen);
+	return transitionTrack;
+}
 
+inline void setState(Automaton &automaton, bool setFinal, unsigned int state) {
+	if(setFinal) {
+		automaton.SetStateFinal(state);
+	}
 }
 
 /**
  * Constructs automaton for unary automaton True
- * @return: Automaton corresponding to the formula True
+ *
+ * @param[out] trueAutomaton: created automaton
+ * @param doComplement: whether automaton should be complemented
+ * TODO: do Complement
  */
-Automaton* ASTForm_True::toUnaryAutomaton() {
-    /*cout << "True -> automaton\n";
-    Automaton trueAutomaton;
+void ASTForm_True::toUnaryAutomaton(Automaton &trueAutomaton, bool doComplement) {
+    // _ -> q0
+	setState(trueAutomaton, !doComplement, 0);
 
-    trueAutomaton.SetStateFinal(0);
-    trueAutomaton.AddTransition(
+	trueAutomaton.AddTransition(
     		Automaton::StateTuple(),
     		Automaton::SymbolType(),
     		0);
 
-
-	return 0;*/
+    // q0 -(X^k)-> q0
+    trueAutomaton.AddTransition(
+    		Automaton::StateTuple({0}),
+    		constructUniversalTrack(),
+    		0);
 }
-
-/*  Automaton aut1;
-  aut1.SetStateFinal(1);
-
-  aut1.AddTransition(
-		  Automaton::StateTuple(),
-		  Automaton::SymbolType("0000"),
-		  0);
-  aut1.AddTransition(
-		  Automaton::StateTuple({0, 0}),
-		  Automaton::SymbolType("11X0"),
-		  1);
-
-  VATA::Serialization::AbstrSerializer* serializer =
-		  new VATA::Serialization::TimbukSerializer();
-  std::cout << aut1.DumpToString(*serializer);*/
 
 /**
  * Constructs automaton for unary automaton False
- * @return: Automaton corresponding to the formula False
+ *
+ * @param[out] falseAutomaton: created automaton
+ * @param doComplement: whether automaton should be complemented
+ * TODO: do Complement
  */
-Automaton* ASTForm_False::toUnaryAutomaton() {
-	cout << "False -> automaton\n";
-	return 0;
+void ASTForm_False::toUnaryAutomaton(Automaton &falseAutomaton, bool doComplement) {
+	// _ -> q0
+	setState(falseAutomaton, doComplement, 0);
+
+	falseAutomaton.AddTransition(
+			Automaton::StateTuple(),
+			Automaton::SymbolType(),
+			0);
+
+	// q0 -(X^k)-> q0
+	falseAutomaton.AddTransition(
+			Automaton::StateTuple({0}),
+			constructUniversalTrack(),
+			0);
 }
 
 /**
@@ -76,13 +87,13 @@ Automaton* ASTForm_False::toUnaryAutomaton() {
  * formula being conversed to exPNF form, so determinization does not need
  * to take place
  *
- * @return: Automaton corresponding to the formula not phi
+ * @param[out] notAutomaton: created automaton
+ * @param doComplement: whether automaton should be complemented
+ *  * TODO: do Complement
  */
-Automaton* ASTForm_Not::toUnaryAutomaton() {
+void ASTForm_Not::toUnaryAutomaton(Automaton &notAutomaton, bool doComplement) {
 	// Inner formula is first conversed to unary automaton
-	cout << "Not -> automaton\n";
-	Automaton* autF = this->f->toUnaryAutomaton();
-	return 0;
+	this->f->toUnaryAutomaton(notAutomaton, true);
 }
 
 /**
@@ -91,14 +102,16 @@ Automaton* ASTForm_Not::toUnaryAutomaton() {
  * First converts formulae phi and psi to automatons and then does a automata
  * product to compute the final automaton.
  *
- * @return: Automaton corresponding to the formula phi and psi
+ * @param[out] andAutomaton: created automaton
+ * @param doComplement: whether automaton should be complemented
  */
-Automaton* ASTForm_And::toUnaryAutomaton() {
+void ASTForm_And::toUnaryAutomaton(Automaton &andAutomaton, bool doComplement) {
 	// Inner formulas are first conversed to unary automatons
-	cout << "And -> automaton\n";
-	Automaton *autF1 = this->f1->toUnaryAutomaton();
-	Automaton *autF2 = this->f2->toUnaryAutomaton();
-	return 0;
+	Automaton left, right;
+	this->f1->toUnaryAutomaton(left, doComplement);
+	this->f2->toUnaryAutomaton(right, doComplement);
+
+	andAutomaton = Automaton::Intersection(left, right);
 }
 
 /**
@@ -107,14 +120,16 @@ Automaton* ASTForm_And::toUnaryAutomaton() {
  * First converts formulae phi or psi to automatons and then does a automata
  * union to compute the final automaton.
  *
- * @return: Automaton corresponding to the formula phi or psi
+ * @param[out] orAutomaton: created automaton
+ * @param doComplement: whether automaton should be complemented
  */
-Automaton* ASTForm_Or::toUnaryAutomaton() {
+void ASTForm_Or::toUnaryAutomaton(Automaton &orAutomaton, bool doComplement) {
 	// Inner formulas are first conversed to unary automatons
-	cout << "Or -> automaton\n";
-	Automaton *autF1 = this->f1->toUnaryAutomaton();
-	Automaton *autF2 = this->f2->toUnaryAutomaton();
-	return 0;
+	Automaton left, right;
+	this->f1->toUnaryAutomaton(left, doComplement);
+	this->f2->toUnaryAutomaton(right, doComplement);
+
+	orAutomaton = Automaton::Union(left, right);
 }
 
 /**
@@ -127,9 +142,8 @@ Automaton* ASTForm_Or::toUnaryAutomaton() {
  *
  *  @return Automaton corresponding to the formula phi or psi
  */
-Automaton* ASTForm_Equal2::toUnaryAutomaton() {
+void ASTForm_Equal2::toUnaryAutomaton(Automaton &aut, bool doComplement) {
 	cout << "Eq2 -> automaton\n";
-	return 0;
 }
 
 /**
@@ -138,9 +152,8 @@ Automaton* ASTForm_Equal2::toUnaryAutomaton() {
  *
  * @return Automaton corresponding to the formula T1 ~= T2
  */
-Automaton* ASTForm_NotEqual2::toUnaryAutomaton() {
+void ASTForm_NotEqual2::toUnaryAutomaton(Automaton &aut, bool doComplement) {
 	cout << "Neq2 -> automaton\n";
-	return 0;
 }
 
 /**
@@ -148,9 +161,8 @@ Automaton* ASTForm_NotEqual2::toUnaryAutomaton() {
  *
  * @return Automaton corresponding to the formula T1 sub T2
  */
-Automaton* ASTForm_Sub::toUnaryAutomaton() {
+void ASTForm_Sub::toUnaryAutomaton(Automaton &aut, bool doComplement) {
 	cout << "Sub -> automaton\n";
-	return 0;
 }
 
 /**
@@ -158,7 +170,6 @@ Automaton* ASTForm_Sub::toUnaryAutomaton() {
  *
  * @return Automaton corresponding to the formula Singleton(X)
  */
-Automaton* ASTForm_FirstOrder::toUnaryAutomaton() {
+void ASTForm_FirstOrder::toUnaryAutomaton(Automaton &aut, bool doComplement) {
 	cout << "Sing -> automaton\n";
-	return 0;
 }
