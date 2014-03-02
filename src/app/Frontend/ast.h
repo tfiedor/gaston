@@ -571,7 +571,6 @@ public:
   Ident getVar() {return n;};
   void dump();
 
-protected:
   int n;
 }; 
 
