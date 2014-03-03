@@ -1,80 +1,177 @@
 \chapter{Introduction}
  
-The use of logic has always had an important place in various sciences, especially in computer science and, in particular, formal verification. The expressiveness of logics allows to specify verified systems in a very natural and intuitive way without the need of deep knowledge of verification procedures at all. The logic used range from plain predicate logic through all kinds of first-order logics like Presburger arithmetic \cite{presburger}, separation logic, and all the way to the more complex monadic second-order logics, like WSkS \cite{wsks}. However, with great expressiveness comes great complexity, ranging from NP-complete for propositional logic, through PSPACE-complete for quantified Boolean formulae, with some stronger logics not being decidable at all.
+The use of logic has always had an important place in various sciences,
+especially in computer science and, in particular, formal verification. The
+expressiveness of logics allows to specify verified systems in a very natural
+and intuitive way without the need of deep knowledge of the used verification
+procedures. The logic used range from plain propositional logic through all
+kinds of first-order logics like Presburger arithmetic \cite{presburger},
+separation logic, and all the way to the more complex monadic second-order
+logics, like WS$k$S \cite{wsks}. However, with great expressiveness comes great
+complexity of decision problems of these logics, ranging from NP-complete for
+propositional logic, through PSPACE-complete for quantified Boolean formulae,
+with some stronger logics not being decidable att all.
 
-WSkS stands for weak monadic second-order logic of $k$ successors. Roughly, this
-means that it allows to quantify over finite set variables where every element
-from the universe of discourse has $k$ successors. This properties open ways for expressing various $k$-ary tree structures, e.g. binary trees or heaps, and linear structures, e.g. linked lists, as well. Decision procedures for WS$k$S are usually based on the correspondence between WSkS formulae and languages of finite automata (be it word or tree automata). The atomic subformulae of an examined WS$k$S formula $\phi$ are translated to the finite (word/tree) automata, which are further connected or manipulated using automata manipulation techniques according to the structure of $\phi$. The resulting automaton then represents the language encoding all models of $\phi$. The problem of checking satisfiability (validity/invalidity) of $\phi$ is in the NONELEMENTARY complexity class.
+WS$k$S stands for \emph{weak monadic second-order logic of $k$ successors}.
+Roughly, this means that it allows to quantify over finite set variables where
+every element from the universe of discourse has $k$ successors. This properties
+open ways for expressing various $k$-ary tree structures, e.g. binary trees or
+heaps, and linear structures, e.g. linked lists, as well. Decision procedures
+for WS$k$S are usually based on the correspondence between WS$k$S formulae and
+languages of finite automata (be it word or tree automata). The atomic
+subformulae of an
+examined WS$k$S formula $\phi$ are translated to finite (word/tree)
+automata, which are further connected or manipulated using automata manipulation
+techniques according to the structure of $\phi$. The resulting automaton then
+represents the language encoding all models of $\phi$. The problem of checking
+satisfiability or unsatisfiability/validity/invalidity of $\phi$ is in the
+NONELEMENTARY complexity class.
 
-There has been several attempts to implement a decision procedure for WSkS, like \cite{nfa} for $k = 1$. Currently the best one is the tool \textsc{MONA} \cite{mona}, an implementation of an automaton-based decision procedure which is quite fast and uses finite word and deterministic binary bottom-up tree automata for deciding WS1S and WS2S formulae respectively. The authors of \textsc{MONA} have developed a number of heuristics, such as the use of binary decision diagrams for a representation of transition functions of automata or cache-friendly implementation of hash tables that made \textsc{MONA} perform well on many practical examples in spite of the terrifying worst-case complexity. 
+There has been several attempts to implement a~decision procedure for WS$k$S,
+like~\cite{nfa} for $k = 1$. Currently the best one is the tool \textsc{MONA}
+\cite{mona}, an implementation of an automata-based decision procedure which is
+quite fast and uses deterministic finite word and binary bottom-up tree automata
+for deciding WS1S and WS2S formulae respectively. The authors of \textsc{MONA}
+have developed a number of heuristics, such as the use of binary decision
+diagrams for the representation of transition functions of automata or
+cache-friendly implementation of hash tables that made \textsc{MONA} perform
+well on many practical examples in spite of the terrifying worst-case
+complexity.
 
 Recently, there has been a major advance in the algorithms manipulating
 non-deter\-mi\-ni\-stic automata (like \cite{vata}). Even problems with high
-worst-case complexity like testing universality or language inclusion of automaton, can now be solved efficiently in many practical cases using algorithms that heuristically prune the search space, such as algorithms based on antichains or on the simulation relations among states of automata.
+worst-case complexity like testing universality or language inclusion of
+automaton, can now be solved efficiently in many practical cases using
+algorithms that heuristically prune the search space, such as algorithms based
+on antichains or on the simulation relation among states of automata.
 
-The main goal of this work is the design and implementation of a decision procedure for WS2S that uses no-deterministic tree automata while exploiting the techniques for their manipulation to achieve better performance.
+The main goal of this work is the design and implementation of a decision
+procedure for WS$k$S that uses non-deterministic tree automata while exploiting
+the techniques for their efficient manipulation to achieve better performance.
 
-The rest of this thesis is organized as follows. In Chapter \ref{preli} all necessary preliminaries are defined. A~short introduction to theory of formal languages will describe finite word and tree automata, as well as some properties of their languages. Another structure that will be defined there will be Binary Decision Diagrams, or BDDs for short, and their extensions. Chapter \ref{wsks} defines the syntax and semantics of the WSkS logic and its restricted forms. Brief description of a decision procedure for WSkS also appear there. Chapter \ref{monachap} describes the approach of \textsc{MONA} and all the tweaks and secrets that were discovered during its development. In Chapter \ref{our} our approach to  a decision procedure for the WSkS logic using non-deterministic automata and its anti-chain based principle will be outlined. A~short introduction to anti-chain based procedures and universality testing of finite word and tree automata is described there as well. Chapter \ref{summary} summarizes this thesis.
+The rest of this thesis is organized as follows. In Chapter \ref{preli} all
+necessary preliminaries are defined. A~short introduction to the theory of
+formal languages will describe finite word and tree automata, as well as some
+properties of their languages. Another structure that will be defined there will
+be Binary Decision Diagrams, or BDDs for short, and their extensions. Chapter
+\ref{wsks} defines the syntax and semantics of the WS$k$S logic and its restricted
+forms. A Brief description of the correspondence between tree automata and
+WS$k$S formulae also appears there.
+Chapter \ref{monachap} describes the approach of \textsc{MONA} and all the
+tweaks and secrets that were discovered during its development. In Chapter
+\ref{our} our approach to  a decision procedure for the WS$k$S logic using
+non-deterministic automata and its anti-chain based principle will be outlined.
+A~short introduction to antichain-based procedures and universality testing of
+finite word and tree automata is described there as well. Chapter \ref{summary}
+summarizes this thesis.
 
 \chapter{Preliminaries}\label{preli}
 
  \section{Formal Languages}
 
- We define an \emph{alphabet} as a finite non-empty set of elements called \emph{symbols}. A~\emph{word} over the alphabet $\Sigma$ is a finite sequence $a_1a_2\ldots a_n$, such that $a_i \in \Sigma$, $1 \leq i \leq n$. The \emph{empty sequence} of symbols, i.e. a sequence  which does not contain any symbols, is denoted as $\epsilon$. 
+ We define an \emph{alphabet} as a finite non-empty set of elements called
+ \emph{symbols}. A~\emph{word} over the alphabet $\Sigma$ is a finite sequence
+ $a_1a_2\ldots a_n$, such that $a_i \in \Sigma$, for all $1 \leq i \leq n$. The
+ \emph{empty sequence} of symbols, i.e. a sequence  which does not contain any
+ symbols, is denoted as $\epsilon$.
 
-Let $x = a_1a_2\ldots a_n$ and $y = b_1b_2\ldots b_m$ be words over the alphabet $\Sigma$, for some $n, m \in \mathbb{N}$. The \emph{concatenation} of words $x$ and $y$ is defined as the word $xy = a_1a_2\ldots a_nb_1b_2\ldots b_m$ over the alphabet $\Sigma$. Note that $\epsilon x = x \epsilon = x$. 
+Let $x = a_1a_2\ldots a_n$ and $y = b_1b_2\ldots b_m$ be words over the alphabet
+$\Sigma$, for some $n, m \in \mathbb{N}$. The \emph{concatenation} of words $x$
+and $y$ is defined as the word $xy = a_1a_2\ldots a_nb_1b_2\ldots b_m$. Note
+that $\epsilon x = x \epsilon = x$.
 
-Let $\Sigma$ be an alphabet. We denote the set of all words over $\Sigma$ as $\Sigma^*$. The set of all words except for the empty word is denoted as $\Sigma^+ = \Sigma^* \setminus \{\epsilon\}$. We call $L \subseteq \Sigma^*$ the language over $\Sigma$.
+Let $\Sigma$ be an alphabet. We denote the set of all words over $\Sigma$ as
+$\Sigma^*$. The set of all words except for the empty word is denoted as
+$\Sigma^+ = \Sigma^* \setminus \{\epsilon\}$. We call $L \subseteq \Sigma^*$ the
+language over $\Sigma$.
 
  \section{Finite Automata}
 
- A~\emph{non-deterministic finite} (word) \emph{automaton} (further abbreviated as FA) is a quintuple $\mathcal{A} = (Q, \Sigma, \delta, I, F)$, where
+ A~\emph{non-deterministic finite} (word) \emph{automaton} (further abbreviated
+ as FA) is a quintuple $\mathcal{A} = (Q, \Sigma, \delta, I, F)$, where
   \begin{itemize}
-	 \item[$Q$] is a finite set of \emph{states},
-	 \item[$I$] $ \subseteq Q$ is the set of \emph{initial states},
-	 \item[$F$] $ \subseteq Q$ is the set of \emph{final states},
-	 \item[$\Sigma$] is the input alphabet,
-	 \item[$\delta$] $ \subseteq Q \times\Sigma\times Q$ is the transition relation. We use $p \overset{a}{\longrightarrow} q$, for $p, q \in Q$ and $a \in \Sigma$ to denote, that $(p, a, q) \in \delta$.
+\item $Q$ is a finite set of \emph{states}, \item $I$ $ \subseteq Q$ is the set
+of \emph{initial states}, \item $F$ $ \subseteq Q$ is the set of \emph{final
+states}, \item $\Sigma$ is the input alphabet, \item $\delta$ $ \subseteq Q
+\times\Sigma\times Q$ is the transition relation. We use $p
+\overset{a}{\longrightarrow} q$, for $p, q \in Q$ and $a \in \Sigma$ to denote
+that $(p, a, q) \in \delta$.
 	\end{itemize}
 	
-		Let $\mathcal{A} = (Q, \Sigma, \delta, I, F)$ be a FA. A~\emph{run} of
-		$\mathcal{A}$ over the word $w = a_1a_2\ldots a_n \in \Sigma^*$ from the state
-		$p \in Q$ to the state $r \in Q$ is a sequence of states $q_0q_1\ldots q_n$, such that $q_0 = p, q_n = r$ and for all $1 \leq i \leq n$ there is a transition $q_{i-1} \overset{a_i}{\longrightarrow} q_i$. We write $p \overset{w}{\Longrightarrow} r$ to denote that there exists a~run from the state $p$ to the state $r$ over the word $w$.
+Let $\mathcal{A} = (Q, \Sigma, \delta, I, F)$ be a FA. A~\emph{run} of
+$\mathcal{A}$ over the word $w = a_1a_2\ldots a_n \in \Sigma^*$ from the state
+$p \in Q$ to the state $r \in Q$ is a sequence of states $q_0q_1\ldots q_n$,
+such that $q_0 = p, q_n = r$ and for all $1 \leq i \leq n$ there is a transition
+$q_{i-1} \overset{a_i}{\longrightarrow} q_i$ in $\delta$. We write $p
+\overset{w}{\Longrightarrow} r$ to denote that there exists a~run from the state
+$p$ to the state $r$ over the word $w$.
 	
-	The \emph{language} accepted by a state $q \in Q$ is defined as $L_{\mathcal{A}}(q) = \{w\ |\ q \overset{w}{\Longrightarrow} q_f, q_f \in F\}$. If it is clear which FA $\mathcal{A}$ we are referring to, we can simplify $L_{\mathcal{A}}$ to $L$. The language accepted by a set of states $S \subseteq Q$ is further defined as $L_{\mathcal{A}}(S) = \bigcup_{q \in S} L_{\mathcal{A}}(q)$ and the language accepted by the automaton $\mathcal{A}$ is defined as $L(\mathcal{A}) = L_{\mathcal{A}}(I)$.
+The \emph{language} accepted by a state $q \in Q$ is defined as
+$L_{\mathcal{A}}(q) = \{w\ |\ q \overset{w}{\Longrightarrow} q_f, q_f \in F\}$.
+If it is clear which FA $\mathcal{A}$ we are referring to, we can simplify
+this to $L(q)$. The language accepted by a set of states $S \subseteq
+Q$ is further defined as $L_{\mathcal{A}}(S) = \bigcup_{q \in S}
+L_{\mathcal{A}}(q)$ and the language accepted by the automaton $\mathcal{A}$ is
+defined as $L(\mathcal{A}) = L_{\mathcal{A}}(I)$.
 	
-	A~\emph{deterministic finite automaton} is a FA $\mathcal{A}$ where $\forall q \in Q, \forall a \in \Sigma: |\{ r \in Q\ |\ q \overset{a}{\longrightarrow} r\}| \leq 1$, i.e. $\delta$ is a partial function $\delta : Q \times \Sigma \longrightarrow Q$. If $\delta$ is total, i.e. $\forall q \in Q, \forall a \in \Sigma : |\delta(q, a)| = 1$, we call $\mathcal{A}$ to be a \emph{complete deterministic finite automaton}. It can be shown that for every deterministic FA there exists a language equivalent complete deterministic FA, by adding new non-final sink state.
+A~\emph{deterministic finite automaton} (DFA) is a FA $\mathcal{A}$ where $|I| =
+1$ and $\forall q \in Q, \forall a \in \Sigma: |\{ r \in Q\ |\ q
+\overset{a}{\longrightarrow} r\}| \leq 1$, i.e. $\delta$ is a partial function
+$\delta : Q \times \Sigma \longrightarrow Q$. If $\delta$ is total, i.e.
+$\forall q \in Q, \forall a \in \Sigma : |\delta(q, a)| = 1$, we call
+$\mathcal{A}$ a \emph{complete deterministic finite automaton}. It can be shown
+that for every deterministic FA there exists a language equivalent complete
+deterministic FA, by adding a new non-final sink state.
 	
 	\begin{lemma}
-	 For every non-deterministic finite automata $\mathcal{A}$, there exists a deterministic finite automata $\mathcal{A}'$ such that $L(\mathcal{A}) = L(\mathcal{A}')$.
+For every non-deterministic finite automata $\mathcal{A}$, there exists a
+deterministic finite automata $\mathcal{A}'$ such that $L(\mathcal{A}) =
+L(\mathcal{A}')$.
 	\end{lemma}
 	
-	Let $\mathcal{A} = (Q, \Sigma, \delta, I, F)$ be a non-deterministic FA. We can construct deterministic FA $\mathcal{A}'= (Q', \Sigma, \delta', I', F')$, such that $L(\mathcal{A}) = L(\mathcal{A}')$, by following method:
+	\begin{proof}
+	Let $\mathcal{A} = (Q, \Sigma, \delta, I, F)$ be a FA. We can construct
+	the DFA $\mathcal{A}'= (Q', \Sigma, \delta', I', F')$, such that
+	$L(\mathcal{A}) = L(\mathcal{A}')$, by the following method:
 	\begin{eqnarray*}
 	 Q' & = & 2^Q\\
-	 I' & = & I\\
+	 I' & = & \{I\}\\
 	 F' & = & \{S \in 2^Q\ |\ S~\cap F \neq \emptyset\}\\
-	 \delta'(S, a) & = & \{r \in Q\ |\ q \overset{a}{\longrightarrow} r\}
+	 \delta'(S, a) & = & \{r \in Q\ |\ q \overset{a}{\longrightarrow} r \in
+	 \delta\}
 	\end{eqnarray*}
 	
-	Note that $\mathcal{A}'$ is a complete.
+	Note that $\mathcal{A}'$ is complete.
 	
-	Proof, that $L(\mathcal{A}) = L(\mathcal{A}')$, by showing that $L(\mathcal{A}) \subseteq L(\mathcal{A}')$ and simultaneously $L(\mathcal{A}') \subseteq L(\mathcal{A})$, will be omitted here, and reader is advised to refer to one of the thesis sources.
+	It can be proved that $L(\mathcal{A}) = L(\mathcal{A}')$ by showing that
+	$L(\mathcal{A}) \subseteq L(\mathcal{A}')$ and simultaneously $L(\mathcal{A}')
+	\subseteq L(\mathcal{A})$ \cite{tin}.
+	\end{proof}
 	
 	\begin{defz}
-	 We define class of regular languages $\mathcal{L}_R$ as class of languages $L \in \Sigma^*$ such that there exists a finite automata $\mathcal{A}$ such that $L(\mathcal{A}) = L$.
+We define the class of regular languages $\mathcal{L}_R$ as the class of
+languages $L \in \Sigma^*$ such that there exists a finite automata
+$\mathcal{A}$ such that $L(\mathcal{A}) = L$.
 	\end{defz}
 	
- \subsection{Closure properties of Regular languages}
+ \subsection{Closure Properties of Regular Languages}
 
 \begin{theorem}
  The class of regular languages is closed under union.
 \end{theorem}
 
 \begin{proof}
-	Let $\mathcal{A} = (Q_\mathcal{A}, \Sigma, \delta_\mathcal{A}, I_\mathcal{A}, F_\mathcal{A})$ and $\mathcal{B} = (Q_\mathcal{B}, \Sigma, \delta_\mathcal{B}, I_\mathcal{B}, F_\mathcal{B})$ be a pair of two finite automata. We construct an automaton accepting an \emph{union} of languages $L(\mathcal{A})$ and $L(\mathcal{B})$  $$ \mathcal{A} \cup \mathcal{B} = (Q_\mathcal{A} \cup Q_\mathcal{B}, \Sigma, \delta_\mathcal{A} \cup \delta_\mathcal{B}, I_\mathcal{A} \cup I_\mathcal{B}, F_\mathcal{A} \cup F_\mathcal{B})$$
+Let $\mathcal{A} = (Q_\mathcal{A}, \Sigma, \delta_\mathcal{A}, I_\mathcal{A},
+F_\mathcal{A})$ and $\mathcal{B} = (Q_\mathcal{B}, \Sigma, \delta_\mathcal{B},
+I_\mathcal{B}, F_\mathcal{B})$ be a pair of finite automata such that
+$Q_\mathcal{A} \cap Q_\mathcal{B}$. We construct an automaton accepting the
+\emph{union} of languages $L(\mathcal{A})$ and $L(\mathcal{B})$  $$ \mathcal{A}
+\cup \mathcal{B} = (Q_\mathcal{A} \cup Q_\mathcal{B}, \Sigma, \delta_\mathcal{A}
+\cup \delta_\mathcal{B}, I_\mathcal{A} \cup I_\mathcal{B}, F_\mathcal{A} \cup
+F_\mathcal{B})$$
 	
-	Proof that $L_{\mathcal{A} \cup \mathcal{B}} = L_\mathcal{A} \cup L_\mathcal{B}$ can be found for example in \cite{tin}.
+The roof that $L(\mathcal{A} \cup \mathcal{B}) = L(\mathcal{A}) \cup
+L(\mathcal{B})$ can be found for example in \cite{tin}.
 \end{proof}
 
   \begin{theorem}
@@ -82,10 +179,18 @@ Let $\Sigma$ be an alphabet. We denote the set of all words over $\Sigma$ as $\S
 	\end{theorem}
 	
 	\begin{proof}
-	Let $\mathcal{A} = (Q_\mathcal{A}, \Sigma, \delta_\mathcal{A}, I_\mathcal{A}, F_\mathcal{A})$ and $\mathcal{B} = (Q_\mathcal{B}, \Sigma, \delta_\mathcal{B}, I_\mathcal{B}, F_\mathcal{B})$ be a pair of two finite automata. We construct an automaton accepting an \emph{intersection} of languages $L(\mathcal{A})$ and $L(\mathcal{B})$ 
-	$$\mathcal{A} \cap \mathcal{B} = (Q_\mathcal{A} \times Q_\mathcal{B}, \Sigma, \delta, I_\mathcal{A} \times I_\mathcal{B}, F_\mathcal{A} \times F_\mathcal{B})$$ where $$\delta = \{(p_1, p_2) \overset{a}{\longrightarrow} (q_1, q_2)\ |\ (p_1, a, q_1) \in \delta_\mathcal{A} \wedge (p_2, a, q_2) \in \delta_\mathcal{B}\}$$
+Let $\mathcal{A} = (Q_\mathcal{A}, \Sigma, \delta_\mathcal{A}, I_\mathcal{A},
+F_\mathcal{A})$ and $\mathcal{B} = (Q_\mathcal{B}, \Sigma, \delta_\mathcal{B},
+I_\mathcal{B}, F_\mathcal{B})$ be a pair of finite automata. We construct an
+automaton accepting the \emph{intersection} of languages $L(\mathcal{A})$ and
+$L(\mathcal{B})$ $$\mathcal{A} \cap \mathcal{B} = (Q_\mathcal{A} \times
+Q_\mathcal{B}, \Sigma, \delta, I_\mathcal{A} \times I_\mathcal{B}, F_\mathcal{A}
+\times F_\mathcal{B})$$ where $$\delta = \{(p_1, p_2)
+\overset{a}{\longrightarrow} (q_1, q_2)\ |\ (p_1, a, q_1) \in \delta_\mathcal{A}
+\wedge (p_2, a, q_2) \in \delta_\mathcal{B}\}$$
 	
-	Proof that $L_{\mathcal{A} \cap \mathcal{B}} = L_\mathcal{A} \cap L_\mathcal{B}$ can be found for example in \cite{tin}.
+The proof that $L(\mathcal{A} \cap \mathcal{B}) = L(\mathcal{A}) \cap
+L(\mathcal{B})$ can be found for example in \cite{tin}.
 \end{proof}
 	
  \begin{theorem}
@@ -93,92 +198,162 @@ Let $\Sigma$ be an alphabet. We denote the set of all words over $\Sigma$ as $\S
 \end{theorem}
 	
 	\begin{proof}
-	Let $\mathcal{A} = (Q_\mathcal{A}, \Sigma, \delta_\mathcal{A}, I_\mathcal{A}, F_\mathcal{A})$ be a complete deterministic FA. We construct an automaton accepting a \emph{complement} of $L(\mathcal{A})$
-	$$\overline{\mathcal{A}} = (Q_\mathcal{A}, \Sigma, \delta_\mathcal{A}, I_\mathcal{A}, Q \setminus F_\mathcal{A})$$
+Let $\mathcal{A} = (Q_\mathcal{A}, \Sigma, \delta_\mathcal{A}, I_\mathcal{A},
+F_\mathcal{A})$ be a complete deterministic FA. We construct an automaton
+accepting the \emph{complement} of $L(\mathcal{A})$ $$\overline{\mathcal{A}} =
+(Q_\mathcal{A}, \Sigma, \delta_\mathcal{A}, I_\mathcal{A}, Q_\mathcal{A}
+\setminus F_\mathcal{A})$$
 	
-	Proof that $L(\overline{\mathcal{A}}) = \Sigma^* \setminus L(\mathcal{A})$ can be found for example in \cite{tin}.
+The proof that $L(\overline{\mathcal{A}}) = \Sigma^* \setminus L(\mathcal{A})$
+can be found for example in \cite{tin}.
  \end{proof}
 
  \section{Tree Automata}
 
- A~\emph{ranked alphabet} $\Sigma$ is a finite set of symbols together with a ranking function $\#: \Sigma \to \mathbb{N}$, denoting $\#a$ as \emph{rank} of $a$. For any $n \geq 0$, we denote by $\Sigma_n$ the set of all symbols of rank $n$ from $\Sigma$, with $\epsilon$ denoting the empty sequence.
+ A~\emph{ranked alphabet} $\Sigma$ is a finite set of symbols together with a
+ ranking function $\#: \Sigma \to \mathbb{N}$, we call $\#a$ the \emph{rank}
+ of $a$. For any $n \geq 0$, we denote by $\Sigma_n$ the set of all symbols of rank
+ $n$ from $\Sigma$. We denote $\epsilon \in \mathbb{N}^*$ the \emph{empty
+ sequence}.
 
-Then a \emph{tree} $t$ over a ranked alphabet $\Sigma$ is defined as a partial mapping $t : \mathbb{N}^* \to \Sigma$, that satisfies the following conditions:
+Then a \emph{tree} $t$ over a ranked alphabet $\Sigma$ is defined as a partial
+mapping $t : \mathbb{N}^* \to \Sigma$, that satisfies the following conditions:
  \begin{enumerate}
   \item \emph{dom}($t$) is a finite prefix-closed subset of $\mathbb{N}^*$,
-	\item for every $v \in dom(t)$, called a \emph{node} of $t$, the following holds: $(\#t(v) = n \geq 0) \Longrightarrow \{i\ |\ vi \in dom(t)\} = \{1,\ldots,n\}$. 
+  \item for every $v \in dom(t)$, called a \emph{node} of $t$, the following
+holds: $(\#t(v) = n \geq 0) \Longrightarrow \{i\ |\ vi \in dom(t)\} =
+\{1,\ldots,n\}$.
  \end{enumerate}
 
-For a node $v$, the $i$-th \emph{child} of $v$ is the node $vi$, and the $i$-th \emph{subtree} of $v$ is the tree $t'$ such that for all $v' \in \mathbb{N}^*$ $t'(v') = t(viv')$. A~Node $v$ which does not have any children is called a \emph{leaf} of the tree $t$. Set of all trees over the alphabet $\Sigma$ is denoted as $T_\Sigma$.
+For a node $v$, the $i$-th \emph{child} of $v$ is the node $vi$, and the $i$-th
+\emph{subtree} of $v$ is the tree $t'$ such that for all $v' \in \mathbb{N}^*$, 
+$t'(v') = t(viv')$. A~node $v$ which does not have any children is called a
+\emph{leaf} of the tree $t$. The set of all trees over the alphabet $\Sigma$ is
+denoted as $T_\Sigma$.
 
-A~(finite, non-deterministic) \emph{tree automaton} (further abbreviated as TA) is a quadruple $\mathcal{A} = (Q, \Sigma, \delta, F)$, where:
+A~(finite, non-deterministic) \emph{tree automaton} (further abbreviated as TA)
+is a quadruple $\mathcal{A} = (Q, \Sigma, \delta, F)$, where:
  \begin{itemize}
-  \item[$Q$] is a finite set of \emph{states},
-	\item[$F$] $ \subseteq Q$ is the set of \emph{final states},
-	\item[$\Sigma$] is a \emph{ranked alphabet},
-	\item[$\delta$] is the \emph{set of transitions}.
+   \item $Q$ is a finite set of \emph{states},
+	\item $\Sigma$ is a \emph{ranked alphabet},
+	\item $\delta$ is the \emph{set of transitions}.
+	\item $F$ $ \subseteq Q$ is the set of \emph{final states},
  \end{itemize}
 
-Each transition is defined as a triple $((q_1,\ldots,q_n), a, q)$, where $q_1,\ldots,q_n,q \in Q, a \in \Sigma$ and $\#a = n$. We use equivalently $(q_1,\ldots,q_n) \overset{a}{\longrightarrow} q$ and $q \overset{a}{\longrightarrow}  (q_1,\ldots,q_n)$ to denote that $((q_1,\ldots,q_n), a, q) \in \delta$, for \emph{bottom-up} and \emph{top-down} representation respectively. In the special case where $n = 0$, we speak about the so-called \emph{leaf rules} that can be abbreviated as $\overset{a}{\longrightarrow}  q$ or $q \overset{a}{\longrightarrow} $.
+Each transition is defined as a triple $((q_1,\ldots,q_n), a, q)$, where
+$q_1,\ldots,q_n,q \in Q, a \in \Sigma$ and $\#a = n$. We use equivalently
+$(q_1,\ldots,q_n) \overset{a}{\longrightarrow} q$ and $q
+\overset{a}{\longrightarrow}  (q_1,\ldots,q_n)$ to denote that
+$((q_1,\ldots,q_n), a, q) \in \delta$, for \emph{bottom-up} and \emph{top-down}
+representation respectively. In the special case where $n = 0$, we speak about
+the so-called \emph{leaf rules} that can be abbreviated as
+$\overset{a}{\longrightarrow}  q$ or $q \overset{a}{\longrightarrow} $.
 
-Let $\mathcal{A} = (Q, \Sigma, \delta, F)$ be a TA. We define a \emph{run} of $\mathcal{A}$ over a tree $t \in T_\Sigma$ as a mapping $\varphi: dom(t) \to Q$ such that for each node $v \in dom(t)$ of rank $\#t(v) = n$, where $\varphi(v) = q$, if $\varphi(vi) = q_i$ for $1 \leq i \leq n$, then $(q_1,\ldots,q_n) \overset{t(v)}{\longrightarrow} q$. We write $t \overset{\varphi}{\Longrightarrow} q$ to denote that $\varphi$ is a~run of $\mathcal{A}$ over $t$ such that $\varphi(\epsilon) = q$. We will write $t \Longrightarrow q$ to denote that there exists a run $\varphi$ for which $t \overset{\varphi}{\Longrightarrow} q$.
+Let $\mathcal{A} = (Q, \Sigma, \delta, F)$ be a TA. We define a \emph{run} of
+$\mathcal{A}$ over a tree $t \in T_\Sigma$ as a mapping $\varphi: dom(t) \to Q$
+such that for each node $v \in dom(t)$ of rank $\#t(v) = n$, where $\varphi(v) =
+q$, if $\varphi(vi) = q_i$ for all $1 \leq i \leq n$, then $(q_1,\ldots,q_n)
+\overset{t(v)}{\longrightarrow} q$. We write $t
+\overset{\varphi}{\Longrightarrow} q$ to denote that $\varphi$ is a~run of
+$\mathcal{A}$ over $t$ such that $\varphi(\epsilon) = q$. We will write $t
+\Longrightarrow q$ to denote that there exists a run $\varphi$ for which $t
+\overset{\varphi}{\Longrightarrow} q$.
 
-The \emph{language} accepted by a state $q$ is defined as $L_{\mathcal{A}}(q) = \{t\ |\ t \Rightarrow q\}$. For a set of states $S \subseteq Q$ we define the language accepted by this set as $L_{\mathcal{A}}(S) = \bigcup_{q \in S} L_{\mathcal{A}}(q)$. Similarly to FA, if it is clear which TA $\mathcal{A}$ we are referring to, we only write $L(q)$ or $L(S)$. Then language of $\mathcal{A}$ is defined as $L(\mathcal{A}) = L(F)$.
+The \emph{language} accepted by a state $q$ is defined as $L_{\mathcal{A}}(q) =
+\{t\ |\ t \Rightarrow q\}$. For a set of states $S \subseteq Q$ we define the
+language accepted by this set as $L_{\mathcal{A}}(S) = \bigcup_{q \in S}
+L_{\mathcal{A}}(q)$. Similarly to FA, if it is clear which TA $\mathcal{A}$ we
+are referring to, we only write $L(q)$ or $L(S)$. Then language of $\mathcal{A}$
+is defined as $L(\mathcal{A}) = L(F)$.
 
 \begin{defz}
-A~\emph{deterministic finite tree automaton} (abbreviated as DFTA) is a non-deterministic finite tree automaton such as there are no two rules with the same left-hand side (and no $\varepsilon$-rules, i.e. rules where symbol is $\varepsilon$) in $\delta$.
+A~\emph{deterministic finite tree automaton} (abbreviated as DTA) is a
+TA such that there are no two rules with the
+same left-hand, or right-hand, side in $\delta$ for bottom-up TA or top-down
+TA respectively.
 \end{defz}
 
-Note that the expressive power of bottom-up and top-down NFTA is the same. However, top-down DFTA are strictly less powerful than top-down NFTA. See \cite{tata} for more details.
+Note that the expressive power of bottom-up and top-down NTA is the same.
+However, top-down DTA are strictly less powerful than top-down NTA. See
+\cite{tata} for more details.
 
 \begin{defz}
-We define class of regular tree languages $\mathcal{L}$ as a class of languages $L$ such that there exists a finite tree automata $\mathcal{A}$ such that $L(\mathcal{A}) = L$.
+We define the class of regular tree languages $\mathcal{L}$ as the class of
+languages $L$ such that there exists a finite tree automata $\mathcal{A}$ such that
+$L(\mathcal{A}) = L$.
 \end{defz}
 
 %%% REGULAR TREE LANGUAGES
 
 %%% BOTTOM UP DETERMINISTIC TREE AUTOMATA
 
-\subsection{Closure properties of Regular Tree Languages}
+\subsection{Closure Properties of Regular Tree Languages}\label{ta-closures}
 
 \begin{theorem}
  The class of regular tree languages is closed under union.
 \end{theorem}
 
 \begin{proof}
-Let $\mathcal{A} = (Q_\mathcal{A}, \Sigma, F_\mathcal{A}, \delta_\mathcal{A})$ and $\mathcal{B} = (Q_\mathcal{B}, \Sigma, F_\mathcal{B}, \delta_\mathcal{B})$ be two tree automata. We construct tree automaton accepting \emph{union} of languages $L(\mathcal{A})$ and $L(\mathcal{B})$  $$\mathcal{A} \cap \mathcal{B} = (Q_\mathcal{A} \times Q_\mathcal{B}, \Sigma, (F_\mathcal{A} \times Q_\mathcal{B}) \cup (Q_\mathcal{A} \times F_\mathcal{B}), \delta_\mathcal{A} \times \delta_\mathcal{B})$$ where
+Let $\mathcal{A} = (Q_\mathcal{A}, \Sigma, F_\mathcal{A}, \delta_\mathcal{A})$
+and $\mathcal{B} = (Q_\mathcal{B}, \Sigma, F_\mathcal{B}, \delta_\mathcal{B})$
+be two tree automata. We construct a tree automaton accepting
+\emph{intersection} of languages $L(\mathcal{A})$ and $L(\mathcal{B})$  $$\mathcal{A} \cap \mathcal{B}
+= (Q_\mathcal{A} \times Q_\mathcal{B}, \Sigma, (F_\mathcal{A} \times
+Q_\mathcal{B}) \cup (Q_\mathcal{A} \times F_\mathcal{B}), \delta_\mathcal{A}
+\times \delta_\mathcal{B})$$ where
  \begin{eqnarray*}
- \delta_\mathcal{A} \times \delta_\mathcal{B} & = & \{ ((q^1_1,q^2_1),\ldots,(q^1_n,q^2_n)) \overset{f}{\longrightarrow} (q^1, q^2)\\ 
-  & | & (q^1_1,\ldots,q^1_n) \overset{f}{\longrightarrow} q^1 \in \delta_1 \wedge (q^2_1,\ldots,q^2_n) \overset{f}{\longrightarrow} q^2 \in \delta_2)\}
-	\end{eqnarray*}
-
-Note that this construction preserves determinism, i.e. if the two given automata are deterministic, then so is the product automaton.
+ \delta_\mathcal{A} \times \delta_\mathcal{B} & = & \{
+ ((q^1_1,q^2_1),\ldots,(q^1_n,q^2_n)) \overset{f}{\longrightarrow} (q^1, q^2)\\
+  & | & (q^1_1,\ldots,q^1_n) \overset{f}{\longrightarrow} q^1 \in \delta_1
+  \wedge (q^2_1,\ldots,q^2_n) \overset{f}{\longrightarrow} q^2 \in \delta_2)\}
+	\end{eqnarray*}.
 \end{proof}
+
+Note that this construction preserves determinism, i.e. if the two given
+automata are deterministic, then so is the product automaton.
 
 \begin{theorem}
  The class of regular tree languages is closed under intersection.
 \end{theorem}
 
 \begin{proof}
-Let $\mathcal{A} = (Q_\mathcal{A}, \Sigma, F_\mathcal{A}, \delta_\mathcal{A})$ and $\mathcal{B} = (Q_\mathcal{B}, \Sigma, F_\mathcal{B}, \delta_\mathcal{B})$ be two tree automata. We construct tree automaton accepting \emph{intersection} of languages $L(\mathcal{A})$ and $L(\mathcal{B})$ $$\mathcal{A} \cap \mathcal{B} = (Q_\mathcal{A} 
-\times Q_\mathcal{B}, \Sigma, F_\mathcal{A} \times F_\mathcal{B}, \delta_\mathcal{A} \times \delta_\mathcal{B})$$
+Let $\mathcal{A} = (Q_\mathcal{A}, \Sigma, F_\mathcal{A}, \delta_\mathcal{A})$
+and $\mathcal{B} = (Q_\mathcal{B}, \Sigma, F_\mathcal{B}, \delta_\mathcal{B})$
+be two tree automata. We construct a tree automaton accepting \emph{union}
+of languages $L(\mathcal{A})$ and $L(\mathcal{B})$ $$\mathcal{A} \cap
+\mathcal{B} = (Q_\mathcal{A} \times Q_\mathcal{B}, \Sigma, F_\mathcal{A} \times
+F_\mathcal{B}, \delta_\mathcal{A} \times \delta_\mathcal{B})$$.
 \end{proof}
 
 \begin{theorem}
- The class of languages is closed under language complementation.
+ The class of regular tree languages is closed under language complementation.
 \end{theorem}
 
 \begin{proof}
-Let $\mathcal{A} = (Q, \Sigma, F, \delta)$ be a complete bottom-up deterministic TA. We construct tree automata accepting \emph{complement} of language of $L(\mathcal{A})$ $$\overline{\mathcal{A}} = (Q, \Sigma, Q - F, \delta)$$
-
-For non-deterministic tree automata, determinization is applied first before the complementation of final state set takes place, which can lead to exponential blow-up.
+Let $\mathcal{A} = (Q, \Sigma, F, \delta)$ be a complete bottom-up deterministic
+TA. We construct tree automaton accepting the \emph{complement} of the language
+$L(\mathcal{A})$ $$\overline{\mathcal{A}} = (Q, \Sigma, Q - F, \delta)$$.
 \end{proof}
+
+Note that for non-deterministic tree automata there is currently known no
+procedure better than first bottom-up detereminizing the automaton and then
+complementing it using the construct above.
 
  \subsection{Relations on Trees}
 
-Given a ranked alphabet $\Sigma$ and $n \geq 0$, let $(T_\Sigma)^n$ be the \emph{Cartesian product} $T_\Sigma \times (T_\Sigma)^{n-1}$ with the ground case $(T_\Sigma)^0 = \{\top\}$, where $\{\top\}$ is a neutral element w.r.t. Cartesian product. A~subset of $(T_\Sigma)^n$ is an $n$-ary relation on $T_\Sigma$. Further, let $\Sigma^n_\bot$ be the \emph{compound alphabet} $\Sigma_\bot^n = (\Sigma \cup \{\bot\})^n$ where $\bot$ is a new symbol, where $\bot \notin \Sigma$, such that $\#\bot = 0$. We write the symbol $(f_1,\ldots,f_n)$ of $\Sigma_\bot^n$ as $f_1\ldots f_n$. Arities of symbols in $\Sigma_\bot^n$ are defined as $\#(f_1\ldots f_n) = \text{max}(\#f_1,\ldots,\#f_n)$.
+Given a ranked alphabet $\Sigma$ and $n \geq 0$, let $(T_\Sigma)^n$ be the
+\emph{Cartesian product} $T_\Sigma \times (T_\Sigma)^{n-1}$ with the ground case
+$(T_\Sigma)^0 = \{\top\}$, where $\{\top\}$ is a neutral element w.r.t.\ 
+Cartesian product. A~subset of $(T_\Sigma)^n$ is an $n$-ary relation on
+$T_\Sigma$. Further, let $\Sigma^n_\bot$ be the \emph{compound alphabet}
+$\Sigma_\bot^n = (\Sigma \cup \{\bot\})^n$ where $\bot$ is a new symbol, where
+$\bot \notin \Sigma$ and $\#\bot = 0$. We write the symbol
+$(f_1,\ldots,f_n)$ of $\Sigma_\bot^n$ as $f_1\ldots f_n$. Arities of symbols in
+$\Sigma_\bot^n$ are defined as $\#(f_1\ldots f_n) =
+\text{max}(\#f_1,\ldots,\#f_n)$.
 
-Let $[\cdot]$ be a function that maps $n$-tuples of trees over $T_\Sigma$ to trees over $T_{\Sigma_\bot^n}$:
+Let $[\cdot]$ be a function that maps $n$-tuples of trees over $T_\Sigma$ to
+trees over $T_{\Sigma_\bot^n}$:
 \begin{equation}
     [\cdot] :
     \begin{cases}
@@ -187,22 +362,30 @@ Let $[\cdot]$ be a function that maps $n$-tuples of trees over $T_\Sigma$ to tre
 		 \ \ f_1\ldots f_n([t_1^1,\ldots,t_n^1],\ldots,[t_1^m,\ldots,t_n^m])
    \end{cases}
 \end{equation}
- where $m$ is the maximal arity of $f_1,\ldots,f_n \in \Sigma$ and $t_i^j$ is, by convention, $\bot$ when $j > \#f_i$.
+ where $m$ is the maximal arity of $f_1,\ldots,f_n \in \Sigma$ and $t_i^j$ is,
+ by convention, $\bot$ when $j > \#f_i$.
 
 \begin{defz}
-Rec is the class of relations $R \subseteq (T_\Sigma)^n$ such that $$\{[t_1,\ldots,t_n]\ |\ (t_1,\ldots,t_n) \in R\}$$ is accepted by a tree automaton on the alphabet $\Sigma_\bot^n$.
+Rec, the recognizable tree relations, is the class of relations $R \subseteq
+(T_\Sigma)^n$ such that the language $$\{[t_1,\ldots,t_n]\ |\ (t_1,\ldots,t_n)
+\in R\}$$ is accepted by a tree automaton on the alphabet $\Sigma_\bot^n$.
 \end{defz}
 
 \begin{prop}
-Rec is closed under Boolean operations, i.e. intersection, union and complementation.
+Rec is closed under Boolean operations, i.e. intersection, union and
+complementation.
 \end{prop}
 
 \begin{proof}
-This is due to the closure properties of tree automata (see Section 1.3 in \cite{tata}).
+This is due to closure properties of tree automata (see Section
+\ref{ta-closures}).
 \end{proof}
 
 \begin{defz}
-If $R \subseteq (T_\Sigma)^n$ where $n \geq 1$ and $1 \leq i \leq n$, then the $i$-th \emph{projection} of R is the relation $R_i \subseteq (T_\Sigma)^{n-1}$ defined by $$ R_i(t_1,\ldots,t_{n-1}) \Leftrightarrow \exists t \in T_\Sigma . R(t_1,\ldots,t_{i-1},t,t_i,\ldots,t_{n-1})$$
+If $R \subseteq (T_\Sigma)^n$ where $n \geq 1$ and $1 \leq i \leq n$, then the
+$i$-th \emph{projection} of R is the relation $R_i \subseteq (T_\Sigma)^{n-1}$
+defined by $$ R_i(t_1,\ldots,t_{n-1}) \Leftrightarrow \exists t \in T_\Sigma .
+R(t_1,\ldots,t_{i-1},t,t_i,\ldots,t_{n-1})$$.
 \end{defz}
 
 \begin{lemma}
@@ -210,15 +393,21 @@ Rec is closed under projection.
 \end{lemma}
 
 \begin{proof}
- Lets assume that $R \in Rec$. The $i$-th projection $R_i$ of $R$ is simply its image by the following tree homomorphism: 
+ Let us assume that $R \in Rec$. The $i$-th projection $R_i$ of $R$ is simply
+ its image by the following tree homomorphism:
  \begin{equation}
- h_i(f_1\ldots f_n (t_1,\ldots,t_k)) \overset{def}{=} f_1\ldots f_{i-1}f_{i+1}\ldots f_n(h_i(t_1),\ldots,h_i(t_m))
+ h_i(f_1\ldots f_n (t_1,\ldots,t_k)) \overset{\mathit{def}}{=} f_1\ldots f_{i-1}f_{i+1}\ldots f_n(h_i(t_1),\ldots,h_i(t_m))
 \end{equation}
-where $m$ is the arity of $(f_1\ldots f_{i_1}f_{i+1}\ldots f_n)$, which is smaller or equal to $k$. Because linear homomorphisms preserve recognizability (Theorem 1.4.3 in \cite{tata}), $R_i \in Rec$.
+where $m$ is the arity of $(f_1\ldots f_{i_1}f_{i+1}\ldots f_n)$, which is
+smaller or equal to $k$. Because linear homomorphisms preserve recognizability
+(Theorem 1.4.3 in \cite{tata}), $R_i \in Rec$.
 \end{proof}
 
 \begin{defz}
- If $R \subseteq (T_\Sigma)^n$ where $n \geq 0$ and $1 \leq i \leq n+1$ then the $i$th \emph{cylindrification} of R is the relation $R_i \subseteq (T_\Sigma)^{n-1}$ defined by $$ R_i(t_1,\ldots,t_{i-1},t,t_i,\ldots,t_n) \Leftrightarrow R(t_1,\ldots,t_{i-1},t_i,\ldots,t_n)$$
+ If $R \subseteq (T_\Sigma)^n$ where $n \geq 0$ and $1 \leq i \leq n+1$ then the
+ $i$th \emph{cylindrification} of R is the relation $R_i \subseteq
+ (T_\Sigma)^{n+1}$ defined by $$ R^i(t_1,\ldots,t_{i-1},t,t_i,\ldots,t_n)
+ \Leftrightarrow R(t_1,\ldots,t_{i-1},t_i,\ldots,t_n)$$
 \end{defz}
 
 \begin{lemma}
@@ -226,161 +415,274 @@ Rec is closed under cylindrification.
 \end{lemma}
 
 \begin{proof}
- Similarly to projection, $i$-th cylindrification is obtained as an inverse homomorphic image, and thus is recognizable as stated by Theorem 1.4.4. in \cite{tata}.
+ Similarly to projection, $i$-th cylindrification is obtained as an inverse
+ homomorphic image, and thus is recognizable as stated by Theorem 1.4.4. in
+ \cite{tata}.
 \end{proof}
 
  \section{Binary Decision Diagrams}\label{bdd}
 
-We define a \emph{Boolean function} of \emph{arity} $k$ as a function $f : \{0,1\}^k \longrightarrow \{0,1\}$. We can further extend the notion of these function to an arbitrary nonempty set $S$ to functions over a~domain set $S$, $f : \{0,1\}^k \longrightarrow S$.
+We define a \emph{Boolean function} of \emph{arity} $k$ as a function $f :
+\{0,1\}^k \longrightarrow \{0,1\}$. A \emph{reduced ordered binary decision
+diagram} (abbreviated as ROBDD or just BDD) $r$ over a set of $n$ Boolean
+variables $X = \{x_1,\ldots,x_n\}$ is a connected directed acyclic graph with a
+single \emph{source node} called \emph{root} and at least one of two sink nodes
+0 and 1. Nodes that are not sink nodes are called \emph{internal nodes}.
+Assignment of Boolean variables to each of the internal nodes is done by the
+function $var$. We assume that var is ordered in the following way: $x_1 < x_2 <
+\ldots < x_n$.
+For every internal node $v$, there exists two outgoing edges labeled as $low$
+and $high$, such that $var(v) < var(v.low) \wedge var(v) < var(v.high)$; and
+$v.low \neq v.high$ as well (since otherwise it could be further reduced).
 
-The \emph{reduced ordered binary decision diagram} (abbreviated as ROBDD or just BDDs) $r$ over a set of $n$ Boolean variables $X = \{x_1,\ldots,x_n\}$ is a connected directed acyclic graph with a single \emph{source node} called \emph{root} and at least one of the two sink nodes 0 and 1. Nodes, that are not sink nodes are called \emph{internal nodes}. Assignment of Boolean variables to each of the internal nodes is done by function $var$, w.r.t. the total ordering $x_1 < x_2 < \ldots < x_n$. For every internal node $v$, there exists two outgoing edges labeled as $low$ and $high$, such that $var(v) < var(v.low) \wedge var(v) < var(v.high)$; and $v.low \neq v.high$ as well (since otherwise it could be further reduced).
-
-Nodes of BDD represents $n$-ary Boolean functions, that map each assignment to the Boolean variables in $X$ a corresponding Boolean value defined as follows, using $\overline{x}$ as abbreviation for $x_1\ldots x_n$:
+Nodes of a BDD represents $n$-ary Boolean functions that map each assignment to
+the Boolean variables in $X$ a corresponding Boolean value defined as follows,
+using $\overline{x}$ as an abbreviation for $x_1\ldots x_n$:
 \begin{eqnarray*}
  \text{\textlbrackdbl} 0\text{\textrbrackdbl} & = & \lambda\overline{x}.0\\
  \text{\textlbrackdbl} 1\text{\textrbrackdbl} & = & \lambda\overline{x}.1\\
- \text{\textlbrackdbl} v\text{\textrbrackdbl} & = & \lambda\overline{x}.(\neg x_i \wedge \text{\textlbrackdbl} v.low\text{\textrbrackdbl}(\overline{x})) \vee (x_i \wedge \text{\textlbrackdbl} v.high\text{\textrbrackdbl}(\overline{x}))\\
+ \text{\textlbrackdbl} v\text{\textrbrackdbl} & = & \lambda\overline{x}.(\neg
+ x_i \wedge \text{\textlbrackdbl} v.low\text{\textrbrackdbl}(\overline{x})) \vee
+ (x_i \wedge \text{\textlbrackdbl} v.high\text{\textrbrackdbl}(\overline{x}))\\
        & \text{where} & var(v) = x_i
 \end{eqnarray*}
 
-For every two nodes $v$ and $w$ from ROBDD, it holds that if $v \neq w$ then \textlbrackdbl $v$ \textrbrackdbl$ \neq$ \textlbrackdbl $w$\textrbrackdbl. ROBDD $r$ then represents the Boolean function \textlbrackdbl $root$\textrbrackdbl.
+For every two nodes $v$ and $w$ from a BDD, it holds that if $v \neq w$ then
+\textlbrackdbl $v$\textrbrackdbl$ \neq$ \textlbrackdbl $w$\textrbrackdbl. BDD
+$r$ then represents the Boolean function \textlbrackdbl $root$\textrbrackdbl.
 
-The notion of ROBDDs can be further generalized to the \emph{multi-terminal binary decision diagrams} (abbreviated as MTDBDDs), which is essentially the same data structures as ROBDDS, with the only difference being the fact, that the sink notes are not restricted to only two nodes, but can be instead any number of nodes with unique labels from arbitrary domain set $S$. All standard notions for ROBDDS can be naturally extended to MTBDDs.
+We can further extend the notion of these function to an arbitrary nonempty set
+$S$ to functions over a~domain set $S$, $f : \{0,1\}^k \longrightarrow S$. The
+notion of ROBDDs can be further generalized to the \emph{multi-terminal binary
+decision diagrams} (abbreviated as MTBDDs), which is essentially the same data
+structures as BDDs, with the only difference being the fact that the set of sink
+nodes is not restricted to only two nodes, but can be instead domain set $S$.
+All standard notions for ROBDDs can be naturally extended to MTBDDs.
 
-\emph{Shared} MTBDD $s$ is a MTBDD with multiple source nodes (or roots) that represent a mapping of every element of the set of roots $R$ to a function induced by the MTBDD corresponding to the given root.
+\emph{Shared} MTBDD $s$ is a MTBDD with multiple source nodes (or roots) that
+represent a mapping of every element of the set of roots $R$ to a function
+induced by the MTBDD corresponding to the given root.
 
-\subsection[Usage of MTBDDs with TA]{Using shared MTBDDs for encoding of Transition Function of Tree Automata}
-Let $\mathcal{A} = (Q, \Sigma, \delta, F)$ be a tree automaton. Let us also assume, that input alphabet $\Sigma$ is the set of all $n$-bit binary numbers, i.e. $\Sigma = \{0,1\}^n$, for some $n$. Each bit is then assigned a~Boolean variable from the set $X = \{x_1,\ldots,x_n\}$. We use $Q^\#$ to denote the set of all tuples of states from $Q$ with up to the maximum arity that some symbol in $\Sigma$ has.
+\subsection[Usage of MTBDDs with TA]{Using Shared MTBDDs for Encoding
+Transition Function of Tree Automata} Let $\mathcal{A} = (Q, \Sigma, \delta, F)$
+be a tree automaton, such that $\Sigma = \{0, 1\}^n$, for some $n$. Each
+position $1 \leq i \leq n$ is then assigned a~Boolean variable from the set $X =
+\{x_1,\ldots,x_n\}$. We use $Q^\#$ to denote the set of all tuples of states from $Q$ with up to the
+maximum arity that some symbol in $\Sigma$ has.
 
-The \emph{bottom-up} representation of the transition function $\delta$ of the TA $\mathcal{A}$ uses a shared MTBDD $\delta^{bu}$ over $\Sigma$, where the set of roots $R = Q^\#$, and the domain set of sink nodes is $2^Q$. So MTBDD $\delta^{bu}$ represents a function \textlbrackdbl $\delta^{bu}$ \textrbrackdbl $: Q^\# \rightarrow (\Sigma \rightarrow 2^Q)$ where
+The \emph{bottom-up} representation of the transition function $\delta$ of the
+TA $\mathcal{A}$ uses a shared MTBDD $\delta^{bu}$ over $\Sigma$, where the set
+of roots $R = Q^\#$, and the domain set of sink nodes is $2^Q$ that is, the
+MTBDD $\delta^{bu}$ represents the function \textlbrackdbl $\delta^{bu}$
+\textrbrackdbl $: Q^\# \rightarrow (\Sigma \rightarrow 2^Q)$ where
  \begin{equation}
   \text{\textlbrackdbl} \delta^{bu} \text{\textrbrackdbl} =
- \lambda (q_1,\ldots,q_p) a . \{q\ |\ (q_1,\ldots,q_p) \overset{a}{\longrightarrow} q\}
- \end{equation}
+ \lambda (q_1,\ldots,q_p)\ a . \{q\ |\ (q_1,\ldots,q_p)
+ \overset{a}{\longrightarrow} q\} \end{equation}.
 
-The \emph{top-down} representation of transition function $\delta$ of the TA $\mathcal{A}$ uses a shared MTBDD $\delta^{td}$ over $\Sigma$, where the set of roots $R = Q$ and the domain of labels of sink nodes is $2^{Q^\#}$. The MTBDD $\delta^{td}$ then represents a function \textlbrackdbl $\delta^{td}$ \textrbrackdbl $: Q \rightarrow (\Sigma \rightarrow 2^{Q^\#}$ where 
+The \emph{top-down} representation of the transition function $\delta$ of the TA
+$\mathcal{A}$ uses a shared MTBDD $\delta^{td}$ over $\Sigma$, where the set of
+roots $R = Q$ and the domain of labels of sink nodes is $2^{Q^\#}$. The MTBDD
+$\delta^{td}$ then represents the function \textlbrackdbl $\delta^{td}$
+\textrbrackdbl $: Q \rightarrow (\Sigma \rightarrow 2^{Q^\#}$ where
 \begin{equation} \text{\textlbrackdbl} \delta^{td} \text{\textrbrackdbl} =
-\lambda q a .
+\lambda q\ a .
 \{(q_1,\ldots,q_p)\ |\ q \overset{a}{\longrightarrow} (q_1,\ldots,q_p)\}
-\end{equation}
+\end{equation}.
 
 \chapter{The WS$k$S Logic}\label{wsks}
 The abbreviation WS$k$S stands for \emph{weak second-order monadic logic of $k$
-successors}. This means that it is a logic that allows quantification over set variable (second-order), which can only represent \emph{finite} sets (weak) of elements and \emph{not functions} (monadic), over a universe of discourse where every element has $k$ successors and can therefore express a tree structure (for $k \geq 2$).
+successors}. This means that it is a logic that allows quantification over set
+variables (second-order), which can only represent \emph{finite} sets (weak) of
+elements and \emph{not functions} (monadic), over a universe of discourse where
+every element has $k$ successors, and can therefore express a tree structure
+(for $k \geq 2$).
  
  \section{Syntax}
- A~WS$k$S \emph{term} is an empty constant $\epsilon$, a first-order variable symbol written in lower-case letters (e.g. \emph{x, y, z,
- \ldots}) or an unary symbol from $\{1,\ldots,n\}$ written in postfix notation.
- For example, $x1123$ or $\epsilon2111$ are terms, where the latter can be shortened to $2111$.
+ A~WS$k$S \emph{term} is an empty constant $\epsilon$, a first-order variable
+ symbol written in lower-case letters (e.g. \emph{x, y, z, \ldots}) or an unary
+ symbol from $\{1,\ldots,k\}$ written in postfix notation.
+ For example, $x1123$ or $\epsilon2111$ are terms, where the latter can be
+ shortened to $2111$.
 
-The \emph{Atomic formulae} are defined as follows:
+The \emph{atomic formulae} are defined as follows:
  \begin{enumerate}
   \item For terms $s$ and $t$, the equality $s = t$ is an atomic formula.
-	\item For terms $s$ and $t$, inequalities $s \leq t$ and $s \geq t$ are atomic formulae.
-	\item For a term $t$ and a second-order variable $X$, the membership constraint $t \in X$ is atomic an formula.
+\item For terms $s$ and $t$, inequalities $s \leq t$ and $s \geq t$ are atomic
+formulae.
+\item For a term $t$ and a second-order variable $X$, the membership constraint
+$t \in X$ is an atomic formula.
  \end{enumerate}
 
-The WS$k$S \emph{formula} is then built out of atomic formulae using the classical logical connectives $\wedge, \vee, \neg, \Leftarrow, \Rightarrow, \Leftrightarrow$ and quantifiers $\exists x, \forall x$ and $\exists X, \forall X$ for quantification over the first-order variables and second-order variables respectively.
+A WS$k$S \emph{formula} is then built out of atomic formulae using the
+classical logical connectives $\wedge, \vee, \neg, \leftarrow, \rightarrow,
+\leftrightarrow$ and quantifiers $\exists x, \forall x$ and $\exists X, \forall
+X$ for quantification over first-order variables and second-order variables
+respectively.
 
-Syntax can be further restricted to only subset of logical connectives and atomic formulas without harm to expressive power of formulae. This will be further explained in Section \ref{restricted}.
-
-The set of \emph{free variables} of a formula $\psi$ is defined as usual.
+Syntax can be further restricted to only a subset of logical connectives and
+atomic formulae without harm to the expressive power of the logic. This will be
+further explained in Section \ref{restricted}. The set of \emph{free variables}
+of a formula $\psi$ is defined as usual.
   
   \section{Semantics}
 	
-	We will interpret terms as strings belonging to $\{1,\ldots,k\}^*$, $=$ as the equality of strings, and $\leq$ as the prefix ordering. Second order variables will be interpreted as the \emph{finite} subsets of $\{1,\ldots,k\}^*$ with $\in$ as the membership predicate.
+We will interpret terms as strings belonging to $\{1,\ldots,k\}^*$, $=$ as the
+equality of strings, and $\leq$ as the prefix ordering. Second order variables
+will be interpreted as \emph{finite} subsets of $\{1,\ldots,k\}^*$ with
+$\in$ as the membership predicate.
 	
-	Let $t_1,\ldots,t_n \in \{1,\ldots,k\}^*$ and $S_1,\ldots,S_n$ be finite subsets of $\{1,\ldots,k\}^*$. Given a formula $\psi(x_1,\ldots,x_n,X_1,\ldots,X_m)$ with free variables $x_1,\ldots,x_n$, $X_n,\ldots,X_m$, the assignment $\delta = \{ x_1 \mapsto t_1,\ldots x_n \mapsto t_n, X_1 \mapsto S_1,\ldots, X_m \mapsto S_m\}$ \emph{satisfies} $\psi$ written as $\delta \vDash \psi$ (or also $t_1,\ldots, t_n, S_1,\ldots,S_m \vDash \psi$) if replacing the variables with their corresponding values, the formula holds in the above model.
+Let $t_1,\ldots,t_n \in \{1,\ldots,k\}^*$ and $S_1,\ldots,S_n$ be finite subsets
+of $\{1,\ldots,k\}^*$. Given a formula $\psi(x_1,\ldots,x_n,X_1,\ldots,X_m)$
+with free variables $x_1,\ldots,x_n$, $X_n,\ldots,X_m$, the assignment $\delta =
+\{ x_1 \mapsto t_1,\ldots, x_n \mapsto t_n, X_1 \mapsto S_1,\ldots, X_m \mapsto
+S_m\}$ \emph{satisfies} $\psi$ written as $\delta \models \psi$ (or also
+$t_1,\ldots, t_n, S_1,\ldots,S_m \models \psi$) if replacing the variables with
+their corresponding values, the formula holds in the above model.
 	
   \section{Restricting Syntax}\label{restricted}
-	We are going to restrict the WSkS syntax to use only second-order variables.
+	We are going to restrict the WS$k$S syntax to use only second-order variables.
 	This can be done by considering every first-order variable as a singleton set
-	and transform every formula to an equivalent one which does not contain any
-	first-order variables. We will consider only following atomic formulas, where
-	$X$ and $Y$ are second-order variables, and build formulae over them:
+	and transforming every formula to an equivalent one which does not contain any
+	first-order variables. We will consider only the following atomic formulae,
+	where $X$ and $Y$ are second-order variables, and build formulae over them:
 	\begin{itemize}
 	 \item $X \subseteq Y$,
-	 \item $\text{Sing}(X)$\,--\,holds true, when $X$ is a singleton set,
-	 \item $X = Yi$\,--\,holds true, when $X$ and $Y$ are singleton sets $\{s\}$ and $\{t\}$ respectively and $s = ti$,
+\item $\mathit{Sing}(X)$\,--\,holds true iff $X$ is a singleton set, \item $X
+= Yi$\,--\,holds true iff $X$ and $Y$ are singleton sets $\{s\}$ and $\{t\}$
+respectively and $s = ti$,
 	 \item $X = \epsilon$.
 	\end{itemize}
 	
-	We can also further simplify the syntax of WS$k$S formulae by restricting
-	logical connectives used to build the formulae to only $\exists$, $\vee$ and $\neg$.
+We can also further simplify the syntax of WS$k$S formulae by restricting
+logical connectives used to build the formulae to only $\exists$, $\vee$ and
+$\neg$.
 	
 	 This syntax will be called
-	the \emph{restricted syntax} and its satisfaction relation will be denoted as $\vDash_2$.
+the \emph{restricted syntax} and its satisfaction relation will be denoted as
+$\models_2$.
 	
 	\begin{prop}
-	There is a translation T from WS$k$S formulae to the restricted syntax such that $$s_1,\ldots,s_n,S_1,\ldots,S_m \vDash \psi(x_1,\ldots,x_n,X_1,\ldots,X_m)$$ if and only if $$\{s_1\},\ldots,\{s_n\},S_1,\ldots,S_m \vDash_2 T(\psi)(X_{x_1},\ldots,X_{x_n}, X_1,\ldots,X_m)$$ Conversely, there is a translation $T'$ from the restricted syntax to WSkS such that $$S_1,\ldots,S_m \vDash T'(\psi)(X_1,\ldots,X_m)$$ if and only if $$S_1,\ldots,S_m \vDash_2 \psi(X_1,\ldots,X_m)$$
+There is a translation T from WS$k$S formulae to the restricted syntax such that
+$$s_1,\ldots,s_n,S_1,\ldots,S_m \models \psi(x_1,\ldots,x_n,X_1,\ldots,X_m)$$ if
+and only if $$\{s_1\},\ldots,\{s_n\},S_1,\ldots,S_m \models_2
+T(\psi)(X_{x_1},\ldots,X_{x_n}, X_1,\ldots,X_m)$$.
+
+ Conversely, there is a
+translation $T'$ from the restricted syntax to WS$k$S such that $$S_1,\ldots,S_m
+\models T'(\psi)(X_1,\ldots,X_m)$$ if and only if $$S_1,\ldots,S_m \models_2
+\psi(X_1,\ldots,X_m)$$.
 	\end{prop}
 	\begin{proof}
-	We will only present a short sketch of the proof for this proposition. For further details see \cite{tata}.
+We will only present a short sketch of the proof for this proposition. For
+further details see \cite{tata}.
 	
-	We can suppose that formulas will be built only upon the atomic formulas $t \in X$ and $s = t$ and so flatten the rest of the atomic formulas.
-	
-	Every first-order variable $y$ will be mapped to a second-order variable $X_y$ as does the following translation $T$ defines.
+We can suppose that formulae will be built only upon the atomic formulae $t \in
+X$ and $s = t$ and so flatten the rest of the atomic formulae. Every first-order
+variable $y$ will be mapped to a second-order variable $X_y$ as follows:
 	
 	 \begin{eqnarray*}
-	 T(y \in X) & \overset{def}{=} & X_y \subseteq X\\
-	 T(y = xi) & \overset{def}{=} &  X_y = X_xi\\
-	 T(x = \varepsilon) & \overset{def}{=} & X_x = \varepsilon\\
-	 T(x = y) & \overset{def}{=} & X_x = X_y\\
-	 T(\psi \vee \phi) & \overset{def}{=} & T(\psi) \vee T(\phi)\\
-	 T(\neg\phi) & \overset{def}{=} & \neg T(\phi)\\
-	 T(\exists X.\phi) & \overset{def}{=} & \exists X.T(\phi)\\
-	 T(\exists y.\phi) & \overset{def}{=} & \exists X_y\ .\ Sing(X_y) \wedge T(\phi)
+	 T(y \in X) & \overset{\mathit{def}}{=} & X_y \subseteq X\\
+	 T(y = xi) & \overset{\mathit{def}}{=} &  X_y = X_xi\\
+	 T(x = \varepsilon) & \overset{\mathit{def}}{=} & X_x = \varepsilon\\
+	 T(x = y) & \overset{\mathit{def}}{=} & X_x = X_y\\
+	 T(\psi \vee \phi) & \overset{\mathit{def}}{=} & T(\psi) \vee T(\phi)\\
+	 T(\neg\phi) & \overset{\mathit{def}}{=} & \neg T(\phi)\\
+	 T(\exists X.\phi) & \overset{\mathit{def}}{=} & \exists X.T(\phi)\\
+	 T(\exists y.\phi) & \overset{\mathit{def}}{=} & \exists X_y\ .\ Sing(X_y) \wedge T(\phi)
 	 \end{eqnarray*}
-	And for each free variable $x$ we add a $Sing(X_x)$ formula. 
+	Moreover, for each free variable $x$ we add a $Sing(X_x)$ formula. 
 	
-	The converse translation is $T'$ will be defined similarly \cite{tata}.
+	The converse translation is $T'$ can be defined similarly as written
+	in~\cite{tata}.
 	\end{proof}
 	
-	We will further restrict the syntax of WSkS. A~WSkS formula $\phi$ is in the \emph{prenex normal form} (abbreviated as PNF) if and only if it is of the form $$\phi = Q_1X_1Q_2X_2\ldots Q_nX_n\ .\ \psi(\mathds{X})$$ where  $Q_i \in \{\exists,\forall\}$, $1 \leq i \leq n$, and $\psi$ is a quantifier-free formula in the restricted syntax as defined above. We denote $Q_1X_1Q_2X_2\ldots Q_nX_n$ as the \emph{prefix} of $\phi$ and $\psi(\mathds{X})$ as the \emph{matrix} of $\phi$.
+We will further restrict the syntax of WS$k$S. A~WS$k$S formula $\phi$ is in the
+\emph{prenex normal form} (abbreviated as PNF) if and only if it is of the form
+$$\phi = Q_1X_1Q_2X_2\ldots Q_nX_n\ .\ \psi(\mathds{X})$$ where  $Q_i \in
+\{\exists,\forall\}$, $1 \leq i \leq n$, and $\psi$ is a quantifier-free formula
+in the restricted syntax as defined above. We denote $Q_1X_1Q_2X_2\ldots Q_nX_n$
+as the \emph{prefix} of $\phi$ and $\psi(\mathds{X})$ as the \emph{matrix} of
+$\phi$.
 	
-	A~WSkS formula $\rho$ is in the \emph{existentially-quantified prenex normal form} (abbreviated as $\exists$PNF), if and only if $$\rho = \exists \mathcal{X}_{m+1}\neg\exists \mathcal{X}_m\ldots\neg\exists \mathcal{X}_2\neg\exists \mathcal{X}_1.\psi(\mathds{X})$$ where $\exists\mathcal{X}_i$, for $\mathcal{X}_i \subseteq \mathds{X}$, is a (possibly empty) sequence $\exists X_a\ldots\exists X_b$ of consecutive existential quantifications and $\psi$ is again a quantifier-free formula in the restricted syntax over $\mathds{X}$.
+A~WS$k$S formula $\rho$ is in the \emph{existentially-quantified prenex normal
+form} (abbreviated as $\exists$PNF), if and only if $$\rho = \exists
+\mathcal{X}_{m+1}\neg\exists \mathcal{X}_m\ldots\neg\exists
+\mathcal{X}_2\neg\exists \mathcal{X}_1.\psi(\mathds{X})$$ where
+$\exists\mathcal{X}_i$, for $\mathcal{X}_i \subseteq \mathds{X}$, is a (possibly
+empty) sequence $\exists X_a\ldots\exists X_b$ of consecutive existential
+quantifications and $\psi$ is again a quantifier-free formula in the restricted
+syntax over $\mathds{X}$.
 	
 	\begin{prop}
-	 There is a translation from WSkS formulas in the restricted syntax to the equivalent formulas in $\exists$PNF. 
+There is a translation from WS$k$S formulae in the restricted syntax to the
+equivalent formulae in $\exists$PNF.
 	\end{prop}
 	
 	\begin{proof}
-	 Lets consider only $\wedge$, $\vee$ and $\neg$ is used in formulas as logical operators. This can be achieved by applying rules $\psi \Leftrightarrow \phi \mapsto (\neg \psi \vee \phi) \wedge (\psi \vee \neg \phi)$ and $\psi \Rightarrow \phi \mapsto \neg \psi \vee \phi$, which preservers logical equivalence.
+Let us consider only $\wedge$, $\vee$ and $\neg$ is used in formulae as logical
+operators. This can be achieved by applying rules $\psi \Leftrightarrow \phi
+\mapsto (\neg \psi \vee \phi) \wedge (\psi \vee \neg \phi)$ and $\psi
+\Rightarrow \phi \mapsto \neg \psi \vee \phi$, which preservers logical
+equivalence.
 	
-	Formula is first translated to the PNF, moving all quantifiers to the leftmost of formulas, renaming variables if needed. Quantifications with unbound variables are removed. We are using the following transformations, where $Q \in \{\exists, \forall\}$ and $\circ \in \{\vee, \wedge\}$:
-	\begin{eqnarray*}
+Formula is first translated to the PNF, moving all quantifiers to the left
+of formulae, renaming variables if needed. Quantifications with unbound
+variables are removed. We are using the following transformations, where $Q \in
+\{\exists, \forall\}$ and $\circ \in \{\vee, \wedge\}$:
+	\begin{eqnarray}
 	 \neg(\exists x \phi) & \equiv & \forall x\neg \phi\\
 	 \neg(\forall x \phi) & \equiv & \exists x\neg \phi\\
-	 Qx.\phi \circ \psi & \equiv & Qx(\phi \circ \psi)\\
-	 \phi \circ Qx.\psi & \equiv & Qx(\phi \circ \psi)\\
-	\end{eqnarray*}
-	All universal quantifiers are transformed to the existential quantifier according to the equivalence $\forall \phi \equiv \neg\exists\neg\phi$. At last all negations are shifted to the atoms according to the following axioms.
+	 Qx.\phi \circ \psi & \equiv & Qx(\phi \circ \psi)\label{one}\\
+	 \phi \circ Qx.\psi & \equiv & Qx(\phi \circ \psi)\label{two}\\
+	\end{eqnarray}
+Note that there has to be no free occurences of quantified variable $x$ in
+$\psi$ and $\phi$ in formulae \ref{one} and \ref{two} respectively.
+	
+All universal quantifiers are transformed to existential quantifier
+according to the equivalence $\forall x.\ \phi \equiv \neg\exists x.\ \neg\phi$.
+Lastly all negations in the matrix are shifted to the atoms according to the
+following laws:
 	\begin{eqnarray*}
 	 \neg\neg\phi & \equiv & \phi\\
 	 \neg(\phi\vee \psi) & \equiv & \neg \phi \wedge \neg \psi\\
 	 \neg(\phi\wedge \psi) & \equiv & \neg \phi \vee \neg \psi 
 	\end{eqnarray*}
- Resulting formula is in the existentially-quantified prenex normal form. 
+ The resulting formula is in the existentially-quantified prenex normal form. 
 	\end{proof}
 	
-\section{Deciding WSkS}\label{classical}
+\section{Deciding WS$k$S}\label{classical}
 
-A~decision procedure is an algorithm that given a formula $\phi$ returns VALID if $\phi$ is valid, SAT if $\phi$ is invalid but satisfiable (additionally yielding two assignments $\mathcal{M}_{true}$ and $\mathcal{M}_{false}$ such that $\mathcal{M}_{true} \vDash \phi$ and $\mathcal{M}_{false} \not\vDash \phi$) and UNSAT if $\phi$ is unsatisfiable.
+A~decision procedure is an algorithm that given a formula $\phi$ returns VALID
+if $\phi$ is valid, SAT if $\phi$ is invalid but satisfiable (additionally
+yielding two assignments $\mathcal{M}_{true}$ and $\mathcal{M}_{false}$ such
+that $\mathcal{M}_{\mathit{true}} \models \phi$ and
+$\mathcal{M}_{\mathit{false}} \not\models \phi$) and UNSAT if $\phi$ is unsatisfiable.
 
-Some properties of verified systems can be checked by being modeled by set of WSkS formulae and then deciding if given formulae hold for all variable assignments, therefore the checked system being valid, or either look for a non-satisfying assignment which leads to violation of specified system.
+Some properties of verified systems can be checked by being modeled by a set of
+WS$k$S formulae and then deciding if the given formulae hold for all variable
+assignments, therefore the checked system being valid, or either look for a
+non-satisfying assignment which leads to violation of the specified properties..
 
-Decision procedure of WSkS makes use of close link of WSkS formulae and automata, i.e. a given formula is transformed to correspondent automata and its language is further examined. First let us define all necessary lemmas and then define the transformation from a formula to an automaton.
+The presented decision procedure for WS$k$S makes use of the close link between
+WS$k$S formulae and automata, i.e.\ a given formula is transformed to
+corresponding finite tree automata and its language is further examined. 
 
- \subsubsection{Definable Sets are Recognizable Sets}
+The contents of this section is based on the exposition over in \cite{tata}.
+
 \begin{defz}
- A~set $L$ of tuples of finite sets of words is \emph{definable in WSkS} if there is a~formula $\psi$ of WSkS with free variables $X_1,\ldots,X_n$ such that $$(S_1,\ldots,S_n) \in L \text{ if and only if } S_1,\ldots,S_n \vDash \psi.$$
-\end{defz}
-
-Each tuple of finite sets of words $S_1,\ldots,S_n \subseteq \{1,\ldots,k\}^*$
-is then identified to a tree $(S_1,\ldots,S_n)^\sim$ over the alphabet
-$\{0,1,\bot\}^n$ where any string containing 0 or 1 is $k$-ary and $\bot^n$ is a constant symbol, such that
+ A~set $L$ of tuples of finite sets of words is \emph{definable in WS$k$S} if
+ there is a~formula $\psi$ of WS$k$S with free variables $X_1,\ldots,X_n$ such
+ that $$(S_1,\ldots,S_n) \in L \text{ if and only if } S_1,\ldots,S_n \models
+ \psi.$$
+\end{defz} Each tuple of finite sets of words $S_1,\ldots,S_n \subseteq
+\{1,\ldots,k\}^*$ is then identified to a tree $(S_1,\ldots,S_n)^\sim$ over the
+alphabet $\{0,1,\bot\}^n$ where any string containing 0 or 1 is $k$-ary and
+$\bot^n$ is a constant symbol, such that
  \begin{equation}
-  dom((S_1,\ldots,S_n)^\sim) \overset{def}{=} \{\epsilon\} \cup \left\{ pi\ |\ \exists p' \in \bigcup_{j = 1}^n S_j.p \leq p', 1 \leq i \leq k\right\}
+  dom((S_1,\ldots,S_n)^\sim) \overset{\mathit{def}}{=} \{\epsilon\} \cup \left\{
+  pi\ \Bigg|\ \exists p' \in \bigcup_{j = 1}^n S_j.p \leq p', 1 \leq i \leq
+  k\right\}
  \end{equation}
 The symbol at the position $p$: $$(S_1,\ldots,S_n)^\sim(p) = \alpha_1\ldots\alpha_n$$ is defined as follows:
  \begin{itemize}
@@ -390,171 +692,333 @@ The symbol at the position $p$: $$(S_1,\ldots,S_n)^\sim(p) = \alpha_1\ldots\alph
  \end{itemize}
  
 \begin{lemma}
-If a set of tuples of finite subsets of $\{1,\ldots,k\}^*$ is definable in WSkS, then $\overset{\sim}{L} \overset{def}{=} \{(S_1,\ldots,S_n)^\sim\ |\ (S_1,\ldots,S_n) \in L\}$ is in Rec \cite{tata}.
+If a set of tuples of finite subsets of $\{1,\ldots,k\}^*$ is definable in
+WS$k$S, then $\overset{\sim}{L} \overset{\mathit{def}}{=}
+\{(S_1,\ldots,S_n)^\sim\ |\ (S_1,\ldots,S_n) \in L\}$ is in Rec.
 \end{lemma}
 
 \begin{proof}
- We have shown in Section \ref{restricted} that every formula in WSkS can be
+ We have shown in Section \ref{restricted} that every formula in WS$k$S can be
  translated into an equivalent formula in the restricted syntax. We can now
  prove the lemma by induction on the structure of the formula $\psi$ which
- defines language $L$.
+ defines the language $L$.
 
-Let us assume that all variables in $\psi$ are bound at most once in the formula and also that there is a fixed total ordering $\leq$ on the variables.
+Let us assume that all variables in $\psi$ are bound at most once in the formula
+and also that there is a fixed total ordering $\<$ on the variables.
 
-If $\phi$ is a subformula of $\psi$ with free variables $Y_1 < \cdots < Y_n$, we construct the automaton $\mathcal{A}_\phi$ over the alphabet $\{0,1,\bot\}^n$ such that $(S_1,\ldots,S_n) \vDash_2 \phi$ if and only if $(S_1,\ldots,S_n)^\sim \in L(\mathcal{A}_\phi)$.
+If $\phi$ is a subformula of $\psi$ with free variables $Y_1 < \cdots < Y_n$, we
+construct the automaton $\mathcal{A}_\phi$ over the alphabet $\{0,1,\bot\}^n$
+such that $(S_1,\ldots,S_n) \models_2 \phi$ if and only if
+$(S_1,\ldots,S_n)^\sim \in L(\mathcal{A}_\phi)$.
 \end{proof}
 
-As induction base, with assumption that $k = 2$ (works for arbitrary $k$), for each atomic subformula of $\psi$ we construct the automaton $\mathcal{A}_{\psi}$ according to the following rules:
+In the following we limit ourself to the case when $k = 2$; an extension to an
+arbitrary $k$ is straightforward. As induction base, with for each atomic
+subformula of $\psi$ we construct the automaton $\mathcal{A}_{\psi}$ according
+to the following rules:
 \begin{itemize}
- \item[-] The automaton $\mathcal{A}_{Sing(X)} = (\{q, q'\}, \{0, 1, \bot\}, \{q'\}, \delta$) where $\delta$ is defined as following:
+ \item[-] The automaton $\mathcal{A}_{Sing(X)} = (\{q, q'\}, \{0, 1, \bot\},
+ \delta, \{q'\}$) where $\delta$ is defined as follows:
 \begin{eqnarray*}
- \bot & \rightarrow & q\\
- 1 (q, q) & \rightarrow & q'\\
- 0 (q, q') & \rightarrow & q'\\
- 0 (q', q) & \rightarrow & q'
+  & \overset{\bot}{\longrightarrow} & q\\
+ (q, q) & \overset{1}{\longrightarrow} & q'\\
+ (q, q') & \overset{0}{\longrightarrow} & q'\\
+ (q', q) & \overset{0}{\longrightarrow} & q'
 \end{eqnarray*}
- \item[-] The automaton $\mathcal{A}_{X \subseteq Y} = (\{q\}, \{0, 1, \bot\}, \{q\}, \delta$), with $X < Y$, where $\delta$ is defined as following:
+ \item[-] The automaton $\mathcal{A}_{X \subseteq Y} = (\{q\}, \{0, 1, \bot\}^2,
+ \delta, \{q\}$), with $X < Y$, where $\delta$ is defined as follows:
 \begin{eqnarray*}
- \bot\bot & \rightarrow & q\\
- 00 (q, q) & \rightarrow & q\\
- \bot 0 (q, q) & \rightarrow & q\\
- 01 (q, q) & \rightarrow & q\\
- 11 (q, q) & \rightarrow & q\\
- \bot1 (q, q) & \rightarrow & q
+  & \overset{\bot\bot}{\longrightarrow} & q\\
+  (q, q) & \overset{00}{\longrightarrow} & q\\
+  (q, q) & \overset{\bot 0}{\longrightarrow} & q\\
+  (q, q) & \overset{01}{\longrightarrow} & q\\
+  (q, q) & \overset{11}{\longrightarrow} & q\\
+  (q, q) & \overset{\bot 1}{\longrightarrow} & q
 \end{eqnarray*}
- \item[-] The automaton $\mathcal{A}_{X = Y1} = (\{q, q', q''\}, \{0, 1, \bot\}, \{q''\}, \delta$), where $\delta$ is defined as following:
+ \item[-] The automaton $\mathcal{A}_{X = Y1} = (\{q, q', q''\}, \{0, 1,
+ \bot\}^2, \delta, \{q''\}$), where $\delta$ is defined as follows:
 \begin{eqnarray*}
- \bot\bot & \rightarrow & q\\
- 1\bot (q, q) & \rightarrow & q'\\
- 00 (q, q'') & \rightarrow & q''\\
- 01 (q', q) & \rightarrow & q''\\
- 00 (q'', q) & \rightarrow & q''
+  & \overset{\bot\bot}{\longrightarrow} & q\\
+  (q, q) & \overset{1\bot}{\longrightarrow} & q'\\
+  (q, q'') & \overset{00}{\longrightarrow} & q''\\
+  (q', q) & \overset{01}{\longrightarrow} & q''\\
+  (q'', q) & \overset{00}{\longrightarrow} & q''
 \end{eqnarray*}
-Note that the automaton for $X = Y2$ is obtained similarly.
+Note that the automaton for $X = Y2$ is obtained similarly by chaning $(q', q) &
+\overset{01}{\longrightarrow} & q''$ to $(q, q') & \overset{01}{\longrightarrow}
+& q''$.
  \item[-] The automaton $\mathcal{A}_{X = \epsilon} = (\{q, q'\}, \{0, 1,
- \bot\}, \{q'\}, \delta$), where $\delta$ is efined as following:
+ \bot\}, \{q'\}, \delta$), where $\delta$ is efined as follows:
 \begin{eqnarray*}
  \bot & \rightarrow & q\\
  1 (q, q) & \rightarrow & q'
 \end{eqnarray*}
 \end{itemize}
 
-Now as the induction step, we will consider only logical operations $\vee, \neg$ and $\exists$ (as defined in the restricted syntax):
+Now as the induction step, we will consider only logical operations $\vee$,
+$\wedge$, $\neg$ and $\exists$ (as defined in the restricted syntax):
 \begin{itemize}
- \item[$\psi$]$ = \psi_1 \vee \psi_2$\,--\,let $\overline{X}_i$ be the set of free variables of $\psi_i$ respectively, and $\overline{X}_1 \cup \overline{X}_2 = \{Y_1,\ldots,Y_n\}$ with some ordering $Y_1 < \ldots < Y_n$. Then we successively apply the $i$-th cylindrification to the automaton of $\psi_1$ (resp. $\psi_2$) for the variables $Y_i$ which are not free in $\psi_1$ (resp. $\psi_2$), so the automata for $\psi_1$ and $\psi_2$ can recognize the solutions of $\psi_1$ and $\psi_2$, with free variables $\overline{X}_1 \cup \overline{X}_2$. Then the automaton $\mathcal{A}_\psi$ is obtained as the union of these automata.
- \item[$\psi$]$ = \neg\psi_1$\,--\,then $\mathcal{A}_\psi$ is the automaton accepting the complement of $L(\mathcal{A}_{\psi_1})$.
- \item[$\psi$]$ = \exists X.\psi_1$\,--\,assuming that $X$ corresponds to the $i$-th component, then $\mathcal{A}_\psi$ is the $i$-th projection of $\mathcal{A}_{\psi_1}$.
+ \item[$\psi$]$ = \psi_1 \vee \psi_2$\,--\,let $\overline{X}_i$ be the set of
+ free variables of $\psi_i$ respectively, and $\overline{X}_1 \cup
+ \overline{X}_2 = \{Y_1,\ldots,Y_n\}$ with some ordering $Y_1 < \ldots < Y_n$.
+ Then we successively apply the $i$-th cylindrification to the automaton of
+ $\psi_1$ (resp. $\psi_2$) for the variables $Y_i$ which are not free in
+ $\psi_1$ (resp. $\psi_2$), so the automata for $\psi_1$ and $\psi_2$ can
+ recognize the solutions of $\psi_1$ and $\psi_2$, with free variables
+ $\overline{X}_1 \cup \overline{X}_2$. Then the automaton $\mathcal{A}_\psi$ is
+ obtained as the union of these automata.
+ \item[$\psi$]$ = \psi_1 \wedge \psi_2$\,--\,is obtained similarly as automaton
+ for connective $\vee$ byt by using \emph{intersection} of automata.
+ \item[$\psi$]$ = \neg\psi_1$\,--\,then $\mathcal{A}_\psi$ is the automaton
+ accepting the complement of $L(\mathcal{A}_{\psi_1})$.
+ \item[$\psi$]$ = \exists X.\psi_1$\,--\,assuming that $X$ corresponds to the
+ $i$-th component, then $\mathcal{A}_\psi$ is the $i$-th projection of
+ $\mathcal{A}_{\psi_1}$.
 \end{itemize}
 
 \begin{prop}
- Since there is a \emph{one-to-one} correspondence between models of $\phi$ and trees accepted by $\mathcal{A}_\phi$, $\phi$ is satisfiable iff $L(\mathcal{A}_\phi)$ is non-empty and valid iff $L(\mathcal{A}_\phi)$  is universal.
+ Since there is a \emph{one-to-one} correspondence between models of $\phi$ and
+ trees accepted by $\mathcal{A}_\phi$, $\phi$ is satisfiable iff
+ $L(\mathcal{A}_\phi)$ is non-empty and valid iff $L(\mathcal{A}_\phi)$  is
+ universal.
 \end{prop}
 
-\subsubsection{Issues of this approach}
+\subsubsection{Issues of This Approach}
 
-Considering WS$k$S formulas with a fixed number of quantifier alternations $N$, this decision method outlined in previous section works in time which is a tower of exponentials with height being $O(N)$.
+Considering WS$k$S formulae with a fixed number of quantifier alternations $N$,
+the decision method outlined in the previous section works in time which is a
+tower of exponentials with height being $O(N)$.
 
-This is mainly because every time we encounter a sequence of quantifiers, we have to do a projection, which yields a non-deterministic automaton, even if the input automaton was deterministic. Now when we encounter a negation of a formula, we have to use determinization before doing a complement of automaton, which requires in general exponential time and exponential space w.r.t states of automata. 
+This is mainly because every time we encounter a sequence of quantifiers, we
+have to do a projection, which yields a non-deterministic automaton, even if the
+input automaton was deterministic. Now when we encounter a negation of a
+formula, we have to use determinization before doing a complement of automaton,
+which requires in general exponential time and exponential space w.r.t states of
+automata.
 
-Thus the computational complexity of WS$k$S is in NONELEMENTARY class, so given a Turing machine $\mathcal{M}$ deciding a satisfiability of WS$k$S formulae, for any $u \geq 0$, there are infinitely many $n$ for which a computation of $\mathcal{M}$ for some sentence of length $n$ requires at least $$\underbrace{2^{2^{\iddots^{2^n}}}}_u$$ steps.
+Thus the computational complexity of WS$k$S is in NONELEMENTARY class, so given
+a Turing machine $\mathcal{M}$ deciding a satisfiability of WS$k$S formulae, for
+any $u \geq 0$, there are infinitely many $n$ for which a computation of
+$\mathcal{M}$ for some sentence of length $n$ requires at least
+$$\underbrace{2^{2^{\iddots^{2^n}}}}_u$$ steps.
 	
 \chapter{\textsc{MONA}}\label{monachap}
 
- \textsc{MONA} \cite{mona} is one of the early implementations of decision procedures for the WS$k$S logic, namely for $k = 1$ and $k = 2$ (note that it can be shown, that arbitrary $k$ can be transformed to formula in WS2S). WS1S can be used for description of linear structures like linked lists or chains, while WS2S is mainly used for binary tree structures like binary tree or binary heap. For many years it is still the best and fastest approach for decision of the formulas with usage of deterministic automata. It is an implementation of the decision procedure from Chapter \ref{classical} with a few tweaks that we describe in this chapter
+ \textsc{MONA} \cite{mona} is one of the early implementations of decision
+ procedures for the WS$k$S logic, namely for $k = 1$ and $k = 2$ (note that it
+ can be shown, that arbitrary $k$ can be transformed to formula in WS2S). WS1S
+ can be used for description of linear structures like linked lists or chains,
+ while WS2S is mainly used for binary tree structures like binary tree or binary
+ heap. For many years it is still the best and fastest approach for decision of
+ the formulae with usage of deterministic automata. It is an implementation of
+ the decision procedure from Chapter \ref{classical} with a few tweaks that we
+ describe in this chapter
 
-\textsc{MONA} has been developed since 1994. Through all these years numerous approaches were tried out and thus number of fine optimizations were discovered. In this chapter we review some of the designed and implementation tricks that stand behind its success. Even though, the overall complexity is still non-elementary for the worst-cases. 
+\textsc{MONA} has been developed since 1994. Through all these years numerous
+approaches were tried out and thus number of fine optimizations were discovered.
+In this chapter we review some of the designed and implementation tricks that
+stand behind its success. Even though, the overall complexity is still
+non-elementary for the worst-cases.
 
  \section{Used optimizations}\label{monasecrets}
 \subsection{Using BDDs for automata representation}\label{monabdd}
-BDDs were introduced to solve the problems of large input alphabets, which also allowed numerous specialized algorithms to be used.
+BDDs were introduced to solve the problems of large input alphabets, which also
+allowed numerous specialized algorithms to be used.
 
-BDDs were described in Section \ref{bdd}, and are useful for its compactness, canonicity and efficient manipulation. \textsc{MONA} uses shared MTBDDs with roots and leaves representing the states. The use of BDDs for representation  of transition relation proved to have the highest effect on formulas that could not be decided in fixed limit of a time that was set up during benchmarks.
+BDDs were described in Section \ref{bdd}, and are useful for its compactness,
+canonicity and efficient manipulation. \textsc{MONA} uses shared MTBDDs with
+roots and leaves representing the states. The use of BDDs for representation  of
+transition relation proved to have the highest effect on formulae that could not
+be decided in fixed limit of a time that was set up during benchmarks.
 
 \subsection{Caching}
-The implementation of the BDDs, as stated in Section \ref{monabdd}, is optimized to minimize the number of cache misses that occur, since it was discovered that cache misses dominate the running time for both the unary and binary BDD apply operations.
+The implementation of the BDDs, as stated in Section \ref{monabdd}, is optimized
+to minimize the number of cache misses that occur, since it was discovered that
+cache misses dominate the running time for both the unary and binary BDD apply
+operations.
 
-Nodes are thus stored directly under the hash address to minimize the cache misses, as opposed to the traditional approach that stores nodes separately from the hash table containing pointers to them, which roughly doubles the time to process a node. 
+Nodes are thus stored directly under the hash address to minimize the cache
+misses, as opposed to the traditional approach that stores nodes separately from
+the hash table containing pointers to them, which roughly doubles the time to
+process a node.
 
 \subsection{Eager minimization}
-Whenever MONA performs the product or projection operation during the translation from formula to an automaton, the Myhill-Nerode minimization takes place, since it is preferable to operate with as small automata as possible. However this approach was shown to be excessive, since minimization procedure often exceeds half of the total running time.
+Whenever MONA performs the product or projection operation during the
+translation from formula to an automaton, the Myhill-Nerode minimization takes
+place, since it is preferable to operate with as small automata as possible.
+However this approach was shown to be excessive, since minimization procedure
+often exceeds half of the total running time.
 
-Alternatives were introduced\,--\,using one final minimization, minimizing only after projection or minimizing only after product, which had different effects and were dependent on concrete benchmarks.
+Alternatives were introduced\,--\,using one final minimization, minimizing only
+after projection or minimizing only after product, which had different effects
+and were dependent on concrete benchmarks.
 
 \subsection{Guided tree automata}
 
-The set of states is partitioned in order to split a large tree automata into the smaller ones to address expensive computations caused by three-dimensional transition tables. This however requires for user to specify the \emph{guide} which is a top-down deterministic tree automaton that assigns state spaces to the nodes of a tree.
+The set of states is partitioned in order to split a large tree automata into
+the smaller ones to address expensive computations caused by three-dimensional
+transition tables. This however requires for user to specify the \emph{guide}
+which is a top-down deterministic tree automaton that assigns state spaces to
+the nodes of a tree.
 
 \subsection{Directed Acyclic Graph representation}\label{dag}
 
-The frontend of the MONA tool is parsing the input files with specification of WS$k$S formulas. This file is converted to the inner representation of automata-theoretic operations, that are further translated to resulting automaton. 
+The frontend of the MONA tool is parsing the input files with specification of
+WS$k$S formulae. This file is converted to the inner representation of
+automata-theoretic operations, that are further translated to resulting
+automaton.
 
-There are however many common subformulas with similar structure, especially if we talk about \emph{signature equivalence}, which holds for two formulas $\phi$ and $\psi$ if there is an order-preserving renaming of the variables in formulas such that the representations of $\phi$ and $\psi$ become identical.
+There are however many common subformulae with similar structure, especially if
+we talk about \emph{signature equivalence}, which holds for two formulae $\phi$
+and $\psi$ if there is an order-preserving renaming of the variables in formulae
+such that the representations of $\phi$ and $\psi$ become identical.
 
-It holds for BDD representation that automata for signature-equivalent trees are isomorphic in the sense that only node labels differ, which means this representations can be reused simply by renaming the variables nodes. Thus MONA represents input formulas in the form of \emph{directed acyclic graph} and not a tree. 
+It holds for BDD representation that automata for signature-equivalent trees are
+isomorphic in the sense that only node labels differ, which means this
+representations can be reused simply by renaming the variables nodes. Thus MONA
+represents input formulae in the form of \emph{directed acyclic graph} and not a
+tree.
 
 \subsection{Three-valued logic and automata}
-Since formulas are translated to the restricted syntax that uses only second-order variables, first-order variables are encoded as singletons. This however raises the issue of \emph{restrictions}, i.e. the formula $\phi$ holds only when some external associated restrictions hold. Since restriction is also a formula, the main issue is that $\phi$ is now undefined outside the restriction. Note that for a first-order variable, the restriction is that it is a singleton set. 
+Since formulae are translated to the restricted syntax that uses only
+second-order variables, first-order variables are encoded as singletons. This
+however raises the issue of \emph{restrictions}, i.e. the formula $\phi$ holds
+only when some external associated restrictions hold. Since restriction is also
+a formula, the main issue is that $\phi$ is now undefined outside the
+restriction. Note that for a first-order variable, the restriction is that it is
+a singleton set.
 
-The nature of these problems are solved by using a three-valued logic. So for a restricted subformula $\phi$ we associate a restriction $\phi_R$. And if for some valuation $\phi_R$ does not hold, then the formulas containing $\phi$ are assigned the third value \emph{dont-care}.
+The nature of these problems are solved by using a three-valued logic. So for a
+restricted subformula $\phi$ we associate a restriction $\phi_R$. And if for
+some valuation $\phi_R$ does not hold, then the formulae containing $\phi$ are
+assigned the third value \emph{dont-care}.
 
-A~special operation converts the rejecting states to dont-cares for the restriction formulas and other automaton operations are modified so these nonacceptance of restrictions are propagated properly. 
+A~special operation converts the rejecting states to dont-cares for the
+restriction formulae and other automaton operations are modified so these
+nonacceptance of restrictions are propagated properly.
 
 \subsection{Formula reductions}
-Various optimizations of formulas takes place in the DAG specified in Section \ref{dag} before the final translation to automata. Reductions are based on syntactic analysis that tries to identify valid subformulas and equivalences among them. 
+Various optimizations of formulae takes place in the DAG specified in Section
+\ref{dag} before the final translation to automata. Reductions are based on
+syntactic analysis that tries to identify valid subformulae and equivalences
+among them.
 
 MONA performs three kinds of reductions:
 \begin{enumerate}
- \item Simple equality and Boolean reductions that can be described by simple rewrite rules like $\phi \wedge \phi \Leftrightarrow \phi$, etc. These rewrite steps guarantee a reduction of complexity, but will not cause significant improvements in the running time, since they rarely apply in realistic situations. However they are cheap and may yield small improvements.
+ \item Simple equality and Boolean reductions that can be described by simple
+ rewrite rules like $\phi \wedge \phi \Leftrightarrow \phi$, etc. These rewrite
+ steps guarantee a reduction of complexity, but will not cause significant
+ improvements in the running time, since they rarely apply in realistic
+ situations. However they are cheap and may yield small improvements.
 
-\item Special quantifier reductions. The basic idea is to apply a rewrite step which removes quantifiers, where they are not useful, as following: $$\exists X . \phi \Leftrightarrow \phi[T/X]$$ provided that $\phi \Rightarrow X = T$ is valid and $T$ is some term satisfying $freevar(T) \subseteq freevar(\phi)$, where $freevar$ denotes the set of free variables of subformula. This is further restricted to different rewrite rule: $$ \exists X_i . \phi \Leftrightarrow \phi[X_j/X_i]$$ provided that $\phi \equiv \ldots \wedge X_i = X_j \wedge \ldots$ and $X_j$ is some variable other than $X_i$. This, however, is not guaranteed to yield better results.
+\item Special quantifier reductions. The basic idea is to apply a rewrite step
+which removes quantifiers, where they are not useful, as following: $$\exists X
+. \phi \Leftrightarrow \phi[T/X]$$ provided that $\phi \Rightarrow X = T$ is
+valid and $T$ is some term satisfying $freevar(T) \subseteq freevar(\phi)$,
+where $freevar$ denotes the set of free variables of subformula. This is further
+restricted to different rewrite rule: $$ \exists X_i . \phi \Leftrightarrow
+\phi[X_j/X_i]$$ provided that $\phi \equiv \ldots \wedge X_i = X_j \wedge
+\ldots$ and $X_j$ is some variable other than $X_i$. This, however, is not
+guaranteed to yield better results.
 
-\item Special conjuction reductions. There are two sources of reductions. The first is formula flattening. The other is  the formula restriction mentioned above.
+\item Special conjuction reductions. There are two sources of reductions. The
+first is formula flattening. The other is  the formula restriction mentioned
+above.
 \end{enumerate}
 
  \chapter{Deciding WS$k$S with Non-deterministic Automata}\label{our}
 
-The \textsc{MONA} implementation of the decision procedure for WS$k$S from Section \ref{classical} uses deterministic bottom-up tree automata (as described in Chapter \ref{monachap}) and so every time non-determinism might have been introduced, such as union and projection corresponding to the disjunction and existential quantification respectively, the automaton is determinised using the subset construction and the information about the original states is forgotten.
+The \textsc{MONA} implementation of the decision procedure for WS$k$S from
+Section \ref{classical} uses deterministic bottom-up tree automata (as described
+in Chapter \ref{monachap}) and so every time non-determinism might have been
+introduced, such as union and projection corresponding to the disjunction and
+existential quantification respectively, the automaton is determinised using the
+subset construction and the information about the original states is forgotten.
 
-So this approach has issues with extensive usage of automaton complementation, since for every negation of the formula $\neg\phi$ we have to do the complementation of the corresponding tree automaton, which is done in exponential time. Moreover every alternation of quantifiers yields two negations. Currently there is no known tree automaton complementation technique better than bottom-up determinization of the automaton (which yields exponential number of states), followed by complementing the set of final states of the resulting deterministic automaton. MONA tool benefits here by being heavily optimized for the use of deterministic finite (tree) automata, as we introduced in \ref{monasecrets}.
+So this approach has issues with extensive usage of automaton complementation,
+since for every negation of the formula $\neg\phi$ we have to do the
+complementation of the corresponding tree automaton, which is done in
+exponential time. Moreover every alternation of quantifiers yields two
+negations. Currently there is no known tree automaton complementation technique
+better than bottom-up determinization of the automaton (which yields exponential
+number of states), followed by complementing the set of final states of the
+resulting deterministic automaton. MONA tool benefits here by being heavily
+optimized for the use of deterministic finite (tree) automata, as we introduced
+in \ref{monasecrets}.
 
-In practice the representation of all models of $\phi$ is then not necessary and any model or an invalid assignment to free variables suffices, therefore constructing the automaton $\mathcal{A}_{\phi}$ representing all models of $\phi$ can be avoided. 
+In practice the representation of all models of $\phi$ is then not necessary and
+any model or an invalid assignment to free variables suffices, therefore
+constructing the automaton $\mathcal{A}_{\phi}$ representing all models of
+$\phi$ can be avoided.
 
-Current trends in formal verification and various other principles tends to use non-deterministic automata instead of deterministic ones. This is due to the fact, that there exist numerous optimized libraries for their usage, like VATA \cite{vata}, and in recent time new algorithms that are effective in practice were developed even for time complex operations like language inclusion or universality testing, which are PSPACE-complete for finite word automata and EXPTIME-complete for tree automata.  
+Current trends in formal verification and various other principles tends to use
+non-deterministic automata instead of deterministic ones. This is due to the
+fact, that there exist numerous optimized libraries for their usage, like VATA
+\cite{vata}, and in recent time new algorithms that are effective in practice
+were developed even for time complex operations like language inclusion or
+universality testing, which are PSPACE-complete for finite word automata and
+EXPTIME-complete for tree automata.
 
-Here we propose to use the similar principle of antichains \cite{tacas}, as defined in the following section, and search for an accepting or non-accepting state \emph{on-the-fly} without constructing the automaton in the first place.
+Here we propose to use the similar principle of antichains \cite{tacas}, as
+defined in the following section, and search for an accepting or non-accepting
+state \emph{on-the-fly} without constructing the automaton in the first place.
 
 \section{Anti-chain based universality testing}
 
-We will give a brief introduction to universality testing of non-deterministic finite word automata and tree automata by algorithm that uses a combination of the simulation-based and the antichain-based approach \cite{tacas}.
+We will give a brief introduction to universality testing of non-deterministic
+finite word automata and tree automata by algorithm that uses a combination of
+the simulation-based and the antichain-based approach \cite{tacas}.
 
 \begin{defz}
-A~\emph{simulation} on finite automata $\mathcal{A} = (Q, \Sigma, \delta, I, F)$  is a relation $\preceq \subseteq Q \times Q$ such that $p \preceq r$ only if (i) $p \in F \Rightarrow r \in F$ and (ii) for every transition $p \overset{a}{\longrightarrow} p'$, there exists a transition $r \overset{a}{\longrightarrow} r'$ such that $p' \preceq r'$.
+A~\emph{simulation} on finite automata $\mathcal{A} = (Q, \Sigma, \delta, I, F)$
+ is a relation $\preceq \subseteq Q \times Q$ such that $p \preceq r$ only if
+(i) $p \in F \Rightarrow r \in F$ and (ii) for every transition $p
+\overset{a}{\longrightarrow} p'$, there exists a transition $r
+\overset{a}{\longrightarrow} r'$ such that $p' \preceq r'$.
 \end{defz}
 
-Further we call a set of states in $\mathcal{A}$, i.e. a subset of $Q$, a \emph{macro-state} and we use $A^{\subseteq}$ to denote a set of relations over the states of $\mathcal{A}$, that imply language inclusion. 
+Further we call a set of states in $\mathcal{A}$, i.e. a subset of $Q$, a
+\emph{macro-state} and we use $A^{\subseteq}$ to denote a set of relations over
+the states of $\mathcal{A}$, that imply language inclusion.
 
 \begin{lemma}
-Given a simulation $\preceq$ on a NFA $\mathcal{A}$, $p \preceq r \Rightarrow L_\mathcal{A}(p) \subseteq L_\mathcal{A}(r)$ \cite{tacas}.
+Given a simulation $\preceq$ on a NFA $\mathcal{A}$, $p \preceq r \Rightarrow
+L_\mathcal{A}(p) \subseteq L_\mathcal{A}(r)$ \cite{tacas}.
 \end{lemma}
 
 \subsection{Universality of NFAs}\label{NFAuniv}
 
-The universality problem for a NFA $\mathcal{A} = (Q, \Sigma, \delta, I, F)$ is to decide whether $L(\mathcal{A}) = \Sigma^*$. The problem is PSPACE-complete.
+The universality problem for a NFA $\mathcal{A} = (Q, \Sigma, \delta, I, F)$ is
+to decide whether $L(\mathcal{A}) = \Sigma^*$. The problem is PSPACE-complete.
 
 The naive algorithm performs determinization using a subset construction to
-obtain a~deterministic automaton $\mathcal{A}_D$, then complements it to obtain $\overline{\mathcal{A}}_D$ and finally checks that there is no reachable accepting state in $\overline{\mathcal{A}}_D$.
+obtain a~deterministic automaton $\mathcal{A}_D$, then complements it to obtain
+$\overline{\mathcal{A}}_D$ and finally checks that there is no reachable
+accepting state in $\overline{\mathcal{A}}_D$.
 
-Proposed algorithm \cite{tacas} runs the subset construction procedure on-the-fly, avoiding explicit construction of $\overline{\mathcal{A}}_D$, and checks if any rejecting macro-state is reachable. However this procedure is further augmented with two optimizations. We define post-image of a~state as $Post(P) = \{p'\ |\ \exists a \in \Sigma: (p, a, p') \in \delta\}$.
+Proposed algorithm \cite{tacas} runs the subset construction procedure
+on-the-fly, avoiding explicit construction of $\overline{\mathcal{A}}_D$, and
+checks if any rejecting macro-state is reachable. However this procedure is
+further augmented with two optimizations. We define post-image of a~state as
+$Post(P) = \{p'\ |\ \exists a \in \Sigma: (p, a, p') \in \delta\}$.
 
 The first optimization is based on the following lemma.
 
 \begin{lemma}\label{lemma2}
- Let $P, R$ be two macro-states of a NFA $\mathcal{A}$, and $\preceq$ be a relation from $\mathcal{A}^\subseteq$. Then, $P \preceq^{\forall\exists} R$ implies $L_\mathcal{A}(P) \subseteq L_\mathcal{A}(R)$, where $P \preceq^{\forall\exists} R$ stands for $\forall p \in P. \exists r\in R : p \preceq r$.
+ Let $P, R$ be two macro-states of a NFA $\mathcal{A}$, and $\preceq$ be a
+ relation from $\mathcal{A}^\subseteq$. Then, $P \preceq^{\forall\exists} R$
+ implies $L_\mathcal{A}(P) \subseteq L_\mathcal{A}(R)$, where $P
+ \preceq^{\forall\exists} R$ stands for $\forall p \in P. \exists r\in R : p
+ \preceq r$.
 \end{lemma}
 
-The relation $\preceq$ can be any relation on the states of $\mathcal{A}$ that implies language inclusion, e.g. maximal simulation or the identity relation (then this is the so called anti-chain approach).
+The relation $\preceq$ can be any relation on the states of $\mathcal{A}$ that
+implies language inclusion, e.g. maximal simulation or the identity relation
+(then this is the so called anti-chain approach).
 
-The second optimization is based on the observation that $L_\mathcal{A}(P) = L_\mathcal{A}(P - \{p_1\})$ if there is some $p_2 \in P$ such that $p_1 \preceq  p_2$, which is a simple consequence of Lemma \ref{lemma2}.
+The second optimization is based on the observation that $L_\mathcal{A}(P) =
+L_\mathcal{A}(P - \{p_1\})$ if there is some $p_2 \in P$ such that $p_1 \preceq 
+p_2$, which is a simple consequence of Lemma \ref{lemma2}.
 
 \begin{algorithm}[hb!]
 		\SetKwFor{For}{foreach}{do}{}
@@ -578,28 +1042,62 @@ The second optimization is based on the observation that $L_\mathcal{A}(P) = L_\
 		\caption{Universality checking using optimized algorithm \cite{tacas}}\label{universality}
 	\end{algorithm}
 	
-	The algorithm works as follows. While there are macro-states to be processed, and no rejecting macro-state was found, one of the macro-states from $Next$ is chosen and moved to the $Processed$ set. All successors of the macro-state are generated, minimized and moved to $Next$ unless there is already some $\preceq^{\forall\exists}$-smaller macro-state in $Next$ or in $Processed$. If a new macro-state is added to $Next$, then all the $\preceq^{\forall\exists}$-bigger states are pruned out of both $Next$ and $Processed$. 
+The algorithm works as follows. While there are macro-states to be processed,
+and no rejecting macro-state was found, one of the macro-states from $Next$ is
+chosen and moved to the $Processed$ set. All successors of the macro-state are
+generated, minimized and moved to $Next$ unless there is already some
+$\preceq^{\forall\exists}$-smaller macro-state in $Next$ or in $Processed$. If a
+new macro-state is added to $Next$, then all the
+$\preceq^{\forall\exists}$-bigger states are pruned out of both $Next$ and
+$Processed$.
 	
-	Correctness of this universality checking algorithm is proved in \cite{tacas}.
+Correctness of this universality checking algorithm is proved in \cite{tacas}.
 
 \subsection{Universality of NTAs}
 
-The principle of optimized universality checking for tree automata is similar to the previous antichains algorithm outlined in the previous section. Instead of relations implying language inclusions, we are going to use relations that imply inclusion of languages of the so called \emph{open} trees, i.e. tress whose leaves are replaced by special symbol denoting a \emph{hole}.
+The principle of optimized universality checking for tree automata is similar to
+the previous antichains algorithm outlined in the previous section. Instead of
+relations implying language inclusions, we are going to use relations that imply
+inclusion of languages of the so called \emph{open} trees, i.e. tress whose
+leaves are replaced by special symbol denoting a \emph{hole}.
 
-The algorithm is very similar to Algorithm \ref{universality} and therefore we are going to refer to source \cite{tacas}.
+The algorithm is very similar to Algorithm \ref{universality} and therefore we
+are going to refer to source \cite{tacas}.
 
 \section{Main idea of deciding WS$k$S with NFA}
 
-Given a formula $\phi$ in $\exists$PNF form (defined in Section \ref{restricted}), suppose there are $m$ negations in the prefix of $\phi$. We will create a hierarchical family of WS$k$S formulae $\Phi = \{\phi_0,\ldots,\phi_m\}$, where $\phi_0 = \phi$ and $\phi_{i+1} = \neg\exists\mathcal{X}_{i+1}.\phi_i$, $1 \leq i \leq m-1$ , and construct a family of automata accepting representations of models of the corresponding formulas.
+Given a formula $\phi$ in $\exists$PNF form (defined in Section
+\ref{restricted}), suppose there are $m$ negations in the prefix of $\phi$. We
+will create a hierarchical family of WS$k$S formulae $\Phi =
+\{\phi_0,\ldots,\phi_m\}$, where $\phi_0 = \phi$ and $\phi_{i+1} =
+\neg\exists\mathcal{X}_{i+1}.\phi_i$, $1 \leq i \leq m-1$ , and construct a
+family of automata accepting representations of models of the corresponding
+formulae.
 
-As defined, testing satisfiability of a formula is equal to testing \emph{non-emptiness} of automaton, which can be done \emph{on-the-fly} without generating the automaton $\mathcal{A}_\phi$. Further we will use the technique similar to the optimized universality checking, as defined in the previous, which will prune states that are subsumed by other states over the entire hierarchical family of automata.
+As defined, testing satisfiability of a formula is equal to testing
+\emph{non-emptiness} of automaton, which can be done \emph{on-the-fly} without
+generating the automaton $\mathcal{A}_\phi$. Further we will use the technique
+similar to the optimized universality checking, as defined in the previous,
+which will prune states that are subsumed by other states over the entire
+hierarchical family of automata.
 
 \chapter{Summary and future work}\label{summary}
 
-In this work we introduced the WS$k$S logic and its decision procedure. We have described classical approach that uses deterministic automata, as well as tool \textsc{MONA} that enhances this procedure by using several optimizations and discussed their complexity issues. 
+In this work we introduced the WS$k$S logic and its decision procedure. We have
+described classical approach that uses deterministic automata, as well as tool
+\textsc{MONA} that enhances this procedure by using several optimizations and
+discussed their complexity issues.
 
-Another approach was proposed that uses non-deterministic automata instead of deterministic ones. This makes use of recent developments in fields of non-deterministic automata algorithms, like universality checking or language inclusion, allowing us to implement procedure similar to anti-chain based testing \cite{tacas} and search for rejecting or accepting states on-the-fly without need to construct automaton corresponding to the given formula at all.
+Another approach was proposed that uses non-deterministic automata instead of
+deterministic ones. This makes use of recent developments in fields of
+non-deterministic automata algorithms, like universality checking or language
+inclusion, allowing us to implement procedure similar to anti-chain based
+testing \cite{tacas} and search for rejecting or accepting states on-the-fly
+without need to construct automaton corresponding to the given formula at all.
 
-The implementation is going to use \textsc{MONA} extensive frontend with several tweaks. We will then work with automata representation by using efficient library \textsc{VATA} \cite{vata}. The correctness of this approach has yet to be proved.
+The implementation is going to use \textsc{MONA} extensive frontend with several
+tweaks. We will then work with automata representation by using efficient
+library \textsc{VATA} \cite{vata}. The correctness of this approach has yet to
+be proved.
 
 %=========================================================================
