@@ -64,12 +64,12 @@ inline void setNonFinalState(Automaton &automaton, bool complement, unsigned int
  * TODO: do Complement
  */
 void ASTForm_True::toUnaryAutomaton(Automaton &trueAutomaton, bool doComplement) {
-    // _ -> q0
+    // (X^k) -> q0
 	setFinalState(trueAutomaton, doComplement, 0);
 
 	trueAutomaton.AddTransition(
     		Automaton::StateTuple(),
-    		Automaton::SymbolType(),
+    		constructUniversalTrack(),
     		0);
 
     // q0 -(X^k)-> q0
@@ -171,10 +171,22 @@ void ASTForm_Equal2::toUnaryAutomaton(Automaton &aut, bool doComplement) {
 		unsigned int X = XTerm->n;
 		ASTTerm2_Var2* YTerm = (ASTTerm2_Var2*) ((ASTTerm2_Plus*) this->T2)->T;
 		unsigned int Y = YTerm->n;
-		// _ -> q0
+		// (x00x) -> q0
+		Automaton::SymbolType q0 = constructUniversalTrack();
+		q0.SetIthVariableValue(X, '0');
+		q0.SetIthVariableValue(Y, '0');
 		aut.AddTransition(
 				Automaton::StateTuple(),
-				Automaton::SymbolType(),
+				q0,
+				0);
+
+		// (x10x) -> q0
+		Automaton::SymbolType q1 = constructUniversalTrack();
+		q1.SetIthVariableValue(X, '1');
+		q1.SetIthVariableValue(Y, '0');
+		aut.AddTransition(
+				Automaton::StateTuple(),
+				q1,
 				0);
 
 		// q0 -(x00x)-> q0
@@ -246,10 +258,31 @@ void ASTForm_Sub::toUnaryAutomaton(Automaton &aut, bool doComplement) {
 
 	ASTTerm2_Var2* T2Var = (ASTTerm2_Var2*) this->T2;
 	unsigned int T2 = (unsigned int) T2Var->n;
-	// _ -> q0
+	//  -(x00x)-> q0
+	Automaton::SymbolType q0 = constructUniversalTrack();
+	q0.SetIthVariableValue(T1, '0');
+	q0.SetIthVariableValue(T2, '0');
 	aut.AddTransition(
 			Automaton::StateTuple(),
-			Automaton::SymbolType(),
+			q0,
+			0);
+
+	//  -(x11x)-> q0
+	Automaton::SymbolType q0b = constructUniversalTrack();
+	q0b.SetIthVariableValue(T1, '1');
+	q0b.SetIthVariableValue(T2, '1');
+	aut.AddTransition(
+			Automaton::StateTuple(),
+			q0b,
+			0);
+
+	// -(x01x)-> q0
+	Automaton::SymbolType q0c = constructUniversalTrack();
+	q0c.SetIthVariableValue(T1, '0');
+	q0c.SetIthVariableValue(T2, '1');
+	aut.AddTransition(
+			Automaton::StateTuple(),
+			q0c,
 			0);
 
 	// q0 -(x00x)-> q0
@@ -292,11 +325,21 @@ void ASTForm_FirstOrder::toUnaryAutomaton(Automaton &aut, bool doComplement) {
 	ASTTerm2_Var2 *XVar = (ASTTerm2_Var2*) this->t;
 	unsigned int X = (unsigned int) XVar->n;
 
-	// _ -> q0
+	// -(x0x)-> q0
+	Automaton::SymbolType q0 = constructUniversalTrack();
+	q0.SetIthVariableValue(X, '0');
 	aut.AddTransition(
 			Automaton::StateTuple(),
-			Automaton::SymbolType(),
+			q0,
 			0);
+
+	// -(x1x)-> q1
+	Automaton::SymbolType q1 = constructUniversalTrack();
+	q1.SetIthVariableValue(X, '1');
+	aut.AddTransition(
+			Automaton::StateTuple(),
+			q1,
+			1);
 
 	// q0 -(x0x)-> q0
 	Automaton::SymbolType q0q0 = constructUniversalTrack();
