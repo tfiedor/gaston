@@ -17,20 +17,22 @@ using Automaton = VATA::BDDBottomUpTreeAut;
 
 /**
  * Constructs automaton for formula True
- * @return: Automaton corresponding to the formula True
+ *
+ * @param[out] trueAutomaton: created automaton
+ * @param doComplement: whether automaton should be complemented
  */
-Automaton* ASTForm_True::toBinaryAutomaton() {
+void ASTForm_True::toBinaryAutomaton(Automaton &trueAutomaton, bool doComplement) {
     cout << "True -> automaton\n";
-	return 0;
 }
 
 /**
  * Constructs automaton for formula False
- * @return: Automaton corresponding to the formula False
+ *
+ * @param[out] falseAutomaton: created automaton
+ * @param doComplement: whether automaton should be complemented
  */
-Automaton* ASTForm_False::toBinaryAutomaton() {
+void ASTForm_False::toBinaryAutomaton(Automaton &falseAutomaton, bool doComplement) {
 	cout << "False -> automaton\n";
-	return 0;
 }
 
 /**
@@ -40,13 +42,13 @@ Automaton* ASTForm_False::toBinaryAutomaton() {
  * formula being conversed to exPNF form, so determinization does not need
  * to take place
  *
- * @return: Automaton corresponding to the formula not phi
+ * @param[out] notAutomaton: created automaton
+ * @param doComplement: whether automaton should be complemented
  */
-Automaton* ASTForm_Not::toBinaryAutomaton() {
+void ASTForm_Not::toBinaryAutomaton(Automaton &notAutomaton, bool doComplement) {
 	// Inner formula is first conversed to binary automaton
-	Automaton* autF = this->f->toBinaryAutomaton();
+	this->f->toBinaryAutomaton(notAutomaton, true);
 	cout << "Not -> automaton\n";
-	return 0;
 }
 
 /**
@@ -55,14 +57,12 @@ Automaton* ASTForm_Not::toBinaryAutomaton() {
  * First converts formulae phi and psi to automatons and then does a automata
  * product to compute the final automaton.
  *
- * @return: Automaton corresponding to the formula phi and psi
+ * @param[out] andAutomaton: created automaton
+ * @param doComplement: whether automaton should be complemented
  */
-Automaton* ASTForm_And::toBinaryAutomaton() {
+void ASTForm_And::toBinaryAutomaton(Automaton &andAutomaton, bool doComplement) {
 	// Inner formulas are first conversed to binary automatons
 	cout << "And -> automaton\n";
-	Automaton *autF1 = this->f1->toBinaryAutomaton();
-	Automaton *autF2 = this->f2->toBinaryAutomaton();
-	return 0;
 }
 
 /**
@@ -71,14 +71,12 @@ Automaton* ASTForm_And::toBinaryAutomaton() {
  * First converts formulae phi or psi to automatons and then does a automata
  * union to compute the final automaton.
  *
- * @return: Automaton corresponding to the formula phi or psi
+ * @param[out] orAutomaton: created automaton
+ * @param doComplement: whether automaton should be complemented
  */
-Automaton* ASTForm_Or::toBinaryAutomaton() {
+void ASTForm_Or::toBinaryAutomaton(Automaton &orAutomaton, bool doComplement) {
 	// Inner formulas are first conversed to binary automatons
 	cout << "Or -> automaton\n";
-	Automaton *autF1 = this->f1->toBinaryAutomaton();
-	Automaton *autF2 = this->f2->toBinaryAutomaton();
-	return 0;
 }
 
 /**
@@ -89,42 +87,42 @@ Automaton* ASTForm_Or::toBinaryAutomaton() {
  *
  *  Constructs template automaton, that does acceptance of the formula
  *
- *  @return Automaton corresponding to the formula phi or psi
+ * @param[out] eqAutomaton: created automaton
+ * @param doComplement: whether automaton should be complemented
  */
-Automaton* ASTForm_Equal2::toBinaryAutomaton() {
+void ASTForm_Equal2::toBinaryAutomaton(Automaton &eqAutomaton, bool doComplement) {
 	cout << "Eq2 -> automaton\n";
-	return 0;
 }
 
 /**
  * Constructs automaton for atomic formula T1 ~= T2, first constructs automaton
  * T1 = T2 and then flip the states
  *
- * @return Automaton corresponding to the formula T1 ~= T2
+ * @param[out] neqAutomaton: created automaton
+ * @param doComplement: whether automaton should be complemented
  */
-Automaton* ASTForm_NotEqual2::toBinaryAutomaton() {
+void ASTForm_NotEqual2::toBinaryAutomaton(Automaton &neqAutomaton, bool doComplement) {
 	cout << "Neq2 -> automaton\n";
-	return 0;
 }
 
 
 /**
  * Constructs automaton for atomic formula T1 sub T2
  *
- * @return Automaton corresponding to the formula T1 sub T2
+ * @param[out] subAutomaton: created automaton
+ * @param doComplement: whether automaton should be complemented
  */
-Automaton* ASTForm_Sub::toBinaryAutomaton() {
+void ASTForm_Sub::toBinaryAutomaton(Automaton &subAutomaton, bool doComplement) {
 	cout << "Sub -> automaton\n";
-	return 0;
 }
 
 
 /**
  * Constructs automaton for formula denoting, that set is a singleton
  *
- * @return Automaton corresponding to the formula Singleton(X)
+ * @param[out] singAutomaton: created automaton
+ * @param doComplement: whether automaton should be complemented
  */
-Automaton* ASTForm_FirstOrder::toBinaryAutomaton() {
+void ASTForm_FirstOrder::toBinaryAutomaton(Automaton &singAutomaton, bool doComplement) {
 	cout << "Sing -> automaton\n";
-	return 0;
 }

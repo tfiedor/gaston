@@ -224,6 +224,11 @@ void splitMatrixAndPrefix(MonaAST* formula, ASTForm* &matrix, ASTForm* &prefix) 
  * the decision procedure process. It should consider the structure of prefix
  * of given formula, so BDD used in transitions of automata can be better
  * reordered
+ *
+ * Several heuristics will be tried out:
+ *  1) Random reorder
+ *  2) No reorder
+ *  3) Prefix-reorder
  */
 void reorder() {
 
@@ -353,10 +358,10 @@ main(int argc, char *argv[])
   Automaton formulaAutomaton;
   // WS1S formula is transformed to unary NTA
   if(options.mode != TREE) {
-	  //matrix->toUnaryAutomaton(formulaAutomaton, false);
+	  matrix->toUnaryAutomaton(formulaAutomaton, false);
   // WS2S formula is transformed to binary NTA
   } else {
-	  //formulaAutomaton = matrix->toBinaryAutomaton();
+	  matrix->toBinaryAutomaton(formulaAutomaton, false);
   }
   ASTForm_True* form1 = new ASTForm_True(Pos());
   ASTForm_True* form2 = new ASTForm_True(Pos());

@@ -162,7 +162,7 @@ public:
 
   // Conversion of AST representation of formula to Automaton
   virtual void toUnaryAutomaton(Automaton &aut, bool doComplement) { std::cout << "Converting formula to unary automaton \n"; }
-  virtual Automaton* toBinaryAutomaton() { std::cout << "Converting formula to binary automaton \n"; return 0; }
+  virtual void toBinaryAutomaton(Automaton &aut, bool doComplement) { std::cout << "Converting formula to binary automaton \n"; }
 };
 
 class FormList: public DequeGC<ASTForm*> {};
@@ -756,7 +756,7 @@ public:
 
   // Conversion of AST representation of formula to Automaton
   void toUnaryAutomaton(Automaton &aut, bool doComplement);
-  Automaton* toBinaryAutomaton();
+  void toBinaryAutomaton(Automaton &aut, bool doComplement);
 };
 
 class ASTForm_False: public ASTForm {
@@ -770,7 +770,7 @@ public:
 
   // Conversion of AST representation of formula to Automaton
   void toUnaryAutomaton(Automaton &aut, bool doComplement);
-  Automaton* toBinaryAutomaton();
+  void toBinaryAutomaton(Automaton &aut, bool doComplement);
 };
 
 class ASTForm_In: public ASTForm_tT {
@@ -836,7 +836,7 @@ public:
 
   // Conversion of AST representation of formula to Automaton
   void toUnaryAutomaton(Automaton &aut, bool doComplement);
-  Automaton* toBinaryAutomaton();
+  void toBinaryAutomaton(Automaton &aut, bool doComplement);
 
 protected:
   ASTTerm1 *t;
@@ -853,7 +853,7 @@ public:
 
   // Conversion of AST representation of formula to Automaton
   void toUnaryAutomaton(Automaton &aut, bool doComplement);
-  Automaton* toBinaryAutomaton();
+  void toBinaryAutomaton(Automaton &aut, bool doComplement);
 };
 
 class ASTForm_Equal1: public ASTForm_tt {
@@ -878,7 +878,7 @@ public:
 
   // Conversion of AST representation of formula to Automaton
   void toUnaryAutomaton(Automaton &aut, bool doComplement);
-  Automaton* toBinaryAutomaton();
+  void toBinaryAutomaton(Automaton &aut, bool doComplement);
 };
 
 class ASTForm_NotEqual1: public ASTForm_tt {
@@ -903,7 +903,7 @@ public:
 
   // Conversion of AST representation of formula to Automaton
   void toUnaryAutomaton(Automaton &aut, bool doComplement);
-  Automaton* toBinaryAutomaton();
+  void toBinaryAutomaton(Automaton &aut, bool doComplement);
 };
 
 class ASTForm_Less: public ASTForm_tt {
@@ -974,7 +974,7 @@ public:
   ASTForm* toRestrictedSyntax();
 
   void toUnaryAutomaton(Automaton &aut, bool doComplement);
-  Automaton* toBinaryAutomaton();
+  void toBinaryAutomaton(Automaton &aut, bool doComplement);
 };
 
 class ASTForm_IdLeft: public ASTForm_ff {
@@ -1001,7 +1001,7 @@ public:
   ASTForm* toRestrictedSyntax();
 
   void toUnaryAutomaton(Automaton &aut, bool doComplement);
-  Automaton* toBinaryAutomaton();
+  void toBinaryAutomaton(Automaton &aut, bool doComplement);
 };
 
 class ASTForm_Not: public ASTForm {
@@ -1021,7 +1021,7 @@ public:
   ASTForm* removeUniversalQuantifier();
 
   void toUnaryAutomaton(Automaton &aut, bool doComplement);
-  Automaton* toBinaryAutomaton();
+  void toBinaryAutomaton(Automaton &aut, bool doComplement);
 
   ASTForm *f;
 };
