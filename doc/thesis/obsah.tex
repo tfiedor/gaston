@@ -165,10 +165,12 @@ Let $\mathcal{A} = (Q_\mathcal{A}, \Sigma, \delta_\mathcal{A}, I_\mathcal{A},
 F_\mathcal{A})$ and $\mathcal{B} = (Q_\mathcal{B}, \Sigma, \delta_\mathcal{B},
 I_\mathcal{B}, F_\mathcal{B})$ be a pair of finite automata such that
 $Q_\mathcal{A} \cap Q_\mathcal{B}$. We construct an automaton accepting the
-\emph{union} of languages $L(\mathcal{A})$ and $L(\mathcal{B})$  $$ \mathcal{A}
-\cup \mathcal{B} = (Q_\mathcal{A} \cup Q_\mathcal{B}, \Sigma, \delta_\mathcal{A}
-\cup \delta_\mathcal{B}, I_\mathcal{A} \cup I_\mathcal{B}, F_\mathcal{A} \cup
-F_\mathcal{B})$$
+\emph{union} of languages $L(\mathcal{A})$ and $L(\mathcal{B})$  
+ \begin{equation} \mathcal{A} \cup \mathcal{B} = (Q_\mathcal{A} \cup
+ Q_\mathcal{B}, \Sigma, \delta_\mathcal{A} \cup \delta_\mathcal{B},
+ I_\mathcal{A} \cup I_\mathcal{B}, F_\mathcal{A} \cup
+F_\mathcal{B})
+\end{equation}
 	
 The roof that $L(\mathcal{A} \cup \mathcal{B}) = L(\mathcal{A}) \cup
 L(\mathcal{B})$ can be found for example in \cite{tin}.
@@ -183,11 +185,17 @@ Let $\mathcal{A} = (Q_\mathcal{A}, \Sigma, \delta_\mathcal{A}, I_\mathcal{A},
 F_\mathcal{A})$ and $\mathcal{B} = (Q_\mathcal{B}, \Sigma, \delta_\mathcal{B},
 I_\mathcal{B}, F_\mathcal{B})$ be a pair of finite automata. We construct an
 automaton accepting the \emph{intersection} of languages $L(\mathcal{A})$ and
-$L(\mathcal{B})$ $$\mathcal{A} \cap \mathcal{B} = (Q_\mathcal{A} \times
+$L(\mathcal{B})$ 
+\begin{equation}
+\mathcal{A} \cap \mathcal{B} = (Q_\mathcal{A} \times
 Q_\mathcal{B}, \Sigma, \delta, I_\mathcal{A} \times I_\mathcal{B}, F_\mathcal{A}
-\times F_\mathcal{B})$$ where $$\delta = \{(p_1, p_2)
+\times F_\mathcal{B})
+\end{equation} where 
+\begin{equation}
+\delta = \{(p_1, p_2)
 \overset{a}{\longrightarrow} (q_1, q_2)\ |\ (p_1, a, q_1) \in \delta_\mathcal{A}
-\wedge (p_2, a, q_2) \in \delta_\mathcal{B}\}$$
+\wedge (p_2, a, q_2) \in \delta_\mathcal{B}\}
+\end{equation}
 	
 The proof that $L(\mathcal{A} \cap \mathcal{B}) = L(\mathcal{A}) \cap
 L(\mathcal{B})$ can be found for example in \cite{tin}.
@@ -200,9 +208,12 @@ L(\mathcal{B})$ can be found for example in \cite{tin}.
 	\begin{proof}
 Let $\mathcal{A} = (Q_\mathcal{A}, \Sigma, \delta_\mathcal{A}, I_\mathcal{A},
 F_\mathcal{A})$ be a complete deterministic FA. We construct an automaton
-accepting the \emph{complement} of $L(\mathcal{A})$ $$\overline{\mathcal{A}} =
+accepting the \emph{complement} of $L(\mathcal{A})$ 
+\begin{equation}
+\overline{\mathcal{A}} =
 (Q_\mathcal{A}, \Sigma, \delta_\mathcal{A}, I_\mathcal{A}, Q_\mathcal{A}
-\setminus F_\mathcal{A})$$
+\setminus F_\mathcal{A})
+\end{equation}
 	
 The proof that $L(\overline{\mathcal{A}}) = \Sigma^* \setminus L(\mathcal{A})$
 can be found for example in \cite{tin}.
@@ -297,16 +308,20 @@ $L(\mathcal{A}) = L$.
 Let $\mathcal{A} = (Q_\mathcal{A}, \Sigma, F_\mathcal{A}, \delta_\mathcal{A})$
 and $\mathcal{B} = (Q_\mathcal{B}, \Sigma, F_\mathcal{B}, \delta_\mathcal{B})$
 be two tree automata. We construct a tree automaton accepting
-\emph{intersection} of languages $L(\mathcal{A})$ and $L(\mathcal{B})$  $$\mathcal{A} \cap \mathcal{B}
+\emph{intersection} of languages $L(\mathcal{A})$ and $L(\mathcal{B})$  
+\begin{equation}
+\mathcal{A} \cap \mathcal{B}
 = (Q_\mathcal{A} \times Q_\mathcal{B}, \Sigma, (F_\mathcal{A} \times
 Q_\mathcal{B}) \cup (Q_\mathcal{A} \times F_\mathcal{B}), \delta_\mathcal{A}
-\times \delta_\mathcal{B})$$ where
- \begin{eqnarray*}
- \delta_\mathcal{A} \times \delta_\mathcal{B} & = & \{
- ((q^1_1,q^2_1),\ldots,(q^1_n,q^2_n)) \overset{f}{\longrightarrow} (q^1, q^2)\\
-  & | & (q^1_1,\ldots,q^1_n) \overset{f}{\longrightarrow} q^1 \in \delta_1
+\times \delta_\mathcal{B})
+\end{equation} where
+ \begin{align}
+ \delta_\mathcal{A} \times \delta_\mathcal{B} = &\{
+ ((q^1_1,q^2_1),\ldots,(q^1_n,q^2_n)) \overset{f}{\longrightarrow} (q^1,
+ q^2)\nonumber \\
+  & | (q^1_1,\ldots,q^1_n) \overset{f}{\longrightarrow} q^1 \in \delta_1
   \wedge (q^2_1,\ldots,q^2_n) \overset{f}{\longrightarrow} q^2 \in \delta_2)\}
-	\end{eqnarray*}.
+	\end{align}.
 \end{proof}
 
 Note that this construction preserves determinism, i.e. if the two given
@@ -320,9 +335,12 @@ automata are deterministic, then so is the product automaton.
 Let $\mathcal{A} = (Q_\mathcal{A}, \Sigma, F_\mathcal{A}, \delta_\mathcal{A})$
 and $\mathcal{B} = (Q_\mathcal{B}, \Sigma, F_\mathcal{B}, \delta_\mathcal{B})$
 be two tree automata. We construct a tree automaton accepting \emph{union}
-of languages $L(\mathcal{A})$ and $L(\mathcal{B})$ $$\mathcal{A} \cap
+of languages $L(\mathcal{A})$ and $L(\mathcal{B})$ 
+\begin{equation}
+\mathcal{A} \cap
 \mathcal{B} = (Q_\mathcal{A} \times Q_\mathcal{B}, \Sigma, F_\mathcal{A} \times
-F_\mathcal{B}, \delta_\mathcal{A} \times \delta_\mathcal{B})$$.
+F_\mathcal{B}, \delta_\mathcal{A} \times \delta_\mathcal{B})
+\end{equation}.
 \end{proof}
 
 \begin{theorem}
@@ -332,7 +350,10 @@ F_\mathcal{B}, \delta_\mathcal{A} \times \delta_\mathcal{B})$$.
 \begin{proof}
 Let $\mathcal{A} = (Q, \Sigma, F, \delta)$ be a complete bottom-up deterministic
 TA. We construct tree automaton accepting the \emph{complement} of the language
-$L(\mathcal{A})$ $$\overline{\mathcal{A}} = (Q, \Sigma, Q - F, \delta)$$.
+$L(\mathcal{A})$ 
+\begin{equation}
+\overline{\mathcal{A}} = (Q, \Sigma, Q - F, \delta)
+\end{equation}.
 \end{proof}
 
 Note that for non-deterministic tree automata there is currently known no
@@ -367,8 +388,11 @@ trees over $T_{\Sigma_\bot^n}$:
 
 \begin{defz}
 Rec, the recognizable tree relations, is the class of relations $R \subseteq
-(T_\Sigma)^n$ such that the language $$\{[t_1,\ldots,t_n]\ |\ (t_1,\ldots,t_n)
-\in R\}$$ is accepted by a tree automaton on the alphabet $\Sigma_\bot^n$.
+(T_\Sigma)^n$ such that the language 
+\begin{equation}
+\{[t_1,\ldots,t_n]\ |\ (t_1,\ldots,t_n)
+\in R\}
+\end{equation} is accepted by a tree automaton on the alphabet $\Sigma_\bot^n$.
 \end{defz}
 
 \begin{prop}
@@ -384,8 +408,11 @@ This is due to closure properties of tree automata (see Section
 \begin{defz}
 If $R \subseteq (T_\Sigma)^n$ where $n \geq 1$ and $1 \leq i \leq n$, then the
 $i$-th \emph{projection} of R is the relation $R_i \subseteq (T_\Sigma)^{n-1}$
-defined by $$ R_i(t_1,\ldots,t_{n-1}) \Leftrightarrow \exists t \in T_\Sigma .
-R(t_1,\ldots,t_{i-1},t,t_i,\ldots,t_{n-1})$$.
+defined by 
+\begin{equation}
+ R_i(t_1,\ldots,t_{n-1}) \Leftrightarrow \exists t \in T_\Sigma
+.\ R(t_1,\ldots,t_{i-1},t,t_i,\ldots,t_{n-1})
+\end{equation}.
 \end{defz}
 
 \begin{lemma}
@@ -406,8 +433,11 @@ smaller or equal to $k$. Because linear homomorphisms preserve recognizability
 \begin{defz}
  If $R \subseteq (T_\Sigma)^n$ where $n \geq 0$ and $1 \leq i \leq n+1$ then the
  $i$th \emph{cylindrification} of R is the relation $R_i \subseteq
- (T_\Sigma)^{n+1}$ defined by $$ R^i(t_1,\ldots,t_{i-1},t,t_i,\ldots,t_n)
- \Leftrightarrow R(t_1,\ldots,t_{i-1},t_i,\ldots,t_n)$$
+ (T_\Sigma)^{n+1}$ defined by 
+\begin{equation}
+ R^i(t_1,\ldots,t_{i-1},t,t_i,\ldots,t_n)
+ \Leftrightarrow R(t_1,\ldots,t_{i-1},t_i,\ldots,t_n)
+\end{equation}
 \end{defz}
 
 \begin{lemma}
@@ -564,14 +594,17 @@ $\models_2$.
 	
 	\begin{prop}
 There is a translation T from WS$k$S formulae to the restricted syntax such that
-$$s_1,\ldots,s_n,S_1,\ldots,S_m \models \psi(x_1,\ldots,x_n,X_1,\ldots,X_m)$$ if
-and only if $$\{s_1\},\ldots,\{s_n\},S_1,\ldots,S_m \models_2
-T(\psi)(X_{x_1},\ldots,X_{x_n}, X_1,\ldots,X_m)$$.
+\begin{equation}
+s_1,\ldots,s_n,S_1,\ldots,S_m \models
+\psi(x_1,\ldots,x_n,X_1,\ldots,X_m)
+\end{equation} if and only if \begin{equation}\{s_1\},\ldots,\{s_n\},S_1,\ldots,S_m \models_2
+T(\psi)(X_{x_1},\ldots,X_{x_n}, X_1,\ldots,X_m)
+\end{equation}.
 
  Conversely, there is a
-translation $T'$ from the restricted syntax to WS$k$S such that $$S_1,\ldots,S_m
-\models T'(\psi)(X_1,\ldots,X_m)$$ if and only if $$S_1,\ldots,S_m \models_2
-\psi(X_1,\ldots,X_m)$$.
+translation $T'$ from the restricted syntax to WS$k$S such that \begin{equation}S_1,\ldots,S_m
+\models T'(\psi)(X_1,\ldots,X_m)\end{equation} if and only if \begin{equation}S_1,\ldots,S_m \models_2
+\psi(X_1,\ldots,X_m)\end{equation}.
 	\end{prop}
 	\begin{proof}
 We will only present a short sketch of the proof for this proposition. For
@@ -581,7 +614,7 @@ We can suppose that formulae will be built only upon the atomic formulae $t \in
 X$ and $s = t$ and so flatten the rest of the atomic formulae. Every first-order
 variable $y$ will be mapped to a second-order variable $X_y$ as follows:
 	
-	 \begin{eqnarray*}
+	 \begin{eqnarray}
 	 T(y \in X) & \overset{\mathit{def}}{=} & X_y \subseteq X\\
 	 T(y = xi) & \overset{\mathit{def}}{=} &  X_y = X_xi\\
 	 T(x = \varepsilon) & \overset{\mathit{def}}{=} & X_x = \varepsilon\\
@@ -590,7 +623,7 @@ variable $y$ will be mapped to a second-order variable $X_y$ as follows:
 	 T(\neg\phi) & \overset{\mathit{def}}{=} & \neg T(\phi)\\
 	 T(\exists X.\phi) & \overset{\mathit{def}}{=} & \exists X.T(\phi)\\
 	 T(\exists y.\phi) & \overset{\mathit{def}}{=} & \exists X_y\ .\ Sing(X_y) \wedge T(\phi)
-	 \end{eqnarray*}
+	 \end{eqnarray}
 	Moreover, for each free variable $x$ we add a $Sing(X_x)$ formula. 
 	
 	The converse translation is $T'$ can be defined similarly as written
@@ -599,16 +632,19 @@ variable $y$ will be mapped to a second-order variable $X_y$ as follows:
 	
 We will further restrict the syntax of WS$k$S. A~WS$k$S formula $\phi$ is in the
 \emph{prenex normal form} (abbreviated as PNF) if and only if it is of the form
-$$\phi = Q_1X_1Q_2X_2\ldots Q_nX_n\ .\ \psi(\mathds{X})$$ where  $Q_i \in
-\{\exists,\forall\}$, $1 \leq i \leq n$, and $\psi$ is a quantifier-free formula
+\begin{equation}
+\phi = Q_1X_1Q_2X_2\ldots Q_nX_n\ .\ \psi(\mathds{X})
+\end{equation} where 
+$Q_i \in \{\exists,\forall\}$, $1 \leq i \leq n$, and $\psi$ is a quantifier-free formula
 in the restricted syntax as defined above. We denote $Q_1X_1Q_2X_2\ldots Q_nX_n$
 as the \emph{prefix} of $\phi$ and $\psi(\mathds{X})$ as the \emph{matrix} of
 $\phi$.
 	
 A~WS$k$S formula $\rho$ is in the \emph{existentially-quantified prenex normal
-form} (abbreviated as $\exists$PNF), if and only if $$\rho = \exists
-\mathcal{X}_{m+1}\neg\exists \mathcal{X}_m\ldots\neg\exists
-\mathcal{X}_2\neg\exists \mathcal{X}_1.\psi(\mathds{X})$$ where
+form} (abbreviated as $\exists$PNF), if and only if \begin{equation}\rho =
+\exists \mathcal{X}_{m+1}\neg\exists \mathcal{X}_m\ldots\neg\exists
+\mathcal{X}_2\neg\exists \mathcal{X}_1.\psi(\mathds{X})
+\end{equation} where
 $\exists\mathcal{X}_i$, for $\mathcal{X}_i \subseteq \mathds{X}$, is a (possibly
 empty) sequence $\exists X_a\ldots\exists X_b$ of consecutive existential
 quantifications and $\psi$ is again a quantifier-free formula in the restricted
@@ -643,11 +679,11 @@ All universal quantifiers are transformed to existential quantifier
 according to the equivalence $\forall x.\ \phi \equiv \neg\exists x.\ \neg\phi$.
 Lastly all negations in the matrix are shifted to the atoms according to the
 following laws:
-	\begin{eqnarray*}
+	\begin{eqnarray}
 	 \neg\neg\phi & \equiv & \phi\\
 	 \neg(\phi\vee \psi) & \equiv & \neg \phi \wedge \neg \psi\\
 	 \neg(\phi\wedge \psi) & \equiv & \neg \phi \vee \neg \psi 
-	\end{eqnarray*}
+	\end{eqnarray}
  The resulting formula is in the existentially-quantified prenex normal form. 
 	\end{proof}
 	
@@ -673,8 +709,8 @@ The contents of this section is based on the exposition over in \cite{tata}.
 \begin{defz}
  A~set $L$ of tuples of finite sets of words is \emph{definable in WS$k$S} if
  there is a~formula $\psi$ of WS$k$S with free variables $X_1,\ldots,X_n$ such
- that $$(S_1,\ldots,S_n) \in L \text{ if and only if } S_1,\ldots,S_n \models
- \psi.$$
+ that \begin{equation}(S_1,\ldots,S_n) \in L \text{ if and only if }
+ S_1,\ldots,S_n \models \psi.\end{equation}
 \end{defz} Each tuple of finite sets of words $S_1,\ldots,S_n \subseteq
 \{1,\ldots,k\}^*$ is then identified to a tree $(S_1,\ldots,S_n)^\sim$ over the
 alphabet $\{0,1,\bot\}^n$ where any string containing 0 or 1 is $k$-ary and
@@ -684,7 +720,8 @@ $\bot^n$ is a constant symbol, such that
   pi\ \Bigg|\ \exists p' \in \bigcup_{j = 1}^n S_j.p \leq p', 1 \leq i \leq
   k\right\}
  \end{equation}
-The symbol at the position $p$: $$(S_1,\ldots,S_n)^\sim(p) = \alpha_1\ldots\alpha_n$$ is defined as follows:
+The symbol at the position $p$: \begin{equation}(S_1,\ldots,S_n)^\sim(p) =
+\alpha_1\ldots\alpha_n\end{equation} is defined as follows:
  \begin{itemize}
   \item $\alpha_i = 1 \text{ iff } p \in S_i$,
   \item $\alpha_i = 0 \text{ iff } p \notin S_i \wedge \exists p': p\cdot p' \in S_i$,
@@ -704,7 +741,7 @@ WS$k$S, then $\overset{\sim}{L} \overset{\mathit{def}}{=}
  defines the language $L$.
 
 Let us assume that all variables in $\psi$ are bound at most once in the formula
-and also that there is a fixed total ordering $\<$ on the variables.
+and also that there is a fixed total ordering $<$ on the variables.
 
 If $\phi$ is a subformula of $\psi$ with free variables $Y_1 < \cdots < Y_n$, we
 construct the automaton $\mathcal{A}_\phi$ over the alphabet $\{0,1,\bot\}^n$
@@ -744,14 +781,14 @@ to the following rules:
   (q', q) & \overset{01}{\longrightarrow} & q''\\
   (q'', q) & \overset{00}{\longrightarrow} & q''
 \end{eqnarray*}
-Note that the automaton for $X = Y2$ is obtained similarly by chaning $(q', q) &
-\overset{01}{\longrightarrow} & q''$ to $(q, q') & \overset{01}{\longrightarrow}
-& q''$.
+Note that the automaton for $X = Y2$ is obtained similarly by changing $(q', q)
+\overset{01}{\longrightarrow} q''$ to $(q, q') \overset{01}{\longrightarrow}
+ q''$.
  \item[-] The automaton $\mathcal{A}_{X = \epsilon} = (\{q, q'\}, \{0, 1,
  \bot\}, \{q'\}, \delta$), where $\delta$ is efined as follows:
 \begin{eqnarray*}
- \bot & \rightarrow & q\\
- 1 (q, q) & \rightarrow & q'
+  & \overset{\bot}{\longrightarrow} & q\\
+ (q, q) & \overset{1}{\longrightarrow}& q'
 \end{eqnarray*}
 \end{itemize}
 
@@ -768,7 +805,7 @@ $\wedge$, $\neg$ and $\exists$ (as defined in the restricted syntax):
  $\overline{X}_1 \cup \overline{X}_2$. Then the automaton $\mathcal{A}_\psi$ is
  obtained as the union of these automata.
  \item[$\psi$]$ = \psi_1 \wedge \psi_2$\,--\,is obtained similarly as automaton
- for connective $\vee$ byt by using \emph{intersection} of automata.
+ for connective $\vee$ by by using \emph{intersection} of automata.
  \item[$\psi$]$ = \neg\psi_1$\,--\,then $\mathcal{A}_\psi$ is the automaton
  accepting the complement of $L(\mathcal{A}_{\psi_1})$.
  \item[$\psi$]$ = \exists X.\psi_1$\,--\,assuming that $X$ corresponds to the
@@ -912,12 +949,13 @@ MONA performs three kinds of reductions:
  situations. However they are cheap and may yield small improvements.
 
 \item Special quantifier reductions. The basic idea is to apply a rewrite step
-which removes quantifiers, where they are not useful, as following: $$\exists X
-. \phi \Leftrightarrow \phi[T/X]$$ provided that $\phi \Rightarrow X = T$ is
-valid and $T$ is some term satisfying $freevar(T) \subseteq freevar(\phi)$,
+which removes quantifiers, where they are not useful, as following: 
+\begin{equation}\exists X
+. \phi \Leftrightarrow \phi[T/X]\end{equation} provided that $\phi \Rightarrow
+X = T$ is valid and $T$ is some term satisfying $freevar(T) \subseteq freevar(\phi)$,
 where $freevar$ denotes the set of free variables of subformula. This is further
-restricted to different rewrite rule: $$ \exists X_i . \phi \Leftrightarrow
-\phi[X_j/X_i]$$ provided that $\phi \equiv \ldots \wedge X_i = X_j \wedge
+restricted to different rewrite rule: \begin{equation} \exists X_i . \phi \Leftrightarrow
+\phi[X_j/X_i]\end{equation} provided that $\phi \equiv \ldots \wedge X_i = X_j \wedge
 \ldots$ and $X_j$ is some variable other than $X_i$. This, however, is not
 guaranteed to yield better results.
 
