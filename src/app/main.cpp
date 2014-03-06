@@ -343,10 +343,6 @@ main(int argc, char *argv[])
     }
   }
   
-  if (options.mode == TREE && (options.dump || options.whole) && 
-      !options.externalWhole)
-    printGuide();
-
   ///////// Conversion to Tree Automata ////////
 
   // First formula in AST representation is split into matrix and prefix part.

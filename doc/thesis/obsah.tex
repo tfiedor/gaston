@@ -555,6 +555,18 @@ atomic formulae without harm to the expressive power of the logic. This will be
 further explained in Section \ref{restricted}. The set of \emph{free variables}
 of a formula $\psi$ is defined as usual.
   
+  \noindent\hrulefill
+  \begin{example}
+  The following example WS$k$S formula $\varphi$ denotes that there exists only
+  one set that contains all elements from universe of discourse.
+  \begin{equation}
+   \varphi \overset{\mathit{def}}{=} \exists X: \forall p: p \in X \wedge
+   \neg\exists Z:
+   X = Z
+  \end{equation}
+   \hrulefill
+  \end{example}\label{wsks-formula}
+  
   \section{Semantics}
 	
 We will interpret terms as strings belonging to $\{1,\ldots,k\}^*$, $=$ as the
@@ -591,6 +603,17 @@ $\neg$.
 	 This syntax will be called
 the \emph{restricted syntax} and its satisfaction relation will be denoted as
 $\models_2$.
+
+  \noindent\hrulefill
+  \begin{example}
+  The following example WS$k$S formula $\phi$ is in restricted syntax and is
+  equivalent to formula from Example \ref{wsks-formula}:
+  \begin{equation}
+   \phi \overset{\mathit{def}}{=} \exists X: \forall P: P \subseteq X \wedge
+   \mathit{Sing}(P) \wedge \neg\exists Z: X = Z
+  \end{equation}
+   \hrulefill
+  \end{example}\label{wsks-formula-restricted}
 	
 	\begin{prop}
 There is a translation T from WS$k$S formulae to the restricted syntax such that
@@ -649,6 +672,17 @@ $\exists\mathcal{X}_i$, for $\mathcal{X}_i \subseteq \mathds{X}$, is a (possibly
 empty) sequence $\exists X_a\ldots\exists X_b$ of consecutive existential
 quantifications and $\psi$ is again a quantifier-free formula in the restricted
 syntax over $\mathds{X}$.
+	
+  \noindent\hrulefill
+  \begin{example}
+  The following example WS$k$S formula $\psi$ is in existentially-quantified prenex normal
+form and is equivalent to formula from Example \ref{wsks-formula}:
+  \begin{equation}
+   \psi \overset{\mathit{def}}{=} \exists X: \neg \exists P \exists Z: \neg P
+   \subseteq X \vee X = Z \vee \neg\mathit{Sing}(P)
+  \end{equation}
+   \hrulefill
+  \end{example}\label{wsks-formula-restricted}
 	
 	\begin{prop}
 There is a translation from WS$k$S formulae in the restricted syntax to the
@@ -819,6 +853,27 @@ $\wedge$, $\neg$ and $\exists$ (as defined in the restricted syntax):
  $L(\mathcal{A}_\phi)$ is non-empty and valid iff $L(\mathcal{A}_\phi)$  is
  universal.
 \end{prop}
+
+  \noindent\hrulefill
+  \begin{example}
+  Consider following WS$k$S formula:
+  \begin{equation}
+  $\rho \overset{\mathit{def}}{=} \exists P:
+ Sing(P) \wedge P \not\subseteq X$
+  \end{equation}
+   \hrulefill
+  \end{example}\label{wsks-formula-restricted}
+ 
+ \begin{figure}[h!]
+ \begin{center}
+  \scalebox{0.55}{\includegraphics{fig/formula-singleton-and-subset.pdf}}
+  \scalebox{0.55}{\includegraphics{fig/formula-automaton-product.pdf}}
+  \scalebox{0.55}{\includegraphics{fig/formula-automaton.pdf}}
+ \end{center}
+ \caption{Finite automata corresponding to the subformulae of the formula
+ $\rho \overset{\mathit{def}}{=} \exists P:
+ Sing(P) \wedge P \not\subseteq X$}\label{automata}
+\end{figure}
 
 \subsubsection{Issues of This Approach}
 

@@ -1,5 +1,5 @@
-#include "ast.h"
-#include "symboltable.h"
+#include "../Frontend/ast.h"
+#include "../Frontend/symboltable.h"
 
 #include <cstring>
 

@@ -114,6 +114,102 @@ dip/fast:
 	$(MAKE) -f CMakeFiles/dip.dir/build.make CMakeFiles/dip.dir/build
 .PHONY : dip/fast
 
+src/app/DecisionProcedure/expnf.o: src/app/DecisionProcedure/expnf.cpp.o
+.PHONY : src/app/DecisionProcedure/expnf.o
+
+# target to build an object file
+src/app/DecisionProcedure/expnf.cpp.o:
+	$(MAKE) -f CMakeFiles/dip.dir/build.make CMakeFiles/dip.dir/src/app/DecisionProcedure/expnf.cpp.o
+.PHONY : src/app/DecisionProcedure/expnf.cpp.o
+
+src/app/DecisionProcedure/expnf.i: src/app/DecisionProcedure/expnf.cpp.i
+.PHONY : src/app/DecisionProcedure/expnf.i
+
+# target to preprocess a source file
+src/app/DecisionProcedure/expnf.cpp.i:
+	$(MAKE) -f CMakeFiles/dip.dir/build.make CMakeFiles/dip.dir/src/app/DecisionProcedure/expnf.cpp.i
+.PHONY : src/app/DecisionProcedure/expnf.cpp.i
+
+src/app/DecisionProcedure/expnf.s: src/app/DecisionProcedure/expnf.cpp.s
+.PHONY : src/app/DecisionProcedure/expnf.s
+
+# target to generate assembly for a file
+src/app/DecisionProcedure/expnf.cpp.s:
+	$(MAKE) -f CMakeFiles/dip.dir/build.make CMakeFiles/dip.dir/src/app/DecisionProcedure/expnf.cpp.s
+.PHONY : src/app/DecisionProcedure/expnf.cpp.s
+
+src/app/DecisionProcedure/formula-flatten.o: src/app/DecisionProcedure/formula-flatten.cpp.o
+.PHONY : src/app/DecisionProcedure/formula-flatten.o
+
+# target to build an object file
+src/app/DecisionProcedure/formula-flatten.cpp.o:
+	$(MAKE) -f CMakeFiles/dip.dir/build.make CMakeFiles/dip.dir/src/app/DecisionProcedure/formula-flatten.cpp.o
+.PHONY : src/app/DecisionProcedure/formula-flatten.cpp.o
+
+src/app/DecisionProcedure/formula-flatten.i: src/app/DecisionProcedure/formula-flatten.cpp.i
+.PHONY : src/app/DecisionProcedure/formula-flatten.i
+
+# target to preprocess a source file
+src/app/DecisionProcedure/formula-flatten.cpp.i:
+	$(MAKE) -f CMakeFiles/dip.dir/build.make CMakeFiles/dip.dir/src/app/DecisionProcedure/formula-flatten.cpp.i
+.PHONY : src/app/DecisionProcedure/formula-flatten.cpp.i
+
+src/app/DecisionProcedure/formula-flatten.s: src/app/DecisionProcedure/formula-flatten.cpp.s
+.PHONY : src/app/DecisionProcedure/formula-flatten.s
+
+# target to generate assembly for a file
+src/app/DecisionProcedure/formula-flatten.cpp.s:
+	$(MAKE) -f CMakeFiles/dip.dir/build.make CMakeFiles/dip.dir/src/app/DecisionProcedure/formula-flatten.cpp.s
+.PHONY : src/app/DecisionProcedure/formula-flatten.cpp.s
+
+src/app/DecisionProcedure/ws1s-formula-to-automaton.o: src/app/DecisionProcedure/ws1s-formula-to-automaton.cpp.o
+.PHONY : src/app/DecisionProcedure/ws1s-formula-to-automaton.o
+
+# target to build an object file
+src/app/DecisionProcedure/ws1s-formula-to-automaton.cpp.o:
+	$(MAKE) -f CMakeFiles/dip.dir/build.make CMakeFiles/dip.dir/src/app/DecisionProcedure/ws1s-formula-to-automaton.cpp.o
+.PHONY : src/app/DecisionProcedure/ws1s-formula-to-automaton.cpp.o
+
+src/app/DecisionProcedure/ws1s-formula-to-automaton.i: src/app/DecisionProcedure/ws1s-formula-to-automaton.cpp.i
+.PHONY : src/app/DecisionProcedure/ws1s-formula-to-automaton.i
+
+# target to preprocess a source file
+src/app/DecisionProcedure/ws1s-formula-to-automaton.cpp.i:
+	$(MAKE) -f CMakeFiles/dip.dir/build.make CMakeFiles/dip.dir/src/app/DecisionProcedure/ws1s-formula-to-automaton.cpp.i
+.PHONY : src/app/DecisionProcedure/ws1s-formula-to-automaton.cpp.i
+
+src/app/DecisionProcedure/ws1s-formula-to-automaton.s: src/app/DecisionProcedure/ws1s-formula-to-automaton.cpp.s
+.PHONY : src/app/DecisionProcedure/ws1s-formula-to-automaton.s
+
+# target to generate assembly for a file
+src/app/DecisionProcedure/ws1s-formula-to-automaton.cpp.s:
+	$(MAKE) -f CMakeFiles/dip.dir/build.make CMakeFiles/dip.dir/src/app/DecisionProcedure/ws1s-formula-to-automaton.cpp.s
+.PHONY : src/app/DecisionProcedure/ws1s-formula-to-automaton.cpp.s
+
+src/app/DecisionProcedure/ws2s-formula-to-automaton.o: src/app/DecisionProcedure/ws2s-formula-to-automaton.cpp.o
+.PHONY : src/app/DecisionProcedure/ws2s-formula-to-automaton.o
+
+# target to build an object file
+src/app/DecisionProcedure/ws2s-formula-to-automaton.cpp.o:
+	$(MAKE) -f CMakeFiles/dip.dir/build.make CMakeFiles/dip.dir/src/app/DecisionProcedure/ws2s-formula-to-automaton.cpp.o
+.PHONY : src/app/DecisionProcedure/ws2s-formula-to-automaton.cpp.o
+
+src/app/DecisionProcedure/ws2s-formula-to-automaton.i: src/app/DecisionProcedure/ws2s-formula-to-automaton.cpp.i
+.PHONY : src/app/DecisionProcedure/ws2s-formula-to-automaton.i
+
+# target to preprocess a source file
+src/app/DecisionProcedure/ws2s-formula-to-automaton.cpp.i:
+	$(MAKE) -f CMakeFiles/dip.dir/build.make CMakeFiles/dip.dir/src/app/DecisionProcedure/ws2s-formula-to-automaton.cpp.i
+.PHONY : src/app/DecisionProcedure/ws2s-formula-to-automaton.cpp.i
+
+src/app/DecisionProcedure/ws2s-formula-to-automaton.s: src/app/DecisionProcedure/ws2s-formula-to-automaton.cpp.s
+.PHONY : src/app/DecisionProcedure/ws2s-formula-to-automaton.s
+
+# target to generate assembly for a file
+src/app/DecisionProcedure/ws2s-formula-to-automaton.cpp.s:
+	$(MAKE) -f CMakeFiles/dip.dir/build.make CMakeFiles/dip.dir/src/app/DecisionProcedure/ws2s-formula-to-automaton.cpp.s
+.PHONY : src/app/DecisionProcedure/ws2s-formula-to-automaton.cpp.s
+
 src/app/Frontend/ast.o: src/app/Frontend/ast.cpp.o
 .PHONY : src/app/Frontend/ast.o
 
@@ -257,54 +353,6 @@ src/app/Frontend/codetable.s: src/app/Frontend/codetable.cpp.s
 src/app/Frontend/codetable.cpp.s:
 	$(MAKE) -f CMakeFiles/dip.dir/build.make CMakeFiles/dip.dir/src/app/Frontend/codetable.cpp.s
 .PHONY : src/app/Frontend/codetable.cpp.s
-
-src/app/Frontend/expnf.o: src/app/Frontend/expnf.cpp.o
-.PHONY : src/app/Frontend/expnf.o
-
-# target to build an object file
-src/app/Frontend/expnf.cpp.o:
-	$(MAKE) -f CMakeFiles/dip.dir/build.make CMakeFiles/dip.dir/src/app/Frontend/expnf.cpp.o
-.PHONY : src/app/Frontend/expnf.cpp.o
-
-src/app/Frontend/expnf.i: src/app/Frontend/expnf.cpp.i
-.PHONY : src/app/Frontend/expnf.i
-
-# target to preprocess a source file
-src/app/Frontend/expnf.cpp.i:
-	$(MAKE) -f CMakeFiles/dip.dir/build.make CMakeFiles/dip.dir/src/app/Frontend/expnf.cpp.i
-.PHONY : src/app/Frontend/expnf.cpp.i
-
-src/app/Frontend/expnf.s: src/app/Frontend/expnf.cpp.s
-.PHONY : src/app/Frontend/expnf.s
-
-# target to generate assembly for a file
-src/app/Frontend/expnf.cpp.s:
-	$(MAKE) -f CMakeFiles/dip.dir/build.make CMakeFiles/dip.dir/src/app/Frontend/expnf.cpp.s
-.PHONY : src/app/Frontend/expnf.cpp.s
-
-src/app/Frontend/formula-flatten.o: src/app/Frontend/formula-flatten.cpp.o
-.PHONY : src/app/Frontend/formula-flatten.o
-
-# target to build an object file
-src/app/Frontend/formula-flatten.cpp.o:
-	$(MAKE) -f CMakeFiles/dip.dir/build.make CMakeFiles/dip.dir/src/app/Frontend/formula-flatten.cpp.o
-.PHONY : src/app/Frontend/formula-flatten.cpp.o
-
-src/app/Frontend/formula-flatten.i: src/app/Frontend/formula-flatten.cpp.i
-.PHONY : src/app/Frontend/formula-flatten.i
-
-# target to preprocess a source file
-src/app/Frontend/formula-flatten.cpp.i:
-	$(MAKE) -f CMakeFiles/dip.dir/build.make CMakeFiles/dip.dir/src/app/Frontend/formula-flatten.cpp.i
-.PHONY : src/app/Frontend/formula-flatten.cpp.i
-
-src/app/Frontend/formula-flatten.s: src/app/Frontend/formula-flatten.cpp.s
-.PHONY : src/app/Frontend/formula-flatten.s
-
-# target to generate assembly for a file
-src/app/Frontend/formula-flatten.cpp.s:
-	$(MAKE) -f CMakeFiles/dip.dir/build.make CMakeFiles/dip.dir/src/app/Frontend/formula-flatten.cpp.s
-.PHONY : src/app/Frontend/formula-flatten.cpp.s
 
 src/app/Frontend/freevars.o: src/app/Frontend/freevars.cpp.o
 .PHONY : src/app/Frontend/freevars.o
@@ -690,54 +738,6 @@ src/app/Frontend/untyped.cpp.s:
 	$(MAKE) -f CMakeFiles/dip.dir/build.make CMakeFiles/dip.dir/src/app/Frontend/untyped.cpp.s
 .PHONY : src/app/Frontend/untyped.cpp.s
 
-src/app/Frontend/ws1s-formula-to-automaton.o: src/app/Frontend/ws1s-formula-to-automaton.cpp.o
-.PHONY : src/app/Frontend/ws1s-formula-to-automaton.o
-
-# target to build an object file
-src/app/Frontend/ws1s-formula-to-automaton.cpp.o:
-	$(MAKE) -f CMakeFiles/dip.dir/build.make CMakeFiles/dip.dir/src/app/Frontend/ws1s-formula-to-automaton.cpp.o
-.PHONY : src/app/Frontend/ws1s-formula-to-automaton.cpp.o
-
-src/app/Frontend/ws1s-formula-to-automaton.i: src/app/Frontend/ws1s-formula-to-automaton.cpp.i
-.PHONY : src/app/Frontend/ws1s-formula-to-automaton.i
-
-# target to preprocess a source file
-src/app/Frontend/ws1s-formula-to-automaton.cpp.i:
-	$(MAKE) -f CMakeFiles/dip.dir/build.make CMakeFiles/dip.dir/src/app/Frontend/ws1s-formula-to-automaton.cpp.i
-.PHONY : src/app/Frontend/ws1s-formula-to-automaton.cpp.i
-
-src/app/Frontend/ws1s-formula-to-automaton.s: src/app/Frontend/ws1s-formula-to-automaton.cpp.s
-.PHONY : src/app/Frontend/ws1s-formula-to-automaton.s
-
-# target to generate assembly for a file
-src/app/Frontend/ws1s-formula-to-automaton.cpp.s:
-	$(MAKE) -f CMakeFiles/dip.dir/build.make CMakeFiles/dip.dir/src/app/Frontend/ws1s-formula-to-automaton.cpp.s
-.PHONY : src/app/Frontend/ws1s-formula-to-automaton.cpp.s
-
-src/app/Frontend/ws2s-formula-to-automaton.o: src/app/Frontend/ws2s-formula-to-automaton.cpp.o
-.PHONY : src/app/Frontend/ws2s-formula-to-automaton.o
-
-# target to build an object file
-src/app/Frontend/ws2s-formula-to-automaton.cpp.o:
-	$(MAKE) -f CMakeFiles/dip.dir/build.make CMakeFiles/dip.dir/src/app/Frontend/ws2s-formula-to-automaton.cpp.o
-.PHONY : src/app/Frontend/ws2s-formula-to-automaton.cpp.o
-
-src/app/Frontend/ws2s-formula-to-automaton.i: src/app/Frontend/ws2s-formula-to-automaton.cpp.i
-.PHONY : src/app/Frontend/ws2s-formula-to-automaton.i
-
-# target to preprocess a source file
-src/app/Frontend/ws2s-formula-to-automaton.cpp.i:
-	$(MAKE) -f CMakeFiles/dip.dir/build.make CMakeFiles/dip.dir/src/app/Frontend/ws2s-formula-to-automaton.cpp.i
-.PHONY : src/app/Frontend/ws2s-formula-to-automaton.cpp.i
-
-src/app/Frontend/ws2s-formula-to-automaton.s: src/app/Frontend/ws2s-formula-to-automaton.cpp.s
-.PHONY : src/app/Frontend/ws2s-formula-to-automaton.s
-
-# target to generate assembly for a file
-src/app/Frontend/ws2s-formula-to-automaton.cpp.s:
-	$(MAKE) -f CMakeFiles/dip.dir/build.make CMakeFiles/dip.dir/src/app/Frontend/ws2s-formula-to-automaton.cpp.s
-.PHONY : src/app/Frontend/ws2s-formula-to-automaton.cpp.s
-
 src/app/main.o: src/app/main.cpp.o
 .PHONY : src/app/main.o
 
@@ -771,6 +771,18 @@ help:
 	@echo "... dip"
 	@echo "... edit_cache"
 	@echo "... rebuild_cache"
+	@echo "... src/app/DecisionProcedure/expnf.o"
+	@echo "... src/app/DecisionProcedure/expnf.i"
+	@echo "... src/app/DecisionProcedure/expnf.s"
+	@echo "... src/app/DecisionProcedure/formula-flatten.o"
+	@echo "... src/app/DecisionProcedure/formula-flatten.i"
+	@echo "... src/app/DecisionProcedure/formula-flatten.s"
+	@echo "... src/app/DecisionProcedure/ws1s-formula-to-automaton.o"
+	@echo "... src/app/DecisionProcedure/ws1s-formula-to-automaton.i"
+	@echo "... src/app/DecisionProcedure/ws1s-formula-to-automaton.s"
+	@echo "... src/app/DecisionProcedure/ws2s-formula-to-automaton.o"
+	@echo "... src/app/DecisionProcedure/ws2s-formula-to-automaton.i"
+	@echo "... src/app/DecisionProcedure/ws2s-formula-to-automaton.s"
 	@echo "... src/app/Frontend/ast.o"
 	@echo "... src/app/Frontend/ast.i"
 	@echo "... src/app/Frontend/ast.s"
@@ -789,12 +801,6 @@ help:
 	@echo "... src/app/Frontend/codetable.o"
 	@echo "... src/app/Frontend/codetable.i"
 	@echo "... src/app/Frontend/codetable.s"
-	@echo "... src/app/Frontend/expnf.o"
-	@echo "... src/app/Frontend/expnf.i"
-	@echo "... src/app/Frontend/expnf.s"
-	@echo "... src/app/Frontend/formula-flatten.o"
-	@echo "... src/app/Frontend/formula-flatten.i"
-	@echo "... src/app/Frontend/formula-flatten.s"
 	@echo "... src/app/Frontend/freevars.o"
 	@echo "... src/app/Frontend/freevars.i"
 	@echo "... src/app/Frontend/freevars.s"
@@ -843,12 +849,6 @@ help:
 	@echo "... src/app/Frontend/untyped.o"
 	@echo "... src/app/Frontend/untyped.i"
 	@echo "... src/app/Frontend/untyped.s"
-	@echo "... src/app/Frontend/ws1s-formula-to-automaton.o"
-	@echo "... src/app/Frontend/ws1s-formula-to-automaton.i"
-	@echo "... src/app/Frontend/ws1s-formula-to-automaton.s"
-	@echo "... src/app/Frontend/ws2s-formula-to-automaton.o"
-	@echo "... src/app/Frontend/ws2s-formula-to-automaton.i"
-	@echo "... src/app/Frontend/ws2s-formula-to-automaton.s"
 	@echo "... src/app/main.o"
 	@echo "... src/app/main.i"
 	@echo "... src/app/main.s"

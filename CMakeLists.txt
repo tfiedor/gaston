@@ -19,7 +19,6 @@ add_executable(dip
 	src/app/Frontend/codedump.cpp
 	src/app/Frontend/codesubst.cpp
 	src/app/Frontend/codetable.cpp
-	src/app/Frontend/expnf.cpp
 	src/app/Frontend/freevars.cpp
 	src/app/Frontend/ident.cpp
 	src/app/Frontend/lib.cpp
@@ -36,9 +35,10 @@ add_executable(dip
 	src/app/Frontend/symboltable.cpp
 	src/app/Frontend/timer.cpp
 	src/app/Frontend/untyped.cpp
-	src/app/Frontend/ws1s-formula-to-automaton.cpp
-	src/app/Frontend/ws2s-formula-to-automaton.cpp
-	src/app/Frontend/formula-flatten.cpp
+	src/app/DecisionProcedure/expnf.cpp
+	src/app/DecisionProcedure/ws1s-formula-to-automaton.cpp
+	src/app/DecisionProcedure/ws2s-formula-to-automaton.cpp
+	src/app/DecisionProcedure/formula-flatten.cpp
 )
 link_directories(${CMAKE_SOURCE_DIR}/src/libs/)
 target_link_libraries(dip ${CMAKE_SOURCE_DIR}/src/libs/libmonabdd.so)

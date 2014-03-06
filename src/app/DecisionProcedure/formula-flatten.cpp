@@ -1,6 +1,6 @@
-#include "ast.h"
-#include "symboltable.h"
-#include "env.h"
+#include "../Frontend/ast.h"
+#include "../Frontend/symboltable.h"
+#include "../Frontend/env.h"
 #include <cstring>
 #include <deque>
 
