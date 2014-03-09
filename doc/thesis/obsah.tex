@@ -154,6 +154,18 @@ languages $L \in \Sigma^*$ such that there exists a finite automata
 $\mathcal{A}$ such that $L(\mathcal{A}) = L$.
 	\end{defz}
 	
+	\noindent\hrulefill
+	\begin{example}
+	Consider 
+	\begin{figure}[h!]
+	\begin{center}
+	 \scalebox{1}{\includegraphics{fig/word-automaton-setminus.pdf}}
+	 \end{center}
+	\end{figure}
+	\end{example}
+	
+	\noindent\hrulefill
+	
  \subsection{Closure Properties of Regular Languages}
 
 \begin{theorem}
@@ -520,6 +532,35 @@ $\delta^{td}$ then represents the function \textlbrackdbl $\delta^{td}$
 \{(q_1,\ldots,q_p)\ |\ q \overset{a}{\longrightarrow} (q_1,\ldots,q_p)\}
 \end{equation}.
 
+\noindent\hrulefill
+\begin{example}
+ Consider word automaton $\mathcal{A}_{\ref{word-automaton}}$ from Example
+ \ref{word-automaton} accepting set minus of coded sets with following transitions:
+ \begin{eqnarray*}
+  q_1 & \overset{00X}{\longrightarrow} & q_1\\
+  q_1 & \overset{011}{\longrightarrow} & q_1\\
+  q_1 & \overset{110}{\longrightarrow} & q_1\\
+  q_1 & \overset{10X}{\longrightarrow} & q_2\\
+  q_1 & \overset{010}{\longrightarrow} & q_2\\
+  q_1 & \overset{111}{\longrightarrow} & q_2\\
+  q_2 & \overset{XXX}{\longrightarrow} & q_2
+ \end{eqnarray*}
+  MTBDD coding the transition function of this automaton is depicted on Figure
+  \ref{mtbdd}.
+ 
+ \begin{figure}[h!]
+  \begin{center}
+   \includegraphics{fig/bdd-transition-function-encoding}
+  \end{center}
+  \caption{MTBDD coding transition function corresponding to the
+  $\mathcal{A}_{\ref{word-automaton}}$ from example
+  \ref{word-automaton}}\label{mtbdd}
+ \end{figure}
+ 
+\end{example}
+
+\noindent\hrulefill
+
 \chapter{The WS$k$S Logic}\label{wsks}
 The abbreviation WS$k$S stands for \emph{weak second-order monadic logic of $k$
 successors}. This means that it is a logic that allows quantification over set
@@ -858,10 +899,22 @@ $\wedge$, $\neg$ and $\exists$ (as defined in the restricted syntax):
   \begin{example}
   Consider following WS$k$S formula:
   \begin{equation}
-  $\rho \overset{\mathit{def}}{=} \exists P:
- Sing(P) \wedge P \not\subseteq X$
+  \rho \overset{\mathit{def}}{=} \exists P:
+ Sing(P) \wedge P \not\subseteq X
   \end{equation}
-   \hrulefill
+  Deciding validity of $\rho$ consists of constructing automaton
+  $\mathcal{A}_\rho$ corresponding to the formula $\rho$ and then afterwards
+  check the language $L(\mathcal{A}_\rho)$ for universality, i.e. if any
+  non-accepting state is reachable. As depicted at Figure \ref{automata} we
+  first construct automata $\mathcal{A}_{\mathit{Sing}(P)}$ and
+  $\mathcal{A}_{P \not\subseteq X}$ for subformulae $\mathit{Sing}(P)$ and $P
+  \not\subseteq X$ respectively. Then we construct product automaton of those
+  subformulae yielding automaton $\mathcal{A}_{\mathit{Sing}(P) \wedge } P
+  \not\subseteq X$. Finally we make a projection of automaton by erasing track
+  corresponding to the quantified variable $P$ and obtain the resulting
+  automaton $\mathcal{A}_\rho$.
+  
+   \noindent\hrulefill
   \end{example}\label{wsks-formula-restricted}
  
  \begin{figure}[h!]
@@ -1146,6 +1199,35 @@ $Processed$.
 	
 Correctness of this universality checking algorithm is proved in \cite{tacas}.
 
+\noindent\hrulefill
+\begin{example}
+Consider testing validity of formula $\varphi$ from Example \ref{wsks-formula}.
+Given automaton $\mathcal{A}_\varphi$ corresponding to formula $\varphi$,
+testing validity of formula $\varphi$ is equivalent to testing universality of
+language $L(\mathcal{A}_\varphi)$.
+
+By classical approach by subset construction of automaton and search for
+non-accepting state 7 states are generated as depicted at Figure
+\ref{compare} If we use the antichain-based approach, then macro-states $\{1,
+4\}$ and $\{1, 4\}$ are simulated by the initial state $\{1\}$ so we don't need
+to expand states any furthers. Since we reached accepting state, we can conclude
+that language of automaton $\mathcal{A}_\varphi$ is universal and formula is
+thus valid. This holds, since for every model there exists assignment $X
+\mapsto \emptyset$ that satisfies this formula.
+\end{example}
+
+\noindent\hrulefill
+
+\begin{figure}
+ \begin{center}
+  \scalebox{0.5}{\includegraphics{fig/antichain-meets-projection.pdf}}
+ \end{center}
+ \caption{Comparison of the antichain-based (grey nodes) and the classical
+ approach to universality checking of the automaton $\mathcal{A}_\psi$
+ corresponding to the formula $\psi \overset{\mathit{def}}{=} \neg\exists P:
+ Sing(P) \wedge\neg P \subseteq X$}\label{compare}
+\end{figure}
+
 \subsection{Universality of NTAs}
 
 The principle of optimized universality checking for tree automata is similar to
@@ -1157,22 +1239,129 @@ leaves are replaced by special symbol denoting a \emph{hole}.
 The algorithm is very similar to Algorithm \ref{universality} and therefore we
 are going to refer to source \cite{tacas}.
 
-\section{Main idea of deciding WS$k$S with NFA}
+\section{Deciding WS$k$S with NFA}
 
-Given a formula $\phi$ in $\exists$PNF form (defined in Section
-\ref{restricted}), suppose there are $m$ negations in the prefix of $\phi$. We
-will create a hierarchical family of WS$k$S formulae $\Phi =
-\{\phi_0,\ldots,\phi_m\}$, where $\phi_0 = \phi$ and $\phi_{i+1} =
-\neg\exists\mathcal{X}_{i+1}.\phi_i$, $1 \leq i \leq m-1$ , and construct a
-family of automata accepting representations of models of the corresponding
-formulae.
+Given formula $\phi$, constructing automaton $\mathcal{A}_\phi$ repr esenting
+all models of $\phi$ is not necessary, since representation of all models of formula
+is not essential and usually any model or an invalid assignment suffices.
+Instead we can exploit the antichain-based techniques defined in previous
+section and search for the accepting or non-accepting state \emph{on-the-fly}
+pruning the search state.
 
-As defined, testing satisfiability of a formula is equal to testing
-\emph{non-emptiness} of automaton, which can be done \emph{on-the-fly} without
-generating the automaton $\mathcal{A}_\phi$. Further we will use the technique
-similar to the optimized universality checking, as defined in the previous,
-which will prune states that are subsumed by other states over the entire
-hierarchical family of automata.
+Formula $\phi$ is first transformed to the logicall equivalent formula $\varphi$
+in existential prenex form (see Section \ref{exPNF}):
+\begin{equation*}
+ \varphi \overset{\mathit{def}}{=}
+ \exists\mathcal{X}_{m+1}\neg\mathcal{X}_m\neg\ldots\neg\exists\mathcal{X}_2\neg\exists\mathcal{X}_1
+ :
+ \pi(\mathbb{X})
+\end{equation*}.
+
+Supposing there are $m$	negations in the prefix of formula $\phi$, we create a
+hierarchical family of WS$k$S formulae $\Phi = \{\varphi_0,\ldots,\varphi_m\}$
+where
+\begin{equation}
+  \varphi_0 \overset{\mathit{def}}{=} \pi
+\end{equation}
+and for all $0 \leq i \leq m-1$
+\begin{equation}
+ \varphi_{i+1} \overset{\mathit{def}}{=} \neg\exists\mathcal{X}_{i+1}: \varphi_i
+\end{equation}
+
+\subsection{Deciding WS1S}
+
+The main concepts of the new approach to deciding WS$k$S is going to be
+described first on WS$1$S formulae and in following section it will be
+generalised to arbritrary $k$, which is pretty straightforward.
+
+Given WS$1$S formula $\varphi$ in $\exists$PNF form, automaton for matrix of
+formula $\mathcal{A}_\pi$ can be constructed out of automata corresponding to
+atomic formulae and their complements and using union and intersection
+operations. Further we construct $\mathcal{A}_\varphi$ from automaton
+$\mathcal{A}_\pi$ by successive applications of complementation $\gamma$ and
+projection $\omega$ according to the prefix of $\varphi$ as defined in
+\ref{preliminaries}.
+
+With these operations we can define the family of automata $\mathbb{A} =
+\{\mathcal{A}_0,\ldots,\mathcal{A}_m$ as follows:
+ \begin{eqnarray}
+  \mathcal{A}_0 & = & \mathcal{A}_\pi\\
+  \mathcal{A}_{i+1} & = & \gamma(\omega_{\mathcal{X}_{i+1}}(\mathcal{A}_i)).
+ \end{eqnarray}, i.e. $$ \mathcal{A}_i =
+ \mathcal{A}_{\exists\mathcal{X}_i\ldots\neg\exists\mathcal{X}_1:
+ \pi(\mathbb{X})}$$
+ 
+ We use the notation $\mathcal{A}_i = (Q_i, \Sigma_i, \delta_i, I_i, F_i)$ to
+ address particular automaton and its components.
+
+There is further connection between the hierarchical family of formulae $\Phi$
+and the hierarchical family of automata $\mathbb{A}$
+\begin{lemma} For all $0 \leq i \leq m$, the language of $\mathcal(A)_i$ is
+\begin{enumerate}
+  \item \emph{universal} iff $\varphi_i$ is \emph{valid},
+  \item \emph{non-empty} iff $\varphi_i$ is \emph{satisfiable},
+  \item \emph{non-universal} iff $\varphi_i$ is \emph{invalid}, and
+  \item \emph{empty} iff $\varphi_i$ is \emph{unsatisfiable}.
+\end{enumerate}
+\end{lemma}
+
+Testing the satisfiability of $\varphi$ is equal to testing \emph{non-emptiness}
+of $\mathcal{A}_m$, which can be done on-the-fly by traversing the state space
+and trying to find a final state $q_f \in F_m$. This search can be optimised by
+prunin states that are subsumed by other states over the entire hierarchical
+family of automata.
+
+\begin{lemma}
+Let $\leq_i \subseteq Q_i \times Q_i$, for $0 \leq i \leq m-1$, be a relation on
+the states of automaton $\mathcal{A}_i$ that implies inclusion of languages of
+states, i.e. $p \eq_i q \Rightarrow L_{\mathcal{A}_i}(p) \subseteq
+L_{\mathcal{A}_i}(q)$. Then $\forall p, r \in Q_i$ and $S \subseteq Q_i$ it
+holds that
+\begin{equation}
+ p \leq_i r \Rightarrow L_\mathcal{i+1}(\{p, r\} \cup S) = L_\mathcal{i+1}(\{r\}
+ \cup S)
+\end{equation} where $\{p, r\}\cup S$, $\{r\}\cup S \in Q_{i+1}$ are states of
+the automaton $\mathcal{A}_{i+1}$.
+\end{lemma}
+
+\begin{defz}
+ Given an automaton $\mathcal{A} = (Q, \Sigma, \delta, I, F)$ and a binary
+ relation $\preceq \subseteq Q \times Q$ on the states of $\mathcal{A}$ we
+ defined the operator $\sqsubseteq: (Q\times Q) \rightarrow (2^Q\times 2^Q)$
+ applied to binary relations over $Q$ as follows:
+  \begin{equation}
+   X \sqsubseteq(\preceq) Y \overset{\mathit{def}}{\Longleftrightarrow} \forall
+   y \in Y \exists x \in X: x \preceq y
+  \end{equation}.
+  Further we can define the power of $\sqsubseteq(\preceq)$ as 
+  \begin{eqnarray}
+   \sqsubseteq^0_\preceq & = & \preceq\\
+   \sqsubseteq^{n+1}_\preceq & = & \sqsubseteq(\sqsubseteq^n_\preceq)
+  \end{eqnarray}.
+  We can further extent this notion to high levels as stated in following lemma.
+  \begin{lemma}
+   Let $\leq_i \subseteq Q_i \times Q_i$, for $0 \leq i \leq m-1$, be a relation
+   on the states of $\mathcal{A}_i$. If $\leq_i$ implies language inclusion on
+   the states of $\mathcal{A}_i$ then $\sqsubseteq_{\preceq_i}$ implies language
+   inclusion on the states of $\mathcal{A}_{i+1}$, i.e. 
+   \begin{align}
+    \text{if} p \leq_i r \Rightarrow L_{\mathcal{A}_i}(p) \subseteq
+    L_{\mathcal{A}_i}(r) \text{then}\\
+    P \sqsubseteq_{\preceq_i} R \Rightarrow L_{\mathcal{A}_{i+1}}(P) \subseteq
+    L_{\mathcal{A}_{i+1}}(R)
+   \end{align}
+  \end{lemma}
+\end{defz}
+
+\subsection{Deciding WS$k$S}
+
+\chapter{Implementation}
+
+\section{Frontend}
+
+\section{Manipulation with NTA}
+
+\chapter{Evaluation}
 
 \chapter{Summary and future work}\label{summary}
 
