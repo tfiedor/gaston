@@ -22,6 +22,7 @@
 #define __ENV_H
 
 enum Mode {LINEAR, TREE};
+enum ReorderMode {NO, RANDOM, HEURISTIC};
 
 class Options {
 public:
@@ -35,7 +36,7 @@ public:
     graphvizSatisfyingEx(false), graphvizCounterEx(false), 
     externalWhole(false), demo(false), 
     inheritedAcceptance(false), unrestrict(false), 
-    alternativeM2LStr(false), reorder(false), optimize(0) {}
+    alternativeM2LStr(false), reorder(HEURISTIC), optimize(0) {}
 
   bool time;
   bool whole;
@@ -57,7 +58,7 @@ public:
   bool inheritedAcceptance;
   bool unrestrict;
   bool alternativeM2LStr;
-  bool reorder;
+  ReorderMode reorder;
   unsigned optimize;
 };
 

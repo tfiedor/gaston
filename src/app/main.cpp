@@ -50,18 +50,31 @@ char *inputFileName = NULL;
 
 extern Ident lastPosVar, allPosVar;
 
+void PrintUsage()
+{
+  cout << "Usage: dip [options] <filename>\n\n"
+    << "Options:\n"
+    << " -t, --time 		Print elapsed time\n"
+    << " -d, --dump-all		Dump AST, symboltable, and code DAG\n"
+    << " -q, --quite		Quiet, don't print progress\n"
+    << " --reorder-bdd		Disable BDD index reordering [no, random, heuristic]\n"
+    << "Example: ./dip -t -d --reorder-bdd=random foo.mona\n\n";
+}
+
 bool 
 ParseArguments(int argc, char *argv[])
 {
   options.printProgress = true;
   options.analysis = true;
   options.optimize = 1;
-  options.reorder = false; //true;
+  options.reorder = HEURISTIC; //true;
 
   switch (argc) {
+  // missing file with formula
   case 1:
       return false;
 
+  // missing file with formula, some option stated
   case 2:
     if (argv[1][0] == '-')
       return false;
@@ -72,103 +85,33 @@ ParseArguments(int argc, char *argv[])
       if (argv[i][0] != '-')
 	return false;
 
-      if (strcmp(argv[i], "-demo") == 0)
-	options.demo = true;
-      else
-	switch (argv[i][1]) {
-	case 'o':
-	  if (sscanf(argv[i]+2, "%u", &options.optimize) != 1)
-	    return false;
-	  break;
-	case 'x':
-	  if (argv[i][2] == 'w') {
-	    options.printProgress = false;
-	    options.externalWhole = true;
-	    options.whole = true;
-	    options.analysis = false;
-	  }
-	  else
-	    return false;
-	  break;
-	case 'g':
-	  options.printProgress = false;
-	  switch (argv[i][2]) {
-	  case 'w':
-	    options.graphvizDFA = true;
-	    options.whole = true;
-	    options.analysis = false;
-	    break;
-	  case 'd':
-	    options.graphvizDAG = true;
-	    options.analysis = false;
-	    break;
-	  case 's':
-	    options.graphvizSatisfyingEx = true;
-	    options.analysis = true;
-	    break;
-	  case 'c':
-	    options.graphvizCounterEx = true;
-	    options.analysis = true;
-	    break;
-	  default:
-	    return false;
-	  }
-	  break;
-	default:
-	  switch (argv[i][1]) {
-	  case 'w':
-	    options.whole = true;
-	    break;
-	  case 'n':
-	    options.analysis = false;
-	    break;
-	  case 'd':
-	    options.dump = true;
-	    break;
-	  case 't':
-	    options.time = true;
-	    break;
-	  case 's':
-	    options.statistics = true;
-	    break;
-	  case 'q':
-	    options.printProgress = false;
-	    break;
-	  case 'c':
-	    options.analysis = true;
-	    break;
-	  case 'e':
-	    options.separateCompilation = true;
-	    break;
-	  case 'i':
-	    options.intermediate = true;
-	    options.statistics = true;
-	    break;
-	  case 'f':
-	    options.treemodeOutput = true;
-	    options.analysis = true;
-	    break;
-	  case 'h':
-	    options.inheritedAcceptance = true;
-	    break;
-	  case 'u':
-	    options.unrestrict = true;
-	    break;
-	  case 'm':
-	    options.alternativeM2LStr = true;
-	    break;
-	  case 'r':
-	    options.reorder = false;
-	    break;
-	  case 'p':
-	    break; // ignore for compatibility
-	  default:
-	    return false;
-	  }
-	  if (argv[i][2] != 0)
-	    return false;
-	  break;
-	}
+      if (strcmp(argv[i], "--dump-all") == 0)
+    	  options.dump = true;
+      else if(strcmp(argv[i], "--time") == 0)
+    	  options.time = true;
+      else if(strcmp(argv[i], "--quiet") == 0)
+    	  options.printProgress = false;
+      else if(strcmp(argv[i], "--reorder-bdd=no") == 0)
+    	  options.reorder = NO;
+      else if(strcmp(argv[i], "--reorder-bdd=random") == 0)
+    	  options.reorder = RANDOM;
+      else if(strcmp(argv[i], "--reorder-bdd=heuristic") == 0)
+    	  options.reorder = HEURISTIC;
+      else {
+		switch (argv[i][1]) {
+		  case 'd':
+			options.dump = true;
+			break;
+		  case 't':
+			options.time = true;
+			break;
+		  case 'q':
+			options.printProgress = false;
+			break;
+		  default:
+			return false;
+		  }
+      }
     }
   } 
   
@@ -219,6 +162,22 @@ void splitMatrixAndPrefix(MonaAST* formula, ASTForm* &matrix, ASTForm* &prefix) 
 }
 
 /**
+ * Does reordering of variables so in output BDD tracks it is easier to remove
+ * the track and reorder the BDD afterwards. This is done by the prefix of
+ * given formula
+ */
+void heuristicReorder() {
+	cout << "Variables reordered by heuristic approach" << std::endl;
+}
+
+/**
+ * Does random reordering of variables
+ */
+void randomReorder() {
+	cout << "Variables reorder randomly" << std::endl;
+}
+
+/**
  * Implementation is not sure at the moment, but should reorder the symbol
  * table or BDD track, so it is optimized for using of projection during
  * the decision procedure process. It should consider the structure of prefix
@@ -230,17 +189,26 @@ void splitMatrixAndPrefix(MonaAST* formula, ASTForm* &matrix, ASTForm* &prefix) 
  *  2) No reorder
  *  3) Prefix-reorder
  */
-void reorder() {
-
+void reorder(ReorderMode mode) {
+	if (mode == NO)
+		return ;
+	else if (mode == HEURISTIC) {
+		heuristicReorder();
+	} else if (mode == RANDOM) {
+		randomReorder();
+	}
 }
 
 int 
 main(int argc, char *argv[])
 {
+  /* Parse initial arguments */
   if (!ParseArguments(argc, argv)) {
+	  PrintUsage();
     exit(-1);
   }
 
+  /* Initialization of timer used for statistics */
   initTimer();
   Timer timer_total;
   timer_total.start();
@@ -264,7 +232,7 @@ main(int argc, char *argv[])
 
   delete untypedAST;
 
-  if (true) {
+  if (options.dump) {
     symbolTable.dump();
     // Dump AST for main formula, verify formulas, and assertion
     cout << "Main formula:\n";
@@ -349,7 +317,7 @@ main(int argc, char *argv[])
   ASTForm *matrix, *prefix;
   splitMatrixAndPrefix(ast, matrix, prefix);
   // Table or BDD tracks are reordered
-  reorder();
+  reorder(options.reorder);
 
   Automaton formulaAutomaton;
   // WS1S formula is transformed to unary NTA
@@ -368,7 +336,9 @@ main(int argc, char *argv[])
 		  new VATA::Serialization::TimbukSerializer();
   std::cout << formulaAutomaton.DumpToString(*serializer);
 
-  symbolTable.dump();
+  if (options.dump) {
+	  symbolTable.dump();
+  }
 
   ///////// CLEAN UP ///////////////////////////////////////////////////////
 
