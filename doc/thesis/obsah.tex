@@ -928,20 +928,7 @@ $\wedge$, $\neg$ and $\exists$ (as defined in the restricted syntax):
  Sing(P) \wedge P \not\subseteq X$}\label{automata}
 \end{figure}
 
-\subsubsection{Issues of This Approach}
-
-Considering WS$k$S formulae with a fixed number of quantifier alternations $N$,
-the decision method outlined in the previous section works in time which is a
-tower of exponentials with height being $O(N)$.
-
-This is mainly because every time we encounter a sequence of quantifiers, we
-have to do a projection, which yields a non-deterministic automaton, even if the
-input automaton was deterministic. Now when we encounter a negation of a
-formula, we have to use determinization before doing a complement of automaton,
-which requires in general exponential time and exponential space w.r.t states of
-automata.
-
-Thus the computational complexity of WS$k$S is in NONELEMENTARY class, so given
+The computational complexity of WS$k$S is in NONELEMENTARY class, so given
 a Turing machine $\mathcal{M}$ deciding a satisfiability of WS$k$S formulae, for
 any $u \geq 0$, there are infinitely many $n$ for which a computation of
 $\mathcal{M}$ for some sentence of length $n$ requires at least
@@ -964,6 +951,27 @@ approaches were tried out and thus number of fine optimizations were discovered.
 In this chapter we review some of the designed and implementation tricks that
 stand behind its success. Even though, the overall complexity is still
 non-elementary for the worst-cases.
+
+\section{Main issue of using deterministic tree automata}
+
+Considering WS$k$S formula with a fixed number of quantifier alternations $N$,
+the decision method outlined in the previous section works in time which is a
+tower of exponentials with height being $O(N)$.
+
+This is mainly because every time we encounter a sequence of quantifiers, we
+have to do a projection, which yields a non-deterministic automaton, even if the
+input automaton was deterministic. Now when we encounter a negation of a
+formula, we have to use determinization before doing a complement of automaton,
+which requires in general exponential time and exponential space w.r.t states of
+automata.
+
+So every time non-determinism is introduced to automaton it is determinised and
+the information about the original states is forgotten. So \textsc{MONA}
+approach has issues with extensive us of automat complementation and since there
+is no known tree automaton complementation technique better than bottom-up
+determinization of automaton with complementation of the set of final states,
+\textsc{MONA} had to come up with heavy optimizations and heuristic to achieve
+good results.
 
  \section{Used optimizations}\label{monasecrets}
 \subsection{Using BDDs for automata representation}\label{monabdd}
