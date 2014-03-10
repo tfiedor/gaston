@@ -1,6 +1,24 @@
 \chapter{Contents of CD}
-\chapter{WS$k$S specification syntax}
+\chapter{WS$k$S specification syntax}\label{syntax}
 \chapter{Usage}
+The usage of the decision procedure tool is:
+\begin{center}
+ \texttt{dip [options] <filename>}
+\end{center}
+\texttt{<filename>} is relative or absolute path to specification of WS$k$S
+formula as defined by syntax described in Appendix \ref{syntax}. The options
+that can be further set are following:
+\begin{itemize}
+  \item[\texttt{-t}],\texttt{--time}\,--\,prints elapsed time for decision
+  procedure and further information about timing of procedure.
+  \item[\texttt{-d}],\texttt{--dump-all}\,--\,dumps information about AST
+  representation of given formula, symbol table, created automaton and etc.
+  \item[\texttt{-q}],\texttt{--quiet}\,--\,suppress printing of information
+  about decision process.
+  \item[\texttt{--reorder-bdd}]\,--\,by default variables are reorder according
+  to the prefix of the given formula. This can be suppressed by adding parameter
+  \texttt{no} or random reordering can be done by option \texttt{random}.
+\end{itemize}
 %\chapter{Konfigra�n� soubor}
 %\chapter{RelaxNG Sch�ma konfigura�n�ho soboru}
 %\chapter{Plakat}

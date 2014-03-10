@@ -12,7 +12,7 @@ pdf: $(CO).pdf
 $(CO).ps: $(CO).dvi
 	dvips $(CO)
 
-$(CO).pdf: obsah.tex
+$(CO).pdf: obsah.tex prilohy.tex
 	pdflatex $(CO)
 	bibtex $(CO)
 	pdflatex $(CO)
