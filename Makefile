@@ -114,6 +114,30 @@ dip/fast:
 	$(MAKE) -f CMakeFiles/dip.dir/build.make CMakeFiles/dip.dir/build
 .PHONY : dip/fast
 
+src/app/DecisionProcedure/decision_procedures.o: src/app/DecisionProcedure/decision_procedures.cpp.o
+.PHONY : src/app/DecisionProcedure/decision_procedures.o
+
+# target to build an object file
+src/app/DecisionProcedure/decision_procedures.cpp.o:
+	$(MAKE) -f CMakeFiles/dip.dir/build.make CMakeFiles/dip.dir/src/app/DecisionProcedure/decision_procedures.cpp.o
+.PHONY : src/app/DecisionProcedure/decision_procedures.cpp.o
+
+src/app/DecisionProcedure/decision_procedures.i: src/app/DecisionProcedure/decision_procedures.cpp.i
+.PHONY : src/app/DecisionProcedure/decision_procedures.i
+
+# target to preprocess a source file
+src/app/DecisionProcedure/decision_procedures.cpp.i:
+	$(MAKE) -f CMakeFiles/dip.dir/build.make CMakeFiles/dip.dir/src/app/DecisionProcedure/decision_procedures.cpp.i
+.PHONY : src/app/DecisionProcedure/decision_procedures.cpp.i
+
+src/app/DecisionProcedure/decision_procedures.s: src/app/DecisionProcedure/decision_procedures.cpp.s
+.PHONY : src/app/DecisionProcedure/decision_procedures.s
+
+# target to generate assembly for a file
+src/app/DecisionProcedure/decision_procedures.cpp.s:
+	$(MAKE) -f CMakeFiles/dip.dir/build.make CMakeFiles/dip.dir/src/app/DecisionProcedure/decision_procedures.cpp.s
+.PHONY : src/app/DecisionProcedure/decision_procedures.cpp.s
+
 src/app/DecisionProcedure/expnf.o: src/app/DecisionProcedure/expnf.cpp.o
 .PHONY : src/app/DecisionProcedure/expnf.o
 
@@ -771,6 +795,9 @@ help:
 	@echo "... dip"
 	@echo "... edit_cache"
 	@echo "... rebuild_cache"
+	@echo "... src/app/DecisionProcedure/decision_procedures.o"
+	@echo "... src/app/DecisionProcedure/decision_procedures.i"
+	@echo "... src/app/DecisionProcedure/decision_procedures.s"
 	@echo "... src/app/DecisionProcedure/expnf.o"
 	@echo "... src/app/DecisionProcedure/expnf.i"
 	@echo "... src/app/DecisionProcedure/expnf.s"

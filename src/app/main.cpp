@@ -27,6 +27,10 @@
 #include "Frontend/offsets.h"
 #include "Frontend/ident.h"
 
+// DecProc headers
+#include <DecisionProcedure/exceptions.hh>
+#include <DecisionProcedure/decision_procedures.hh>
+
 using std::cout;
 
 using Automaton = VATA::BDDBottomUpTreeAut;
@@ -338,6 +342,19 @@ main(int argc, char *argv[])
 
   if (options.dump) {
 	  symbolTable.dump();
+  }
+
+  ///////// DECISION PROCEDURE /////////////////////////////////////////////
+  try {
+	  // Deciding WS1S formula
+	  if(options.mode != TREE) {
+		  decideWS1S();
+	  // Deciding WS2S formula
+	  } else {
+		  decideWS2S();
+	  }
+  } catch (NotImplementedException& e) {
+	  std::cerr << e.what() << std::endl;
   }
 
   ///////// CLEAN UP ///////////////////////////////////////////////////////

@@ -57,6 +57,20 @@ inline void setNonFinalState(Automaton &automaton, bool complement, unsigned int
 }
 
 /**
+ * Adds universal transition (X^k) to automaton leading from state from to to
+ *
+ * @param automaton: automaton, where we are adding universal transition
+ * @param from: state tuple of left hand side of transition
+ * @param to: state tuple of right hand side of transition
+ */
+void addUniversalTransition(
+		Automaton& automaton,
+		Automaton::StateTuple from,
+		Automaton::StateType to) {
+	automaton.AddTransition(from, constructUniversalTrack(), to);
+}
+
+/**
  * Constructs automaton for unary automaton True
  *
  * @param[out] trueAutomaton: created automaton
@@ -65,18 +79,13 @@ inline void setNonFinalState(Automaton &automaton, bool complement, unsigned int
  */
 void ASTForm_True::toUnaryAutomaton(Automaton &trueAutomaton, bool doComplement) {
     // (X^k) -> q0
-	setFinalState(trueAutomaton, doComplement, 0);
-
-	trueAutomaton.AddTransition(
-    		Automaton::StateTuple(),
-    		constructUniversalTrack(),
-    		0);
+	addUniversalTransition(trueAutomaton, Automaton::StateTuple(), 0);
 
     // q0 -(X^k)-> q0
-    trueAutomaton.AddTransition(
-    		Automaton::StateTuple({0}),
-    		constructUniversalTrack(),
-    		0);
+	addUniversalTransition(trueAutomaton, Automaton::StateTuple({0}), 0);
+
+    // Final state q0
+	setFinalState(trueAutomaton, doComplement, 0);
 }
 
 /**
@@ -87,19 +96,14 @@ void ASTForm_True::toUnaryAutomaton(Automaton &trueAutomaton, bool doComplement)
  * TODO: do Complement
  */
 void ASTForm_False::toUnaryAutomaton(Automaton &falseAutomaton, bool doComplement) {
-	// _ -> q0
-	setNonFinalState(falseAutomaton, doComplement, 0);
-
-	falseAutomaton.AddTransition(
-			Automaton::StateTuple(),
-			Automaton::SymbolType(),
-			0);
+	// (X^k) -> q0
+	addUniversalTransition(falseAutomaton, Automaton::StateTuple(), 0);
 
 	// q0 -(X^k)-> q0
-	falseAutomaton.AddTransition(
-			Automaton::StateTuple({0}),
-			constructUniversalTrack(),
-			0);
+	addUniversalTransition(falseAutomaton, Automaton::StateTuple({0}), 0);
+
+	// no final states
+	setNonFinalState(falseAutomaton, doComplement, 0);
 }
 
 /**

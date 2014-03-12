@@ -39,6 +39,7 @@ add_executable(dip
 	src/app/DecisionProcedure/ws1s-formula-to-automaton.cpp
 	src/app/DecisionProcedure/ws2s-formula-to-automaton.cpp
 	src/app/DecisionProcedure/formula-flatten.cpp
+	src/app/DecisionProcedure/decision_procedures.cpp
 )
 link_directories(${CMAKE_SOURCE_DIR}/src/libs/)
 target_link_libraries(dip ${CMAKE_SOURCE_DIR}/src/libs/libmonabdd.so)
