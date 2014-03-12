@@ -114,6 +114,30 @@ dip/fast:
 	$(MAKE) -f CMakeFiles/dip.dir/build.make CMakeFiles/dip.dir/build
 .PHONY : dip/fast
 
+src/app/DecisionProcedure/automata.o: src/app/DecisionProcedure/automata.cpp.o
+.PHONY : src/app/DecisionProcedure/automata.o
+
+# target to build an object file
+src/app/DecisionProcedure/automata.cpp.o:
+	$(MAKE) -f CMakeFiles/dip.dir/build.make CMakeFiles/dip.dir/src/app/DecisionProcedure/automata.cpp.o
+.PHONY : src/app/DecisionProcedure/automata.cpp.o
+
+src/app/DecisionProcedure/automata.i: src/app/DecisionProcedure/automata.cpp.i
+.PHONY : src/app/DecisionProcedure/automata.i
+
+# target to preprocess a source file
+src/app/DecisionProcedure/automata.cpp.i:
+	$(MAKE) -f CMakeFiles/dip.dir/build.make CMakeFiles/dip.dir/src/app/DecisionProcedure/automata.cpp.i
+.PHONY : src/app/DecisionProcedure/automata.cpp.i
+
+src/app/DecisionProcedure/automata.s: src/app/DecisionProcedure/automata.cpp.s
+.PHONY : src/app/DecisionProcedure/automata.s
+
+# target to generate assembly for a file
+src/app/DecisionProcedure/automata.cpp.s:
+	$(MAKE) -f CMakeFiles/dip.dir/build.make CMakeFiles/dip.dir/src/app/DecisionProcedure/automata.cpp.s
+.PHONY : src/app/DecisionProcedure/automata.cpp.s
+
 src/app/DecisionProcedure/decision_procedures.o: src/app/DecisionProcedure/decision_procedures.cpp.o
 .PHONY : src/app/DecisionProcedure/decision_procedures.o
 
@@ -795,6 +819,9 @@ help:
 	@echo "... dip"
 	@echo "... edit_cache"
 	@echo "... rebuild_cache"
+	@echo "... src/app/DecisionProcedure/automata.o"
+	@echo "... src/app/DecisionProcedure/automata.i"
+	@echo "... src/app/DecisionProcedure/automata.s"
 	@echo "... src/app/DecisionProcedure/decision_procedures.o"
 	@echo "... src/app/DecisionProcedure/decision_procedures.i"
 	@echo "... src/app/DecisionProcedure/decision_procedures.s"

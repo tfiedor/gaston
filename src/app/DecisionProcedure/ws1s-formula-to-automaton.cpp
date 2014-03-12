@@ -9,66 +9,13 @@
 #include <vata/serialization/timbuk_serializer.hh>
 #include <vata/util/binary_relation.hh>
 
+#include "automata.hh"
+
 using std::cout;
 
 extern SymbolTable symbolTable;
 
 using Automaton = VATA::BDDBottomUpTreeAut;
-
-/**
- * Constructs universal track X^k according to the number of variables used
- * in formula, i.e. in symbol table
- *
- * @return: universal track for transition
- */
-Automaton::SymbolType constructUniversalTrack() {
-	unsigned int trackLen = symbolTable.noIdents;
-	Automaton::SymbolType transitionTrack;
-	transitionTrack.AddVariablesUpTo(trackLen);
-	return transitionTrack;
-}
-
-/**
- * Sets state as final in automaton, according to the whether we are
- * complementing the automaton or not
- *
- * @param[in] automaton: automaton, where we are setting states
- * @param[in] complement: whether we are constructing complement automaton
- * @param[in] state: which state we are setting as final
- */
-inline void setFinalState(Automaton &automaton, bool complement, unsigned int state) {
-	if(!complement) {
-		automaton.SetStateFinal(state);
-	}
-}
-
-/**
- * Sets state as non-final in automaton, according to the whether we are
- * complementing the automaton or not
- *
- * @param[in] automaton: automaton, where we are setting states
- * @param[in] complement: whether we are constructing complement automaton
- * @param[in] state: which state we are setting as non final
- */
-inline void setNonFinalState(Automaton &automaton, bool complement, unsigned int state) {
-	if(complement) {
-		automaton.SetStateFinal(state);
-	}
-}
-
-/**
- * Adds universal transition (X^k) to automaton leading from state from to to
- *
- * @param automaton: automaton, where we are adding universal transition
- * @param from: state tuple of left hand side of transition
- * @param to: state tuple of right hand side of transition
- */
-void addUniversalTransition(
-		Automaton& automaton,
-		Automaton::StateTuple from,
-		Automaton::StateType to) {
-	automaton.AddTransition(from, constructUniversalTrack(), to);
-}
 
 /**
  * Constructs automaton for unary automaton True
@@ -158,19 +105,6 @@ void ASTForm_Or::toUnaryAutomaton(Automaton &orAutomaton, bool doComplement) {
 }
 
 /**
- * @param aut: automaton, where we are added track of len 2
- * @param q: state tuple from which transition occurs
- * @param x:
- */
-void addTrack(Automaton& aut, Automaton::StateTuple q, int x, int y, char* track, int qf) {
-	// TODO: add assert to tracklen
-	Automaton::SymbolType bddTrack = constructUniversalTrack();
-	bddTrack.SetIthVariableValue(x, track[0]);
-	bddTrack.SetIthVariableValue(y, track[1]);
-	aut.AddTransition(q, bddTrack, qf);
-}
-
-/**
  * Constructs automaton for atomic formula T1 = T2, according to its structure:
  *  1) X = Y1
  *  2) T1 = T2
@@ -189,22 +123,22 @@ void ASTForm_Equal2::toUnaryAutomaton(Automaton &aut, bool doComplement) {
 		ASTTerm2_Var2* YTerm = (ASTTerm2_Var2*) ((ASTTerm2_Plus*) this->T2)->T;
 		unsigned int Y = YTerm->n;
 		// (x00x) -> q0
-		addTrack(aut, Automaton::StateTuple(), X, Y, (char *) "00", 0);
+		addTransition(aut, Automaton::StateTuple(), X, Y, (char *) "00", 0);
 
 		// (x10x) -> q0
-		addTrack(aut, Automaton::StateTuple(), X, Y, (char *) "10", 0);
+		addTransition(aut, Automaton::StateTuple(), X, Y, (char *) "10", 0);
 
 		// q0 -(x00x)-> q0
-		addTrack(aut, Automaton::StateTuple({0}), X, Y, (char *) "00", 0);
+		addTransition(aut, Automaton::StateTuple({0}), X, Y, (char *) "00", 0);
 
 		// q0 -(x10x)-> q1
-		addTrack(aut, Automaton::StateTuple({0}), X, Y, (char *) "10", 1);
+		addTransition(aut, Automaton::StateTuple({0}), X, Y, (char *) "10", 1);
 
 		// q1 -(x01x)-> q2
-		addTrack(aut, Automaton::StateTuple({1}), X, Y, (char *) "01", 2);
+		addTransition(aut, Automaton::StateTuple({1}), X, Y, (char *) "01", 2);
 
 		// q2 -(x00x)-> q2
-		addTrack(aut, Automaton::StateTuple({2}), X, Y, (char *) "00", 2);
+		addTransition(aut, Automaton::StateTuple({2}), X, Y, (char *) "00", 2);
 
 		// set q2 final
 		setNonFinalState(aut, doComplement, 0);
@@ -243,31 +177,25 @@ void ASTForm_Sub::toUnaryAutomaton(Automaton &aut, bool doComplement) {
 	ASTTerm2_Var2* T2Var = (ASTTerm2_Var2*) this->T2;
 	unsigned int T2 = (unsigned int) T2Var->n;
 	//  -(x00x)-> q0
-	addTrack(aut, Automaton::StateTuple(), T1, T2, (char *) "00", 0);
+	addTransition(aut, Automaton::StateTuple(), T1, T2, (char *) "00", 0);
 
 	//  -(x11x)-> q0
-	addTrack(aut, Automaton::StateTuple(), T1, T2, (char *) "11", 0);
+	addTransition(aut, Automaton::StateTuple(), T1, T2, (char *) "11", 0);
 
 	// -(x01x)-> q0
-	addTrack(aut, Automaton::StateTuple(), T1, T2, (char *) "01", 0);
+	addTransition(aut, Automaton::StateTuple(), T1, T2, (char *) "01", 0);
 
 	// q0 -(x00x)-> q0
-	addTrack(aut, Automaton::StateTuple({0}), T1, T2, (char *) "00", 0);
+	addTransition(aut, Automaton::StateTuple({0}), T1, T2, (char *) "00", 0);
 
 	// q0 -(x11x)-> q0
-	addTrack(aut, Automaton::StateTuple({0}), T1, T2, (char *) "11", 0);
+	addTransition(aut, Automaton::StateTuple({0}), T1, T2, (char *) "11", 0);
 
 	// q0 -(x01x)-> q0
-	addTrack(aut, Automaton::StateTuple({0}), T1, T2, (char *) "01", 0);
+	addTransition(aut, Automaton::StateTuple({0}), T1, T2, (char *) "01", 0);
 
 	// final state q0
 	setFinalState(aut, doComplement, 0);
-}
-
-void addTrack(Automaton& aut, Automaton::StateTuple q, int x, char track, int qf) {
-	Automaton::SymbolType bddTrack = constructUniversalTrack();
-	bddTrack.SetIthVariableValue(x, track);
-	aut.AddTransition(q, bddTrack, qf);
 }
 
 /**
@@ -280,19 +208,19 @@ void ASTForm_FirstOrder::toUnaryAutomaton(Automaton &aut, bool doComplement) {
 	unsigned int X = (unsigned int) XVar->n;
 
 	// -(x0x)-> q0
-	addTrack(aut, Automaton::StateTuple(), X, '0', 0);
+	addTransition(aut, Automaton::StateTuple(), X, '0', 0);
 
 	// -(x1x)-> q1
-	addTrack(aut, Automaton::StateTuple(), X, '1', 0);
+	addTransition(aut, Automaton::StateTuple(), X, '1', 0);
 
 	// q0 -(x0x)-> q0
-	addTrack(aut, Automaton::StateTuple({0}), X, '0', 0);
+	addTransition(aut, Automaton::StateTuple({0}), X, '0', 0);
 
 	// q0 -(x1x)-> q1
-	addTrack(aut, Automaton::StateTuple({0}), X, '1', 1);
+	addTransition(aut, Automaton::StateTuple({0}), X, '1', 1);
 
 	// q1 -(x0x)-> q1
-	addTrack(aut, Automaton::StateTuple({1}), X, '0', 1);
+	addTransition(aut, Automaton::StateTuple({1}), X, '0', 1);
 
 	// final state q1
 	setNonFinalState(aut, doComplement, 0);

@@ -35,6 +35,7 @@ add_executable(dip
 	src/app/Frontend/symboltable.cpp
 	src/app/Frontend/timer.cpp
 	src/app/Frontend/untyped.cpp
+	src/app/DecisionProcedure/automata.cpp
 	src/app/DecisionProcedure/expnf.cpp
 	src/app/DecisionProcedure/ws1s-formula-to-automaton.cpp
 	src/app/DecisionProcedure/ws2s-formula-to-automaton.cpp
