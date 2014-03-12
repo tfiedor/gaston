@@ -158,6 +158,19 @@ void ASTForm_Or::toUnaryAutomaton(Automaton &orAutomaton, bool doComplement) {
 }
 
 /**
+ * @param aut: automaton, where we are added track of len 2
+ * @param q: state tuple from which transition occurs
+ * @param x:
+ */
+void addTrack(Automaton& aut, Automaton::StateTuple q, int x, int y, char* track, int qf) {
+	// TODO: add assert to tracklen
+	Automaton::SymbolType bddTrack = constructUniversalTrack();
+	bddTrack.SetIthVariableValue(x, track[0]);
+	bddTrack.SetIthVariableValue(y, track[1]);
+	aut.AddTransition(q, bddTrack, qf);
+}
+
+/**
  * Constructs automaton for atomic formula T1 = T2, according to its structure:
  *  1) X = Y1
  *  2) T1 = T2
@@ -176,58 +189,23 @@ void ASTForm_Equal2::toUnaryAutomaton(Automaton &aut, bool doComplement) {
 		ASTTerm2_Var2* YTerm = (ASTTerm2_Var2*) ((ASTTerm2_Plus*) this->T2)->T;
 		unsigned int Y = YTerm->n;
 		// (x00x) -> q0
-		Automaton::SymbolType q0 = constructUniversalTrack();
-		q0.SetIthVariableValue(X, '0');
-		q0.SetIthVariableValue(Y, '0');
-		aut.AddTransition(
-				Automaton::StateTuple(),
-				q0,
-				0);
+		addTrack(aut, Automaton::StateTuple(), X, Y, (char *) "00", 0);
 
 		// (x10x) -> q0
-		Automaton::SymbolType q1 = constructUniversalTrack();
-		q1.SetIthVariableValue(X, '1');
-		q1.SetIthVariableValue(Y, '0');
-		aut.AddTransition(
-				Automaton::StateTuple(),
-				q1,
-				0);
+		addTrack(aut, Automaton::StateTuple(), X, Y, (char *) "10", 0);
 
 		// q0 -(x00x)-> q0
-		Automaton::SymbolType q0q0 = constructUniversalTrack();
-		q0q0.SetIthVariableValue(X, '0');
-		q0q0.SetIthVariableValue(Y, '0');
-		aut.AddTransition(
-				Automaton::StateTuple({0}),
-				q0q0,
-				0);
+		addTrack(aut, Automaton::StateTuple({0}), X, Y, (char *) "00", 0);
 
 		// q0 -(x10x)-> q1
-		Automaton::SymbolType q0q1 = constructUniversalTrack();
-		q0q1.SetIthVariableValue(X, '1');
-		q0q1.SetIthVariableValue(X, '0');
-		aut.AddTransition(
-				Automaton::StateTuple({0}),
-				q0q1,
-				1);
+		addTrack(aut, Automaton::StateTuple({0}), X, Y, (char *) "10", 1);
 
 		// q1 -(x01x)-> q2
-		Automaton::SymbolType q1q2 = constructUniversalTrack();
-		q1q2.SetIthVariableValue(X, '0');
-		q1q2.SetIthVariableValue(Y, '1');
-		aut.AddTransition(
-				Automaton::StateTuple({1}),
-				q1q2,
-				2);
+		addTrack(aut, Automaton::StateTuple({1}), X, Y, (char *) "01", 2);
 
 		// q2 -(x00x)-> q2
-		Automaton::SymbolType q2q2 = constructUniversalTrack();
-		q2q2.SetIthVariableValue(X, '0');
-		q2q2.SetIthVariableValue(Y, '0');
-		aut.AddTransition(
-				Automaton::StateTuple({2}),
-				q2q2,
-				2);
+		addTrack(aut, Automaton::StateTuple({2}), X, Y, (char *) "00", 2);
+
 		// set q2 final
 		setNonFinalState(aut, doComplement, 0);
 		setNonFinalState(aut, doComplement, 1);
@@ -237,6 +215,8 @@ void ASTForm_Equal2::toUnaryAutomaton(Automaton &aut, bool doComplement) {
 	} else if (this->T1->kind == aVar2 && this->T2->kind == aVar2) {
 
 	// 3) X = e
+	} else {
+
 	}
 }
 
@@ -263,61 +243,31 @@ void ASTForm_Sub::toUnaryAutomaton(Automaton &aut, bool doComplement) {
 	ASTTerm2_Var2* T2Var = (ASTTerm2_Var2*) this->T2;
 	unsigned int T2 = (unsigned int) T2Var->n;
 	//  -(x00x)-> q0
-	Automaton::SymbolType q0 = constructUniversalTrack();
-	q0.SetIthVariableValue(T1, '0');
-	q0.SetIthVariableValue(T2, '0');
-	aut.AddTransition(
-			Automaton::StateTuple(),
-			q0,
-			0);
+	addTrack(aut, Automaton::StateTuple(), T1, T2, (char *) "00", 0);
 
 	//  -(x11x)-> q0
-	Automaton::SymbolType q0b = constructUniversalTrack();
-	q0b.SetIthVariableValue(T1, '1');
-	q0b.SetIthVariableValue(T2, '1');
-	aut.AddTransition(
-			Automaton::StateTuple(),
-			q0b,
-			0);
+	addTrack(aut, Automaton::StateTuple(), T1, T2, (char *) "11", 0);
 
 	// -(x01x)-> q0
-	Automaton::SymbolType q0c = constructUniversalTrack();
-	q0c.SetIthVariableValue(T1, '0');
-	q0c.SetIthVariableValue(T2, '1');
-	aut.AddTransition(
-			Automaton::StateTuple(),
-			q0c,
-			0);
+	addTrack(aut, Automaton::StateTuple(), T1, T2, (char *) "01", 0);
 
 	// q0 -(x00x)-> q0
-	Automaton::SymbolType q0q0 = constructUniversalTrack();
-	q0q0.SetIthVariableValue(T1, '0');
-	q0q0.SetIthVariableValue(T2, '0');
-	aut.AddTransition(
-			Automaton::StateTuple({0}),
-			q0q0,
-			0);
+	addTrack(aut, Automaton::StateTuple({0}), T1, T2, (char *) "00", 0);
 
 	// q0 -(x11x)-> q0
-	Automaton::SymbolType q0q0b = constructUniversalTrack();
-	q0q0b.SetIthVariableValue(T1, '1');
-	q0q0b.SetIthVariableValue(T2, '1');
-	aut.AddTransition(
-			Automaton::StateTuple({0}),
-			q0q0b,
-			0);
+	addTrack(aut, Automaton::StateTuple({0}), T1, T2, (char *) "11", 0);
 
 	// q0 -(x01x)-> q0
-	Automaton::SymbolType q0q0c = constructUniversalTrack();
-	q0q0c.SetIthVariableValue(T1, '0');
-	q0q0c.SetIthVariableValue(T2, '1');
-	aut.AddTransition(
-			Automaton::StateTuple({0}),
-			q0q0c,
-			0);
+	addTrack(aut, Automaton::StateTuple({0}), T1, T2, (char *) "01", 0);
 
 	// final state q0
 	setFinalState(aut, doComplement, 0);
+}
+
+void addTrack(Automaton& aut, Automaton::StateTuple q, int x, char track, int qf) {
+	Automaton::SymbolType bddTrack = constructUniversalTrack();
+	bddTrack.SetIthVariableValue(x, track);
+	aut.AddTransition(q, bddTrack, qf);
 }
 
 /**
@@ -330,44 +280,19 @@ void ASTForm_FirstOrder::toUnaryAutomaton(Automaton &aut, bool doComplement) {
 	unsigned int X = (unsigned int) XVar->n;
 
 	// -(x0x)-> q0
-	Automaton::SymbolType q0 = constructUniversalTrack();
-	q0.SetIthVariableValue(X, '0');
-	aut.AddTransition(
-			Automaton::StateTuple(),
-			q0,
-			0);
+	addTrack(aut, Automaton::StateTuple(), X, '0', 0);
 
 	// -(x1x)-> q1
-	Automaton::SymbolType q1 = constructUniversalTrack();
-	q1.SetIthVariableValue(X, '1');
-	aut.AddTransition(
-			Automaton::StateTuple(),
-			q1,
-			1);
+	addTrack(aut, Automaton::StateTuple(), X, '1', 0);
 
 	// q0 -(x0x)-> q0
-	Automaton::SymbolType q0q0 = constructUniversalTrack();
-	q0q0.SetIthVariableValue(X, '0');
-	aut.AddTransition(
-			Automaton::StateTuple({0}),
-			q0q0,
-			0);
+	addTrack(aut, Automaton::StateTuple({0}), X, '0', 0);
 
 	// q0 -(x1x)-> q1
-	Automaton::SymbolType q0q1 = constructUniversalTrack();
-	q0q1.SetIthVariableValue(X, '1');
-	aut.AddTransition(
-			Automaton::StateTuple({0}),
-			q0q1,
-			1);
+	addTrack(aut, Automaton::StateTuple({0}), X, '1', 1);
 
 	// q1 -(x0x)-> q1
-	Automaton::SymbolType q1q1 = constructUniversalTrack();
-	q1q1.SetIthVariableValue(X, '0');
-	aut.AddTransition(
-			Automaton::StateTuple({1}),
-			q1q1,
-			1);
+	addTrack(aut, Automaton::StateTuple({1}), X, '0', 1);
 
 	// final state q1
 	setNonFinalState(aut, doComplement, 0);
