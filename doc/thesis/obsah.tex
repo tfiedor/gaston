@@ -156,11 +156,20 @@ $\mathcal{A}$ such that $L(\mathcal{A}) = L$.
 	
 	\noindent\hrulefill
 	\begin{example}
-	Consider 
+	Consider coding of subsets of $\{1,\ldots,n\}$, for some $n \in \mathbb{N}$, as
+	binary strings $X = a_1\ldots a_n$, where $a_i$ is $1$ if $i \in X$ and $0$ if
+	$i \notin X$.
+	
+	We can construct automaton $\mathcal{A}$ that accepts set difference $X$ of two
+	sets $Y$ and $Z$, i.e. $X = Y \setminus Z$, as depicted on Figure
+	\ref{set-automaton}.
+	
 	\begin{figure}[h!]
 	\begin{center}
 	 \scalebox{1}{\includegraphics{fig/word-automaton-setminus.pdf}}
 	 \end{center}
+	 \caption{Automaton $\mathcal{A}$ accepting set difference of two
+	 sets.}\label{set-automaton}
 	\end{figure}
 	\end{example}
 	
