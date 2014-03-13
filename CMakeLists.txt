@@ -36,10 +36,10 @@ add_executable(dip
 	src/app/Frontend/timer.cpp
 	src/app/Frontend/untyped.cpp
 	src/app/DecisionProcedure/automata.cpp
-	src/app/DecisionProcedure/expnf.cpp
-	src/app/DecisionProcedure/ws1s-formula-to-automaton.cpp
-	src/app/DecisionProcedure/ws2s-formula-to-automaton.cpp
-	src/app/DecisionProcedure/formula-flatten.cpp
+	src/app/DecisionProcedure/formula_existential_form_conversion.cpp
+	src/app/DecisionProcedure/formula_flattening.cpp
+	src/app/DecisionProcedure/formula_to_automaton_ws1s.cpp
+	src/app/DecisionProcedure/formula_to_automaton_ws2s.cpp
 	src/app/DecisionProcedure/decision_procedures.cpp
 )
 link_directories(${CMAKE_SOURCE_DIR}/src/libs/)

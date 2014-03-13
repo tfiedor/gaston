@@ -162,101 +162,101 @@ src/app/DecisionProcedure/decision_procedures.cpp.s:
 	$(MAKE) -f CMakeFiles/dip.dir/build.make CMakeFiles/dip.dir/src/app/DecisionProcedure/decision_procedures.cpp.s
 .PHONY : src/app/DecisionProcedure/decision_procedures.cpp.s
 
-src/app/DecisionProcedure/expnf.o: src/app/DecisionProcedure/expnf.cpp.o
-.PHONY : src/app/DecisionProcedure/expnf.o
+src/app/DecisionProcedure/formula_existential_form_conversion.o: src/app/DecisionProcedure/formula_existential_form_conversion.cpp.o
+.PHONY : src/app/DecisionProcedure/formula_existential_form_conversion.o
 
 # target to build an object file
-src/app/DecisionProcedure/expnf.cpp.o:
-	$(MAKE) -f CMakeFiles/dip.dir/build.make CMakeFiles/dip.dir/src/app/DecisionProcedure/expnf.cpp.o
-.PHONY : src/app/DecisionProcedure/expnf.cpp.o
+src/app/DecisionProcedure/formula_existential_form_conversion.cpp.o:
+	$(MAKE) -f CMakeFiles/dip.dir/build.make CMakeFiles/dip.dir/src/app/DecisionProcedure/formula_existential_form_conversion.cpp.o
+.PHONY : src/app/DecisionProcedure/formula_existential_form_conversion.cpp.o
 
-src/app/DecisionProcedure/expnf.i: src/app/DecisionProcedure/expnf.cpp.i
-.PHONY : src/app/DecisionProcedure/expnf.i
+src/app/DecisionProcedure/formula_existential_form_conversion.i: src/app/DecisionProcedure/formula_existential_form_conversion.cpp.i
+.PHONY : src/app/DecisionProcedure/formula_existential_form_conversion.i
 
 # target to preprocess a source file
-src/app/DecisionProcedure/expnf.cpp.i:
-	$(MAKE) -f CMakeFiles/dip.dir/build.make CMakeFiles/dip.dir/src/app/DecisionProcedure/expnf.cpp.i
-.PHONY : src/app/DecisionProcedure/expnf.cpp.i
+src/app/DecisionProcedure/formula_existential_form_conversion.cpp.i:
+	$(MAKE) -f CMakeFiles/dip.dir/build.make CMakeFiles/dip.dir/src/app/DecisionProcedure/formula_existential_form_conversion.cpp.i
+.PHONY : src/app/DecisionProcedure/formula_existential_form_conversion.cpp.i
 
-src/app/DecisionProcedure/expnf.s: src/app/DecisionProcedure/expnf.cpp.s
-.PHONY : src/app/DecisionProcedure/expnf.s
+src/app/DecisionProcedure/formula_existential_form_conversion.s: src/app/DecisionProcedure/formula_existential_form_conversion.cpp.s
+.PHONY : src/app/DecisionProcedure/formula_existential_form_conversion.s
 
 # target to generate assembly for a file
-src/app/DecisionProcedure/expnf.cpp.s:
-	$(MAKE) -f CMakeFiles/dip.dir/build.make CMakeFiles/dip.dir/src/app/DecisionProcedure/expnf.cpp.s
-.PHONY : src/app/DecisionProcedure/expnf.cpp.s
+src/app/DecisionProcedure/formula_existential_form_conversion.cpp.s:
+	$(MAKE) -f CMakeFiles/dip.dir/build.make CMakeFiles/dip.dir/src/app/DecisionProcedure/formula_existential_form_conversion.cpp.s
+.PHONY : src/app/DecisionProcedure/formula_existential_form_conversion.cpp.s
 
-src/app/DecisionProcedure/formula-flatten.o: src/app/DecisionProcedure/formula-flatten.cpp.o
-.PHONY : src/app/DecisionProcedure/formula-flatten.o
+src/app/DecisionProcedure/formula_flattening.o: src/app/DecisionProcedure/formula_flattening.cpp.o
+.PHONY : src/app/DecisionProcedure/formula_flattening.o
 
 # target to build an object file
-src/app/DecisionProcedure/formula-flatten.cpp.o:
-	$(MAKE) -f CMakeFiles/dip.dir/build.make CMakeFiles/dip.dir/src/app/DecisionProcedure/formula-flatten.cpp.o
-.PHONY : src/app/DecisionProcedure/formula-flatten.cpp.o
+src/app/DecisionProcedure/formula_flattening.cpp.o:
+	$(MAKE) -f CMakeFiles/dip.dir/build.make CMakeFiles/dip.dir/src/app/DecisionProcedure/formula_flattening.cpp.o
+.PHONY : src/app/DecisionProcedure/formula_flattening.cpp.o
 
-src/app/DecisionProcedure/formula-flatten.i: src/app/DecisionProcedure/formula-flatten.cpp.i
-.PHONY : src/app/DecisionProcedure/formula-flatten.i
+src/app/DecisionProcedure/formula_flattening.i: src/app/DecisionProcedure/formula_flattening.cpp.i
+.PHONY : src/app/DecisionProcedure/formula_flattening.i
 
 # target to preprocess a source file
-src/app/DecisionProcedure/formula-flatten.cpp.i:
-	$(MAKE) -f CMakeFiles/dip.dir/build.make CMakeFiles/dip.dir/src/app/DecisionProcedure/formula-flatten.cpp.i
-.PHONY : src/app/DecisionProcedure/formula-flatten.cpp.i
+src/app/DecisionProcedure/formula_flattening.cpp.i:
+	$(MAKE) -f CMakeFiles/dip.dir/build.make CMakeFiles/dip.dir/src/app/DecisionProcedure/formula_flattening.cpp.i
+.PHONY : src/app/DecisionProcedure/formula_flattening.cpp.i
 
-src/app/DecisionProcedure/formula-flatten.s: src/app/DecisionProcedure/formula-flatten.cpp.s
-.PHONY : src/app/DecisionProcedure/formula-flatten.s
+src/app/DecisionProcedure/formula_flattening.s: src/app/DecisionProcedure/formula_flattening.cpp.s
+.PHONY : src/app/DecisionProcedure/formula_flattening.s
 
 # target to generate assembly for a file
-src/app/DecisionProcedure/formula-flatten.cpp.s:
-	$(MAKE) -f CMakeFiles/dip.dir/build.make CMakeFiles/dip.dir/src/app/DecisionProcedure/formula-flatten.cpp.s
-.PHONY : src/app/DecisionProcedure/formula-flatten.cpp.s
+src/app/DecisionProcedure/formula_flattening.cpp.s:
+	$(MAKE) -f CMakeFiles/dip.dir/build.make CMakeFiles/dip.dir/src/app/DecisionProcedure/formula_flattening.cpp.s
+.PHONY : src/app/DecisionProcedure/formula_flattening.cpp.s
 
-src/app/DecisionProcedure/ws1s-formula-to-automaton.o: src/app/DecisionProcedure/ws1s-formula-to-automaton.cpp.o
-.PHONY : src/app/DecisionProcedure/ws1s-formula-to-automaton.o
+src/app/DecisionProcedure/formula_to_automaton_ws1s.o: src/app/DecisionProcedure/formula_to_automaton_ws1s.cpp.o
+.PHONY : src/app/DecisionProcedure/formula_to_automaton_ws1s.o
 
 # target to build an object file
-src/app/DecisionProcedure/ws1s-formula-to-automaton.cpp.o:
-	$(MAKE) -f CMakeFiles/dip.dir/build.make CMakeFiles/dip.dir/src/app/DecisionProcedure/ws1s-formula-to-automaton.cpp.o
-.PHONY : src/app/DecisionProcedure/ws1s-formula-to-automaton.cpp.o
+src/app/DecisionProcedure/formula_to_automaton_ws1s.cpp.o:
+	$(MAKE) -f CMakeFiles/dip.dir/build.make CMakeFiles/dip.dir/src/app/DecisionProcedure/formula_to_automaton_ws1s.cpp.o
+.PHONY : src/app/DecisionProcedure/formula_to_automaton_ws1s.cpp.o
 
-src/app/DecisionProcedure/ws1s-formula-to-automaton.i: src/app/DecisionProcedure/ws1s-formula-to-automaton.cpp.i
-.PHONY : src/app/DecisionProcedure/ws1s-formula-to-automaton.i
+src/app/DecisionProcedure/formula_to_automaton_ws1s.i: src/app/DecisionProcedure/formula_to_automaton_ws1s.cpp.i
+.PHONY : src/app/DecisionProcedure/formula_to_automaton_ws1s.i
 
 # target to preprocess a source file
-src/app/DecisionProcedure/ws1s-formula-to-automaton.cpp.i:
-	$(MAKE) -f CMakeFiles/dip.dir/build.make CMakeFiles/dip.dir/src/app/DecisionProcedure/ws1s-formula-to-automaton.cpp.i
-.PHONY : src/app/DecisionProcedure/ws1s-formula-to-automaton.cpp.i
+src/app/DecisionProcedure/formula_to_automaton_ws1s.cpp.i:
+	$(MAKE) -f CMakeFiles/dip.dir/build.make CMakeFiles/dip.dir/src/app/DecisionProcedure/formula_to_automaton_ws1s.cpp.i
+.PHONY : src/app/DecisionProcedure/formula_to_automaton_ws1s.cpp.i
 
-src/app/DecisionProcedure/ws1s-formula-to-automaton.s: src/app/DecisionProcedure/ws1s-formula-to-automaton.cpp.s
-.PHONY : src/app/DecisionProcedure/ws1s-formula-to-automaton.s
+src/app/DecisionProcedure/formula_to_automaton_ws1s.s: src/app/DecisionProcedure/formula_to_automaton_ws1s.cpp.s
+.PHONY : src/app/DecisionProcedure/formula_to_automaton_ws1s.s
 
 # target to generate assembly for a file
-src/app/DecisionProcedure/ws1s-formula-to-automaton.cpp.s:
-	$(MAKE) -f CMakeFiles/dip.dir/build.make CMakeFiles/dip.dir/src/app/DecisionProcedure/ws1s-formula-to-automaton.cpp.s
-.PHONY : src/app/DecisionProcedure/ws1s-formula-to-automaton.cpp.s
+src/app/DecisionProcedure/formula_to_automaton_ws1s.cpp.s:
+	$(MAKE) -f CMakeFiles/dip.dir/build.make CMakeFiles/dip.dir/src/app/DecisionProcedure/formula_to_automaton_ws1s.cpp.s
+.PHONY : src/app/DecisionProcedure/formula_to_automaton_ws1s.cpp.s
 
-src/app/DecisionProcedure/ws2s-formula-to-automaton.o: src/app/DecisionProcedure/ws2s-formula-to-automaton.cpp.o
-.PHONY : src/app/DecisionProcedure/ws2s-formula-to-automaton.o
+src/app/DecisionProcedure/formula_to_automaton_ws2s.o: src/app/DecisionProcedure/formula_to_automaton_ws2s.cpp.o
+.PHONY : src/app/DecisionProcedure/formula_to_automaton_ws2s.o
 
 # target to build an object file
-src/app/DecisionProcedure/ws2s-formula-to-automaton.cpp.o:
-	$(MAKE) -f CMakeFiles/dip.dir/build.make CMakeFiles/dip.dir/src/app/DecisionProcedure/ws2s-formula-to-automaton.cpp.o
-.PHONY : src/app/DecisionProcedure/ws2s-formula-to-automaton.cpp.o
+src/app/DecisionProcedure/formula_to_automaton_ws2s.cpp.o:
+	$(MAKE) -f CMakeFiles/dip.dir/build.make CMakeFiles/dip.dir/src/app/DecisionProcedure/formula_to_automaton_ws2s.cpp.o
+.PHONY : src/app/DecisionProcedure/formula_to_automaton_ws2s.cpp.o
 
-src/app/DecisionProcedure/ws2s-formula-to-automaton.i: src/app/DecisionProcedure/ws2s-formula-to-automaton.cpp.i
-.PHONY : src/app/DecisionProcedure/ws2s-formula-to-automaton.i
+src/app/DecisionProcedure/formula_to_automaton_ws2s.i: src/app/DecisionProcedure/formula_to_automaton_ws2s.cpp.i
+.PHONY : src/app/DecisionProcedure/formula_to_automaton_ws2s.i
 
 # target to preprocess a source file
-src/app/DecisionProcedure/ws2s-formula-to-automaton.cpp.i:
-	$(MAKE) -f CMakeFiles/dip.dir/build.make CMakeFiles/dip.dir/src/app/DecisionProcedure/ws2s-formula-to-automaton.cpp.i
-.PHONY : src/app/DecisionProcedure/ws2s-formula-to-automaton.cpp.i
+src/app/DecisionProcedure/formula_to_automaton_ws2s.cpp.i:
+	$(MAKE) -f CMakeFiles/dip.dir/build.make CMakeFiles/dip.dir/src/app/DecisionProcedure/formula_to_automaton_ws2s.cpp.i
+.PHONY : src/app/DecisionProcedure/formula_to_automaton_ws2s.cpp.i
 
-src/app/DecisionProcedure/ws2s-formula-to-automaton.s: src/app/DecisionProcedure/ws2s-formula-to-automaton.cpp.s
-.PHONY : src/app/DecisionProcedure/ws2s-formula-to-automaton.s
+src/app/DecisionProcedure/formula_to_automaton_ws2s.s: src/app/DecisionProcedure/formula_to_automaton_ws2s.cpp.s
+.PHONY : src/app/DecisionProcedure/formula_to_automaton_ws2s.s
 
 # target to generate assembly for a file
-src/app/DecisionProcedure/ws2s-formula-to-automaton.cpp.s:
-	$(MAKE) -f CMakeFiles/dip.dir/build.make CMakeFiles/dip.dir/src/app/DecisionProcedure/ws2s-formula-to-automaton.cpp.s
-.PHONY : src/app/DecisionProcedure/ws2s-formula-to-automaton.cpp.s
+src/app/DecisionProcedure/formula_to_automaton_ws2s.cpp.s:
+	$(MAKE) -f CMakeFiles/dip.dir/build.make CMakeFiles/dip.dir/src/app/DecisionProcedure/formula_to_automaton_ws2s.cpp.s
+.PHONY : src/app/DecisionProcedure/formula_to_automaton_ws2s.cpp.s
 
 src/app/Frontend/ast.o: src/app/Frontend/ast.cpp.o
 .PHONY : src/app/Frontend/ast.o
@@ -825,18 +825,18 @@ help:
 	@echo "... src/app/DecisionProcedure/decision_procedures.o"
 	@echo "... src/app/DecisionProcedure/decision_procedures.i"
 	@echo "... src/app/DecisionProcedure/decision_procedures.s"
-	@echo "... src/app/DecisionProcedure/expnf.o"
-	@echo "... src/app/DecisionProcedure/expnf.i"
-	@echo "... src/app/DecisionProcedure/expnf.s"
-	@echo "... src/app/DecisionProcedure/formula-flatten.o"
-	@echo "... src/app/DecisionProcedure/formula-flatten.i"
-	@echo "... src/app/DecisionProcedure/formula-flatten.s"
-	@echo "... src/app/DecisionProcedure/ws1s-formula-to-automaton.o"
-	@echo "... src/app/DecisionProcedure/ws1s-formula-to-automaton.i"
-	@echo "... src/app/DecisionProcedure/ws1s-formula-to-automaton.s"
-	@echo "... src/app/DecisionProcedure/ws2s-formula-to-automaton.o"
-	@echo "... src/app/DecisionProcedure/ws2s-formula-to-automaton.i"
-	@echo "... src/app/DecisionProcedure/ws2s-formula-to-automaton.s"
+	@echo "... src/app/DecisionProcedure/formula_existential_form_conversion.o"
+	@echo "... src/app/DecisionProcedure/formula_existential_form_conversion.i"
+	@echo "... src/app/DecisionProcedure/formula_existential_form_conversion.s"
+	@echo "... src/app/DecisionProcedure/formula_flattening.o"
+	@echo "... src/app/DecisionProcedure/formula_flattening.i"
+	@echo "... src/app/DecisionProcedure/formula_flattening.s"
+	@echo "... src/app/DecisionProcedure/formula_to_automaton_ws1s.o"
+	@echo "... src/app/DecisionProcedure/formula_to_automaton_ws1s.i"
+	@echo "... src/app/DecisionProcedure/formula_to_automaton_ws1s.s"
+	@echo "... src/app/DecisionProcedure/formula_to_automaton_ws2s.o"
+	@echo "... src/app/DecisionProcedure/formula_to_automaton_ws2s.i"
+	@echo "... src/app/DecisionProcedure/formula_to_automaton_ws2s.s"
 	@echo "... src/app/Frontend/ast.o"
 	@echo "... src/app/Frontend/ast.i"
 	@echo "... src/app/Frontend/ast.s"
