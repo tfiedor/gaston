@@ -1,5 +1,42 @@
 \chapter{Contents of CD}
+
+In main directory of the cd, there is a \texttt{cmake} source for compilation of
+the application.
+
+\paragraph{Directory \texttt{/doc/thesis}}
+
+Contains \LaTeX sources with Makefile for compilation of thesis.
+
+\paragraph{Directory \texttt{/examples/formulae}}
+
+Contains examples written in \textsc{MONA} syntax for deciding. Ranging from
+simple examples used for testing functionality to more complex ones used for
+evaluation of created code.
+
+\paragraph{Directory \texttt{/include/vata}}
+
+Contains headers needed to be included during compilation of program for part of
+the functions that are used from library \texttt{VATA}.
+
+\paragraph{Directory \texttt{/src/app/DecisionProcedure}}
+
+Contains main part of the application sources that does the conversion of given
+representation of formulae into automaton and afterwards the procedure of
+deciding validity or satisfiability.
+
+\paragraph{Directory \texttt{/src/app/Frontend}}
+
+Contains part of the sources that does the parsing of the input formulae
+specification into inner representation in program
+
+\paragraph{Directory \texttt{/src/libs}}
+
+Contains external libraries that are used in application. Namely these are
+several libraries needed for \textsc{MONA} part and library for manipulating
+with NTA \textsc{VATA}.
+
 \chapter{WS$k$S specification syntax}\label{syntax}
+
 \chapter{Usage}
 The usage of the decision procedure tool is:
 \begin{center}
