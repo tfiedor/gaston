@@ -970,6 +970,7 @@ public:
 
   ASTForm* toRestrictedSyntax();
 
+  ASTForm* flatten();
   void toUnaryAutomaton(Automaton &aut, bool doComplement);
   void toBinaryAutomaton(Automaton &aut, bool doComplement);
 };

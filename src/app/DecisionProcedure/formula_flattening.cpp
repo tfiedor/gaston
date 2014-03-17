@@ -358,3 +358,22 @@ ASTForm* ASTForm_uvf::flatten() {
     f = f->flatten();
     return this;
 }
+
+/**
+ * Flatten the conjunction to optimize AND(True, phi), that is appearing
+ * due to the parsing approach of the MONA
+ *
+ * @return: flattened formula
+ */
+ASTForm* ASTForm_And::flatten() {
+	f1 = f1->flatten();
+	f2 = f2->flatten();
+
+	if(f1->kind == aTrue) {
+		return f2;
+	} else if (f2->kind == aTrue) {
+		return f1;
+	} else {
+		return this;
+	}
+}
