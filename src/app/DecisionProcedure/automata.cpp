@@ -1,5 +1,31 @@
 #include "automata.hh"
 
+#include <cstdio>
+#include <cstdlib>
+
+/**
+ * Converst character to specification of VATA
+ *
+ * @param[in] c: classical character from {0, 1, X}
+ * @return: character from enum {ONE, ZERO, DONT_CARE} from VATA spec.
+ */
+
+char charToAsgn(char c) {
+	switch(c) {
+	case '0':
+		return 0x01;
+		break;
+	case '1':
+		return 0x02;
+		break;
+	case 'X':
+		return 0x02;
+		break;
+	default:
+		assert(false);
+	}
+}
+
 /**
  * Constructs following transition for automaton:
  *   q -(xx'XY'xx)-> qf
@@ -14,8 +40,8 @@
 void addTransition(Automaton& aut, Automaton::StateTuple q, int x, int y, char* track, int qf) {
 	// TODO: add assert to tracklen
 	Automaton::SymbolType bddTrack = constructUniversalTrack();
-	bddTrack.SetIthVariableValue(x, track[0]);
-	bddTrack.SetIthVariableValue(y, track[1]);
+	bddTrack.SetIthVariableValue(x, charToAsgn(track[0]));
+	bddTrack.SetIthVariableValue(y, charToAsgn(track[1]));
 	aut.AddTransition(q, bddTrack, qf);
 }
 
@@ -31,7 +57,7 @@ void addTransition(Automaton& aut, Automaton::StateTuple q, int x, int y, char* 
  */
 void addTransition(Automaton& aut, Automaton::StateTuple q, int x, char track, int qf) {
 	Automaton::SymbolType bddTrack = constructUniversalTrack();
-	bddTrack.SetIthVariableValue(x, track);
+	bddTrack.SetIthVariableValue(x, charToAsgn(track));
 	aut.AddTransition(q, bddTrack, qf);
 }
 

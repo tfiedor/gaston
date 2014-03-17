@@ -900,10 +900,7 @@ public:
   VarCode makeCode(SubstCode *subst = NULL);
   void dump();
   ASTForm* clone() { return new ASTForm_NotEqual2(*this); }
-
-  // Conversion of AST representation of formula to Automaton
-  void toUnaryAutomaton(Automaton &aut, bool doComplement);
-  void toBinaryAutomaton(Automaton &aut, bool doComplement);
+  ASTForm* flatten();
 };
 
 class ASTForm_Less: public ASTForm_tt {

@@ -13,9 +13,11 @@ extern SymbolTable symbolTable;
 
 using Automaton = VATA::BDDBottomUpTreeAut;
 
+char charToAsgn(char c);
 void addTransition(Automaton& aut, Automaton::StateTuple q, int x, int y, char* track, int qf);
 void addTransition(Automaton& aut, Automaton::StateTuple q, int x, char track, int qf);
 void addUniversalTransition(Automaton& automaton, Automaton::StateTuple from, Automaton::StateType to);
+
 Automaton::SymbolType constructUniversalTrack();
 
 /**

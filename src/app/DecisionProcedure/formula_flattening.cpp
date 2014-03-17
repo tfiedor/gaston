@@ -88,7 +88,13 @@ ASTForm* ASTForm_Equal1::flatten() {
 		rightEqual = new ASTForm_Equal1(zVar, this->t2, Pos());
 		conjuction = new ASTForm_And(leftEqual, rightEqual, Pos());
 		return new ASTForm_Ex1(0, new IdentList(z), conjuction->flatten(), Pos());
-	// X = e ???
+	// x = e ???
+	} else if(this->t1->kind == aVar1 && this->t2->kind == aInt && ((ASTTerm1_Int*) this->t2)->value() == 0) {
+		x = new ASTTerm2_Var2(((ASTTerm1_Var1*)this->t1)->getVar(), Pos());
+		ASTList* set = new ASTList();
+		set->push_back((AST*) new ASTTerm1_Int(0, Pos()));
+		ASTTerm2_Set* e = new ASTTerm2_Set(set, Pos());
+		return new ASTForm_Equal2(x, e, Pos());
 	// TODO: This is not solved
 	} else {
 		std::cerr << "Not Implemented yet!\n";
@@ -106,6 +112,18 @@ ASTForm* ASTForm_Equal1::flatten() {
  */
 ASTForm* ASTForm_NotEqual1::flatten() {
 	ASTForm_Equal1* eq = new ASTForm_Equal1(this->t1, this->t2, Pos());
+	return new ASTForm_Not(eq->flatten(), Pos());
+}
+
+/**
+ * Flattens formula so it only uses certain atomic formulae
+ *
+ * X ~= Y -> not X = Y
+ *
+ * @return: flattened formula
+ */
+ASTForm* ASTForm_NotEqual2::flatten() {
+	ASTForm_Equal2* eq = new ASTForm_Equal2(this->T1, this->T2, Pos());
 	return new ASTForm_Not(eq->flatten(), Pos());
 }
 

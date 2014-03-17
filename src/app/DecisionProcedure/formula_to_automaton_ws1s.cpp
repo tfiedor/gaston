@@ -147,22 +147,37 @@ void ASTForm_Equal2::toUnaryAutomaton(Automaton &aut, bool doComplement) {
 
 	// 2) T1 = T2
 	} else if (this->T1->kind == aVar2 && this->T2->kind == aVar2) {
+		ASTTerm2_Var2* T1Term = (ASTTerm2_Var2*) this->T1;
+		unsigned int T1 = T1Term->n;
+		ASTTerm2_Var2* T2Term = (ASTTerm2_Var2*) this->T2;
+		unsigned int T2 = T2Term->n;
 
+		// (x00x) -> q0
+		addTransition(aut, Automaton::StateTuple(), T1, T2, (char *) "00", 0);
+
+		// (x11x) -> q0
+		addTransition(aut, Automaton::StateTuple(), T1, T2, (char *) "11", 0);
+
+		// q0 -(x00x)-> q0
+		addTransition(aut, Automaton::StateTuple({0}), T1, T2, (char *) "00", 0);
+
+		// q0 -(x11x)-> q0
+		addTransition(aut, Automaton::StateTuple({0}), T1, T2, (char *) "11", 0);
+
+		// set q0 final
+		setFinalState(aut, doComplement, 0);
 	// 3) X = e
+	// this should be X = {0} hopefully
 	} else {
+		ASTTerm2_Var2 *XTerm = (ASTTerm2_Var2*) this->T1;
+		unsigned int X = XTerm->n;
 
+		// (x1x)-> q0
+		addTransition(aut, Automaton::StateTuple(), X, '1', 0);
+
+		// set q0 final
+		setFinalState(aut, doComplement, 0);
 	}
-}
-
-/**
- * Constructs automaton for atomic formula T1 ~= T2, first constructs automaton
- * TODO: This probably should be flattened
- * T1 = T2 and then flip the states
- *
- * @return Automaton corresponding to the formula T1 ~= T2
- */
-void ASTForm_NotEqual2::toUnaryAutomaton(Automaton &aut, bool doComplement) {
-	cout << "Neq2 -> automaton\n";
 }
 
 /**

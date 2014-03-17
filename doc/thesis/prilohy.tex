@@ -37,6 +37,70 @@ with NTA \textsc{VATA}.
 
 \chapter{WS$k$S specification syntax}\label{syntax}
 
+The following grammar below describes supported subset of \textsc{MONA} syntax
+for specification of verified formulae. It uses the classical BNF-like notation.
+For full syntax for \textsc{MONA} program consult the tool manual \cite{mona}.
+
+\subsubsection{Specification}
+\begin{verbatim}
+program ::= (header;)? (declaration;)+
+header ::=  ws1s | ws2s
+\end{verbatim}
+
+\subsubsection{Declarations}
+% TODO: Not complete
+\begin{verbatim}
+declaration ::= formula
+			 |  var0 (varname)+
+             |  var1 (varname)+
+             |  var2 (varname)+
+             |  'pred' varname (params)? = formula
+             |  'macro' varname (params)? = formula
+\end{verbatim}
+
+\subsubsection{Formulae}
+\begin{verbatim}
+formula ::= 'true' | 'false' | (formula)
+         |  zero-order-var
+         | ~formula
+         | formula | formula
+         | formula & formula
+         | formula => formula
+         | formula <=> formula
+         | first-order-term = first-order-term 
+         | first-order-term ~= first-order-term 
+         | first-order-term < first-order-term 
+         | first-order-term > first-order-term
+         | first-order-term <= first-order-term 
+         | first-order-term >= first-order-term
+         | second-order-term = second-order-term
+         | second-order-term ~= second-order-term
+         | second-order-term 'sub' second-order-term
+         | first-order-term 'in' second-order-term
+         | ex1 (varname)+ : formula
+         | all1 (varname)+ : formula
+         | ex2 (varname)+ : formula
+         | all2 (varname)+ : formula
+\end{verbatim}
+
+\subsubsection{First-order terms in WS1S}
+\begin{verbatim}
+first-order-term ::= varname | (first-order-term)
+                  |  int
+                  | first-order-term + int
+                  | first-order-term - int
+\end{verbatim}
+
+\subsubsection{Second-order terms in WS1S}
+\begin{verbatim}
+second-order-term ::= varname | (second-order-term)
+                   |  second-order-term union second-order-term
+                   |  second-order-term inter second-order-term
+                   |  second-order-term \ second-order-term
+                   |  second-order-term + int
+                   |  second-order-term - int
+\end{verbatim}
+
 \chapter{Usage}
 The usage of the decision procedure tool is:
 \begin{center}

@@ -95,18 +95,6 @@ void ASTForm_Equal2::toBinaryAutomaton(Automaton &eqAutomaton, bool doComplement
 }
 
 /**
- * Constructs automaton for atomic formula T1 ~= T2, first constructs automaton
- * T1 = T2 and then flip the states
- *
- * @param[out] neqAutomaton: created automaton
- * @param doComplement: whether automaton should be complemented
- */
-void ASTForm_NotEqual2::toBinaryAutomaton(Automaton &neqAutomaton, bool doComplement) {
-	cout << "Neq2 -> automaton\n";
-}
-
-
-/**
  * Constructs automaton for atomic formula T1 sub T2
  *
  * @param[out] subAutomaton: created automaton
