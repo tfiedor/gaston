@@ -70,8 +70,8 @@ A WS$k$S \emph{formula} is then built out of these atomic formulae using only th
 logical connectives $\wedge, \vee, \neg$ and the existential quantifier $\exists
 X$ for quantification over second-order variables.
 
-\begin{example} The following example WS$k$S formula $\varphi$ denotes that there
-exists a singleton set which is not a subset of the set $X$.
+\begin{example} The following example WS$k$S formula $\psi$ denotes that there
+does not exist a singleton set which is not a subset of the set $X$.
 \begin{equation}
  \psi \overset{\mathit{def}}{=} \neg\exists P: Sing(P) \wedge P
  \not\subseteq X
@@ -155,10 +155,10 @@ without explicitly constructing it, but rather using a search of the state space
 over powers of the state set of $\mathcal{A}_0$. To illustrate this on an
 example, consider the example formula $\psi \overset{\mathit{def}}{=}
 \neg\exists P:
- Sing(P) \wedge\neg P \subseteq X$ and the automaton
+ Sing(P) \wedge P \not\subseteq X$ and the automaton
 $\mathcal{A}_\varphi$ from Figure 1 corresponding to the formula $\varphi
 \overset{\mathit{def}}{=} \exists P:
- Sing(P) \wedge\neg P \subseteq X$, i.e. $\psi \overset{\mathit{def}}{=} \neg
+ Sing(P) \wedge P \not\subseteq X$, i.e. $\psi \overset{\mathit{def}}{=} \neg
  \phi$. We can search for a non-accepting state of $\mathcal{A}_\psi$ by
  searching for a reachable set of states of $\mathcal{A}_\varphi$ that does not
  contain a final state. Further, by using the antichains principle, if we
@@ -173,7 +173,7 @@ $\mathcal{A}_\varphi$ from Figure 1 corresponding to the formula $\varphi
  \caption{Comparison of the antichain-based (grey nodes) and the classical
  approach to universality checking of the automaton $\mathcal{A}_\psi$
  corresponding to the formula $\psi \overset{\mathit{def}}{=} \neg\exists P:
- Sing(P) \wedge\neg P \subseteq X$}\label{compare}
+ Sing(P) \wedge P \not\subseteq X$}\label{compare}
 \end{figure}
 
 \section{Conclusion}
