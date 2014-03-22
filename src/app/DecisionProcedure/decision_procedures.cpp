@@ -1,5 +1,5 @@
 #include <cstdio>
-#include "exceptions.hh"
+#include "environment.hh"
 
 void decideWS1S() {
 	std::cout << "Deciding WS1S formula transformed to automaton" << std::endl;

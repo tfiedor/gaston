@@ -1,5 +1,5 @@
-#ifndef __EXCEPTIONS__H__
-#define __EXCEPTIONS__H__
+#ifndef __DIP__H__
+#define __DIP__H__
 
 #include <exception>
 #include <iostream>
@@ -10,5 +10,7 @@ class NotImplementedException : public std::exception {
 			return "Functionality not implemented yet";
 		}
 };
+
+enum Decision {SATISFIABLE, UNSATISFIABLE, VALID, INVALID};
 
 #endif

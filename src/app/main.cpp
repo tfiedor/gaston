@@ -5,6 +5,7 @@
 #include <sys/time.h>
 #include <sys/resource.h>
 #include <signal.h>
+#include <map>
 
 // VATA headers
 #include <vata/bdd_bu_tree_aut.hh>
@@ -28,12 +29,15 @@
 #include "Frontend/ident.h"
 
 // DecProc headers
-#include <DecisionProcedure/exceptions.hh>
+#include <DecisionProcedure/environment.hh>
 #include <DecisionProcedure/decision_procedures.hh>
 
 using std::cout;
 
 using Automaton = VATA::BDDBottomUpTreeAut;
+
+typedef unsigned int uint;
+typedef std::map<uint, uint> VarToTrackMap;
 
 Options options;
 MonaUntypedAST *untypedAST;
@@ -43,6 +47,7 @@ Offsets offsets;
 CodeTable *codeTable;
 Guide guide;
 AutLib lib;
+VarToTrackMap varMap;
 int numTypes = 0;
 bool regenerate = false;
 
@@ -237,17 +242,23 @@ main(int argc, char *argv[])
   delete untypedAST;
 
   if (options.dump) {
-    symbolTable.dump();
-    // Dump AST for main formula, verify formulas, and assertion
-    cout << "Main formula:\n";
-    (ast->formula)->dump();
+	symbolTable.dump();
+	// Dump AST for main formula, verify formulas, and assertion
+	cout << "Main formula:\n";
+	(ast->formula)->dump();
+  }
 
+  // Flattening of the formula
+  ast->formula = (ASTForm*) (ast->formula)->toSecondOrder();
+  if(options.dump) {
     cout << "\nFlattening of the formula:\n";
-    ast->formula = (ASTForm*) (ast->formula)->toSecondOrder();
     (ast->formula)->dump();
+  }
 
-    // Transform AST to existentional Prenex Normal Form
-    ast->formula = (ASTForm*) (ast->formula)->toExistentionalPNF();
+  // Transform AST to existentional Prenex Normal Form
+  ast->formula = (ASTForm*) (ast->formula)->toExistentionalPNF();
+
+  if(options.dump) {
     cout << "\nAfter transformation:\n";
     (ast->formula)->dump();
 
@@ -317,11 +328,14 @@ main(int argc, char *argv[])
   
   ///////// Conversion to Tree Automata ////////
 
+  // Table or BDD tracks are reordered
+  IdentList free, bound;
+  (ast->formula)->freeVars(&free, &bound);
+  reorder(options.reorder);
+
   // First formula in AST representation is split into matrix and prefix part.
   ASTForm *matrix, *prefix;
   splitMatrixAndPrefix(ast, matrix, prefix);
-  // Table or BDD tracks are reordered
-  reorder(options.reorder);
 
   Automaton formulaAutomaton;
   // WS1S formula is transformed to unary NTA
@@ -331,10 +345,6 @@ main(int argc, char *argv[])
   } else {
 	  matrix->toBinaryAutomaton(formulaAutomaton, false);
   }
-  ASTForm_True* form1 = new ASTForm_True(Pos());
-  ASTForm_True* form2 = new ASTForm_True(Pos());
-  ASTForm_And* form = new ASTForm_And(form1, form2, Pos());
-  form->toUnaryAutomaton(formulaAutomaton, false);
 
   VATA::Serialization::AbstrSerializer* serializer =
 		  new VATA::Serialization::TimbukSerializer();
