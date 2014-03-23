@@ -1,5 +1,5 @@
-# Most simple example, there could be;
+#Most simple example, there could be;
 
-var2 U;
+var2 U, X, W;
 
 all2 Z: ex2 Y: U sub Y => Z = U \ Y;

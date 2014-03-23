@@ -138,6 +138,30 @@ src/app/DecisionProcedure/automata.cpp.s:
 	$(MAKE) -f CMakeFiles/dip.dir/build.make CMakeFiles/dip.dir/src/app/DecisionProcedure/automata.cpp.s
 .PHONY : src/app/DecisionProcedure/automata.cpp.s
 
+src/app/DecisionProcedure/containers/VarToTrackMap.o: src/app/DecisionProcedure/containers/VarToTrackMap.cpp.o
+.PHONY : src/app/DecisionProcedure/containers/VarToTrackMap.o
+
+# target to build an object file
+src/app/DecisionProcedure/containers/VarToTrackMap.cpp.o:
+	$(MAKE) -f CMakeFiles/dip.dir/build.make CMakeFiles/dip.dir/src/app/DecisionProcedure/containers/VarToTrackMap.cpp.o
+.PHONY : src/app/DecisionProcedure/containers/VarToTrackMap.cpp.o
+
+src/app/DecisionProcedure/containers/VarToTrackMap.i: src/app/DecisionProcedure/containers/VarToTrackMap.cpp.i
+.PHONY : src/app/DecisionProcedure/containers/VarToTrackMap.i
+
+# target to preprocess a source file
+src/app/DecisionProcedure/containers/VarToTrackMap.cpp.i:
+	$(MAKE) -f CMakeFiles/dip.dir/build.make CMakeFiles/dip.dir/src/app/DecisionProcedure/containers/VarToTrackMap.cpp.i
+.PHONY : src/app/DecisionProcedure/containers/VarToTrackMap.cpp.i
+
+src/app/DecisionProcedure/containers/VarToTrackMap.s: src/app/DecisionProcedure/containers/VarToTrackMap.cpp.s
+.PHONY : src/app/DecisionProcedure/containers/VarToTrackMap.s
+
+# target to generate assembly for a file
+src/app/DecisionProcedure/containers/VarToTrackMap.cpp.s:
+	$(MAKE) -f CMakeFiles/dip.dir/build.make CMakeFiles/dip.dir/src/app/DecisionProcedure/containers/VarToTrackMap.cpp.s
+.PHONY : src/app/DecisionProcedure/containers/VarToTrackMap.cpp.s
+
 src/app/DecisionProcedure/decision_procedures.o: src/app/DecisionProcedure/decision_procedures.cpp.o
 .PHONY : src/app/DecisionProcedure/decision_procedures.o
 
@@ -822,6 +846,9 @@ help:
 	@echo "... src/app/DecisionProcedure/automata.o"
 	@echo "... src/app/DecisionProcedure/automata.i"
 	@echo "... src/app/DecisionProcedure/automata.s"
+	@echo "... src/app/DecisionProcedure/containers/VarToTrackMap.o"
+	@echo "... src/app/DecisionProcedure/containers/VarToTrackMap.i"
+	@echo "... src/app/DecisionProcedure/containers/VarToTrackMap.s"
 	@echo "... src/app/DecisionProcedure/decision_procedures.o"
 	@echo "... src/app/DecisionProcedure/decision_procedures.i"
 	@echo "... src/app/DecisionProcedure/decision_procedures.s"

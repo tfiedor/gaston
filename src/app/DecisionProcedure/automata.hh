@@ -8,7 +8,9 @@
 #include <vata/util/binary_relation.hh>
 
 #include "../Frontend/symboltable.h"
+#include "containers/VarToTrackMap.hh"
 
+extern VarToTrackMap varMap;
 extern SymbolTable symbolTable;
 
 using Automaton = VATA::BDDBottomUpTreeAut;

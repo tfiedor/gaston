@@ -41,6 +41,7 @@ add_executable(dip
 	src/app/DecisionProcedure/formula_to_automaton_ws1s.cpp
 	src/app/DecisionProcedure/formula_to_automaton_ws2s.cpp
 	src/app/DecisionProcedure/decision_procedures.cpp
+	src/app/DecisionProcedure/containers/VarToTrackMap.cpp
 )
 link_directories(${CMAKE_SOURCE_DIR}/src/libs/)
 target_link_libraries(dip ${CMAKE_SOURCE_DIR}/src/libs/libmonabdd.so)

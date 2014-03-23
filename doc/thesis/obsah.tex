@@ -897,6 +897,40 @@ $\wedge$, $\neg$ and $\exists$ (as defined in the restricted syntax):
  $\mathcal{A}_{\psi_1}$.
 \end{itemize}
 
+In implementation terms existentional quantification is therefore equivalent to
+operation of projection on automaton transition. This raises an issue with final
+states of constructed automaton $\mathcal{A}$, since projection erases some of
+the transition tracks of automaton and thus intruduces non-determinism. Such automaton has to
+be determinized yielding DTA $\mathcal{A}$'.
+
+However automaton $\mathcal{A}'$ is not enough, since searched witness of some
+model can be longer after operation of projection. Final states
+$F_{\mathcal{A}'}$ has to be extended to include such states that can reach some
+final states on strings of $\{\{0\}^k\}^*$. 
+
+\begin{defz}
+We define a \emph{right-quotient} of language $L$ with a language $L'$ as
+\begin{equation}
+ L / L' = \{w\ |\ \exists u \in L' : w\cdot u \in L\}
+\end{equation}.
+\end{defz}
+
+Now we define a language $L^i$ as
+\begin{equation}
+ L^i = \{w \in \{\{0, 1\}^k\}^*\ |\ \text{the $j$-th track of word} \mathit{w}
+ \text{is of the form $0^*$ for $j \neq i$}\}. \end{equation}
+ 
+ So the language of automaton $\mathcal{A}'$ after projection $\gamma_i$ on
+ $i$-th track of the transition is defined as
+ \begin{equation}
+  L(\mathcal{A}') = \gamma_i(L(\mathcal{A}) / L^i).
+ \end{equation}
+ 
+ In \textsc{MONA} \cite{mona} this is done in $\mathcal{O}(n)$ time by using
+ breath-first search by backwards exploration of the automaton from final
+ states followed by subset construction fo determinized automaton yielding only
+ reachable states.
+
 \begin{prop}
  Since there is a \emph{one-to-one} correspondence between models of $\phi$ and
  trees accepted by $\mathcal{A}_\phi$, $\phi$ is satisfiable iff
@@ -922,8 +956,7 @@ $\wedge$, $\neg$ and $\exists$ (as defined in the restricted syntax):
   \not\subseteq X$. Finally we make a projection of automaton by erasing track
   corresponding to the quantified variable $P$ and obtain the resulting
   automaton $\mathcal{A}_\rho$.
-  
-   \noindent\hrulefill
+
   \end{example}\label{wsks-formula-restricted}
  
  \begin{figure}[h!]
@@ -936,6 +969,7 @@ $\wedge$, $\neg$ and $\exists$ (as defined in the restricted syntax):
  $\rho \overset{\mathit{def}}{=} \exists P:
  Sing(P) \wedge P \not\subseteq X$}\label{automata}
 \end{figure}
+   \noindent\hrulefill
 
 The computational complexity of WS$k$S is in NONELEMENTARY class, so given
 a Turing machine $\mathcal{M}$ deciding a satisfiability of WS$k$S formulae, for
@@ -1374,11 +1408,125 @@ the automaton $\mathcal{A}_{i+1}$.
 
 \chapter{Implementation}
 
-\section{Frontend}
+As depicted on Figure \ref{flow} the input of implemented application is
+specification of WS$1$S or WS$2$S formulae w.r.t. subset of \textsc{MONA}
+formulae syntax as described in Appendix \ref{syntax}. Input file is parsed with
+lexical and syntax analyzer into intermediate representation as Abstract Syntax
+Tree (AST) \ref{ast} with logical connectives or atomic operations as the nodes. 
+
+AST is further flattened according to the translation rules to restricted syntax
+\ref{restricted} and transformed into existential prenex normal form (see
+Section \ref{expnf}). The resulting AST is then broken into matrix\,--\,a
+quantifier tree formulae\,--\,and a prefix\,--\,chain of quantifiers. 
+
+During the parsing of input specification, a symbol table is filled with used
+first or second-order variables and predicates/macros. Mapping of the variables
+to the BDD tracks is constructed in several possible ways. Either it corresponds
+to the place of the definition during parsing process, or can be randomly
+shuffled or matches the chain of the quantifiers from prefix, i.e. during
+projection of the track the reordering of the tree takes less time.
+
+The formula corresponding to the matrix of the formula is converted to the NTA
+with use of the chosen library for manipulation with automata. Along with the
+prefix of formulae this is an input for the decision procedure which returns
+if the formulae is valid, invalid, but satisfiable, or unsatisfiable.
 
 \section{Manipulation with NTA}
 
+For inner representation of automata used in decision procedure, library
+\texttt{libvata} \cite{vata} written in C++ was chosen for being highly
+efficient and open source library that exploits some of the recent developments
+of algorithm for NTA manipulation. Its main usage is in fields of formal verification, but can be effectively used in other domains as well. 
+
+\texttt{libvata} supports two possible encodings of tree
+automata\,--\,\emph{explicit} and \emph{semi-symbolic}\,--\,where these
+encodings differs in the way they store the transtion relation of automata. The
+semi-symbolic representation uses MTBDDs for storing the transitions of automata
+as described in Section \ref{mtbdd}. This is mostly intended for automata with
+large input alphabets like in the case of some decision procedures of logics
+such as WS$k$S or $MSO$ (monadic second-order logic). Library is designed in a
+modular way, so it can be easily extended with new encodings and operations.
+
+The input of library is usually a text representation in automaton in Timbuk
+format \cite{timbuk}, which is parsed and transformed into inner representation
+with states, transition, alphabets, etc. The other way is building the automaton
+from scratch using the function for appropriate encodings. Each automaton can be
+serialized back to an output format through serializers.
+
+We are going to use the semi-symbolic encoding that provides both bottom-up and
+top-down representation of tree automata. These representation differs in
+storage of MBDDD where for top-down representation input symbols have to be
+stored along with their arity in order to distinguish between two same symbols
+with a different arity. On the other hand, in the bottom-up representation arity
+can be induced from the arity of the tuples on the left-hand side of the
+transition. 
+
+ \section{Decision procedure}
+ 
+ The main algorithm for deciding WS$k$S formulae is implemented w.r.t the formal
+ desinged as outlined in Section \ref{ours}. In that section it was also proved
+ that it is correct.
+ 
+ The input of procedure is a set of second-order quantified variables
+ $\{\mathcal{X}_1,ldots,\mathcal{X}_{m+1}\}$ obtained from prefix of the input
+ formula and an NTA corresponding to the matrix of the formula.
+ 
+ Further for each level $0 \leq i \leq m$ we construct a \emph{transition cache}
+ that maps states of level $i$ to the MTBDD corresponding to their transition
+ relation $\delta_i$, i.e. it implements a function $transCache_i$ such
+ that
+ \begin{equation}
+  transCache_i : Q_i \rightarrow (\Sigma_i \rightarrow 2^{Q_i})
+ \end{equation} where $transCache_0$ is pre-filled with the transition relation
+ of matrix automaton $\delta_0$. If a value for the looked-up key $q_i \in Q_i$
+ is not in the cache, then we define $transCache_i(q_i) \mapsto \bot$.
+ 
+ On several levels the constructed automaton corresponding to the input formulae
+ is minimised by function \texttt{minimiseSet(S)}, where $S$ is a set of states.
+ This optimization does not need to be concrete for algorithm to work, so it
+ could be for example implemented as classic Myhill-Nerode equivalence reduction
+ \cite{MH}. However most of these minimisations requires a deterministic
+ automaton to be constructed first so it is not suitable for our procedure.
+ Instead we are using the simulation relation as defined in Section \ref{sim}.
+ It must hold that $$L(minimiseSet(S)) = L(S)$$.
+
 \chapter{Evaluation}
+
+In this chapter we are going to provide an evaluation of the implemented
+decision procedure described in the previous chapters. The performance was
+tested on two different scenarios and compared with the implementation of the
+procedure using deterministic tree automata \textsc{MONA}. The first batch of
+tests measures how our implementation resulted in terms of quantification and
+how more quantifiers adds to the computational speed-up. The other tests are
+evaluating decision of quantifier free formulae. 
+
+\section{Presburger Arithmetic}
+
+One of the classical logics is Presburger Arithmetic \cite{pres}, the
+first-order theory of integer number with addition and ordering, which is
+decidable. There exists an algorithm that can decide the Presburger formula in
+$2^{2^{2^{pn\log n}}}$ time \cite{pres-time}. 
+
+The WS$k$S is stronger logic and can be used for deciding of Presburger as well
+by converting the formulae into WS$k$S and then use the described algorithm.
+However this does not provide the faster algorithm as the bound complexity of
+WS$k$S is higher than for Presburger Arithmetic. 
+
+In Presburger Arithmetic a \texttt{term} is either a integer constant or a
+variable. The Presburger formula is then either in form of $term < term$, $term
++ term$ or $constant * term$. It can be further assumbed that the multipliers
+are the powers of two.
+
+The conversion to WS$k$S treats the variable as set with a set variable being a
+bit of the binary representation of the number with addition of a sign bit.
+
+The main convenience of these family of formulae that every operation $+$ or $*$
+in a term generates at least one quantifier in the WS$k$S formulae, which can
+futher results to quite a large exponential blowup and hence show the speed-up
+of our approach in contrary to the \texttt{MONA}.
+
+Random formulae were generated with different number of quantifiers and bounded
+by different constants and evaluated by both \texttt{MONA} and our tool. 
 
 \chapter{Summary and future work}\label{summary}
 

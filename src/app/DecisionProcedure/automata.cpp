@@ -40,8 +40,8 @@ char charToAsgn(char c) {
 void addTransition(Automaton& aut, Automaton::StateTuple q, int x, int y, char* track, int qf) {
 	// TODO: add assert to tracklen
 	Automaton::SymbolType bddTrack = constructUniversalTrack();
-	bddTrack.SetIthVariableValue(x, charToAsgn(track[0]));
-	bddTrack.SetIthVariableValue(y, charToAsgn(track[1]));
+	bddTrack.SetIthVariableValue(varMap[x], charToAsgn(track[0]));
+	bddTrack.SetIthVariableValue(varMap[y], charToAsgn(track[1]));
 	aut.AddTransition(q, bddTrack, qf);
 }
 
@@ -57,7 +57,7 @@ void addTransition(Automaton& aut, Automaton::StateTuple q, int x, int y, char* 
  */
 void addTransition(Automaton& aut, Automaton::StateTuple q, int x, char track, int qf) {
 	Automaton::SymbolType bddTrack = constructUniversalTrack();
-	bddTrack.SetIthVariableValue(x, charToAsgn(track));
+	bddTrack.SetIthVariableValue(varMap[x], charToAsgn(track));
 	aut.AddTransition(q, bddTrack, qf);
 }
 
@@ -83,7 +83,7 @@ void addUniversalTransition(
  * @return: universal track for transition
  */
 Automaton::SymbolType constructUniversalTrack() {
-	unsigned int trackLen = symbolTable.noIdents;
+	unsigned int trackLen = varMap.TrackLength();
 	Automaton::SymbolType transitionTrack;
 	transitionTrack.AddVariablesUpTo(trackLen);
 	return transitionTrack;

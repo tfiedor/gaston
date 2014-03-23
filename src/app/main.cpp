@@ -31,13 +31,13 @@
 // DecProc headers
 #include <DecisionProcedure/environment.hh>
 #include <DecisionProcedure/decision_procedures.hh>
+#include <DecisionProcedure/containers/VarToTrackMap.hh>
 
 using std::cout;
 
 using Automaton = VATA::BDDBottomUpTreeAut;
 
 typedef unsigned int uint;
-typedef std::map<uint, uint> VarToTrackMap;
 
 Options options;
 MonaUntypedAST *untypedAST;
@@ -171,19 +171,46 @@ void splitMatrixAndPrefix(MonaAST* formula, ASTForm* &matrix, ASTForm* &prefix) 
 }
 
 /**
+ * No reordering
+ */
+void noReorder(IdentList *free, IdentList *bound) {
+	IdentList *vars = ident_union(free, bound);
+	if (vars != 0) {
+		varMap.initializeFromList(vars);
+	}
+}
+
+/**
  * Does reordering of variables so in output BDD tracks it is easier to remove
  * the track and reorder the BDD afterwards. This is done by the prefix of
  * given formula
  */
-void heuristicReorder() {
-	cout << "Variables reordered by heuristic approach" << std::endl;
+void heuristicReorder(IdentList *free, IdentList *bound) {
+	cout << "[*] Variables reordered by heuristic approach" << std::endl;
+	varMap.initializeFromLists(bound, free);
+}
+
+/**
+ * Randomly shuffles list of vars
+ *
+ * @param[in] list: list to be shuffled
+ * @return: shuffled list
+ */
+IdentList* shuffle(IdentList* list) {
+	// TODO: not implemented yet
+	return list;
 }
 
 /**
  * Does random reordering of variables
  */
-void randomReorder() {
-	cout << "Variables reorder randomly" << std::endl;
+void randomReorder(IdentList *free, IdentList *bound) {
+	cout << "[*] Variables reorder randomly" << std::endl;
+	IdentList *vars = ident_union(free, bound);
+	if (vars != 0) {
+		vars = shuffle(vars);
+		varMap.initializeFromList(vars);
+	}
 }
 
 /**
@@ -198,13 +225,16 @@ void randomReorder() {
  *  2) No reorder
  *  3) Prefix-reorder
  */
-void reorder(ReorderMode mode) {
+void reorder(ReorderMode mode, ASTForm* formula) {
+	IdentList free, bound;
+	formula->freeVars(&free, &bound);
+
 	if (mode == NO)
-		return ;
+		noReorder(&free, &bound);
 	else if (mode == HEURISTIC) {
-		heuristicReorder();
+		heuristicReorder(&free, &bound);
 	} else if (mode == RANDOM) {
-		randomReorder();
+		randomReorder(&free, &bound);
 	}
 }
 
@@ -329,9 +359,8 @@ main(int argc, char *argv[])
   ///////// Conversion to Tree Automata ////////
 
   // Table or BDD tracks are reordered
-  IdentList free, bound;
-  (ast->formula)->freeVars(&free, &bound);
-  reorder(options.reorder);
+  reorder(options.reorder, ast->formula);
+  varMap.dumpMap();
 
   // First formula in AST representation is split into matrix and prefix part.
   ASTForm *matrix, *prefix;
