@@ -11,14 +11,14 @@ private:
 	typedef unsigned int uint;
 	typedef std::map<uint, uint> varMap;
 
-	// < Members >
+	// < Private Members >
 	varMap vttMap;
 
-	// < Methods >
+	// < Private Methods >
 	void addIdentifiers(IdentList* );
 
 public:
-	// < Methods >
+	// < Public Methods >
 	uint TrackLength();
 	uint operator[](uint);
 	void dumpMap();
