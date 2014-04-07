@@ -4,7 +4,7 @@
 #include <cstdlib>
 
 /**
- * Converst character to specification of VATA
+ * Converts character to specification of VATA
  *
  * @param[in] c: classical character from {0, 1, X}
  * @return: character from enum {ONE, ZERO, DONT_CARE} from VATA spec.

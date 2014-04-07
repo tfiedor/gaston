@@ -59,6 +59,8 @@ char *inputFileName = NULL;
 
 extern Ident lastPosVar, allPosVar;
 
+#define DEBUG;
+
 void PrintUsage()
 {
   cout << "Usage: dip [options] <filename>\n\n"
@@ -365,6 +367,26 @@ main(int argc, char *argv[])
   // First formula in AST representation is split into matrix and prefix part.
   ASTForm *matrix, *prefix;
   splitMatrixAndPrefix(ast, matrix, prefix);
+
+  // Transform prefix to set of sets of second-order variables
+#ifdef DEBUG
+  cout << "Converting prefix to list of lists: \n";
+  prefix->dump();
+#endif
+
+  PrefixListType plist = convertPrefixFormulaToList(prefix);
+
+#ifdef DEBUG
+  cout << "\n";
+  for(PrefixListType::iterator it = plist.begin(); it != plist.end(); ++it) {
+	  cout << "[";
+	  for(VariableSet::iterator jt = it->begin(); jt != it->end(); ++jt) {
+		  cout << *jt << " ";
+	  }
+	  cout << "], ";
+  }
+  cout << "\n";
+#endif
 
   Automaton formulaAutomaton;
   // WS1S formula is transformed to unary NTA

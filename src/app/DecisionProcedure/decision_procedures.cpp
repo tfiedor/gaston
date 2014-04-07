@@ -2,6 +2,7 @@
 #include "environment.hh"
 #include "decision_procedures.hh"
 
+
 /**
  * Checks whether there exists a satisfying example for formula
  *
@@ -75,6 +76,52 @@ int decideWS1S(Automaton aut, TSatExample & example, TUnSatExample & counterExam
 	} else {
 		return -1;
 	}
+}
+
+/**
+ * Takes formula, the prefix, and converts it to the set of sets of second
+ * order variables, according to the variable map;
+ *
+ * @param formula: formula corresponding to the prefix
+ * @return: list of lists of second-order variables
+ */
+PrefixListType convertPrefixFormulaToList(ASTForm* formula) {
+	PrefixListType list;
+	VariableSet set;
+	unsigned int quantifiedSize;
+	unsigned int value;
+
+	ASTForm* iterator = formula;
+	// while we are not at the end of the prefix
+	while (iterator->kind != aTrue) {
+		// Add to set
+		if (iterator->kind == aEx2) {
+			ASTForm_Ex2* exf = (ASTForm_Ex2*) iterator;
+
+			quantifiedSize = (exf->vl)->size();
+			for (unsigned i = 0; i < quantifiedSize; ++i) {
+				value = (exf->vl)->pop_front();
+				set.push_front(varMap[value]);
+			}
+			iterator = exf->f;
+		// Create new set
+		} else if (iterator->kind == aNot) {
+			list.push_front(set);
+			set.clear();
+
+			ASTForm_Not* notf = (ASTForm_Not*) iterator;
+			iterator = notf->f;
+		// Fail, should not happen
+		} else {
+			assert(false);
+		}
+	}
+
+	if (set.size() != 0) {
+		list.push_front(set);
+	}
+
+	return list;
 }
 
 /**
