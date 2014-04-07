@@ -384,13 +384,33 @@ main(int argc, char *argv[])
   }
 
   ///////// DECISION PROCEDURE /////////////////////////////////////////////
+  int decided;
+  TSatExample example;
+  TUnSatExample counterExample;
   try {
 	  // Deciding WS1S formula
 	  if(options.mode != TREE) {
-		  decideWS1S();
+		  decided = decideWS1S(formulaAutomaton, example, counterExample);
 	  // Deciding WS2S formula
 	  } else {
-		  decideWS2S();
+		  decided = decideWS2S(formulaAutomaton, example, counterExample);
+	  }
+
+	  // Outing the results of decision procedure
+	  cout << "Formula is ";
+	  switch(decided) {
+	  case SATISFIABLE:
+		  cout << "'SATISFIABLE'\n";
+		  break;
+	  case UNSATISFIABLE:
+		  cout << "'UNSATISFIABLE'\n";
+		  break;
+	  case VALID:
+		  cout << "'VALID'\n";
+		  break;
+	  default:
+		  cout << "undecidable due to unforseen error.\n";
+		  break;
 	  }
   } catch (NotImplementedException& e) {
 	  std::cerr << e.what() << std::endl;
