@@ -2,14 +2,25 @@
 #include "environment.hh"
 #include "decision_procedures.hh"
 
+/**
+ * Computes the final states from automaton
+ *
+ * @param aut: Automaton for matrix
+ * @return: final states of automaton corresponding to final formula
+ *
+ * TODO: StateHT for now, this is not how it should work :)
+ */
+FinalStatesType computeFinalStates(Automaton aut) {
+	return aut.GetFinalStates();
+}
 
 /**
  * Checks whether there exists a satisfying example for formula
  *
  * @return: true if there exists a sat example
  */
-bool existsSatisfyingExample() {
-	return false;
+bool existsSatisfyingExample(FinalStatesType fm) {
+	return fm.size() != 0;
 }
 
 /**
@@ -18,7 +29,7 @@ bool existsSatisfyingExample() {
  * @return: true if there exists an unsat example
  */
 bool existsUnsatisfyingExample() {
-	return false;
+	return true;
 }
 
 /**
@@ -56,7 +67,11 @@ TUnSatExample findUnsatisfyingExample() {
 int decideWS1S(Automaton aut, TSatExample & example, TUnSatExample & counterExample) {
 	std::cout << "Deciding WS1S formula transformed to automaton" << std::endl;
 
-	bool hasExample = existsSatisfyingExample();
+	// Compute the final states
+	FinalStatesType fm;
+	fm = computeFinalStates(aut);
+
+	bool hasExample = existsSatisfyingExample(fm);
 	bool hasCounterExample = existsUnsatisfyingExample();
 
 	// No satisfiable solution was found

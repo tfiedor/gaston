@@ -33,6 +33,8 @@
 #include <DecisionProcedure/decision_procedures.hh>
 #include <DecisionProcedure/containers/VarToTrackMap.hh>
 
+#define DEBUG
+
 using std::cout;
 
 using Automaton = VATA::BDDBottomUpTreeAut;
@@ -58,8 +60,6 @@ extern Deque<FileSource *> source;
 char *inputFileName = NULL;
 
 extern Ident lastPosVar, allPosVar;
-
-#define DEBUG;
 
 void PrintUsage()
 {
