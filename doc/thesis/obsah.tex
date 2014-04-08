@@ -1260,7 +1260,7 @@ language $L(\mathcal{A}_\varphi)$.
 By classical approach by subset construction of automaton and search for
 non-accepting state 7 states are generated as depicted at Figure
 \ref{compare} If we use the antichain-based approach, then macro-states $\{1,
-4\}$ and $\{1, 4\}$ are simulated by the initial state $\{1\}$ so we don't need
+2\}$ and $\{1, 4\}$ are simulated by the initial state $\{1\}$ so we don't need
 to expand states any furthers. Since we reached accepting state, we can conclude
 that language of automaton $\mathcal{A}_\varphi$ is universal and formula is
 thus valid. This holds, since for every model there exists assignment $X
@@ -1292,15 +1292,15 @@ are going to refer to source \cite{tacas}.
 
 \section{Deciding WS$k$S with NFA}
 
-Given formula $\phi$, constructing automaton $\mathcal{A}_\phi$ representing
-all models of $\phi$ is not necessary, since representation of all models of formula
-is not essential and usually any model or an invalid assignment suffices.
+Given formula $\phi$, constructing the automaton $\mathcal{A}_\phi$ representing
+all models of formula $\phi$ is not necessary, since representation of all
+models of formula is not essential and usually any model or an invalid assignment suffices.
 Instead we can exploit the antichain-based techniques defined in previous
 section and search for the accepting or non-accepting state \emph{on-the-fly}
 pruning the search state.
 
-Formula $\phi$ is first transformed to the logical equivalent formula $\varphi$
-in existential prenex form (see Section \ref{exPNF}):
+First the formula $\phi$ is transformed to the logically equivalent formula
+$\varphi$ in existential prenex form (see Section \ref{exPNF}):
 \begin{equation*}
  \varphi \overset{\mathit{def}}{=}
  \exists\mathcal{X}_{m+1}\neg\mathcal{X}_m\neg\ldots\neg\exists\mathcal{X}_2\neg\exists\mathcal{X}_1
@@ -1308,8 +1308,8 @@ in existential prenex form (see Section \ref{exPNF}):
  \pi(\mathbb{X}).
 \end{equation*}
 
-Supposing there are $m$	negations in the prefix of formula $\phi$, we create a
-hierarchical family of WS$k$S formulae $\Phi = \{\varphi_0,\ldots,\varphi_m\}$
+Now supposing there are $m$	negations in the prefix of formula $\phi$, we create
+a hierarchical family of WS$k$S formulae $\Phi = \{\varphi_0,\ldots,\varphi_m\}$
 where
 \begin{equation}
   \varphi_0 \overset{\mathit{def}}{=} \pi
@@ -1322,28 +1322,28 @@ and for all $0 \leq i \leq m-1$
 
 \subsection{Deciding WS1S}
 
-The main concepts of the new approach to deciding WS$k$S is going to be
-described first on WS$1$S formulae and in following section it will be
+The main concept of the new approach to deciding WS$k$S is going to be
+outlined first on WS$1$S formulae and in following section it will be
 generalised to arbritrary $k$, which is pretty straightforward.
 
 Given WS$1$S formula $\varphi$ in $\exists$PNF form, automaton for matrix of
 formula $\mathcal{A}_\pi$ can be constructed out of automata corresponding to
-atomic formulae and their complements and using union and intersection
-operations. Further we construct $\mathcal{A}_\varphi$ from automaton
+the atomic formulae and their complements by using operations of union and
+intersection. Further we construct $\mathcal{A}_\varphi$ from automaton
 $\mathcal{A}_\pi$ by successive applications of complementation $\gamma$ and
-projection $\omega$ according to the prefix of $\varphi$ as defined in
-\ref{preliminaries}.
+projection $\omega$ according to the prefix of $\varphi$ as these
+operation were defined in \ref{preliminaries}.
 
-As we outlined in Section \ref{wsks}, there is a problem with encoding of models
-and using the projection on automata. After projection automaton corresponding
-to the formula does not accept some of the valid models of formula, as described
-on Figure \ref{models}. \textsc{MONA} (see Section \ref{mona}) solves this by
+As we described in Section \ref{wsks}, there is a problem with encoding of
+all models and using the projection operation on automata. After the projection
+the automaton corresponding to the formula does not accept some of the valid
+models of formula, as described on Figure \ref{models}. \textsc{MONA} (see Section \ref{mona}) solves this by
 adjusting the final states of automaton by using the bread-first search
-algorithm in linear time. 
+algorithm in linear time after each projection in formula. 
 
 However, this approach needs fully constructed automaton, so this cannot be used
-in our on-the-fly algorithm. Instead we will precompute these states before
-using any algorithm. 
+in on-the-fly algorithm. Instead we will precompute the set of final states
+before using any algorithm. 
 
 \begin{defz}
  We define the \emph{downward closure} of a set $S$ as 
@@ -1366,7 +1366,7 @@ We define the complement of the downward closure as set
  \begin{eqnarray}
  \overline{\downarrow S} \overset{\mathit{def}}{=} & \{ \uparrow P\ |\ P = s_1
  \cap s_2 \wedge P \neq \emptyset, s_1, s_2 \in S\}\\
- \cup & \{\uparrow\{p\}\ |\ \neq\exists s \in S: p \in S\} 
+ \cup & \{\uparrow\{p\}\ |\ \not\exists s \in S: p \in S\} 
  \end{eqnarray}
 \end{defz}
 
@@ -1382,29 +1382,37 @@ that complement of upward closure is downward closure and vice versa.
  {\color{red}TODO: This is rather important}
 \end{proof}
 
+The consequence of this lemma is that during the manipulation with downward and
+upwards sets we will only work with the maximal/minimal sets and thus cover the
+great range of states and reduce the complexity.
+
 \begin{defz}
- We define the \emph{preset through zero track} as set of states such that
+ We define the \emph{preset through zero tracks} as a set of states such that
  \begin{equation}
- PRE_0(Q) = \{r\ |\ \exists q \in Q: r \overset{0^*}{\rightarrow} q\}.
+ PRE_0(Q) = \{r\ |\ \exists q \in Q: r \overset{0^k}{\longrightarrow} q\}.
  \end{equation}
- 
  We denote the transition closure of $PRE_0(Q)$ as $PRE_0^*(Q)$.
 \end{defz}
 
 With these operations we can define the family of automata $\mathbb{A} =
-\{\mathcal{A}_0,\ldots,\mathcal{A}_m$ as follows:
+\{\mathcal{A}_0,\ldots,\mathcal{A}_m\}$ as follows:
  \begin{eqnarray}
   \mathcal{A}_0 & = & \mathcal{A}_\pi\\
   \mathcal{A}_{i+1} & = & \gamma(\omega_{\mathcal{X}_{i+1}}(\mathcal{A}_i)).
- \end{eqnarray}, i.e. $$ \mathcal{A}_i =
+ \end{eqnarray}
+ 
+ Note that the automaton for case $i$ thus correspond to following automaton:
+ \begin{equation} \mathcal{A}_i =
  \mathcal{A}_{\exists\mathcal{X}_i\ldots\neg\exists\mathcal{X}_1.
- \pi(\mathbb{X})}\}$$
+ \pi(\mathbb{X})}\end{equation}
  
  We use the notation $\mathcal{A}_i = (Q_i, \Sigma_i, \delta_i, I_i, F_i)$ to
  address particular automaton and its components.
 There is further connection between the hierarchical family of formulae $\Phi$
-and the hierarchical family of automata $\mathbb{A}$
-\begin{lemma} For all $0 \leq i \leq m$, the language of $\mathcal(A)_i$ is
+and the hierarchical family of automata $\mathbb{A}$ as described by the
+following lemma.
+ \begin{lemma} For all $0 \leq i \leq m$, the language of
+$\mathcal(A)_i$ is
 \begin{enumerate}
   \item \emph{universal} iff $\varphi_i$ is \emph{valid},
   \item \emph{non-empty} iff $\varphi_i$ is \emph{satisfiable},
@@ -1429,6 +1437,8 @@ $\mathcal{A}_i = (Q_i, \Sigma_i, \delta_i, I_i, F_i)$ as follows:
  F_{i+1} & = & \overline{\downarrow\{Q\ |\ Q = PRE_0^*(P), P \in F_i\}}
 \end{eqnarray}
 
+\subsection{Computing predecesors of set}
+
 \subsubsection{Constructing set of final states}\label{final-states}
 
 \subsubsection{Algorithm of Decision procedure}
@@ -1441,34 +1451,36 @@ Given a formula
  \pi(\mathbb{X}).
 \end{equation*}
 we can construct a set of final states $F_m$ as outlined in previous section.
-We use this set to examine whether there exists a satisfying example and
-counterexample and use them to determine if a given formula is \emph{valid},
+We use this set to examine whether there exists a satisfying example or
+counterexample and use them to determine if the given formula is \emph{valid},
 \emph{invalid, but satisfiable} or \emph{unsatisfiable}.
 
 \begin{defz}
-We say a formula is \emph{closed} if there occurs no free variable. We further
-define a \emph{closure} of a formula $\varphi$ as formula $\phi$ such that
+We say a formula $\phi$ is \emph{closed} if there is no free variable, i.e.
+$freeVars(\phi) = \emptyset$.
+We further define a \emph{closure} of a formula $\varphi$ as formula $\phi$ such that
 \begin{equation}
  \phi \overset{\mathit{def}}{=} \exists\mathcal{X}. \varphi
 \end{equation}
 where
 \begin{equation}
- \mathcal{X} = \{X\ |\ X \in \mathtt{freeVars}_\varphi\}.
+ \mathcal{X} = \{X\ |\ X \in \mathtt{freeVars}(\varphi)\}.
 \end{equation}
 
 We can construct automaton corresponding to the closure of a formula $\varphi$
 similarly to the projection of automaton over set of variables and we will
-denote this automat as $\tilde{\mathcal{A_\varphi}} = \{\tilde{Q},
-\tilde{\Sigma}, \tilde{\delta}, \tilde{I}, \tilde{F}$. Note that since the
+denote this automat as $\widetilde{\mathcal{A_\varphi}} = \{\widetilde{Q},
+\widetilde{\Sigma}, \widetilde{\delta}, \widetilde{I}, \widetilde{F}\}$. Note that since the
 formula has no free variables, the tracks on transitions in automaton are blank.
 \end{defz}
 
 \begin{lemma}\label{exists-example}
 There exists a satisfying assignment (example) for formula $\varphi$ if the
-initial state of the automaton $\tilde{\mathcal{A}_\varphi}$ corresponding to
-the closure of formula $\varphi$ is final, i.e.
+initial state of the automaton $\widetilde{\mathcal{A}}_\varphi$ corresponding
+to the closure of formula $\varphi$ is final, i.e.
 \begin{equation}
- I_m \in \tilde{F_m}
+ \widetilde{I}_m \in \widetilde{F}_m \Rightarrow \exists \mathcal{M}:
+ \mathcal{M} \models \phi
 \end{equation}
 \end{lemma}
 
@@ -1478,8 +1490,8 @@ the closure of formula $\varphi$ is final, i.e.
 
 \begin{lemma}
 There exists a unsatisfying assigment (counter-example) for formula $\varphi$ if
-the initial state of automaton $\tilde{\mathcal{A}_{\neg\varphi}}$ corresponding
-to the closure of formula $\varphi$ is final.
+the initial state of automaton $\widetilde{\mathcal{A}}_{\neg\varphi}$
+corresponding to the closure of formula $\varphi$ is final.
 \end{lemma}
 
 \begin{proof}
@@ -1497,12 +1509,13 @@ $\phi$ is
 \end{enumerate}
 \end{lemma}
 \begin{proof}
-This comes from the definition of (in)validity and (un)satisfiability.
+This comes from the definition of (in)validity and (un)satisfiability
+\cite{sat}.
 \end{proof}
 
 The final algorithm \ref{deciding-wsks-alg} for deciding WS$k$S formula is based
-on Lemmas \ref{exists-example} and \ref{exists-counter-example} and computed list of final
-states of automaton corresponding to the formula. The more detailed
+on Lemmas \ref{exists-example} and \ref{exists-counter-example} and precomputed
+list of final states of automaton corresponding to the formula. The more detailed
 description how to receive examples and set of final states is outlined in
 previous algorithms \ref{final-states}.
 
@@ -1528,15 +1541,15 @@ previous algorithms \ref{final-states}.
 		is valid, \texttt{SAT} otherwise}
 		\BlankLine
 		$F_m = \{q\ |\ L(q) \cap (0^k)^* \neq \emptyset\}$\;
-		$example = a_1\ldots a_n$, $a_i \in \Sigma_m$, for $0 < i < n$, $\exists q_0
+		example = $a_1\ldots a_n$, $a_i \in \Sigma_m$, for $0 < i < n$, $\exists q_0
 		\in I_m: q_0 \overset{example}{\longrightarrow} q_f$, $q_f \in F_m$\;
-		$counter-example = b_1\ldots b_k$, $b_i \in \Sigma_m$, for $0 < i < k$,
-		$\exists q_0 \in I_m: q_0 \overset{example}{\longrightarrow} q_f$, $q_f \in
+		cnt-ex = $b_1\ldots b_k$, $b_i \in \Sigma_m$, for $0 < i < k$,
+		$\exists q_0 \in I_m: q_0 \overset{cnt-ex}{\longrightarrow} q_f$, $q_f \in
 		Q_m \setminus F_m$\;
 		\uIf{example = $\emptyset$}{
 		 \Return \texttt{UNSAT}\;
 		}
-		\uElseIf{example $\neq \emptyset$ \&\& counter-example $= \emptyset$}{
+		\uElseIf{example $\neq \emptyset$ and cnt-ex $= \emptyset$}{
 		 \Return \texttt{VALID}\;
 		}
 		\Else{

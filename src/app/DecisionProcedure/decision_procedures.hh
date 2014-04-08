@@ -26,7 +26,9 @@ typedef std::deque<VariableSet> PrefixListType;
 using Automaton = VATA::BDDBottomUpTreeAut;
 using StateType = size_t;
 using StateHT = std::unordered_set<StateType>;
+using StateTuple = std::vector<StateType>;
 typedef StateHT FinalStatesType;
+typedef StateHT StateSetType;
 
 // < Module Functions >
 int decideWS1S(Automaton aut, TSatExample & example, TUnSatExample & counterExample);
