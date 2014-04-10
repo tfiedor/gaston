@@ -1300,7 +1300,7 @@ section and search for the accepting or non-accepting state \emph{on-the-fly}
 pruning the search state.
 
 First the formula $\phi$ is transformed to the logically equivalent formula
-$\varphi$ in existential prenex form (see Section \ref{exPNF}):
+$\varphi$ in existential prenex form (see Section \ref{restricted}):
 \begin{equation*}
  \varphi \overset{\mathit{def}}{=}
  \exists\mathcal{X}_{m+1}\neg\mathcal{X}_m\neg\ldots\neg\exists\mathcal{X}_2\neg\exists\mathcal{X}_1
@@ -1320,7 +1320,7 @@ and for all $0 \leq i \leq m-1$
  \varphi_i.
 \end{equation}
 
-\subsection{Deciding WS1S}
+\subsection{Introduction to Deciding WS1S}
 
 The main concept of the new approach to deciding WS$k$S is going to be
 outlined first on WS$1$S formulae and in following section it will be
@@ -1332,14 +1332,42 @@ the atomic formulae and their complements by using operations of union and
 intersection. Further we construct $\mathcal{A}_\varphi$ from automaton
 $\mathcal{A}_\pi$ by successive applications of complementation $\gamma$ and
 projection $\omega$ according to the prefix of $\varphi$ as these
-operation were defined in \ref{preliminaries}.
+operation were defined in Section \ref{preli}.
 
-As we described in Section \ref{wsks}, there is a problem with encoding of
-all models and using the projection operation on automata. After the projection
-the automaton corresponding to the formula does not accept some of the valid
-models of formula, as described on Figure \ref{models}. \textsc{MONA} (see Section \ref{mona}) solves this by
-adjusting the final states of automaton by using the bread-first search
-algorithm in linear time after each projection in formula. 
+As we described in Section \ref{wsks}, there is a problem with encoding of all
+models and using the projection operation on automata. After the projection the
+automaton corresponding to the formula does not accept some of the valid models
+of formula, as described by Example \ref{models}. \textsc{MONA} (see Section
+\ref{classical}) solves this by adjusting the final states of automaton by using
+the bread-first search algorithm in linear time after each projection in
+formula.
+
+\noindent\hrulefill
+\begin{example}
+ Take the formula $P \not\subseteq X$ and its corresponding automaton
+ $\mathcal{A}_a$ depicted on Figure \ref{projection}a with one final state.
+ After projection over the track corresponding to the variable $P$ we get the
+ automaton $\mathcal{A}_b$ on Figure \ref{projection}b.
+ 
+ After the projection automaton does not accept f.e. word $111 \notin
+ L(\mathcal{A}_{\exists P: P \not\subseteq X})$ even though the set $\{1, 2,
+ 3\} \models \exists P: P \not\subseteq X$. However it does accept another
+ encoding of this set $1110 \in L(\mathcal{A}_{\exists P: P \not\subseteq X})$.
+ Hence we must adjust the final states and at state $3$ to $F_{\exists P: P
+ \not\subseteq X}$ to yield correct automaton representing models of formula.
+ 
+ \begin{figure}[h!]
+  \begin{center}
+   \scalebox{0.75}{\includegraphics{fig/projection-problem}}
+  \end{center}
+  \caption{Problem with final states after projection is that
+  Language of automata restricts some of the valid encodings
+  of models afterwise.}\label{projection}
+ \end{figure}\label{models}
+ 
+\end{example}
+
+\noindent\hrulefill
 
 However, this approach needs fully constructed automaton, so this cannot be used
 in on-the-fly algorithm. Instead we will precompute the set of final states
@@ -1375,17 +1403,6 @@ is an union of upward closures of all atoms from $Q$ such that they are not
 members of any generator in set $S$ and all intersection of generators. Note
 that complement of upward closure is downward closure and vice versa. 
 
-\begin{lemma}
- Downward and upward closure of set $S$ is monotonic.
-\end{lemma}
-\begin{proof}
- {\color{red}TODO: This is rather important}
-\end{proof}
-
-The consequence of this lemma is that during the manipulation with downward and
-upwards sets we will only work with the maximal/minimal sets and thus cover the
-great range of states and reduce the complexity.
-
 \begin{defz}
  We define the \emph{preset through zero tracks} as a set of states such that
  \begin{equation}
@@ -1393,6 +1410,17 @@ great range of states and reduce the complexity.
  \end{equation}
  We denote the transition closure of $PRE_0(Q)$ as $PRE_0^*(Q)$.
 \end{defz}
+
+\begin{lemma}
+Relation $PRE_0$ is monotonic on downward and upward closure of the set.
+\end{lemma}\label{PRE-is-monotonic}
+\begin{proof}
+ {\color{red}TODO: This is rather important}
+\end{proof}
+
+The consequence of this lemma is that during the manipulation with downward and
+upwards sets we will only work with the maximal/minimal sets and thus cover the
+great range of states and reduce the complexity.
 
 With these operations we can define the family of automata $\mathbb{A} =
 \{\mathcal{A}_0,\ldots,\mathcal{A}_m\}$ as follows:
@@ -1422,7 +1450,64 @@ $\mathcal(A)_i$ is
 \end{lemma}
 
 \begin{proof}
- {\color{red}TODO: This is rather important}
+ This can be proved by induction on $i$. With base case $i = 0$ holding due to a
+ proposition \ref{prop}. We can further prove this lema for case $i = n + 1$
+ supposing it holds for some $n$, i.e. the language of $\mathcal{A}_n$ is
+ \begin{enumerate}
+   \item universal iff $\varphi_n$ is valid,
+   \item non-empty iff $\varphi_n$ is satisfiable,
+   \item non-universal iff $\varphi_n$ is invalid, and
+   \item empty iff $\varphi_n$ is unsatisfiable.
+ \end{enumerate}
+ 
+ We define the formula $\varphi_{n+1}$ as 
+ \begin{equation}
+ \varphi_{n+1} \overset{\mathit{def}}{=} \neg\exists\mathcal{X}_{n+1}.
+ \varphi_n.
+ \end{equation}
+ 
+ Now we will consult each of the cases of the validity, or satisfiablity, of
+ given formula $\varphi_n$:
+ \begin{enumerate}
+   \item Suppose that $\varphi_n$ is valid. Then after the projection over set
+   of variables $\mathcal{X}_{n+1}$ the formula is still valid and the negation
+   of the formula $\varphi_{n+1} = \neg\exists\mathcal{X}_{n+1}.\varphi_n$ is
+   thus unsatisfiable. By the induction hypothesis it holds, that the language
+   $L(\mathcal{A}_n)$ is universal. After projection the language
+   $\omega_{\mathcal{X}_{n+1}}(L(\mathcal{A}))$ is also universal and the
+   negation thus makes the language $L(\mathcal{A}_{n+1})$ empty.
+   \item Suppose that $\varphi_n$ is satisfiable. Then after projection formula
+   $\exists\mathcal{X}_{n+1}. \varphi_n$ is also satisfiable (since, the
+   projection yields bigger or equivalent language) and the negation of the
+   formula $\varphi_{n+1} = \neg\exists\mathcal{X}_{n+1}.\varphi$ is thus
+   invalid. From induction hypotesis it holds that the language
+   $L(\mathcal{A}_n)$ is non-empty. After the projection the language remains
+   non-empty and so the negation of the formula yields non-universal language
+   $L(\mathcal{A}_{n+1})$.
+   \item Suppose that $\varphi_n$ is unsatisfiable. Then after projection
+   formula $\exists\mathcal{X}_{n+1}$ is still unsatisfiable, which means that
+   the negation of the formula $\neg\exists\mathcal{X}_{n+1}$ is valid. By
+   induction hypothesis the language $L(\mathcal{A}_n)$ is empty. The projection
+   of the language $\omega_{\mathcal{X}_{n+1}}(L(\mathcal{A}_n))$ is still empty
+   and so the negation of the formula yields univesal language.
+   \item Suppose that $\varphi_n$ is invalid. Then after projection formula
+   $\exists\mathcal{X}_{n+1}$ can either be still invalid or can become valid,
+   after the augmentation of the final states. Thus we have to distinguish two
+   cases:
+   \begin{enumerate}
+     \item Let us assume thet formula $\exists\mathcal{X}_{n+1}\varphi_n$ is
+     invalid.
+     Then after negation formula $\neg\exists\mathcal{X}_{n+1}\varphi_n$ is
+     satisfiable. By induction hypothesis the language $L(\mathcal{A}_n)$ is
+     non-universal. After the projection the language is still non-universal and
+     so the negation of the formula yields non-empty language.
+     \item Let us assume that formula $\exists\mathcal{X}_{n+1}\varphi_n$ is
+     valid. Then after negation formula $\neg\exists\mathcal{X}_{n+1}\varphi_n$
+     is unsatisfiable. By induction hypthesis the language $L(\mathcal{A}_n)$ is
+     non-universal. After the projection the language become universal and so
+     the negation of the formula yields empty language.
+   \end{enumerate}
+ \end{enumerate}
 \end{proof}
 
 Further we can construct automaton $\mathcal{A}_{i+1}$ from automaton
@@ -1434,14 +1519,33 @@ $\mathcal{A}_i = (Q_i, \Sigma_i, \delta_i, I_i, F_i)$ as follows:
  |\ R = \bigcup_{p \in P} \{r\ |\ p \overset{a}{\rightarrow} q \in \delta_i\}, a \in
  \Sigma_i\}\\
  I_{i+1} & = & \{I_i\}\\
- F_{i+1} & = & \overline{\downarrow\{Q\ |\ Q = PRE_0^*(P), P \in F_i\}}
+ F_{i+1} & = & \downarrow\overline{\{Q\ |\ Q = PRE_0^*(P), P \in F_i\}}
 \end{eqnarray}
 
-\subsection{Computing predecesors of set}
+Notice that the set of the final states $F_{i+1}$ is computed from the states of
+the previous level of quantification. First we need to compute the predecessors
+of every final state which yields the following set
+\begin{equation}
+ F_{\exists\mathcal{X}_{i+1}\varphi_i} = \{Q\ |\ Q = PRE_0^*(P), P \in F_i\}
+\end{equation}
+This can be done according to the Lemma \ref{PRE-is-monotonic}. Now to obtain
+the set of final states for complement of the automaton, we would first have to
+determinise the set to set
+\begin{equation}
+ F^DET_{\exists\mathcal{X}_{i+1}\varphi_i} = \uparrow\{ \{s\}\ |\ s \in
+ F_{\exists\mathcal{X}_{i+1}\varphi_i}\}
+\end{equation}
+We can complement this set and hence get the equation \ref{F}.
 
-\subsubsection{Constructing set of final states}\label{final-states}
+Next we proceed to computation of the predecessors of the set and how to compute
+the set of final states. This approach is similar to the backward universality
+checking as introduced in \cite{backwards-universality}.
 
-\subsubsection{Algorithm of Decision procedure}
+\subsection{Computing Predecessors of Set}
+
+\subsection{Constructing Set of Final States}\label{final-states}
+
+\subsection{Algorithm of Decision Procedure}
 
 Given a formula
 \begin{equation*}
@@ -1479,13 +1583,21 @@ There exists a satisfying assignment (example) for formula $\varphi$ if the
 initial state of the automaton $\widetilde{\mathcal{A}}_\varphi$ corresponding
 to the closure of formula $\varphi$ is final, i.e.
 \begin{equation}
- \widetilde{I}_m \in \widetilde{F}_m \Rightarrow \exists \mathcal{M}:
- \mathcal{M} \models \phi
+ \widetilde{I}_m \in \widetilde{F}_m \Leftrightarrow \exists \mathcal{M}:
+ \mathcal{M} \models \varphi
 \end{equation}
 \end{lemma}
 
 \begin{proof}
- {\color{red}TODO: This is rather important}
+ Computing the set $\widetilde{F}_m$ is done by using the projection over the
+ free variables of formula and thus we obtain empty tracks on transitions of
+ automaton. Then we compute the predecessors of original final states to yield
+ the set. Since tracks are blank then if there exists a reachable final state
+ then $\widetilde{I}_m \in \widetilde{F}_m$. 
+ 
+ So in the original automaton there exists a reachable state $q_f \in F_m$ and a
+ string $w$ such that $\exists q_0 \in I_m: q_0 \overset{w}{\longrightarrow}
+ q_f$ and $w \models \varphi$.
 \end{proof}
 
 \begin{lemma}
@@ -1558,6 +1670,8 @@ previous algorithms \ref{final-states}.
 		\caption{Algorithm for deciding WS$k$S formulae}\label{deciding-wsks-alg}
 	\end{algorithm}
 
+\subsection{Computing (counter)example}
+
 \subsection{Deciding WS$k$S}
 
 \chapter{Implementation}
@@ -1588,9 +1702,10 @@ if the formulae is valid, invalid, but satisfiable, or unsatisfiable.
 \section{Manipulation with NTA}
 
 For inner representation of automata used in decision procedure, library
-\texttt{libvata} \cite{vata} written in C++ was chosen for being highly
+\texttt{libvata} \cite{vata-tool} written in C++ was chosen for being highly
 efficient and open source library that exploits some of the recent developments
-of algorithm for NTA manipulation. Its main usage is in fields of formal verification, but can be effectively used in other domains as well. 
+of algorithm for NTA manipulation. Its main usage is in fields of formal
+verification, but can be effectively used in other domains as well.
 
 \texttt{libvata} supports two possible encodings of tree
 automata\,--\,\emph{explicit} and \emph{semi-symbolic}\,--\,where these
@@ -1616,33 +1731,6 @@ can be induced from the arity of the tuples on the left-hand side of the
 transition. 
 
  \section{Decision procedure}
- 
- The main algorithm for deciding WS$k$S formulae is implemented w.r.t the formal
- desinged as outlined in Section \ref{ours}. In that section it was also proved
- that it is correct.
- 
- The input of procedure is a set of second-order quantified variables
- $\{\mathcal{X}_1,ldots,\mathcal{X}_{m+1}\}$ obtained from prefix of the input
- formula and an NTA corresponding to the matrix of the formula.
- 
- Further for each level $0 \leq i \leq m$ we construct a \emph{transition cache}
- that maps states of level $i$ to the MTBDD corresponding to their transition
- relation $\delta_i$, i.e. it implements a function $transCache_i$ such
- that
- \begin{equation}
-  transCache_i : Q_i \rightarrow (\Sigma_i \rightarrow 2^{Q_i})
- \end{equation} where $transCache_0$ is pre-filled with the transition relation
- of matrix automaton $\delta_0$. If a value for the looked-up key $q_i \in Q_i$
- is not in the cache, then we define $transCache_i(q_i) \mapsto \bot$.
- 
- On several levels the constructed automaton corresponding to the input formulae
- is minimised by function \texttt{minimiseSet(S)}, where $S$ is a set of states.
- This optimization does not need to be concrete for algorithm to work, so it
- could be for example implemented as classic Myhill-Nerode equivalence reduction
- \cite{MH}. However most of these minimisations requires a deterministic
- automaton to be constructed first so it is not suitable for our procedure.
- Instead we are using the simulation relation as defined in Section \ref{sim}.
- It must hold that $$L(minimiseSet(S)) = L(S)$$.
 
 \chapter{Evaluation}
 
@@ -1682,7 +1770,7 @@ of our approach in contrary to the \texttt{MONA}.
 Random formulae were generated with different number of quantifiers and bounded
 by different constants and evaluated by both \texttt{MONA} and our tool. 
 
-\chapter{Summary and future work}\label{summary}
+\chapter{Summary}\label{summary}
 
 In this work we introduced the WS$k$S logic and its decision procedure. We have
 described classical approach that uses deterministic automata, as well as tool
