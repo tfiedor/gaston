@@ -234,6 +234,18 @@ public:
 	return true;
     return false;
   }
+
+  int index(const T &elem)
+  {
+	int index = 0;
+    iterator i;
+    for (i = begin(); i != end(); i++) {
+      if (*i == elem)
+    	  return index;
+      ++index;
+    }
+    return -1;
+  }
 };
 
 template<class T>

@@ -114,6 +114,7 @@ public:
     AST(o, kind, p) {}
 
   virtual ASTTermCode *makeCode(SubstCode *subst = NULL) = 0;
+  virtual ASTTerm* unfoldMacro(IdentList*, ASTList*) { return this;}
   void dump() = 0;
 };
 
@@ -123,6 +124,7 @@ public:
     ASTTerm(oTerm1, kind, p) {}
 
   ASTTermCode *makeCode(SubstCode *subst = NULL) = 0;
+  virtual ASTTerm1* unfoldMacro(IdentList*, ASTList*) { return this;}
   void dump() = 0; 
 };
 
@@ -134,6 +136,8 @@ public:
     ASTTerm(oTerm2, kind, p) {}
 
   ASTTermCode *makeCode(SubstCode *subst = NULL) = 0;
+  virtual ASTTerm2* unfoldMacro(IdentList*, ASTList*) { return this;}
+  virtual ASTTerm2* clone() { return this; }
   void dump() = 0; 
 };
 
@@ -156,6 +160,7 @@ public:
   virtual ASTForm* removeUniversalQuantifier() { return this; }
   virtual ASTForm* unfoldNegations() { return this; }
   virtual ASTForm* flatten() { return this;}
+  virtual ASTForm* unfoldMacro(IdentList* i, ASTList* a) { return this; }
 
   ASTForm* toExistentionalPNF();
   ASTForm* toSecondOrder();
@@ -279,6 +284,7 @@ public:
   ~ASTTerm2_TT() {delete T1; delete T2;}
 
   void freeVars(IdentList*, IdentList*);
+  ASTTerm2* unfoldMacro(IdentList*, ASTList*);
 
   ASTTerm2 *T1;
   ASTTerm2 *T2;
@@ -303,6 +309,7 @@ public:
   ~ASTForm_tT() {delete t1; delete T2;}
 
   void freeVars(IdentList*, IdentList*);
+  ASTForm* unfoldMacro(IdentList*, ASTList*);
 
   ASTTerm1 *t1; 
   ASTTerm2 *T2;
@@ -375,6 +382,7 @@ public:
 
   void freeVars(IdentList*, IdentList*);
   ASTForm* flatten();
+  ASTForm* unfoldMacro(IdentList*, ASTList*);
 
   ASTForm *f;
 };
@@ -390,6 +398,7 @@ public:
   ASTForm* removeUniversalQuantifier();
   ASTForm* unfoldNegations();
   ASTForm* flatten();
+  ASTForm* unfoldMacro(IdentList*, ASTList*);
 
   ASTForm *f1;
   ASTForm *f2;
@@ -415,6 +424,7 @@ public:
   ASTForm* removeUniversalQuantifier();
   ASTForm* unfoldNegations();
   ASTForm* flatten();
+  ASTForm* unfoldMacro(IdentList*, ASTList*);
 
   IdentList *vl;
 };
@@ -430,6 +440,7 @@ public:
   ASTForm* removeUniversalQuantifier();
   ASTForm* unfoldNegations();
   ASTForm* flatten();
+  ASTForm* unfoldMacro(IdentList*, ASTList*);
 
   IdentList *ul;
   IdentList *vl;
@@ -446,6 +457,8 @@ public:
   ASTTermCode *makeCode(SubstCode *subst = NULL);
   Ident getVar() {return n;};
   void dump();
+
+  ASTTerm1* unfoldMacro(IdentList*, ASTList*);
 };
 
 class ASTTerm1_Dot: public ASTTerm1_t {
@@ -570,6 +583,9 @@ public:
   ASTTermCode *makeCode(SubstCode *subst = NULL);
   Ident getVar() {return n;};
   void dump();
+
+  ASTTerm2* unfoldMacro(IdentList*, ASTList*);
+  ASTTerm2* clone() { return new ASTTerm2_Var2(this->n, this->pos);}
 
   int n;
 }; 
@@ -739,7 +755,8 @@ public:
   void freeVars(IdentList*, IdentList*);
   VarCode makeCode(SubstCode *subst = NULL);
   void dump();
-  ASTForm* clone() { return new ASTForm_Var0(*this); }
+  ASTForm* clone() { return new ASTForm_Var0(this->n, this->pos); }
+  ASTForm* unfoldMacro(IdentList*, ASTList*);
 
 protected:
   int n;
@@ -752,7 +769,7 @@ public:
 
   VarCode makeCode(SubstCode *subst = NULL);
   void dump();
-  ASTForm* clone() { return new ASTForm_True(*this); }
+  ASTForm* clone() { return new ASTForm_True(this->pos); }
 
   // Conversion of AST representation of formula to Automaton
   void toUnaryAutomaton(Automaton &aut, bool doComplement);
@@ -766,7 +783,7 @@ public:
 
   VarCode makeCode(SubstCode *subst = NULL);
   void dump();
-  ASTForm* clone() { return new ASTForm_False(*this); }
+  ASTForm* clone() { return new ASTForm_False(this->pos); }
 
   // Conversion of AST representation of formula to Automaton
   void toUnaryAutomaton(Automaton &aut, bool doComplement);
@@ -780,7 +797,7 @@ public:
 
   VarCode makeCode(SubstCode *subst = NULL);
   void dump();
-  ASTForm* clone() { return new ASTForm_In(*this); }
+  ASTForm* clone() { return new ASTForm_In(this->t1, this->T2, this->pos); }
 
   ASTForm* flatten();
 };
@@ -792,7 +809,7 @@ public:
 
   VarCode makeCode(SubstCode *subst = NULL);
   void dump();
-  ASTForm* clone() { return new ASTForm_Notin(*this); }
+  ASTForm* clone() { return new ASTForm_Notin(this->t1, this->T2, this->pos); }
 
   ASTForm* flatten();
 };
@@ -806,7 +823,7 @@ public:
   void freeVars(IdentList*, IdentList*);
   VarCode makeCode(SubstCode *subst = NULL);
   void dump();
-  ASTForm* clone() { return new ASTForm_RootPred(*this); }
+  ASTForm* clone() { return new ASTForm_RootPred(this->t, this->ul, this->pos); }
 
 protected:
   IdentList *ul;
@@ -820,7 +837,7 @@ public:
 
   VarCode makeCode(SubstCode *subst = NULL);
   void dump();
-  ASTForm* clone() { return new ASTForm_EmptyPred(*this); }
+  ASTForm* clone() { return new ASTForm_EmptyPred(this->T, this->pos); }
 };
 
 class ASTForm_FirstOrder: public ASTForm {
@@ -832,7 +849,7 @@ public:
   VarCode makeCode(SubstCode *subst = NULL);
   void freeVars(IdentList*, IdentList*);
   void dump();
-  ASTForm* clone() { return new ASTForm_FirstOrder(*this); }
+  ASTForm* clone() { return new ASTForm_FirstOrder(this->t, this->pos); }
 
   // Conversion of AST representation of formula to Automaton
   void toUnaryAutomaton(Automaton &aut, bool doComplement);
@@ -849,7 +866,7 @@ public:
 
   VarCode makeCode(SubstCode *subst = NULL);
   void dump();
-  ASTForm* clone() { return new ASTForm_Sub(*this); }
+  ASTForm* clone() { return new ASTForm_Sub(this->T1->clone(), this->T2->clone(), this->pos); }
 
   // Conversion of AST representation of formula to Automaton
   void toUnaryAutomaton(Automaton &aut, bool doComplement);
@@ -863,7 +880,7 @@ public:
 
   VarCode makeCode(SubstCode *subst = NULL);
   void dump();
-  ASTForm* clone() { return new ASTForm_Equal1(*this); }
+  ASTForm* clone() { return new ASTForm_Equal1(this->t1, this->t2, this->pos); }
   ASTForm* flatten();
 };
 
@@ -874,7 +891,7 @@ public:
 
   VarCode makeCode(SubstCode *subst = NULL);
   void dump();
-  ASTForm* clone() { return new ASTForm_Equal2(*this); }
+  ASTForm* clone() { return new ASTForm_Equal2(this->T1, this->T2, this->pos); }
 
   // Conversion of AST representation of formula to Automaton
   void toUnaryAutomaton(Automaton &aut, bool doComplement);
@@ -888,7 +905,7 @@ public:
 
   VarCode makeCode(SubstCode *subst = NULL);
   void dump();
-  ASTForm* clone() { return new ASTForm_NotEqual1(*this); }
+  ASTForm* clone() { return new ASTForm_NotEqual1(this->t1, this->t2, this->pos); }
   ASTForm* flatten();
 };
 
@@ -899,7 +916,7 @@ public:
 
   VarCode makeCode(SubstCode *subst = NULL);
   void dump();
-  ASTForm* clone() { return new ASTForm_NotEqual2(*this); }
+  ASTForm* clone() { return new ASTForm_NotEqual2(this->T1, this->T2, this->pos); }
   ASTForm* flatten();
 };
 
@@ -910,7 +927,7 @@ public:
 
   VarCode makeCode(SubstCode *subst = NULL);
   void dump();
-  ASTForm* clone() { return new ASTForm_Less(*this); }
+  ASTForm* clone() { return new ASTForm_Less(this->t1, this->t2, this->pos); }
   ASTForm* flatten();
 };
 
@@ -921,7 +938,7 @@ public:
 
   VarCode makeCode(SubstCode *subst = NULL);
   void dump();
-  ASTForm* clone() { return new ASTForm_LessEq(*this); }
+  ASTForm* clone() { return new ASTForm_LessEq(this->t1, this->t2, this->pos); }
   ASTForm* flatten();
 };
 
@@ -932,7 +949,7 @@ public:
 
   VarCode makeCode(SubstCode *subst = NULL);
   void dump();
-  ASTForm* clone() { return new ASTForm_WellFormedTree(*this); }
+  ASTForm* clone() { return new ASTForm_WellFormedTree(this->T, this->pos); }
 };
 
 class ASTForm_Impl: public ASTForm_ff {
@@ -942,7 +959,7 @@ public:
 
   VarCode makeCode(SubstCode *subst = NULL);
   void dump();
-  ASTForm* clone() { return new ASTForm_Impl(*this); }
+  ASTForm* clone() { return new ASTForm_Impl(this->f1->clone(), this->f2->clone(), this->pos); }
 
   ASTForm* toRestrictedSyntax();
 };
@@ -954,7 +971,7 @@ public:
 
   VarCode makeCode(SubstCode *subst = NULL);
   void dump();
-  ASTForm* clone() { return new ASTForm_Biimpl(*this); }
+  ASTForm* clone() { return new ASTForm_Biimpl(this->f1->clone(), this->f2->clone(), this->pos); }
 
   ASTForm* toRestrictedSyntax();
 };
@@ -966,7 +983,7 @@ public:
 
   VarCode makeCode(SubstCode *subst = NULL);
   void dump();
-  ASTForm* clone() { return new ASTForm_And(*this); }
+  ASTForm* clone() { return new ASTForm_And(this->f1->clone(), this->f2->clone(), this->pos); }
 
   ASTForm* toRestrictedSyntax();
 
@@ -982,7 +999,7 @@ public:
 
   VarCode makeCode(SubstCode *subst = NULL);
   void dump();
-  ASTForm* clone() { return new ASTForm_IdLeft(*this); }
+  ASTForm* clone() { return new ASTForm_IdLeft(this->f1->clone(), this->f2->clone(), this->pos); }
 
   ASTForm* toRestrictedSyntax();
 };
@@ -994,7 +1011,7 @@ public:
 
   VarCode makeCode(SubstCode *subst = NULL);
   void dump();
-  ASTForm* clone() { return new ASTForm_Or(*this); }
+  ASTForm* clone() { return new ASTForm_Or(this->f1->clone(), this->f2->clone(), this->pos); }
 
   ASTForm* toRestrictedSyntax();
 
@@ -1011,7 +1028,9 @@ public:
   void freeVars(IdentList*, IdentList*);
   VarCode makeCode(SubstCode *subst = NULL);
   void dump();
-  ASTForm* clone() { return new ASTForm_Not(*this); }
+  ASTForm* clone() { return new ASTForm_Not(this->f->clone(), this->pos); }
+  ASTForm* flatten();
+  ASTForm* unfoldMacro(IdentList*, ASTList*);
 
   ASTForm* toRestrictedSyntax();
   ASTForm* toPrenexNormalForm();
@@ -1031,7 +1050,7 @@ public:
 
   VarCode makeCode(SubstCode *subst = NULL);
   void dump();
-  ASTForm* clone() { return new ASTForm_Ex0(*this); }
+  ASTForm* clone() { return new ASTForm_Ex0(this->vl, this->f->clone(), this->pos); }
 
   ASTForm* toRestrictedSyntax();
 };
@@ -1043,7 +1062,7 @@ public:
 
   VarCode makeCode(SubstCode *subst = NULL);
   void dump();
-  ASTForm* clone() { return new ASTForm_Ex1(*this); }
+  ASTForm* clone() { return new ASTForm_Ex1(this->ul, this->vl, this->f->clone(), this->pos); }
 
   ASTForm* toRestrictedSyntax();
   ASTForm* flatten();
@@ -1056,7 +1075,7 @@ public:
 
   VarCode makeCode(SubstCode *subst = NULL);
   void dump();
-  ASTForm* clone() { return new ASTForm_Ex2(*this); }
+  ASTForm* clone() { return new ASTForm_Ex2(this->ul, this->vl, this->f->clone(), this->pos); }
 
   ASTForm* toRestrictedSyntax();
 };
@@ -1068,7 +1087,7 @@ public:
 
   VarCode makeCode(SubstCode *subst = NULL);
   void dump();
-  ASTForm* clone() { return new ASTForm_All0(*this); }
+  ASTForm* clone() { return new ASTForm_All0(this->vl, this->f->clone(), this->pos); }
 
   ASTForm* toRestrictedSyntax();
   ASTForm* removeUniversalQuantifier();
@@ -1081,7 +1100,7 @@ public:
 
   VarCode makeCode(SubstCode *subst = NULL);
   void dump();
-  ASTForm* clone() { return new ASTForm_All1(*this); }
+  ASTForm* clone() { return new ASTForm_All1(this->ul, this->vl, this->f->clone(), this->pos); }
   
   ASTForm* toRestrictedSyntax();
   ASTForm* removeUniversalQuantifier();
@@ -1095,7 +1114,7 @@ public:
 
   VarCode makeCode(SubstCode *subst = NULL);
   void dump();
-  ASTForm* clone() { return new ASTForm_All2(*this); }
+  ASTForm* clone() { return new ASTForm_All2(this->ul, this->vl, this->f->clone(), this->pos); }
 
   ASTForm* toRestrictedSyntax();
   ASTForm* removeUniversalQuantifier();
@@ -1110,7 +1129,7 @@ public:
   void freeVars(IdentList*, IdentList*);
   VarCode makeCode(SubstCode *subst = NULL);
   void dump();
-  ASTForm* clone() { return new ASTForm_Let0(*this); }
+  ASTForm* clone() { return new ASTForm_Let0(this->defIdents, this->defForms, this->f->clone(), this->pos); }
 
 protected:
   IdentList *defIdents;
@@ -1127,7 +1146,7 @@ public:
   void freeVars(IdentList*, IdentList*);
   VarCode makeCode(SubstCode *subst = NULL);
   void dump();
-  ASTForm* clone() { return new ASTForm_Let1(*this); }
+  ASTForm* clone() { return new ASTForm_Let1(this->defIdents, this->defTerms, this->f->clone(), this->pos); }
 
 protected:
   IdentList *defIdents;
@@ -1144,7 +1163,7 @@ public:
   void freeVars(IdentList*, IdentList*);
   VarCode makeCode(SubstCode *subst = NULL);
   void dump();
-  ASTForm* clone() { return new ASTForm_Let2(*this); }
+  ASTForm* clone() { return new ASTForm_Let2(this->defIdents, this->defTerms, this->f->clone(), this->pos); }
 
 protected:
   IdentList *defIdents;
@@ -1161,7 +1180,8 @@ public:
   void freeVars(IdentList*, IdentList*);
   VarCode makeCode(SubstCode *subst = NULL);
   void dump();
-  ASTForm* clone() { return new ASTForm_Call(*this); }
+  ASTForm* clone() { return new ASTForm_Call(this->n, this->args, this->pos); }
+  ASTForm* flatten();
 
 protected:
   ASTList *args;

@@ -1,6 +1,8 @@
 #include "../Frontend/ast.h"
 #include "../Frontend/symboltable.h"
 #include "../Frontend/env.h"
+#include "../Frontend/predlib.h"
+#include "environment.hh"
 #include <cstring>
 #include <deque>
 
@@ -8,6 +10,7 @@ using std::cout;
 
 extern SymbolTable symbolTable;
 extern Options options;
+extern PredicateLib predicateLib;
 
 /**
  * Conversion of formula to Second Order, that means all the formulas are
@@ -78,7 +81,7 @@ ASTForm* ASTForm_Equal1::flatten() {
 			leftEqual = new ASTForm_Equal1(zVar, temp->t, Pos());
 			rightEqual = new ASTForm_Equal1(this->t1, new ASTTerm1_Plus(zVar, temp->n, Pos()), Pos());
 			conjuction = new ASTForm_And(leftEqual, rightEqual, Pos());
-			return new ASTForm_Ex1(0, new IdentList(z), conjuction->flatten(), Pos());
+			return (new ASTForm_Ex1(0, new IdentList(z), conjuction, Pos()))->flatten();
 		}
 	// xi = yi -> ex z: z = xi & z = yj
 	} else if (this->t1->kind == aPlus1 && this->t2->kind == aPlus1) {
@@ -87,7 +90,7 @@ ASTForm* ASTForm_Equal1::flatten() {
 		leftEqual = new ASTForm_Equal1(zVar, this->t1, Pos());
 		rightEqual = new ASTForm_Equal1(zVar, this->t2, Pos());
 		conjuction = new ASTForm_And(leftEqual, rightEqual, Pos());
-		return new ASTForm_Ex1(0, new IdentList(z), conjuction->flatten(), Pos());
+		return (new ASTForm_Ex1(0, new IdentList(z), conjuction, Pos()))->flatten();
 	// x = e ???
 	} else if(this->t1->kind == aVar1 && this->t2->kind == aInt && ((ASTTerm1_Int*) this->t2)->value() == 0) {
 		x = new ASTTerm2_Var2(((ASTTerm1_Var1*)this->t1)->getVar(), Pos());
@@ -191,7 +194,8 @@ ASTForm* substituteFreshLessEq(ASTTerm1* leftTerm, ASTTerm1* rightTerm, bool sub
 	}
 	conjuction = new ASTForm_And(left, right, Pos());
 
-	return new ASTForm_Ex1(0, new IdentList(z->getVar()), conjuction->flatten(), Pos());
+	ASTForm_Ex1* newFormula = new ASTForm_Ex1(0, new IdentList(z->getVar()), conjuction, Pos());
+	return newFormula->flatten();
 }
 
 /**
@@ -240,7 +244,8 @@ ASTForm* ASTForm_LessEq::flatten() {
 		ASTForm_In* xInX = new ASTForm_In(this->t1, X, Pos());
 		outerImplication = new ASTForm_Impl(innerConjuction, xInX, Pos());
 
-		return new ASTForm_All2(0, new IdentList(X->getVar()), outerImplication, Pos());
+		ASTForm_All2* newFormula = new ASTForm_All2(0, new IdentList(X->getVar()), outerImplication, Pos());
+		return newFormula->flatten();
 	}
 	return this;
 }
@@ -319,6 +324,16 @@ ASTForm* ASTForm_All1::flatten() {
 }
 
 /**
+ * Transformation of Not
+ *
+ * @return: flattened formula
+ */
+ASTForm* ASTForm_Not::flatten() {
+	f = f->flatten();
+	return this;
+}
+
+/**
  * Generic transformation for wide range of formulae
  *
  * @return: flattened formula
@@ -375,5 +390,180 @@ ASTForm* ASTForm_And::flatten() {
 		return f1;
 	} else {
 		return this;
+	}
+}
+
+/**
+ * Unfolds formal parameters to real parameters
+ *
+ * @param fParams: list of formal parameters
+ * @param rParams: list of real parameters
+ * @return: unfolded macro
+ */
+ASTForm* ASTForm_f::unfoldMacro(IdentList* fParams, ASTList* rParams) {
+	f = f->unfoldMacro(fParams, rParams);
+	return this;
+}
+
+/**
+ * Unfolds formal parameters to real parameters
+ *
+ * @param fParams: list of formal parameters
+ * @param rParams: list of real parameters
+ * @return: unfolded macro
+ */
+ASTForm* ASTForm_ff::unfoldMacro(IdentList* fParams, ASTList* rParams) {
+	f1 = f1->unfoldMacro(fParams, rParams);
+	f2 = f2->unfoldMacro(fParams, rParams);
+	return this;
+}
+
+/**
+ * Unfolds formal parameters to real parameters
+ *
+ * @param fParams: list of formal parameters
+ * @param rParams: list of real parameters
+ * @return: unfolded macro
+ */
+ASTForm* ASTForm_uvf::unfoldMacro(IdentList* fParams, ASTList* rParams) {
+	f = f->unfoldMacro(fParams, rParams);
+	return this;
+}
+
+/**
+ * Unfolds formal parameters to real parameters
+ *
+ * @param fParams: list of formal parameters
+ * @param rParams: list of real parameters
+ * @return: unfolded macro
+ */
+ASTForm* ASTForm_tT::unfoldMacro(IdentList* fParams, ASTList* rParams) {
+	t1 = t1->unfoldMacro(fParams, rParams);
+	T2 = T2->unfoldMacro(fParams, rParams);
+	return this;
+}
+
+/**
+ * Unfolds formal parameters to real parameters
+ *
+ * @param fParams: list of formal parameters
+ * @param rParams: list of real parameters
+ * @return: unfolded macro
+ */
+ASTTerm2* ASTTerm2_TT::unfoldMacro(IdentList* fParams, ASTList* rParams) {
+	T1 = T1->unfoldMacro(fParams, rParams);
+	T2 = T2->unfoldMacro(fParams, rParams);
+	return this;
+}
+
+/**
+ * Unfolds formal parameters to real parameters
+ *
+ * @param fParams: list of formal parameters
+ * @param rParams: list of real parameters
+ * @return: unfolded macro
+ */
+ASTForm* ASTForm_vf::unfoldMacro(IdentList* fParams, ASTList* rParams) {
+	f = f->unfoldMacro(fParams, rParams);
+	return this;
+}
+
+/**
+ * Unfolds formal parameters to real parameters
+ *
+ * @param fParams: list of formal parameters
+ * @param rParams: list of real parameters
+ * @return: unfolded macro
+ */
+ASTForm* ASTForm_Not::unfoldMacro(IdentList* fParams, ASTList* rParams) {
+	f = f->unfoldMacro(fParams, rParams);
+	return this;
+}
+
+/**
+ * Unfolds formal parameters to real parameters
+ * TODO: may segfault
+ *
+ * @param fParams: list of formal parameters
+ * @param rParams: list of real parameters
+ * @return: unfolded macro
+ */
+ASTTerm1* ASTTerm1_Var1::unfoldMacro(IdentList* fParams, ASTList* rParams) {
+	int index = fParams->index(this->n);
+	if (index != -1) {
+		(rParams->get(index))->dump();
+		return (ASTTerm1*) rParams->get(index);
+	} else {
+		return (ASTTerm1*) this;
+	}
+}
+
+/**
+ * Unfolds formal parameters to real parameters
+ * TODO: may segfault
+ *
+ * @param fParams: list of formal parameters
+ * @param rParams: list of real parameters
+ * @return: unfolded macro
+ */
+ASTTerm2* ASTTerm2_Var2::unfoldMacro(IdentList* fParams, ASTList* rParams) {
+	int index = fParams->index(this->n);
+	if (index != -1) {
+		(rParams->get(index))->dump();
+		return (ASTTerm2*) rParams->get(index);
+	} else {
+		return (ASTTerm2*) this;
+	}
+}
+
+/**
+ * Unfolds formal parameters to real parameters
+ * TODO: may segfault
+ *
+ * @param fParams: list of formal parameters
+ * @param rParams: list of real parameters
+ * @return: unfolded macro
+ */
+ASTForm* ASTForm_Var0::unfoldMacro(IdentList* fParams, ASTList* rParams) {
+	int index = fParams->index(this->n);
+	if (index != -1) {
+		ASTForm* formula = ((ASTForm*) rParams->get(index));
+		return formula->clone();
+	} else {
+		return (ASTForm*) this;
+	}
+}
+
+/**
+ * Unfolds the called macro by substituting its formal parameters with real
+ * parameters
+ *
+ * @param called: called macro
+ * @param realParams: real parameters
+ * @return: unfolded formula
+ */
+ASTForm* unfoldFormula(PredLibEntry* called, ASTList* realParams) {
+	IdentList* formalParams = called->formals;
+
+	ASTForm* clonnedFormula = (called->ast)->clone();
+	ASTForm* unfoldedFormula = clonnedFormula->unfoldMacro(formalParams, realParams);
+	return unfoldedFormula->flatten();
+}
+
+/**
+ * Unfolds the macro according to the real arguments
+ *
+ * @return: flattened formula
+ */
+ASTForm* ASTForm_Call::flatten() {
+	int calledNumber = this->n;
+
+	PredLibEntry* called = predicateLib.lookup(calledNumber);
+
+	/* So far, we will treat predicate and macro the same */
+	if (!called->isMacro) {
+		return unfoldFormula(called, this->args);
+	} else {
+		return unfoldFormula(called, this->args);
 	}
 }
