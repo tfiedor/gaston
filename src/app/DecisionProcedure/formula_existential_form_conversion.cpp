@@ -312,27 +312,27 @@ ASTForm* negateQuantifier(ASTForm_Not* node) {
     switch(q->kind) {
         case aEx0:
             formula = new ASTForm_Not(((ASTForm_Ex0*)q)->f, node->pos);
-            return new ASTForm_All0(((ASTForm_Ex0*)q)->vl, formula, ((ASTForm_Ex0*)q)->pos);
+            return new ASTForm_All0(((ASTForm_Ex0*)q)->vl, formula->toPrenexNormalForm(), ((ASTForm_Ex0*)q)->pos);
             break;
         case aEx1:
             formula = new ASTForm_Not(((ASTForm_Ex1*)q)->f, node->pos);
-            return new ASTForm_All1(((ASTForm_Ex1*)q)->ul, ((ASTForm_Ex1*)q)->vl, formula, ((ASTForm_Ex1*)q)->pos);
+            return new ASTForm_All1(((ASTForm_Ex1*)q)->ul, ((ASTForm_Ex1*)q)->vl, formula->toPrenexNormalForm(), ((ASTForm_Ex1*)q)->pos);
             break;
         case aEx2:
             formula = new ASTForm_Not(((ASTForm_Ex2*)q)->f, node->pos);
-            return new ASTForm_All2(((ASTForm_Ex2*)q)->ul, ((ASTForm_Ex2*)q)->vl, formula, ((ASTForm_Ex2*)q)->pos);
+            return new ASTForm_All2(((ASTForm_Ex2*)q)->ul, ((ASTForm_Ex2*)q)->vl, formula->toPrenexNormalForm(), ((ASTForm_Ex2*)q)->pos);
             break;
         case aAll0:
             formula = new ASTForm_Not(((ASTForm_All0*)q)->f, node->pos);
-            return new ASTForm_Ex0(((ASTForm_All0*)q)->vl, formula, ((ASTForm_All0*)q)->pos);
+            return new ASTForm_Ex0(((ASTForm_All0*)q)->vl, formula->toPrenexNormalForm(), ((ASTForm_All0*)q)->pos);
             break;
         case aAll1:
             formula = new ASTForm_Not(((ASTForm_All1*)q)->f, node->pos);
-            return new ASTForm_Ex1(((ASTForm_All1*)q)->ul, ((ASTForm_All1*)q)->vl, formula, ((ASTForm_All1*)q)->pos);
+            return new ASTForm_Ex1(((ASTForm_All1*)q)->ul, ((ASTForm_All1*)q)->vl, formula->toPrenexNormalForm(), ((ASTForm_All1*)q)->pos);
             break;
         case aAll2:
             formula = new ASTForm_Not(((ASTForm_All2*)q)->f, node->pos);
-            return new ASTForm_Ex2(((ASTForm_All2*)q)->ul, ((ASTForm_All2*)q)->vl, formula, ((ASTForm_All2*)q)->pos);
+            return new ASTForm_Ex2(((ASTForm_All2*)q)->ul, ((ASTForm_All2*)q)->vl, formula->toPrenexNormalForm(), ((ASTForm_All2*)q)->pos);
             break;
         default:
             return node;
