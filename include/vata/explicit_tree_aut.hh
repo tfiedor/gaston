@@ -126,6 +126,9 @@ public:   // public data types
 
 		virtual FwdTranslatorPtr GetSymbolTransl() = 0;
 		virtual BwdTranslatorPtr GetSymbolBackTransl() = 0;
+
+		virtual ~AbstractAlphabet()
+		{ }
 	};
 
 
@@ -154,6 +157,9 @@ public:   // public data types
 
 			return BwdTranslatorPtr(bwdTransl);
 		}
+
+		virtual ~OnTheFlyAlphabet() override
+		{ }
 	};
 
 	class DirectAlphabet : public AbstractAlphabet
@@ -187,6 +193,23 @@ public:   // public data types
 		{
 			return BwdTranslatorPtr(new DirectBackTranslator);
 		}
+
+		virtual ~DirectAlphabet() override
+		{ }
+	};
+
+	/**
+	 * @brief  Base class for translation of symbols
+	 *
+	 * This is the base class for functors translating symbols, see @fn TranslateSymbols.
+	 */
+	class AbstractSymbolTranslateF
+	{
+	public:
+		virtual SymbolType operator()(const SymbolType&) = 0;
+
+		virtual ~AbstractSymbolTranslateF()
+		{ }
 	};
 
 	using AlphabetType = std::shared_ptr<AbstractAlphabet>;
@@ -511,6 +534,20 @@ public:   // methods
 		const std::string&                        params = "") const;
 
 
+	AutDescription DumpToAutDesc(
+		const std::string&                        params = "") const;
+
+
+	AutDescription DumpToAutDesc(
+		const StateDict&                          stateDict,
+		const std::string&                        params = "") const;
+
+
+	AutDescription DumpToAutDesc(
+		const StateBackTranslStrict&              stateTransl,
+		const std::string&                        params = "") const;
+
+
 	iterator begin();
 	iterator end();
 	const_iterator begin() const;
@@ -708,6 +745,20 @@ public:   // methods
 	{
 		throw NotImplementedException(__func__);
 	}
+
+
+	/**
+	 * @brief  Translates all symbols according to a translator
+	 *
+	 * This method translates symbols of all transitions according to the @p
+	 * transl functor passed to the method. The changed automaton is returned.
+	 *
+	 * @param[in,out]  transl  The functor for the translation
+	 *
+	 * @returns  The automaton with symbols in transitions changed
+	 */
+	ExplicitTreeAut TranslateSymbols(
+		AbstractSymbolTranslateF&       transl) const;
 
 	std::string ToString(const Transition& trans) const;
 };

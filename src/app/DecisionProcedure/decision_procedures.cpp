@@ -28,8 +28,8 @@ bool existsSatisfyingExample(FinalStatesType fm) {
  *
  * @return: true if there exists an unsat example
  */
-bool existsUnsatisfyingExample() {
-	return true;
+bool existsUnsatisfyingExample(FinalStatesType fm, StateHT qm) {
+	return fm.size() != qm.size();
 }
 
 /**
@@ -68,24 +68,27 @@ int decideWS1S(Automaton aut, TSatExample & example, TUnSatExample & counterExam
 	std::cout << "Deciding WS1S formula transformed to automaton" << std::endl;
 
 	// Compute the final states
+	StateHT allStates;
+	aut.RemoveUnreachableStates(&allStates);
+
 	FinalStatesType fm;
 	fm = computeFinalStates(aut);
 
 	bool hasExample = existsSatisfyingExample(fm);
-	bool hasCounterExample = existsUnsatisfyingExample();
+	bool hasCounterExample = existsUnsatisfyingExample(fm, allStates);
 
 	// No satisfiable solution was found
 	if(!hasExample) {
-		counterExample = findUnsatisfyingExample();
+		//counterExample = findUnsatisfyingExample();
 		return UNSATISFIABLE;
 	// There exists a satisfiable solution and does not exist an unsatisfiable solution
 	} else if (hasExample && !hasCounterExample) {
-		example = findSatisfyingExample();
+		//example = findSatisfyingExample();
 		return VALID;
 	// else there only exists a satisfiable solution
 	} else if (hasExample) {
-		example = findSatisfyingExample();
-		counterExample = findUnsatisfyingExample();
+		//example = findSatisfyingExample();
+		//counterExample = findUnsatisfyingExample();
 		return SATISFIABLE;
 	// THIS SHOULD NOT HAPPEN
 	} else {

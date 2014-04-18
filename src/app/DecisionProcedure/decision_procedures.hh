@@ -36,7 +36,7 @@ int decideWS2S(Automaton aut, TSatExample & example, TUnSatExample & counterExam
 TSatExample findSatisfyingExample();
 TUnSatExample findUnsatisfyingExample();
 bool existsSatisfyingExample(FinalStatesType fm);
-bool existsUnsatisfyingExample(FinalStatesType fm);
+bool existsUnsatisfyingExample(FinalStatesType fm, StateHT qm);
 PrefixListType convertPrefixFormulaToList(ASTForm* formula);
 FinalStatesType computeFinalStates(Automaton aut);
 

@@ -529,7 +529,7 @@ MTBDD $\delta^{bu}$ represents the function \textlbrackdbl $\delta^{bu}$
  \begin{equation}
   \text{\textlbrackdbl} \delta^{bu} \text{\textrbrackdbl} =
  \lambda (q_1,\ldots,q_p)\ a . \{q\ |\ (q_1,\ldots,q_p)
- \overset{a}{\longrightarrow} q\} \end{equation}.
+ \overset{a}{\longrightarrow} q\}. \end{equation}
 
 The \emph{top-down} representation of the transition function $\delta$ of the TA
 $\mathcal{A}$ uses a shared MTBDD $\delta^{td}$ over $\Sigma$, where the set of
@@ -538,8 +538,8 @@ $\delta^{td}$ then represents the function \textlbrackdbl $\delta^{td}$
 \textrbrackdbl $: Q \rightarrow (\Sigma \rightarrow 2^{Q^\#}$ where
 \begin{equation} \text{\textlbrackdbl} \delta^{td} \text{\textrbrackdbl} =
 \lambda q\ a .
-\{(q_1,\ldots,q_p)\ |\ q \overset{a}{\longrightarrow} (q_1,\ldots,q_p)\}
-\end{equation}.
+\{(q_1,\ldots,q_p)\ |\ q \overset{a}{\longrightarrow} (q_1,\ldots,q_p)\}.
+\end{equation}
 
 \noindent\hrulefill
 \begin{example}
@@ -1292,9 +1292,10 @@ are going to refer to source \cite{tacas}.
 
 \section{Deciding WS$k$S with NFA}
 
-Given formula $\phi$, constructing the automaton $\mathcal{A}_\phi$ representing
-all models of formula $\phi$ is not necessary, since representation of all
-models of formula is not essential and usually any model or an invalid assignment suffices.
+Given formula $\phi$, construction of the automaton $\mathcal{A}_\phi$
+representing all models of formula $\phi$ is not necessary, since
+we noticed that representation of all models of the formula is not essential and
+usually any model or an invalid assignment suffices.
 Instead we can exploit the antichain-based techniques defined in previous
 section and search for the accepting or non-accepting state \emph{on-the-fly}
 pruning the search state.
@@ -1308,8 +1309,8 @@ $\varphi$ in existential prenex form (see Section \ref{restricted}):
  \pi(\mathbb{X}).
 \end{equation*}
 
-Now supposing there are $m$	negations in the prefix of formula $\phi$, we create
-a hierarchical family of WS$k$S formulae $\Phi = \{\varphi_0,\ldots,\varphi_m\}$
+Now supposing there are $m$	negations in the prefix of formula $\varphi$, we
+create a hierarchical family of WS$k$S formulae $\Phi = \{\varphi_0,\ldots,\varphi_m\}$
 where
 \begin{equation}
   \varphi_0 \overset{\mathit{def}}{=} \pi
@@ -1320,16 +1321,44 @@ and for all $0 \leq i \leq m-1$
  \varphi_i.
 \end{equation}
 
-\subsection{Introduction to Deciding WS1S}
+{\color{red} How to best define the operation $\omega$? The description in draft
+is rather chaotic IMO and could be more readable}
 
-The main concept of the new approach to deciding WS$k$S is going to be
-outlined first on WS$1$S formulae and in following section it will be
-generalised to arbritrary $k$, which is pretty straightforward.
+\begin{defz}
+ Given the automaton $\mathcal{A} = (Q, \Sigma, \delta, I, F)$ we define the
+ \emph{projection} $\omega_\mathcal{X}$ of $\mathcal{A}$ as the automaton
+ $\omega_\mathcal{X}(\mathcal{A}) = (Q, \omega_{\mathcal{X}}(\Sigma),
+ \omega_{\mathcal{X}}(\delta), I, PRE_0^*(F))$ where
+ \begin{equation}
+  \omega_{\mathcal{X}}(\delta) = \left\{ p \overset{\omega(a)}{\longrightarrow}
+  r\ |\ p \overset{a}{\rightarrow} r \in \delta, a \in \Sigma\right\}
+ \end{equation}
+ Note that after the operation of projection we have to adjust the final states
+ according to the $PRE_0$ relation.
+\end{defz}
 
-Given WS$1$S formula $\varphi$ in $\exists$PNF form, automaton for matrix of
+\begin{defz}
+ Given the automaton $\mathcal{A} = (Q, \Sigma, \delta, I, F)$ we define the
+ \emph{complementation} $\gamma$ of $\mathcal{A}$ as the automaton
+ $\gamma(\mathcal{A}) = (2^Q, \Sigma, \delta_\gamma, \{I\}, \{S \subseteq Q\
+ |\ S \cap Q = \emptyset)$ where
+ \begin{equation}
+  \delta_\gamma = \{R \overset{a}{\rightarrow}\ |\ \exists r \in R, s \in S: r
+  \overset{a}{g} s, a \in \Sigma\}
+ \end{equation}
+ Note that this operation $\gamma$ corresponds to the determinisation of the
+ input automaton using the subset construction followed by swapping of final and
+ non-final states of the determinised automaton.
+\end{defz}
+
+The main concept of this new approach to deciding WS$k$S is going to be outlined
+first on WS$1$S formulae and later will be generalised to arbritrary $k$, which
+is pretty straightforward.
+
+So given WS$1$S formula $\varphi$ in $\exists$PNF form, automaton for matrix of
 formula $\mathcal{A}_\pi$ can be constructed out of automata corresponding to
 the atomic formulae and their complements by using operations of union and
-intersection. Further we construct $\mathcal{A}_\varphi$ from automaton
+intersection only. Further we construct $\mathcal{A}_\varphi$ from automaton
 $\mathcal{A}_\pi$ by successive applications of complementation $\gamma$ and
 projection $\omega$ according to the prefix of $\varphi$ as these
 operation were defined in Section \ref{preli}.
@@ -1360,8 +1389,8 @@ formula.
   \begin{center}
    \scalebox{0.75}{\includegraphics{fig/projection-problem}}
   \end{center}
-  \caption{Problem with final states after projection is that
-  Language of automata restricts some of the valid encodings
+  \caption{The problem with final states after projection is that
+  language of the final automaton restricts some of the valid encodings
   of models afterwise.}\label{projection}
  \end{figure}\label{models}
  
@@ -1370,11 +1399,14 @@ formula.
 \noindent\hrulefill
 
 However, this approach needs fully constructed automaton, so this cannot be used
-in on-the-fly algorithm. Instead we will precompute the set of final states
-before using any algorithm. 
+in on-the-fly algorithm. Instead we can either precompute the set of final
+states before using any algorithm using the algorithm similar to backward
+universality testing \cite{backwards-universality} or use the naive lazy
+approach that will determine whether the state is final only when it is needed.
 
 \begin{defz}
- We define the \emph{downward closure} of a set $S$ as 
+ We define the \emph{downward closure} of a set $S$ as set $\downarrow S$ such
+ that
  \begin{equation}
   \downarrow S \overset{\mathit{def}}{=} \{p\in Q\ |\ \exists q \in S: p
   \subseteq q\}
@@ -1382,7 +1414,8 @@ before using any algorithm.
 \end{defz}
 
 \begin{defz}
- Similarly we define the \emph{upward closure} of a set $S$ as
+ Similarly we define the \emph{upward closure} of a set $S$ as set $\uparrow S$
+ such that
  \begin{equation}
  \uparrow S \overset{\mathit{def}}{=} \{p\in Q\ |\ \exists q \in S: q \subseteq
  p\}
@@ -1390,46 +1423,25 @@ before using any algorithm.
 \end{defz}
 
 \begin{defz}
-We define the complement of the downward closure as set
- \begin{eqnarray}
- \overline{\downarrow S} \overset{\mathit{def}}{=} & \{ \uparrow P\ |\ P = s_1
- \cap s_2 \wedge P \neq \emptyset, s_1, s_2 \in S\}\\
- \cup & \{\uparrow\{p\}\ |\ \not\exists s \in S: p \in S\} 
- \end{eqnarray}
-\end{defz}
-
-Intuitively, as depicted on Figure \ref{updown}, the complement of downward set
-is an union of upward closures of all atoms from $Q$ such that they are not
-members of any generator in set $S$ and all intersection of generators. Note
-that complement of upward closure is downward closure and vice versa. 
-
-\begin{defz}
  We define the \emph{preset through zero tracks} as a set of states such that
  \begin{equation}
- PRE_0(Q) = \{r\ |\ \exists q \in Q: r \overset{0^k}{\longrightarrow} q\}.
+ PRE_0(Q) = \{r\ |\ \exists q \in Q: r \overset{(0)^k}{\longrightarrow}
+ q\}.\footnote{Note that $(0)^k$ does stand for zero track of width $k$ not
+ length.}
  \end{equation}
- We denote the transition closure of $PRE_0(Q)$ as $PRE_0^*(Q)$.
+ We denote the transition closure of $PRE_0(Q)$ as $PRE_0^*(Q)$. Note that we
+ can define the $POST_0(Q)$ relation simiralry to the $PRE_0$ relation.
 \end{defz}
 
-\begin{lemma}
-Relation $PRE_0$ is monotonic on downward and upward closure of the set.
-\end{lemma}\label{PRE-is-monotonic}
-\begin{proof}
- {\color{red}TODO: This is rather important}
-\end{proof}
-
-The consequence of this lemma is that during the manipulation with downward and
-upwards sets we will only work with the maximal/minimal sets and thus cover the
-great range of states and reduce the complexity.
-
-With these operations we can define the family of automata $\mathbb{A} =
-\{\mathcal{A}_0,\ldots,\mathcal{A}_m\}$ as follows:
+Now analogously to the family of formulae $\Phi$ we can define
+the family of automata $\mathbb{A} = \{\mathcal{A}_0,\ldots,\mathcal{A}_m\}$ as follows:
  \begin{eqnarray}
   \mathcal{A}_0 & = & \mathcal{A}_\pi\\
   \mathcal{A}_{i+1} & = & \gamma(\omega_{\mathcal{X}_{i+1}}(\mathcal{A}_i)).
  \end{eqnarray}
  
- Note that the automaton for case $i$ thus correspond to following automaton:
+ Note that the automaton for case $i$ thus correspond to the following
+ automaton:
  \begin{equation} \mathcal{A}_i =
  \mathcal{A}_{\exists\mathcal{X}_i\ldots\neg\exists\mathcal{X}_1.
  \pi(\mathbb{X})}\end{equation}
@@ -1440,7 +1452,7 @@ There is further connection between the hierarchical family of formulae $\Phi$
 and the hierarchical family of automata $\mathbb{A}$ as described by the
 following lemma.
  \begin{lemma} For all $0 \leq i \leq m$, the language of
-$\mathcal(A)_i$ is
+$\mathcal{A}_i$ is
 \begin{enumerate}
   \item \emph{universal} iff $\varphi_i$ is \emph{valid},
   \item \emph{non-empty} iff $\varphi_i$ is \emph{satisfiable},
@@ -1510,16 +1522,20 @@ $\mathcal(A)_i$ is
  \end{enumerate}
 \end{proof}
 
+{\color{red} This proof may not be needed (i think probably it should), but may
+be chaotic. Also not sure if the invalid part is correct. It certainly is
+shady.}
+
 Further we can construct automaton $\mathcal{A}_{i+1}$ from automaton
 $\mathcal{A}_i = (Q_i, \Sigma_i, \delta_i, I_i, F_i)$ as follows:
 \begin{eqnarray}
  Q_{i+1} & = & 2^{Q_i}\\
  \Sigma_{i+1} & = & \Sigma_{i|\omega_{\mathcal{X}_{i+1}}}\\
- \delta_i & = & \{P \overset{\omega_{\mathcal{X}_{i+1}}(a)}{\longrightarrow} R\
- |\ R = \bigcup_{p \in P} \{r\ |\ p \overset{a}{\rightarrow} q \in \delta_i\}, a \in
+ \delta_{i+1} & = & \{P \overset{\omega_{\mathcal{X}_{i+1}}(a)}{\longrightarrow}
+ R\ |\ R = \bigcup_{p \in P} \{r\ |\ p \overset{a}{\rightarrow} q \in \delta_i\}, a \in
  \Sigma_i\}\\
  I_{i+1} & = & \{I_i\}\\
- F_{i+1} & = & \downarrow\overline{\{Q\ |\ Q = PRE_0^*(P), P \in F_i\}}
+ F_{i+1} & = & \downarrow\overline{\{Q\ |\ Q = PRE_0^*(P), P \in F_i\}}\label{F}
 \end{eqnarray}
 
 Notice that the set of the final states $F_{i+1}$ is computed from the states of
@@ -1528,40 +1544,24 @@ of every final state which yields the following set
 \begin{equation}
  F_{\exists\mathcal{X}_{i+1}\varphi_i} = \{Q\ |\ Q = PRE_0^*(P), P \in F_i\}
 \end{equation}
-This can be done according to the Lemma \ref{PRE-is-monotonic}. Now to obtain
-the set of final states for complement of the automaton, we would first have to
-determinise the set to set
+Now to obtain the set of final states for complement of the automaton, we would
+first have to determinise the set to set
 \begin{equation}
- F^DET_{\exists\mathcal{X}_{i+1}\varphi_i} = \uparrow\{ \{s\}\ |\ s \in
+ F^{DET}_{\exists\mathcal{X}_{i+1}\varphi_i} = \uparrow\{ \{s\}\ |\ s \in
  F_{\exists\mathcal{X}_{i+1}\varphi_i}\}
 \end{equation}
 We can complement this set and hence get the equation \ref{F}.
 
-Next we proceed to computation of the predecessors of the set and how to compute
-the set of final states. This approach is similar to the backward universality
-checking as introduced in \cite{backwards-universality}.
+{\color{red} Do we even need this???}
 
-\subsection{Computing Predecessors of Set}
-
-\subsection{Constructing Set of Final States}\label{final-states}
-
-\subsection{Algorithm of Decision Procedure}
-
-Given a formula
-\begin{equation*}
- \varphi \overset{\mathit{def}}{=}
- \exists\mathcal{X}_{m+1}\neg\mathcal{X}_m\neg\ldots\neg\exists\mathcal{X}_2\neg\exists\mathcal{X}_1
- .
- \pi(\mathbb{X}).
-\end{equation*}
-we can construct a set of final states $F_m$ as outlined in previous section.
-We use this set to examine whether there exists a satisfying example or
-counterexample and use them to determine if the given formula is \emph{valid},
-\emph{invalid, but satisfiable} or \emph{unsatisfiable}.
+Now given the automaton $\mathcal{A}_0$ and a set of sets of second-order
+variables $\{\mathcal{X}_1,\ldots,\mathcal{X}_m\}$ corresponding to the matrix
+and prefix of formula respectively. We can clasiffy the formula according to the
+existence of the satisfying and unsatisfying assingments.
 
 \begin{defz}
 We say a formula $\phi$ is \emph{closed} if there is no free variable, i.e.
-$freeVars(\phi) = \emptyset$.
+$freeVars_\phi = \emptyset$.
 We further define a \emph{closure} of a formula $\varphi$ as formula $\phi$ such that
 \begin{equation}
  \phi \overset{\mathit{def}}{=} \exists\mathcal{X}. \varphi
@@ -1610,7 +1610,7 @@ corresponding to the closure of formula $\varphi$ is final.
 The proof is similar to the proof of Lemma \ref{exists-example}.
 \end{proof}
 
-\begin{lemma}\label{exists-counter-example}
+\begin{lemma}\label{example-deciding-link}
 The following lemma describes the correspondence between satisfying and
 unsatisfying examples and validity/satisfiability of formula. WS$k$S formula
 $\phi$ is
@@ -1625,11 +1625,41 @@ This comes from the definition of (in)validity and (un)satisfiability
 \cite{sat}.
 \end{proof}
 
-The final algorithm \ref{deciding-wsks-alg} for deciding WS$k$S formula is based
-on Lemmas \ref{exists-example} and \ref{exists-counter-example} and precomputed
-list of final states of automaton corresponding to the formula. The more detailed
-description how to receive examples and set of final states is outlined in
-previous algorithms \ref{final-states}.
+\begin{defz}
+ For all $0 \leq i \leq m$ we define the relation $\leq_i \subseteq Q_i \times
+ Q_i$ as follows:
+ \begin{eqnarray}
+  \leq_0 & = & id\\
+  A \leq_i B & \Leftrightarrow & \forall a \in A \exists b \in B: a \leq_i b\\
+ \end{eqnarray}
+\end{defz}
+
+\begin{lemma}
+ For all $0 \leq i \leq m$ it holds that
+ \begin{equation}
+  \leq_i \subseteq \leq_i^L \Rightarrow \leq_{i+1} \subseteq \leq_{i+1}^L
+ \end{equation}
+\end{lemma}
+\begin{proof}
+
+\end{proof}
+
+{\color{red} Well, i'm not sure how to define this neatly out of the tabula
+snapshoot :), thinks this needs more evaluation by Lukas/Ondra}
+
+The final Algorithm \ref{deciding-wsks-alg} for deciding WS$k$S is based on the Lemma
+\ref{example-deciding-link}. Algorithm does the closure of the formula $\varphi$
+and $\neg\varphi$ and decides whether there exists a satisfying example for the
+formulae by checking whether the initial state is final or not.
+
+The function for deciding whether the state is final is described by Algorithm
+\ref{is-final-state}. It is based on worklist algorithm and is called
+recursively on level of the state, i.e. the macro-state is final if all its
+states are non-final. However if the state of macro-state is proved to be
+non-final we have to examine his successors, which are thus added to worklist.
+In addition we can prune the search state using the antichains.
+
+{\color{red} Is state a macro-state as well? }
 
 % given automaton A0, sets {X1,..,Xm}
 % 
@@ -1647,21 +1677,23 @@ previous algorithms \ref{final-states}.
 		\SetKwFor{For}{foreach}{do}{}
 		\SetKwRepeat{Repeat}{repeat}{until}
 		\KwIn{Automaton $\mathcal{A}_0$, a set
-		$\{\mathcal{X}_1,\ldots,\mathcal{X}_{m+1}\}$ of sets of second-order
-		variables}
+		$\{\mathcal{X}_1,\ldots,\mathcal{X}_{m}\}$ of sets of second-order
+		variables, a set of free variables $\mathcal{X}_{m+1}$}
 		\KwOut{\texttt{UNSAT} if formula is unsatisfiable, \texttt{VALID} if formula
 		is valid, \texttt{SAT} otherwise}
 		\BlankLine
-		$F_m = \{q\ |\ L(q) \cap (0^k)^* \neq \emptyset\}$\;
-		example = $a_1\ldots a_n$, $a_i \in \Sigma_m$, for $0 < i < n$, $\exists q_0
-		\in I_m: q_0 \overset{example}{\longrightarrow} q_f$, $q_f \in F_m$\;
-		cnt-ex = $b_1\ldots b_k$, $b_i \in \Sigma_m$, for $0 < i < k$,
-		$\exists q_0 \in I_m: q_0 \overset{cnt-ex}{\longrightarrow} q_f$, $q_f \in
-		Q_m \setminus F_m$\;
-		\uIf{example = $\emptyset$}{
-		 \Return \texttt{UNSAT}\;
-		}
-		\uElseIf{example $\neq \emptyset$ and cnt-ex $= \emptyset$}{
+		existsSatExample = \texttt{IsFinal($I_m$, m)}\;
+		existsUnSatExample = \texttt{IsFinal($I_{m+1}, m+1$)}\;
+		\BlankLine
+		{\color{red}Yes this is chaotic. Basically the SAT example can be computed
+		by closing the formula and checking if $I_m$ is final. However for UNSAT
+		example we have to do the complement and then close it, so maybe just adding
+		the one more level? Is it enough? Or should I specify it another way?}
+		\BlankLine
+		\uIf{not existsSatExample}{
+		\Return
+		\texttt{UNSAT}\; }
+		\uElseIf{existsSatExample and not existsUnSatExample}{
 		 \Return \texttt{VALID}\;
 		}
 		\Else{
@@ -1670,9 +1702,48 @@ previous algorithms \ref{final-states}.
 		\caption{Algorithm for deciding WS$k$S formulae}\label{deciding-wsks-alg}
 	\end{algorithm}
 
-\subsection{Computing (counter)example}
+
+% workset = Q
+% while workset != empty:
+%    q = workset.pop()
+%    
+
+\begin{function}[h]
+
+  \caption{IsStateFinal(macro-state $Q$, unsigned $\mathit{level}$)}
+  \KwOut{TRUE if macro-state $Q$ is final on $\mathit{level}$, FALSE otherwise}
+
+  \BlankLine
+  {\color{red} Very rough draft of how it should work. It is similar to the
+  formal description from the tabula that we discussed. Didn't state how the
+  Succ will be computed for now. First I'd like to solve this function.}
+  \BlankLine
+
+  \uIf{level = 0}{
+  	\Return $Q \in F_0$\;
+  }
+  \Else{
+  	worklist = Q\;
+  	\While{worklist $\neq \emptyset$}{
+  	  q = worklist.pop()\;
+  	  \uIf{IsStateFinal(q, level-1)}{
+  	    \Return False\;
+  	  }
+  	  \Else{
+  	    worklist = worklist $\cup Succ_0$(q, level-1)\;
+  	  }
+  	}
+  	\Return True\;
+  }
+
+\end{function}
+
+{\color{red} Should I structure this Section more into some subsection? I think
+that it's too tldr; and it could be partitioned into some sections.}
 
 \subsection{Deciding WS$k$S}
+
+{\color{red} this is where i'll surely need some help.}
 
 \chapter{Implementation}
 
@@ -1767,15 +1838,86 @@ in a term generates at least one quantifier in the WS$k$S formulae, which can
 futher results to quite a large exponential blowup and hence show the speed-up
 of our approach in contrary to the \texttt{MONA}.
 
+The other parametric part of the presburger arithmetic is bounding of the
+maximal constant used in expressions. Since constants are represented by sets
+containing positions of ones in bitwise representation of the constant, we can
+further study the impact of this on performance of decision procedure.
+
+So the formula $\varphi \overset{\mathit{def}}{=} X = \mathtt{pconst}{I}$, where
+X is second-order variable representing constant $I$, as follows:
+\begin{equation}
+ \varphi \overset{\mathit{def}}{=} \bigwedge_{i = 0}^{\lceil \log_2 I\rceil} C_i
+\end{equation}
+where
+\begin{equation}
+  C_i = \begin{dcases*}
+         i \in X  & when $i$th bit of $I$ is set\\
+         i \notin X & when $i$th bit of $I$ is not set
+         \end{dcases*}
+\end{equation}
+with special case
+\begin{equation}
+  C_0 = \begin{dcases*}
+          0 \in X  & if $I < 0$\\
+         0 \notin X & if $I > 0$\\
+         true & otherwise
+         \end{dcases*}
+\end{equation}
+
+Further we can construct the formulae for operations of addition, relation
+less-than and times 2 operation as follows:
+\begin{eqnarray}
+ plus(R, P, Q) & \overset{\mathit{def}}{=} & \exists Carry:
+ noCarryIn(Carry) \wedge \forall t:\\
+ &  propagateCarry(t, Carry, P, Q) & \wedge computeResults(t,
+ Carry, P, Q, R)\\
+ less(P, Q) & \overset{\mathit{def}}{=} &\exists R: T \neq \{\empty\} \wedge
+ plus(Q, P, T)\\
+ timesTwo(P, Q) & \overset{\mathit{def}}{=} & plus(Q, P, P) 
+\end{eqnarray}
+where
+\begin{eqnarray}
+ propagateCarry(Carry, P, Q) & \overset{\mathit{def}}{=} & t + 1 \in Carry
+ \Leftrightarrow at_least_two(t \in P, t \in Q, t \in Carry)\\
+ computeResult(t, Carry, P, Q, R) & \overset{\mathit{def}}{=} & t \in R
+ \Leftrightarrow xor(xor(t \in P, t \in Q), t \in Carry)\\
+ at_least_two(\varphi_1, \varphi_2, \varphi_3) & \overset{\mathit{def}}{=} &
+ (\varphi_1 \wedge \varphi_2) \vee (\varphi_1 \wedge \varphi_3) \vee (\varphi_2
+ \wedge \varphi_3)\\
+ xor(\varphi_1, \varphi_2) & \overset{\mathit{def}}{=} & (\varphi_1 \wedge
+ \neg\varphi_2) \vee (\neg\varphi_1 \wedge \varphi_2)
+\end{eqnarray}
+
 Random formulae were generated with different number of quantifiers and bounded
 by different constants and evaluated by both \texttt{MONA} and our tool. 
 
-\chapter{Summary}\label{summary}
+\section{Parametric horn formulae}
 
-In this work we introduced the WS$k$S logic and its decision procedure. We have
-described classical approach that uses deterministic automata, as well as tool
-\textsc{MONA} that enhances this procedure by using several optimizations and
-discussed their complexity issues.
+Other experiments done with our implemented tool were carried out on specific
+artificially created parametric formulae in Horn form \cite{horn}. 
+
+\begin{defz}
+We a formula $\varphi$ a \emph{Horn formula} if\ldots
+\end{defz}
+
+The concrete formula with parameter $n$ is in form of
+\begin{equation}
+ \varphi_n \overset{\mathit{def}}{=} \exists X\forall x_1\ldots x_n.
+ \bigwedge_{i = 1}^{n-1} (x_i \in X \Rightarrow x_{i+1} \in X)
+\end{equation}
+
+This family of formulae is valid. It was further examined that \textsc{MONA} can
+only decide the formulae up to parameter $n = 15$ due to insufficient memory for
+storing BDDs. In results it is shown that the logical approach \cite{mso} proves
+to better for solving this family of formulae in contrary to automata-formulae
+connection used by both \textsc{MONA} and our approach.
+
+\chapter{Conclusion}\label{summary}
+
+In this work we introduced the WS$k$S logic and some its decision procedures. We
+have described the classical approach that uses deterministic automata, as well
+as tool \textsc{MONA} that enhances this procedure by using several optimizations and
+discussed their complexity issues and problems they have to deal with.
 
 Another approach was proposed that uses non-deterministic automata instead of
 deterministic ones. This makes use of recent developments in fields of
@@ -1784,9 +1926,13 @@ inclusion, allowing us to implement procedure similar to anti-chain based
 testing \cite{tacas} and search for rejecting or accepting states on-the-fly
 without need to construct automaton corresponding to the given formula at all.
 
-The implementation is going to use \textsc{MONA} extensive frontend with several
-tweaks. We will then work with automata representation by using efficient
-library \textsc{VATA} \cite{vata}. The correctness of this approach has yet to
-be proved.
+We implemented a prototype of the designed decision procedure, that is able to
+handle a subset of WS$k$S formulae and studied the impact of the usage of
+non-determinsitic automata on two case studies.
+
+For the further extension of this procedure we propose to implement more
+optimizations that takes advantage of reusing the parts of the formulae, or
+automata, like Direct Acyclic Graph (DAG) or automata-cache with reindexing of
+the variables.
 
 %=========================================================================

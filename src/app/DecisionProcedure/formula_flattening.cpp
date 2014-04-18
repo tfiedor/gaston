@@ -244,7 +244,7 @@ ASTForm* ASTForm_LessEq::flatten() {
 		ASTForm_In* xInX = new ASTForm_In(this->t1, X, Pos());
 		outerImplication = new ASTForm_Impl(innerConjuction, xInX, Pos());
 
-		ASTForm_All2* newFormula = new ASTForm_All2(0, new IdentList(X->getVar()), outerImplication, Pos());
+		ASTForm_All2* newFormula = new ASTForm_All2(0, new IdentList(X->getVar()), outerImplication->flatten() , Pos());
 		return newFormula->flatten();
 	}
 	return this;
