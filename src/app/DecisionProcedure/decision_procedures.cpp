@@ -72,6 +72,11 @@ TUnSatExample findUnsatisfyingExample() {
 int decideWS1S(Automaton aut, TSatExample & example, TUnSatExample & counterExample, PrefixListType formulaPrefixSet, PrefixListType negFormulaPrefixSet) {
 	std::cout << "Deciding WS1S formula transformed to automaton" << std::endl;
 
+	// Getting initial states
+	const MTBDDLeafStateSet & matrixInitialStates = getInitialStatesOfAutomaton(aut);
+	std::cout << "Initial states of original automaton corresponding to the matrix of formula are ";
+	std::cout << VATA::Util::Convert::ToString(matrixInitialStates) << "\n";
+
 	// Compute the final states
 	StateHT allStates;
 	aut.RemoveUnreachableStates(&allStates);
@@ -221,6 +226,34 @@ void closePrefix(PrefixListType & prefix, IdentList* freeVars, bool negationIsTo
 			prefix[0].push_front(varMap[value]);
 		}
 	}
+}
+
+/**
+ * Gets MTBDD representation of transition relation from state tuple
+ *
+ * @param aut: NTA
+ * @param states: states for which we want transition relation
+ * @return: MTBDD corresponding to the relation
+ * TODO: NOT WORKING AS IT SHOULD - DELETE MAYBE?
+ */
+inline void getMTBDDForStateTuple(const TransMTBDD* & bdd, Automaton aut, const StateTuple & states) {
+	std::cout << "in getMTBDDForStateTuple\n";
+	uintptr_t bddAsInt = aut.GetTransMTBDDForTuple(states);
+	bdd = reinterpret_cast<const TransMTBDD*&> (bddAsInt);
+	std::cout << VATA::Util::Convert::ToString(bdd->GetValue(constructUniversalTrack())) << "\n";
+}
+
+/**
+ * Returns set of initial states of automaton
+ *
+ * @param aut: automaton
+ * @return: set of initial states
+ */
+const MTBDDLeafStateSet & getInitialStatesOfAutomaton(Automaton aut) {
+	const TransMTBDD* bdd;
+	uintptr_t bddAsInt = aut.GetTransMTBDDForTuple(Automaton::StateTuple());
+	bdd = reinterpret_cast<const TransMTBDD*> (bddAsInt);
+	return (bdd->GetValue(constructUniversalTrack()));
 }
 
 /**

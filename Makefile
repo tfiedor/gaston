@@ -138,6 +138,30 @@ src/app/DecisionProcedure/automata.cpp.s:
 	$(MAKE) -f CMakeFiles/dip.dir/build.make CMakeFiles/dip.dir/src/app/DecisionProcedure/automata.cpp.s
 .PHONY : src/app/DecisionProcedure/automata.cpp.s
 
+src/app/DecisionProcedure/containers/StateSet.o: src/app/DecisionProcedure/containers/StateSet.cpp.o
+.PHONY : src/app/DecisionProcedure/containers/StateSet.o
+
+# target to build an object file
+src/app/DecisionProcedure/containers/StateSet.cpp.o:
+	$(MAKE) -f CMakeFiles/dip.dir/build.make CMakeFiles/dip.dir/src/app/DecisionProcedure/containers/StateSet.cpp.o
+.PHONY : src/app/DecisionProcedure/containers/StateSet.cpp.o
+
+src/app/DecisionProcedure/containers/StateSet.i: src/app/DecisionProcedure/containers/StateSet.cpp.i
+.PHONY : src/app/DecisionProcedure/containers/StateSet.i
+
+# target to preprocess a source file
+src/app/DecisionProcedure/containers/StateSet.cpp.i:
+	$(MAKE) -f CMakeFiles/dip.dir/build.make CMakeFiles/dip.dir/src/app/DecisionProcedure/containers/StateSet.cpp.i
+.PHONY : src/app/DecisionProcedure/containers/StateSet.cpp.i
+
+src/app/DecisionProcedure/containers/StateSet.s: src/app/DecisionProcedure/containers/StateSet.cpp.s
+.PHONY : src/app/DecisionProcedure/containers/StateSet.s
+
+# target to generate assembly for a file
+src/app/DecisionProcedure/containers/StateSet.cpp.s:
+	$(MAKE) -f CMakeFiles/dip.dir/build.make CMakeFiles/dip.dir/src/app/DecisionProcedure/containers/StateSet.cpp.s
+.PHONY : src/app/DecisionProcedure/containers/StateSet.cpp.s
+
 src/app/DecisionProcedure/containers/VarToTrackMap.o: src/app/DecisionProcedure/containers/VarToTrackMap.cpp.o
 .PHONY : src/app/DecisionProcedure/containers/VarToTrackMap.o
 
@@ -846,6 +870,9 @@ help:
 	@echo "... src/app/DecisionProcedure/automata.o"
 	@echo "... src/app/DecisionProcedure/automata.i"
 	@echo "... src/app/DecisionProcedure/automata.s"
+	@echo "... src/app/DecisionProcedure/containers/StateSet.o"
+	@echo "... src/app/DecisionProcedure/containers/StateSet.i"
+	@echo "... src/app/DecisionProcedure/containers/StateSet.s"
 	@echo "... src/app/DecisionProcedure/containers/VarToTrackMap.o"
 	@echo "... src/app/DecisionProcedure/containers/VarToTrackMap.i"
 	@echo "... src/app/DecisionProcedure/containers/VarToTrackMap.s"
