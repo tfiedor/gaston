@@ -63,9 +63,13 @@ TUnSatExample findUnsatisfyingExample() {
  *
  * @param example: satisfiable example for WS1S formula
  * @param counterExample: unsatisfiable counter-example for formula
+ * @param formulaPrefixSet: set of second-order variables corresponding to
+ * 		the prefix of the closed formula phi
+ * @param negFormulaPrefixSet: set of second-order variables corresponding to
+ * 		the prefix of the closed negation of formula phi
  * @return: Decision procedure results
  */
-int decideWS1S(Automaton aut, TSatExample & example, TUnSatExample & counterExample) {
+int decideWS1S(Automaton aut, TSatExample & example, TUnSatExample & counterExample, PrefixListType formulaPrefixSet, PrefixListType negFormulaPrefixSet) {
 	std::cout << "Deciding WS1S formula transformed to automaton" << std::endl;
 
 	// Compute the final states
@@ -116,8 +120,8 @@ bool StateIsFinal(MacroState state, unsigned level) {
 		// TODO: fill the worklist with states of macro-state
 
 		while (worklist.size() != 0) {
-			MacroState q = worklist.pop_front();
-			if StateIsFinal(q, level - 1) {
+			MacroState q;// = worklist.pop_front();
+			if (StateIsFinal(q, level - 1)) {
 				return false;
 			} else {
 				// TODO: enque the successors
@@ -141,6 +145,13 @@ PrefixListType convertPrefixFormulaToList(ASTForm* formula) {
 	VariableSet set;
 	unsigned int quantifiedSize;
 	unsigned int value;
+	bool isFirstNeg = true;
+
+	// empty prefix is just one empty list
+	if (formula->kind == aTrue) {
+		list.push_front(set);
+		return list;
+	}
 
 	ASTForm* iterator = formula;
 	// while we are not at the end of the prefix
@@ -157,8 +168,12 @@ PrefixListType convertPrefixFormulaToList(ASTForm* formula) {
 			iterator = exf->f;
 		// Create new set
 		} else if (iterator->kind == aNot) {
-			list.push_front(set);
-			set.clear();
+			if (!isFirstNeg) {
+				list.push_front(set);
+				set.clear();
+			} else {
+				isFirstNeg = false;
+			}
 
 			ASTForm_Not* notf = (ASTForm_Not*) iterator;
 			iterator = notf->f;
@@ -173,6 +188,39 @@ PrefixListType convertPrefixFormulaToList(ASTForm* formula) {
 	}
 
 	return list;
+}
+
+/**
+ * Does the closure of the formula, by adding the variables to the list of
+ * prefix sets
+ *
+ * @param prefix: list of second-order variables corresponding to the prefix
+ * @param freeVars: list of free variables in formula
+ * @param negationIsTopMost: whether the prefix had negation on left or no
+ */
+void closePrefix(PrefixListType & prefix, IdentList* freeVars, bool negationIsTopmost) {
+	unsigned int quantifiedSize;
+	unsigned value;
+
+	// phi = neg exists X ...
+	if (negationIsTopmost) {
+		// we will add new level of quantification
+		VariableSet set;
+		quantifiedSize = freeVars->size();
+		for (unsigned i = 0; i < quantifiedSize; ++i) {
+			value = freeVars->get(i);
+			set.push_front(varMap[value]);
+		}
+		prefix.push_front(set);
+	// phi = exists X ...
+	} else {
+		// adding to existing level of quantification
+		quantifiedSize = freeVars->size();
+		for (unsigned i = 0; i < quantifiedSize; ++i) {
+			value = freeVars->get(i);
+			prefix[0].push_front(varMap[value]);
+		}
+	}
 }
 
 /**

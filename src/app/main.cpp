@@ -362,7 +362,12 @@ main(int argc, char *argv[])
 
   // Table or BDD tracks are reordered
   reorder(options.reorder, ast->formula);
+#ifdef DEBUG
   varMap.dumpMap();
+#endif
+
+  IdentList freeVars, bound;
+  (ast->formula)->freeVars(&freeVars, &bound);
 
   // First formula in AST representation is split into matrix and prefix part.
   ASTForm *matrix, *prefix;
@@ -375,10 +380,22 @@ main(int argc, char *argv[])
 #endif
 
   PrefixListType plist = convertPrefixFormulaToList(prefix);
+  PrefixListType nplist(plist);
+  closePrefix(plist, &freeVars, (prefix->kind == aNot));
+  closePrefix(nplist, &freeVars, (prefix->kind != aNot));
 
 #ifdef DEBUG
   cout << "\n";
   for(PrefixListType::iterator it = plist.begin(); it != plist.end(); ++it) {
+	  cout << "[";
+	  for(VariableSet::iterator jt = it->begin(); jt != it->end(); ++jt) {
+		  cout << *jt << " ";
+	  }
+	  cout << "], ";
+  }
+  cout << "\n";
+  cout << "\n";
+  for(PrefixListType::iterator it = nplist.begin(); it != nplist.end(); ++it) {
 	  cout << "[";
 	  for(VariableSet::iterator jt = it->begin(); jt != it->end(); ++jt) {
 		  cout << *jt << " ";
@@ -412,7 +429,7 @@ main(int argc, char *argv[])
   try {
 	  // Deciding WS1S formula
 	  if(options.mode != TREE) {
-		  decided = decideWS1S(formulaAutomaton, example, counterExample);
+		  decided = decideWS1S(formulaAutomaton, example, counterExample, plist, nplist);
 	  // Deciding WS2S formula
 	  } else {
 		  decided = decideWS2S(formulaAutomaton, example, counterExample);
@@ -431,7 +448,7 @@ main(int argc, char *argv[])
 		  cout << "'VALID'\n";
 		  break;
 	  default:
-		  cout << "undecidable due to unforseen error.\n";
+		  cout << "undecidable due to unforeseen error.\n";
 		  break;
 	  }
   } catch (NotImplementedException& e) {
