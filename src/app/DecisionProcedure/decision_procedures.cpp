@@ -1,4 +1,5 @@
 #include <cstdio>
+#include <deque>
 #include "environment.hh"
 #include "decision_procedures.hh"
 
@@ -94,6 +95,38 @@ int decideWS1S(Automaton aut, TSatExample & example, TUnSatExample & counterExam
 	} else {
 		return -1;
 	}
+}
+
+/**
+ * Implementation of workset-based algorithm for deciding whether the given
+ * macro-state is final or not. Macro-state is final if all its substates are
+ * non-final
+ *
+ * @param state: macro state we are checking
+ * @param level: level of projection
+ * @return True if the macro-state is final
+ */
+bool StateIsFinal(MacroState state, unsigned level) {
+	// return whether the state is final in automaton
+	if (level == 0) {
+
+	// level > 0
+	} else {
+		std::deque<MacroState> worklist;
+		// TODO: fill the worklist with states of macro-state
+
+		while (worklist.size() != 0) {
+			MacroState q = worklist.pop_front();
+			if StateIsFinal(q, level - 1) {
+				return false;
+			} else {
+				// TODO: enque the successors
+			}
+		}
+
+		return true;
+	}
+
 }
 
 /**

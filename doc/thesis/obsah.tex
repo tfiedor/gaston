@@ -1220,18 +1220,21 @@ p_2$, which is a simple consequence of Lemma \ref{lemma2}.
 \begin{algorithm}[hb!]
 		\SetKwFor{For}{foreach}{do}{}
 		\SetKwRepeat{Repeat}{repeat}{until}
-		\KwIn{A~NFA $\mathcal{A} = (Q, \Sigma, \delta, I, F)$, a relation $\preceq \in \mathcal{A}^\subseteq$}
-		\KwOut{\textsc{TRUE} if $\mathcal{A}$ is \emph{universal}, otherwise \textsc{FALSE}}
+		\KwIn{An initial state $I$ of automaton $\mathcal{A}$, a simulation relation
+		$\leq \subseteq Q_\mathcal{A} \times Q_\mathcal{A}$ on states of
+		$\mathcal{A}$, procedure for computing $Post$ set of the state $Q$ $Post(Q)$
+		and a predicate $IsAccepting(F)$ that decides whether state $F$ is final}
+		\KwOut{\textsc{TRUE} if there $\exists$ a final state in $\mathcal{A}$}
 		\BlankLine
-    \lIf{I~is rejecting}{\textbf{return} \textsc{FALSE}}
+    \lIf{IsAccepting(I)}{\textbf{return} \textsc{FALSE}}
 		$Processed := \emptyset$\;
-		$Next := \{Minimise(I)\}$\;
+		$Next := \{(I\}$\;
 		\While{$Next \neq \emptyset$}{
 		  Pick and remove a macro-state $R$ from $Next$ and move it to $Processed$\;
-			\For{$P \in \{Minimize(R')\ |\ R' \in Post(R)\}$}{
-			 \lIf{P is rejecting}{\textbf{return} \textsc{FALSE}}
-			 \uIf{$\neg\exists S~\in Processed \cup Next$ s.t. $S \preceq^{\forall\exists} P$}{
-			  Remove all $S$ from $Processed \cup Next$ s.t. $P \preceq^{\forall\exists} S$\;
+			\For{$P \in Post(R)$}{
+			 \lIf{IsAccepting(P)}{\textbf{return} \textsc{FALSE}}
+			 \uIf{$\neg\exists S~\in Processed \cup Next$ s.t. $S \leq P$}{
+			  Remove all $S$ from $Processed \cup Next$ s.t. $P \leq S$\;
 				Add $P$ to $Next$\;
 			 }
 			}
@@ -1240,15 +1243,39 @@ p_2$, which is a simple consequence of Lemma \ref{lemma2}.
 	\end{algorithm}
 	
 The algorithm works as follows. While there are macro-states to be processed,
-and no rejecting macro-state was found, one of the macro-states from $Next$ is
+and no accepting macro-state was found, one of the macro-states from $Next$ is
 chosen and moved to the $Processed$ set. All successors of the macro-state are
 generated, minimized and moved to $Next$ unless there is already some
-$\preceq^{\forall\exists}$-smaller macro-state in $Next$ or in $Processed$. If a
+$\leq$-smaller macro-state in $Next$ or in $Processed$. If a
 new macro-state is added to $Next$, then all the
-$\preceq^{\forall\exists}$-bigger states are pruned out of both $Next$ and
+$\leq$-bigger states are pruned out of both $Next$ and
 $Processed$.
 	
-Correctness of this universality checking algorithm is proved in \cite{tacas}.
+\begin{lemma}\label{search-is-correct}
+ The search for accepting state using the Algorithm \ref{universality} is
+ correct.
+\end{lemma}
+\begin{proof}
+ Proof can be found in \cite{raskin}.
+\end{proof}
+
+Now testing the universality of of automaton $\mathcal{A}$ is equivalent to
+searching for an accepting state in automaton $\mathcal{A}'$ obtained by
+determinization and complementation of final states.
+
+\begin{lemma}\label{simulation-in-ca}
+Relation $\subseteq^{-1}$ is simulation on complemented automaton $\mathcal{A}$.
+\end{lemma}
+\begin{proof}
+ Proof can be found in \cite{raskin}
+\end{proof}
+
+\begin{lemma}
+Universality testing with use of Algorithm \ref{universality} is correct.
+\end{lemma}
+\begin{proof}
+This is a consequence of Lemmas \ref{simulation-in-ca} and \ref{search-is-correct}.
+\end{proof}
 
 \noindent\hrulefill
 \begin{example}
@@ -1344,7 +1371,7 @@ is rather chaotic IMO and could be more readable}
  |\ S \cap Q = \emptyset)$ where
  \begin{equation}
   \delta_\gamma = \{R \overset{a}{\rightarrow}\ |\ \exists r \in R, s \in S: r
-  \overset{a}{g} s, a \in \Sigma\}
+  \overset{a}{\rightarrow} s, a \in \Sigma\}
  \end{equation}
  Note that this operation $\gamma$ corresponds to the determinisation of the
  input automaton using the subset construction followed by swapping of final and
@@ -1404,23 +1431,23 @@ states before using any algorithm using the algorithm similar to backward
 universality testing \cite{backwards-universality} or use the naive lazy
 approach that will determine whether the state is final only when it is needed.
 
-\begin{defz}
- We define the \emph{downward closure} of a set $S$ as set $\downarrow S$ such
- that
- \begin{equation}
-  \downarrow S \overset{\mathit{def}}{=} \{p\in Q\ |\ \exists q \in S: p
-  \subseteq q\}
- \end{equation}
-\end{defz}
-
-\begin{defz}
- Similarly we define the \emph{upward closure} of a set $S$ as set $\uparrow S$
- such that
- \begin{equation}
- \uparrow S \overset{\mathit{def}}{=} \{p\in Q\ |\ \exists q \in S: q \subseteq
- p\}
- \end{equation}
-\end{defz}
+% \begin{defz}
+%  We define the \emph{downward closure} of a set $S$ as set $\downarrow S$ such
+%  that
+%  \begin{equation}
+%   \downarrow S \overset{\mathit{def}}{=} \{p\in Q\ |\ \exists q \in S: p
+%   \subseteq q\}
+%  \end{equation}
+% \end{defz}
+% 
+% \begin{defz}
+%  Similarly we define the \emph{upward closure} of a set $S$ as set $\uparrow S$
+%  such that
+%  \begin{equation}
+%  \uparrow S \overset{\mathit{def}}{=} \{p\in Q\ |\ \exists q \in S: q \subseteq
+%  p\}
+%  \end{equation}
+% \end{defz}
 
 \begin{defz}
  We define the \emph{preset through zero tracks} as a set of states such that
@@ -1440,11 +1467,11 @@ the family of automata $\mathbb{A} = \{\mathcal{A}_0,\ldots,\mathcal{A}_m\}$ as 
   \mathcal{A}_{i+1} & = & \gamma(\omega_{\mathcal{X}_{i+1}}(\mathcal{A}_i)).
  \end{eqnarray}
  
- Note that the automaton for case $i$ thus correspond to the following
- automaton:
+ Note that the automaton for case $i$ thus corresponds to the following
+formula:
  \begin{equation} \mathcal{A}_i =
- \mathcal{A}_{\exists\mathcal{X}_i\ldots\neg\exists\mathcal{X}_1.
- \pi(\mathbb{X})}\end{equation}
+ \exists\mathcal{X}_i\ldots\neg\exists\mathcal{X}_1.
+ \pi(\mathbb{X})\end{equation}
  
  We use the notation $\mathcal{A}_i = (Q_i, \Sigma_i, \delta_i, I_i, F_i)$ to
  address particular automaton and its components.
@@ -1462,97 +1489,96 @@ $\mathcal{A}_i$ is
 \end{lemma}
 
 \begin{proof}
- This can be proved by induction on $i$. With base case $i = 0$ holding due to a
- proposition \ref{prop}. We can further prove this lema for case $i = n + 1$
- supposing it holds for some $n$, i.e. the language of $\mathcal{A}_n$ is
- \begin{enumerate}
-   \item universal iff $\varphi_n$ is valid,
-   \item non-empty iff $\varphi_n$ is satisfiable,
-   \item non-universal iff $\varphi_n$ is invalid, and
-   \item empty iff $\varphi_n$ is unsatisfiable.
- \end{enumerate}
- 
- We define the formula $\varphi_{n+1}$ as 
- \begin{equation}
- \varphi_{n+1} \overset{\mathit{def}}{=} \neg\exists\mathcal{X}_{n+1}.
- \varphi_n.
- \end{equation}
- 
- Now we will consult each of the cases of the validity, or satisfiablity, of
- given formula $\varphi_n$:
- \begin{enumerate}
-   \item Suppose that $\varphi_n$ is valid. Then after the projection over set
-   of variables $\mathcal{X}_{n+1}$ the formula is still valid and the negation
-   of the formula $\varphi_{n+1} = \neg\exists\mathcal{X}_{n+1}.\varphi_n$ is
-   thus unsatisfiable. By the induction hypothesis it holds, that the language
-   $L(\mathcal{A}_n)$ is universal. After projection the language
-   $\omega_{\mathcal{X}_{n+1}}(L(\mathcal{A}))$ is also universal and the
-   negation thus makes the language $L(\mathcal{A}_{n+1})$ empty.
-   \item Suppose that $\varphi_n$ is satisfiable. Then after projection formula
-   $\exists\mathcal{X}_{n+1}. \varphi_n$ is also satisfiable (since, the
-   projection yields bigger or equivalent language) and the negation of the
-   formula $\varphi_{n+1} = \neg\exists\mathcal{X}_{n+1}.\varphi$ is thus
-   invalid. From induction hypotesis it holds that the language
-   $L(\mathcal{A}_n)$ is non-empty. After the projection the language remains
-   non-empty and so the negation of the formula yields non-universal language
-   $L(\mathcal{A}_{n+1})$.
-   \item Suppose that $\varphi_n$ is unsatisfiable. Then after projection
-   formula $\exists\mathcal{X}_{n+1}$ is still unsatisfiable, which means that
-   the negation of the formula $\neg\exists\mathcal{X}_{n+1}$ is valid. By
-   induction hypothesis the language $L(\mathcal{A}_n)$ is empty. The projection
-   of the language $\omega_{\mathcal{X}_{n+1}}(L(\mathcal{A}_n))$ is still empty
-   and so the negation of the formula yields univesal language.
-   \item Suppose that $\varphi_n$ is invalid. Then after projection formula
-   $\exists\mathcal{X}_{n+1}$ can either be still invalid or can become valid,
-   after the augmentation of the final states. Thus we have to distinguish two
-   cases:
-   \begin{enumerate}
-     \item Let us assume thet formula $\exists\mathcal{X}_{n+1}\varphi_n$ is
-     invalid.
-     Then after negation formula $\neg\exists\mathcal{X}_{n+1}\varphi_n$ is
-     satisfiable. By induction hypothesis the language $L(\mathcal{A}_n)$ is
-     non-universal. After the projection the language is still non-universal and
-     so the negation of the formula yields non-empty language.
-     \item Let us assume that formula $\exists\mathcal{X}_{n+1}\varphi_n$ is
-     valid. Then after negation formula $\neg\exists\mathcal{X}_{n+1}\varphi_n$
-     is unsatisfiable. By induction hypthesis the language $L(\mathcal{A}_n)$ is
-     non-universal. After the projection the language become universal and so
-     the negation of the formula yields empty language.
-   \end{enumerate}
- \end{enumerate}
+Proof of this Lemma can be found in \cite{tata}.
+%  This can be proved by induction on $i$. With base case $i = 0$ holding due to a
+%  proposition \ref{prop}. We can further prove this lema for case $i = n + 1$
+%  supposing it holds for some $n$, i.e. the language of $\mathcal{A}_n$ is
+%  \begin{enumerate}
+%    \item universal iff $\varphi_n$ is valid,
+%    \item non-empty iff $\varphi_n$ is satisfiable,
+%    \item non-universal iff $\varphi_n$ is invalid, and
+%    \item empty iff $\varphi_n$ is unsatisfiable.
+%  \end{enumerate}
+%  
+%  We define the formula $\varphi_{n+1}$ as 
+%  \begin{equation}
+%  \varphi_{n+1} \overset{\mathit{def}}{=} \neg\exists\mathcal{X}_{n+1}.
+%  \varphi_n.
+%  \end{equation}
+%  
+%  Now we will consult each of the cases of the validity, or satisfiablity, of
+%  given formula $\varphi_n$:
+%  \begin{enumerate}
+%    \item Suppose that $\varphi_n$ is valid. Then after the projection over set
+%    of variables $\mathcal{X}_{n+1}$ the formula is still valid and the negation
+%    of the formula $\varphi_{n+1} = \neg\exists\mathcal{X}_{n+1}.\varphi_n$ is
+%    thus unsatisfiable. By the induction hypothesis it holds, that the language
+%    $L(\mathcal{A}_n)$ is universal. After projection the language
+%    $\omega_{\mathcal{X}_{n+1}}(L(\mathcal{A}))$ is also universal and the
+%    negation thus makes the language $L(\mathcal{A}_{n+1})$ empty.
+%    \item Suppose that $\varphi_n$ is satisfiable. Then after projection formula
+%    $\exists\mathcal{X}_{n+1}. \varphi_n$ is also satisfiable (since, the
+%    projection yields bigger or equivalent language) and the negation of the
+%    formula $\varphi_{n+1} = \neg\exists\mathcal{X}_{n+1}.\varphi$ is thus
+%    invalid. From induction hypotesis it holds that the language
+%    $L(\mathcal{A}_n)$ is non-empty. After the projection the language remains
+%    non-empty and so the negation of the formula yields non-universal language
+%    $L(\mathcal{A}_{n+1})$.
+%    \item Suppose that $\varphi_n$ is unsatisfiable. Then after projection
+%    formula $\exists\mathcal{X}_{n+1}$ is still unsatisfiable, which means that
+%    the negation of the formula $\neg\exists\mathcal{X}_{n+1}$ is valid. By
+%    induction hypothesis the language $L(\mathcal{A}_n)$ is empty. The projection
+%    of the language $\omega_{\mathcal{X}_{n+1}}(L(\mathcal{A}_n))$ is still empty
+%    and so the negation of the formula yields univesal language.
+%    \item Suppose that $\varphi_n$ is invalid. Then after projection formula
+%    $\exists\mathcal{X}_{n+1}$ can either be still invalid or can become valid,
+%    after the augmentation of the final states. Thus we have to distinguish two
+%    cases:
+%    \begin{enumerate}
+%      \item Let us assume thet formula $\exists\mathcal{X}_{n+1}\varphi_n$ is
+%      invalid.
+%      Then after negation formula $\neg\exists\mathcal{X}_{n+1}\varphi_n$ is
+%      satisfiable. By induction hypothesis the language $L(\mathcal{A}_n)$ is
+%      non-universal. After the projection the language is still non-universal and
+%      so the negation of the formula yields non-empty language.
+%      \item Let us assume that formula $\exists\mathcal{X}_{n+1}\varphi_n$ is
+%      valid. Then after negation formula $\neg\exists\mathcal{X}_{n+1}\varphi_n$
+%      is unsatisfiable. By induction hypthesis the language $L(\mathcal{A}_n)$ is
+%      non-universal. After the projection the language become universal and so
+%      the negation of the formula yields empty language.
+%    \end{enumerate}
+%  \end{enumerate}
 \end{proof}
 
 {\color{red} This proof may not be needed (i think probably it should), but may
 be chaotic. Also not sure if the invalid part is correct. It certainly is
 shady.}
 
-Further we can construct automaton $\mathcal{A}_{i+1}$ from automaton
-$\mathcal{A}_i = (Q_i, \Sigma_i, \delta_i, I_i, F_i)$ as follows:
-\begin{eqnarray}
- Q_{i+1} & = & 2^{Q_i}\\
- \Sigma_{i+1} & = & \Sigma_{i|\omega_{\mathcal{X}_{i+1}}}\\
- \delta_{i+1} & = & \{P \overset{\omega_{\mathcal{X}_{i+1}}(a)}{\longrightarrow}
- R\ |\ R = \bigcup_{p \in P} \{r\ |\ p \overset{a}{\rightarrow} q \in \delta_i\}, a \in
- \Sigma_i\}\\
- I_{i+1} & = & \{I_i\}\\
- F_{i+1} & = & \downarrow\overline{\{Q\ |\ Q = PRE_0^*(P), P \in F_i\}}\label{F}
-\end{eqnarray}
-
-Notice that the set of the final states $F_{i+1}$ is computed from the states of
-the previous level of quantification. First we need to compute the predecessors
-of every final state which yields the following set
-\begin{equation}
- F_{\exists\mathcal{X}_{i+1}\varphi_i} = \{Q\ |\ Q = PRE_0^*(P), P \in F_i\}
-\end{equation}
-Now to obtain the set of final states for complement of the automaton, we would
-first have to determinise the set to set
-\begin{equation}
- F^{DET}_{\exists\mathcal{X}_{i+1}\varphi_i} = \uparrow\{ \{s\}\ |\ s \in
- F_{\exists\mathcal{X}_{i+1}\varphi_i}\}
-\end{equation}
-We can complement this set and hence get the equation \ref{F}.
-
-{\color{red} Do we even need this???}
+% Further we can construct automaton $\mathcal{A}_{i+1}$ from automaton
+% $\mathcal{A}_i = (Q_i, \Sigma_i, \delta_i, I_i, F_i)$ as follows:
+% \begin{eqnarray}
+%  Q_{i+1} & = & 2^{Q_i}\\
+%  \Sigma_{i+1} & = & \Sigma_{i|\omega_{\mathcal{X}_{i+1}}}\\
+%  \delta_{i+1} & = & \{P \overset{\omega_{\mathcal{X}_{i+1}}(a)}{\longrightarrow}
+%  R\ |\ R = \bigcup_{p \in P} \{r\ |\ p \overset{a}{\rightarrow} q \in \delta_i\}, a \in
+%  \Sigma_i\}\\
+%  I_{i+1} & = & \{I_i\}\\
+%  F_{i+1} & = & \downarrow\overline{\{Q\ |\ Q = PRE_0^*(P), P \in F_i\}}\label{F}
+% \end{eqnarray}
+% 
+% Notice that the set of the final states $F_{i+1}$ is computed from the states of
+% the previous level of quantification. First we need to compute the predecessors
+% of every final state which yields the following set
+% \begin{equation}
+%  F_{\exists\mathcal{X}_{i+1}\varphi_i} = \{Q\ |\ Q = PRE_0^*(P), P \in F_i\}
+% \end{equation}
+% Now to obtain the set of final states for complement of the automaton, we would
+% first have to determinise the set to set
+% \begin{equation}
+%  F^{DET}_{\exists\mathcal{X}_{i+1}\varphi_i} = \uparrow\{ \{s\}\ |\ s \in
+%  F_{\exists\mathcal{X}_{i+1}\varphi_i}\}
+% \end{equation}
+% We can complement this set and hence get the equation \ref{F}.
 
 Now given the automaton $\mathcal{A}_0$ and a set of sets of second-order
 variables $\{\mathcal{X}_1,\ldots,\mathcal{X}_m\}$ corresponding to the matrix
@@ -1561,14 +1587,14 @@ existence of the satisfying and unsatisfying assingments.
 
 \begin{defz}
 We say a formula $\phi$ is \emph{closed} if there is no free variable, i.e.
-$freeVars_\phi = \emptyset$.
+$freeVars(\phi) = \emptyset$.
 We further define a \emph{closure} of a formula $\varphi$ as formula $\phi$ such that
 \begin{equation}
  \phi \overset{\mathit{def}}{=} \exists\mathcal{X}. \varphi
 \end{equation}
 where
 \begin{equation}
- \mathcal{X} = \{X\ |\ X \in \mathtt{freeVars}(\varphi)\}.
+ \mathcal{X} = \mathtt{freeVars}(\varphi).
 \end{equation}
 
 We can construct automaton corresponding to the closure of a formula $\varphi$
@@ -1579,69 +1605,65 @@ formula has no free variables, the tracks on transitions in automaton are blank.
 \end{defz}
 
 \begin{lemma}\label{exists-example}
-There exists a satisfying assignment (example) for formula $\varphi$ if the
-initial state of the automaton $\widetilde{\mathcal{A}}_\varphi$ corresponding
-to the closure of formula $\varphi$ is final, i.e.
+Let $\varphi$ be a closed WS$k$S formula. There exists a satisfying assignment
+(example) for formula $\varphi$ iff the initial state of the automaton
+$\{\mathcal{A}_\varphi$ corresponding to the formula $\varphi$ is final, i.e.
 \begin{equation}
- \widetilde{I}_m \in \widetilde{F}_m \Leftrightarrow \exists \mathcal{M}:
- \mathcal{M} \models \varphi
+ I_m \subseteq F_m \overset{\mathit{def}}{\Leftrightarrow} \models \varphi
 \end{equation}
 \end{lemma}
 
 \begin{proof}
- Computing the set $\widetilde{F}_m$ is done by using the projection over the
- free variables of formula and thus we obtain empty tracks on transitions of
- automaton. Then we compute the predecessors of original final states to yield
- the set. Since tracks are blank then if there exists a reachable final state
- then $\widetilde{I}_m \in \widetilde{F}_m$. 
- 
- So in the original automaton there exists a reachable state $q_f \in F_m$ and a
- string $w$ such that $\exists q_0 \in I_m: q_0 \overset{w}{\longrightarrow}
- q_f$ and $w \models \varphi$.
+ Since the formula is closed the tracks on the transitions of automaton
+ $\mathcal{A}_\varphi$ are blank. Thus if there exists a reachable final state
+ in automaton then after computing the $PRE_0^*(F)$ to adjust the final states
+ of automaton the initial state must be final as well.
 \end{proof}
 
-\begin{lemma}
-There exists a unsatisfying assigment (counter-example) for formula $\varphi$ if
-the initial state of automaton $\widetilde{\mathcal{A}}_{\neg\varphi}$
-corresponding to the closure of formula $\varphi$ is final.
-\end{lemma}
+We can extend this notion to any formula WS$k$S formula $\psi$ by computing the
+closure of the formula $\psi$ to yield formula $\varphi$ and test the validity
+of the formula as stated by Lemma \ref{exists-example}.
 
-\begin{proof}
-The proof is similar to the proof of Lemma \ref{exists-example}.
-\end{proof}
-
-\begin{lemma}\label{example-deciding-link}
-The following lemma describes the correspondence between satisfying and
-unsatisfying examples and validity/satisfiability of formula. WS$k$S formula
-$\phi$ is
-\begin{enumerate}
-  \item \emph{unsatisfiable} iff there is no satisfiable assigment,
-  \item \emph{satisfiable} iff there exists a satisfiable assigment,
-  \item \emph{valid} iff there is no unsatisfiable assigment.
-\end{enumerate}
-\end{lemma}
-\begin{proof}
-This comes from the definition of (in)validity and (un)satisfiability
-\cite{sat}.
-\end{proof}
+% \begin{lemma}
+% There exists a unsatisfying assigment (counter-example) for formula $\varphi$ if
+% the initial state of automaton $\widetilde{\mathcal{A}}_{\neg\varphi}$
+% corresponding to the closure of formula $\varphi$ is final.
+% \end{lemma}
+% 
+% \begin{proof}
+% The proof is similar to the proof of Lemma \ref{exists-example}.
+% \end{proof}
+% 
+% \begin{lemma}\label{example-deciding-link}
+% The following lemma describes the correspondence between satisfying and
+% unsatisfying examples and validity/satisfiability of formula. WS$k$S formula
+% $\phi$ is
+% \begin{enumerate}
+%   \item \emph{unsatisfiable} iff there is no satisfiable assigment,
+%   \item \emph{satisfiable} iff there exists a satisfiable assigment,
+%   \item \emph{valid} iff there is no unsatisfiable assigment.
+% \end{enumerate}
+% \end{lemma}
+% \begin{proof}
+% This comes from the definition of (in)validity and (un)satisfiability
+% \cite{sat}.
+% \end{proof}
 
 \begin{defz}
  For all $0 \leq i \leq m$ we define the relation $\leq_i \subseteq Q_i \times
  Q_i$ as follows:
  \begin{eqnarray}
   \leq_0 & = & id\\
-  A \leq_i B & \Leftrightarrow & \forall a \in A \exists b \in B: a \leq_i b\\
+  A \leq_{i+1} B & \Leftrightarrow & \forall a \in A \exists b \in B: a \geq_i
+  b\\
  \end{eqnarray}
 \end{defz}
 
 \begin{lemma}
- For all $0 \leq i \leq m$ it holds that
- \begin{equation}
-  \leq_i \subseteq \leq_i^L \Rightarrow \leq_{i+1} \subseteq \leq_{i+1}^L
- \end{equation}
+ For all $0 \leq i \leq m$ the relation $\leq_i$ is simulation.
 \end{lemma}
 \begin{proof}
-
+ {\color{red} It's trivial.}
 \end{proof}
 
 {\color{red} Well, i'm not sure how to define this neatly out of the tabula
@@ -1676,30 +1698,41 @@ In addition we can prune the search state using the antichains.
 \begin{algorithm}[hb!]
 		\SetKwFor{For}{foreach}{do}{}
 		\SetKwRepeat{Repeat}{repeat}{until}
-		\KwIn{Automaton $\mathcal{A}_0$, a set
-		$\{\mathcal{X}_1,\ldots,\mathcal{X}_{m}\}$ of sets of second-order
-		variables, a set of free variables $\mathcal{X}_{m+1}$}
-		\KwOut{\texttt{UNSAT} if formula is unsatisfiable, \texttt{VALID} if formula
-		is valid, \texttt{SAT} otherwise}
+		\KwIn{Initial state $I_m$ of automaton $A_{\varphi_m}$}
+		\KwOut{\textsc{TRUE} if state $I_m$ is final, \textsc{FALSE} otherwise}
 		\BlankLine
-		existsSatExample = \texttt{IsFinal($I_m$, m)}\;
-		existsUnSatExample = \texttt{IsFinal($I_{m+1}, m+1$)}\;
-		\BlankLine
-		{\color{red}Yes this is chaotic. Basically the SAT example can be computed
-		by closing the formula and checking if $I_m$ is final. However for UNSAT
-		example we have to do the complement and then close it, so maybe just adding
-		the one more level? Is it enough? Or should I specify it another way?}
-		\BlankLine
-		\uIf{not existsSatExample}{
-		\Return
-		\texttt{UNSAT}\; }
-		\uElseIf{existsSatExample and not existsUnSatExample}{
-		 \Return \texttt{VALID}\;
+		\uIf{\texttt{IsStateAccepting}($I_m$, m) = \textsc{TRUE}}{
+		  \Return \textsc{TRUE}\;
 		}
 		\Else{
-		 \Return \texttt{SAT}\;
+		  \Return \textsc{FALSE}\;
 		}
-		\caption{Algorithm for deciding WS$k$S formulae}\label{deciding-wsks-alg}
+		\SetKwProg{myproc}{Function}{}{}
+		\BlankLine
+  \myproc{IsStateAccepting(state P, level i)}{
+  	\nl \uIf{i = 0}{
+  		\Return $P \in F_i$\;
+  	}
+  	\uElse{
+  	\SetEndCharOfAlgoLine{}
+  	  Call Algorithm \ref{universality} with following parameters:\;
+  	   \hspace{1cm}p,\;
+  	   \hspace{1cm}i - 1,\;
+  	   \hspace{1cm}$Post^0_{i-1}$,\;
+  	   \hspace{1cm}\\$\lambda$ q.  IsStateAccepting(i-1, q).\;
+  	\SetEndCharOfAlgoLine{;}
+  	  \uIf{All invocations of Algorithm \ref{universality} returns
+  	  \textsc{FALSE}}{
+  	    \Return \textsc{TRUE}\;
+  	  } 
+  	  \Else{
+  	    \Return \textsc{FALSE}\;
+  	  }
+  	  
+  	  }
+  }
+		\caption{Algorithm for deciding validity of WS$k$S
+		formulae}\label{deciding-wsks-alg}
 	\end{algorithm}
 
 
@@ -1707,36 +1740,6 @@ In addition we can prune the search state using the antichains.
 % while workset != empty:
 %    q = workset.pop()
 %    
-
-\begin{function}[h]
-
-  \caption{IsStateFinal(macro-state $Q$, unsigned $\mathit{level}$)}
-  \KwOut{TRUE if macro-state $Q$ is final on $\mathit{level}$, FALSE otherwise}
-
-  \BlankLine
-  {\color{red} Very rough draft of how it should work. It is similar to the
-  formal description from the tabula that we discussed. Didn't state how the
-  Succ will be computed for now. First I'd like to solve this function.}
-  \BlankLine
-
-  \uIf{level = 0}{
-  	\Return $Q \in F_0$\;
-  }
-  \Else{
-  	worklist = Q\;
-  	\While{worklist $\neq \emptyset$}{
-  	  q = worklist.pop()\;
-  	  \uIf{IsStateFinal(q, level-1)}{
-  	    \Return False\;
-  	  }
-  	  \Else{
-  	    worklist = worklist $\cup Succ_0$(q, level-1)\;
-  	  }
-  	}
-  	\Return True\;
-  }
-
-\end{function}
 
 {\color{red} Should I structure this Section more into some subsection? I think
 that it's too tldr; and it could be partitioned into some sections.}

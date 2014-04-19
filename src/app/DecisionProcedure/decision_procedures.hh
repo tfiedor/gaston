@@ -29,6 +29,7 @@ using StateHT = std::unordered_set<StateType>;
 using StateTuple = std::vector<StateType>;
 typedef StateHT FinalStatesType;
 typedef StateHT StateSetType;
+typedef MacroState StateType; // For now
 
 // < Module Functions >
 int decideWS1S(Automaton aut, TSatExample & example, TUnSatExample & counterExample);
@@ -39,5 +40,7 @@ bool existsSatisfyingExample(FinalStatesType fm);
 bool existsUnsatisfyingExample(FinalStatesType fm, StateHT qm);
 PrefixListType convertPrefixFormulaToList(ASTForm* formula);
 FinalStatesType computeFinalStates(Automaton aut);
+
+bool StateIsFinal(MacroState state, unsigned level);
 
 #endif
