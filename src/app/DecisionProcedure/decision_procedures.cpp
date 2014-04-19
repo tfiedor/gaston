@@ -72,10 +72,9 @@ TUnSatExample findUnsatisfyingExample() {
 int decideWS1S(Automaton aut, TSatExample & example, TUnSatExample & counterExample, PrefixListType formulaPrefixSet, PrefixListType negFormulaPrefixSet) {
 	std::cout << "Deciding WS1S formula transformed to automaton" << std::endl;
 
-	// Getting initial states
-	const MTBDDLeafStateSet & matrixInitialStates = getInitialStatesOfAutomaton(aut);
-	std::cout << "Initial states of original automaton corresponding to the matrix of formula are ";
-	std::cout << VATA::Util::Convert::ToString(matrixInitialStates) << "\n";
+	// Construct initial state of final automaton
+	MacroStateSet* initialState = constructInitialState(aut, formulaPrefixSet.size() - 1);
+	initialState->dump();
 
 	// Compute the final states
 	StateHT allStates;
@@ -115,17 +114,17 @@ int decideWS1S(Automaton aut, TSatExample & example, TUnSatExample & counterExam
  * @param level: level of projection
  * @return True if the macro-state is final
  */
-bool StateIsFinal(MacroState state, unsigned level) {
+bool StateIsFinal(TStateSet state, unsigned level) {
 	// return whether the state is final in automaton
 	if (level == 0) {
 
 	// level > 0
 	} else {
-		std::deque<MacroState> worklist;
+		std::deque<TStateSet> worklist;
 		// TODO: fill the worklist with states of macro-state
 
 		while (worklist.size() != 0) {
-			MacroState q;// = worklist.pop_front();
+			TStateSet q;// = worklist.pop_front();
 			if (StateIsFinal(q, level - 1)) {
 				return false;
 			} else {
@@ -254,6 +253,38 @@ const MTBDDLeafStateSet & getInitialStatesOfAutomaton(Automaton aut) {
 	uintptr_t bddAsInt = aut.GetTransMTBDDForTuple(Automaton::StateTuple());
 	bdd = reinterpret_cast<const TransMTBDD*> (bddAsInt);
 	return (bdd->GetValue(constructUniversalTrack()));
+}
+
+/**
+ * Constructs new initial state for the final automaton, according to the
+ * number of determinizations that we are going to need.
+ *
+ * @param aut: matrix automaton
+ * @param numberOfDeterminizations: how many levels we will need
+ * @return initial state of the final automaton
+ */
+MacroStateSet* constructInitialState(Automaton aut, unsigned numberOfDeterminizations) {
+	// Getting initial states
+	const MTBDDLeafStateSet & matrixInitialStates = getInitialStatesOfAutomaton(aut);
+	std::cout << "Initial states of original automaton corresponding to the matrix of formula are ";
+	std::cout << VATA::Util::Convert::ToString(matrixInitialStates) << "\n";
+
+	// first construct the set of leaf states
+	StateSetList states;
+	for (auto state : matrixInitialStates) {
+		states.push_back(new LeafStateSet(state));
+	}
+
+	// now add some levels
+	MacroStateSet* ithState;
+	while (numberOfDeterminizations != 0){
+		ithState = new MacroStateSet(states);
+		states.clear();
+		states.push_back(ithState);
+		--numberOfDeterminizations;
+	}
+
+	return ithState;
 }
 
 /**

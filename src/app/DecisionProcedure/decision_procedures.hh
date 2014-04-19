@@ -36,7 +36,6 @@ using MTBDDLeafStateSet = VATA::Util::OrdVector<StateType>;
 using TransMTBDD = VATA::MTBDDPkg::OndriksMTBDD<MTBDDLeafStateSet>;
 typedef StateHT FinalStatesType;
 typedef StateHT StateSetType;
-typedef StateType MacroState; // For now
 
 // < Module Functions >
 int decideWS1S(Automaton aut, TSatExample & example, TUnSatExample & counterExample, PrefixListType formulaPrefixSet, PrefixListType negFormulaPrefixSet);
@@ -50,7 +49,8 @@ void closePrefix(PrefixListType & prefix, IdentList* freeVars, bool negationIsTo
 FinalStatesType computeFinalStates(Automaton aut);
 inline void getMTBDDForStateTuple(const TransMTBDD* & bdd, Automaton aut, const StateTuple &);
 const MTBDDLeafStateSet & getInitialStatesOfAutomaton(Automaton aut);
+MacroStateSet* constructInitialState(Automaton aut, unsigned numberOfDeterminizations);
 
-bool StateIsFinal(MacroState state, unsigned level);
+bool StateIsFinal(MacroStateSet state, unsigned level);
 
 #endif
