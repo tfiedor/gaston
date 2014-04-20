@@ -42,15 +42,14 @@ int decideWS1S(Automaton aut, TSatExample & example, TUnSatExample & counterExam
 int decideWS2S(Automaton aut, TSatExample & example, TUnSatExample & counterExample);
 TSatExample findSatisfyingExample();
 TUnSatExample findUnsatisfyingExample();
-bool existsSatisfyingExample(FinalStatesType fm);
-bool existsUnsatisfyingExample(FinalStatesType fm, StateHT qm);
+bool existsSatisfyingExample(Automaton aut, MacroStateSet* initialState, PrefixListType formulaPrefixSet);
+bool existsUnsatisfyingExample(Automaton aut, MacroStateSet* initialState, PrefixListType negFormulaPrefixSet);
 PrefixListType convertPrefixFormulaToList(ASTForm* formula);
 void closePrefix(PrefixListType & prefix, IdentList* freeVars, bool negationIsTopmonst);
 FinalStatesType computeFinalStates(Automaton aut);
 inline void getMTBDDForStateTuple(const TransMTBDD* & bdd, Automaton aut, const StateTuple &);
 const MTBDDLeafStateSet & getInitialStatesOfAutomaton(Automaton aut);
 MacroStateSet* constructInitialState(Automaton aut, unsigned numberOfDeterminizations);
-
-bool StateIsFinal(MacroStateSet state, unsigned level);
+bool StateIsFinal(Automaton aut, TStateSet* state, unsigned level);
 
 #endif

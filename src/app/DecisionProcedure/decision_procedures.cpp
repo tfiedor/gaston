@@ -18,10 +18,15 @@ FinalStatesType computeFinalStates(Automaton aut) {
 /**
  * Checks whether there exists a satisfying example for formula
  *
+ * TODO: final projection
  * @return: true if there exists a sat example
  */
-bool existsSatisfyingExample(FinalStatesType fm) {
-	return fm.size() != 0;
+bool existsSatisfyingExample(Automaton aut, MacroStateSet* initialState, PrefixListType formulaPrefixSet) {
+	std::cout << "Does SAT example exist?\n";
+	unsigned int determinizationNo = formulaPrefixSet.size() - 1;
+
+	bool initialStateIsFinal = StateIsFinal(aut, initialState, determinizationNo);
+	return initialStateIsFinal;
 }
 
 /**
@@ -29,8 +34,12 @@ bool existsSatisfyingExample(FinalStatesType fm) {
  *
  * @return: true if there exists an unsat example
  */
-bool existsUnsatisfyingExample(FinalStatesType fm, StateHT qm) {
-	return fm.size() != qm.size();
+bool existsUnsatisfyingExample(Automaton aut, MacroStateSet* initialState, PrefixListType negFormulaPrefixSet) {
+	std::cout << "Does UNSAT example exist?\n";
+	unsigned int determinizationNo = negFormulaPrefixSet.size() - 1;
+
+	bool initialStateIsFinal = StateIsFinal(aut, initialState, determinizationNo);
+	return initialStateIsFinal;
 }
 
 /**
@@ -75,6 +84,7 @@ int decideWS1S(Automaton aut, TSatExample & example, TUnSatExample & counterExam
 	// Construct initial state of final automaton
 	MacroStateSet* initialState = constructInitialState(aut, formulaPrefixSet.size() - 1);
 	initialState->dump();
+	MacroStateSet* negInitialState = constructInitialState(aut, negFormulaPrefixSet.size() - 1);
 
 	// Compute the final states
 	StateHT allStates;
@@ -83,8 +93,8 @@ int decideWS1S(Automaton aut, TSatExample & example, TUnSatExample & counterExam
 	FinalStatesType fm;
 	fm = computeFinalStates(aut);
 
-	bool hasExample = existsSatisfyingExample(fm);
-	bool hasCounterExample = existsUnsatisfyingExample(fm, allStates);
+	bool hasExample = existsSatisfyingExample(aut, initialState, formulaPrefixSet);
+	bool hasCounterExample = existsUnsatisfyingExample(aut, negInitialState, negFormulaPrefixSet);
 
 	// No satisfiable solution was found
 	if(!hasExample) {
@@ -110,28 +120,41 @@ int decideWS1S(Automaton aut, TSatExample & example, TUnSatExample & counterExam
  * macro-state is final or not. Macro-state is final if all its substates are
  * non-final
  *
+ * @param aut: automaton // FOR NOW! may be replaced by cache
  * @param state: macro state we are checking
  * @param level: level of projection
  * @return True if the macro-state is final
  */
-bool StateIsFinal(TStateSet state, unsigned level) {
+bool StateIsFinal(Automaton aut, TStateSet* state, unsigned level) {
 	// return whether the state is final in automaton
+	std::cout << "Checking if state ";
+	state->dump();
+	std::cout << " is final\n";
 	if (level == 0) {
-
+		LeafStateSet* leaf = reinterpret_cast<LeafStateSet*>(state);
+		StateType q = leaf->getState();
+		return aut.IsStateFinal(q);
 	// level > 0
 	} else {
-		std::deque<TStateSet> worklist;
-		// TODO: fill the worklist with states of macro-state
+		std::deque<TStateSet*> worklist;
+		MacroStateSet* macroState = reinterpret_cast<MacroStateSet*>(state);
+		StateSetList states = macroState->getMacroStates();
+		for (auto state : states) {
+			worklist.push_back(state);
+		}
 
 		while (worklist.size() != 0) {
-			TStateSet q;// = worklist.pop_front();
-			if (StateIsFinal(q, level - 1)) {
+			TStateSet* q = worklist.front();
+			worklist.pop_front();
+			if (StateIsFinal(aut, q, level - 1)) {
+				std::cout << "Nope it is\n";
 				return false;
 			} else {
-				// TODO: enque the successors
+				// TODO: enque the successors - cannot do atm :(
 			}
 		}
 
+		std::cout << "Yes it is\n";
 		return true;
 	}
 
