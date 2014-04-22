@@ -16,7 +16,7 @@
                     semithick,initial text={}]
   \tikzstyle{every state}=[fill=none,draw=black,text=black]
 
-  \node[initial,state,accepting] (A)                    {$(1, 3)$};
+  \node[initial,state] (A)                    {$(1, 3)$};
   \node[state]         (B) [right of=A]       {$(2, 3)$};
   \node[state]         (C) [right of=B]       {$(\bot, 3)$};
   \node[state,accepting]         (D) [below of=B]       {$(2, \bot)$};
