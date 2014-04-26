@@ -2,57 +2,46 @@
 #define __MTBDD_FACTORS_H__
 
 #include "mtbdd/apply1func.hh"
+#include "mtbdd/apply2func.hh"
+#include "mtbdd/void_apply1func.hh"
+#include "containers/StateSet.hh"
+#include "decision_procedures.hh"
+
+using MTBDDLeafStateSet = VATA::Util::OrdVector<StateType>;
 
 /**
  * Family of MTBDD manipulation functors
  */
 
-/**
- * Class for doing the IthProjection of the MTBDD
- */
 GCC_DIAG_OFF(effc++)
-class IthProjectionFunctor : VATA::MTBDDPkg::Apply1Functor<
-	IthProjectionFunctor, StateSet, StateSet> {
+class StateDeterminizatorFunctor : public VATA::MTBDDPkg::Apply1Functor<StateDeterminizatorFunctor, MTBDDLeafStateSet, TStateSet*> {
 GCC_DIAG_ON(effc++)
-	public:
+public:
 	// < Public Methods >
-	StateSet ApplyOperation(const StateSet & lhs);
+	inline TStateSet* ApplyOperation(const MTBDDLeafStateSet & lhs) {
+		StateSetList states;
+
+		for (auto state : lhs) {
+			states.push_back(new LeafStateSet(state));
+		}
+
+		return new MacroStateSet(states);
+	}
 };
 
-/**
- * Class for iterating over the MTBDD and minimizing it
- */
 GCC_DIAG_OFF(effc++)
-class MinimiseSetFunctor : VATA::MTBDDPkg::Apply1Functor<
-	MinimiseSetFunctor, StateSet, StateSet> {
+class MacroStateDeterminizatorFunctor : public VATA::MTBDDPkg::Apply1Functor<MacroStateDeterminizatorFunctor, TStateSet*, TStateSet*> {
 GCC_DIAG_ON(effc++)
-	public:
+public:
 	// < Public Methods >
-	StateSet ApplyOperation(const StateSet & lhs);
-}
+	inline TStateSet* ApplyOperation(TStateSet* lhs) {
+		StateSetList states;
+		MacroStateSet* mlhs = reinterpret_cast<MacroStateSet*>(lhs);
+		states.push_back(mlhs);
 
-/**
- * Class for doing the union of two MTBDD with minimisation
- */
-GCC_DIAG_OFF(effc++)
-class MinimiseUnionFunctor : VATA::MTBDDPkg::Apply2Functor<
-	MinimiseUnionFunctor, StateSet, StateSet, StateSet> {
-GCC_DIAG_ON(effc++)
-	public:
-	// < Public Methods >
-	StateSet ApplyOperation(const StateSet & lhs, const StateSet & rhs);
-}
+		return new MacroStateSet(states);
+	}
 
-/**
- * Collects newly created states to workset
- */
-GCC_DIAG_OFF(effc++)
-class WorksetCollectorFunctor : VATA::MTBDDPkg::VoidApply1Functor<
-	WorksetCollectorFunctor, StateSet> {
-GCC_DIAG_ON(effc++)
-	public:
-	// < Public Methods >
-	void ApplyOperation(const StateSet & lhs);
-}
+};
 
 #endif

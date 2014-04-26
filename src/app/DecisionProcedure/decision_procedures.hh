@@ -14,11 +14,13 @@
 #include "../Frontend/ident.h"
 
 #include <deque>
+#include <memory>
 
 #include "mtbdd/ondriks_mtbdd.hh"
 #include "containers/VarToTrackMap.hh"
 #include "containers/StateSet.hh"
 #include "automata.hh"
+#include "mtbdd_factors.hh"
 
 extern VarToTrackMap varMap;
 
@@ -34,22 +36,25 @@ using StateHT = std::unordered_set<StateType>;
 using StateTuple = std::vector<StateType>;
 using MTBDDLeafStateSet = VATA::Util::OrdVector<StateType>;
 using TransMTBDD = VATA::MTBDDPkg::OndriksMTBDD<MTBDDLeafStateSet>;
+using MacroTransMTBDD = VATA::MTBDDPkg::OndriksMTBDD<TStateSet*>;
 typedef StateHT FinalStatesType;
 typedef StateHT StateSetType;
 
 // < Module Functions >
-int decideWS1S(Automaton aut, TSatExample & example, TUnSatExample & counterExample, PrefixListType formulaPrefixSet, PrefixListType negFormulaPrefixSet);
-int decideWS2S(Automaton aut, TSatExample & example, TUnSatExample & counterExample);
+int decideWS1S(Automaton & aut, TSatExample & example, TUnSatExample & counterExample, PrefixListType formulaPrefixSet, PrefixListType negFormulaPrefixSet);
+int decideWS2S(Automaton & aut, TSatExample & example, TUnSatExample & counterExample);
 TSatExample findSatisfyingExample();
 TUnSatExample findUnsatisfyingExample();
-bool existsSatisfyingExample(Automaton aut, MacroStateSet* initialState, PrefixListType formulaPrefixSet);
-bool existsUnsatisfyingExample(Automaton aut, MacroStateSet* initialState, PrefixListType negFormulaPrefixSet);
+bool existsSatisfyingExample(Automaton & aut, MacroStateSet* initialState, PrefixListType formulaPrefixSet);
+bool existsUnsatisfyingExample(Automaton & aut, MacroStateSet* initialState, PrefixListType negFormulaPrefixSet);
 PrefixListType convertPrefixFormulaToList(ASTForm* formula);
 void closePrefix(PrefixListType & prefix, IdentList* freeVars, bool negationIsTopmonst);
-FinalStatesType computeFinalStates(Automaton aut);
-inline void getMTBDDForStateTuple(const TransMTBDD* & bdd, Automaton aut, const StateTuple &);
-const MTBDDLeafStateSet & getInitialStatesOfAutomaton(Automaton aut);
-MacroStateSet* constructInitialState(Automaton aut, unsigned numberOfDeterminizations);
-bool StateIsFinal(Automaton aut, TStateSet* state, unsigned level);
+FinalStatesType computeFinalStates(Automaton & aut);
+TransMTBDD* getMTBDDForStateTuple(Automaton & aut, const StateTuple & states);
+const MTBDDLeafStateSet & getInitialStatesOfAutomaton(Automaton & aut);
+MacroStateSet* constructInitialState(Automaton &  aut, unsigned numberOfDeterminizations);
+bool StateIsFinal(Automaton & aut, TStateSet* state, unsigned level);
+TStateSet* GetZeroPost(Automaton & aut, TStateSet* state, unsigned level);
+MacroTransMTBDD* GetMTBDDForPost(Automaton & aut, TStateSet* state, unsigned level);
 
 #endif

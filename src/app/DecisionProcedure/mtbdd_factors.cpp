@@ -1,41 +1,35 @@
 #include "mtbdd_factors.hh"
 
 /**
- * Implementation of ith-projection over MTBDD
+ * Does determinization of MTBDD converting from VATA representation to macro
+ * state representation
  *
- * @param lhs: left side of functor
- * @return: set after ith-projection
+ * @param lhs: operand
+ * @return: determinized MTBDD
  */
-StateSet IthProjectionFunctor::ApplyOperation(const StateSet & lhs) {
-	return lhs;
-}
+/*inline TStateSet* StateDeterminizatorFunctor::ApplyOperation(const MTBDDLeafStateSet & lhs) {
+	StateSetList states;
+
+	for (auto state : lhs) {
+		states.push_back(new LeafStateSet(state));
+	}
+
+	return new MacroStateSet(states);
+}*/
 
 /**
- * Implementation of minisation of MTBDD represented transition function
+ * Does determinization of i-1 level
  *
- * @param lhs: left side of functor
- * @return: minimised set
+ * @param lhs: operand
+ * @return: determinized MTBDD
  */
-StateSet MinimiseSetFunctor::ApplyOperation(const StateSet & lhs) {
-	return lhs;
-}
+/*TStateSet* MacroStateDeterminizatorFunctor::ApplyOperation(TStateSet* lhs) {
+	StateSetList states;
 
-/**
- * Implementation of union and minimisation of two MTBDD
- *
- * @param lhs: left side of functor
- * @param rhs: right side of functor
- * @return: minimised union of lhs and rhs;
- */
-StateSet MinimiseUnionFunctor::ApplyOperation(const StateSet & lhs, const StateSet & rhs) {
-	return lhs;
-}
+	for (auto state : lhs) {
+		states.push_back(state);
+	}
 
-/**
- * Collects new states to functor
- *
- * @param lhs: left side of functor
- */
-void WorksetCollectorFunctor::ApplyOperation(const StateSet & lhs) {
+	return new MacroStateSet(states);
+}*/
 
-}

@@ -143,7 +143,7 @@ WS$k$S}
       \pause
       \item Výrazný pokrok v algoritmech nad nedeterministickými automaty jako
       např.
-      jazykové inkluze či testování universality jazyka automatu
+      testování jazykové inkluze či universality jazyka automatu
       \begin{itemize}
       \pause
         \item[$\Rightarrow$]algoritmy založené na antichainech
@@ -175,6 +175,9 @@ WS$k$S}
   
     \begin{frame}{Rozhodování WS$k$S pomocí NFA: Algoritmus}
   \begin{algorithm}[H]
+  \SetAlgorithmName{Algoritmus}{algoritmus}{Seznam algoritmů}
+  		\SetKwInput{KwIn}{Vstup}
+  		\SetKwInput{KwOut}{Výstup}
 		\SetKwFor{For}{foreach}{do}{}
 		\SetKwRepeat{Repeat}{repeat}{until}
 		\KwIn{Počáteční stav $I_m$ automatu $A_{\varphi_m}$, Automat
@@ -183,10 +186,10 @@ WS$k$S}
 		jinak}
 		\BlankLine
 		\Return IsStateAccepting($I_m$, $m$)\;
-		\SetKwProg{myproc}{Function}{}{}
+		\SetKwProg{myproc}{Funkce}{}{}
 		\BlankLine
 		  \myproc{IsStateAccepting(state Q, level i)}{
-		   \For{$q \in Q$:}{
+		   \For{$q \in Q$}{
 		     \uIf{IsStateAccepting(q, i-1)}{
 		       \Return \textsc{FALSE}\;
 		       }
@@ -242,7 +245,7 @@ WS$k$S}
   \begin{frame}{Shrnutí}
   \begin{itemize}
     \item Představen přístup k rozhodování logiky WS$k$S za pomocí použití
-    nedeterministických automatu
+    nedeterministických automatů
       \pause
     \item Využití knihovny \texttt{libvata} pro efektivní manipulaci s NTA
       \pause

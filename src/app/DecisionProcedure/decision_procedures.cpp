@@ -11,7 +11,7 @@
  *
  * TODO: StateHT for now, this is not how it should work :)
  */
-FinalStatesType computeFinalStates(Automaton aut) {
+FinalStatesType computeFinalStates(Automaton & aut) {
 	return aut.GetFinalStates();
 }
 
@@ -21,12 +21,25 @@ FinalStatesType computeFinalStates(Automaton aut) {
  * TODO: final projection
  * @return: true if there exists a sat example
  */
-bool existsSatisfyingExample(Automaton aut, MacroStateSet* initialState, PrefixListType formulaPrefixSet) {
+bool existsSatisfyingExample(Automaton & aut, MacroStateSet* initialState, PrefixListType formulaPrefixSet) {
 	std::cout << "Does SAT example exist?\n";
-	unsigned int determinizationNo = formulaPrefixSet.size() - 1;
+	unsigned int determinizationNo = formulaPrefixSet.size();
+	bool stateIsFinal;
 
-	bool initialStateIsFinal = StateIsFinal(aut, initialState, determinizationNo);
-	return initialStateIsFinal;
+	std::deque<TStateSet*> worklist;
+	worklist.push_front(initialState);
+
+	while(worklist.size() != 0) {
+		TStateSet* q = worklist.front();
+		worklist.pop_front();
+		if(StateIsFinal(aut, q, determinizationNo)) {
+			return true;
+		} else {
+			TStateSet* zeroSucc = GetZeroPost(aut, q, determinizationNo);
+		}
+	}
+
+	return false;
 }
 
 /**
@@ -34,9 +47,9 @@ bool existsSatisfyingExample(Automaton aut, MacroStateSet* initialState, PrefixL
  *
  * @return: true if there exists an unsat example
  */
-bool existsUnsatisfyingExample(Automaton aut, MacroStateSet* initialState, PrefixListType negFormulaPrefixSet) {
+bool existsUnsatisfyingExample(Automaton & aut, MacroStateSet* initialState, PrefixListType negFormulaPrefixSet) {
 	std::cout << "Does UNSAT example exist?\n";
-	unsigned int determinizationNo = negFormulaPrefixSet.size() - 1;
+	unsigned int determinizationNo = negFormulaPrefixSet.size();
 
 	bool initialStateIsFinal = StateIsFinal(aut, initialState, determinizationNo);
 	return initialStateIsFinal;
@@ -78,13 +91,13 @@ TUnSatExample findUnsatisfyingExample() {
  * 		the prefix of the closed negation of formula phi
  * @return: Decision procedure results
  */
-int decideWS1S(Automaton aut, TSatExample & example, TUnSatExample & counterExample, PrefixListType formulaPrefixSet, PrefixListType negFormulaPrefixSet) {
+int decideWS1S(Automaton & aut, TSatExample & example, TUnSatExample & counterExample, PrefixListType formulaPrefixSet, PrefixListType negFormulaPrefixSet) {
 	std::cout << "Deciding WS1S formula transformed to automaton" << std::endl;
 
 	// Construct initial state of final automaton
-	MacroStateSet* initialState = constructInitialState(aut, formulaPrefixSet.size() - 1);
+	MacroStateSet* initialState = constructInitialState(aut, formulaPrefixSet.size());
 	initialState->dump();
-	MacroStateSet* negInitialState = constructInitialState(aut, negFormulaPrefixSet.size() - 1);
+	MacroStateSet* negInitialState = constructInitialState(aut, negFormulaPrefixSet.size());
 
 	// Compute the final states
 	StateHT allStates;
@@ -125,11 +138,8 @@ int decideWS1S(Automaton aut, TSatExample & example, TUnSatExample & counterExam
  * @param level: level of projection
  * @return True if the macro-state is final
  */
-bool StateIsFinal(Automaton aut, TStateSet* state, unsigned level) {
+bool StateIsFinal(Automaton & aut, TStateSet* state, unsigned level) {
 	// return whether the state is final in automaton
-	std::cout << "Checking if state ";
-	state->dump();
-	std::cout << " is final\n";
 	if (level == 0) {
 		LeafStateSet* leaf = reinterpret_cast<LeafStateSet*>(state);
 		StateType q = leaf->getState();
@@ -147,14 +157,19 @@ bool StateIsFinal(Automaton aut, TStateSet* state, unsigned level) {
 			TStateSet* q = worklist.front();
 			worklist.pop_front();
 			if (StateIsFinal(aut, q, level - 1)) {
-				std::cout << "Nope it is\n";
+				state->dump();
+				std::cout << " is NONFINAL\n";
 				return false;
 			} else {
-				// TODO: enque the successors - cannot do atm :(
+				// Enqueue all its successors
+				TStateSet* zeroSuccessor = GetZeroPost(aut, q, level);
+				if (zeroSuccessor != nullptr)
+					worklist.push_front(zeroSuccessor);
 			}
 		}
 
-		std::cout << "Yes it is\n";
+		state->dump();
+		std::cout << " is FINAL\n";
 		return true;
 	}
 
@@ -256,13 +271,11 @@ void closePrefix(PrefixListType & prefix, IdentList* freeVars, bool negationIsTo
  * @param aut: NTA
  * @param states: states for which we want transition relation
  * @return: MTBDD corresponding to the relation
- * TODO: NOT WORKING AS IT SHOULD - DELETE MAYBE?
  */
-inline void getMTBDDForStateTuple(const TransMTBDD* & bdd, Automaton aut, const StateTuple & states) {
-	std::cout << "in getMTBDDForStateTuple\n";
+TransMTBDD* getMTBDDForStateTuple(Automaton & aut, const StateTuple & states) {
 	uintptr_t bddAsInt = aut.GetTransMTBDDForTuple(states);
-	bdd = reinterpret_cast<const TransMTBDD*&> (bddAsInt);
-	std::cout << VATA::Util::Convert::ToString(bdd->GetValue(constructUniversalTrack())) << "\n";
+	std::cout << bddAsInt << "\n";
+	return reinterpret_cast<TransMTBDD*>(bddAsInt);
 }
 
 /**
@@ -271,10 +284,25 @@ inline void getMTBDDForStateTuple(const TransMTBDD* & bdd, Automaton aut, const 
  * @param aut: automaton
  * @return: set of initial states
  */
-const MTBDDLeafStateSet & getInitialStatesOfAutomaton(Automaton aut) {
-	const TransMTBDD* bdd;
-	uintptr_t bddAsInt = aut.GetTransMTBDDForTuple(Automaton::StateTuple());
-	bdd = reinterpret_cast<const TransMTBDD*> (bddAsInt);
+const MTBDDLeafStateSet & getInitialStatesOfAutomaton(Automaton & aut) {
+	TransMTBDD* bdd = getMTBDDForStateTuple(aut, Automaton::StateTuple());
+
+	// SOME TEEEEEEEESTS /////////////////////
+	std::cout << "\nSome teeests\n\n";
+	StateDeterminizatorFunctor sdFunctor;
+	MacroTransMTBDD mbdd = sdFunctor(*bdd);
+	MacroTransMTBDD *mbdd_ptr = &mbdd;
+	TStateSet* states = mbdd_ptr->GetValue(constructUniversalTrack());
+	states->dump();
+
+	std::cout << "\nMore teeests\n\n";
+	MacroStateDeterminizatorFunctor msdFunctor;
+	MacroTransMTBDD mbdd2 = msdFunctor(mbdd);
+	TStateSet* dStates = mbdd2.GetValue(constructUniversalTrack());
+	dStates->dump();
+	std::cout << "\n\n";
+
+	///////////////////////////////////////////
 	return (bdd->GetValue(constructUniversalTrack()));
 }
 
@@ -286,7 +314,7 @@ const MTBDDLeafStateSet & getInitialStatesOfAutomaton(Automaton aut) {
  * @param numberOfDeterminizations: how many levels we will need
  * @return initial state of the final automaton
  */
-MacroStateSet* constructInitialState(Automaton aut, unsigned numberOfDeterminizations) {
+MacroStateSet* constructInitialState(Automaton & aut, unsigned numberOfDeterminizations) {
 	// Getting initial states
 	const MTBDDLeafStateSet & matrixInitialStates = getInitialStatesOfAutomaton(aut);
 	std::cout << "Initial states of original automaton corresponding to the matrix of formula are ";
@@ -310,6 +338,27 @@ MacroStateSet* constructInitialState(Automaton aut, unsigned numberOfDeterminiza
 	return ithState;
 }
 
+TStateSet* GetZeroPost(Automaton & aut, TStateSet* state, unsigned level) {
+	// get post for all states under lower level
+	// do the union of these posts
+	// do the prefix thingie for 00000XXXX
+	// collect reachable states
+	return nullptr;
+}
+
+MacroTransMTBDD* GetMTBDDForPost(Automaton & aut, TStateSet* state, unsigned level) {
+	// Convert MTBDD from VATA to MacroStateRepresentation
+	if (level == 0) {
+
+	} else {
+	// get post for all states under lower level
+	// do the union of posts represented as mtbdd
+	// do projection
+	// return it
+	}
+	return nullptr;
+}
+
 /**
  * Similar decision procedure, we'll not be solving WS2S at the moment
  * since it's probably far too hard than expected
@@ -318,7 +367,7 @@ MacroStateSet* constructInitialState(Automaton aut, unsigned numberOfDeterminiza
  * @param counterExample: unsatisfiable counter-example for formula
  * @return: Decision procedure results
  */
-int decideWS2S(Automaton aut, TSatExample & example, TUnSatExample & counterExample) {
+int decideWS2S(Automaton & aut, TSatExample & example, TUnSatExample & counterExample) {
 	std::cout << "Deciding WS2S formula transformed to automaton" << std::endl;
 	throw NotImplementedException();
 }
