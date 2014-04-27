@@ -293,13 +293,21 @@ const MTBDDLeafStateSet & getInitialStatesOfAutomaton(Automaton & aut) {
 	MacroTransMTBDD mbdd = sdFunctor(*bdd);
 	MacroTransMTBDD *mbdd_ptr = &mbdd;
 	TStateSet* states = mbdd_ptr->GetValue(constructUniversalTrack());
-	states->dump();
+	//states->dump();
+	std::cout << MacroTransMTBDD::DumpToDot({&mbdd}) << "\n\n";
+	std::cout << (*reinterpret_cast<MacroStateSet*>(states));
 
 	std::cout << "\nMore teeests\n\n";
 	MacroStateDeterminizatorFunctor msdFunctor;
 	MacroTransMTBDD mbdd2 = msdFunctor(mbdd);
 	TStateSet* dStates = mbdd2.GetValue(constructUniversalTrack());
-	dStates->dump();
+	//dStates->dump();
+	//std::cout << MacroTransMTBDD::DumpToDot({&mbdd2}) << "\n\n";
+
+	MacroUnionFunctor muFunctor;
+	MacroTransMTBDD mbdd3 = muFunctor(mbdd2, mbdd2);
+	TStateSet* muStates = mbdd3.GetValue(constructUniversalTrack());
+	//muStates->dump();
 	std::cout << "\n\n";
 
 	///////////////////////////////////////////

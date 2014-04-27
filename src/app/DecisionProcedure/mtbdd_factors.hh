@@ -21,8 +21,12 @@ public:
 	inline TStateSet* ApplyOperation(const MTBDDLeafStateSet & lhs) {
 		StateSetList states;
 
-		for (auto state : lhs) {
-			states.push_back(new LeafStateSet(state));
+		if (lhs.size() != 0) {
+			for (auto state : lhs) {
+				states.push_back(new LeafStateSet(state));
+			}
+		} else {
+			states.push_back(new LeafStateSet());
 		}
 
 		return new MacroStateSet(states);
@@ -41,7 +45,24 @@ public:
 
 		return new MacroStateSet(states);
 	}
+};
 
+GCC_DIAG_OFF(effc++)
+class MacroUnionFunctor : public VATA::MTBDDPkg::Apply2Functor<MacroUnionFunctor, TStateSet*, TStateSet*, TStateSet*> {
+GCC_DIAG_ON(effc++)
+public:
+	// < Public Methods >
+	inline TStateSet* ApplyOperation(TStateSet* lhs, TStateSet* rhs) {
+		MacroStateSet* mlhs = reinterpret_cast<MacroStateSet*>(lhs);
+		MacroStateSet* mrhs = reinterpret_cast<MacroStateSet*>(rhs);
+		StateSetList lhsStates = mlhs->getMacroStates();
+		StateSetList rhsStates = mrhs->getMacroStates();
+		for (auto state : rhsStates) {
+			lhsStates.push_back(state);
+		}
+
+		return new MacroStateSet(lhsStates);
+	}
 };
 
 #endif
