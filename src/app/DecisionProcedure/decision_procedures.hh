@@ -51,10 +51,10 @@ PrefixListType convertPrefixFormulaToList(ASTForm* formula);
 void closePrefix(PrefixListType & prefix, IdentList* freeVars, bool negationIsTopmonst);
 FinalStatesType computeFinalStates(Automaton & aut);
 TransMTBDD* getMTBDDForStateTuple(Automaton & aut, const StateTuple & states);
-const MTBDDLeafStateSet & getInitialStatesOfAutomaton(Automaton & aut);
+void getInitialStatesOfAutomaton(Automaton & aut, MTBDDLeafStateSet &);
 MacroStateSet* constructInitialState(Automaton &  aut, unsigned numberOfDeterminizations);
-bool StateIsFinal(Automaton & aut, TStateSet* state, unsigned level);
-TStateSet* GetZeroPost(Automaton & aut, TStateSet* state, unsigned level);
-MacroTransMTBDD* GetMTBDDForPost(Automaton & aut, TStateSet* state, unsigned level);
+bool StateIsFinal(Automaton & aut, TStateSet* state, unsigned level, PrefixListType & prefix);
+TStateSet* GetZeroPost(Automaton & aut, TStateSet* state, unsigned level, PrefixListType & prefix);
+MacroTransMTBDD* GetMTBDDForPost(Automaton & aut, TStateSet* state, unsigned level, PrefixListType & prefix);
 
 #endif

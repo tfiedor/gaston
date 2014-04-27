@@ -36,6 +36,29 @@ StateType LeafStateSet::getState() {
 }
 
 /**
+ * Conversion to string representation
+ *
+ * @return: string representation of macro state
+ *
+ * TODO: may not be needed
+ */
+std::string MacroStateSet::ToString() {
+	std::ostringstream ss;
+	ss << "{";
+	StateSetList states = this->macroStates;
+	unsigned int numberOfStates = this->macroStates.size();
+	for (auto state : states) {
+		--numberOfStates;
+		ss << state->ToString();
+		if (numberOfStates != 0) {
+			ss << ", ";
+		}
+	}
+	ss << "}";
+	return ss.str();
+}
+
+/**
  * Prints Set of StateType states
  */
 void MacroStateSet::dump() {
@@ -52,17 +75,6 @@ void MacroStateSet::dump() {
 		}
 	}
 	std::cout << "}";
-}
-
-/**
- * Conversion to string representation
- *
- * @return: string representation of macro state
- *
- * TODO: may not be needed
- */
-std::string MacroStateSet::ToString() {
-	return "{}";
 }
 
 /**

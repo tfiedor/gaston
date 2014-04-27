@@ -32,10 +32,10 @@ bool existsSatisfyingExample(Automaton & aut, MacroStateSet* initialState, Prefi
 	while(worklist.size() != 0) {
 		TStateSet* q = worklist.front();
 		worklist.pop_front();
-		if(StateIsFinal(aut, q, determinizationNo)) {
+		if(StateIsFinal(aut, q, determinizationNo, formulaPrefixSet)) {
 			return true;
 		} else {
-			TStateSet* zeroSucc = GetZeroPost(aut, q, determinizationNo);
+			TStateSet* zeroSucc = GetZeroPost(aut, q, determinizationNo, formulaPrefixSet);
 		}
 	}
 
@@ -49,10 +49,8 @@ bool existsSatisfyingExample(Automaton & aut, MacroStateSet* initialState, Prefi
  */
 bool existsUnsatisfyingExample(Automaton & aut, MacroStateSet* initialState, PrefixListType negFormulaPrefixSet) {
 	std::cout << "Does UNSAT example exist?\n";
-	unsigned int determinizationNo = negFormulaPrefixSet.size();
-
-	bool initialStateIsFinal = StateIsFinal(aut, initialState, determinizationNo);
-	return initialStateIsFinal;
+	// Yes this is confusing :) should be renamed
+	return existsSatisfyingExample(aut, initialState, negFormulaPrefixSet);
 }
 
 /**
@@ -138,7 +136,7 @@ int decideWS1S(Automaton & aut, TSatExample & example, TUnSatExample & counterEx
  * @param level: level of projection
  * @return True if the macro-state is final
  */
-bool StateIsFinal(Automaton & aut, TStateSet* state, unsigned level) {
+bool StateIsFinal(Automaton & aut, TStateSet* state, unsigned level, PrefixListType & prefix) {
 	// return whether the state is final in automaton
 	if (level == 0) {
 		LeafStateSet* leaf = reinterpret_cast<LeafStateSet*>(state);
@@ -156,13 +154,13 @@ bool StateIsFinal(Automaton & aut, TStateSet* state, unsigned level) {
 		while (worklist.size() != 0) {
 			TStateSet* q = worklist.front();
 			worklist.pop_front();
-			if (StateIsFinal(aut, q, level - 1)) {
+			if (StateIsFinal(aut, q, level - 1, prefix)) {
 				state->dump();
 				std::cout << " is NONFINAL\n";
 				return false;
 			} else {
 				// Enqueue all its successors
-				TStateSet* zeroSuccessor = GetZeroPost(aut, q, level);
+				TStateSet* zeroSuccessor = GetZeroPost(aut, q, level, prefix);
 				if (zeroSuccessor != nullptr)
 					worklist.push_front(zeroSuccessor);
 			}
@@ -274,7 +272,6 @@ void closePrefix(PrefixListType & prefix, IdentList* freeVars, bool negationIsTo
  */
 TransMTBDD* getMTBDDForStateTuple(Automaton & aut, const StateTuple & states) {
 	uintptr_t bddAsInt = aut.GetTransMTBDDForTuple(states);
-	std::cout << bddAsInt << "\n";
 	return reinterpret_cast<TransMTBDD*>(bddAsInt);
 }
 
@@ -284,34 +281,12 @@ TransMTBDD* getMTBDDForStateTuple(Automaton & aut, const StateTuple & states) {
  * @param aut: automaton
  * @return: set of initial states
  */
-const MTBDDLeafStateSet & getInitialStatesOfAutomaton(Automaton & aut) {
+void getInitialStatesOfAutomaton(Automaton & aut, MTBDDLeafStateSet & initialStates) {
 	TransMTBDD* bdd = getMTBDDForStateTuple(aut, Automaton::StateTuple());
 
-	// SOME TEEEEEEEESTS /////////////////////
-	std::cout << "\nSome teeests\n\n";
-	StateDeterminizatorFunctor sdFunctor;
-	MacroTransMTBDD mbdd = sdFunctor(*bdd);
-	MacroTransMTBDD *mbdd_ptr = &mbdd;
-	TStateSet* states = mbdd_ptr->GetValue(constructUniversalTrack());
-	//states->dump();
-	std::cout << MacroTransMTBDD::DumpToDot({&mbdd}) << "\n\n";
-	std::cout << (*reinterpret_cast<MacroStateSet*>(states));
-
-	std::cout << "\nMore teeests\n\n";
-	MacroStateDeterminizatorFunctor msdFunctor;
-	MacroTransMTBDD mbdd2 = msdFunctor(mbdd);
-	TStateSet* dStates = mbdd2.GetValue(constructUniversalTrack());
-	//dStates->dump();
-	//std::cout << MacroTransMTBDD::DumpToDot({&mbdd2}) << "\n\n";
-
-	MacroUnionFunctor muFunctor;
-	MacroTransMTBDD mbdd3 = muFunctor(mbdd2, mbdd2);
-	TStateSet* muStates = mbdd3.GetValue(constructUniversalTrack());
-	//muStates->dump();
-	std::cout << "\n\n";
-
-	///////////////////////////////////////////
-	return (bdd->GetValue(constructUniversalTrack()));
+	// TODO: solve sink state
+	StateCollectorFunctor scf(initialStates);
+	scf(*bdd);
 }
 
 /**
@@ -324,7 +299,8 @@ const MTBDDLeafStateSet & getInitialStatesOfAutomaton(Automaton & aut) {
  */
 MacroStateSet* constructInitialState(Automaton & aut, unsigned numberOfDeterminizations) {
 	// Getting initial states
-	const MTBDDLeafStateSet & matrixInitialStates = getInitialStatesOfAutomaton(aut);
+	MTBDDLeafStateSet matrixInitialStates;
+	getInitialStatesOfAutomaton(aut, matrixInitialStates);
 	std::cout << "Initial states of original automaton corresponding to the matrix of formula are ";
 	std::cout << VATA::Util::Convert::ToString(matrixInitialStates) << "\n";
 
@@ -346,24 +322,60 @@ MacroStateSet* constructInitialState(Automaton & aut, unsigned numberOfDetermini
 	return ithState;
 }
 
-TStateSet* GetZeroPost(Automaton & aut, TStateSet* state, unsigned level) {
+/**
+ * Constructs a post through zero tracks from @p state of @p level with respect
+ * to @p prefix. First computes the post of the macro-state and then proceeds
+ * with getting the 0 tracks successors and collecting the reachable states
+ *
+ * @param aut: base automaton
+ * @param state: initial state we are getting zero post for
+ * @param level: level of macro inception
+ * @param prefix: list of variables for projection
+ * @return: zero post of initial @p state
+ */
+TStateSet* GetZeroPost(Automaton & aut, TStateSet* state, unsigned level, PrefixListType & prefix) {
+	/*MacroStateSet *macroState = reinterpret_cast<MacroStateSet*>(state);
 	// get post for all states under lower level
 	// do the union of these posts
+	for (auto state: states) {
+		MacroStateSet* transMtbdd = GetMTBDDForPost(aut, state, level - 1, prefix);
+	}
 	// do the prefix thingie for 00000XXXX
 	// collect reachable states
+	StateSetList reachableStates;
+	return new MacroStateSet(reachableStates);*/
 	return nullptr;
 }
 
-MacroTransMTBDD* GetMTBDDForPost(Automaton & aut, TStateSet* state, unsigned level) {
+/**
+ * Generates post of @p state, by constructing posts of lesser level and
+ * doing the union of these states with projection over the prefix
+ *
+ * @param aut: base automaton
+ * @param state: initial state we are generating post for
+ * @param level: level of inception
+ * @param prefix: list of variables for projection
+ * @return MTBDD representing the post of the state @p state
+ */
+MacroTransMTBDD* GetMTBDDForPost(Automaton & aut, TStateSet* state, unsigned level, PrefixListType & prefix) {
 	// Convert MTBDD from VATA to MacroStateRepresentation
-	if (level == 0) {
-
+	/*if (level == 0) {
+		// Is Leaf State set
+		LeafStateSet* lState = reinterpret_cast<LeafStateSet*>(state);
+		StateType stateValue = lState.getState();
+		TransBDD stateTransition = GetMTBDDForStateTuple(aut, Automaton::StateTuple({stateValue}));
 	} else {
+		MacroStateSet* mState = reinterpret_cast<MacroStateSet*>(state);
+		StateSetList states = mState.getMacroStates();
 	// get post for all states under lower level
 	// do the union of posts represented as mtbdd
+		for (auto state : states) {
+			MacroStateSet* transMtbdd = GetMTBDDForPost(aut, state, level - 1, prefix);
+
+		}
 	// do projection
 	// return it
-	}
+	}*/
 	return nullptr;
 }
 

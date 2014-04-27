@@ -20,6 +20,7 @@ private:
 public:
 	// < Public Methods >
 	virtual void dump() {};
+	virtual std::string ToString() {};
 	friend inline std::ostream& operator<<(std::ostream& os, const TStateSet& tss) {os << "something";};
 };
 
@@ -54,7 +55,6 @@ public:
 	  * @return: output stream
 	  */
 	friend inline std::ostream& operator<<(std::ostream& os, const LeafStateSet& mss) {
-		std::cout << "Madafakin orange\n";
 		std::ostringstream ss;
 		ss << mss.getState();
 		os << ss.str();
@@ -88,14 +88,14 @@ public:
 	 * @return: output stream
 	 */
 	friend inline std::ostream& operator<<(std::ostream& os, const MacroStateSet& mss){
-		std::cout << "Madafakin apple\n";
 		os << "{";
 
 		unsigned int numberOfStates = mss.macroStates.size();
 
 		for (TStateSet* macroState : mss.macroStates) {
 			--numberOfStates;
-			::operator<<(os, *macroState);
+			TStateSet mState = *macroState;
+			os << mState.ToString();
 			if (numberOfStates != 0) {
 				os << ", ";
 			}

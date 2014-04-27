@@ -1222,17 +1222,18 @@ p_2$, which is a simple consequence of Lemma \ref{lemma2}.
 		\SetKwRepeat{Repeat}{repeat}{until}
 		\KwIn{An initial state $I$ of automaton $\mathcal{A}$, a simulation relation
 		$\leq \subseteq Q_\mathcal{A} \times Q_\mathcal{A}$ on states of
-		$\mathcal{A}$, procedure for computing $Post$ set of the state $Q$ $Post(Q)$
-		and a predicate $IsAccepting(F)$ that decides whether state $F$ is final}
-		\KwOut{\textsc{TRUE} if there $\exists$ a final state in $\mathcal{A}$}
+		$\mathcal{A}$, procedure for computing succesors of a state
+		$\delta^*$ and a predicate $IsAccepting(F)$ that decides whether state $F$ is
+		final}
+		\KwOut{\textsc{TRUE} if there exists a final state in $\mathcal{A}$}
 		\BlankLine
-    \lIf{IsAccepting(I)}{\textbf{return} \textsc{FALSE}}
+    \uIf{IsAccepting(I)}{\textbf{return} \textsc{FALSE}}
 		$Processed := \emptyset$\;
-		$Next := \{(I\}$\;
+		$Next := \{I\}$\;
 		\While{$Next \neq \emptyset$}{
 		  Pick and remove a macro-state $R$ from $Next$ and move it to $Processed$\;
-			\For{$P \in Post(R)$}{
-			 \lIf{IsAccepting(P)}{\textbf{return} \textsc{FALSE}}
+			\For{$P \in \delta^*(R)$}{
+			 \uIf{IsAccepting(P)}{\textbf{return} \textsc{FALSE}}
 			 \uIf{$\neg\exists S~\in Processed \cup Next$ s.t. $S \leq P$}{
 			  Remove all $S$ from $Processed \cup Next$ s.t. $P \leq S$\;
 				Add $P$ to $Next$\;
@@ -1449,16 +1450,16 @@ approach that will determine whether the state is final only when it is needed.
 %  \end{equation}
 % \end{defz}
 
-\begin{defz}
- We define the \emph{preset through zero tracks} as a set of states such that
- \begin{equation}
- PRE_0(Q) = \{r\ |\ \exists q \in Q: r \overset{(0)^k}{\longrightarrow}
- q\}.\footnote{Note that $(0)^k$ does stand for zero track of width $k$ not
- length.}
- \end{equation}
- We denote the transition closure of $PRE_0(Q)$ as $PRE_0^*(Q)$. Note that we
- can define the $POST_0(Q)$ relation simiralry to the $PRE_0$ relation.
-\end{defz}
+% \begin{defz}
+%  We define the \emph{preset through zero tracks} as a set of states such that
+%  \begin{equation}
+%  PRE_0(Q) = \{r\ |\ \exists q \in Q: r \overset{(0)^k}{\longrightarrow}
+%  q\}.\footnote{Note that $(0)^k$ does stand for zero track of width $k$ not
+%  length.}
+%  \end{equation}
+%  We denote the transition closure of $PRE_0(Q)$ as $PRE_0^*(Q)$. Note that we
+%  can define the $POST_0(Q)$ relation simiralry to the $PRE_0$ relation.
+% \end{defz}
 
 Now analogously to the family of formulae $\Phi$ we can define
 the family of automata $\mathbb{A} = \{\mathcal{A}_0,\ldots,\mathcal{A}_m\}$ as follows:
@@ -1701,32 +1702,32 @@ In addition we can prune the search state using the antichains.
 		\KwIn{Initial state $I_m$ of automaton $A_{\varphi_m}$}
 		\KwOut{\textsc{TRUE} if state $I_m$ is final, \textsc{FALSE} otherwise}
 		\BlankLine
-		\uIf{\texttt{IsStateAccepting}($I_m$, m) = \textsc{TRUE}}{
-		  \Return \textsc{TRUE}\;
+		\nl \uIf{IsStateAccepting($I_m$, m) = \textsc{TRUE}}{
+		\nl   \Return \textsc{TRUE}\;
 		}
-		\Else{
-		  \Return \textsc{FALSE}\;
+		\nl \Else{
+		\nl   \Return \textsc{FALSE}\;
 		}
 		\SetKwProg{myproc}{Function}{}{}
 		\BlankLine
   \myproc{IsStateAccepting(state P, level i)}{
   	\nl \uIf{i = 0}{
-  		\Return $P \in F_i$\;
-  	}
-  	\uElse{
+  	\nl 	\Return $P \in F_i$\;}
+  	\nl \uElse{
   	\SetEndCharOfAlgoLine{}
-  	  Call Algorithm \ref{universality} with following parameters:\;
-  	   \hspace{1cm}p,\;
-  	   \hspace{1cm}i - 1,\;
-  	   \hspace{1cm}$Post^0_{i-1}$,\;
-  	   \hspace{1cm}\\$\lambda$ q.  IsStateAccepting(i-1, q).\;
+  	\nl   Call Algorithm \ref{universality} with following parameters:\;
+  	   \hspace{0.5cm}state p,\;
+  	   \hspace{0.5cm}level i - 1,\;
+  	   \hspace{0.5cm}successor function $\delta^0_{i-1}$,\;
+  	   \hspace{0.5cm}accepting predicate $\lambda$ q.
+  	   IsStateAccepting(q, i-1).\;
   	\SetEndCharOfAlgoLine{;}
-  	  \uIf{All invocations of Algorithm \ref{universality} returns
+  	 \nl  \uIf{All invocations of Algorithm \ref{universality} returns
   	  \textsc{FALSE}}{
-  	    \Return \textsc{TRUE}\;
+  	 \nl    \Return \textsc{TRUE}\;
   	  } 
-  	  \Else{
-  	    \Return \textsc{FALSE}\;
+  	  \nl \Else{
+  	  \nl   \Return \textsc{FALSE}\;
   	  }
   	  
   	  }
