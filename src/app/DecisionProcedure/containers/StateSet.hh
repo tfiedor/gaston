@@ -94,8 +94,7 @@ public:
 
 		for (TStateSet* macroState : mss.macroStates) {
 			--numberOfStates;
-			TStateSet mState = *macroState;
-			os << mState.ToString();
+			os << macroState->ToString();
 			if (numberOfStates != 0) {
 				os << ", ";
 			}

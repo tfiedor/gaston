@@ -284,6 +284,37 @@ TransMTBDD* getMTBDDForStateTuple(Automaton & aut, const StateTuple & states) {
 void getInitialStatesOfAutomaton(Automaton & aut, MTBDDLeafStateSet & initialStates) {
 	TransMTBDD* bdd = getMTBDDForStateTuple(aut, Automaton::StateTuple());
 
+	// SOME TEEEEEEEESTS /////////////////////
+	std::cout << "\nSome teeests\n\n";
+	StateDeterminizatorFunctor sdFunctor;
+	std::cout << "a\n";
+	MacroTransMTBDD mbdd = sdFunctor(*bdd);
+	std::cout << "b\n";
+	MacroTransMTBDD *mbdd_ptr = &mbdd;
+	std::cout << "c\n";
+	MacroStateSet* states = mbdd_ptr->GetValue(constructUniversalTrack());
+	std::cout << "d\n";
+	//states->dump();
+	std::cout << MacroTransMTBDD::DumpToDot({&mbdd}) << "\n\n";
+	std::cout << "e\n";
+	std::cout << (*reinterpret_cast<MacroStateSet*>(states));
+	std::cout << "f\n";
+
+	std::cout << "\nMore teeests\n\n";
+	MacroStateDeterminizatorFunctor msdFunctor;
+	MacroTransMTBDD mbdd2 = msdFunctor(mbdd);
+	TStateSet* dStates = mbdd2.GetValue(constructUniversalTrack());
+	//dStates->dump();
+	//std::cout << MacroTransMTBDD::DumpToDot({&mbdd2}) << "\n\n";
+
+	MacroUnionFunctor muFunctor;
+	MacroTransMTBDD mbdd3 = muFunctor(mbdd2, mbdd2);
+	TStateSet* muStates = mbdd3.GetValue(constructUniversalTrack());
+	//muStates->dump();
+	std::cout << "\n\n";
+
+	///////////////////////////////////////////
+
 	// TODO: solve sink state
 	StateCollectorFunctor scf(initialStates);
 	scf(*bdd);

@@ -18,7 +18,7 @@ class StateDeterminizatorFunctor : public VATA::MTBDDPkg::Apply1Functor<StateDet
 GCC_DIAG_ON(effc++)
 public:
 	// < Public Methods >
-	inline TStateSet* ApplyOperation(const MTBDDLeafStateSet & lhs) {
+	inline MacroStateSet* ApplyOperation(const MTBDDLeafStateSet & lhs) {
 		StateSetList states;
 
 		if (lhs.size() != 0) {
@@ -38,7 +38,7 @@ class MacroStateDeterminizatorFunctor : public VATA::MTBDDPkg::Apply1Functor<Mac
 GCC_DIAG_ON(effc++)
 public:
 	// < Public Methods >
-	inline TStateSet* ApplyOperation(MacroStateSet* lhs) {
+	inline MacroStateSet* ApplyOperation(MacroStateSet* lhs) {
 		StateSetList states;
 		states.push_back(lhs);
 
@@ -51,7 +51,7 @@ class MacroUnionFunctor : public VATA::MTBDDPkg::Apply2Functor<MacroUnionFunctor
 GCC_DIAG_ON(effc++)
 public:
 	// < Public Methods >
-	inline TStateSet* ApplyOperation(MacroStateSet* lhs, MacroStateSet* rhs) {
+	inline MacroStateSet* ApplyOperation(MacroStateSet* lhs, MacroStateSet* rhs) {
 		StateSetList lhsStates = lhs->getMacroStates();
 		StateSetList rhsStates = rhs->getMacroStates();
 		for (auto state : rhsStates) {

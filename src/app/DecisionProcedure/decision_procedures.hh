@@ -36,7 +36,7 @@ using StateHT = std::unordered_set<StateType>;
 using StateTuple = std::vector<StateType>;
 using MTBDDLeafStateSet = VATA::Util::OrdVector<StateType>;
 using TransMTBDD = VATA::MTBDDPkg::OndriksMTBDD<MTBDDLeafStateSet>;
-using MacroTransMTBDD = VATA::MTBDDPkg::OndriksMTBDD<TStateSet*>;
+using MacroTransMTBDD = VATA::MTBDDPkg::OndriksMTBDD<MacroStateSet*>;
 typedef StateHT FinalStatesType;
 typedef StateHT StateSetType;
 
