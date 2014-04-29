@@ -29,7 +29,7 @@ bool existsSatisfyingExample(Automaton & aut, MacroStateSet* initialState, Prefi
 	std::deque<TStateSet*> worklist;
 	worklist.push_front(initialState);
 
-	bool second = false;
+	int count = 0;
 	while(worklist.size() != 0) {
 		TStateSet* q = worklist.front();
 		worklist.pop_front();
@@ -46,11 +46,13 @@ bool existsSatisfyingExample(Automaton & aut, MacroStateSet* initialState, Prefi
 			StateSetList reachable;
 			MacroStateCollectorFunctor msc(reachable);
 			msc(postMTBDD);
-
+		++count;
 			// add post to worklist
-			if (!second) {
+			if (count != 5) {
 				worklist.push_back(reachable[0]);
-				second = true;
+				std::cout << "Enqueing next post\n";
+				reachable[0]->dump();
+				std::cout << "\n";
 			}
 
 			assert(reachable.size() == 1);
@@ -388,7 +390,6 @@ int getProjectionVariable(unsigned level, PrefixListType & prefix) {
  * @return MTBDD representing the post of the state @p state
  */
 MacroTransMTBDD GetMTBDDForPost(Automaton & aut, TStateSet* state, unsigned level, PrefixListType & prefix) {
-	std::cout << "Calling GetMTBDDForPost for level " << level << "\n";
 	// Convert MTBDD from VATA to MacroStateRepresentation
 	if (level == 0) {
 		// Is Leaf State set
@@ -418,25 +419,32 @@ MacroTransMTBDD GetMTBDDForPost(Automaton & aut, TStateSet* state, unsigned leve
 
 		// get first and determinize it
 		const MacroTransMTBDD & frontPost = GetMTBDDForPost(aut, front, level-1, prefix);
-
+		//std::cout << "----------------------<" << level << ">----------------------\n";
 		// TODO: This may not be correct, not sure atm
 		int projecting = getProjectionVariable(level-1, prefix);
-		std::cout << "Projecting on level " << level << " by " << projecting << "\n\n";
+
+		//std::cout << "Projecting on level " << level << " by " << projecting << "\n\n";
 		MacroTransMTBDD detResultMtbdd = (level == 1) ? frontPost : (msdf(frontPost)).Project(
 				[&frontPost, projecting](size_t var) {return var <= projecting;}, muf);
-		std::cout << "BDD after projection: " << MacroTransMTBDD::DumpToDot({&detResultMtbdd});
-
+		//std::cout << "BDD after projection: " << MacroTransMTBDD::DumpToDot({&detResultMtbdd});
+		//std::cout << "\n\n";
 		// do the union of posts represented as mtbdd
 		while(!states.empty()) {
 			front = states.front();
 			states.pop_front();
 			const MacroTransMTBDD & nextPost = GetMTBDDForPost(aut, front, level-1, prefix);
+			//std::cout << "BDD before projection: " << MacroTransMTBDD::DumpToDot({&nextPost});
+			//std::cout << "BDD after projection: " << MacroTransMTBDD::DumpToDot({&detResultMtbdd});
+			//std::cout << "\n\n";
 			//MacroTransMTBDD tempDet = msdf(nextPost);
-			detResultMtbdd = muf(detResultMtbdd, nextPost);
+			detResultMtbdd = muf(detResultMtbdd, (level == 1) ? nextPost : (msdf(nextPost)).Project(
+					[&nextPost, projecting](size_t var) {return var <= projecting;}, muf));
 		}
 
-		std::cout << "Returning from level " << level << "\n";
-		std::cout << "BDD: " << MacroTransMTBDD::DumpToDot({&detResultMtbdd});
+		//std::cout << "Returning from level " << level << "\n";
+		//std::cout << "BDD: " << MacroTransMTBDD::DumpToDot({&detResultMtbdd});
+		//std::cout << "\n\n";
+		//std::cout << "---------------------->" << level << "<----------------------\n";
 
 		// do projection and return;
 		return detResultMtbdd;
