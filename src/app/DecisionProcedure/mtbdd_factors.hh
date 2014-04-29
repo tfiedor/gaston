@@ -54,8 +54,16 @@ public:
 	inline MacroStateSet* ApplyOperation(MacroStateSet* lhs, MacroStateSet* rhs) {
 		StateSetList lhsStates = lhs->getMacroStates();
 		StateSetList rhsStates = rhs->getMacroStates();
+
 		for (auto state : rhsStates) {
-			lhsStates.push_back(state);
+			// TODO: this should be special function
+			auto matching_iter = std::find_if(lhsStates.begin(), lhsStates.end(),
+					[state](TStateSet* s) {
+						return s->DoCompare(state);
+					});
+			if (matching_iter == lhsStates.end()) {
+				lhsStates.push_back(state);
+			}
 		}
 
 		return new MacroStateSet(lhsStates);
