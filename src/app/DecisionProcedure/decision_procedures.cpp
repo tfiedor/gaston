@@ -27,17 +27,18 @@ bool existsSatisfyingExample(Automaton & aut, MacroStateSet* initialState, Prefi
 	bool stateIsFinal;
 
 	std::deque<TStateSet*> worklist;
+	std::deque<TStateSet*> processed;
 	worklist.push_front(initialState);
 
-	int count = 0;
 	while(worklist.size() != 0) {
 		TStateSet* q = worklist.front();
 		worklist.pop_front();
+		processed.push_back(q);
+
 		if(!StateIsFinal(aut, q, determinizationNo, formulaPrefixSet)) {
 			std::cout << "\nYes, there exist!\n";
 			return true;
 		// TODO: here should antichains take place
-		// TODO: this may cause fucking cycles
 		} else {
 			// construct the post of the state
 			const MacroTransMTBDD & postMTBDD = GetMTBDDForPost(aut, q, determinizationNo, formulaPrefixSet);
@@ -46,16 +47,17 @@ bool existsSatisfyingExample(Automaton & aut, MacroStateSet* initialState, Prefi
 			StateSetList reachable;
 			MacroStateCollectorFunctor msc(reachable);
 			msc(postMTBDD);
-		++count;
-			// add post to worklist
-			if (count != 5) {
-				worklist.push_back(reachable[0]);
-				std::cout << "Enqueing next post\n";
-				reachable[0]->dump();
-				std::cout << "\n";
-			}
-
 			assert(reachable.size() == 1);
+
+			TStateSet *newPost = reachable[0];
+
+			auto matching_iter = std::find_if(processed.begin(), processed.end(),
+					[newPost](TStateSet* s) {
+						return s->DoCompare(newPost);
+					});
+			if (matching_iter == processed.end()) {
+				worklist.push_back(newPost);
+			}
 		}
 	}
 	std::cout << "\nNo, there is not T_T!\n";
@@ -179,6 +181,7 @@ bool StateIsFinal(Automaton & aut, TStateSet* state, unsigned level, PrefixListT
 				std::cout << " is NONFINAL\n";
 				return false;
 			} else {
+				// TODO: THIS IS NOT DONE!!!!
 				// Enqueue all its successors
 				TStateSet* zeroSuccessor = GetZeroPost(aut, q, level, prefix);
 				if (zeroSuccessor != nullptr)
@@ -226,6 +229,7 @@ PrefixListType convertPrefixFormulaToList(ASTForm* formula) {
 				set.push_front(varMap[value]);
 			}
 			iterator = exf->f;
+			isFirstNeg = false;
 		// Create new set
 		} else if (iterator->kind == aNot) {
 			if (!isFirstNeg) {
