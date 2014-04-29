@@ -111,6 +111,7 @@ void ASTForm_Or::toUnaryAutomaton(Automaton &orAutomaton, bool doComplement) {
  *  3) X = e
  *
  * TODO: Y1 = X? Switch?
+ * TODO: Determinize
  *  Constructs template automaton, that does acceptance of the formula
  *
  *  @return Automaton corresponding to the formula phi or psi
@@ -191,14 +192,8 @@ void ASTForm_Sub::toUnaryAutomaton(Automaton &aut, bool doComplement) {
 
 	ASTTerm2_Var2* T2Var = (ASTTerm2_Var2*) this->T2;
 	unsigned int T2 = (unsigned int) T2Var->n;
-	//  -(x00x)-> q0
-	addTransition(aut, Automaton::StateTuple(), T1, T2, (char *) "00", 0);
-
-	//  -(x11x)-> q0
-	addTransition(aut, Automaton::StateTuple(), T1, T2, (char *) "11", 0);
-
-	// -(x01x)-> q0
-	addTransition(aut, Automaton::StateTuple(), T1, T2, (char *) "01", 0);
+	//  -(xxxx)-> q0
+	addUniversalTransition(aut, Automaton::StateTuple({}), 0);
 
 	// q0 -(x00x)-> q0
 	addTransition(aut, Automaton::StateTuple({0}), T1, T2, (char *) "00", 0);
@@ -209,12 +204,21 @@ void ASTForm_Sub::toUnaryAutomaton(Automaton &aut, bool doComplement) {
 	// q0 -(x01x)-> q0
 	addTransition(aut, Automaton::StateTuple({0}), T1, T2, (char *) "01", 0);
 
+	// q0 -(x10x)-> q1 = sink
+	addTransition(aut, Automaton::StateTuple({0}), T1, T2, (char *) "10", 1);
+
+	// q1 -(xxxx)-> q1
+	addUniversalTransition(aut, Automaton::StateTuple({1}), 1);
+
 	// final state q0
 	setFinalState(aut, doComplement, 0);
+	// nonfinal state q1
+	setNonFinalState(aut, doComplement, 1);
 }
 
 /**
  * Constructs automaton for formula denoting, that set is a singleton
+ * TODO: Determinize
  *
  * @return Automaton corresponding to the formula Singleton(X)
  */

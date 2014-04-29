@@ -55,6 +55,7 @@ void getInitialStatesOfAutomaton(Automaton & aut, MTBDDLeafStateSet &);
 MacroStateSet* constructInitialState(Automaton &  aut, unsigned numberOfDeterminizations);
 bool StateIsFinal(Automaton & aut, TStateSet* state, unsigned level, PrefixListType & prefix);
 TStateSet* GetZeroPost(Automaton & aut, TStateSet* state, unsigned level, PrefixListType & prefix);
-MacroTransMTBDD* GetMTBDDForPost(Automaton & aut, TStateSet* state, unsigned level, PrefixListType & prefix);
+int getProjectionVariable(unsigned level, PrefixListType & prefix);
+MacroTransMTBDD GetMTBDDForPost(Automaton & aut, TStateSet* state, unsigned level, PrefixListType & prefix);
 
 #endif

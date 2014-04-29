@@ -94,4 +94,16 @@ public:
 	}
 };
 
+GCC_DIAG_OFF(effc++)
+class AdditionApplyFunctor : public VATA::MTBDDPkg::Apply2Functor<AdditionApplyFunctor, MTBDDLeafStateSet, MTBDDLeafStateSet, MTBDDLeafStateSet> {
+GCC_DIAG_ON(effc++)
+
+public:
+
+	inline MTBDDLeafStateSet ApplyOperation(const MTBDDLeafStateSet& lhs, const MTBDDLeafStateSet& rhs)
+	{
+		return lhs.Union(rhs);
+	}
+};
+
 #endif

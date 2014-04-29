@@ -18,7 +18,7 @@ void VarToTrackMap::addIdentifiers(IdentList* identifiers) {
 
 	for (int i = 0; i < identSize; ++i) {
 		val = identifiers->pop_front();
-		(this->vttMap)[val] = ++index;
+		(this->vttMap)[val] = index++;
 	}
 }
 
