@@ -19,7 +19,7 @@ char charToAsgn(char c) {
 		return 0x02;
 		break;
 	case 'X':
-		return 0x02;
+		return 0x03;
 		break;
 	default:
 		assert(false);

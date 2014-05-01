@@ -50,6 +50,7 @@ CodeTable *codeTable;
 Guide guide;
 AutLib lib;
 VarToTrackMap varMap;
+IdentList inFirstOrder;
 int numTypes = 0;
 bool regenerate = false;
 

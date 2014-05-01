@@ -16,24 +16,45 @@ FinalStatesType computeFinalStates(Automaton & aut) {
 }
 
 /**
+ * Test, whether the state is already enqueued
+ *
+ * @param queue: queue of states
+ * @param state: looked up state
+ * @return: true if state is in queue
+ */
+bool isNotEnqueued(StateSetList & queue, TStateSet*& state) {
+	// tries to find matching state in list/queue/wtv
+	// if not found .end() is returned
+	auto matching_iter = std::find_if(queue.begin(), queue.end(),
+			[state](TStateSet* s) {
+				return s->DoCompare(state);
+			});
+
+	return matching_iter == queue.end();
+}
+
+/**
  * Checks whether there exists a satisfying example for formula
  *
- * TODO: final projection
  * @return: true if there exists a sat example
  */
 bool existsSatisfyingExample(Automaton & aut, MacroStateSet* initialState, PrefixListType formulaPrefixSet) {
-	std::cout << "Does SAT example exist?\n";
+	//std::cout << "Does SAT example exist?\n";
 	unsigned int determinizationNo = formulaPrefixSet.size();
 	bool stateIsFinal;
 
-	std::deque<TStateSet*> worklist;
-	std::deque<TStateSet*> processed;
+	StateSetList worklist;
+	StateSetList processed;
 	worklist.push_front(initialState);
 
 	while(worklist.size() != 0) {
 		TStateSet* q = worklist.front();
 		worklist.pop_front();
 		processed.push_back(q);
+
+		//std::cout << "Getting state from worklist: ";
+		//q->dump();
+		//std::cout << "\n";
 
 		if(!StateIsFinal(aut, q, determinizationNo, formulaPrefixSet)) {
 			std::cout << "\nYes, there exist!\n";
@@ -49,18 +70,16 @@ bool existsSatisfyingExample(Automaton & aut, MacroStateSet* initialState, Prefi
 			msc(postMTBDD);
 			assert(reachable.size() == 1);
 
+			//std::cout << "Generating new post:\n";
 			TStateSet *newPost = reachable[0];
-
-			auto matching_iter = std::find_if(processed.begin(), processed.end(),
-					[newPost](TStateSet* s) {
-						return s->DoCompare(newPost);
-					});
-			if (matching_iter == processed.end()) {
+			//newPost->dump();
+			//std::cout << "\n";
+			if (isNotEnqueued(processed, newPost)) {
 				worklist.push_back(newPost);
 			}
 		}
 	}
-	std::cout << "\nNo, there is not T_T!\n";
+	//std::cout << "\nNo, there is not T_T!\n";
 	return false;
 }
 
@@ -123,10 +142,23 @@ int decideWS1S(Automaton & aut, TSatExample & example, TUnSatExample & counterEx
 	StateHT allStates;
 	aut.RemoveUnreachableStates(&allStates);
 
+	/*TransMTBDD * tbdd = getMTBDDForStateTuple(aut, Automaton::StateTuple({}));
+	std::cout << "Leaf : bdd\n";
+	std::cout << TransMTBDD::DumpToDot({tbdd}) << "\n\n";
+	// Dump bdds
+	for (auto state : allStates) {
+		TransMTBDD* bdd = getMTBDDForStateTuple(aut, Automaton::StateTuple({state}));
+		std::cout << state << " : bdd\n";
+		std::cout << TransMTBDD::DumpToDot({bdd}) << "\n\n";
+	}*/
+
 	FinalStatesType fm;
 	fm = computeFinalStates(aut);
 
 	bool hasExample = existsSatisfyingExample(aut, initialState, formulaPrefixSet);
+	// TODO: remove
+	//bool hasExample = true;
+	////////////////////////
 	bool hasCounterExample = existsUnsatisfyingExample(aut, negInitialState, negFormulaPrefixSet);
 
 	// No satisfiable solution was found
@@ -134,7 +166,7 @@ int decideWS1S(Automaton & aut, TSatExample & example, TUnSatExample & counterEx
 		//counterExample = findUnsatisfyingExample();
 		return UNSATISFIABLE;
 	// There exists a satisfiable solution and does not exist an unsatisfiable solution
-	} else if (hasExample && !hasCounterExample) {
+	} else if (!hasCounterExample) {
 		//example = findSatisfyingExample();
 		return VALID;
 	// else there only exists a satisfiable solution
@@ -166,7 +198,8 @@ bool StateIsFinal(Automaton & aut, TStateSet* state, unsigned level, PrefixListT
 		return aut.IsStateFinal(q);
 	// level > 0
 	} else {
-		std::deque<TStateSet*> worklist;
+		StateSetList worklist;
+		StateSetList processed;
 		MacroStateSet* macroState = reinterpret_cast<MacroStateSet*>(state);
 		StateSetList states = macroState->getMacroStates();
 		for (auto state : states) {
@@ -176,21 +209,27 @@ bool StateIsFinal(Automaton & aut, TStateSet* state, unsigned level, PrefixListT
 		while (worklist.size() != 0) {
 			TStateSet* q = worklist.front();
 			worklist.pop_front();
+			processed.push_back(q);
+
 			if (StateIsFinal(aut, q, level - 1, prefix)) {
-				state->dump();
-				std::cout << " is NONFINAL\n";
+				//state->dump();
+				//std::cout << " is NONFINAL\n";
 				return false;
 			} else {
-				// TODO: THIS IS NOT DONE!!!!
 				// Enqueue all its successors
-				TStateSet* zeroSuccessor = GetZeroPost(aut, q, level, prefix);
-				if (zeroSuccessor != nullptr)
+				MacroStateSet* zeroSuccessor = GetZeroPost(aut, q, level-1, prefix);
+				if (isNotEnqueued(processed, q)) {
+					//std::cout << "Enqueing zero successor:\n";
+					//zeroSuccessor->dump();
+					//std::cout << "\n\n";
 					worklist.push_front(zeroSuccessor);
+				}
+				//////////////////////////////////////////////////////////
 			}
 		}
 
-		state->dump();
-		std::cout << " is FINAL\n";
+		//state->dump();
+		//std::cout << " is FINAL\n";
 		return true;
 	}
 
@@ -326,16 +365,13 @@ MacroStateSet* constructInitialState(Automaton & aut, unsigned numberOfDetermini
 	MTBDDLeafStateSet matrixInitialStates;
 	getInitialStatesOfAutomaton(aut, matrixInitialStates);
 	std::cout << "Initial states of original automaton corresponding to the matrix of formula are ";
-	std::cout << VATA::Util::Convert::ToString(matrixInitialStates) << "\n";
+	//std::cout << VATA::Util::Convert::ToString(matrixInitialStates) << "\n";
 
 	// first construct the set of leaf states
 	StateSetList states;
 	for (auto state : matrixInitialStates) {
 		states.push_back(new LeafStateSet(state));
 	}
-	// TODO: FOR NOW ////
-	//states.push_back(new LeafStateSet(1));
-	///////////////////
 
 	// now add some levels
 	MacroStateSet* ithState;
@@ -360,18 +396,13 @@ MacroStateSet* constructInitialState(Automaton & aut, unsigned numberOfDetermini
  * @param prefix: list of variables for projection
  * @return: zero post of initial @p state
  */
-TStateSet* GetZeroPost(Automaton & aut, TStateSet* state, unsigned level, PrefixListType & prefix) {
-	/*MacroStateSet *macroState = reinterpret_cast<MacroStateSet*>(state);
-	// get post for all states under lower level
-	// do the union of these posts
-	for (auto state: states) {
-		MacroStateSet* transMtbdd = GetMTBDDForPost(aut, state, level - 1, prefix);
-	}
-	// do the prefix thingie for 00000XXXX
-	// collect reachable states
-	StateSetList reachableStates;
-	return new MacroStateSet(reachableStates);*/
-	return nullptr;
+MacroStateSet* GetZeroPost(Automaton & aut, TStateSet*& state, unsigned level, PrefixListType & prefix) {
+	const MacroTransMTBDD & transPost = GetMTBDDForPost(aut, state, level, prefix);
+	//std::cout << MacroTransMTBDD::DumpToDot({&transPost});
+
+	// should return value for 0^k according to the implementation of GetValue()
+	MacroStateSet *postStates = transPost.GetValue(constructUniversalTrack());
+	return postStates;
 }
 
 int getProjectionVariable(unsigned level, PrefixListType & prefix) {

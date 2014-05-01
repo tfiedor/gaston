@@ -11,6 +11,7 @@ using std::cout;
 extern SymbolTable symbolTable;
 extern Options options;
 extern PredicateLib predicateLib;
+extern IdentList inFirstOrder;
 
 /**
  * Conversion of formula to Second Order, that means all the formulas are
@@ -30,7 +31,7 @@ ASTForm* ASTForm::toSecondOrder() {
 	if (allVars != 0) {
 		Ident* it = allVars->begin();
 		while(it != allVars->end()) {
-			if (symbolTable.lookupType(*it) == Varname1) {
+			if (symbolTable.lookupType(*it) == Varname1 && !inFirstOrder.exists(*it)) {
 				singleton = new ASTForm_FirstOrder(new ASTTerm1_Var1((*it), Pos()), Pos());
 				flattenedFormula = new ASTForm_And(singleton, flattenedFormula, Pos());
 			}
@@ -286,7 +287,10 @@ ASTForm* ASTForm_In::flatten() {
 		return substituteFreshIn(this->t1, this->T2);
 	} else {
 		ASTTerm2_Var2 *secondOrderX = new ASTTerm2_Var2(((ASTTerm1_Var1*)this->t1)->n, Pos());
-		return new ASTForm_Sub(secondOrderX, this->T2, Pos());
+		ASTForm_Sub* subX = new ASTForm_Sub(secondOrderX, this->T2, Pos());
+		ASTForm_FirstOrder *singleton = new ASTForm_FirstOrder(new ASTTerm1_Var1(((ASTTerm1_Var1*)this->t1)->n, Pos()), Pos());
+		inFirstOrder.insert(((ASTTerm1_Var1*)this->t1)->n);
+		return new ASTForm_And(singleton, subX, Pos());
 	}
 	return this;
 }

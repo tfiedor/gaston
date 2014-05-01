@@ -22,7 +22,6 @@ using Automaton = VATA::BDDBottomUpTreeAut;
  *
  * @param[out] trueAutomaton: created automaton
  * @param doComplement: whether automaton should be complemented
- * TODO: do Complement
  */
 void ASTForm_True::toUnaryAutomaton(Automaton &trueAutomaton, bool doComplement) {
     // (X^k) -> q0
@@ -40,7 +39,6 @@ void ASTForm_True::toUnaryAutomaton(Automaton &trueAutomaton, bool doComplement)
  *
  * @param[out] falseAutomaton: created automaton
  * @param doComplement: whether automaton should be complemented
- * TODO: do Complement
  */
 void ASTForm_False::toUnaryAutomaton(Automaton &falseAutomaton, bool doComplement) {
 	// (X^k) -> q0
@@ -218,7 +216,6 @@ void ASTForm_Sub::toUnaryAutomaton(Automaton &aut, bool doComplement) {
 
 /**
  * Constructs automaton for formula denoting, that set is a singleton
- * TODO: Determinize
  *
  * @return Automaton corresponding to the formula Singleton(X)
  */
@@ -226,11 +223,8 @@ void ASTForm_FirstOrder::toUnaryAutomaton(Automaton &aut, bool doComplement) {
 	ASTTerm2_Var2 *XVar = (ASTTerm2_Var2*) this->t;
 	unsigned int X = (unsigned int) XVar->n;
 
-	// -(x0x)-> q0
-	addTransition(aut, Automaton::StateTuple(), X, '0', 0);
-
-	// -(x1x)-> q1
-	addTransition(aut, Automaton::StateTuple(), X, '1', 0);
+	// -(xxx)-> q0
+	addUniversalTransition(aut, Automaton::StateTuple({}), 0);
 
 	// q0 -(x0x)-> q0
 	addTransition(aut, Automaton::StateTuple({0}), X, '0', 0);
@@ -241,7 +235,14 @@ void ASTForm_FirstOrder::toUnaryAutomaton(Automaton &aut, bool doComplement) {
 	// q1 -(x0x)-> q1
 	addTransition(aut, Automaton::StateTuple({1}), X, '0', 1);
 
+	// q1 -(x1x)-> q2
+	addTransition(aut, Automaton::StateTuple({1}), X, '1', 2);
+
+	// q2 -(xxx)-> q2
+	addUniversalTransition(aut, Automaton::StateTuple({2}), 2);
+
 	// final state q1
 	setNonFinalState(aut, doComplement, 0);
 	setFinalState(aut, doComplement, 1);
+	setNonFinalState(aut, doComplement, 2);
 }
