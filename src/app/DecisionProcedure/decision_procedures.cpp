@@ -1,5 +1,4 @@
 #include <cstdio>
-#include <deque>
 #include "environment.hh"
 #include "decision_procedures.hh"
 
@@ -45,11 +44,11 @@ bool existsSatisfyingExample(Automaton & aut, MacroStateSet* initialState, Prefi
 
 	StateSetList worklist;
 	StateSetList processed;
-	worklist.push_front(initialState);
+	worklist.push_back(initialState);
 
 	while(worklist.size() != 0) {
-		TStateSet* q = worklist.front();
-		worklist.pop_front();
+		TStateSet* q = worklist.back();
+		worklist.pop_back();
 		processed.push_back(q);
 
 		//std::cout << "Getting state from worklist: ";
@@ -207,8 +206,8 @@ bool StateIsFinal(Automaton & aut, TStateSet* state, unsigned level, PrefixListT
 		}
 
 		while (worklist.size() != 0) {
-			TStateSet* q = worklist.front();
-			worklist.pop_front();
+			TStateSet* q = worklist.back();
+			worklist.pop_back();
 			processed.push_back(q);
 
 			if (StateIsFinal(aut, q, level - 1, prefix)) {
@@ -222,7 +221,7 @@ bool StateIsFinal(Automaton & aut, TStateSet* state, unsigned level, PrefixListT
 					//std::cout << "Enqueing zero successor:\n";
 					//zeroSuccessor->dump();
 					//std::cout << "\n\n";
-					worklist.push_front(zeroSuccessor);
+					worklist.push_back(zeroSuccessor);
 				}
 				//////////////////////////////////////////////////////////
 			}
@@ -447,8 +446,8 @@ MacroTransMTBDD GetMTBDDForPost(Automaton & aut, TStateSet* state, unsigned leve
 		MacroStateSet* mState = reinterpret_cast<MacroStateSet*>(state);
 		StateSetList states = mState->getMacroStates();
 		// get post for all states under lower level
-		TStateSet* front = states.front();
-		states.pop_front();
+		TStateSet* front = states.back();
+		states.pop_back();
 		MacroStateDeterminizatorFunctor msdf;
 		MacroUnionFunctor muf;
 
@@ -465,8 +464,8 @@ MacroTransMTBDD GetMTBDDForPost(Automaton & aut, TStateSet* state, unsigned leve
 		//std::cout << "\n\n";
 		// do the union of posts represented as mtbdd
 		while(!states.empty()) {
-			front = states.front();
-			states.pop_front();
+			front = states.back();
+			states.pop_back();
 			const MacroTransMTBDD & nextPost = GetMTBDDForPost(aut, front, level-1, prefix);
 			//std::cout << "BDD before projection: " << MacroTransMTBDD::DumpToDot({&nextPost});
 			//std::cout << "BDD after projection: " << MacroTransMTBDD::DumpToDot({&detResultMtbdd});

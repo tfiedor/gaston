@@ -1,7 +1,7 @@
 #ifndef __STATE_SET__
 #define __STATE_SET__
 
-#include <deque>
+#include <vector>
 #include <iostream>
 #include <sstream>
 #include <string>
@@ -13,7 +13,7 @@ class LeafStateSet;
 
 // < Typedefs >
 typedef size_t StateType;
-typedef std::deque<TStateSet*> StateSetList;
+typedef std::vector<TStateSet*> StateSetList;
 
 // < Enums >
 enum {SET, STATE, MACROSTATE};
@@ -24,8 +24,10 @@ enum {SET, STATE, MACROSTATE};
 class TStateSet {
 private:
 public:
+	// < Public Members >
+	unsigned int type;
+
 	// < Public Methods >
-	virtual int getType() {return SET;}
 	virtual void dump() {}
 	virtual bool DoCompare(TStateSet*) {return false;};
 	virtual std::string ToString() {}
@@ -45,10 +47,9 @@ private:
 
 public:
 	// < Public Methods >
-	LeafStateSet (StateType q) : state(q), stateIsSink(false) {}
+	LeafStateSet (StateType q) : state(q), stateIsSink(false) {type = STATE;}
 	LeafStateSet () : state(-1), stateIsSink(true) {}
 
-	int getType() {return STATE;}
 	void dump();
 	std::string ToString();
 	bool isSink() {return this->stateIsSink; }
@@ -63,8 +64,7 @@ public:
 	 * @return: true if they are the same
 	 */
 	bool DoCompare(TStateSet* lhs) {
-		int lhsType = lhs->getType();
-		if (lhsType == MACROSTATE) {
+		if (lhs->type == MACROSTATE) {
 			return false;
 		} else {
 			LeafStateSet *lhss = dynamic_cast<LeafStateSet*>(lhs);
@@ -98,9 +98,8 @@ private:
 
 public:
 	// < Public Methods >
-	MacroStateSet (StateSetList Q) : macroStates(Q) {}
+	MacroStateSet (StateSetList Q) : macroStates(Q) { type = MACROSTATE;}
 
-	int getType() {return MACROSTATE;}
 	void dump();
 	std::string ToString();
 	StateSetList getMacroStates();
@@ -114,9 +113,7 @@ public:
 	 * @return: true if they are the same
 	 */
 	bool DoCompare(TStateSet* lhs) {
-		int lhsType = lhs->getType();
-
-		if (lhsType == STATE) {
+		if (lhs->type == STATE) {
 			return false;
 		} else {
 			MacroStateSet* lhss = dynamic_cast<MacroStateSet*>(lhs);

@@ -4,7 +4,7 @@
 #include "../Frontend/predlib.h"
 #include "environment.hh"
 #include <cstring>
-#include <deque>
+#include <vector>
 
 using std::cout;
 
