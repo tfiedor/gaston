@@ -121,11 +121,8 @@ void ASTForm_Equal2::toUnaryAutomaton(Automaton &aut, bool doComplement) {
 		unsigned int X = XTerm->n;
 		ASTTerm2_Var2* YTerm = (ASTTerm2_Var2*) ((ASTTerm2_Plus*) this->T2)->T;
 		unsigned int Y = YTerm->n;
-		// (x00x) -> q0
-		addTransition(aut, Automaton::StateTuple(), X, Y, (char *) "00", 0);
-
-		// (x10x) -> q0
-		addTransition(aut, Automaton::StateTuple(), X, Y, (char *) "10", 0);
+		// (xxxx) -> q0
+		addUniversalTransition(aut, Automaton::StateTuple(), 0);
 
 		// q0 -(x00x)-> q0
 		addTransition(aut, Automaton::StateTuple({0}), X, Y, (char *) "00", 0);
@@ -133,16 +130,41 @@ void ASTForm_Equal2::toUnaryAutomaton(Automaton &aut, bool doComplement) {
 		// q0 -(x10x)-> q1
 		addTransition(aut, Automaton::StateTuple({0}), X, Y, (char *) "10", 1);
 
+		// q0 -(x01x)-> q3
+		addTransition(aut, Automaton::StateTuple({0}), X, Y, (char *) "01", 3);
+
+		// q0 -(x11x)-> q3
+		addTransition(aut, Automaton::StateTuple({0}), X, Y, (char *) "11", 3);
+
 		// q1 -(x01x)-> q2
 		addTransition(aut, Automaton::StateTuple({1}), X, Y, (char *) "01", 2);
 
+		// q1 -(x00x)-> q3
+		addTransition(aut, Automaton::StateTuple({1}), X, Y, (char *) "00", 3);
+
+		// q1 -(x10x)-> q3
+		addTransition(aut, Automaton::StateTuple({1}), X, Y, (char *) "10", 3);
+
+		// q1 -(x11x)-> q3
+		addTransition(aut, Automaton::StateTuple({1}), X, Y, (char *) "11", 3);
+
 		// q2 -(x00x)-> q2
 		addTransition(aut, Automaton::StateTuple({2}), X, Y, (char *) "00", 2);
+
+		// q2 -(x01x)-> q3
+		addTransition(aut, Automaton::StateTuple({2}), X, Y, (char *) "01", 3);
+
+		// q2 -(x10x)-> q3
+		addTransition(aut, Automaton::StateTuple({2}), X, Y, (char *) "10", 3);
+
+		// q2 -(x11x)-> q3
+		addTransition(aut, Automaton::StateTuple({2}), X, Y, (char *) "11", 3);
 
 		// set q2 final
 		setNonFinalState(aut, doComplement, 0);
 		setNonFinalState(aut, doComplement, 1);
 		setFinalState(aut, doComplement, 2);
+		setNonFinalState(aut, doComplement, 3);
 
 	// 2) T1 = T2
 	} else if (this->T1->kind == aVar2 && this->T2->kind == aVar2) {
@@ -151,11 +173,8 @@ void ASTForm_Equal2::toUnaryAutomaton(Automaton &aut, bool doComplement) {
 		ASTTerm2_Var2* T2Term = (ASTTerm2_Var2*) this->T2;
 		unsigned int T2 = T2Term->n;
 
-		// (x00x) -> q0
-		addTransition(aut, Automaton::StateTuple(), T1, T2, (char *) "00", 0);
-
-		// (x11x) -> q0
-		addTransition(aut, Automaton::StateTuple(), T1, T2, (char *) "11", 0);
+		// (xxxx) -> q0
+		addUniversalTransition(aut, Automaton::StateTuple(), 0);
 
 		// q0 -(x00x)-> q0
 		addTransition(aut, Automaton::StateTuple({0}), T1, T2, (char *) "00", 0);
@@ -163,19 +182,43 @@ void ASTForm_Equal2::toUnaryAutomaton(Automaton &aut, bool doComplement) {
 		// q0 -(x11x)-> q0
 		addTransition(aut, Automaton::StateTuple({0}), T1, T2, (char *) "11", 0);
 
+		// q0 -(x01x)-> q1
+		addTransition(aut, Automaton::StateTuple({0}), T1, T2, (char *) "01", 1);
+
+		// q0 -(x10x)-> q1
+		addTransition(aut, Automaton::StateTuple({0}), T1, T2, (char *) "10", 1);
+
+		// q1 -(xxxx)-> q1
+		addUniversalTransition(aut, Automaton::StateTuple({1}), 1);
+
 		// set q0 final
 		setFinalState(aut, doComplement, 0);
+		setNonFinalState(aut, doComplement, 1);
 	// 3) X = e
 	// this should be X = {0} hopefully
 	} else {
 		ASTTerm2_Var2 *XTerm = (ASTTerm2_Var2*) this->T1;
 		unsigned int X = XTerm->n;
 
-		// (x1x)-> q0
-		addTransition(aut, Automaton::StateTuple(), X, '1', 0);
+		// (xxx)-> q0
+		addUniversalTransition(aut, Automaton::StateTuple({}), 0);
+
+		// q0 -(x1x)-> q1
+		addTransition(aut, Automaton::StateTuple({0}), X, '1', 1);
+
+		// q0 -(x0x)-> q2
+		addTransition(aut, Automaton::StateTuple({0}), X, '0', 2);
+
+		// q1 -(xxx)-> q2
+		addUniversalTransition(aut, Automaton::StateTuple({1}), 2);
+
+		// q2 -(xxx)-> q2
+		addUniversalTransition(aut, Automaton::StateTuple({2}), 2);
 
 		// set q0 final
-		setFinalState(aut, doComplement, 0);
+		setNonFinalState(aut, doComplement, 0);
+		setFinalState(aut, doComplement, 1);
+		setNonFinalState(aut, doComplement, 2);
 	}
 }
 
