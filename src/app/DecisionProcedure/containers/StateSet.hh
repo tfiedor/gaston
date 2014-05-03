@@ -67,7 +67,9 @@ public:
 		if (lhs->type == MACROSTATE) {
 			return false;
 		} else {
-			LeafStateSet *lhss = dynamic_cast<LeafStateSet*>(lhs);
+			// TODO: THIS MAY BE SUICIDAL!!!!
+			//LeafStateSet *lhss = reinterpret_cast<LeafStateSet*>(lhs);
+			LeafStateSet* lhss = (LeafStateSet*)(lhs);
 			return this->state == lhss->getState();
 		}
 	}
@@ -116,7 +118,9 @@ public:
 		if (lhs->type == STATE) {
 			return false;
 		} else {
-			MacroStateSet* lhss = dynamic_cast<MacroStateSet*>(lhs);
+			// TODO: THIS MAY BE SUICIDAL!!!!
+			//MacroStateSet* lhss = reinterpret_cast<MacroStateSet*>(lhs);
+			MacroStateSet* lhss = (MacroStateSet*)(lhs);
 			StateSetList lhsStates = lhss->getMacroStates();
 
 			if(lhsStates.size() != this->macroStates.size()) {

@@ -13,6 +13,8 @@ extern Options options;
 extern PredicateLib predicateLib;
 extern IdentList inFirstOrder;
 
+#define SMART_FLATTEN
+
 /**
  * Conversion of formula to Second Order, that means all the formulas are
  * flattened according to certain rules and all first-order variables are
@@ -286,11 +288,16 @@ ASTForm* ASTForm_In::flatten() {
 	if (this->t1->kind != aVar1) {
 		return substituteFreshIn(this->t1, this->T2);
 	} else {
+#ifdef SMART_FLATTEN
+		inFirstOrder.insert(((ASTTerm1_Var1*)this->t1)->n);
+		return this;
+#else
 		ASTTerm2_Var2 *secondOrderX = new ASTTerm2_Var2(((ASTTerm1_Var1*)this->t1)->n, Pos());
 		ASTForm_Sub* subX = new ASTForm_Sub(secondOrderX, this->T2, Pos());
 		ASTForm_FirstOrder *singleton = new ASTForm_FirstOrder(new ASTTerm1_Var1(((ASTTerm1_Var1*)this->t1)->n, Pos()), Pos());
 		inFirstOrder.insert(((ASTTerm1_Var1*)this->t1)->n);
 		return new ASTForm_And(singleton, subX, Pos());
+#endif
 	}
 	return this;
 }

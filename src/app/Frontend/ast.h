@@ -800,6 +800,9 @@ public:
   ASTForm* clone() { return new ASTForm_In(this->t1, this->T2, this->pos); }
 
   ASTForm* flatten();
+
+  // Conversion of AST representation of formula to Automaton
+  void toUnaryAutomaton(Automaton &aut, bool doComplement);
 };
 
 class ASTForm_Notin: public ASTForm_tT {

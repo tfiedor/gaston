@@ -289,3 +289,43 @@ void ASTForm_FirstOrder::toUnaryAutomaton(Automaton &aut, bool doComplement) {
 	setFinalState(aut, doComplement, 1);
 	setNonFinalState(aut, doComplement, 2);
 }
+
+/**
+ * Constructs automaton for formula denoting that x is in X
+ *
+ * @return Automaton corresponding to the formula x in X
+ */
+void ASTForm_In::toUnaryAutomaton(Automaton &aut, bool doComplement) {
+	ASTTerm2_Var2 *XVar = (ASTTerm2_Var2*) this->T2;
+	unsigned int X = (unsigned int) XVar->n;
+	ASTTerm1_Var1 *xVar = (ASTTerm1_Var1*) this->t1;
+	unsigned int x = (unsigned int) xVar->n;
+
+	// -(xxx)-> q0
+	addUniversalTransition(aut, Automaton::StateTuple({}), 0);
+
+	// q0 -(x00x)-> q0
+	addTransition(aut, Automaton::StateTuple({0}), x, X, (char *) "00", 0);
+
+	// q0 -(x01x)-> q0
+	addTransition(aut, Automaton::StateTuple({0}), x, X, (char *) "01", 0);
+
+	// q0 -(x11x)-> q1
+	addTransition(aut, Automaton::StateTuple({0}), x, X, (char *) "11", 1);
+
+	// q0 -(x10x)-> q2
+	addTransition(aut, Automaton::StateTuple({0}), x, X, (char *) "10", 2);
+
+	// q1 -(x0Xx)-> q1
+	addTransition(aut, Automaton::StateTuple({1}), x, X, (char *) "0X", 1);
+
+	// q1 -(x1Xx)-> q2
+	addTransition(aut, Automaton::StateTuple({1}), x, X, (char *) "1X", 2);
+
+	// q2 -(xXXx)-> q2
+	addUniversalTransition(aut, Automaton::StateTuple({2}), 2);
+
+	setNonFinalState(aut, doComplement, 0);
+	setFinalState(aut, doComplement, 1);
+	setNonFinalState(aut, doComplement, 2);
+}
