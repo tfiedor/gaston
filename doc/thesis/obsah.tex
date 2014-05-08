@@ -10,7 +10,7 @@ separation logic, and all the way to the more complex monadic second-order
 logics, like WS$k$S \cite{wsks}. However, with great expressiveness comes great
 complexity of decision problems of these logics, ranging from NP-complete for
 propositional logic, through PSPACE-complete for quantified Boolean formulae,
-with some stronger logics not being decidable att all.
+with some stronger logics not being decidable at all.
 
 WS$k$S stands for \emph{weak monadic second-order logic of $k$ successors}.
 Roughly, this means that it allows to quantify over finite set variables where
@@ -378,7 +378,7 @@ $L(\mathcal{A})$
 \end{proof}
 
 Note that for non-deterministic tree automata there is currently known no
-procedure better than first bottom-up detereminizing the automaton and then
+procedure better than first bottom-up determinizing the automaton and then
 complementing it using the construct above.
 
  \subsection{Relations on Trees}
@@ -756,7 +756,7 @@ variables are removed. We are using the following transformations, where $Q \in
 	 Qx.\phi \circ \psi & \equiv & Qx(\phi \circ \psi)\label{one}\\
 	 \phi \circ Qx.\psi & \equiv & Qx(\phi \circ \psi)\label{two}\\
 	\end{eqnarray}
-Note that there has to be no free occurences of quantified variable $x$ in
+Note that there has to be no free occurrences of quantified variable $x$ in
 $\psi$ and $\phi$ in formulae \ref{one} and \ref{two} respectively.
 	
 All universal quantifiers are transformed to existential quantifier
@@ -833,7 +833,7 @@ such that $(S_1,\ldots,S_n) \models_2 \phi$ if and only if
 $(S_1,\ldots,S_n)^\sim \in L(\mathcal{A}_\phi)$.
 \end{proof}
 
-In the following we limit ourself to the case when $k = 2$; an extension to an
+In the following we limit ourselves to the case when $k = 2$; an extension to an
 arbitrary $k$ is straightforward. As induction base, with for each atomic
 subformula of $\psi$ we construct the automaton $\mathcal{A}_{\psi}$ according
 to the following rules:
@@ -869,7 +869,7 @@ Note that the automaton for $X = Y2$ is obtained similarly by changing $(q', q)
 \overset{01}{\longrightarrow} q''$ to $(q, q') \overset{01}{\longrightarrow}
  q''$.
  \item[-] The automaton $\mathcal{A}_{X = \epsilon} = (\{q, q'\}, \{0, 1,
- \bot\}, \{q'\}, \delta$), where $\delta$ is efined as follows:
+ \bot\}, \{q'\}, \delta$), where $\delta$ is defined as follows:
 \begin{eqnarray*}
   & \overset{\bot}{\longrightarrow} & q\\
  (q, q) & \overset{1}{\longrightarrow}& q'
@@ -897,11 +897,11 @@ $\wedge$, $\neg$ and $\exists$ (as defined in the restricted syntax):
  $\mathcal{A}_{\psi_1}$.
 \end{itemize}
 
-In implementation terms existentional quantification is therefore equivalent to
+In implementation terms existential quantification is therefore equivalent to
 operation of projection on automaton transition. This raises an issue with final
 states of constructed automaton $\mathcal{A}$, since projection erases some of
-the transition tracks of automaton and thus intruduces non-determinism. Such automaton has to
-be determinized yielding DTA $\mathcal{A}$'.
+the transition tracks of automaton and thus introduces non-determinism. Such automaton has to
+be determinised yielding DTA $\mathcal{A}$'.
 
 However automaton $\mathcal{A}'$ is not enough, since searched witness of some
 model can be longer after operation of projection. Final states
@@ -928,7 +928,7 @@ Now we define a language $L^i$ as
  
  In \textsc{MONA} \cite{mona} this is done in $\mathcal{O}(n)$ time by using
  breath-first search by backwards exploration of the automaton from final
- states followed by subset construction fo determinized automaton yielding only
+ states followed by subset construction of determinised automaton yielding only
  reachable states.
 
 \begin{prop}
@@ -946,7 +946,7 @@ Now we define a language $L^i$ as
  Sing(P) \wedge P \not\subseteq X
   \end{equation}
   Deciding validity of $\rho$ consists of constructing automaton
-  $\mathcal{A}_\rho$ corresponding to the formula $\rho$ and then afterwards
+  $\mathcal{A}_\rho$ corresponding to the formula $\rho$ and then afterward
   check the language $L(\mathcal{A}_\rho)$ for universality, i.e. if any
   non-accepting state is reachable. As depicted at Figure \ref{automata} we
   first construct automata $\mathcal{A}_{\mathit{Sing}(P)}$ and
@@ -1010,7 +1010,7 @@ automata.
 
 So every time non-determinism is introduced to automaton it is determinised and
 the information about the original states is forgotten. So \textsc{MONA}
-approach has issues with extensive us of automat complementation and since there
+approach has issues with extensive us of automaton complementation and since there
 is no known tree automaton complementation technique better than bottom-up
 determinization of automaton with complementation of the set of final states,
 \textsc{MONA} had to come up with heavy optimizations and heuristic to achieve
@@ -1125,80 +1125,84 @@ above.
 
  \chapter{Deciding WS$k$S with Non-deterministic Automata}\label{our}
 
-The \textsc{MONA} implementation of the decision procedure for WS$k$S from
+The \textsc{MONA} tool implementation of the decision procedure for WS$k$S from
 Section \ref{classical} uses deterministic bottom-up tree automata (as described
 in Chapter \ref{monachap}) and so every time non-determinism might have been
-introduced, such as union and projection corresponding to the disjunction and
-existential quantification respectively, the automaton is determinised using the
+introduced, such through union and projection corresponding to disjunction
+and existential quantification respectively, the automaton is determinised using the
 subset construction and the information about the original states is forgotten.
 
 So this approach has issues with extensive usage of automaton complementation,
-since for every negation of the formula $\neg\phi$ we have to do the
+since for every negation of the formula $\phi$ we have to do the
 complementation of the corresponding tree automaton, which is done in
-exponential time. Moreover every alternation of quantifiers yields two
-negations. Currently there is no known tree automaton complementation technique
-better than bottom-up determinization of the automaton (which yields exponential
-number of states), followed by complementing the set of final states of the
-resulting deterministic automaton. MONA tool is thus heavily optimized for the
-use of deterministic finite (tree) automata, as we introduced in
+exponential time. Moreover, every alternation of quantifiers yields a
+negation. Currently there is no known tree automaton complementation technique
+better than bottom-up determinization of the automaton (which yields
+an exponential number of states), followed by complementing the set of final
+states of the resulting deterministic automaton. The MONA tool is thus heavily
+optimized for the use of deterministic finite (tree) automata, as we introduced in
 \ref{monasecrets}.
 
-In practice the representation of all models of $\phi$ is then not necessary and
-any model or an invalid assignment to free variables suffices, therefore
+In practice, the representation of all models of $\phi$ is not always necessary
+and any model or an invalid assignment to free variables suffices, therefore
 constructing the automaton $\mathcal{A}_{\phi}$ representing all models of
 $\phi$ can be avoided.
 
 Current trends in formal verification and theory of automata tends to use
-non-deterministic automata instead of deterministic ones. This is due to the
-fact that there exist optimized libraries for their usage, like VATA
+non-deter\-ministic automata instead of deterministic ones. This is due to the
+fact that there exist optimized libraries for their use, like VATA
 \cite{vata}, and recently new algorithms that are efficient in practice
 were developed even for time complex operations like language inclusion or
 universality testing, which are PSPACE-complete for finite word automata and
 EXPTIME-complete for tree automata.
 
-Here we propose to use algorithm based on the principle of antichains
-\cite{tacas}, as defined in the following section, and search for an accepting
+Here we propose to use an algorithm based on the principle of antichains
+\cite{tacas}, defined in the following sections, and search for an accepting
 or non-accepting state \emph{on-the-fly} without constructing the automaton in
 the first place.
 
-\section{Antichain based universality testing}
+\section{Antichain-based universality testing of NFAs}
 
 We will give a brief introduction to universality testing for non-deterministic
-finite word automata and tree automata by an algorithm that uses a combination
-of the simulation-based and the antichain-based approach \cite{tacas}.
+finite word automata by an algorithm that uses a combination
+of the simulation-based and the antichain-based approaches \cite{tacas}.
 
 \begin{defz}
-A~\emph{simulation} on a finite automata $\mathcal{A} = (Q, \Sigma, \delta, I,
-F)$ is a relation $\preceq \subseteq Q \times Q$ such that $p \preceq r$ only if
-(i) $p \in F \Rightarrow r \in F$ and (ii) for every transition $p
-\overset{a}{\longrightarrow} p'$, there exists a transition $r
+A~\emph{simulation} on a finite automaton $\mathcal{A} = (Q, \Sigma, \delta, I,
+F)$ is a relation $\preceq \subseteq Q \times Q$ such that $p \preceq r$ implies
+the following two conditions (i) $p \in F \Rightarrow r \in F$ and (ii) for
+every transition $p \overset{a}{\longrightarrow} p'$, there exists a transition $r
 \overset{a}{\longrightarrow} r'$ such that $p' \preceq r'$.
 \end{defz}
 
 Further we call a set of states in $\mathcal{A}$, i.e. a subset of $Q$, a
 \emph{macro-state} and we use $A^{\subseteq}$ to denote a set of relations over
-the states of $\mathcal{A}$ that imply language inclusion.
+the states of $\mathcal{A}$ that imply language inclusion, that is for all
+$\leqq \in A^{\subseteq}$ $p \leqq r \Rightarrow L(p) \subseteq L(r)$.
 
 \begin{lemma}
-Given a simulation $\preceq$ on a NFA $\mathcal{A}$, $p \preceq r \Rightarrow
-L_\mathcal{A}(p) \subseteq L_\mathcal{A}(r)$ \cite{tacas}.
+Given a simulation $\preceq \in A^{\subseteq}$ on a NFA $\mathcal{A}$, $p
+\preceq r \Rightarrow L_\mathcal{A}(p) \subseteq L_\mathcal{A}(r)$.
 \end{lemma}
 
-\subsection{Universality of NFAs}\label{NFAuniv}
+\begin{proof}
+A proof can be found in \cite{tacas}.
+\end{proof}
 
 The universality problem for a NFA $\mathcal{A} = (Q, \Sigma, \delta, I, F)$ is
 to decide whether $L(\mathcal{A}) = \Sigma^*$. The problem is PSPACE-complete.
 
 The naive algorithm performs determinization using a subset construction to
 obtain a~deterministic automaton $\mathcal{A}_D$, then complements it to obtain
-$\overline{\mathcal{A}}_D$ and finally checks that there is no reachable
-accepting state in $\overline{\mathcal{A}}_D$.
+$\overline{\mathcal{A}_D}$ and finally checks that there is no reachable
+accepting state in $\overline{\mathcal{A}_D}$ (in case there is, the language
+is not universal).
 
-Proposed algorithm \cite{tacas} runs the subset construction procedure
-on-the-fly, avoiding explicit construction of $\overline{\mathcal{A}}_D$, and
-checks if any rejecting macro-state is reachable. However this procedure is
-further augmented with two optimizations. We define post-image of a~state as
-$Post(P) = \{p'\ |\ \exists a \in \Sigma: (p, a, p') \in \delta\}$.
+The algorithm proposed in \cite{tacas} runs the subset construction procedure
+on-the-fly, avoiding explicit construction of $\overline{\mathcal{A}_D}$, and
+checks if any accepting macro-state is reachable. This procedure is
+further augmented with two optimizations. We define the post-image of a~state as
+$Post(p) = \{p'\in Q\ |\ \exists a \in \Sigma: (p, a, p') \in \delta\}$.
 
 The first optimization is based on the following lemma.
 
@@ -1211,93 +1215,98 @@ The first optimization is based on the following lemma.
 \end{lemma}
 
 The relation $\preceq$ can be any relation on the states of $\mathcal{A}$ that
-implies language inclusion, e.g. maximal simulation or the identity relation
-(then this is the so called antichain approach).
-
-The second optimization is based on the observation that $L_\mathcal{A}(P) =
-L_\mathcal{A}(P - \{p_1\})$ if there is some $p_2 \in P \setminus \{p_1\}$ such
+implies language inclusion, e.g. the maximum simulation or the identity
+relation. The other optimization is based on the observation that
+$L_\mathcal{A}(P) = L_\mathcal{A}(P - \{p_1\})$ if there is some $p_2 \in P \setminus \{p_1\}$ such
 that $p_1 \preceq p_2$, which is a simple consequence of Lemma \ref{lemma2}.
 
-\begin{algorithm}[hb!]
+\begin{algorithm}[ht!]
 		\SetKwFor{For}{foreach}{do}{}
 		\SetKwRepeat{Repeat}{repeat}{until}
-		\KwIn{An initial state $I$ of automaton $\mathcal{A}$, a simulation relation
-		$\leq \subseteq Q_\mathcal{A} \times Q_\mathcal{A}$ on states of
-		$\mathcal{A}$, successor function $\delta$ and a predicate $IsAccepting(F)$ that decides whether state $F$ is
-		final}
+		\KwIn{A state $I$ of automaton $\mathcal{A}$, a simulation relation
+		$\leqq \subseteq A^{\subseteq}$ on states of
+		$\mathcal{A}$, a successor function $\delta$ and a predicate
+		\texttt{IsAccepting(F)} that decides whether state $F$ is final}
 		\KwOut{\textsc{TRUE} iff there exists a reachable final state in
 		$\mathcal{A}$,
 		\textsc{FALSE} otherwise}
 		\BlankLine
 				\SetKwProg{myproc}{Function}{}{}
 		\BlankLine
-  \myproc{CheckForReachableState(state I, level i, post function $\delta$, pred
-  IsAccepting)}{
-    \uIf{IsAccepting(I)}{\Return \textsc{TRUE}\;}
-		$Processed := \emptyset$\;
-		$Next := \{I\}$\;
-		\While{$Next \neq \emptyset$}{
-		  Pick and remove a macro-state $R$ from $Next$ and move it to $Processed$\;
-			\For{$P \in \delta(R)$}{
-			 \uIf{IsAccepting(P)}{\Return \textsc{TRUE}\;}
-			 \uIf{$\neg\exists S~\in Processed \cup Next$ s.t. $S \leq P$}{
-			  Remove all $S$ from $Processed \cup Next$ s.t. $P \leq S$\;
-				Add $P$ to $Next$\;
+  \myproc{\upshape \texttt{CheckForReachableState}(\textbf{state} I, level i,
+  \textbf{post function} $\delta$, \textbf{pred} \texttt{IsAccepting})}{
+    \nl\uIf{\upshape \texttt{IsAccepting}(I)}{
+    	\nl\Return \textsc{TRUE}\;}
+		\nl $Processed := \emptyset$\;
+		\nl $Next := \{I\}$\;
+		\nl\While{$Next \neq \emptyset$}{
+		  \nl Pick and remove a macro-state $R$ from $Next$ and move it to
+		  $Processed$\;
+			 \nl \uIf{\upshape \texttt{IsAccepting}(R)}{\nl \Return \textsc{TRUE}\;}
+			\nl \For{$P \in \delta(R)$}{
+			 \nl \uIf{$\neg\exists S~\in Processed \cup Next$ s.t. $P \leqq S$}{
+			  \nl Remove all $S$ from $Processed \cup Next$ s.t. $S \leqq P$\;
+				\nl Add $P$ to $Next$\;
 			 }
 			}
 		}
-		\Return \textsc{FALSE}\;
+		\nl \Return \textsc{FALSE}\;
 		}
 		\caption{Checking reachability of an
 		accepting state using optimized algorithm\cite{tacas}}\label{universality}
 	\end{algorithm}
 	
-The algorithm works as follows. While there are macro-states to be processed,
-and no accepting macro-state has been found, one of the macro-states from $Next$
+The algorithm \ref{universality} works as follows. While there are macro-states
+to be processed, and no accepting macro-state has been found, one of the macro-states from $Next$
 is chosen and moved to the $Processed$ set. All successors of the macro-state are
 generated, minimized and moved to $Next$ unless there is already some
-$\leq$-smaller macro-state in $Next$ or in $Processed$. If a
+$\preceq$-smaller macro-state in $Next$ or in $Processed$. If a
 new macro-state is added to $Next$, then all the
-$\leq$-bigger states are pruned out of both $Next$ and
+$\preceq$-bigger states are pruned out of both $Next$ and
 $Processed$.
-	
-\begin{lemma}\label{search-is-correct}
- Algorithm \ref{universality} returns \textsc{TRUE} iff it reaches an accepting
- state.
-\end{lemma}
-\begin{proof}
- Proof can be found in \cite{raskin}.
-\end{proof}
 
-Now testing the universality of of automaton $\mathcal{A}$ is equivalent to
+Testing the universality of an automaton $\mathcal{A}$ is equivalent to
 searching for an accepting state in automaton $\mathcal{A}'$ obtained by
 determinization and complementation of final states.
+	
+\begin{lemma}\label{search-is-correct}
+ Given the automaton $\mathcal{A}$, function \texttt{CheckForReachableState()}
+ \ref{universality} returns \textsc{TRUE} iff there is a reachable accepting
+ state in $\mathcal{A}$.
+\end{lemma}
+\begin{proof}
+ A proof can be found in \cite{raskin}.
+\end{proof}
 
 \begin{lemma}\label{simulation-in-ca}
-Relation $\subseteq^{-1}$ is simulation on complemented automaton $\mathcal{A}$.
+Relation $\subseteq^{-1}$ is a simulation on the complemented automaton
+$\mathcal{A}'$.
 \end{lemma}
 \begin{proof}
  Proof can be found in \cite{raskin}
 \end{proof}
 
 \begin{lemma}
-Universality testing with use of Algorithm \ref{universality} is correct.
+The language of automaton $\mathcal{A}$ is universal if the Algorithm
+\ref{universal} returns \textsc{TRUE}
 \end{lemma}
 
 \noindent\hrulefill
 \begin{example}
-Consider testing validity of formula $\varphi$ from Example \ref{wsks-formula}.
-Given automaton $\mathcal{A}_\varphi$ corresponding to formula $\varphi$,
-testing validity of formula $\varphi$ is equivalent to testing universality of
-language $L(\mathcal{A}_\varphi)$.
+Consider testing validity of a formula $\varphi$ from Example
+\ref{wsks-formula}.
+Given automaton $\mathcal{A}_\varphi$ corresponding to the formula $\varphi$
+(see Section \ref{classical}), testing validity of $\varphi$ is
+equivalent to testing universality of the language $L(\mathcal{A}_\varphi)$.
 
-By classical approach by subset construction of automaton and search for
-accepting state 7 states are generated as depicted at Figure
+When using the textbook approach for testing universality (by using the subset
+construction and complementation), 7 states are generated as depicted in Figure
 \ref{compare} If we use the antichain-based approach, then macro-states $\{1,
-2\}$ and $\{1, 4\}$ are simulated by the initial state $\{1\}$ so we don't need
-to expand states any further. Since we didn't reach an accepting state, we can
-conclude that language of automaton $\mathcal{A}_\varphi$ is not universal and
-formula is thus invalid.
+2\}$ and $\{1, 4\}$ are simulated by the initial state $\{1\}$ so we can
+discard these states.
+Since we have not reached an accepting state, we can conclude that the language
+of the automaton $\mathcal{A}_\varphi$ is not universal and $\varphi$ is thus
+invalid.
 \end{example}
 
 \noindent\hrulefill
@@ -1306,32 +1315,31 @@ formula is thus invalid.
  \begin{center}
   \scalebox{0.5}{\includegraphics{fig/antichain-meets-projection.pdf}}
  \end{center}
- \caption{Comparison of the antichain-based (grey nodes) and the classical
- approach to universality checking of the automaton $\mathcal{A}_\psi$
+ \caption{Comparison of the antichain-based (grey nodes) and the classical (all
+ nodes) approach to universality checking of the automaton $\mathcal{A}_\psi$
  corresponding to the formula $\psi \overset{\mathit{def}}{=} \neg\exists P:
  Sing(P) \wedge\neg P \subseteq X$}\label{compare}
 \end{figure}
 
-\section{Deciding WS$k$S with NFAs}
+\section{Deciding WS1S with NFAs}
 
 Given formula $\phi$, construction of the automaton $\mathcal{A}_\phi$
-representing all models of formula $\phi$ is not necessary, since
-we noticed that representation of all models of the formula is not essential and
-usually any model or an invalid assignment suffices.
-Instead we can exploit the antichain-based techniques defined in previous
-section and search for the accepting or non-accepting state \emph{on-the-fly}
-pruning the search state.
+representing all models of $\phi$ is not always necessary and in many
+applications any model or an invalid assignment suffices.
+Therefore we can exploit the antichain-based techniques defined in previous
+section and search for an accepting or non-accepting state \emph{on-the-fly}
+while pruning the search space.
 
-First the formula $\phi$ is transformed to the logically equivalent formula
-$\varphi$ in existential prenex form (see Section \ref{restricted}):
+First, the formula $\phi$ is transformed to a logically equivalent formula
+$\varphi$ in the existential prenex form (see Section \ref{restricted}):
 \begin{equation*}
  \varphi \overset{\mathit{def}}{=}
  \exists\mathcal{X}_{m+1}\neg\mathcal{X}_m\neg\ldots\neg\exists\mathcal{X}_2\neg\exists\mathcal{X}_1
  :
- \pi(\mathbb{X}).
+ \pi.
 \end{equation*}
 
-Now supposing there are $m$	negations in the prefix of formula $\varphi$, we
+Supposing there are $m$	negations in the prefix of the formula $\varphi$, we
 create a hierarchical family of WS$k$S formulae $\Phi = \{\varphi_0,\ldots,\varphi_m\}$
 where
 \begin{equation}
@@ -1342,9 +1350,10 @@ and for all $0 \leq i \leq m-1$
  \varphi_{i+1} \overset{\mathit{def}}{=} \neg\exists\mathcal{X}_{i+1}.
  \varphi_i.
 \end{equation}
-The relation between this family of formulae $\Phi$ and formula $\varphi$ is
+The relation between this family of formulae $\Phi$ and the formula $\varphi$ is
 depicted as follows:
 \begin{equation}
+\begin{aligned}
 \varphi = \exists \mathcal{X}_{m+1}\,
 \underset{\varphi_m}{\underbrace{
   \neg\,\exists \mathcal{X}_m\,
@@ -1362,43 +1371,100 @@ depicted as follows:
     }}
   }
 }}
+\end{aligned}
 \end{equation}
 
-We will use $\Gamma(G)$ to denote the alphabet used in automaton defined as the
-set of functions $Theta(G) = \{f : G \rightarrow \{0, 1, \bot\}\}$, with the special case for $G
-= \emptyset$ defined as $\Gamma(\emptyset) = \{\#\}$. Elements of this set can
-be viewed as strings of fixed lenght $|G|$ over the alphabet $\{0, 1, \bot\}$ where
-each position in the strings is associated with exactly one element of G.
+We will use $\Gamma(G)$ to denote the alphabet defined as the
+set of functions $\Theta(G) = \{f : G \rightarrow \{0, 1, \bot\}\}$, with the
+special case for $G = \emptyset$ defined as $\Gamma(\emptyset) = \{\#\}$. Elements of this set can
+be viewed as strings of a fixed length $|G|$ over the alphabet $\{0, 1, \bot\}$
+where each position in the strings is associated with exactly one element of G.
 
-Now given the symbol $f \in \Gamma(G)$ and a set $H \subseteq G$ the
-\emph{projection} of $f$ over set $H$ written as $\omega_H(f)$, can be defined
-as the restriction of the function $f$ over the set $H$, i.e. $\omega_H(f) =
-f|_{G\setminus H}$. This can be further extended to the sets of symbols. Given a
-set $E \subseteq \Gamma(G)$, we define the projection over a set $H \subseteq G$
-written as $\omega_H(E)$, as $\omega_H(E) = \{\omega_H(f)\ |\ f \in E\}$. Given
-a tree $t : \mathbb{N}^* \rightarrow \Gamma(G)$ the projection of $t$ over $H
-\subseteq G$ is defined as $\omega_H(t) = \{(n, \omega_H(f))\ |\ (n, f) \in
-t\}$. NOte that $\omega_H(t) : \mathbb{N}^* \rightarrow \Gamma(G\setminus H)$,
+Now, given the symbol $f \in \Gamma(G)$ and a set $H \subseteq G$ the
+\emph{projection} of $f$ over the set $H$, written as $\omega_H(f)$, can be
+defined as the restriction of the function $f$ over the set $G\setminus H$, i.e.
+$\omega_H(f) = f|_{G\setminus H}$. This can be further extended to sets of symbols. Given a
+set $E \subseteq \Gamma(G)$, we define the projection over a set $H \subseteq
+G$, written $\omega_H(E)$, as $\omega_H(E) = \{\omega_H(f)\ |\ f \in E\}$.
 
-Now for a language $L \subseteq \Gamma(G)^*$, the projection of $L$ over $H$,
+For a language $L \subseteq \Gamma(G)^*$, the projection of $L$ over $H$,
 written as $\omega_H(L)$, is defined as $\omega_H(L) = \{\omega_H(f)\ |\ f \in
-L\}$. Note that $\omega_H(L) \subseteq \Gamma_{G\setminus H}^*$.
+L\}$. Note that $\omega_H(L) \subseteq \Gamma(G\setminus H)^*$.
 
-\begin{lemma} Given the alphabet $\Gamma(G)$, $H \subseteq G$ and $X, Y \in
-\Gamma_G^*$ it holds that
+\begin{lemma} Given the alphabet $\Gamma(G)$, $H \subseteq G$ and $X, Y
+\subseteq \Gamma(G)^*$ it holds that
 \begin{equation}
  X \subseteq Y \Longrightarrow \omega_H(X) \subseteq \omega_H(Y).
 \end{equation}
 \end{lemma}
+\begin{proof}
+{\color{red} will we even need this?}
+\end{proof}
+
+As we described in Section \ref{wsks}, there is an issue with the encoding of
+all models and using the projection operation on automata. After the projection the
+automaton corresponding to a formula does not accept some of the valid models
+of formula, as described by Example \ref{models}. \textsc{MONA} (see Section
+\ref{classical}) solves this by adjusting the final states of the automaton by
+using the bread-first search algorithm in linear time after every projection of
+automaton.
+
+\noindent\hrulefill
+\begin{example}
+ Consider the formula $P \not\subseteq X$ and its corresponding automaton
+ $\mathcal{A}_{P \not\subseteq X}$ depicted in Figure \ref{projection} with one
+ final state.
+ After projection over the track corresponding to the variable $P$ we get the
+ automaton $\mathcal{A}_{\exists P: P \not\subseteq X}b$ in Figure
+ \ref{projection}b.
+ 
+ After the projection the automaton does not accept e.g. the word $111 \notin
+ L(\mathcal{A}_{\exists P: P \not\subseteq X})$ even though the set $X = \{1, 2,
+ 3\} \models \exists P: P \not\subseteq X$. However, it does accept another
+ encoding of this set $1110 \in L(\mathcal{A}_{\exists P: P \not\subseteq X})$,
+ which is not a correct encoding according to the rules set in Chapter
+ \ref{wsks}. Hence we must adjust the final states.
+ 
+ \begin{figure}[h!]
+  \begin{center}
+   \scalebox{0.75}{\includegraphics{fig/projection-problem}}
+  \end{center}
+  \caption{The issue with final states after projection is that
+  the language of the resulting automaton restricts encodings
+  of some valid models afterwards.}\label{projection}
+ \end{figure}\label{models}
+\end{example}
+\noindent\hrulefill
+
+However, this approach needs a fully constructed automaton, so this cannot be
+used in an on-the-fly algorithm. Instead, we can either precompute the set of
+inspired by backwards universality testing \cite{backwards-universality} or use
+a lazy approach that will determine whether a state is final only when this
+information is needed.
+
+Note that in the following we will use the symbol $\overline{0}$ as the
+substitute for symbol $0^k$, for some known $k$.
+
+\begin{defz}
+For a set of states $Q$ of automaton $\mathcal{A} = (Q, \Sigma, \delta, I, F)$
+we define the \emph{set of predecessors through zero tracks} as the set $\mathit{PRE}_0(Q)$ of states such that
+\begin{equation}
+ \mathit{PRE}_0(Q) = \{r \in Q\ |\ \exists q \in Q: r
+ \overset{\overline{0}}{\longrightarrow} q \in \delta\}.
+\end{equation}
+We denote the reflexive transitive closure of $PRE_0(Q)$ as $PRE_0^*(Q)$. Note
+that we can define the $POST_0(Q)$ function similarly to $PRE_0$.
+\end{defz}
 
 \begin{defz}
  Given the automaton $\mathcal{A} = (Q, \Sigma, \delta, I, F)$ we define the
- \emph{projection} $\omega_\mathcal{X}$ of $\mathcal{A}$ as the automaton
- $\omega_\mathcal{X}(\mathcal{A}) = (Q, \omega_{\mathcal{X}}(\Sigma),
- \omega_{\mathcal{X}}(\delta), I, PRE_0^*(F))$ where
+ \emph{projection} $\omega_\mathcal{X}$ over the set of variables $\mathcal{X}$
+ of $\mathcal{A}$ as the automaton $\omega_\mathcal{X}(\mathcal{A}) = (Q,
+ \omega_{\mathcal{X}}(\Sigma), \omega_{\mathcal{X}}(\delta), I, PRE_0^*(F))$
+ where
  \begin{equation}
   \omega_{\mathcal{X}}(\delta) = \left\{ p \overset{\omega(a)}{\longrightarrow}
-  r\ |\ p \overset{a}{\rightarrow} r \in \delta, a \in \Sigma\right\}
+  r\ |\ p \overset{a}{\rightarrow} r \in \delta, a \in \Sigma\right\}.
  \end{equation}
  Note that after the operation of projection we have to adjust the final states
  according to the $PRE_0$ relation.
@@ -1410,66 +1476,24 @@ L\}$. Note that $\omega_H(L) \subseteq \Gamma_{G\setminus H}^*$.
  $\gamma(\mathcal{A}) = (2^Q, \Sigma, \delta_\gamma, \{I\}, \{S \subseteq Q\
  |\ S \cap Q = \emptyset)$ where
  \begin{equation}
-  \delta_\gamma = \{R \overset{a}{\rightarrow}\ S |\ \exists r \in R, s \in S: r
-  \overset{a}{\rightarrow} s, a \in \Sigma\}
+  \delta_\gamma = \{R \overset{a}{\rightarrow} S \mid S = \{s \in Q \mid \exists
+  r \in R: r \overset{a}{\rightarrow} s\}\}
  \end{equation}
  Note that this operation $\gamma$ corresponds to the determinisation of the
- input automaton using the subset construction followed by swapping of final and
+ input automaton using the subset construction followed by swapping final and
  non-final states of the determinised automaton.
 \end{defz}
 
-The main concept of this new approach to deciding WS$k$S is going to be outlined
-first on WS$1$S formulae and later will be generalised to arbritrary $k$, which
-is pretty straightforward.
+We will first outline our new approach to deciding WS$k$S on WS$1$S formulae and
+later generalize it to arbitrary $k$, which is quite straightforward.
 
-So given WS$1$S formula $\varphi$ in $\exists$PNF form, automaton for matrix of
-formula $\mathcal{A}_\pi$ can be constructed out of automata corresponding to
-the atomic formulae and their complements by using operations of union and
-intersection only. Further we construct $\mathcal{A}_\varphi$ from automaton
-$\mathcal{A}_\pi$ by successive applications of complementation $\gamma$ and
-projection $\omega$ according to the prefix of $\varphi$ as these
-operation were defined in Section \ref{preli}.
-
-As we described in Section \ref{wsks}, there is a problem with encoding of all
-models and using the projection operation on automata. After the projection the
-automaton corresponding to the formula does not accept some of the valid models
-of formula, as described by Example \ref{models}. \textsc{MONA} (see Section
-\ref{classical}) solves this by adjusting the final states of automaton by using
-the bread-first search algorithm in linear time after each projection in
-formula.
-
-\noindent\hrulefill
-\begin{example}
- Take the formula $P \not\subseteq X$ and its corresponding automaton
- $\mathcal{A}_a$ depicted on Figure \ref{projection}a with one final state.
- After projection over the track corresponding to the variable $P$ we get the
- automaton $\mathcal{A}_b$ on Figure \ref{projection}b.
- 
- After the projection automaton does not accept f.e. word $111 \notin
- L(\mathcal{A}_{\exists P: P \not\subseteq X})$ even though the set $\{1, 2,
- 3\} \models \exists P: P \not\subseteq X$. However it does accept another
- encoding of this set $1110 \in L(\mathcal{A}_{\exists P: P \not\subseteq X})$.
- Hence we must adjust the final states and at state $3$ to $F_{\exists P: P
- \not\subseteq X}$ to yield correct automaton representing models of formula.
- 
- \begin{figure}[h!]
-  \begin{center}
-   \scalebox{0.75}{\includegraphics{fig/projection-problem}}
-  \end{center}
-  \caption{The problem with final states after projection is that
-  language of the final automaton restricts some of the valid encodings
-  of models afterwise.}\label{projection}
- \end{figure}\label{models}
- 
-\end{example}
-
-\noindent\hrulefill
-
-However, this approach needs fully constructed automaton, so this cannot be used
-in on-the-fly algorithm. Instead we can either precompute the set of final
-states before using any algorithm using the algorithm similar to backward
-universality testing \cite{backwards-universality} or use the naive lazy
-approach that will determine whether the state is final only when it is needed.
+Given a WS$1$S formula $\varphi$ in the $\exists$PNF form, the automaton for
+the matrix $\pi$ of the formula, $\mathcal{A}_\pi$, can be constructed out of
+automata corresponding to the atomic formulae and their complements by using operations of union and
+intersection only. Further, we could construct $\mathcal{A}_\varphi$ from
+the automaton $\mathcal{A}_\pi$ by successive applications of complementation
+$\gamma$ and projection $\omega$ according to the prefix of $\varphi$, as these
+operations were defined in Section \ref{preli}. But we take a different path.
 
 % \begin{defz}
 %  We define the \emph{downward closure} of a set $S$ as set $\downarrow S$ such
@@ -1500,22 +1524,23 @@ approach that will determine whether the state is final only when it is needed.
 %  can define the $POST_0(Q)$ relation simiralry to the $PRE_0$ relation.
 % \end{defz}
 
-Now analogously to the family of formulae $\Phi$ we can define
+Analogously to the family of formulae $\Phi$, we can define
 the family of automata $\mathbb{A} = \{\mathcal{A}_0,\ldots,\mathcal{A}_m\}$ as follows:
  \begin{eqnarray}
   \mathcal{A}_0 & = & \mathcal{A}_\pi\\
   \mathcal{A}_{i+1} & = & \gamma(\omega_{\mathcal{X}_{i+1}}(\mathcal{A}_i)).
  \end{eqnarray}
  
- Note that the automaton for case $i$ thus corresponds to the following
+ Note that the automaton $\mathcal{A}_i$ then corresponds to the following
 formula:
  \begin{equation} \mathcal{A}_i =
  \exists\mathcal{X}_i\ldots\neg\exists\mathcal{X}_1.
- \pi(\mathbb{X})\end{equation}
+ \pi(\mathbb{X}).
+ \end{equation}
  
  We use the notation $\mathcal{A}_i = (Q_i, \Sigma_i, \delta_i, I_i, F_i)$ to
- address particular automaton and its components.
-There is further connection between the hierarchical family of formulae $\Phi$
+ address a particular automaton and its components.
+There is a further connection between the hierarchical family of formulae $\Phi$
 and the hierarchical family of automata $\mathbb{A}$ as described by the
 following lemma.
  \begin{lemma} For all $0 \leq i \leq m$, the language of
@@ -1526,7 +1551,7 @@ $\mathcal{A}_i$ is
   \item \emph{non-universal} iff $\varphi_i$ is \emph{invalid}, and
   \item \emph{empty} iff $\varphi_i$ is \emph{unsatisfiable}.
 \end{enumerate}
-\end{lemma}
+\end{lemma}\label{uni-valid}
 
 \begin{proof}
 Proof of this Lemma can be found in \cite{tata}.
@@ -1590,9 +1615,6 @@ Proof of this Lemma can be found in \cite{tata}.
 %  \end{enumerate}
 \end{proof}
 
-{\color{red} This proof may not be needed (i think probably it should), but may
-be chaotic. Also not sure if the invalid part is correct. It certainly is
-shady.}
 
 % Further we can construct automaton $\mathcal{A}_{i+1}$ from automaton
 % $\mathcal{A}_i = (Q_i, \Sigma_i, \delta_i, I_i, F_i)$ as follows:
@@ -1620,48 +1642,46 @@ shady.}
 % \end{equation}
 % We can complement this set and hence get the equation \ref{F}.
 
-Now given the automaton $\mathcal{A}_0$ and a set of sets of second-order
-variables $\{\mathcal{X}_1,\ldots,\mathcal{X}_m\}$ corresponding to the matrix
-and prefix of formula respectively. We can clasiffy the formula according to the
-existence of the satisfying and unsatisfying assingments.
+Given the automaton $\mathcal{A}_0$ and the sequence of sets of second-order
+variables $(\mathcal{X}_1,\ldots,\mathcal{X}_m)$ corresponding to the matrix
+and prefix of $\varphi$ respectively, we can classify the formula according to
+the existence of satisfying and unsatisfying assignments.
 
 \begin{defz}
 We say a formula $\phi$ is \emph{closed} if there is no free variable, i.e.
-$freeVars(\phi) = \emptyset$.
-We further define a \emph{closure} of a formula $\varphi$ as formula $\phi$ such that
+$\mathit{freeVars}(\phi) = \emptyset$.
+We further define a \emph{existential closure} of a formula $\varphi$ as formula
+$\phi$ such that
 \begin{equation}
- \phi \overset{\mathit{def}}{=} \exists\mathcal{X}. \varphi
+ \exists-\mathit{cl}(\varphi) = \exists\mathcal{X}. \varphi
 \end{equation}
 where
 \begin{equation}
- \mathcal{X} = \mathtt{freeVars}(\varphi).
+ \mathcal{X} = \mathit{freeVars}(\varphi).
 \end{equation}
 
-We can construct automaton corresponding to the closure of a formula $\varphi$
-similarly to the projection of automaton over set of variables and we will
-denote this automat as $\widetilde{\mathcal{A_\varphi}} = \{\widetilde{Q},
-\widetilde{\Sigma}, \widetilde{\delta}, \widetilde{I}, \widetilde{F}\}$. Note that since the
-formula has no free variables, the tracks on transitions in automaton are blank.
+Note that we can construct an automaton corresponding to the existential closure
+of a formula $\varphi$ similarly to the projection of automaton over set of variables and we will
+denote this automaton as $\widetilde{\mathcal{A_\varphi}} = \{\widetilde{Q},
+\widetilde{\Sigma}, \widetilde{\delta}, \widetilde{I}, \widetilde{F}\}$. It is
+obvious that since the formula has no free variables, the tracks on transitions
+in $\widetilde{\mathcal{A}_\varphi}$ are $\bot$.
 \end{defz}
 
 \begin{lemma}\label{exists-example}
-Let $\varphi$ be a closed WS$k$S formula. There exists a satisfying assignment
-(example) for formula $\varphi$ iff the initial state of the automaton
-$\mathcal{A}_\varphi$ corresponding to the formula $\varphi$ is final, i.e.
+Let $\varphi$ be a $\exists$-closed WS$k$S formula. Then $\varphi$ has a model
+iff the initial state of $\mathcal{A}_\varphi$ is final, i.e.
 \begin{equation}
- I_m \subseteq F_m \Leftrightarrow \models \varphi
+ I_m \cap F_m \neq \emptyset \Leftrightarrow\ \models \varphi
 \end{equation}
 \end{lemma}
 
 \begin{proof}
- Since the formula is closed the tracks on the transitions of automaton
- $\mathcal{A}_\varphi$ are blank. Thus if there exists a reachable final state
- in automaton then after computing the $PRE_0^*(F)$ to adjust the final states
- of automaton the initial state must be final as well.
+This is implied by Lemma \ref{uni-valid}
 \end{proof}
 
-We can extend this notion to any formula WS$k$S formula $\psi$ by computing the
-closure of the formula $\psi$ to yield formula $\varphi$ and test the validity
+We can extend this notion to any formula WS1S formula $\psi$ by computing the
+closure of the formula $\psi$ to yield a formula $\varphi$ and test the validity
 of the formula as stated by Lemma \ref{exists-example}.
 
 % \begin{lemma}
@@ -1689,39 +1709,26 @@ of the formula as stated by Lemma \ref{exists-example}.
 % \cite{sat}.
 % \end{proof}
 
+To optimize the algorithm of validity testing for WS1S formulae, we are going
+to define the necessary relations so we can prune the state space during the
+search for an accepting or a rejecting state. 
+
 \begin{defz}
  For all $0 \leq i \leq m$ we define the relation $\leq_i \subseteq Q_i \times
  Q_i$ as follows:
  \begin{eqnarray}
   \leq_0 & = & id\\
-  A \leq_{i+1} B & \Leftrightarrow & \forall a \in A \exists b \in B: a \geq_i
-  b\\
+  A \leq_{i+1} B & \Leftrightarrow & \forall b \in B \exists a \in A: a \geq_i
+  b
  \end{eqnarray}
 \end{defz}
 
 \begin{lemma}
- For all $0 \leq i \leq m$ the relation $\leq_i$ is simulation.
+ For all $0 \leq i \leq m$ the relation $\leq_i$ is a simulation.
 \end{lemma}
 \begin{proof}
  {\color{red} It's trivial.}
 \end{proof}
-
-{\color{red} Well, i'm not sure how to define this neatly out of the tabula
-snapshoot :), thinks this needs more evaluation by Lukas/Ondra}
-
-The final Algorithm \ref{deciding-wsks-alg} for deciding WS$k$S is based on the Lemma
-\ref{example-deciding-link}. Algorithm does the closure of the formula $\varphi$
-and $\neg\varphi$ and decides whether there exists a satisfying example for the
-formulae by checking whether the initial state is final or not.
-
-The function for deciding whether the state is final is described by Algorithm
-\ref{is-final-state}. It is based on worklist algorithm and is called
-recursively on level of the state, i.e. the macro-state is final if all its
-states are non-final. However if the state of macro-state is proved to be
-non-final we have to examine his successors, which are thus added to worklist.
-In addition we can prune the search state using the antichains.
-
-{\color{red} Is state a macro-state as well? }
 
 % given automaton A0, sets {X1,..,Xm}
 % 
@@ -1737,52 +1744,46 @@ In addition we can prune the search state using the antichains.
 
 \begin{defz}
 Given the automaton $\mathcal{A} = (Q, \Sigma, \delta, I, F)$ we define the
-automaton containing only zero tracks reachable from initial state as the
+automaton containing only zero tracks reachable from an initial state as the
 automaton $\mathcal{A}^0 = (Q^0, \Sigma, \delta^0, I, Q^0)$ where
 \begin{eqnarray}
- Q^0 & = & I \cup \{q\ |\ \exists w \in \{(0^k)\}^*: q
- \overset{w}{\longrightarrow} f, f \in I\}\\
- \delta^0 = \{p \overset{(0^k)}{\longrightarrow} q\ |\ p, q \in Q^0\}
+ Q^0 & = & I \cup \{q \in Q \mid \exists w \in \overline{0}^*: f
+ \overset{w}{\longrightarrow} q, f \in I\}\\
+ \delta^0 & = & \{p \overset{\overline{0}}{\longrightarrow} q\ |\ p, q \in Q^0\}
 \end{eqnarray}
 \end{defz}
 
-Note that all the states are final due to the adjustment of states to conform
-the problem with model encoding.
+Note that all states are final due to the adjustment of states after projection.
+The final Algorithm \ref{deciding-wsks-alg} is based on universality checking
+algorithm as described in this chapter. It comes from 
 
 \begin{algorithm}[hb!]
 		\SetKwFor{For}{foreach}{do}{}
 		\SetKwRepeat{Repeat}{repeat}{until}
-		\KwIn{Initial state $I_m$ of automaton $A_{\varphi_m}$}
-		\KwOut{\textsc{TRUE} if state $I_m$ is final, \textsc{FALSE} otherwise}
+		\KwIn{Initial state $I_m$ of automaton $A_{\neg\varphi_m}$}
+		\KwOut{\textsc{TRUE} iff state $I_m$ is final, \textsc{FALSE} otherwise}
 		\BlankLine
-		\nl \uIf{IsStateAccepting($I_m$, m) = \textsc{TRUE}}{
-		\nl   \Return \textsc{TRUE}\;
-		}
-		\nl \Else{
-		\nl   \Return \textsc{FALSE}\;
-		}
+		\nl \Return \texttt{IsStateAccepting}($I_m$, m) = \textsc{TRUE}
 		\SetKwProg{myproc}{Function}{}{}
 		\BlankLine
-  \myproc{IsStateAccepting(state P, level i)}{
-  	\nl \uIf{i = 0}{
-  	\nl 	\Return $P \in F_i$\;}
+  \myproc{\upshape \texttt{IsStateAccepting}(\textbf{state} P, \textbf{level}
+  i)}{ 
+  \nl \uIf{i = 0}{
+  	\nl 	\Return $P \in F_0$\;}
   	\nl \uElse{
   	\SetEndCharOfAlgoLine{}
-  	\nl CheckForReachableState(p, i-1, $\delta^0_{i-1}$, $\lambda$ q.
-  	   IsStateAccepting(q, i-1))\;
-  	\SetEndCharOfAlgoLine{;}
-  	 \nl  \uIf{All invocations of Algorithm \ref{universality} returns
-  	  \textsc{FALSE}}{
-  	 \nl    \Return \textsc{TRUE}\;
-  	  } 
-  	  \nl \Else{
-  	  \nl   \Return \textsc{FALSE}\;
-  	  }
-  	  
+  		\nl \For{$p \in P$}{
+  			\nl \uIf{\upshape \texttt{CheckForReachableState}(p, i-1, $\delta^0_{i-1}$,
+  			($\lambda$ q.
+  	   IsStateAccepting(q, i-1)))}{
+  	   			\nl \Return \textsc{FALSE}\;
+  	   		}
+  		}
+  		\nl \Return \textsc{TRUE}\;
   	  }
   }
-		\caption{Algorithm for deciding validity of WS$k$S
-		formulae}\label{deciding-wsks-alg}
+		\caption{Algorithm for deciding validity of a WS$k$S
+		formulae $\varphi$}\label{deciding-wsks-alg}
 	\end{algorithm}
 
 
@@ -1791,182 +1792,192 @@ the problem with model encoding.
 %    q = workset.pop()
 %    
 
-{\color{red} Should I structure this Section more into some subsection? I think
-that it's too tldr; and it could be partitioned into some sections.}
-
 \subsection{Deciding WS$k$S}
 
-{\color{red} this is where i'll surely need some help. Used the part of the
-draft and partly I overwrote it to correspond more with the definitions from
-previous section}
-
-In previous section we introduced the concept of the algorithm on WS$1$S logic
-using the nondeterministic finite automata (or unary tree automata). Now we will
-further extend this procedure to arbitrary $k$.
+In the previous section we introduced the concept of the algorithm on WS$1$S
+logic using nondeterministic finite automata (or unary tree automata). We will
+further extend this procedure to an arbitrary $k$.
 
 Similar to WS$1$S we will define the hierarchical family of tree automata
 $\mathbb{A} = \{\mathcal{A}_0,\ldots,\mathcal{A}_m\}$ where
 \begin{equation}
  \mathcal{A}_0 = (Q_0, \Sigma_0, \delta_0, F_0)
-\end{equation} is a nondeterministic finite tree automaton corresponding ot the
+\end{equation} is a nondeterministic finite tree automaton corresponding to the
 WS$k$S formula $\varphi_0 \overset{\mathit{def}}{=} \pi(\mathbb{X})$, such that
 $\Sigma_0 = \Gamma(\mathbb{X})$ and
 \begin{equation}
  \mathcal{A}_{i+1} = (Q_{i+1}, \Sigma_{i+1}, \delta_{i+1}, F_{i+1})
 \end{equation}
-is a tree automaton corresponding to the formule $\varphi_{i+1}
-\overset{\mathit{def}}{=} \neg\mathcal{X}_{i+1}\varphi_i$ where
+is a tree automaton corresponding to the formula $\varphi_{i+1}
+\overset{\mathit{def}}{=} \neg\exists\mathcal{X}_{i+1}: \varphi_i$ where
 \begin{eqnarray}
  Q_{i+1} & = & 2^{Q_i}\\
  \Sigma_{i+1} & = & \omega_{\mathcal{X}_{i+1}}(\Sigma_i)\\
- \delta_{i+1} & = & \{((R_1),\ldots,R_t), \omega_{\mathcal{X}_{i+1}}(f), S)\}\\
- S & = & \{s \in Q_i\ |\ \exists r_1 \in R_1,\ldots,r_t \in R_t.
- ((r1,\ldots,r_t), f, s) \in \delta_i\}\\
- F_{i+1} & = & \{R \in Q_{i+1}\ |\ R \cap F_i = \emptyset\}
+ F_{i+1} & = & \{R \in Q_{i+1}\ |\ R \cap F_i = \emptyset\}\\
+ \delta_{i+1} & = & \{(R_1,\ldots,R_t), \omega_{\mathcal{X}_{i+1}}(f), S)\}\\
 \end{eqnarray}
+where
+\begin{equation}
+S = \{s \in Q_i\ |\ \exists r_1 \in R_1,\ldots,r_t \in R_t.
+ ((r1,\ldots,r_t), f, s) \in \delta_i\}
+\end{equation}
 
 {\color{red} Fi+1 is not correct, it should correspond to the states after
 projection. How to define this best for tree automata?}
 
 {\color{red} What else is needed? The rest of the draft part?}
 
+ Given
+a tree $t : \mathbb{N}^* \rightarrow \Gamma(G)$ the projection of $t$ over $H
+\subseteq G$ is defined as $\omega_H(t) = \{(n, \omega_H(f))\ |\ (n, f) \in
+t\}$. Note that $\omega_H(t) : \mathbb{N}^* \rightarrow \Gamma(G\setminus H)$,
+
 \chapter{Implementation}
 
-As depicted on Figure \ref{flow} the input of implemented application is
-specification of WS$1$S or WS$2$S formulae w.r.t. subset of \textsc{MONA}
-formulae syntax as described in Appendix \ref{syntax}. Input file is parsed with
-lexical and syntax analyzer into intermediate representation as Abstract Syntax
-Tree (AST) \ref{ast} with logical connectives or atomic operations as the nodes. 
+As depicted in Figure \ref{flow}, the input of the implemented application is
+a collection of WS$1$S or WS$2$S formulae written using the \textsc{MONA}
+syntax as described in Appendix \ref{syntax}. The frontend of the
+created application is reused and slightly modified parser of tool \textsc{MONA}
+that is based on \texttt{yacc} \cite{yacc} parser generator. Input file is
+parsed into an intermediate representation as an Abstract Syntax
+Tree (AST) with logical connectives or atomic formulae as the
+tree nodes.
 
-AST is further flattened according to the translation rules to restricted syntax
-\ref{restricted} and transformed into existential prenex normal form (see
-Section \ref{expnf}). The resulting AST is then broken into matrix\,--\,a
-quantifier tree formulae\,--\,and a prefix\,--\,chain of quantifiers. 
+While parsing the input file, a symbol table is filled with the used
+first or second-order variables and the defined predicates/macros. Mapping of
+the variables to the MTBDD tracks can be constructed in several possible ways.
+Either it can correspond to the place of the definition of the variable during
+the parsing process, chosen randomly or match the sequence of quantifiers from
+the prefix. We prefer the last option, because projection of lower-leveled MTBDD
+nodes is more efficient than higher-level nodes.
 
-The frontend of the application is reused and slightly modified parser of tool
-\textsc{MONA} that is based on \texttt{yacc} \cite{yacc} parsing tool. During
-the parsing of input specification, a symbol table is filled with used first or
-second-order variables and predicates/macros. Mapping of the variables to the
-BDD tracks is constructed in several possible ways. Either it corresponds to the
-place of the definition during parsing process, or can be randomly shuffled or
-matches the chain of the quantifiers from prefix, i.e. during projection of the
-track the reordering of the tree takes less time.
+The AST is then flattened according to the rules for translation to
+the restricted syntax (see Section \ref{restricted}) and transformed into
+the existential prenex normal form (see Section \ref{restricted}). The resulting
+AST is then broken into the matrix (a quantifier free formula) and the
+prefix (sequence of quantifiers).
 
-The formula corresponding to the matrix of the formula is converted to the NTA
-with use of the chosen library for manipulation with automata. Along with the
-prefix of formulae this is an input for the decision procedure which returns
-if the formulae is valid, invalid, but satisfiable, or unsatisfiable.
+The matrix of the formula is converted to the NTA
+with use of the \texttt{libvata} library
+\cite{vata-tool}.
+Along with the prefix of the formula this is an input for the decision procedure
+which decides whether the formula is \emph{valid}, \emph{invalid, but
+satisfiable}, or \emph{unsatisfiable}.
 
 \begin{figure}[hb]
 \begin{center}
  \scalebox{0.42}{\includegraphics{fig/flow.pdf}}
- \caption{Transformation of data through the decision process}
+ \caption{Transformation of data through the decision procedure}\label{flow}
  \end{center}
 \end{figure}
 
 \section{Manipulation with NTA}
 
-For inner representation of automata used in decision procedure, library
-\texttt{libvata} \cite{vata-tool} written in C++ was chosen for being highly
-efficient and open source library that exploits some of the recent developments
-of algorithm for NTA manipulation. Its main usage is in fields of formal
-verification, but can be effectively used in other domains as well.
+For the inner representation of automata used in the decision procedure, the
+\texttt{libvata} library \cite{vata-tool}, written in C++, was chosen for being
+a highly efficient and open source library that exploits some of the recent
+developments of algorithms for NTA manipulation. Its main use is in the fields
+of formal verification, but it can be efficiently used in other domains as well.
 
-\texttt{libvata} supports two possible encodings of tree
-automata\,--\,\emph{explicit} and \emph{semi-symbolic}\,--\,where these
-encodings differs in the way they store the transtion relation of automata. The
-semi-symbolic representation uses MTBDDs for storing the transitions of automata
-as described in Section \ref{mtbdd}. This is mostly intended for automata with
-large input alphabets like in the case of some decision procedures of logics
-such as WS$k$S or $MSO$ (monadic second-order logic). Library is designed in a
-modular way, so it can be easily extended with new encodings and operations.
+\texttt{libvata} supports two possible encodings of tree automata
+(\emph{explicit} and \emph{semi-symbolic}) which differ in the way they store
+the transition relatios of automata. The semi-symbolic representation uses
+MTBDDs for storing the transitions of automata as described in Section
+\ref{mtbdd}. This is mostly intended for automata with large input alphabets
+like in the case of some decision procedures of logics such as WS$k$S or MSO
+\cite{mso} (monadic second-order logic). The library is designed in a modular
+way, so it can be easily extended with new encodings and operations.
 
-The input of library is usually a text representation in automaton in Timbuk
-format \cite{timbuk}, which is parsed and transformed into inner representation
-with states, transition, alphabets, etc. The other way is building the automaton
-from scratch using the function for appropriate encodings. Each automaton can be
-serialized back to an output format through serializers.
+The library provides a command line interface, so the input of the library is
+usually a text representation in automaton in Timbuk format \cite{timbuk}, which
+is parsed and transformed into inner representation with states, transition,
+alphabets, etc. However we can also build the automaton from scratch using API
+functions for appropriate encodings. Each automaton can be serialized back to an
+output format (like Timbuk) through serializers.
 
 We are going to use the semi-symbolic encoding that provides both bottom-up and
 top-down representation of tree automata. These representation differs in
-storage of MBDDD where for top-down representation input symbols have to be
-stored along with their arity in order to distinguish between two same symbols
-with a different arity. On the other hand, in the bottom-up representation arity
-can be induced from the arity of the tuples on the left-hand side of the
-transition. 
+storage of MTBDD where for top-down representation the storage is more complex,
+while on the other hand, in the bottom-up representation arity can be inferred
+from the arity of the tuples on the left-hand side of the transition.
+
+As for the representation of automata, we have chosen the bottom-up
+representation.
 
  \section{Decision procedure}
  
- In Chapter \ref{ours} we introduced the formal concepts of deciding WS$k$S
- with non-deterministic automata and designed the algorithm for testing validity
- of given formula $\varphi$. In this section we will closely decribed the
- implementation of this formal algorithm in language c++.
+ In Chapter \ref{our} we introduced the formal concepts of deciding WS$k$S
+ with non-deterministic automata and designed the algorithm for testing
+ validity of a given formula $\varphi$. In this section we will closely describe
+ the practical implementation of this formal algorithm in the C++ language.
  
- For each level $0 \leq i \leq m$ we define two caches that will store the
- already computed results to achieve better results. In
- case we get the cache miss, the cache returns value $\bot$ instead.
- $BDDCache_i$ is a cache that maps states of level $i$ to their
- corresponding BDDs representing their transition relations $\delta_i$, i.e.
+ For each level $1 \leq i \leq m$ we define two caches that will store the
+ already computed results to avoid their repeated computation during the
+ decision procedure. In case we get a cache miss, the value $\bot$ is returned
+ instead. $\mathit{BDDCache}_i$ is a cache that maps states of level $i$ to
+ their corresponding MTBDDs representing their transition relations $\delta_i$, i.e.
  \begin{equation}
-  transCache_i : Q_i \rightarrow (\Sigma_i \rightarrow 2^{Q_i}).
+  \mathit{BDDCache} : Q_i \rightarrow ((\Sigma_i \rightarrow 2^{Q_i}) \cup
+  \{\bot\}).
  \end{equation}
  
- Further we define the cache for storing the finality of states
- $StateCache_i$ that maps macrostates to their finality, i.e.
+ Further we define the cache $\mathit{StateCache}_i$ for storing which states
+ are final and which are non-final, i.e.
  \begin{equation}
-  StateCache_i : Q_i \rightarrow \{Final, NonFinal\}
+  \mathit{StateCache} : Q_i \rightarrow \{Final, NonFinal, \bot\}
  \end{equation}
  
- The main core of the deciding is Function that is checking whether the state on
- level $0 \leq i \leq m$ is final or not. Since we are constructing a
- complement of automaton on level $i$ the state is final iff all of its child states are
- non-final or there exists a successor over the zero tracks that is final (due
- to projection). During the generating of successor we can prune some of the
- states through the $\leq_i$ relation.
+ The core function for deciding WS$k$S is \ref{impl-state-is-final} which checks
+ whether the state on level $0 \leq i \leq m$ is final or not. Since we are
+ constructing a complement of an automaton on level $i$, the state is final iff
+ all of its child states are non-final or there exists a successor over the zero
+ tracks that is final (due to projection). While generating successors
+ we can also prune some of the states if they are in relation $\leq_i$ as
+ defined previously.
  
-\begin{algorithm}[h!]
+\begin{function}[h!]
 		\SetKwFor{For}{foreach}{do}{}
 		\SetKwRepeat{Repeat}{repeat}{until}
 		\KwIn{State $q$ of automaton $A_{\varphi_m}$, level of determinization $m$}
 		\KwOut{\textsc{TRUE} if state $q$ is final, \textsc{FALSE} otherwise}
-		\KwData{\texttt{OracleCache} caches the answers of \texttt{StateIsFinal}
+		\KwData{\texttt{StateCache} caches the answers of \texttt{StateIsFinal}
 		function}
 		\BlankLine
-		\nl finality := OracleCache[q]\;
-		\nl \uIf{finality $\neq$ $\bot$}{
-		  \nl\Return finality
+		\nl isFinal := \texttt{StateCache}[q]\;
+		\nl \uIf{isFinal $\neq$ $\bot$}{
+		  \nl\Return isFinal\;
 		}
 		\BlankLine
 		\nl \uIf{m = 0}{
-			\nl finality := $q \in F_0$\;
+			\nl isFinal := $Q \in F_0$\;
 		}
 		\nl \Else{
-			\nl\For{$q \in state$}{
-				\nl \uIf{StateIsFinal(q, m-1)}{
-					\nl finality := \textsc{FALSE}\;
+			\nl\For{$q \in Q$}{
+				\nl \uIf{\upshape \texttt{StateIsFinal}(q, m-1)}{
+					\nl isFinal := \textsc{FALSE}\;
 					\nl \textbf{break}\;
 				}
 				\nl \Else{
-					\nl succ := buildSuccessorTree(q)\;
+					\nl succ := \texttt{buildSuccessorTree}(q, m)\;
 					\nl \textbf{apply1} succ ($\lambda$ x. \textbf{if} x is reachable by
-					low successors in BDD \textbf{then} workset := workset $\cup$ x) 
+					low successors only in BDD \textbf{then} workset := workset $\cup$ x)\;
 				}
 			}
-			\nl finality := \textsc{TRUE}\;
+			\nl isFinal := \textsc{TRUE}\;
 		}
-		\nl OracleCache[q] = finality\;
-		\nl \Return finality\;
-		\caption{Deciding whether state is
-		final or not}\label{impl-state-is-final}
-	\end{algorithm}
+		\nl \texttt{StateCache}[q] = isFinal\;
+		\nl \Return isFinal\;
+		\caption{StateIsFinal(state q, level m)}\label{impl-state-is-final}
+\end{function}
  
- The main algorithm \ref{impl-main} is based on worklist algorithm. Since we
+ The main Algorithm \ref{impl-main} is based on the workset algorithm. Since we
  are working with closed formulae, at the last level of determinization in
- family of defined automata we are looking for a non-final state using the
- function \texttt{StateIsFinal} as described on \ref{impl-state-is-final}. If
+ the defined family of automata we are looking for a non-final state using the
+ function \ref{impl-state-is-final}. If
  the initial state is not final, we are generating its next successor and add it
  to worklist if it is not enqueued already or we can prune it through the
- $\leq_i$ relation.
+ $\leq_i$ relation, i.e. if the successors $q$ of state $p$ is $\leq_i$-smaller
+ we discard it.
  
 \begin{algorithm}[h!]
 		\SetKwFor{For}{foreach}{do}{}
@@ -1978,55 +1989,66 @@ transition.
 		\nl processed := workset\;
 		\nl \While{$\exists q_m \in workset$}{
 			\nl workset := workset $\setminus \{q_m\}$\;
-			\nl\uIf{not StateIsFinal($q_m$, level)}{
+			\nl\uIf{\upshape \texttt{StateIsFinal}($q_m$, level) = \textsc{FALSE}}{
 				\nl \Return \textsc{TRUE}\;
 			}
 			\nl\Else{
-				\nl succ := buildSuccessorTree($q_m$, level)\;
+				\nl succ := \texttt{buildSuccessorTree}($q_m$, level)\;
 				\nl\textbf{apply1} succ ($\lambda$ x. \textbf{if} x $\notin$ processed
-				\textbf{then} workset := workset $cup \{x\}$)\;
+				\textbf{then} workset := workset $\cup \{x\}$)\;
 				processed := processed $\cup$ workset\; 
 				}
 		}
+		\nl \Return \textsc{FALSE}\;
 		\caption{Deciding whether there exists a satisfying example for formula	
 		}\label{impl-main}
 	\end{algorithm}
  
- The successor of a state is constructed out of its children \ref{impl-succ}.
- The construction is optimized with the use of cache. After the BDDs for
- transitions of children of a state are build we use the binary apply for doing
- the union of those BDDs to yield the BDD corresponding to the transition for
- the state. This BDD is further projected using the operation of projection. 
+ The successor of a state can be constructed out of its children
+ as described by function \ref{impl-succ}.
+ This construction is optimized with the use of cache. After the MTBDDs for
+ transitions of children of a state are built, we use the binary apply for doing
+ the union of those MTBDDs to yield the MTBDD corresponding to the transition
+ from the state. This MTBDD is further modified using the operation of
+ projection.
  
-\begin{algorithm}[h!]
+\begin{function}[h!]
 		\SetKwFor{For}{foreach}{do}{}
 		\SetKwRepeat{Repeat}{repeat}{until}
 		\KwIn{State $q$ of automaton $A_{\varphi_m}$, level of determinization $m$}
 		\KwOut{Successor of state $q$}
-		\KwData{\texttt{BDDCache} mapping macrostates to its transition BDDs}
+		\KwData{\texttt{BDDCache} mapping macro-states to their transition BDDs}
 		\BlankLine
-		\nl succ := BDDCache[q]\;
+		\nl succ := \texttt{BDDCache}[q]\;
 		\nl \uIf{succ $\neq \bot$}{
 			\nl \Return succ\;
 		}
 		\nl succ := $\emptyset$\;
 		\nl\For{$r \in q$}{
-			\nl childSucc := \texttt{buildSuccessor(r, m-1)}\;
+			\nl childSucc := \texttt{buildSuccessorTree(r, m-1)}\;
 			\nl \textbf{apply2} succ childSucc ($\lambda$ x y. x $\cup$ y)\;
 		}
-		\nl succ := project(succ, level)\;
-		\nl BDDCache[q] := succ\;
+		\nl succ := \texttt{project}(succ, level)\;
+		\nl \texttt{BDDCache}[q] := succ\;
 		\nl \Return succ\;
-		\caption{Building successor of state $q$}\label{impl-succ}
-	\end{algorithm}
+		\caption{buildSuccessorTree(state q, level m)}\label{impl-succ}
+	\end{function}
  
  \section{Optimizations}
  
- We used the tool \texttt{valgrind}, especially its part \texttt{callgrind}, to
- profile the implementation and tried to identify weak spots of the application.
- Of the most frequent operation in the procedure is the relational operators on
- the classes representing macro-states used f.e. for pruning the state search,
- macro-state and operations with worklist.
+ During the implementation process we used the tool \texttt{valgrind}
+ \cite{valgrind}, especially its part \texttt{callgrind}, to profile the
+ implementation in C++ and tried to identify weak spots of the application.
+ One of the most frequent operations in the procedure are the relational
+ operators on the classes representing macro-states used e.g. for pruning the state search,
+ macro-state comparison and operations with worklist.
+ 
+ We propose to optimize this by using bitwise operations and bit array for
+ storing the leaf states to ease some of the computation. There are several
+ possibilities to use in C++ \cite{bitwise} and we have chosen the container
+ with best performance, which is \texttt{boost::dynamic\_bitset}. The results
+ have shown that the performance of comparison between macro-states of first
+ level of detereminization got better by great margin.
  
  \subsection{Extending set of atomic formulae}
  
@@ -2034,9 +2056,28 @@ transition.
  defining whole range of WS$k$S logic, automata corresponding to the flattened
  versions of some of the atomic formulae (like $\leq$ for example) are too large
  for processing and slow down the algorithm. As shown in Table
- \ref{atomic-formulae} we can heavily reduce the size of matrix automaton by
- extending the set of the atomic formulae defined in \ref{restricted} and yield
+ \ref{atomic-formulae} we can heavily reduce the size of matrix automaton just
+ by extending the set of the atomic formulae defined in \ref{restricted} and yield
  better computational results.
+ 
+ \noindent\hrulefill
+ \begin{example}
+ Let us take $\varphi = x \leq y$ for example. In the classical restricted
+ syntax, this formula $\varphi$ would be flattened as follows:
+ \begin{equation}
+  x \leq y \overset{\mathit{def}}{=} \forall X. (y \in X \wedge (\forall z. z1
+  \in X \Rightarrow z \in X)) \Rightarrow x \in X
+ \end{equation} 
+ which corresponds to automaton with X states. However we can construct the
+ following atomic automaton with 4 states only, which means we can save Y\% of
+ the number of the states.
+ \end{example}
+ 
+ \noindent\hrulefill
+ 
+ Besides defining automata for more of the WS$k$S syntax connectives and atomic
+ formulae, we could even extend the syntax and create some of the more complex
+ operations like modulo or predecessor predicate, just like \textsc{MONA} does.
  
  {\color{red} Maybe do a Appendix with all the atomic formulae?}
  
@@ -2055,6 +2096,7 @@ transition.
  {\color{red} Here will be several evaluations of ratio between cache hits and
  misses.}
 
+\iffalse
 \chapter{Evaluation}
 
 In this chapter we are going to provide an evaluation of the implemented
@@ -2079,7 +2121,7 @@ WS$k$S is higher than for Presburger Arithmetic.
 
 In Presburger Arithmetic a \texttt{term} is either a integer constant or a
 variable. The Presburger formula is then either in form of $term < term$, $term
-+ term$ or $constant * term$. It can be further assumbed that the multipliers
++ term$ or $constant * term$. It can be further assumed that the multipliers
 are the powers of two.
 
 The conversion to WS$k$S treats the variable as set with a set variable being a
@@ -2087,12 +2129,12 @@ bit of the binary representation of the number with addition of a sign bit.
 
 The main convenience of these family of formulae that every operation $+$ or $*$
 in a term generates at least one quantifier in the WS$k$S formulae, which can
-futher results to quite a large exponential blowup and hence show the speed-up
+further results to quite a large exponential blowup and hence show the speed-up
 of our approach in contrary to the \texttt{MONA}.
 
 The other parametric part of the presburger arithmetic is bounding of the
 maximal constant used in expressions. Since constants are represented by sets
-containing positions of ones in bitwise representation of the constant, we can
+containing positions of ones in bit-wise representation of the constant, we can
 further study the impact of this on performance of decision procedure.
 
 So the formula $\varphi \overset{\mathit{def}}{=} X = \mathtt{pconst}{I}$, where
@@ -2163,6 +2205,7 @@ only decide the formulae up to parameter $n = 15$ due to insufficient memory for
 storing BDDs. In results it is shown that the logical approach \cite{mso} proves
 to better for solving this family of formulae in contrary to automata-formulae
 connection used by both \textsc{MONA} and our approach.
+\fi
 
 \chapter{Conclusion}\label{summary}
 
@@ -2180,25 +2223,25 @@ without need to construct automaton corresponding to the given formula at all.
 
 We implemented a prototype of the designed decision procedure, that is able to
 handle a subset of WS$k$S formulae, namely formulae for case $k = 1$, and
-studied the impact of the usage of non-determinsitic automata on two case
+studied the impact of the usage of non-deterministic automata on two case
 studies. Out of the computational results on series of formulae we identified
 some of the weak spots of the application and tried to optimized them to achieve
 better results.
 
 Although our results could not beat \textsc{MONA} and its many heuristics and
-optimizations, we have shown that the non-determinitic approach to deciding
+optimizations, we have shown that the non-deterministic approach to deciding
 WS$k$S has indeed great potential and yield good results with future research.
 
 Just like \textsc{MONA} did, we propose some further optimizations that could
 enhance the results in processes. One of the weak spots of algorithm is the size
 of the base automaton corresponding to the unquantified part of the formula.
-\textsc{MONA} always does minimizations after every operation so it works with
+\textsc{MONA} always does minimization after every operation so it works with
 the smallest automata possible. We can reduce the size of non-deterministic
 automata through simulation computation followed by downward reduction. 
 
 Most of the formulae used in practice share very similar subformulae that can be
 represented as single node and reuse the constructed automaton by reindexing its
 variables. We propose to optimize the frontend of the procedure to use the
-Direct Acyclic Graph (DAG) \cite{dag} instead of plain AST. 
+Direct Acyclic Graph (DAG) instead of plain AST. 
 
 %=========================================================================

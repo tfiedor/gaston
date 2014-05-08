@@ -111,6 +111,15 @@ TUnSatExample findUnsatisfyingExample() {
 	return 1;
 }
 
+struct SetCompare : public std::binary_function<TStateSet*, TStateSet*, bool>
+{
+    bool operator()(TStateSet* lhs, TStateSet* rhs) const
+    {
+    	std::cout << "Doing teh compare!~\n";
+        return lhs->DoCompare(rhs);
+    }
+};
+
 /**
  * Performs a decision procedure of automaton corresponding to the formula phi
  * This takes several steps, as first we compute the final states of the
@@ -150,6 +159,20 @@ int decideWS1S(Automaton & aut, TSatExample & example, TUnSatExample & counterEx
 		std::cout << state << " : bdd\n";
 		std::cout << TransMTBDD::DumpToDot({bdd}) << "\n\n";
 	}*/
+
+
+	MacroStateSet* in2 = constructInitialState(aut, formulaPrefixSet.size());
+	std::cout << "\n\n";
+
+	std::unordered_map<TStateSet*, bool, std::hash<TStateSet*>, SetCompare> StateCache;
+	StateCache[initialState] = true;
+	/*bool isFinal = StateCache[initialState];
+	initialState->dump();
+	std::cout << " is " << isFinal << "\n";*/
+	bool isFinal2 = StateCache.find(in2) != StateCache.end();
+	bool isFinal3 = StateCache[negInitialState];
+	in2->dump();
+	std::cout << " is " << isFinal2 << " vs " << isFinal3 << "\n";
 
 	FinalStatesType fm;
 	fm = computeFinalStates(aut);

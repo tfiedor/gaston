@@ -20,16 +20,19 @@ public:
 	// < Public Methods >
 	inline MacroStateSet* ApplyOperation(const MTBDDLeafStateSet & lhs) {
 		StateSetList states;
+		TLeafMask mask;
 
 		if (lhs.size() != 0) {
 			for (auto state : lhs) {
 				states.push_back(new LeafStateSet(state));
+				mask.resize(TStateSet::stateNo, false);
+				mask.set(state, true);
 			}
 		} else {
 			states.push_back(new LeafStateSet());
 		}
 
-		return new MacroStateSet(states);
+		return new MacroStateSet(states, mask);
 	}
 };
 
@@ -65,8 +68,12 @@ public:
 				lhsStates.push_back(state);
 			}
 		}
+		if(lhs->leaves.any() && rhs->leaves.any()) {
+			return new MacroStateSet(lhsStates, lhs->leaves | rhs->leaves);
+		} else {
+			return new MacroStateSet(lhsStates);
+		}
 
-		return new MacroStateSet(lhsStates);
 	}
 };
 

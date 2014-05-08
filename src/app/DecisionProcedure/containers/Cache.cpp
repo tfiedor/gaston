@@ -12,7 +12,7 @@
  * @param key: looked-up key
  * @return: data for key
  */
-CacheData Cache::lookUp(CacheKey key) {
+CacheData lookUp(CacheKey key) {
 	return this->_cache[key];
 }
 
@@ -52,3 +52,4 @@ CacheData MultiLevelCache::lookUp(CacheKey key, unsigned level) {
 void MultiLevelCache::storeIn(CacheKey key, CacheData data, unsigned level) {
 	this->_mlCache[level].storeIn(key, data);
 }
+

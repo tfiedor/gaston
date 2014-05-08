@@ -20,8 +20,13 @@ private:
 	CacheMap _cache;
 public:
 	// < Public Methods >
-	CacheData lookUp(CacheKey);
-	void storeIn(CacheKey, CacheData);
+	CacheData lookUp(CacheKey key){
+		return this->_cache[key];
+	}
+
+	void storeIn(CacheKey key, CacheData data){
+		this->_cache[key] = data;
+	}
 };
 
 template<class CacheKey, class CacheData, unsigned LEVELS>
@@ -32,8 +37,14 @@ private:
 
 public:
 	// < Public Methods >
-	CacheData lookUp(CacheKey, unsigned);
-	void storeIn(CacheKey, CacheData, unsigned);
+	CacheData lookUp(CacheKey key, unsigned level) {
+		return this->_mlCache[level].lookUp(key);
+	}
+
+	void storeIn(CacheKey key, CacheData data, unsigned level) {
+		this->_mlCache[level].storeIn(key, data);
+	}
+
 };
 
 #endif

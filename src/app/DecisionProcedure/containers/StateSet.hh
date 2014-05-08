@@ -7,13 +7,18 @@
 #include <string>
 #include <algorithm>
 
+#include <boost/dynamic_bitset.hpp>
+
 class TStateSet;
 class MacroStateSet;
 class LeafStateSet;
 
+#define USE_DYNAMIC_BITSETS
+
 // < Typedefs >
 typedef size_t StateType;
 typedef std::vector<TStateSet*> StateSetList;
+using TLeafMask = boost::dynamic_bitset<>;
 
 // < Enums >
 enum {SET, STATE, MACROSTATE};
@@ -24,8 +29,13 @@ enum {SET, STATE, MACROSTATE};
 class TStateSet {
 private:
 public:
+	// < Static Members >
+	static unsigned int stateNo;
+
 	// < Public Members >
 	unsigned int type;
+	TLeafMask leaves;
+
 
 	// < Public Methods >
 	virtual void dump() {}
@@ -99,8 +109,14 @@ private:
 	StateSetList macroStates;
 
 public:
+
 	// < Public Methods >
 	MacroStateSet (StateSetList Q) : macroStates(Q) { type = MACROSTATE;}
+	MacroStateSet (StateSetList Q, TLeafMask l) : macroStates(Q) { type = MACROSTATE; leaves = l;}
+	MacroStateSet (StateSetList Q, StateType q): macroStates(Q) {
+		type = MACROSTATE;
+		//leaves.set(q, true);
+	}
 
 	void dump();
 	std::string ToString();
@@ -118,6 +134,18 @@ public:
 		if (lhs->type == STATE) {
 			return false;
 		} else {
+			// test if they are same
+			// Optimization: sets of level 1 are compared by bitwise operations
+			if(this->leaves.any() && lhs->leaves.any()) {
+				unsigned size = TStateSet::stateNo;
+				for(unsigned i = 0; i < size; ++i) {
+					if(this->leaves[i] ^ lhs->leaves[i]) {
+						return false;
+					}
+				}
+				return true;
+			}
+
 			// TODO: THIS MAY BE SUICIDAL!!!!
 			//MacroStateSet* lhss = reinterpret_cast<MacroStateSet*>(lhs);
 			MacroStateSet* lhss = (MacroStateSet*)(lhs);

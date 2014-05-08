@@ -15,10 +15,12 @@
 
 #include <deque>
 #include <memory>
+#include <unordered_map>
 
 #include "mtbdd/ondriks_mtbdd.hh"
 #include "containers/VarToTrackMap.hh"
 #include "containers/StateSet.hh"
+#include "containers/Cache.hh"
 #include "automata.hh"
 #include "mtbdd_factors.hh"
 

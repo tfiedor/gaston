@@ -37,6 +37,8 @@
 
 using std::cout;
 
+using StateToStateTranslator = VATA::AutBase::StateToStateTranslWeak;
+using StateToStateMap         = std::unordered_map<StateType, StateType>;
 using Automaton = VATA::BDDBottomUpTreeAut;
 
 typedef unsigned int uint;
@@ -414,6 +416,19 @@ main(int argc, char *argv[])
   } else {
 	  matrix->toBinaryAutomaton(formulaAutomaton, false);
   }
+
+  StateHT reachable;
+  formulaAutomaton = formulaAutomaton.RemoveUnreachableStates(&reachable);
+
+  // reindex the states, since it sux
+  StateType stateCnt = 0;
+  StateToStateMap translMap;
+  StateToStateTranslator stateTransl(translMap,
+	[&stateCnt](const StateType&){return stateCnt++;});
+  TStateSet::stateNo = reachable.size();
+  std::cout << TStateSet::stateNo << "?\n";
+
+  formulaAutomaton = formulaAutomaton.ReindexStates(stateTransl);
 
   VATA::Serialization::AbstrSerializer* serializer =
 		  new VATA::Serialization::TimbukSerializer();

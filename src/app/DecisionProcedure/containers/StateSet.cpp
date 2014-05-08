@@ -9,12 +9,6 @@ void LeafStateSet::dump() {
 	std::cout << this->state;
 }
 
-/*std::ostream& operator<<(std::ostream& os, const LeafStateSet& mss) {
-	std::ostringstream ss;
-	ss << mss.state;
-	os << ss.str();
-}*/
-
 /**
  * Overloaded function for conversion to string
  *
@@ -39,8 +33,6 @@ StateType LeafStateSet::getState() {
  * Conversion to string representation
  *
  * @return: string representation of macro state
- *
- * TODO: may not be needed
  */
 std::string MacroStateSet::ToString() {
 	std::ostringstream ss;
@@ -103,3 +95,5 @@ StateSetList MacroStateSet::getMacroStates() const {
 void MacroStateSet::addState(TStateSet* state) {
 	this->macroStates.push_back(state);
 }
+
+unsigned int TStateSet::stateNo = 0;
