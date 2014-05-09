@@ -107,7 +107,7 @@ $q_{i-1} \overset{a_i}{\longrightarrow} q_i$ in $\delta$. We write $p
 $p$ to the state $r$ over the word $w$.
 	
 The \emph{language} accepted by a state $q \in Q$ is defined as
-$L_{\mathcal{A}}(q) = \{w\ |\ q \overset{w}{\Longrightarrow} q_f, q_f \in F\}$.
+$L_{\mathcal{A}}(q) = \{w \mid q \overset{w}{\Longrightarrow} q_f, q_f \in F\}$.
 If it is clear which FA $\mathcal{A}$ we are referring to, we can simplify
 this to $L(q)$. The language accepted by a set of states $S \subseteq
 Q$ is further defined as $L_{\mathcal{A}}(S) = \bigcup_{q \in S}
@@ -115,7 +115,7 @@ L_{\mathcal{A}}(q)$ and the language accepted by the automaton $\mathcal{A}$ is
 defined as $L(\mathcal{A}) = L_{\mathcal{A}}(I)$.
 	
 A~\emph{deterministic finite automaton} (DFA) is a FA $\mathcal{A}$ where $|I| =
-1$ and $\forall q \in Q, \forall a \in \Sigma: |\{ r \in Q\ |\ q
+1$ and $\forall q \in Q, \forall a \in \Sigma: |\{ r \in Q \mid q
 \overset{a}{\longrightarrow} r\}| \leq 1$, i.e. $\delta$ is a partial function
 $\delta : Q \times \Sigma \longrightarrow Q$. If $\delta$ is total, i.e.
 $\forall q \in Q, \forall a \in \Sigma : |\delta(q, a)| = 1$, we call
@@ -136,8 +136,8 @@ L(\mathcal{A}')$.
 	\begin{eqnarray*}
 	 Q' & = & 2^Q\\
 	 I' & = & \{I\}\\
-	 F' & = & \{S \in 2^Q\ |\ S~\cap F \neq \emptyset\}\\
-	 \delta'(S, a) & = & \{r \in Q\ |\ q \overset{a}{\longrightarrow} r \in
+	 F' & = & \{S \in 2^Q \mid S~\cap F \neq \emptyset\}\\
+	 \delta'(S, a) & = & \{r \in Q \mid q \overset{a}{\longrightarrow} r \in
 	 \delta\}
 	\end{eqnarray*}
 	
@@ -161,7 +161,7 @@ $\mathcal{A}$ such that $L(\mathcal{A}) = L$.
 	$i \notin X$.
 	
 	We can construct automaton $\mathcal{A}$ that accepts set difference $X$ of two
-	sets $Y$ and $Z$, i.e. $X = Y \setminus Z$, as depicted on Figure
+	sets $Y$ and $Z$, i.e. $X = Y \setminus Z$, as depicted in Figure
 	\ref{set-automaton}.
 	
 	\begin{figure}[h!]
@@ -214,7 +214,7 @@ Q_\mathcal{B}, \Sigma, \delta, I_\mathcal{A} \times I_\mathcal{B}, F_\mathcal{A}
 \end{equation} where 
 \begin{equation}
 \delta = \{(p_1, p_2)
-\overset{a}{\longrightarrow} (q_1, q_2)\ |\ (p_1, a, q_1) \in \delta_\mathcal{A}
+\overset{a}{\longrightarrow} (q_1, q_2) \mid (p_1, a, q_1) \in \delta_\mathcal{A}
 \wedge (p_2, a, q_2) \in \delta_\mathcal{B}\}
 \end{equation}
 	
@@ -253,7 +253,7 @@ mapping $t : \mathbb{N}^* \to \Sigma$, that satisfies the following conditions:
  \begin{enumerate}
   \item \emph{dom}($t$) is a finite prefix-closed subset of $\mathbb{N}^*$,
   \item for every $v \in dom(t)$, called a \emph{node} of $t$, the following
-holds: $(\#t(v) = n \geq 0) \Longrightarrow \{i\ |\ vi \in dom(t)\} =
+holds: $(\#t(v) = n \geq 0) \Longrightarrow \{i \mid vi \in dom(t)\} =
 \{1,\ldots,n\}$.
  \end{enumerate}
 
@@ -292,7 +292,7 @@ $\mathcal{A}$ over $t$ such that $\varphi(\epsilon) = q$. We will write $t
 \overset{\varphi}{\Longrightarrow} q$.
 
 The \emph{language} accepted by a state $q$ is defined as $L_{\mathcal{A}}(q) =
-\{t\ |\ t \Rightarrow q\}$. For a set of states $S \subseteq Q$ we define the
+\{t \mid t \Rightarrow q\}$. For a set of states $S \subseteq Q$ we define the
 language accepted by this set as $L_{\mathcal{A}}(S) = \bigcup_{q \in S}
 L_{\mathcal{A}}(q)$. Similarly to FA, if it is clear which TA $\mathcal{A}$ we
 are referring to, we only write $L(q)$ or $L(S)$. Then language of $\mathcal{A}$
@@ -411,7 +411,7 @@ trees over $T_{\Sigma_\bot^n}$:
 Rec, the recognizable tree relations, is the class of relations $R \subseteq
 (T_\Sigma)^n$ such that the language 
 \begin{equation}
-\{[t_1,\ldots,t_n]\ |\ (t_1,\ldots,t_n)
+\{[t_1,\ldots,t_n] \mid (t_1,\ldots,t_n)
 \in R\}
 \end{equation} is accepted by a tree automaton on the alphabet $\Sigma_\bot^n$.
 \end{defz}
@@ -528,7 +528,7 @@ MTBDD $\delta^{bu}$ represents the function \textlbrackdbl $\delta^{bu}$
 \textrbrackdbl $: Q^\# \rightarrow (\Sigma \rightarrow 2^Q)$ where
  \begin{equation}
   \text{\textlbrackdbl} \delta^{bu} \text{\textrbrackdbl} =
- \lambda (q_1,\ldots,q_p)\ a . \{q\ |\ (q_1,\ldots,q_p)
+ \lambda (q_1,\ldots,q_p)\ a . \{q \mid (q_1,\ldots,q_p)
  \overset{a}{\longrightarrow} q\}. \end{equation}
 
 The \emph{top-down} representation of the transition function $\delta$ of the TA
@@ -538,7 +538,7 @@ $\delta^{td}$ then represents the function \textlbrackdbl $\delta^{td}$
 \textrbrackdbl $: Q \rightarrow (\Sigma \rightarrow 2^{Q^\#}$ where
 \begin{equation} \text{\textlbrackdbl} \delta^{td} \text{\textrbrackdbl} =
 \lambda q\ a .
-\{(q_1,\ldots,q_p)\ |\ q \overset{a}{\longrightarrow} (q_1,\ldots,q_p)\}.
+\{(q_1,\ldots,q_p) \mid q \overset{a}{\longrightarrow} (q_1,\ldots,q_p)\}.
 \end{equation}
 
 \noindent\hrulefill
@@ -554,7 +554,7 @@ $\delta^{td}$ then represents the function \textlbrackdbl $\delta^{td}$
   q_1 & \overset{111}{\longrightarrow} & q_2\\
   q_2 & \overset{XXX}{\longrightarrow} & q_2
  \end{eqnarray*}
-  MTBDD coding the transition function of this automaton is depicted on Figure
+  MTBDD coding the transition function of this automaton is depicted in Figure
   \ref{mtbdd}.
  
  \begin{figure}[h!]
@@ -815,7 +815,7 @@ The symbol at the position $p$: \begin{equation}(S_1,\ldots,S_n)^\sim(p) =
 \begin{lemma}
 If a set of tuples of finite subsets of $\{1,\ldots,k\}^*$ is definable in
 WS$k$S, then $\overset{\sim}{L} \overset{\mathit{def}}{=}
-\{(S_1,\ldots,S_n)^\sim\ |\ (S_1,\ldots,S_n) \in L\}$ is in Rec.
+\{(S_1,\ldots,S_n)^\sim \mid (S_1,\ldots,S_n) \in L\}$ is in Rec.
 \end{lemma}
 
 \begin{proof}
@@ -911,13 +911,13 @@ final states on strings of $\{\{0\}^k\}^*$.
 \begin{defz}
 We define a \emph{right-quotient} of language $L$ with a language $L'$ as
 \begin{equation}
- L / L' = \{w\ |\ \exists u \in L' : w\cdot u \in L\}
+ L / L' = \{w \mid \exists u \in L' : w\cdot u \in L\}
 \end{equation}.
 \end{defz}
 
 Now we define a language $L^i$ as
 \begin{equation}
- L^i = \{w \in \{\{0, 1\}^k\}^*\ |\ \text{the $j$-th track of word} \mathit{w}
+ L^i = \{w \in \{\{0, 1\}^k\}^* \mid \text{the $j$-th track of word} \mathit{w}
  \text{is of the form $0^*$ for $j \neq i$}\}. \end{equation}
  
  So the language of automaton $\mathcal{A}'$ after projection $\gamma_i$ on
@@ -948,7 +948,7 @@ Now we define a language $L^i$ as
   Deciding validity of $\rho$ consists of constructing automaton
   $\mathcal{A}_\rho$ corresponding to the formula $\rho$ and then afterward
   check the language $L(\mathcal{A}_\rho)$ for universality, i.e. if any
-  non-accepting state is reachable. As depicted at Figure \ref{automata} we
+  non-accepting state is reachable. As depicted in Figure \ref{automata} we
   first construct automata $\mathcal{A}_{\mathit{Sing}(P)}$ and
   $\mathcal{A}_{P \not\subseteq X}$ for subformulae $\mathit{Sing}(P)$ and $P
   \not\subseteq X$ respectively. Then we construct product automaton of those
@@ -1202,7 +1202,7 @@ The algorithm proposed in \cite{tacas} runs the subset construction procedure
 on-the-fly, avoiding explicit construction of $\overline{\mathcal{A}_D}$, and
 checks if any accepting macro-state is reachable. This procedure is
 further augmented with two optimizations. We define the post-image of a~state as
-$Post(p) = \{p'\in Q\ |\ \exists a \in \Sigma: (p, a, p') \in \delta\}$.
+$Post(p) = \{p'\in Q \mid \exists a \in \Sigma: (p, a, p') \in \delta\}$.
 
 The first optimization is based on the following lemma.
 
@@ -1385,10 +1385,10 @@ Now, given the symbol $f \in \Gamma(G)$ and a set $H \subseteq G$ the
 defined as the restriction of the function $f$ over the set $G\setminus H$, i.e.
 $\omega_H(f) = f|_{G\setminus H}$. This can be further extended to sets of symbols. Given a
 set $E \subseteq \Gamma(G)$, we define the projection over a set $H \subseteq
-G$, written $\omega_H(E)$, as $\omega_H(E) = \{\omega_H(f)\ |\ f \in E\}$.
+G$, written $\omega_H(E)$, as $\omega_H(E) = \{\omega_H(f) \mid f \in E\}$.
 
 For a language $L \subseteq \Gamma(G)^*$, the projection of $L$ over $H$,
-written as $\omega_H(L)$, is defined as $\omega_H(L) = \{\omega_H(f)\ |\ f \in
+written as $\omega_H(L)$, is defined as $\omega_H(L) = \{\omega_H(f) \mid f \in
 L\}$. Note that $\omega_H(L) \subseteq \Gamma(G\setminus H)^*$.
 
 \begin{lemma} Given the alphabet $\Gamma(G)$, $H \subseteq G$ and $X, Y
@@ -1398,7 +1398,10 @@ L\}$. Note that $\omega_H(L) \subseteq \Gamma(G\setminus H)^*$.
 \end{equation}
 \end{lemma}
 \begin{proof}
-{\color{red} will we even need this?}
+For each symbol $z \in \omega_H(X)$ there must exist some $x \in X$ such that
+$z = \omega_H(x)$. Since $X \subseteq Y$ it must also hold that $x \in Y$, and
+hence $\omega_H(x) \in \omega_H(Y)$. Therefore $\omega_H(X) \subseteq
+\omega_H(Y)$.
 \end{proof}
 
 As we described in Section \ref{wsks}, there is an issue with the encoding of
@@ -1449,7 +1452,7 @@ substitute for symbol $0^k$, for some known $k$.
 For a set of states $Q$ of automaton $\mathcal{A} = (Q, \Sigma, \delta, I, F)$
 we define the \emph{set of predecessors through zero tracks} as the set $\mathit{PRE}_0(Q)$ of states such that
 \begin{equation}
- \mathit{PRE}_0(Q) = \{r \in Q\ |\ \exists q \in Q: r
+ \mathit{PRE}_0(Q) = \{r \in Q \mid \exists q \in Q: r
  \overset{\overline{0}}{\longrightarrow} q \in \delta\}.
 \end{equation}
 We denote the reflexive transitive closure of $PRE_0(Q)$ as $PRE_0^*(Q)$. Note
@@ -1464,7 +1467,7 @@ that we can define the $POST_0(Q)$ function similarly to $PRE_0$.
  where
  \begin{equation}
   \omega_{\mathcal{X}}(\delta) = \left\{ p \overset{\omega(a)}{\longrightarrow}
-  r\ |\ p \overset{a}{\rightarrow} r \in \delta, a \in \Sigma\right\}.
+  r \mid p \overset{a}{\rightarrow} r \in \delta, a \in \Sigma\right\}.
  \end{equation}
  Note that after the operation of projection we have to adjust the final states
  according to the $PRE_0$ relation.
@@ -1499,7 +1502,7 @@ operations were defined in Section \ref{preli}. But we take a different path.
 %  We define the \emph{downward closure} of a set $S$ as set $\downarrow S$ such
 %  that
 %  \begin{equation}
-%   \downarrow S \overset{\mathit{def}}{=} \{p\in Q\ |\ \exists q \in S: p
+%   \downarrow S \overset{\mathit{def}}{=} \{p\in Q \mid \exists q \in S: p
 %   \subseteq q\}
 %  \end{equation}
 % \end{defz}
@@ -1508,7 +1511,7 @@ operations were defined in Section \ref{preli}. But we take a different path.
 %  Similarly we define the \emph{upward closure} of a set $S$ as set $\uparrow S$
 %  such that
 %  \begin{equation}
-%  \uparrow S \overset{\mathit{def}}{=} \{p\in Q\ |\ \exists q \in S: q \subseteq
+%  \uparrow S \overset{\mathit{def}}{=} \{p\in Q \mid \exists q \in S: q \subseteq
 %  p\}
 %  \end{equation}
 % \end{defz}
@@ -1516,7 +1519,7 @@ operations were defined in Section \ref{preli}. But we take a different path.
 % \begin{defz}
 %  We define the \emph{preset through zero tracks} as a set of states such that
 %  \begin{equation}
-%  PRE_0(Q) = \{r\ |\ \exists q \in Q: r \overset{(0)^k}{\longrightarrow}
+%  PRE_0(Q) = \{r \mid \exists q \in Q: r \overset{(0)^k}{\longrightarrow}
 %  q\}.\footnote{Note that $(0)^k$ does stand for zero track of width $k$ not
 %  length.}
 %  \end{equation}
@@ -1622,22 +1625,22 @@ Proof of this Lemma can be found in \cite{tata}.
 %  Q_{i+1} & = & 2^{Q_i}\\
 %  \Sigma_{i+1} & = & \Sigma_{i|\omega_{\mathcal{X}_{i+1}}}\\
 %  \delta_{i+1} & = & \{P \overset{\omega_{\mathcal{X}_{i+1}}(a)}{\longrightarrow}
-%  R\ |\ R = \bigcup_{p \in P} \{r\ |\ p \overset{a}{\rightarrow} q \in \delta_i\}, a \in
+%  R \mid R = \bigcup_{p \in P} \{r \mid p \overset{a}{\rightarrow} q \in \delta_i\}, a \in
 %  \Sigma_i\}\\
 %  I_{i+1} & = & \{I_i\}\\
-%  F_{i+1} & = & \downarrow\overline{\{Q\ |\ Q = PRE_0^*(P), P \in F_i\}}\label{F}
+%  F_{i+1} & = & \downarrow\overline{\{Q \mid Q = PRE_0^*(P), P \in F_i\}}\label{F}
 % \end{eqnarray}
 % 
 % Notice that the set of the final states $F_{i+1}$ is computed from the states of
 % the previous level of quantification. First we need to compute the predecessors
 % of every final state which yields the following set
 % \begin{equation}
-%  F_{\exists\mathcal{X}_{i+1}\varphi_i} = \{Q\ |\ Q = PRE_0^*(P), P \in F_i\}
+%  F_{\exists\mathcal{X}_{i+1}\varphi_i} = \{Q \mid Q = PRE_0^*(P), P \in F_i\}
 % \end{equation}
 % Now to obtain the set of final states for complement of the automaton, we would
 % first have to determinise the set to set
 % \begin{equation}
-%  F^{DET}_{\exists\mathcal{X}_{i+1}\varphi_i} = \uparrow\{ \{s\}\ |\ s \in
+%  F^{DET}_{\exists\mathcal{X}_{i+1}\varphi_i} = \uparrow\{ \{s\} \mid s \in
 %  F_{\exists\mathcal{X}_{i+1}\varphi_i}\}
 % \end{equation}
 % We can complement this set and hence get the equation \ref{F}.
@@ -1749,7 +1752,7 @@ automaton $\mathcal{A}^0 = (Q^0, \Sigma, \delta^0, I, Q^0)$ where
 \begin{eqnarray}
  Q^0 & = & I \cup \{q \in Q \mid \exists w \in \overline{0}^*: f
  \overset{w}{\longrightarrow} q, f \in I\}\\
- \delta^0 & = & \{p \overset{\overline{0}}{\longrightarrow} q\ |\ p, q \in Q^0\}
+ \delta^0 & = & \{p \overset{\overline{0}}{\longrightarrow} q \mid p, q \in Q^0\}
 \end{eqnarray}
 \end{defz}
 
@@ -1798,6 +1801,11 @@ In the previous section we introduced the concept of the algorithm on WS$1$S
 logic using nondeterministic finite automata (or unary tree automata). We will
 further extend this procedure to an arbitrary $k$.
 
+We extent the notion of projection to trees. Given a tree $t :
+\mathbb{N}^* \rightarrow \Gamma(G)$ the projection of $t$ over $H \subseteq G$
+is defined as $\omega_H(t) = \{(n, \omega_H(f)) \mid (n, f) \in t\}$. Note that
+$\omega_H(t) : \mathbb{N}^* \rightarrow \Gamma(G\setminus H)$.
+
 Similar to WS$1$S we will define the hierarchical family of tree automata
 $\mathbb{A} = \{\mathcal{A}_0,\ldots,\mathcal{A}_m\}$ where
 \begin{equation}
@@ -1813,24 +1821,45 @@ is a tree automaton corresponding to the formula $\varphi_{i+1}
 \begin{eqnarray}
  Q_{i+1} & = & 2^{Q_i}\\
  \Sigma_{i+1} & = & \omega_{\mathcal{X}_{i+1}}(\Sigma_i)\\
- F_{i+1} & = & \{R \in Q_{i+1}\ |\ R \cap F_i = \emptyset\}\\
+ F_{i+1} & = & \{R \in Q_{i+1} \mid R \cap F_i = \emptyset\}\\
  \delta_{i+1} & = & \{(R_1,\ldots,R_t), \omega_{\mathcal{X}_{i+1}}(f), S)\}\\
 \end{eqnarray}
 where
 \begin{equation}
-S = \{s \in Q_i\ |\ \exists r_1 \in R_1,\ldots,r_t \in R_t.
+S = \{s \in Q_i \mid \exists r_1 \in R_1,\ldots,r_t \in R_t.
  ((r1,\ldots,r_t), f, s) \in \delta_i\}
 \end{equation}
 
 {\color{red} Fi+1 is not correct, it should correspond to the states after
 projection. How to define this best for tree automata?}
 
-{\color{red} What else is needed? The rest of the draft part?}
+In order to be able to talk about possible \emph{futures} of states of automata
+from family of $\mathbb{A}$ we exploit the notion of languages of the so called
+\emph{open trees} as defined in \cite{tacas}.
 
- Given
-a tree $t : \mathbb{N}^* \rightarrow \Gamma(G)$ the projection of $t$ over $H
-\subseteq G$ is defined as $\omega_H(t) = \{(n, \omega_H(f))\ |\ (n, f) \in
-t\}$. Note that $\omega_H(t) : \mathbb{N}^* \rightarrow \Gamma(G\setminus H)$,
+Consider a ranked alphabet $\Sigma$, we define a special symbol $\square \notin
+\Sigma$ with rank 0, called a \emph{hole}. Then an \emph{open tree} over
+$\Sigma$ is a tree over $\Sigma \cup \{\square\}$ such that all its leaves are
+labeled by symbol $\square$. we use $T_\Sigma^\square$ to denote the set of all
+open trees over $\Sigma$. Given states $q_1,\ldots,q_n$ of automaton
+$\mathcal{A} = (Q, \Sigma, \delta, F)$ and an open tree $t$ with leaves
+$v_1,\ldots,v_n$, a run $\pi$ of $\mathcal{A}$ on $t$ from $(q_1,\ldots,q_n)$ is
+defined in similar way as the run on a tree except that for each leav $v_i, 1
+\leq i \leq n$, we have $\pi(v_i) = q_i$. We use $t(q_1,\ldots,q_n)
+\overset{\pi}{\Longrightarrow} q$ to denote that $\pi$ is a run of $\mathcal{A}$
+on $t$ from $(q_1,\ldots,q_n)$ such that $\pi(\epsilon) = q$. We define the
+notation $t(q_1,\ldots,q_n) \Longrightarrow q$ similarly to runs on trees.
+
+The language of $\mathcal{A}$ accepted from a tuple $(q_1,\ldots,q_n)$ of states
+of $Q$ is $L^\square_\mathcal{A}(q_1,\ldots,q_n) = \{t \in T^\square_\Sigma
+\mid t(q_1,\ldots,q_n) \Longrightarrow q \text{for some } q \in F\}$. Then
+language of $\mathcal{A}$ accepted froma tuple $(S_1,\ldots,S_n)$ of sets of
+states from $\mathcal{A}$ is defined as
+follows:
+\begin{equation}
+L_\mathcal{A}^\square(S_1,\ldots,S_n) = \bigcup_{(s_1,\ldots,s_n) \in
+S_1\times\ldots\times S_n} L_\mathcal{A}^\square(s_1,\ldots,s_n)
+\end{equation}
 
 \chapter{Implementation}
 
