@@ -2,6 +2,11 @@
 #include "environment.hh"
 #include "decision_procedures.hh"
 
+// Global Variables
+
+MultiLevelMCache<bool> StateCache;
+MultiLevelMCache<MacroTransMTBDD> BDDCache;
+
 /**
  * Computes the final states from automaton
  *
@@ -111,15 +116,6 @@ TUnSatExample findUnsatisfyingExample() {
 	return 1;
 }
 
-struct SetCompare : public std::binary_function<TStateSet*, TStateSet*, bool>
-{
-    bool operator()(TStateSet* lhs, TStateSet* rhs) const
-    {
-    	std::cout << "Doing teh compare!~\n";
-        return lhs->DoCompare(rhs);
-    }
-};
-
 /**
  * Performs a decision procedure of automaton corresponding to the formula phi
  * This takes several steps, as first we compute the final states of the
@@ -141,14 +137,22 @@ struct SetCompare : public std::binary_function<TStateSet*, TStateSet*, bool>
 int decideWS1S(Automaton & aut, TSatExample & example, TUnSatExample & counterExample, PrefixListType formulaPrefixSet, PrefixListType negFormulaPrefixSet) {
 	std::cout << "Deciding WS1S formula transformed to automaton" << std::endl;
 
+	// Number of determinizations
+	unsigned formulaDeterminizations = formulaPrefixSet.size();
+	unsigned negFormulaDeterminizations = negFormulaPrefixSet.size();
+	unsigned cacheSize = (formulaDeterminizations >= negFormulaDeterminizations) ? formulaDeterminizations : negFormulaDeterminizations;
+	StateCache.extend(cacheSize);
+	BDDCache.extend(cacheSize);
+
 	// Construct initial state of final automaton
-	MacroStateSet* initialState = constructInitialState(aut, formulaPrefixSet.size());
+	MacroStateSet* initialState = constructInitialState(aut, formulaDeterminizations);
 	initialState->dump();
-	MacroStateSet* negInitialState = constructInitialState(aut, negFormulaPrefixSet.size());
+	MacroStateSet* negInitialState = constructInitialState(aut, negFormulaDeterminizations);
 
 	// Compute the final states
 	StateHT allStates;
 	aut.RemoveUnreachableStates(&allStates);
+
 
 	/*TransMTBDD * tbdd = getMTBDDForStateTuple(aut, Automaton::StateTuple({}));
 	std::cout << "Leaf : bdd\n";
@@ -160,27 +164,10 @@ int decideWS1S(Automaton & aut, TSatExample & example, TUnSatExample & counterEx
 		std::cout << TransMTBDD::DumpToDot({bdd}) << "\n\n";
 	}*/
 
-
-	MacroStateSet* in2 = constructInitialState(aut, formulaPrefixSet.size());
-	std::cout << "\n\n";
-
-	std::unordered_map<TStateSet*, bool, std::hash<TStateSet*>, SetCompare> StateCache;
-	StateCache[initialState] = true;
-	/*bool isFinal = StateCache[initialState];
-	initialState->dump();
-	std::cout << " is " << isFinal << "\n";*/
-	bool isFinal2 = StateCache.find(in2) != StateCache.end();
-	bool isFinal3 = StateCache[negInitialState];
-	in2->dump();
-	std::cout << " is " << isFinal2 << " vs " << isFinal3 << "\n";
-
 	FinalStatesType fm;
 	fm = computeFinalStates(aut);
 
 	bool hasExample = existsSatisfyingExample(aut, initialState, formulaPrefixSet);
-	// TODO: remove
-	//bool hasExample = true;
-	////////////////////////
 	bool hasCounterExample = existsUnsatisfyingExample(aut, negInitialState, negFormulaPrefixSet);
 
 	// No satisfiable solution was found
@@ -223,6 +210,16 @@ bool StateIsFinal(Automaton & aut, TStateSet* state, unsigned level, PrefixListT
 		StateSetList worklist;
 		StateSetList processed;
 		MacroStateSet* macroState = reinterpret_cast<MacroStateSet*>(state);
+
+		// Look into Cache
+		bool isFinal;
+		if(StateCache.retrieveFromCache(macroState, isFinal, level)) {
+			std::cout << "CacheHit\n";
+			return isFinal;
+		} else {
+			std::cout << "CacheMiss\n";
+		}
+
 		StateSetList states = macroState->getMacroStates();
 		for (auto state : states) {
 			worklist.push_back(state);
@@ -236,6 +233,7 @@ bool StateIsFinal(Automaton & aut, TStateSet* state, unsigned level, PrefixListT
 			if (StateIsFinal(aut, q, level - 1, prefix)) {
 				//state->dump();
 				//std::cout << " is NONFINAL\n";
+				StateCache.storeIn(macroState, false, level);
 				return false;
 			} else {
 				// Enqueue all its successors
@@ -252,6 +250,7 @@ bool StateIsFinal(Automaton & aut, TStateSet* state, unsigned level, PrefixListT
 
 		//state->dump();
 		//std::cout << " is FINAL\n";
+		StateCache.storeIn(macroState, true, level);
 		return true;
 	}
 
@@ -467,6 +466,12 @@ MacroTransMTBDD GetMTBDDForPost(Automaton & aut, TStateSet* state, unsigned leve
 		}
 	} else {
 		MacroStateSet* mState = reinterpret_cast<MacroStateSet*>(state);
+
+		// Look into cache
+		if(BDDCache.inCache(mState, level)) {
+			return BDDCache.lookUp(mState, level);
+		}
+
 		StateSetList states = mState->getMacroStates();
 		// get post for all states under lower level
 		TStateSet* front = states.back();
@@ -502,6 +507,10 @@ MacroTransMTBDD GetMTBDDForPost(Automaton & aut, TStateSet* state, unsigned leve
 		//std::cout << "BDD: " << MacroTransMTBDD::DumpToDot({&detResultMtbdd});
 		//std::cout << "\n\n";
 		//std::cout << "---------------------->" << level << "<----------------------\n";
+
+		//////////////////////////////////
+		BDDCache.storeIn(mState, detResultMtbdd, level);
+		/////////////////////////////////
 
 		// do projection and return;
 		return detResultMtbdd;

@@ -1720,7 +1720,7 @@ search for an accepting or a rejecting state.
  For all $0 \leq i \leq m$ we define the relation $\leq_i \subseteq Q_i \times
  Q_i$ as follows:
  \begin{eqnarray}
-  \leq_0 & = & id\\
+  \leq_0 & = & \text{id}\\
   A \leq_{i+1} B & \Leftrightarrow & \forall b \in B \exists a \in A: a \geq_i
   b
  \end{eqnarray}
@@ -1756,11 +1756,7 @@ automaton $\mathcal{A}^0 = (Q^0, \Sigma, \delta^0, I, Q^0)$ where
 \end{eqnarray}
 \end{defz}
 
-Note that all states are final due to the adjustment of states after projection.
-The final Algorithm \ref{deciding-wsks-alg} is based on universality checking
-algorithm as described in this chapter. It comes from 
-
-\begin{algorithm}[hb!]
+\begin{algorithm}[ht!]
 		\SetKwFor{For}{foreach}{do}{}
 		\SetKwRepeat{Repeat}{repeat}{until}
 		\KwIn{Initial state $I_m$ of automaton $A_{\neg\varphi_m}$}
@@ -1789,6 +1785,9 @@ algorithm as described in this chapter. It comes from
 		formulae $\varphi$}\label{deciding-wsks-alg}
 	\end{algorithm}
 
+Note that all states are final due to the adjustment of states after projection.
+The final Algorithm \ref{deciding-wsks-alg} is based on universality checking
+algorithm as described in this chapter.
 
 % workset = Q
 % while workset != empty:
@@ -1799,7 +1798,7 @@ algorithm as described in this chapter. It comes from
 
 In the previous section we introduced the concept of the algorithm on WS$1$S
 logic using nondeterministic finite automata (or unary tree automata). We will
-further extend this procedure to an arbitrary $k$.
+briefly extend this procedure to an arbitrary $k$.
 
 We extent the notion of projection to trees. Given a tree $t :
 \mathbb{N}^* \rightarrow \Gamma(G)$ the projection of $t$ over $H \subseteq G$
@@ -1860,6 +1859,59 @@ follows:
 L_\mathcal{A}^\square(S_1,\ldots,S_n) = \bigcup_{(s_1,\ldots,s_n) \in
 S_1\times\ldots\times S_n} L_\mathcal{A}^\square(s_1,\ldots,s_n)
 \end{equation}
+
+Given the vector $\overset{\rightarrow}{q_n} = (q_1,\ldots,q_n)$ of states, we
+use the notation $L_\mathcal{A}^\square$ to denote the language of open trees
+$L_\Sigma^\square$. Further we use the notation $\overset{\rightarrow}{q_n}[e
+\mapsto s]$, where $1 \leq e \leq n$, to denote the vector
+$(q_1,\ldots,q_{e-1}, s, q_{e+1},\ldots,q_n)$. This notion can be further
+extended to vectors of sets of states.
+
+Further we extent the notion of pruning states as defined in previous sections
+over the languages of open trees by the following lemmas.
+
+\begin{lemma}
+Let $\sqsubseteq_i \subseteq Q_i \times Q_i$, $0 \leq i \leq m-1$, be a relation
+on the states of the automaton $\mathcal{A}_i$ such that implies inclusion of
+languages of open trees, i.e.
+\begin{equation}
+ a \sqsubseteq_i b \Rightarrow \forall 1 \leq e \leq n. \forall
+ \overset{\rightarrow}{q_n} \in Q_i^n.
+ L_{\mathcal{A}_i}(\overset{\rightarrow}{q_n}[e \mapsto a]) \subseteq
+ L_{\mathcal{A}_i}(\overset{\rightarrow}{q_n}[e \mapsto b])
+\end{equation}
+then $\forall p, r \in Q_i$, $S \subseteq Q_i$ and $\overset{\rightarrow}{V_n}
+\subseteq Q^n_i$, $1 \leq e \leq n$ it holds that
+\begin{equation}
+ p \sqsubseteq_i r \Rightarrow
+ L_{\mathcal{A_{i+1}}}(\overset{\rightarrow}{V_n}[e \mapsto (\{p, r\} \cup S)])
+ \subseteq  L_{\mathcal{A_{i+1}}}(\overset{\rightarrow}{V_n}[e \mapsto (\{r\}
+ \cup S)])
+\end{equation}
+where $(\{p, r,\} \cup S)$, $(\{r\} \cup S)$ are states of automaton
+$\mathcal{A}_{i+1}$.
+\end{lemma}
+
+\begin{proof}
+Proof can be found in \cite{tacas}.
+\end{proof}
+
+\begin{defz}
+For all $0 \leq i \leq m$ we define the family of relations
+$\{\sqsubseteq_i^0,\ldots,\sqsubseteq^i_i\}$ over the states of the automaton
+$\mathcal{A}_i$ such that $\forall 0 \leq k \leq i: \sqsubseteq_i^k\subseteq Q_i
+\times Q_i$ as follows:
+\begin{eqnarray}
+ \sqsubseteq_0 & = & \text{id}\\
+ \sqsubseteq_i & = & \{(A, B) \mid \forall b \in B \exists a \in A. a
+ \sqsupseteq b\}
+\end{eqnarray}
+\end{defz}
+
+We can use the Algorithm \ref{deciding-wsks-alg} described in previous section
+to decide any WS$k$S with operation of projection extended over the trees.
+Further we can use relations previously defined to prune the state space
+similarly to word automata.
 
 \chapter{Implementation}
 
@@ -1957,79 +2009,83 @@ representation.
  \end{equation}
  
  The core function for deciding WS$k$S is \ref{impl-state-is-final} which checks
- whether the state on level $0 \leq i \leq m$ is final or not. Since we are
- constructing a complement of an automaton on level $i$, the state is final iff
- all of its child states are non-final or there exists a successor over the zero
- tracks that is final (due to projection). While generating successors
- we can also prune some of the states if they are in relation $\leq_i$ as
- defined previously.
+ whether there exists a reachable final state on level $0 \leq i \leq m$ from
+ state $q$. This function is corresponding to the implementation of algorithm
+ \ref{deciding-wsks-alg} with use of function \ref{impl-succ} for building successors of
+ states and Algorithm \ref{impl-main} for checking whether the state is final.
+ The implementation is using the workset algorithm and uses apply operations
+ over the MTBDDs of constructed successors.
  
 \begin{function}[h!]
 		\SetKwFor{For}{foreach}{do}{}
 		\SetKwRepeat{Repeat}{repeat}{until}
 		\KwIn{State $q$ of automaton $A_{\varphi_m}$, level of determinization $m$}
-		\KwOut{\textsc{TRUE} if state $q$ is final, \textsc{FALSE} otherwise}
-		\KwData{\texttt{StateCache} caches the answers of \texttt{StateIsFinal}
-		function}
+		\KwOut{\textsc{TRUE} if there is reachable accepting state from $q$,
+		\textsc{FALSE} otherwise}
 		\BlankLine
-		\nl isFinal := \texttt{StateCache}[q]\;
-		\nl \uIf{isFinal $\neq$ $\bot$}{
-		  \nl\Return isFinal\;
-		}
-		\BlankLine
-		\nl \uIf{m = 0}{
-			\nl isFinal := $Q \in F_0$\;
-		}
-		\nl \Else{
-			\nl\For{$q \in Q$}{
-				\nl \uIf{\upshape \texttt{StateIsFinal}(q, m-1)}{
-					\nl isFinal := \textsc{FALSE}\;
-					\nl \textbf{break}\;
-				}
-				\nl \Else{
-					\nl succ := \texttt{buildSuccessorTree}(q, m)\;
-					\nl \textbf{apply1} succ ($\lambda$ x. \textbf{if} x is reachable by
-					low successors only in BDD \textbf{then} workset := workset $\cup$ x)\;
-				}
+		\nl workset := $\{q\}$\;
+		\nl processed := workset\;
+		\nl \While{$\exists q_m \in workset$}{
+			\nl workset := workset $\setminus \{q_m\}$\;
+			\nl\uIf{\upshape \texttt{IsStateFinal}($q_m$, $m$)}{
+				\nl \Return \textsc{TRUE}\;
 			}
-			\nl isFinal := \textsc{TRUE}\;
-		}
-		\nl \texttt{StateCache}[q] = isFinal\;
-		\nl \Return isFinal\;
-		\caption{StateIsFinal(state q, level m)}\label{impl-state-is-final}
+			\nl\Else{
+				\nl succ := \texttt{buildSuccessorTree($q_m$, m)}\;
+				\nl\textbf{apply1} succ ($\lambda$ x. \textbf{if} $x \notin $processed$
+				\wedge \not\exists y \in $processed$: x < y$ \textbf{then} workset :=
+				workset $\cup \{x\}$)\; 
+				\nl processed := processed $\cup$ workset\; 
+				} 
+			}
+			\Return \textsc{FALSE}\;
+		\caption{CheckForAcceptingState(state q, level m)}\label{impl-state-is-final}
 \end{function}
  
- The main Algorithm \ref{impl-main} is based on the workset algorithm. Since we
- are working with closed formulae, at the last level of determinization in
- the defined family of automata we are looking for a non-final state using the
- function \ref{impl-state-is-final}. If
- the initial state is not final, we are generating its next successor and add it
- to worklist if it is not enqueued already or we can prune it through the
- $\leq_i$ relation, i.e. if the successors $q$ of state $p$ is $\leq_i$-smaller
- we discard it.
+ The main Algorithm \ref{impl-main} for deciding WS$k$S is corresponding to the
+ implementation of Algorithm \ref{universality}. It first checks the cache
+ whether the state has already been decided and else call the
+ \ref{impl-state-is-final} function for checking for reachable final state. We
+ can further extend this procedure to deciding satisfiability of WS$k$S
+ formulae by checking the validity of $\exists$-closed input formulae. This
+ means that given the input we close the formula and its negation and test the
+ validity of constructed formulae to decide their satisfiability. Further we can
+ decide the formula according to the relationships between validity,
+ satisfiability and unsatisfiability.
  
 \begin{algorithm}[h!]
 		\SetKwFor{For}{foreach}{do}{}
 		\SetKwRepeat{Repeat}{repeat}{until}
 		\KwIn{State $I_m$ of automaton $A_{\varphi_m}$, level of determinization $m$}
 		\KwOut{\textsc{TRUE} if state $I_m$ is final, \textsc{FALSE} otherwise}
+		\KwData{\texttt{StateCache} caches the answers of \texttt{StateIsFinal}
+		function}
 		\BlankLine
-		\nl workset := $\{I_m\}$\;
-		\nl processed := workset\;
-		\nl \While{$\exists q_m \in workset$}{
-			\nl workset := workset $\setminus \{q_m\}$\;
-			\nl\uIf{\upshape \texttt{StateIsFinal}($q_m$, level) = \textsc{FALSE}}{
-				\nl \Return \textsc{TRUE}\;
-			}
-			\nl\Else{
-				\nl succ := \texttt{buildSuccessorTree}($q_m$, level)\;
-				\nl\textbf{apply1} succ ($\lambda$ x. \textbf{if} x $\notin$ processed
-				\textbf{then} workset := workset $\cup \{x\}$)\;
-				processed := processed $\cup$ workset\; 
-				}
-		}
-		\nl \Return \textsc{FALSE}\;
-		\caption{Deciding whether there exists a satisfying example for formula	
+		\nl\Return \texttt{IsStateFinal}($I_m$, $m$)\;
+		\BlankLine
+		\SetKwProg{myproc}{Function}{}{}
+ 		\myproc{\upshape \texttt{IsStateFinal}(\textbf{state} P, \textbf{level}
+  i)}{ 
+  		\nl isFinal := \texttt{StateCache}[P, m]\;
+  		\nl\uIf{isFinal $\neq \bot$}{
+  			\nl \Return isFinal\;
+  		}
+  		\BlankLine
+  		\nl\uIf{m = 0}{
+  		  \nl \Return $Q \in F_0$\;
+  		}
+  		\nl\Else{
+  			\nl\For{$q \in Q$}{
+  				\nl\uIf{\upshape \texttt{CheckForAcceptingState(q, m-1)}}{
+  				    \nl \texttt{StateCache}[P, m] := \textsc{FALSE}\;
+  					\nl\Return \textsc{FALSE}\;
+  				}
+  			}
+  			\nl \texttt{StateCache}[P, m] := \textsc{TRUE}\;
+  			\nl \Return \textsc{TRUE}\;
+  		}
+  }
+		\caption{Implementation of deciding validity of WS$k$S formula
 		}\label{impl-main}
 	\end{algorithm}
  

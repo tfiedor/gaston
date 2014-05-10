@@ -18,6 +18,7 @@ class LeafStateSet;
 // < Typedefs >
 typedef size_t StateType;
 typedef std::vector<TStateSet*> StateSetList;
+typedef std::vector<TStateSet*>::iterator StateSetIterator;
 using TLeafMask = boost::dynamic_bitset<>;
 
 // < Enums >
@@ -111,11 +112,18 @@ private:
 public:
 
 	// < Public Methods >
+	MacroStateSet () { type = MACROSTATE;}
 	MacroStateSet (StateSetList Q) : macroStates(Q) { type = MACROSTATE;}
 	MacroStateSet (StateSetList Q, TLeafMask l) : macroStates(Q) { type = MACROSTATE; leaves = l;}
 	MacroStateSet (StateSetList Q, StateType q): macroStates(Q) {
 		type = MACROSTATE;
 		//leaves.set(q, true);
+	}
+
+	~MacroStateSet () {
+		for(StateSetIterator it = this->macroStates.begin(); it != this->macroStates.end(); ++it) {
+			delete *it;
+		}
 	}
 
 	void dump();
