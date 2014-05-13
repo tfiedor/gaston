@@ -1127,28 +1127,26 @@ above.
 
 The \textsc{MONA} tool implementation of the decision procedure for WS$k$S from
 Section \ref{classical} uses deterministic bottom-up tree automata (as described
-in Chapter \ref{monachap}) and so every time non-determinism might have been
-introduced, such through union and projection corresponding to disjunction
+in Chapter \ref{monachap}) and so every time non-determinism might be
+introduced, such as through union and projection corresponding to disjunction
 and existential quantification respectively, the automaton is determinised using the
 subset construction and the information about the original states is forgotten.
 
-So this approach has issues with extensive usage of automaton complementation,
-since for every negation of the formula $\phi$ we have to do the
-complementation of the corresponding tree automaton, which is done in
-exponential time. Moreover, every alternation of quantifiers yields a
-negation. Currently there is no known tree automaton complementation technique
-better than bottom-up determinization of the automaton (which yields
-an exponential number of states), followed by complementing the set of final
-states of the resulting deterministic automaton. The MONA tool is thus heavily
-optimized for the use of deterministic finite (tree) automata, as we introduced in
-\ref{monasecrets}.
+While this approach makes automaton complementation ease (since deterministic
+automata require only swapping final with non-final states), the extensive
+determinisation is still a serious drawback. The \textsc{MONA} tool is
+thus heavily optimized for the use of deterministic finite (tree)
+automata, as we introduced in Section \ref{monasecrets}. However, a decision
+procedure that uses non-deterministic automata needs to deal with the issue of
+complementation, for which there is currently no known algorithm that avoids
+determinisation and the respective state explosion.
 
 In practice, the representation of all models of $\phi$ is not always necessary
 and any model or an invalid assignment to free variables suffices, therefore
 constructing the automaton $\mathcal{A}_{\phi}$ representing all models of
 $\phi$ can be avoided.
 
-Current trends in formal verification and theory of automata tends to use
+Current trends in formal verification and theory of automata tend to use
 non-deter\-ministic automata instead of deterministic ones. This is due to the
 fact that there exist optimized libraries for their use, like VATA
 \cite{vata}, and recently new algorithms that are efficient in practice
@@ -1158,8 +1156,8 @@ EXPTIME-complete for tree automata.
 
 Here we propose to use an algorithm based on the principle of antichains
 \cite{tacas}, defined in the following sections, and search for an accepting
-or non-accepting state \emph{on-the-fly} without constructing the automaton in
-the first place.
+or non-accepting state \emph{on-the-fly} without constructing the automaton
+corresponding to the given formula in the first place.
 
 \section{Antichain-based universality testing of NFAs}
 
@@ -1223,26 +1221,26 @@ that $p_1 \preceq p_2$, which is a simple consequence of Lemma \ref{lemma2}.
 \begin{algorithm}[ht!]
 		\SetKwFor{For}{foreach}{do}{}
 		\SetKwRepeat{Repeat}{repeat}{until}
-		\KwIn{A state $I$ of automaton $\mathcal{A}$, a simulation relation
+		\KwIn{A macro-state $I$ of automaton $\mathcal{A}$, a simulation relation
 		$\leqq \subseteq A^{\subseteq}$ on states of
 		$\mathcal{A}$, a successor function $\delta$ and a predicate
-		\texttt{IsAccepting(F)} that decides whether state $F$ is final}
+		\texttt{IsFinal(F)} that decides whether a macro-state $F$ is final}
 		\KwOut{\textsc{TRUE} iff there exists a reachable final state in
 		$\mathcal{A}$,
 		\textsc{FALSE} otherwise}
 		\BlankLine
 				\SetKwProg{myproc}{Function}{}{}
 		\BlankLine
-  \myproc{\upshape \texttt{CheckForReachableState}(\textbf{state} I, level i,
+  \myproc{\upshape \texttt{IsFinalReachable}(\textbf{state} I, level i,
   \textbf{post function} $\delta$, \textbf{pred} \texttt{IsAccepting})}{
-    \nl\uIf{\upshape \texttt{IsAccepting}(I)}{
+    \nl\uIf{\upshape \texttt{IsFinal}(I)}{
     	\nl\Return \textsc{TRUE}\;}
 		\nl $Processed := \emptyset$\;
 		\nl $Next := \{I\}$\;
 		\nl\While{$Next \neq \emptyset$}{
 		  \nl Pick and remove a macro-state $R$ from $Next$ and move it to
 		  $Processed$\;
-			 \nl \uIf{\upshape \texttt{IsAccepting}(R)}{\nl \Return \textsc{TRUE}\;}
+			 \nl \uIf{\upshape \texttt{IsFinal}(R)}{\nl \Return \textsc{TRUE}\;}
 			\nl \For{$P \in \delta(R)$}{
 			 \nl \uIf{$\neg\exists S~\in Processed \cup Next$ s.t. $P \leqq S$}{
 			  \nl Remove all $S$ from $Processed \cup Next$ s.t. $S \leqq P$\;
@@ -1252,8 +1250,8 @@ that $p_1 \preceq p_2$, which is a simple consequence of Lemma \ref{lemma2}.
 		}
 		\nl \Return \textsc{FALSE}\;
 		}
-		\caption{Checking reachability of an
-		accepting state using optimized algorithm\cite{tacas}}\label{universality}
+		\caption{Checking reachability of a
+		final state using optimized algorithm\cite{tacas}}\label{universality}
 	\end{algorithm}
 	
 The algorithm \ref{universality} works as follows. While there are macro-states
@@ -1477,7 +1475,7 @@ that we can define the $POST_0(Q)$ function similarly to $PRE_0$.
  Given the automaton $\mathcal{A} = (Q, \Sigma, \delta, I, F)$ we define the
  \emph{complementation} $\gamma$ of $\mathcal{A}$ as the automaton
  $\gamma(\mathcal{A}) = (2^Q, \Sigma, \delta_\gamma, \{I\}, \{S \subseteq Q\
- |\ S \cap Q = \emptyset)$ where
+ |\ S \cap F = \emptyset\})$ where
  \begin{equation}
   \delta_\gamma = \{R \overset{a}{\rightarrow} S \mid S = \{s \in Q \mid \exists
   r \in R: r \overset{a}{\rightarrow} s\}\}
@@ -1727,7 +1725,8 @@ search for an accepting or a rejecting state.
 \end{defz}
 
 \begin{lemma}
- For all $0 \leq i \leq m$ the relation $\leq_i$ is a simulation.
+ For all $0 \leq i \leq m$ the relation $\leq_i$ is a simulation on
+ $\mathcal{A}_i$.
 \end{lemma}
 \begin{proof}
  {\color{red} It's trivial.}
@@ -1747,33 +1746,34 @@ search for an accepting or a rejecting state.
 
 \begin{defz}
 Given the automaton $\mathcal{A} = (Q, \Sigma, \delta, I, F)$ we define the
-automaton containing only zero tracks reachable from an initial state as the
-automaton $\mathcal{A}^0 = (Q^0, \Sigma, \delta^0, I, Q^0)$ where
+restriction of $\mathcal{A}$ to zero tracks as
+the automaton $\mathcal{A}^0 = (Q^0, \{\overline{0}\}, \delta^0, I, PRE_0^*(F))$
+where
 \begin{eqnarray}
  Q^0 & = & I \cup \{q \in Q \mid \exists w \in \overline{0}^*: f
  \overset{w}{\longrightarrow} q, f \in I\}\\
- \delta^0 & = & \{p \overset{\overline{0}}{\longrightarrow} q \mid p, q \in Q^0\}
+ \delta^0 & = & \{p \overset{\overline{0}}{\longrightarrow} q \in \delta\}
 \end{eqnarray}
 \end{defz}
 
 \begin{algorithm}[ht!]
 		\SetKwFor{For}{foreach}{do}{}
 		\SetKwRepeat{Repeat}{repeat}{until}
-		\KwIn{Initial state $I_m$ of automaton $A_{\neg\varphi_m}$}
+		\KwIn{The initial state $I_m$ of the automaton $A_{\neg\varphi_m}$}
 		\KwOut{\textsc{TRUE} iff state $I_m$ is final, \textsc{FALSE} otherwise}
 		\BlankLine
-		\nl \Return \texttt{IsStateAccepting}($I_m$, m) = \textsc{TRUE}
+		\nl \Return \texttt{IsStateAccepting}($I_m$, $m$) = \textsc{TRUE}
 		\SetKwProg{myproc}{Function}{}{}
 		\BlankLine
-  \myproc{\upshape \texttt{IsStateAccepting}(\textbf{state} P, \textbf{level}
-  i)}{ 
+  \myproc{\upshape \texttt{IsStateAccepting}(\textbf{state} $P$, \textbf{level}
+  $i$)}{ 
   \nl \uIf{i = 0}{
   	\nl 	\Return $P \in F_0$\;}
   	\nl \uElse{
   	\SetEndCharOfAlgoLine{}
   		\nl \For{$p \in P$}{
-  			\nl \uIf{\upshape \texttt{CheckForReachableState}(p, i-1, $\delta^0_{i-1}$,
-  			($\lambda$ q.
+  			\nl \uIf{\upshape \texttt{CheckForReachableState}($p$, $i-1$,
+  			$\delta^0_{i-1}$, ($\lambda$ q.
   	   IsStateAccepting(q, i-1)))}{
   	   			\nl \Return \textsc{FALSE}\;
   	   		}
@@ -1781,8 +1781,8 @@ automaton $\mathcal{A}^0 = (Q^0, \Sigma, \delta^0, I, Q^0)$ where
   		\nl \Return \textsc{TRUE}\;
   	  }
   }
-		\caption{Algorithm for deciding validity of a WS$k$S
-		formulae $\varphi$}\label{deciding-wsks-alg}
+		\caption{Algorithm for deciding the validity of a WS$k$S
+		formula $\varphi$}\label{deciding-wsks-alg}
 	\end{algorithm}
 
 Note that all states are final due to the adjustment of states after projection.

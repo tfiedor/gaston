@@ -434,10 +434,10 @@ MacroStateSet* GetZeroPost(Automaton & aut, TStateSet*& state, unsigned level, P
 }
 
 int getProjectionVariable(unsigned level, PrefixListType & prefix) {
-	if (prefix.size() == level+1) {
+	int index = level;
+	if (prefix[index].size() == 0) {
 		return 0;
 	} else {
-		int index = level;
 		return prefix[index][0];
 	}
 }
