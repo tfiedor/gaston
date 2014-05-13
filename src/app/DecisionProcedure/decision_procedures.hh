@@ -29,7 +29,7 @@ extern VarToTrackMap varMap;
 // < Module Typedefs >
 typedef bool TSatExample;
 typedef bool TUnSatExample;
-typedef std::deque<unsigned int> VariableSet;
+typedef std::vector<unsigned int> VariableSet;
 typedef std::deque<VariableSet> PrefixListType;
 
 using Automaton = VATA::BDDBottomUpTreeAut;

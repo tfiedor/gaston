@@ -348,9 +348,9 @@ private:  // private methods
 		{
 			assert(IsInternal(ptr));
 
-			return Convert::ToString(ptr) + " -> " +
+			return "var(" + Convert::ToString(GetVarFromInternal(ptr)) + ")" + Convert::ToString(ptr) + " -> " +
 				Convert::ToString(GetLowFromInternal(ptr)) + " [style = dashed];\n" +
-				Convert::ToString(ptr) + " -> " +
+				"var(" + Convert::ToString(GetVarFromInternal(ptr)) + ")" + Convert::ToString(ptr) + " -> " +
 				Convert::ToString(GetHighFromInternal(ptr)) + " [style = solid];\n" +
 				mtbddNodeToDotString(GetLowFromInternal(ptr), cache) +
 				mtbddNodeToDotString(GetHighFromInternal(ptr), cache);

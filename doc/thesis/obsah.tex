@@ -2142,8 +2142,9 @@ representation.
  versions of some of the atomic formulae (like $\leq$ for example) are too large
  for processing and slow down the algorithm. As shown in Table
  \ref{atomic-formulae} we can heavily reduce the size of matrix automaton just
- by extending the set of the atomic formulae defined in \ref{restricted} and yield
- better computational results.
+ by extending the set of the atomic formulae defined in \ref{restricted} and
+ construct special automata for frequently used operations and yielding smaller
+ base automaton in result.
  
  \noindent\hrulefill
  \begin{example}
@@ -2161,10 +2162,16 @@ representation.
  \noindent\hrulefill
  
  Besides defining automata for more of the WS$k$S syntax connectives and atomic
- formulae, we could even extend the syntax and create some of the more complex
- operations like modulo or predecessor predicate, just like \textsc{MONA} does.
+ formulae, we can extend the syntax even further and create some of the more
+ complex operations like modulo or predecessor predicate, just like
+ \textsc{MONA} does, that is not specifically defined in WS$k$S logic. 
  
- {\color{red} Maybe do a Appendix with all the atomic formulae?}
+ Note that we can decide Presburger formulae \cite{presburger} with basic set of
+ automic formulae as shown for example in \cite{presburger-wsks}. This
+ approach yields big automata in process one alternation of negation for each
+ addition in formula. However we can construct a special automaton accepting the
+ addition of two Presburger constants with 4 states only, thus greatly reducing
+ the time needed to decide this formula.
  
  \subsection{Cache}
  
@@ -2181,7 +2188,6 @@ representation.
  {\color{red} Here will be several evaluations of ratio between cache hits and
  misses.}
 
-\iffalse
 \chapter{Evaluation}
 
 In this chapter we are going to provide an evaluation of the implemented
@@ -2192,6 +2198,7 @@ tests measures how our implementation resulted in terms of quantification and
 how more quantifiers adds to the computational speed-up. The other tests are
 evaluating decision of quantifier free formulae. 
 
+\iffalse
 \section{Presburger Arithmetic}
 
 One of the classical logics is Presburger Arithmetic \cite{pres}, the
@@ -2270,6 +2277,8 @@ where
 Random formulae were generated with different number of quantifiers and bounded
 by different constants and evaluated by both \texttt{MONA} and our tool. 
 
+\fi
+
 \section{Parametric horn formulae}
 
 Other experiments done with our implemented tool were carried out on specific
@@ -2287,10 +2296,9 @@ The concrete formula with parameter $n$ is in form of
 
 This family of formulae is valid. It was further examined that \textsc{MONA} can
 only decide the formulae up to parameter $n = 15$ due to insufficient memory for
-storing BDDs. In results it is shown that the logical approach \cite{mso} proves
-to better for solving this family of formulae in contrary to automata-formulae
-connection used by both \textsc{MONA} and our approach.
-\fi
+storing BDDs. In results it is shown that the logical approach
+\cite{logic-approach} proves to better for solving this family of formulae in
+contrary to automata-formulae connection used by both \textsc{MONA} and our approach.
 
 \chapter{Conclusion}\label{summary}
 

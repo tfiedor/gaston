@@ -69,6 +69,13 @@ public:
 	bool inCache(MacroStateSet* key) {
 		return (this->_cache.find(key)) != this->_cache.end();
 	}
+
+	void clear() {
+		for(auto itPair = this->_cache.begin(); itPair != this->_cache.end(); ++itPair) {
+			delete itPair->first;
+			itPair = this->_cache.erase(itPair);
+		}
+	}
 };
 
 template<class CacheData>
@@ -103,6 +110,11 @@ public:
 		return this->_mlCache[level].inCache(key);
 	}
 
+	void clear() {
+		for(auto it = this->_mlCache.begin(); it != this->_mlCache.end(); ++it) {
+			it->clear();
+		}
+	}
 };
 
 #endif

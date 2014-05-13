@@ -316,11 +316,17 @@ void ASTForm_In::toUnaryAutomaton(Automaton &aut, bool doComplement) {
 	// q0 -(x10x)-> q2
 	addTransition(aut, Automaton::StateTuple({0}), x, X, (char *) "10", 2);
 
-	// q1 -(x0Xx)-> q1
-	addTransition(aut, Automaton::StateTuple({1}), x, X, (char *) "0X", 1);
+	// q1 -(x00x)-> q1
+	addTransition(aut, Automaton::StateTuple({1}), x, X, (char *) "00", 1);
 
-	// q1 -(x1Xx)-> q2
-	addTransition(aut, Automaton::StateTuple({1}), x, X, (char *) "1X", 2);
+	// q1 -(x01x)-> q1
+	addTransition(aut, Automaton::StateTuple({1}), x, X, (char *) "01", 1);
+
+	// q1 -(x10x)-> q2
+	addTransition(aut, Automaton::StateTuple({1}), x, X, (char *) "10", 2);
+
+	// q1 -(x11x)-> q2
+	addTransition(aut, Automaton::StateTuple({1}), x, X, (char *) "11", 2);
 
 	// q2 -(xXXx)-> q2
 	addUniversalTransition(aut, Automaton::StateTuple({2}), 2);

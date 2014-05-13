@@ -29,6 +29,8 @@ FinalStatesType computeFinalStates(Automaton & aut) {
 bool isNotEnqueued(StateSetList & queue, TStateSet*& state) {
 	// tries to find matching state in list/queue/wtv
 	// if not found .end() is returned
+
+	// TODO: ADD PRUNING BY RELATIONS
 	auto matching_iter = std::find_if(queue.begin(), queue.end(),
 			[state](TStateSet* s) {
 				return s->DoCompare(state);
@@ -56,12 +58,12 @@ bool existsSatisfyingExample(Automaton & aut, MacroStateSet* initialState, Prefi
 		worklist.pop_back();
 		processed.push_back(q);
 
-		//std::cout << "Getting state from worklist: ";
-		//q->dump();
-		//std::cout << "\n";
+		/*std::cout << "Getting state from worklist: ";
+		q->dump();
+		std::cout << "\n";*/
 
 		if(!StateIsFinal(aut, q, determinizationNo, formulaPrefixSet)) {
-			std::cout << "\nYes, there exist!\n";
+			//std::cout << "\nYes, there exist!\n";
 			return true;
 		// TODO: here should antichains take place
 		} else {
@@ -71,14 +73,22 @@ bool existsSatisfyingExample(Automaton & aut, MacroStateSet* initialState, Prefi
 			// collect reachable state to one macro state which is the successor of this procedure
 			StateSetList reachable;
 			MacroStateCollectorFunctor msc(reachable);
+			//std::cout << "Dumping MTBDD:\n" << MacroTransMTBDD::DumpToDot({&postMTBDD}) << "\n";
 			msc(postMTBDD);
-			assert(reachable.size() == 1);
 
 			//std::cout << "Generating new post:\n";
 			TStateSet *newPost = reachable[0];
 			//newPost->dump();
 			//std::cout << "\n";
+			/*for (auto it = reachable.begin(); it != reachable.end(); ++it) {
+				(*it)->dump();
+				std::cout << "\n";
+			}*/
+			assert(reachable.size() == 1);
 			if (isNotEnqueued(processed, newPost)) {
+				/*::cout << "New post = \n";
+				newPost->dump();
+				std::cout << "\n";*/
 				worklist.push_back(newPost);
 			}
 		}
@@ -146,13 +156,15 @@ int decideWS1S(Automaton & aut, TSatExample & example, TUnSatExample & counterEx
 
 	// Construct initial state of final automaton
 	MacroStateSet* initialState = constructInitialState(aut, formulaDeterminizations);
-	initialState->dump();
+	//initialState->dump();
+	//std::cout << "\n";
 	MacroStateSet* negInitialState = constructInitialState(aut, negFormulaDeterminizations);
+	//negInitialState->dump();
+	//std::cout << "\n";
 
 	// Compute the final states
 	StateHT allStates;
 	aut.RemoveUnreachableStates(&allStates);
-
 
 	/*TransMTBDD * tbdd = getMTBDDForStateTuple(aut, Automaton::StateTuple({}));
 	std::cout << "Leaf : bdd\n";
@@ -214,10 +226,7 @@ bool StateIsFinal(Automaton & aut, TStateSet* state, unsigned level, PrefixListT
 		// Look into Cache
 		bool isFinal;
 		if(StateCache.retrieveFromCache(macroState, isFinal, level)) {
-			std::cout << "CacheHit\n";
 			return isFinal;
-		} else {
-			std::cout << "CacheMiss\n";
 		}
 
 		StateSetList states = macroState->getMacroStates();
@@ -286,7 +295,7 @@ PrefixListType convertPrefixFormulaToList(ASTForm* formula) {
 			quantifiedSize = (exf->vl)->size();
 			for (unsigned i = 0; i < quantifiedSize; ++i) {
 				value = (exf->vl)->pop_front();
-				set.push_front(varMap[value]);
+				set.push_back(varMap[value]);
 			}
 			iterator = exf->f;
 			isFirstNeg = false;
@@ -325,6 +334,7 @@ PrefixListType convertPrefixFormulaToList(ASTForm* formula) {
 void closePrefix(PrefixListType & prefix, IdentList* freeVars, bool negationIsTopmost) {
 	unsigned int quantifiedSize;
 	unsigned value;
+	unsigned int prefixSize = prefix.size();
 
 	// phi = neg exists X ...
 	if (negationIsTopmost) {
@@ -333,16 +343,16 @@ void closePrefix(PrefixListType & prefix, IdentList* freeVars, bool negationIsTo
 		quantifiedSize = freeVars->size();
 		for (unsigned i = 0; i < quantifiedSize; ++i) {
 			value = freeVars->get(i);
-			set.push_front(varMap[value]);
+			set.push_back(varMap[value]);
 		}
-		prefix.push_front(set);
+		prefix.push_back(set);
 	// phi = exists X ...
 	} else {
 		// adding to existing level of quantification
 		quantifiedSize = freeVars->size();
 		for (unsigned i = 0; i < quantifiedSize; ++i) {
 			value = freeVars->get(i);
-			prefix[0].push_front(varMap[value]);
+			prefix[prefixSize-1].push_back(varMap[value]);
 		}
 	}
 }
@@ -385,8 +395,6 @@ MacroStateSet* constructInitialState(Automaton & aut, unsigned numberOfDetermini
 	// Getting initial states
 	MTBDDLeafStateSet matrixInitialStates;
 	getInitialStatesOfAutomaton(aut, matrixInitialStates);
-	std::cout << "Initial states of original automaton corresponding to the matrix of formula are ";
-	//std::cout << VATA::Util::Convert::ToString(matrixInitialStates) << "\n";
 
 	// first construct the set of leaf states
 	StateSetList states;
@@ -419,7 +427,6 @@ MacroStateSet* constructInitialState(Automaton & aut, unsigned numberOfDetermini
  */
 MacroStateSet* GetZeroPost(Automaton & aut, TStateSet*& state, unsigned level, PrefixListType & prefix) {
 	const MacroTransMTBDD & transPost = GetMTBDDForPost(aut, state, level, prefix);
-	//std::cout << MacroTransMTBDD::DumpToDot({&transPost});
 
 	// should return value for 0^k according to the implementation of GetValue()
 	MacroStateSet *postStates = transPost.GetValue(constructUniversalTrack());
@@ -427,11 +434,11 @@ MacroStateSet* GetZeroPost(Automaton & aut, TStateSet*& state, unsigned level, P
 }
 
 int getProjectionVariable(unsigned level, PrefixListType & prefix) {
-	if (prefix.size() == level) {
+	if (prefix.size() == level+1) {
 		return 0;
 	} else {
-		int index = prefix.size() - 1 - level;
-		return prefix[index].size();
+		int index = level;
+		return prefix[index][0];
 	}
 }
 
@@ -453,12 +460,15 @@ MacroTransMTBDD GetMTBDDForPost(Automaton & aut, TStateSet* state, unsigned leve
 		StateType stateValue = lState->getState();
 		TransMTBDD *stateTransition = getMTBDDForStateTuple(aut, Automaton::StateTuple({stateValue}));
 
+		//std::cout << "Before proj BDD: " << TransMTBDD::DumpToDot({stateTransition}) << "\n\n";
 		int projecting = getProjectionVariable(level, prefix);
+		//std::cout << "Projecting: " << projecting << " on level " << level << "\n";
 		StateDeterminizatorFunctor sdf;
-		if (projecting != 0) {
+		if (projecting >= 0) {
 			AdditionApplyFunctor adder;
 			TransMTBDD projected = stateTransition->Project(
-				[stateTransition, projecting](size_t var) {return var < projecting;}, adder);
+				[stateTransition, projecting](size_t var) {return var <= projecting;}, adder);
+			//std::cout << "After proj BDD: " << TransMTBDD::DumpToDot({&projected}) << "\n\n";
 			return sdf(projected);
 		} else {
 		// Convert to TStateSet representation
@@ -481,36 +491,25 @@ MacroTransMTBDD GetMTBDDForPost(Automaton & aut, TStateSet* state, unsigned leve
 
 		// get first and determinize it
 		const MacroTransMTBDD & frontPost = GetMTBDDForPost(aut, front, level-1, prefix);
-		//std::cout << "----------------------<" << level << ">----------------------\n";
-		// TODO: This may not be correct, not sure atm
 		int projecting = getProjectionVariable(level-1, prefix);
 
-		//std::cout << "Projecting on level " << level << " by " << projecting << "\n\n";
+		//std::cout << "Projecting: " << projecting << " on level " << level << "\n";
+
 		MacroTransMTBDD detResultMtbdd = (level == 1) ? frontPost : (msdf(frontPost)).Project(
 				[&frontPost, projecting](size_t var) {return var <= projecting;}, muf);
-		//std::cout << "BDD after projection: " << MacroTransMTBDD::DumpToDot({&detResultMtbdd});
-		//std::cout << "\n\n";
 		// do the union of posts represented as mtbdd
+
+		// TODO: do the caching of union metaproducts
 		while(!states.empty()) {
 			front = states.back();
 			states.pop_back();
 			const MacroTransMTBDD & nextPost = GetMTBDDForPost(aut, front, level-1, prefix);
-			//std::cout << "BDD before projection: " << MacroTransMTBDD::DumpToDot({&nextPost});
-			//std::cout << "BDD after projection: " << MacroTransMTBDD::DumpToDot({&detResultMtbdd});
-			//std::cout << "\n\n";
-			//MacroTransMTBDD tempDet = msdf(nextPost);
 			detResultMtbdd = muf(detResultMtbdd, (level == 1) ? nextPost : (msdf(nextPost)).Project(
 					[&nextPost, projecting](size_t var) {return var <= projecting;}, muf));
 		}
 
-		//std::cout << "Returning from level " << level << "\n";
-		//std::cout << "BDD: " << MacroTransMTBDD::DumpToDot({&detResultMtbdd});
-		//std::cout << "\n\n";
-		//std::cout << "---------------------->" << level << "<----------------------\n";
-
-		//////////////////////////////////
+		// cache the results
 		BDDCache.storeIn(mState, detResultMtbdd, level);
-		/////////////////////////////////
 
 		// do projection and return;
 		return detResultMtbdd;

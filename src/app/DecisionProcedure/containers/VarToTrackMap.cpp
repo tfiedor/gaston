@@ -38,15 +38,17 @@ uint VarToTrackMap::TrackLength() {
  * @return: track number associanted to variable val
  */
 uint VarToTrackMap::operator[](uint val) {
-	return this->vttMap[val];
+	unsigned int mapSize = this->vttMap.size();
+	return mapSize - 1 - this->vttMap[val];
 }
 
 /**
  * Prints var -> trackNo map
  */
 void VarToTrackMap::dumpMap() {
+	unsigned int mapSize = this->vttMap.size();
 	for (auto it = this->vttMap.begin(); it != vttMap.end(); ++it) {
-		std::cout << it->first << " -> " << it->second << '\n';
+		std::cout << it->first << " -> " << (mapSize - 1 - it->second) << '\n';
 	}
 }
 

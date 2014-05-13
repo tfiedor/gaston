@@ -32,6 +32,7 @@
 #include <DecisionProcedure/environment.hh>
 #include <DecisionProcedure/decision_procedures.hh>
 #include <DecisionProcedure/containers/VarToTrackMap.hh>
+#include "DecisionProcedure/containers/Cache.hh"
 
 #define DEBUG
 
@@ -55,6 +56,9 @@ VarToTrackMap varMap;
 IdentList inFirstOrder;
 int numTypes = 0;
 bool regenerate = false;
+
+extern MultiLevelMCache<bool> StateCache;
+extern MultiLevelMCache<MacroTransMTBDD> BDDCache;
 
 extern int yyparse(void);
 extern void loadFile(char *filename);
@@ -426,7 +430,6 @@ main(int argc, char *argv[])
   StateToStateTranslator stateTransl(translMap,
 	[&stateCnt](const StateType&){return stateCnt++;});
   TStateSet::stateNo = reachable.size();
-  std::cout << TStateSet::stateNo << "?\n";
 
   formulaAutomaton = formulaAutomaton.ReindexStates(stateTransl);
 
@@ -464,7 +467,7 @@ main(int argc, char *argv[])
 		  cout << "'VALID'\n";
 		  break;
 	  default:
-		  cout << "undecidable due to unforeseen error.\n";
+		  cout << "Undecidable due to unforeseen error.\n";
 		  break;
 	  }
   } catch (NotImplementedException& e) {
@@ -473,7 +476,13 @@ main(int argc, char *argv[])
 
   ///////// CLEAN UP ///////////////////////////////////////////////////////
 
-  delete ast;
+  //delete ast;
+
+  delete matrix;
+  delete prefix;
+
+  /*StateCache.clear();
+  BDDCache.clear();*/
     
   if (options.statistics)
     print_statistics();

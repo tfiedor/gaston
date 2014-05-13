@@ -41,6 +41,7 @@ public:
 	// < Public Methods >
 	virtual void dump() {}
 	virtual bool DoCompare(TStateSet*) {return false;};
+	virtual bool CanBePruned(TStateSet*) {return false;};
 	virtual std::string ToString() {}
 	friend inline std::ostream& operator<<(std::ostream& os, const TStateSet& tss) {os << "";}
 };
@@ -59,7 +60,7 @@ private:
 public:
 	// < Public Methods >
 	LeafStateSet (StateType q) : state(q), stateIsSink(false) {type = STATE;}
-	LeafStateSet () : state(-1), stateIsSink(true) {}
+	LeafStateSet () : state(-1), stateIsSink(true) {type = STATE;}
 
 	void dump();
 	std::string ToString();
@@ -80,6 +81,15 @@ public:
 		} else {
 			// TODO: THIS MAY BE SUICIDAL!!!!
 			//LeafStateSet *lhss = reinterpret_cast<LeafStateSet*>(lhs);
+			LeafStateSet* lhss = (LeafStateSet*)(lhs);
+			return this->state == lhss->getState();
+		}
+	}
+
+	bool CanBePruned(TStateSet* lhs) {
+		if(lhs->type == MACROSTATE) {
+			return false;
+		} else {
 			LeafStateSet* lhss = (LeafStateSet*)(lhs);
 			return this->state == lhss->getState();
 		}
@@ -122,7 +132,7 @@ public:
 
 	~MacroStateSet () {
 		for(StateSetIterator it = this->macroStates.begin(); it != this->macroStates.end(); ++it) {
-			delete *it;
+			delete (*it);
 		}
 	}
 
@@ -175,6 +185,15 @@ public:
 
 				return true;
 			}
+		}
+	}
+
+	bool CanBePruned(TStateSet* lhs) {
+		if(lhs->type == STATE) {
+			return false;
+		// test if they are in relation, otherwise they can be pruned
+		} else {
+
 		}
 	}
 

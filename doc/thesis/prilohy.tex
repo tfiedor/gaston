@@ -120,6 +120,61 @@ that can be further set are following:
   to the prefix of the given formula. This can be suppressed by adding parameter
   \texttt{no} or random reordering can be done by option \texttt{random}.
 \end{itemize}
+
+\chapter{List of Atomic Formulae}
+
+We list in this Appendix automata corresponding to the atomic formulae of WS$k$S
+logic used in decision procedure. These automata are further used for
+construction of initial base automaton as described in Section \ref{wsks}. This
+appendinx is structured into two parts: first describes basic set of atomic
+formulae defined for restricted syntax (see \ref{restricted}) and the other
+lists automata for the extension of syntax we are supporting to optimize size of
+used automata.
+
+Note that all shown automata are non-deterministic.
+
+\section{Atomic formulae for restricted syntax}
+
+\begin{figure}[h!]
+ \begin{center}
+  \includegraphics{fig/atomic-equal-succ}
+ \end{center}
+ \caption{Automaton corresponding to atomic formulae $X = Y1$, i.e. $Y$ is
+ successor of $X$.}
+\end{figure}
+
+\begin{figure}[h!]
+ \begin{center}
+  \includegraphics{fig/atomic-equals-zero}
+ \end{center}
+ \caption{Automaton corresponding to atomic formulae $X = \epsilon$.}
+\end{figure}
+
+\begin{figure}[h!]
+ \begin{center}
+  \includegraphics{fig/atomic-equal-terms}
+ \end{center}
+ \caption{Automaton corresponding to atomic formulae $T_1 = T_2$, where $T_1$
+ and $T_2$ are two second-order variables.}
+\end{figure}
+
+\begin{figure}[h!]
+ \begin{center}
+  \includegraphics{fig/atomic-singleton}
+ \end{center}
+ \caption{Automaton corresponding to atomic formulae $\mathit{Singleton}(P)$,
+ i.e. that $P$ is set containing exactly one element.}
+\end{figure}
+
+\begin{figure}[h!]
+ \begin{center}
+  \includegraphics{fig/atomic-subset}
+ \end{center}
+ \caption{Automaton corresponding to atomic formulae $X \subseteq Y$}
+\end{figure}
+
+\section{Extending restricted syntax}
+
 %\chapter{Konfigra�n� soubor}
 %\chapter{RelaxNG Sch�ma konfigura�n�ho soboru}
 %\chapter{Plakat}
