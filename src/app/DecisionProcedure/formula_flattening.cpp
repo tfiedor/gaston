@@ -13,7 +13,31 @@ extern Options options;
 extern PredicateLib predicateLib;
 extern IdentList inFirstOrder;
 
-#define SMART_FLATTEN
+//#define SMART_FLATTEN
+
+
+/**
+ * Generates fresh first-order variable that can be used for quantification
+ *
+ * @return: fresh first-order variable
+ */
+ASTTerm1_Var1* generateFreshFirstOrder() {
+	unsigned int z;
+	z = symbolTable.insertFresh(Varname1);
+	return new ASTTerm1_Var1(z, Pos());
+}
+
+/**
+ * Generates fresh second-order variable that can be used for quantification
+ *
+ * @return: fresh second-order variable
+ */
+ASTTerm2_Var2* generateFreshSecondOrder() {
+	unsigned int Z;
+	Z = symbolTable.insertFresh(Varname2);
+	return new ASTTerm2_Var2(Z, Pos());
+}
+
 
 /**
  * Conversion of formula to Second Order, that means all the formulas are
@@ -93,14 +117,27 @@ ASTForm* ASTForm_Equal1::flatten() {
 		leftEqual = new ASTForm_Equal1(zVar, this->t1, Pos());
 		rightEqual = new ASTForm_Equal1(zVar, this->t2, Pos());
 		conjuction = new ASTForm_And(leftEqual, rightEqual, Pos());
-		return (new ASTForm_Ex1(0, new IdentList(z), conjuction, Pos()))->flatten();
+		return (new ASTForm_Ex2(0, new IdentList(z), conjuction, Pos()))->flatten();
 	// x = e ???
-	} else if(this->t1->kind == aVar1 && this->t2->kind == aInt && ((ASTTerm1_Int*) this->t2)->value() == 0) {
-		x = new ASTTerm2_Var2(((ASTTerm1_Var1*)this->t1)->getVar(), Pos());
-		ASTList* set = new ASTList();
-		set->push_back((AST*) new ASTTerm1_Int(0, Pos()));
-		ASTTerm2_Set* e = new ASTTerm2_Set(set, Pos());
-		return new ASTForm_Equal2(x, e, Pos());
+	} else if(this->t1->kind == aVar1 && this->t2->kind == aInt) {
+#ifdef SMART_FLATTEN
+//TODO:
+#else
+		unsigned int val = ((ASTTerm1_Int*) this->t2)->value();
+		if(val == 0) {
+			x = new ASTTerm2_Var2(((ASTTerm1_Var1*)this->t1)->getVar(), Pos());
+			ASTList* set = new ASTList();
+			set->push_back((AST*) new ASTTerm1_Int(0, Pos()));
+			ASTTerm2_Set* e = new ASTTerm2_Set(set, Pos());
+			return new ASTForm_Equal2(x, e, Pos());
+		} else {
+			ASTTerm1_Var1* z = generateFreshFirstOrder();
+			ASTForm_Equal1* zLess = new ASTForm_Equal1(z, new ASTTerm1_Int(val-1, Pos()), Pos());
+			ASTForm_Equal1* plus = new ASTForm_Equal1(this->t1, new ASTTerm1_Plus(z, 1, Pos()), Pos());
+			ASTForm_And* conjuction = new ASTForm_And(zLess->flatten(), plus->flatten(), Pos());
+			return new ASTForm_Ex2(0, new IdentList(z->getVar()), conjuction, Pos());
+		}
+#endif
 	// TODO: This is not solved
 	} else {
 		std::cerr << "Not Implemented yet!\n";
@@ -133,6 +170,23 @@ ASTForm* ASTForm_NotEqual2::flatten() {
 	return new ASTForm_Not(eq->flatten(), Pos());
 }
 
+/*
+ * X = {1, 2, 3...} -> 1 \in X & ....
+ */
+ASTForm* ASTForm_Equal2::flatten() {
+	if(this->T2->kind == aSet) {
+		ASTList* vars = ((ASTTerm2_Set*)this->T2)->elements;
+		ASTForm* formula = new ASTForm_True(Pos());
+		for(auto var = vars->begin(); var != vars->end(); ++var) {
+			ASTForm_In* newIn = new ASTForm_In((ASTTerm1*)*var, this->T1, Pos());
+			formula = new ASTForm_And(formula, newIn, Pos());
+		}
+		return formula;
+	} else {
+		return this;
+	}
+}
+
 /**
  * Flattens formula to second-order variables and restricted syntax so it uses
  * only certain atomic formulae
@@ -146,28 +200,6 @@ ASTForm* ASTForm_Less::flatten() {
 	ASTForm_LessEq* rightSide = new ASTForm_LessEq(this->t1, this->t2, Pos());
 	ASTForm_And* conjuction = new ASTForm_And(leftSide, rightSide, Pos());
 	return conjuction->flatten();
-}
-
-/**
- * Generates fresh first-order variable that can be used for quantification
- *
- * @return: fresh first-order variable
- */
-ASTTerm1_Var1* generateFreshFirstOrder() {
-	unsigned int z;
-	z = symbolTable.insertFresh(Varname1);
-	return new ASTTerm1_Var1(z, Pos());
-}
-
-/**
- * Generates fresh second-order variable that can be used for quantification
- *
- * @return: fresh second-order variable
- */
-ASTTerm2_Var2* generateFreshSecondOrder() {
-	unsigned int Z;
-	Z = symbolTable.insertFresh(Varname2);
-	return new ASTTerm2_Var2(Z, Pos());
 }
 
 /**
@@ -216,6 +248,11 @@ ASTForm* ASTForm_LessEq::flatten() {
 	} else if (this->t2->kind != aVar1) {
 		return substituteFreshLessEq(this->t1, this->t2, false);
 	} else {
+#ifdef SMART_FLATTEN
+		inFirstOrder.insert(((ASTTerm1_Var1*)this->t1)->getVar());
+		inFirstOrder.insert(((ASTTerm1_Var1*)this->t2)->getVar());
+		return this;
+#else
 		ASTTerm2_Var2* X = generateFreshSecondOrder();
 		ASTTerm1_Var1* z = generateFreshFirstOrder();
 
@@ -249,6 +286,7 @@ ASTForm* ASTForm_LessEq::flatten() {
 
 		ASTForm_All2* newFormula = new ASTForm_All2(0, new IdentList(X->getVar()), outerImplication->flatten() , Pos());
 		return newFormula->flatten();
+#endif
 	}
 	return this;
 }
@@ -274,7 +312,7 @@ ASTForm* substituteFreshIn(ASTTerm1* leftTerm, ASTTerm2* rightTerm) {
 	right = new ASTForm_In(z, rightTerm, Pos());
 	conjuction = new ASTForm_And(left, right, Pos());
 
-	return new ASTForm_Ex1(0, new IdentList(z->getVar()), conjuction->flatten(), Pos());
+	return new ASTForm_Ex2(0, new IdentList(z->getVar()), conjuction->flatten(), Pos());
 }
 
 /**
@@ -286,7 +324,15 @@ ASTForm* substituteFreshIn(ASTTerm1* leftTerm, ASTTerm2* rightTerm) {
  */
 ASTForm* ASTForm_In::flatten() {
 	if (this->t1->kind != aVar1) {
+#ifdef SMART_FLATTEN
+		if(this->t1->kind == aInt) {
+			return this;
+		} else {
+			return substituteFreshIn(this->t1, this->T2);
+		}
+#else
 		return substituteFreshIn(this->t1, this->T2);
+#endif
 	} else {
 #ifdef SMART_FLATTEN
 		inFirstOrder.insert(((ASTTerm1_Var1*)this->t1)->n);

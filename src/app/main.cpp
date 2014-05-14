@@ -196,7 +196,7 @@ void noReorder(IdentList *free, IdentList *bound) {
  */
 void heuristicReorder(IdentList *free, IdentList *bound) {
 	cout << "[*] Variables reordered by heuristic approach" << std::endl;
-	varMap.initializeFromLists(bound, free);
+	varMap.initializeFromLists(free, bound);
 }
 
 /**

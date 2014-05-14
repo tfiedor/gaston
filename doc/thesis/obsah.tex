@@ -1264,11 +1264,11 @@ The algorithm for testing universality universality of NFA is based on the
 Algorithm \ref{universality}, which works as follows.
 While there are macro-states to be processed, and no accepting macro-state has
 been found, one of the macro-states from $\mathit{Next}$ is chosen and moved to
-the $mathit{Processed}$ set. All successors of the macro-state are generated,
-minimized and moved to $mathit{Next}$ unless there is already some
-$\preceq$-smaller macro-state in $mathit{Next}$ or in $mathit{Processed}$. If a
-new macro-state is added to $mathit{Next}$, then all $\preceq$-bigger states
-are pruned out of both $mathit{Next}$ and $mathit{Processed}$.
+the $\mathit{Processed}$ set. All successors of the macro-state are generated,
+minimized and moved to $\mathit{Next}$ unless there is already some
+$\preceq$-smaller macro-state in $\mathit{Next}$ or in $\mathit{Processed}$. If
+a new macro-state is added to $\mathit{Next}$, then all $\preceq$-bigger states
+are pruned out of both $\mathit{Next}$ and $\mathit{Processed}$.
 
 Testing the universality of an automaton $\mathcal{A}$ is thus equivalent to
 searching for an accepting state in automaton $\overline{\mathcal{A}_D}$
@@ -1728,7 +1728,7 @@ To optimize the algorithm of validity testing for WS1S formulae, we are going
 to define the necessary relations so we can prune the state space during the
 search for an accepting or a rejecting state. 
 
-\begin{defz}
+\begin{defz}\label{simulation-definition}
  For all $0 \leq i \leq m$ we define the relation $\leq_i \subseteq Q_i \times
  Q_i$ as follows:
  \begin{eqnarray}
@@ -1743,7 +1743,67 @@ search for an accepting or a rejecting state.
  $\mathcal{A}_i$.
 \end{lemma}
 \begin{proof}
- {\color{red} It's trivial.}
+ We will prove this lemma by induction on level of relation $i$.
+ 
+ \begin{enumerate}
+   \item Base case $i = 0$: From definition of relation $\leq_i$, $\leq_0$ is
+   equal to identity relation, which is a simulation \cite{tacas}.
+   \item Now let us take the following induction hypothesis:
+ \end{enumerate}
+ \begin{equation}
+  \leq_n \texttt{ is a simulation on } \mathcal{A}_n
+ \end{equation}
+ Further we will prove this for the case $i = n+1$, i.e. that
+ \begin{equation}
+ \leq A \leq_{n+1} B \overset{\mathit{def}}{\Leftrightarrow} \forall b \in B
+ \exists a \in A. a \geq_n b.
+ \end{equation}
+ Relation $\leq_n$ is a simulation on $\omega_{n+1}(\mathcal{A}_n)$, since if
+ $\forall b \in B \exists a \in A. a \geq_n b$ then it also holds that
+ $\omega_{n+1}(a) \geq_n \omega_{n+1}(b)$.
+ 
+ Now to prove that $A \leq_{n+1} B$ is a simulation we must show that following
+ formula is true:
+ \begin{equation}
+ (A \overset{x}{\rightarrow} A' \Rightarrow (\exists B'. B
+ \overset{x}{\rightarrow} B' \wedge A' \leq_{n+1} B')) \wedge (A \in F_{n+1}
+ \Rightarrow B \in F_{n+1}).
+ \end{equation}
+ 
+  \begin{enumerate}
+   \item $(A \overset{x}{\rightarrow} A' \Rightarrow (\exists B'. B
+ \overset{x}{\rightarrow} B' \wedge A' \leq_{n+1} B'))$
+ \end{enumerate}
+ 
+ This can be further elaborated into following formula:
+ 
+ \begin{equation}
+ (A \overset{x}{\rightarrow} \{a' \mid \exists a \in A. a
+ \overset{x}{\rightarrow} a'\}) \Rightarrow ( (B \overset{x}{\rightarrow}
+ \{b' \mid \exists b \in B. b \overset{x}{\rightarrow} b'\}) \wedge \forall b'
+ \in B' \exists a' \in A'. a' \geq_n b')
+ \end{equation}
+ 
+ Since $A \leq_{n+1} B$, so $\forall b \in B \exists a \in A. b \geq_n a$, then
+ $\forall b' \in \{b' \mid \exists b \in B. b \overset{x}{\rightarrow} b'\}$
+ there is some $a' \in \{a' \mid \exists a \in A. a \overset{x}{\rightarrow} a'$
+ such that $b' \leq_n a'$. Because, if there did not exists such $a'$ then $A
+ \leq_n B$ could not be a simulation in first place.
+ 
+ \begin{enumerate}
+   \item $A \in F_{n+1} \Rightarrow B \in F_{n+1}$
+ \end{enumerate}
+ Macro-state A is final on level $i$ if it does not contain a state on level
+ $i-1$ which is final, i.e. $A \in F_{n+1}
+ \overset{\mathit{def}}{\Leftrightarrow} \neg\exists a \in A. a \in F_n$. Then
+ according to the Definition \ref{simulation-definition} it holds that
+ \begin{equation}
+  \neg\exists b \in B. b \in F_n \Rightarrow B \in F_{n+1}.
+ \end{equation}
+ 
+ We have shown that both formulae of the conjuction are true and thus the
+ relation $\leq_i$ is simulation on $\mathcal{A}_i$.
+ 
 \end{proof}
 
 % given automaton A0, sets {X1,..,Xm}
@@ -2000,10 +2060,12 @@ representation.
 
  \section{Decision procedure}
  
- In Chapter \ref{our} we introduced the formal concepts of deciding WS$k$S
+ In Chapter \ref{our} we introduced the formal concepts of deciding WS$1$S
  with non-deterministic automata and designed the algorithm for testing
- validity of a given formula $\varphi$. In this section we will closely describe
- the practical implementation of this formal algorithm in the C++ language.
+ validity of a given formula $\varphi$. We then further extended this approach
+ to arbitrary $k$. In this section we will closely describe the practical
+ implementation of this formal algorithm in the C++ language. The prototype of
+ this procedure is going to be restricted to WS$1$S only.
  
  For each level $1 \leq i \leq m$ we define two caches that will store the
  already computed results to avoid their repeated computation during the
@@ -2011,14 +2073,14 @@ representation.
  instead. $\mathit{BDDCache}_i$ is a cache that maps states of level $i$ to
  their corresponding MTBDDs representing their transition relations $\delta_i$, i.e.
  \begin{equation}
-  \mathit{BDDCache} : Q_i \rightarrow ((\Sigma_i \rightarrow 2^{Q_i}) \cup
+  \mathit{BDDCache}_i : Q_i \rightarrow ((\Sigma_i \rightarrow 2^{Q_i}) \cup
   \{\bot\}).
  \end{equation}
  
  Further we define the cache $\mathit{StateCache}_i$ for storing which states
  are final and which are non-final, i.e.
  \begin{equation}
-  \mathit{StateCache} : Q_i \rightarrow \{Final, NonFinal, \bot\}
+  \mathit{StateCache}_i : Q_i \rightarrow \{Final, NonFinal, \bot\}
  \end{equation}
  
  The core function for deciding WS$k$S is \ref{impl-state-is-final} which checks
@@ -2026,8 +2088,8 @@ representation.
  state $q$. This function is corresponding to the implementation of algorithm
  \ref{deciding-wsks-alg} with use of function \ref{impl-succ} for building successors of
  states and Algorithm \ref{impl-main} for checking whether the state is final.
- The implementation is using the workset algorithm and uses apply operations
- over the MTBDDs of constructed successors.
+ The implementation is based on the workset algorithm and uses efficient apply
+ operations over the MTBDDs of constructed successors.
  
 \begin{function}[h!]
 		\SetKwFor{For}{foreach}{do}{}
@@ -2058,13 +2120,14 @@ representation.
  The main Algorithm \ref{impl-main} for deciding WS$k$S is corresponding to the
  implementation of Algorithm \ref{universality}. It first checks the cache
  whether the state has already been decided and else call the
- \ref{impl-state-is-final} function for checking for reachable final state. We
- can further extend this procedure to deciding satisfiability of WS$k$S
+ \ref{impl-state-is-final} function for checking if there exists a reachable
+ final state.
+ We can further extend this procedure to deciding satisfiability of WS$k$S
  formulae by checking the validity of $\exists$-closed input formulae. This
  means that given the input we close the formula and its negation and test the
  validity of constructed formulae to decide their satisfiability. Further we can
  decide the formula according to the relationships between validity,
- satisfiability and unsatisfiability.
+ satisfiability and unsatisfiability \cite{logics}.
  
 \begin{algorithm}[h!]
 		\SetKwFor{For}{foreach}{do}{}
@@ -2104,8 +2167,8 @@ representation.
  
  The successor of a state can be constructed out of its children
  as described by function \ref{impl-succ}.
- This construction is optimized with the use of cache. After the MTBDDs for
- transitions of children of a state are built, we use the binary apply for doing
+ This construction is also optimized with the use of the cache. After the MTBDDs
+ for transitions of children of a state are built, we use the binary apply for doing
  the union of those MTBDDs to yield the MTBDD corresponding to the transition
  from the state. This MTBDD is further modified using the operation of
  projection.
@@ -2138,26 +2201,72 @@ representation.
  \cite{valgrind}, especially its part \texttt{callgrind}, to profile the
  implementation in C++ and tried to identify weak spots of the application.
  One of the most frequent operations in the procedure are the relational
- operators on the classes representing macro-states used e.g. for pruning the state search,
- macro-state comparison and operations with worklist.
+ operators on the classes representing macro-states used e.g. for pruning the
+ state search, macro-state comparison and operations with worklist.
  
  We propose to optimize this by using bitwise operations and bit array for
  storing the leaf states to ease some of the computation. There are several
  possibilities to use in C++ \cite{bitwise} and we have chosen the container
  with best performance, which is \texttt{boost::dynamic\_bitset}. The results
  have shown that the performance of comparison between macro-states of first
- level of detereminization got better by great margin.
+ level of detereminization got better by great margin. 
+ 
+ Besides some of the minor optimizations, we also extended the set of atomic
+ formulae and try to cache some of the intermediate results during the
+ process to lessen the computation time. We will briefly describe these
+ optimizations in the following subsections and the impact of the optimizations
+ will be further discussed in following Chapter \ref{evaluation}.
  
  \subsection{Extending set of atomic formulae}
  
  While the set of atomic formulae in restricted syntax is indeed enough for
- defining whole range of WS$k$S logic, automata corresponding to the flattened
- versions of some of the atomic formulae (like $\leq$ for example) are too large
- for processing and slow down the algorithm. As shown in Table
+ defining the whole range of WS$k$S logic, automata corresponding to the
+ flattened versions of some of the atomic formulae (like $\leq$ for example) can
+ be too large for processing and slow down the algorithm. As shown in Table
  \ref{atomic-formulae} we can heavily reduce the size of matrix automaton just
  by extending the set of the atomic formulae defined in \ref{restricted} and
  construct special automata for frequently used operations and yielding smaller
- base automaton in result.
+ base automaton in result. Even though some of reductions can seem to be
+ insignificant, due to their frequent occurences in many practical formulae the
+ overall reduction can be enormous in result.
+ 
+ \begin{table}
+  \catcode`\-=12
+ \begin{center}
+  \begin{tabular}{|c|c|c|c|c|}
+  \hline  
+                    &\multicolumn{2}{c|}{\textbf{quantifiers}/\textbf{alternations}}&\multicolumn{2}{c|}{\textbf{size
+                    of automaton [states]}}\\
+    \cline{2-5}
+    \textbf{Formula} & \textbf{before}     &    \textbf{after}    &
+    \textbf{before}     &    \textbf{after}\\
+    \hline
+    \hline
+    $X \subseteq \mathbb{N}$ & 0 & 0 & $\infty$ & max($X$)$ + 2$\\
+    \hline
+    $X = \{1, 4, 6\}$ & 0 & 0 & 24 & 8\\
+    \hline
+    $X = \{1, 3, 5, 7, 9\}$ & 0 & 0 & 93 & 11\\
+    \hline
+    \hline
+    $x \in X$ & 0 & 0 & 5 & 2\\
+    \hline
+    const $k \in X$ & $k+1$ & 0 & ? & $k$+3\\
+    \hline
+    $0 \in X$ & 1 & 0 & 3 & 3\\
+    \hline
+    $1 \in X$ & 2 & 0 & ? & 4\\
+    \hline
+    \hline
+    $x \leq y$ & 3/2 & 0 & 13 & 4\\
+    \hline
+  \end{tabular}
+ \end{center}
+ \caption{Comparison of basic set of atomic formulae with extended set in size
+ of automata, number of quantifiers and alternations. Note that $\infty$
+ denotes that it number of states cannot be measured or denoted by mathematical
+ equation.}
+ \end{table}
  
  \noindent\hrulefill
  \begin{example}
@@ -2171,45 +2280,55 @@ representation.
  following atomic automaton with 4 states only, which means we can save Y\% of
  the number of the states.
  \end{example}
- 
  \noindent\hrulefill
  
  Besides defining automata for more of the WS$k$S syntax connectives and atomic
- formulae, we can extend the syntax even further and create some of the more
+ formulae, we could extend the syntax even further and create some of the more
  complex operations like modulo or predecessor predicate, just like
- \textsc{MONA} does, that is not specifically defined in WS$k$S logic. 
+ \textsc{MONA} does, that is not specifically defined in WS$k$S logic.
+ \textsc{MONA} \cite{mona-secrets} takes this even further and allows us to
+ define external automata that can be included in input specification.
  
- Note that we can decide Presburger formulae \cite{presburger} with basic set of
- automic formulae as shown for example in \cite{presburger-wsks}. This
- approach yields big automata in process one alternation of negation for each
- addition in formula. However we can construct a special automaton accepting the
- addition of two Presburger constants with 4 states only, thus greatly reducing
- the time needed to decide this formula.
+ Note that we can decide Presburger formulae \cite{presburger} with the basic
+ set of automic formulae as shown for example in \cite{presburger-wsks}. This
+ approach yields big automata in process with one alternation of negation for
+ each addition in formula. However, we can construct a special automaton
+ accepting the addition of two Presburger constants with 4 states only, thus
+ greatly reducing the time needed to decide this family of formulae.
  
  \subsection{Cache}
  
  The caching of some of the already computed results can be applied to several
- places in code. First we can cache the already computed answers for finality of
- macro-states. Second during the computation of successors of states, we can
- cache the BDDs that were already constructed before.
+ places in code. First we can cache the already computed results of deciding
+ which of the macro-states are final. Second during the computation of
+ successors of states, we can cache the BDDs that were already constructed before.
  
+ Generally caching is a trade-off between time and space, which raises the
+ questions how much will we store in the cache. One of the most frequent
+ operations over MTBDDs is the union of posts of macro-states. By storing all of
+ the intermediate results during the union of MTBDDs we can speed up the
+ algorithm greatly on the expenses of using more memory.
+  
  With the design of algorithm, which is looking for existing example, i.e.
  searching for reachable state, in automaton corresponding to the formulae and
  its negation (to get counterexample) this means we don't have to compute
- and classify lots of states twice.
- 
- {\color{red} Here will be several evaluations of ratio between cache hits and
- misses.}
+ and classify lots of states twice. Also some of the lower leveled macro-states
+ are frequently used and does not need to be computed again this way.
 
 \chapter{Evaluation}
 
 In this chapter we are going to provide an evaluation of the implemented
-decision procedure described in the previous chapters. The performance was
-tested on two different scenarios and compared with the implementation of the
-procedure using deterministic tree automata \textsc{MONA}. The first batch of
-tests measures how our implementation resulted in terms of quantification and
-how more quantifiers adds to the computational speed-up. The other tests are
-evaluating decision of quantifier free formulae. 
+decision procedure described in the previous chapters. All the tests were
+performed in virtualized environment with \ldots on a laptop computer with a
+\ldots.
+
+The performance of our prototype implementation was tested by measuring several
+different metrics and compared with the tool \textsc{MONA} which is using the
+deterministic tree automata instead. The run tests were measuring the speed and
+number of generated states of decision procedure depending on the size of the
+input formula and number of quantifier alternations. The other tests are
+examining the impact of used optimizations on the performance of implementation,
+like the cache hit-miss ratio or overall speed.
 
 \iffalse
 \section{Presburger Arithmetic}
@@ -2294,24 +2413,29 @@ by different constants and evaluated by both \texttt{MONA} and our tool.
 
 \section{Parametric horn formulae}
 
-Other experiments done with our implemented tool were carried out on specific
-artificially created parametric formulae in Horn form \cite{horn}. 
-
-\begin{defz}
-We a formula $\varphi$ a \emph{Horn formula} if\ldots
-\end{defz}
-
-The concrete formula with parameter $n$ is in form of
+Our experiments done with our implemented tool were carried out on specific
+artificially created parametric formulae in the following Horn form
+\cite{horn}:
 \begin{equation}
  \varphi_n \overset{\mathit{def}}{=} \exists X\forall x_1\ldots x_n.
  \bigwedge_{i = 1}^{n-1} (x_i \in X \Rightarrow x_{i+1} \in X)
 \end{equation}
 
-This family of formulae is valid. It was further examined that \textsc{MONA} can
-only decide the formulae up to parameter $n = 15$ due to insufficient memory for
-storing BDDs. In results it is shown that the logical approach
-\cite{logic-approach} proves to better for solving this family of formulae in
-contrary to automata-formulae connection used by both \textsc{MONA} and our approach.
+This family of formulae is valid and closed and is suitable for experiments
+since we can freely change the number of alternations in formulae and the size
+of the resulting automaton. Also it was further examined that \textsc{MONA} is
+able to only decide the formulae up to parameter $n = 15$ due to insufficient
+memory for storing MTBDDs. In results it is shown that the logical approach
+\cite{logic-approach} proves to be better for solving this family of formulae in
+contrary to automata-formulae connection used by both \textsc{MONA} and our
+approach. However we will show, that our approach and used library for
+manipulating non-deterministic automata \cite{libvata} is more memory efficient
+and has no problem deciding these formulae and fairly compete with the logical
+approach.
+
+\subsection{Speed compare with \textsc{MONA}}
+
+\subsection{Impact of used optimizations}
 
 \chapter{Conclusion}\label{summary}
 

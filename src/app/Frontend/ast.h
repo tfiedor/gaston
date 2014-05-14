@@ -679,7 +679,7 @@ public:
   ASTTermCode *makeCode(SubstCode *subst = NULL);
   void dump();
 
-protected:
+public:
   ASTList *elements;
 };
 
@@ -895,6 +895,7 @@ public:
   VarCode makeCode(SubstCode *subst = NULL);
   void dump();
   ASTForm* clone() { return new ASTForm_Equal2(this->T1, this->T2, this->pos); }
+  ASTForm* flatten();
 
   // Conversion of AST representation of formula to Automaton
   void toUnaryAutomaton(Automaton &aut, bool doComplement);
@@ -941,6 +942,7 @@ public:
 
   VarCode makeCode(SubstCode *subst = NULL);
   void dump();
+  void toUnaryAutomaton(Automaton &aut, bool doComplement);
   ASTForm* clone() { return new ASTForm_LessEq(this->t1, this->t2, this->pos); }
   ASTForm* flatten();
 };

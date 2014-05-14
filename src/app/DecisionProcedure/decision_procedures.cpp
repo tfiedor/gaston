@@ -39,6 +39,19 @@ bool isNotEnqueued(StateSetList & queue, TStateSet*& state) {
 	return matching_iter == queue.end();
 }
 
+bool isNotEnqueued(StateSetList & queue, MacroStateSet*& state) {
+	// tries to find matching state in list/queue/wtv
+	// if not found .end() is returned
+
+	// TODO: ADD PRUNING BY RELATIONS
+	auto matching_iter = std::find_if(queue.begin(), queue.end(),
+			[state](TStateSet* s) {
+				return s->DoCompare(state);
+			});
+
+	return matching_iter == queue.end();
+}
+
 /**
  * Checks whether there exists a satisfying example for formula
  *
@@ -62,8 +75,8 @@ bool existsSatisfyingExample(Automaton & aut, MacroStateSet* initialState, Prefi
 		q->dump();
 		std::cout << "\n";*/
 
-		if(!StateIsFinal(aut, q, determinizationNo, formulaPrefixSet)) {
-			//std::cout << "\nYes, there exist!\n";
+		if(StateIsFinal(aut, q, determinizationNo, formulaPrefixSet)) {
+			std::cout << "\nYes, there exist!\n";
 			return true;
 		// TODO: here should antichains take place
 		} else {
@@ -84,16 +97,17 @@ bool existsSatisfyingExample(Automaton & aut, MacroStateSet* initialState, Prefi
 				(*it)->dump();
 				std::cout << "\n";
 			}*/
-			assert(reachable.size() == 1);
-			if (isNotEnqueued(processed, newPost)) {
-				/*::cout << "New post = \n";
-				newPost->dump();
-				std::cout << "\n";*/
-				worklist.push_back(newPost);
+			for (auto it = reachable.begin(); it != reachable.end(); ++it) {
+				if (isNotEnqueued(processed, *it)) {
+					/*std::cout << "New post = \n";
+					(*it)->dump();
+					std::cout << "\n";*/
+					worklist.push_back(*it);
+				}
 			}
 		}
 	}
-	//std::cout << "\nNo, there is not T_T!\n";
+	std::cout << "\nNo, there is not T_T!\n";
 	return false;
 }
 
@@ -156,11 +170,11 @@ int decideWS1S(Automaton & aut, TSatExample & example, TUnSatExample & counterEx
 
 	// Construct initial state of final automaton
 	MacroStateSet* initialState = constructInitialState(aut, formulaDeterminizations);
-	//initialState->dump();
-	//std::cout << "\n";
+	initialState->dump();
+	std::cout << "\n";
 	MacroStateSet* negInitialState = constructInitialState(aut, negFormulaDeterminizations);
-	//negInitialState->dump();
-	//std::cout << "\n";
+	negInitialState->dump();
+	std::cout << "\n";
 
 	// Compute the final states
 	StateHT allStates;
@@ -226,6 +240,7 @@ bool StateIsFinal(Automaton & aut, TStateSet* state, unsigned level, PrefixListT
 		// Look into Cache
 		bool isFinal;
 		if(StateCache.retrieveFromCache(macroState, isFinal, level)) {
+			//std::cout << "In cache = " << isFinal << "\n";
 			return isFinal;
 		}
 
@@ -239,26 +254,51 @@ bool StateIsFinal(Automaton & aut, TStateSet* state, unsigned level, PrefixListT
 			worklist.pop_back();
 			processed.push_back(q);
 
+			/*std::cout << "Got from queue\n";
+			q->dump();
+			std::cout << "\n";*/
+
 			if (StateIsFinal(aut, q, level - 1, prefix)) {
-				//state->dump();
-				//std::cout << " is NONFINAL\n";
+				/*state->dump();
+				std::cout << " is NONFINAL\n";*/
 				StateCache.storeIn(macroState, false, level);
 				return false;
 			} else {
 				// Enqueue all its successors
 				MacroStateSet* zeroSuccessor = GetZeroPost(aut, q, level-1, prefix);
-				if (isNotEnqueued(processed, q)) {
-					//std::cout << "Enqueing zero successor:\n";
-					//zeroSuccessor->dump();
-					//std::cout << "\n\n";
-					worklist.push_back(zeroSuccessor);
+				/*std::cout << "Dumping zero successor: \n";
+				q->dump();
+				std::cout << " ---00--->\n";
+				zeroSuccessor->dump();
+				std::cout << "\n\n";*/
+				if ((level - 1) == 0) {
+					StateSetList s = zeroSuccessor->getMacroStates();
+					for(auto it = s.begin(); it != s.end(); ++it) {
+						if(isNotEnqueued(processed, *it)) {
+							StateType leafState = reinterpret_cast<LeafStateSet*>(*it)->getState();
+							//std::cout << "Pushing leaf " << leafState << "\n";
+							worklist.push_back(*it);
+						}
+					}
+				} else {
+					if (isNotEnqueued(processed, zeroSuccessor)) {
+						/*std::cout << "Enqueing zero successor:\n";
+						zeroSuccessor->dump();
+						std::cout << "\n";
+						q->dump();
+						std::cout << "\n\n";*/
+						worklist.push_back(zeroSuccessor);
+					} else {
+						/*zeroSuccessor->dump();
+						std::cout << " is in queue\n";*/
+					}
 				}
 				//////////////////////////////////////////////////////////
 			}
 		}
 
-		//state->dump();
-		//std::cout << " is FINAL\n";
+		/*state->dump();
+		std::cout << " is FINAL\n";*/
 		StateCache.storeIn(macroState, true, level);
 		return true;
 	}
@@ -338,23 +378,17 @@ void closePrefix(PrefixListType & prefix, IdentList* freeVars, bool negationIsTo
 
 	// phi = neg exists X ...
 	if (negationIsTopmost) {
-		// we will add new level of quantification
-		VariableSet set;
-		quantifiedSize = freeVars->size();
-		for (unsigned i = 0; i < quantifiedSize; ++i) {
-			value = freeVars->get(i);
-			set.push_back(varMap[value]);
-		}
-		prefix.push_back(set);
-	// phi = exists X ...
-	} else {
-		// adding to existing level of quantification
-		quantifiedSize = freeVars->size();
-		for (unsigned i = 0; i < quantifiedSize; ++i) {
-			value = freeVars->get(i);
-			prefix[prefixSize-1].push_back(varMap[value]);
-		}
+		VariableSet s;
+		prefix.push_back(s);
 	}
+	// we will add new level of quantification
+	VariableSet set;
+	quantifiedSize = freeVars->size();
+	for (unsigned i = 0; i < quantifiedSize; ++i) {
+		value = freeVars->get(i);
+		//set.push_back(varMap[value]);
+	}
+	prefix.push_back(set);
 }
 
 /**
@@ -428,8 +462,15 @@ MacroStateSet* constructInitialState(Automaton & aut, unsigned numberOfDetermini
 MacroStateSet* GetZeroPost(Automaton & aut, TStateSet*& state, unsigned level, PrefixListType & prefix) {
 	const MacroTransMTBDD & transPost = GetMTBDDForPost(aut, state, level, prefix);
 
+	/*std::cout << "Getting Zero Post for ";
+	state->dump();
+	std::cout << "\n\n";
+	std::cout << "Post BDD: " << MacroTransMTBDD::DumpToDot({&transPost}) << "\n\n";*/
+
 	// should return value for 0^k according to the implementation of GetValue()
 	MacroStateSet *postStates = transPost.GetValue(constructUniversalTrack());
+	/*postStates->dump();
+	std::cout << "---\n\n";*/
 	return postStates;
 }
 
@@ -438,7 +479,7 @@ int getProjectionVariable(unsigned level, PrefixListType & prefix) {
 	if (prefix[index].size() == 0) {
 		return 0;
 	} else {
-		return prefix[index][0];
+		return prefix[index][0]+1;
 	}
 }
 
@@ -464,10 +505,10 @@ MacroTransMTBDD GetMTBDDForPost(Automaton & aut, TStateSet* state, unsigned leve
 		int projecting = getProjectionVariable(level, prefix);
 		//std::cout << "Projecting: " << projecting << " on level " << level << "\n";
 		StateDeterminizatorFunctor sdf;
-		if (projecting >= 0) {
+		if (projecting > 0) {
 			AdditionApplyFunctor adder;
 			TransMTBDD projected = stateTransition->Project(
-				[stateTransition, projecting](size_t var) {return var <= projecting;}, adder);
+				[stateTransition, projecting](size_t var) {return var < projecting;}, adder);
 			//std::cout << "After proj BDD: " << TransMTBDD::DumpToDot({&projected}) << "\n\n";
 			return sdf(projected);
 		} else {
@@ -476,6 +517,10 @@ MacroTransMTBDD GetMTBDDForPost(Automaton & aut, TStateSet* state, unsigned leve
 		}
 	} else {
 		MacroStateSet* mState = reinterpret_cast<MacroStateSet*>(state);
+
+		/*std::cout << "Computing post for:\n";
+		mState->dump();
+		std::cout << "\n";*/
 
 		// Look into cache
 		if(BDDCache.inCache(mState, level)) {
@@ -496,7 +541,7 @@ MacroTransMTBDD GetMTBDDForPost(Automaton & aut, TStateSet* state, unsigned leve
 		//std::cout << "Projecting: " << projecting << " on level " << level << "\n";
 
 		MacroTransMTBDD detResultMtbdd = (level == 1) ? frontPost : (msdf(frontPost)).Project(
-				[&frontPost, projecting](size_t var) {return var <= projecting;}, muf);
+				[&frontPost, projecting](size_t var) {return var < projecting;}, muf);
 		// do the union of posts represented as mtbdd
 
 		// TODO: do the caching of union metaproducts
@@ -505,8 +550,10 @@ MacroTransMTBDD GetMTBDDForPost(Automaton & aut, TStateSet* state, unsigned leve
 			states.pop_back();
 			const MacroTransMTBDD & nextPost = GetMTBDDForPost(aut, front, level-1, prefix);
 			detResultMtbdd = muf(detResultMtbdd, (level == 1) ? nextPost : (msdf(nextPost)).Project(
-					[&nextPost, projecting](size_t var) {return var <= projecting;}, muf));
+					[&nextPost, projecting](size_t var) {return var < projecting;}, muf));
 		}
+
+		//std::cout << MacroTransMTBDD::DumpToDot({&detResultMtbdd}) << "\n";
 
 		// cache the results
 		BDDCache.storeIn(mState, detResultMtbdd, level);
