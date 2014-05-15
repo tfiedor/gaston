@@ -62,7 +62,11 @@ public:
 			// TODO: this should be special function
 			auto matching_iter = std::find_if(lhsStates.begin(), lhsStates.end(),
 					[state](TStateSet* s) {
+#ifdef PRUNE_BY_RELATION
+						return state->CanBePruned(s);
+#else
 						return s->DoCompare(state);
+#endif
 					});
 			if (matching_iter == lhsStates.end()) {
 				lhsStates.push_back(state);

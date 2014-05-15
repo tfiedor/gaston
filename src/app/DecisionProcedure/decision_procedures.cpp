@@ -26,27 +26,35 @@ FinalStatesType computeFinalStates(Automaton & aut) {
  * @param state: looked up state
  * @return: true if state is in queue
  */
-bool isNotEnqueued(StateSetList & queue, TStateSet*& state) {
+bool isNotEnqueued(StateSetList & queue, TStateSet*& state, unsigned level) {
 	// tries to find matching state in list/queue/wtv
 	// if not found .end() is returned
 
 	// TODO: ADD PRUNING BY RELATIONS
 	auto matching_iter = std::find_if(queue.begin(), queue.end(),
-			[state](TStateSet* s) {
+			[state, level](TStateSet* s) {
+#ifdef PRUNE_BY_RELATION
+				return state->CanBePruned(s, level);
+#else
 				return s->DoCompare(state);
+#endif
 			});
 
 	return matching_iter == queue.end();
 }
 
-bool isNotEnqueued(StateSetList & queue, MacroStateSet*& state) {
+bool isNotEnqueued(StateSetList & queue, MacroStateSet*& state, unsigned level) {
 	// tries to find matching state in list/queue/wtv
 	// if not found .end() is returned
 
 	// TODO: ADD PRUNING BY RELATIONS
 	auto matching_iter = std::find_if(queue.begin(), queue.end(),
-			[state](TStateSet* s) {
+			[state, level](TStateSet* s) {
+#ifdef PRUNE_BY_RELATION
+				return state->CanBePruned(s, level);
+#else
 				return s->DoCompare(state);
+#endif
 			});
 
 	return matching_iter == queue.end();
@@ -98,7 +106,7 @@ bool existsSatisfyingExample(Automaton & aut, MacroStateSet* initialState, Prefi
 				std::cout << "\n";
 			}*/
 			for (auto it = reachable.begin(); it != reachable.end(); ++it) {
-				if (isNotEnqueued(processed, *it)) {
+				if (isNotEnqueued(processed, *it, determinizationNo)) {
 					/*std::cout << "New post = \n";
 					(*it)->dump();
 					std::cout << "\n";*/
@@ -274,14 +282,13 @@ bool StateIsFinal(Automaton & aut, TStateSet* state, unsigned level, PrefixListT
 				if ((level - 1) == 0) {
 					StateSetList s = zeroSuccessor->getMacroStates();
 					for(auto it = s.begin(); it != s.end(); ++it) {
-						if(isNotEnqueued(processed, *it)) {
+						if(isNotEnqueued(processed, *it, level-1)) {
 							StateType leafState = reinterpret_cast<LeafStateSet*>(*it)->getState();
-							//std::cout << "Pushing leaf " << leafState << "\n";
 							worklist.push_back(*it);
 						}
 					}
 				} else {
-					if (isNotEnqueued(processed, zeroSuccessor)) {
+					if (isNotEnqueued(processed, zeroSuccessor, level-1)) {
 						/*std::cout << "Enqueing zero successor:\n";
 						zeroSuccessor->dump();
 						std::cout << "\n";

@@ -41,7 +41,7 @@ public:
 	// < Public Methods >
 	virtual void dump() {}
 	virtual bool DoCompare(TStateSet*) {return false;};
-	virtual bool CanBePruned(TStateSet*) {return false;};
+	virtual bool CanBePruned(TStateSet*, unsigned) {return false;};
 	virtual std::string ToString() {}
 	friend inline std::ostream& operator<<(std::ostream& os, const TStateSet& tss) {os << "";}
 };
@@ -86,7 +86,7 @@ public:
 		}
 	}
 
-	bool CanBePruned(TStateSet* lhs) {
+	bool CanBePruned(TStateSet* lhs, unsigned pruneUpTo) {
 		if(lhs->type == MACROSTATE) {
 			return false;
 		} else {
@@ -188,12 +188,43 @@ public:
 		}
 	}
 
-	bool CanBePruned(TStateSet* lhs) {
-		if(lhs->type == STATE) {
-			return false;
-		// test if they are in relation, otherwise they can be pruned
+	/**
+	 * @return True, if lhs is bigger and thus can be pruned
+	 */
+	bool CanBePruned(TStateSet* lhs, unsigned pruneUpTo) {
+		if(pruneUpTo == -1) {
+			return this->DoCompare(lhs);
 		} else {
+			if(lhs->type == STATE) {
+				return false;
+			// test if they are in relation, otherwise they can be pruned
+			} else {
+				if(pruneUpTo == 0) {
+					if(this->leaves.any() && lhs->leaves.any()) {
+						bool can = lhs->leaves.is_subset_of(this->leaves);
+						if(can) {
+							//std::cout << "Can be pruned lul\n";
+						}
+						return can;
+					}
+				}
 
+				MacroStateSet* lhss = (MacroStateSet*)(lhs);
+				StateSetList lhsStates = lhss->getMacroStates();
+
+				for (auto state: lhsStates) {
+					auto matching_iter = std::find_if(this->macroStates.begin(), this->macroStates.end(),
+							[state, pruneUpTo](TStateSet* s) {
+								return state->CanBePruned(s, pruneUpTo -1);
+							});
+					if (matching_iter == this->macroStates.end()) {
+						return false;
+					}
+				}
+
+				//std::cout << "Can be pruned lol\n";
+				return true;
+			}
 		}
 	}
 

@@ -2226,9 +2226,7 @@ representation.
  \ref{atomic-formulae} we can heavily reduce the size of matrix automaton just
  by extending the set of the atomic formulae defined in \ref{restricted} and
  construct special automata for frequently used operations and yielding smaller
- base automaton in result. Even though some of reductions can seem to be
- insignificant, due to their frequent occurences in many practical formulae the
- overall reduction can be enormous in result.
+ base automaton in result. 
  
  \begin{table}
   \catcode`\-=12
@@ -2251,11 +2249,11 @@ representation.
     \hline
     $x \in X$ & 0 & 0 & 5 & 2\\
     \hline
-    const $k \in X$ & $k+1$ & 0 & ? & $k$+3\\
+    const $k \in X$ & $k+1$ & 0 & $k$+3 & $k$+3\\
     \hline
     $0 \in X$ & 1 & 0 & 3 & 3\\
     \hline
-    $1 \in X$ & 2 & 0 & ? & 4\\
+    $1 \in X$ & 2 & 0 & 4 & 4\\
     \hline
     \hline
     $x \leq y$ & 3/2 & 0 & 13 & 4\\
@@ -2276,11 +2274,26 @@ representation.
   x \leq y \overset{\mathit{def}}{=} \forall X. (y \in X \wedge (\forall z. z1
   \in X \Rightarrow z \in X)) \Rightarrow x \in X
  \end{equation} 
- which corresponds to automaton with X states. However we can construct the
- following atomic automaton with 4 states only, which means we can save Y\% of
- the number of the states.
+ which corresponds to automaton with 13 states. However we can construct the
+ following atomic automaton with 4 states only depicted in the Figure
+ \ref{less-eq}, which means we can save around $70\%$ of the number of the
+ states.
+ \begin{figure}[h!]
+ \begin{center}
+  \includegraphics{fig/atomic-x-lesseq-y}
+ \end{center}
+ \caption{Automaton corresponding to atomic formulae $x \leq y$}\label{less-eq}
+\end{figure}
  \end{example}
  \noindent\hrulefill
+ 
+ Even though some of reductions can seem to be
+ insignificant, due to their frequent occurences in many practical formulae the
+ overall reduction can be enormous in result. Another reduction comes from
+ lessening the number of projections produced by creation of some temporary
+ variables like for formula $\varphi \overset{\mathit{def}}{=} k \in X$ which
+ after extending atomic formulae yield same number of states, however without
+ quantifications.
  
  Besides defining automata for more of the WS$k$S syntax connectives and atomic
  formulae, we could extend the syntax even further and create some of the more
@@ -2319,16 +2332,24 @@ representation.
 
 In this chapter we are going to provide an evaluation of the implemented
 decision procedure described in the previous chapters. All the tests were
-performed in virtualized environment with \ldots on a laptop computer with a
-\ldots.
+performed in the virtualized environment with operating system Linux Ubuntu
+12.10 with 4096\ MB of memory and one virtual processor natively running on a
+laptop computer with a 8\ GB RAM memory and dual core processor running on 2.5
+GHz.
 
 The performance of our prototype implementation was tested by measuring several
 different metrics and compared with the tool \textsc{MONA} which is using the
-deterministic tree automata instead. The run tests were measuring the speed and
-number of generated states of decision procedure depending on the size of the
-input formula and number of quantifier alternations. The other tests are
-examining the impact of used optimizations on the performance of implementation,
-like the cache hit-miss ratio or overall speed.
+deterministic tree automata instead of non-deterministic automata used in our
+approach.
+The run tests were measuring the speed and number of generated states of
+decision procedure depending on the size of the input formula and number of
+quantifier alternations. The other tests are examining the impact of used
+optimizations on the performance of implementation, like the cache hit-miss
+ratio or overall speed.
+
+Note that we will use the symbol $\infty$ if either the test fails due to the
+insufficient memory or it has been interupted due to the time limit and thus we
+could not recieve any valid data.
 
 \iffalse
 \section{Presburger Arithmetic}
@@ -2413,29 +2434,33 @@ by different constants and evaluated by both \texttt{MONA} and our tool.
 
 \section{Parametric horn formulae}
 
-Our experiments done with our implemented tool were carried out on specific
-artificially created parametric formulae in the following Horn form
+Our first batch of experiments done with our implemented tool were carried out
+on specific artificially created parametric formulae in the following Horn form
 \cite{horn}:
 \begin{equation}
  \varphi_n \overset{\mathit{def}}{=} \exists X\forall x_1\ldots x_n.
  \bigwedge_{i = 1}^{n-1} (x_i \in X \Rightarrow x_{i+1} \in X)
 \end{equation}
 
-This family of formulae is valid and closed and is suitable for experiments
+This family of formulae is closed and valid and is suitable for our experiments
 since we can freely change the number of alternations in formulae and the size
-of the resulting automaton. Also it was further examined that \textsc{MONA} is
-able to only decide the formulae up to parameter $n = 15$ due to insufficient
-memory for storing MTBDDs. In results it is shown that the logical approach
-\cite{logic-approach} proves to be better for solving this family of formulae in
+of the resulting automaton depending on quantifier prefix and parameter $n$.
+Also it was further examined that \textsc{MONA} is able to only decide the
+formulae up to parameter $n = 15$ due to insufficient memory for storing MTBDDs.
+In results it is shown that the logical approach designed in
+\cite{logic-approach} proves to be better for solving this kind of formulae in
 contrary to automata-formulae connection used by both \textsc{MONA} and our
 approach. However we will show, that our approach and used library for
-manipulating non-deterministic automata \cite{libvata} is more memory efficient
-and has no problem deciding these formulae and fairly compete with the logical
-approach.
+manipulating non-deterministic automata \cite{libvata} is far more memory
+efficient with handling MTBDDs and has no problem deciding these formulae and
+fairly compete with the proposed logical composition approach.
 
-\subsection{Speed compare with \textsc{MONA}}
+\subsection{Comparison with \textsc{MONA}}
 
 \subsection{Impact of used optimizations}
+
+In this subsection we will discuss the impact of optimizations developped during
+process on the performance of implementation.
 
 \chapter{Conclusion}\label{summary}
 

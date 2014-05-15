@@ -82,7 +82,6 @@ void ASTForm_And::toUnaryAutomaton(Automaton &andAutomaton, bool doComplement) {
 	Automaton left, right;
 	this->f1->toUnaryAutomaton(left, doComplement);
 	this->f2->toUnaryAutomaton(right, doComplement);
-
 	andAutomaton = Automaton::Intersection(left, right);
 }
 
@@ -198,7 +197,6 @@ void ASTForm_Equal2::toUnaryAutomaton(Automaton &aut, bool doComplement) {
 		setNonFinalState(aut, doComplement, 1);
 	// X = {...}
 	} else if(this->T2->kind == aSet) {
-		std::cout << "Is this called?\n";
 		ASTTerm2_Var2 *T1Term = (ASTTerm2_Var2*) this->T1;
 		unsigned int X = T1Term->n;
 		ASTList* vars = ((ASTTerm2_Set*)this->T2)->elements;

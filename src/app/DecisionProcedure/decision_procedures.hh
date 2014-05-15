@@ -24,6 +24,8 @@
 #include "automata.hh"
 #include "mtbdd_factors.hh"
 
+#define PRUNE_BY_RELATION
+
 extern VarToTrackMap varMap;
 
 // < Module Typedefs >

@@ -13,7 +13,7 @@ extern Options options;
 extern PredicateLib predicateLib;
 extern IdentList inFirstOrder;
 
-//#define SMART_FLATTEN
+#define SMART_FLATTEN
 
 
 /**

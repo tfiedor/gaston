@@ -421,6 +421,8 @@ main(int argc, char *argv[])
 	  matrix->toBinaryAutomaton(formulaAutomaton, false);
   }
 
+  std::cout << "I'm done\n";
+
   StateHT reachable;
   formulaAutomaton = formulaAutomaton.RemoveUnreachableStates(&reachable);
 
