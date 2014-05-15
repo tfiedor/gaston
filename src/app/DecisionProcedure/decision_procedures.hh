@@ -25,6 +25,9 @@
 #include "mtbdd_factors.hh"
 
 #define PRUNE_BY_RELATION
+#define SMART_FLATTEN
+#define USE_CACHE
+#define SMART_BINARY
 
 extern VarToTrackMap varMap;
 

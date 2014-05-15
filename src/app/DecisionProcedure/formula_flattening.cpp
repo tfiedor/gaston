@@ -5,6 +5,7 @@
 #include "environment.hh"
 #include <cstring>
 #include <vector>
+#include "decision_procedures.hh"
 
 using std::cout;
 
@@ -12,9 +13,6 @@ extern SymbolTable symbolTable;
 extern Options options;
 extern PredicateLib predicateLib;
 extern IdentList inFirstOrder;
-
-#define SMART_FLATTEN
-
 
 /**
  * Generates fresh first-order variable that can be used for quantification

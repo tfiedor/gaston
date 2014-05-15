@@ -154,6 +154,7 @@ public:
 		} else {
 			// test if they are same
 			// Optimization: sets of level 1 are compared by bitwise operations
+#ifdef USE_BINARY
 			if(this->leaves.any() && lhs->leaves.any()) {
 				unsigned size = TStateSet::stateNo;
 				for(unsigned i = 0; i < size; ++i) {
@@ -163,6 +164,7 @@ public:
 				}
 				return true;
 			}
+#endif
 
 			// TODO: THIS MAY BE SUICIDAL!!!!
 			//MacroStateSet* lhss = reinterpret_cast<MacroStateSet*>(lhs);
@@ -201,11 +203,7 @@ public:
 			} else {
 				if(pruneUpTo == 0) {
 					if(this->leaves.any() && lhs->leaves.any()) {
-						bool can = lhs->leaves.is_subset_of(this->leaves);
-						if(can) {
-							//std::cout << "Can be pruned lul\n";
-						}
-						return can;
+						return lhs->leaves.is_subset_of(this->leaves);
 					}
 				}
 
@@ -216,6 +214,7 @@ public:
 					auto matching_iter = std::find_if(this->macroStates.begin(), this->macroStates.end(),
 							[state, pruneUpTo](TStateSet* s) {
 								return state->CanBePruned(s, pruneUpTo -1);
+								//return s->CanBePruned(state, pruneUpTo-1);
 							});
 					if (matching_iter == this->macroStates.end()) {
 						return false;

@@ -35,6 +35,7 @@ bool isNotEnqueued(StateSetList & queue, TStateSet*& state, unsigned level) {
 			[state, level](TStateSet* s) {
 #ifdef PRUNE_BY_RELATION
 				return state->CanBePruned(s, level);
+				//return s->CanBePruned(state, level);
 #else
 				return s->DoCompare(state);
 #endif
@@ -52,6 +53,7 @@ bool isNotEnqueued(StateSetList & queue, MacroStateSet*& state, unsigned level) 
 			[state, level](TStateSet* s) {
 #ifdef PRUNE_BY_RELATION
 				return state->CanBePruned(s, level);
+				//return s->CanBePruned(state, level);
 #else
 				return s->DoCompare(state);
 #endif
@@ -247,10 +249,12 @@ bool StateIsFinal(Automaton & aut, TStateSet* state, unsigned level, PrefixListT
 
 		// Look into Cache
 		bool isFinal;
+#ifdef USE_CACHE
 		if(StateCache.retrieveFromCache(macroState, isFinal, level)) {
 			//std::cout << "In cache = " << isFinal << "\n";
 			return isFinal;
 		}
+#endif
 
 		StateSetList states = macroState->getMacroStates();
 		for (auto state : states) {
@@ -269,7 +273,9 @@ bool StateIsFinal(Automaton & aut, TStateSet* state, unsigned level, PrefixListT
 			if (StateIsFinal(aut, q, level - 1, prefix)) {
 				/*state->dump();
 				std::cout << " is NONFINAL\n";*/
+#ifdef USE_CACHE
 				StateCache.storeIn(macroState, false, level);
+#endif
 				return false;
 			} else {
 				// Enqueue all its successors
@@ -306,7 +312,9 @@ bool StateIsFinal(Automaton & aut, TStateSet* state, unsigned level, PrefixListT
 
 		/*state->dump();
 		std::cout << " is FINAL\n";*/
+#ifdef USE_CACHE
 		StateCache.storeIn(macroState, true, level);
+#endif
 		return true;
 	}
 
@@ -530,9 +538,11 @@ MacroTransMTBDD GetMTBDDForPost(Automaton & aut, TStateSet* state, unsigned leve
 		std::cout << "\n";*/
 
 		// Look into cache
+#ifdef USE_CACHE
 		if(BDDCache.inCache(mState, level)) {
 			return BDDCache.lookUp(mState, level);
 		}
+#endif
 
 		StateSetList states = mState->getMacroStates();
 		// get post for all states under lower level
@@ -563,7 +573,9 @@ MacroTransMTBDD GetMTBDDForPost(Automaton & aut, TStateSet* state, unsigned leve
 		//std::cout << MacroTransMTBDD::DumpToDot({&detResultMtbdd}) << "\n";
 
 		// cache the results
+#ifdef USE_CACHE
 		BDDCache.storeIn(mState, detResultMtbdd, level);
+#endif
 
 		// do projection and return;
 		return detResultMtbdd;
