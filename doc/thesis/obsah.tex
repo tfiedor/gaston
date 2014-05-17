@@ -1168,6 +1168,36 @@ corresponding to the given formula in the first place.
 We will give a brief introduction to universality testing for non-deterministic
 finite word automata by an algorithm that uses a combination
 of the simulation-based and the antichain-based approaches \cite{tacas}.
+\newpage
+
+\noindent\hrulefill
+\begin{example}
+Consider testing validity of the formula $\varphi$ from Example
+\ref{wsks-formula}.
+Given automaton $\mathcal{A}_\varphi$ corresponding to the formula $\varphi$
+(see Section \ref{classical}), testing validity of $\varphi$ is
+equivalent to testing universality of the language $L(\mathcal{A}_\varphi)$.
+
+\begin{figure}
+ \begin{center}
+  \scalebox{0.5}{\includegraphics{fig/antichain-meets-projection.pdf}}
+ \end{center}
+ \caption{Comparison of the antichain-based (grey nodes) and the classical (all
+ nodes) approach to universality checking of the automaton $\mathcal{A}_\psi$
+ corresponding to the formula $\psi \overset{\mathit{def}}{=} \neg\exists P:
+ Sing(P) \wedge\neg P \subseteq X$}\label{compare}
+\end{figure}
+
+When using the textbook approach for testing universality (by using the subset
+construction and complementation), 7 states are generated as depicted in Figure
+\ref{compare} If we use the antichain-based approach, then macro-states $\{1,
+2\}$ and $\{1, 4\}$ are simulated by the initial state $\{1\}$ so we can
+discard these states.
+Since we have not reached an accepting state, we can conclude that the language
+of the automaton $\mathcal{A}_\varphi$ is not universal and $\varphi$ is thus
+invalid.
+\end{example}
+\noindent\hrulefill
 
 \begin{defz}
 A~\emph{simulation} on a finite automaton $\mathcal{A} = (Q, \Sigma, \delta, I,
@@ -1298,36 +1328,6 @@ The language of automaton $\mathcal{A}$ is universal if the fucntion
 Algorithm
 \ref{universal} returns \textsc{TRUE}.
 \end{lemma}
-
-\noindent\hrulefill
-\begin{example}
-Consider testing validity of the formula $\varphi$ from Example
-\ref{wsks-formula}.
-Given automaton $\mathcal{A}_\varphi$ corresponding to the formula $\varphi$
-(see Section \ref{classical}), testing validity of $\varphi$ is
-equivalent to testing universality of the language $L(\mathcal{A}_\varphi)$.
-
-When using the textbook approach for testing universality (by using the subset
-construction and complementation), 7 states are generated as depicted in Figure
-\ref{compare} If we use the antichain-based approach, then macro-states $\{1,
-2\}$ and $\{1, 4\}$ are simulated by the initial state $\{1\}$ so we can
-discard these states.
-Since we have not reached an accepting state, we can conclude that the language
-of the automaton $\mathcal{A}_\varphi$ is not universal and $\varphi$ is thus
-invalid.
-\end{example}
-
-\noindent\hrulefill
-
-\begin{figure}
- \begin{center}
-  \scalebox{0.5}{\includegraphics{fig/antichain-meets-projection.pdf}}
- \end{center}
- \caption{Comparison of the antichain-based (grey nodes) and the classical (all
- nodes) approach to universality checking of the automaton $\mathcal{A}_\psi$
- corresponding to the formula $\psi \overset{\mathit{def}}{=} \neg\exists P:
- Sing(P) \wedge\neg P \subseteq X$}\label{compare}
-\end{figure}
 
 \section{Deciding WS1S with NFAs}
 
@@ -2330,21 +2330,23 @@ representation.
 
 \chapter{Evaluation}
 
-In this chapter we are going to provide an evaluation of the implemented
-decision procedure described in the previous chapters. All the tests were
-performed in the virtualized environment with operating system Linux Ubuntu
-12.10 with 4096\ MB of memory and one virtual processor natively running on a
-laptop computer with a 8\ GB RAM memory and dual core processor running on 2.5
+In this chapter we are going to provide an evaluation of our tool
+\texttt{dWiNA}\footnote{\texttt{d}eciding \texttt{Wi}th
+\texttt{N}on-deterministic \texttt{A}utomata}\,---\,an implementation of
+a decision procedure described in the previous chapters.
+All the tests were performed in the virtualized environment with operating system Linux Ubuntu
+12.10 with 4096\ MB of operating memory and one virtual processor natively
+running on a laptop computer with a 8\ GB RAM memory and dual core processor running on 2.5
 GHz.
 
 The performance of our prototype implementation was tested by measuring several
-different metrics and compared with the tool \textsc{MONA} which is using the
+different metrics and compared with the \textsc{MONA} tool which is using the
 deterministic tree automata instead of non-deterministic automata used in our
-approach.
-The run tests were measuring the speed and number of generated states of
+approach and is heavily optimized (See \ref{monasecrets}).
+The run tests were measuring the speed and size of the state space of
 decision procedure depending on the size of the input formula and number of
-quantifier alternations. The other tests are examining the impact of used
-optimizations on the performance of implementation, like the cache hit-miss
+quantifier alternations. The other tests were examining the impact of used
+optimizations on the performance of our implementation, like the cache hit-miss
 ratio or overall speed.
 
 Note that we will use the symbol $\infty$ if either the test fails due to the
@@ -2434,10 +2436,10 @@ by different constants and evaluated by both \texttt{MONA} and our tool.
 
 \section{Parametric horn formulae}
 
-Our first batch of experiments done with our implemented tool were carried out
-on specific artificially created parametric formulae in the following Horn form
+Experiments done with our implemented tool were carried out
+on specific parametric formulae in the following Horn form
 \cite{horn}:
-\begin{equation}
+\begin{equation}\label{horn}
  \varphi_n \overset{\mathit{def}}{=} \exists X\forall x_1\ldots x_n.
  \bigwedge_{i = 1}^{n-1} (x_i \in X \Rightarrow x_{i+1} \in X)
 \end{equation}
@@ -2445,27 +2447,274 @@ on specific artificially created parametric formulae in the following Horn form
 This family of formulae is closed and valid and is suitable for our experiments
 since we can freely change the number of alternations in formulae and the size
 of the resulting automaton depending on quantifier prefix and parameter $n$.
-Also it was further examined that \textsc{MONA} is able to only decide the
-formulae up to parameter $n = 15$ due to insufficient memory for storing MTBDDs.
-In results it is shown that the logical approach designed in
+Also it was further discovered that \textsc{MONA} is able to only decide
+formulae up to parameter $n = 15$ due to the insufficient memory for storing
+MTBDDs.
+In results it is proposed by its authors that the logical approach designed in
 \cite{logic-approach} proves to be better for solving this kind of formulae in
 contrary to automata-formulae connection used by both \textsc{MONA} and our
-approach. However we will show, that our approach and used library for
+approach. However, we will show, that our algorithm and used library for
 manipulating non-deterministic automata \cite{libvata} is far more memory
 efficient with handling MTBDDs and has no problem deciding these formulae and
 fairly compete with the proposed logical composition approach.
 
-\subsection{Comparison with \textsc{MONA}}
+\section{Comparison with \textsc{MONA}}
+We have run tests with the generated formulae of form \ref{horn} for parameter
+$n$ ranging from $2$ to $50$ with various number of quantifier alternations
+ranging from $2$ to $9$ alternation per formula. The size of base automaton
+(corresponding to quantifier-free matrix) is heavily dependent on the number of
+alterations in formulae as depicted in Table \ref{n-size}. Even number of
+alternations spawns one additional negation of base automaton which then results
+in disjunction of formulae that is handled as an union of automata. This way
+the automaton size is increasing heavily in relation with parameter $n$.
 
-\subsection{Impact of used optimizations}
+\begin{table}[h!]
+\catcode`\-=12
+ \begin{center}
+  \begin{tabular}{| c | r | r |}
+  \hline
+   \multirow{2}{*}{\textbf{alternations}} & \multirow{2}{*}{\textbf{n}} &
+   \textbf{automaton}\\
+   &								  & \textbf{[states]}\\
+   \hline
+   \multirow{6}{*}{even} & 2 & 9\\
+   \cline{2-3}
+   & 3 & 18\\
+   \cline{2-3}
+   & 4 & 27\\
+   \cline{2-3}
+   & 5 & 36\\
+   \cline{2-3}
+   & 6 & 45\\
+   \cline{2-3}
+   & 7 & 54\\
+   \hline
+   \multirow{6}{*}{odd} & 2 & 6\\
+   \cline{2-3}
+   & 3 & 30\\
+   \cline{2-3}
+   & 4 & 144\\
+   \cline{2-3}
+   & 5 & 648\\
+   \cline{2-3}
+   & 6 & 3\ 240\\
+   \cline{2-3}
+   & 7 & 15\ 336\\
+   \hline
+  \end{tabular}
+ \end{center}
+ \caption{Base automaton size depending on number of alternations in formula
+ and parameter $n$.}\label{n-size}
+\end{table}
 
-In this subsection we will discuss the impact of optimizations developped during
-process on the performance of implementation.
+In \cite{logic-approach} it was proposed that this type of formula is not
+suitable for automata-based approach and logical decomposition is much better
+as decision procedure. The results in Table \ref{n=1} certainly proved that
+\textsc{MONA} has problems with deciding these formulae for $n \geq 15$,
+however, this is due to the enormous size of BDDs representing transitions in
+automata that are stored as optimization and not flaw in automata-based
+approach, since our tool \texttt{dWiNA} has no problems with deciding formulae for greater $n$.
+
+\begin{table}[h!]
+\catcode`\-=12
+\begin{center}
+ \begin{tabular}{| r | r | r | r |}
+ \hline
+  & \multicolumn{3}{| c |}{\textbf{time}} \\
+ \cline{2-4}
+  \textbf{n} & \textbf{logic} & \texttt{dWiNA} & \texttt{MONA}\\
+  \hline
+  10 & 0.01 & 0.01 & 0.12\\
+  12 & 0.01 & 0.01 & 0.89\\
+  13 & 0.01 & 0.01 & 2.28\\
+  14 & 0.01 & 0.01 & 5.53\\
+  15 & 0.01 & 0.02 &15.06\\
+  16 & 0.01 & 0.02 & $\infty$\\
+  50 & 0.01 & 0.07 & $\infty$\\
+  \hline 
+ \end{tabular}
+ \caption{Time evaluation of deciding formulae of form \ref{horn} in
+ dependence on paramter $n$ for fixed number of alternations (1).}\label{n=1}
+ \end{center}
+\end{table}
+
+\begin{figure}[h!]
+ \begin{center}
+  \scalebox{0.45}{\includegraphics{fig/graf-alt-n-time}}
+ \end{center}
+ \caption{Comparison of speed of \texttt{dWiNA} and \textsc{MONA} based on
+ parameter $n$ and number of alternations in formula.}\label{alt-n}
+\end{figure}
+
+We further compared our tool with \textsc{MONA} tool in dependence on the
+parameter $n$ and number of alternation. It is clear from Figure \ref{alt-n}
+that due to the huge differences in base automaton size between odd and even
+alternations on generated benchmark formuale the time needed for computation is
+rather unsteady for our implementation. This is because of the
+inefficient representation of macro-states and thus some of operations takes too
+much time to compute, like pruning or comparison. \textsc{MONA} however has no
+problem with alternations and yields steady times for all numbers of
+alternations showing that full construction of automata along with minimizations
+is still efficient and has good results in product. This is contrary to our base
+assumption that our \emph{on-the-fly} approach should not have issues with
+alternations. Note that some combinations of alternations and parameter $n$
+cannont be done and were thus approximated in shown mesh grid.
+
+\begin{table}
+\begin{center}
+ \begin{tabular}{|c|r|r|}
+  \hline
+  \textbf{alternations} & \texttt{dWiNA} & \textsc{MONA}\\
+  \hline
+  1 & 0.01 & 0.01\\
+  \hline
+  2 & 2.2 & 0.01\\
+  \hline
+  3 & 0.01 & 0.01\\
+  \hline
+  4 & 1.49 & 0.01\\
+  \hline
+  5 & 0.04 & 0.01\\
+  \hline
+  6 & 2.9 & 0.01\\
+  \hline
+ \end{tabular}
+ \end{center}
+ \caption{Time comparison of \texttt{dWiNA} and \textsc{MONA} with fixed $n =
+ 6$}
+\end{table}
+\newpage
+In Figure \ref{size-n} we show the alternate view on the data: the time
+comparison with \textsc{MONA} based on the size of base automaton (our). Here we
+see that in dependence on size of automata our approach is not that bad and can
+yield good results even though there are no automata reductions during the
+process.
+
+\begin{figure}[h!]
+ \begin{center}
+  \scalebox{0.5}{\includegraphics{fig/graf-alt-size}}
+ \end{center}
+ \caption{Alternative speed comparison of \texttt{dWiNA} and \textsc{MONA}
+ based on size of automaton.}\label{size-n}
+\end{figure}
+
+Even though \textsc{MONA} is more consistent when it comes to number of
+alternations of quantifiers in formulae and has better computational results, in
+terms of generated and evaluated search space our \texttt{dWiNA} is more
+efficient. Figure \ref{state-graph} shows that \emph{on-the-fly} approach
+generates much less states and needs only a portion of them for evaluation. This
+shows that our approach certainly has a potential to beat \textsc{MONA} even in
+time, but requires additional optimizations to take place.
+
+\begin{figure}[h!]
+ \begin{center}
+  \scalebox{0.5}{\includegraphics{fig/graf-states}}
+ \end{center}
+ \caption{Comparison of number of generated/evaluated state between
+ \texttt{dWiNA} and \textsc{MONA}.}\label{state-graph}
+\end{figure}
+
+The other thing is that for many practical cases we do not need fully expanded
+automaton to decide whether its language is universal (or empty) and usually any
+non-accepting (or accepting) suffices. Thus the \emph{on-the-fly} approach is
+more suited for these kinds of problems.
+
+\section{Impact of used optimizations}
+
+We will discuss the impact of optimizations developed during
+process on the performance of implementation. Aside for some minor optimizations
+we introduced some of our implementation secrets in Section \ref{optimizations}.
+The most notable ones is the pruning of the states during the search for the
+accepting states. The other ones is smarter flattening of the input formulae
+with extended set of atomic formulae and caching during the process.
+
+We can see from Table \ref{opt-times} that all of these optimizations have great
+impact on the performance. However the greatest one is definitely the smart
+flattening since this way we are working with considerably smaller automata than
+with basic atomic automata set. The pruning of the state space was lower on this
+kind of formulae than expected as shown in Figure \ref{state-graph}, but still
+is great asset to the overall speed.
+
+\begin{table}[h!]
+\catcode`\-=12
+ \begin{center}
+  \begin{tabular}{| r | r | r | r | r | r | r |}
+  \hline
+   \textbf{n} & \textbf{alternations} & \textbf{all[s]} & \textbf{no opt
+   [s]} & \textbf{pruning [s]} & \textbf{smart flatten} & \textbf{cache}\\
+   \hline
+    \multirow{4}{*}{5} & 2 & 0.11 & $\infty$ & 24.05 & 0.49 & 25.2\\
+    \cline{2-7}
+     & 3 & 0.02 & 0.75 & 0.16 & 0.04 & 0.08\\
+    \cline{2-7}
+     & 4 & 0.14 & $\infty$ & $\infty$ & 1.09 & 13.71\\
+    \cline{2-7}
+     & 5 & 0.03 & 5.4 & 1.04 & 0.17 & 0.42\\
+    \hline
+   \hline
+   \multirow{4}{*}{6} & 2 & 2.2 & $\infty$ & $\infty$ & 9.59 & $\infty$\\
+   \cline{2-7}
+    & 3 & 0.01 & 1.22 & 0.3 & 0.06 & 0.14\\
+    \cline{2-7}
+    & 4 & 1.49 & $\infty$ & $\infty$ & 11.15 & $\infty$\\
+    \cline{2-7}
+    & 5 & 0.04 & 17.7 & 2.34 & 0.28 & 2.47\\
+   \hline
+  \end{tabular}
+ \end{center}
+ \caption{Speed compare for various optimizations based on number of
+ alternations and parameter $n$.}\label{opt-times}
+\end{table}
+\newpage
+Other notable optimization is definitely cache. Based on the result in
+Table \ref{opt-times} the impact of caching intermediate results during the
+decision process is formidable and for some $n$, where the implementation
+without optimizations fails, is even able to give proper answer. While cache
+that stores whether given state is final or non-final is not overly used in
+process, the cache for storing MTBDDs and especially some of the intermediate
+results during the construction of MTBDDs corresponding to the posts of states
+is used in more than $75\%$ of cases. More detailed outlook on efficiency of
+MTBDD cache is depicted in Table \ref{cache-hits}. The cache was tested on
+various formulae of parameter $n$ and the results are shown for
+macro-state levels up to $7$.
+
+\begin{table}[h!]
+ \begin{center}
+  \begin{tabular}{| r | r |}
+  \hline
+   \textbf{Level} & \textbf{Cache-hit ratio}\\
+   \hline
+   1 & 0.816\\
+   2 & 0.768\\
+   3 & 0.760\\
+   4 & 0.728\\
+   5 & 0.704\\
+   6 & 0.667\\
+   \hline
+  \end{tabular}
+ \end{center}
+ \label{Average cache-hit ration for various level of determinizations for
+ MTBDD cache.}\label{cache-hits}
+\end{table}
+
+\subsection{Discussion of results}
+
+In this chapter we have shown that we can beat
+\textsc{MONA} in several aspects, namely generated search space and computation
+time to decide benchmark formulae for some cases. While \textsc{MONA} is
+indeed far more consistent with its results, we can see that for some kinds of
+formulae generating the whole state space can be excessive and to search for an
+accepting state in automaton corresponding to formulae only small fragment of
+state space is required. 
+
+Our tool thus has a good potential of becoming proper decision procedure for
+WS$k$S, but still needs some optimizations to yield more consistent results in practice. 
 
 \chapter{Conclusion}\label{summary}
 
-In this work we introduced the WS$k$S logic and some its decision procedures. We
-have described the classical approach that uses deterministic automata, as well
+In this work we introduced the WS$k$S logic and some its decision procedures
+and implementations.
+We have described the classical approach that uses deterministic automata, as well
 as tool \textsc{MONA} that enhances this procedure by using several optimizations and
 discussed their complexity issues and problems they have to deal with.
 
@@ -2474,7 +2723,8 @@ deterministic ones. This makes use of recent developments in fields of
 non-deterministic automata algorithms, like universality checking or language
 inclusion, allowing us to implement procedure similar to anti-chain based
 testing \cite{tacas} and search for rejecting or accepting states on-the-fly
-without need to construct automaton corresponding to the given formula at all.
+without need to construct the automaton corresponding to the given formula at
+all.
 
 We implemented a prototype of the designed decision procedure, that is able to
 handle a subset of WS$k$S formulae, namely formulae for case $k = 1$, and
@@ -2483,11 +2733,16 @@ studies. Out of the computational results on series of formulae we identified
 some of the weak spots of the application and tried to optimized them to achieve
 better results.
 
-Although our results could not beat \textsc{MONA} and its many heuristics and
-optimizations, we have shown that the non-deterministic approach to deciding
-WS$k$S has indeed great potential and yield good results with future research.
+We evaluated our tool \texttt{dWiNA} on family of parametric formulae of Horn
+form and compared it with \textsc{MONA} in several different aspects. We have
+shown that \emph{on-the-fly} approach generates only a portion of state space in
+contrary to classical deterministic approach. While \textsc{MONA} is more
+consistent with its results and has no problems with excessive number of
+alternations, based on the size of the base automaton we were able to beat
+\textsc{MONA} even in speed. The non-deterministic approach to deciding WS$k$S
+has indeed a great potential and will yield good results with future research.
 
-Just like \textsc{MONA} did, we propose some further optimizations that could
+We further propose some further optimizations that could
 enhance the results in processes. One of the weak spots of algorithm is the size
 of the base automaton corresponding to the unquantified part of the formula.
 \textsc{MONA} always does minimization after every operation so it works with

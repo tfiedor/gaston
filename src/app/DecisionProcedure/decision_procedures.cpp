@@ -4,8 +4,9 @@
 
 // Global Variables
 
-MultiLevelMCache<bool> StateCache;
-MultiLevelMCache<MacroTransMTBDD> BDDCache;
+extern MultiLevelMCache<bool> StateCache;
+extern MultiLevelMCache<MacroTransMTBDD> BDDCache;
+extern MultiLevelMCache<bool> OccurenceCache;
 
 /**
  * Computes the final states from automaton
@@ -177,6 +178,7 @@ int decideWS1S(Automaton & aut, TSatExample & example, TUnSatExample & counterEx
 	unsigned cacheSize = (formulaDeterminizations >= negFormulaDeterminizations) ? formulaDeterminizations : negFormulaDeterminizations;
 	StateCache.extend(cacheSize);
 	BDDCache.extend(cacheSize);
+	OccurenceCache.extend(cacheSize);
 
 	// Construct initial state of final automaton
 	MacroStateSet* initialState = constructInitialState(aut, formulaDeterminizations);
@@ -541,6 +543,9 @@ MacroTransMTBDD GetMTBDDForPost(Automaton & aut, TStateSet* state, unsigned leve
 #ifdef USE_CACHE
 		if(BDDCache.inCache(mState, level)) {
 			return BDDCache.lookUp(mState, level);
+		}
+		if(!OccurenceCache.inCache(mState, level)) {
+			OccurenceCache.storeIn(mState, level, true);
 		}
 #endif
 

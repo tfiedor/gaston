@@ -57,8 +57,9 @@ IdentList inFirstOrder;
 int numTypes = 0;
 bool regenerate = false;
 
-extern MultiLevelMCache<bool> StateCache;
-extern MultiLevelMCache<MacroTransMTBDD> BDDCache;
+MultiLevelMCache<bool> StateCache;
+MultiLevelMCache<MacroTransMTBDD> BDDCache;
+MultiLevelMCache<bool> OccurenceCache;
 
 extern int yyparse(void);
 extern void loadFile(char *filename);
@@ -475,6 +476,12 @@ main(int argc, char *argv[])
   } catch (NotImplementedException& e) {
 	  std::cerr << e.what() << std::endl;
   }
+
+  // TODO: delete this
+  std::cout << "StateCache\n";
+  StateCache.dumpStats();
+  std::cout << "BDDCache\n";
+  BDDCache.dumpStats();
 
   ///////// CLEAN UP ///////////////////////////////////////////////////////
 

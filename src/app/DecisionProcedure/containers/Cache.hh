@@ -37,6 +37,8 @@ private:
 
 	// < Private Members >
 	CacheMap _cache;
+	unsigned int cacheHits = 0;
+	unsigned int cacheMisses = 0;
 public:
 	// < Public Methods >
 	CacheData lookUp(MacroStateSet* key){
@@ -59,15 +61,22 @@ public:
 	bool retrieveFromCache(MacroStateSet* key, CacheData & data) {
 		ConstInterator_CacheMap search = this->_cache.find(key);
 		if (search == this->_cache.end()) {
+			++cacheMisses;
 			return false;
 		} else {
 			data = search->second;
+			++cacheHits;
 			return true;
 		}
 	}
 
 	bool inCache(MacroStateSet* key) {
-		return (this->_cache.find(key)) != this->_cache.end();
+		bool inC = (this->_cache.find(key)) != this->_cache.end();
+		if(inC) {
+			++cacheHits;
+		} else {
+			++cacheMisses;
+		}
 	}
 
 	void clear() {
@@ -75,6 +84,16 @@ public:
 			delete itPair->first;
 			itPair = this->_cache.erase(itPair);
 		}
+	}
+
+	unsigned int dumpStats(unsigned int level) {
+		unsigned int size = this->_cache.size();
+		std::cout << "Level " << level << " cache: " << size;
+		if(this->cacheHits+this->cacheMisses != 0)
+			std::cout << "(" << this->cacheHits << ":" << this->cacheMisses << ") -> "<< (this->cacheHits/(double)(this->cacheHits+this->cacheMisses)) <<"\n";
+		else
+			std::cout << "\n";
+		return size;
 	}
 };
 
@@ -114,6 +133,15 @@ public:
 		for(auto it = this->_mlCache.begin(); it != this->_mlCache.end(); ++it) {
 			it->clear();
 		}
+	}
+
+	void dumpStats() {
+		unsigned int count = 0;
+		unsigned int index = 0;
+		for(auto it = this->_mlCache.begin(); it != this->_mlCache.end(); ++it) {
+			count += it->dumpStats(index++);
+		}
+		std::cout << "Overall number of states in cache: " << count << "\n";
 	}
 };
 
