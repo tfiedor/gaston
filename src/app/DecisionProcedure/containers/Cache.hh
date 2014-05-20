@@ -16,8 +16,8 @@ struct SetCompare : public std::binary_function<MacroStateSet*, MacroStateSet*, 
 
 struct MacroStateSet_Hash{
 	int operator()(MacroStateSet * set) const {
-		StateSetList macroStates = set->getMacroStates();
-		return macroStates.size();
+		//StateSetList macroStates = set->getMacroStates();
+		return set->getMacroStates().size();
 	}
 };
 

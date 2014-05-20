@@ -12,6 +12,7 @@
 // MONA headers
 #include "../Frontend/ast.h"
 #include "../Frontend/ident.h"
+#include "../Frontend/env.h"
 
 #include <deque>
 #include <memory>
@@ -26,14 +27,15 @@
 
 #define PRUNE_BY_RELATION
 #define SMART_FLATTEN
-#define USE_CACHE
+#define USE_STATECACHE
+// BDD Cache is temporary disable due to the memory leaks
+//#define USE_BDDCACHE
 #define SMART_BINARY
 
 extern VarToTrackMap varMap;
+extern Options options;
 
 // < Module Typedefs >
-typedef bool TSatExample;
-typedef bool TUnSatExample;
 typedef std::vector<unsigned int> VariableSet;
 typedef std::deque<VariableSet> PrefixListType;
 
@@ -48,10 +50,8 @@ typedef StateHT FinalStatesType;
 typedef StateHT StateSetType;
 
 // < Module Functions >
-int decideWS1S(Automaton & aut, TSatExample & example, TUnSatExample & counterExample, PrefixListType formulaPrefixSet, PrefixListType negFormulaPrefixSet);
-int decideWS2S(Automaton & aut, TSatExample & example, TUnSatExample & counterExample);
-TSatExample findSatisfyingExample();
-TUnSatExample findUnsatisfyingExample();
+int decideWS1S(Automaton & aut, PrefixListType formulaPrefixSet, PrefixListType negFormulaPrefixSet);
+int decideWS2S(Automaton & aut);
 bool existsSatisfyingExample(Automaton & aut, MacroStateSet* initialState, PrefixListType formulaPrefixSet);
 bool existsUnsatisfyingExample(Automaton & aut, MacroStateSet* initialState, PrefixListType negFormulaPrefixSet);
 PrefixListType convertPrefixFormulaToList(ASTForm* formula);

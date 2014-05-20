@@ -48,6 +48,15 @@ PredicateLib::~PredicateLib()
   delete[] table;
 }
 
+void PredicateLib::cleanUp() {
+	  int i;
+	  Deque<PredLibEntry*>::iterator j;
+	  for (i = 0; i < PREDLIB_SIZE; i++)
+	    for (j = table[i].begin(); j != table[i].end(); j++)
+	      delete *j;
+	  delete[] table;
+}
+
 void 
 PredicateLib::insert(IdentList *formals, 
 		     IdentList *frees,

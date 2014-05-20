@@ -1,11 +1,12 @@
 \chapter{Contents of CD}
 
-In main directory of the cd, there is a \texttt{cmake} source for compilation of
-the application.
+In the main directory of the cd, there is a \texttt{cmake} source for
+compilation of the application.
 
 \paragraph{Directory \texttt{/doc/thesis}}
 
-Contains \LaTeX sources with Makefile for compilation of thesis.
+Contains \LaTeX\ sources with \texttt{Makefile} for the compilation of
+this thesis.
 
 \paragraph{Directory \texttt{/examples/formulae}}
 
@@ -16,7 +17,7 @@ evaluation of created code.
 \paragraph{Directory \texttt{/include/vata}}
 
 Contains headers needed to be included during compilation of program for part of
-the functions that are used from library \texttt{VATA}.
+the functions that are used from the \texttt{libvata} library.
 
 \paragraph{Directory \texttt{/src/app/DecisionProcedure}}
 
@@ -32,14 +33,14 @@ specification into inner representation in program
 \paragraph{Directory \texttt{/src/libs}}
 
 Contains external libraries that are used in application. Namely these are
-several libraries needed for \textsc{MONA} part and library for manipulating
-with NTA \textsc{VATA}.
+several libraries needed for \textsc{MONA} frontend and the \texttt{libvata}
+library for manipulating with NTA.
 
 \chapter{WS$k$S specification syntax}\label{syntax}
 
-The following grammar below describes supported subset of \textsc{MONA} syntax
+The following grammar describes supported subset of \textsc{MONA} syntax
 for specification of verified formulae. It uses the classical BNF-like notation.
-For full syntax for \textsc{MONA} program consult the tool manual \cite{mona}.
+For full syntax for \textsc{MONA} program consult the tool manual \cite{monamanual}.
 
 \subsubsection{Specification}
 \begin{verbatim}
@@ -51,7 +52,7 @@ header ::=  ws1s | ws2s
 % TODO: Not complete
 \begin{verbatim}
 declaration ::= formula
-			 |  var0 (varname)+
+             |  var0 (varname)+
              |  var1 (varname)+
              |  var2 (varname)+
              |  'pred' varname (params)? = formula
@@ -74,6 +75,7 @@ formula ::= 'true' | 'false' | (formula)
          | first-order-term <= first-order-term 
          | first-order-term >= first-order-term
          | second-order-term = second-order-term
+         | second-order-term = { (int)+ }
          | second-order-term ~= second-order-term
          | second-order-term 'sub' second-order-term
          | first-order-term 'in' second-order-term
@@ -88,7 +90,6 @@ formula ::= 'true' | 'false' | (formula)
 first-order-term ::= varname | (first-order-term)
                   |  int
                   | first-order-term + int
-                  | first-order-term - int
 \end{verbatim}
 
 \subsubsection{Second-order terms in WS1S}
@@ -98,13 +99,12 @@ second-order-term ::= varname | (second-order-term)
                    |  second-order-term inter second-order-term
                    |  second-order-term \ second-order-term
                    |  second-order-term + int
-                   |  second-order-term - int
 \end{verbatim}
 
 \chapter{Usage}
 The usage of the decision procedure tool is:
 \begin{center}
- \texttt{dip [options] <filename>}
+ \texttt{dWiNA [options] <filename>}
 \end{center}
 \texttt{<filename>} is relative or absolute path to specification of WS$k$S
 formula as defined by syntax described in Appendix \ref{syntax}. The options
@@ -172,7 +172,7 @@ Note that all shown automata are non-deterministic.
  \end{center}
  \caption{Automaton corresponding to atomic formulae $X \subseteq Y$}
 \end{figure}
-
+\newpage
 \section{Extending restricted syntax}
 
 \begin{figure}[h!]
@@ -186,9 +186,23 @@ Note that all shown automata are non-deterministic.
  \begin{center}
   \includegraphics{fig/atomic-x-lesseq-y}
  \end{center}
- \caption{Automaton corresponding to atomic formulae $x \in X$}
+ \caption{Automaton corresponding to atomic formulae $x \leq y$}
 \end{figure}
 
+\begin{figure}[h!]
+ \begin{center}
+  \includegraphics{fig/atomic-konst-in-X}
+ \end{center}
+ \caption{Automaton corresponding to atomic formulae $\mathtt{const} k \in X$}
+\end{figure}
+
+\begin{figure}[h!]
+ \begin{center}
+  \includegraphics{fig/atomic-set-is-X}
+ \end{center}
+ \caption{Automaton corresponding to atomic formulae $X = \{x_1,\ldots,x_n\}$,
+ for some ordering of integer constants $x_1 \leq \ldots \leq x_n$.}
+\end{figure}
 
 %\chapter{Konfigra�n� soubor}
 %\chapter{RelaxNG Sch�ma konfigura�n�ho soboru}

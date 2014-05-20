@@ -106,6 +106,22 @@ SymbolTable::~SymbolTable()
   delete[] symbols;
 }
 
+void SymbolTable::cleanUp() {
+	  delete[] declarationTable;
+
+	  Deque<Entry*>::iterator l;
+	  for (l = identMap.begin();
+	       l != identMap.end(); l++)
+	    delete *l;
+
+	  unsigned i;
+	  Deque<char*>::iterator j;
+	  for (i = 0; i < size; i++)
+	    for (j = symbols[i].begin(); j != symbols[i].end(); j++)
+	      delete[] *j;
+	  delete[] symbols;
+}
+
 
 char *
 SymbolTable::insertString(char *str)

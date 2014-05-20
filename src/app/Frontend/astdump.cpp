@@ -380,19 +380,19 @@ ASTForm_WellFormedTree::dump()
 void 
 ASTForm_Impl::dump()
 {
-  cout << "Impl("; f1->dump(); cout << ","; f2->dump(); cout << ")";
+  cout << "("; f1->dump(); cout << " => "; f2->dump(); cout << ")";
 }
     
 void 
 ASTForm_Biimpl::dump()
 {
-  cout << "Biimpl("; f1->dump(); cout << ","; f2->dump(); cout << ")";
+  cout << "("; f1->dump(); cout << " <=> "; f2->dump(); cout << ")";
 }
     
 void 
 ASTForm_And::dump()
 {
-  cout << "And("; f1->dump(); cout << ","; f2->dump(); cout << ")";
+  cout << "("; f1->dump(); cout << " & "; f2->dump(); cout << ")";
 }
     
 void 
@@ -404,13 +404,13 @@ ASTForm_IdLeft::dump()
 void 
 ASTForm_Or::dump()
 {
-  cout << "Or("; f1->dump(); cout << ","; f2->dump(); cout << ")";
+  cout << "("; f1->dump(); cout << " | "; f2->dump(); cout << ")";
 }
     
 void 
 ASTForm_Not::dump()
 {
-  cout << "Not("; f->dump(); cout << ")";
+  cout << "~("; f->dump(); cout << ")";
 }
     
 void 

@@ -67,6 +67,7 @@ public:
   
   void          insert(IdentList *formals, IdentList *frees, IdentList *bound,
 		       ASTForm *formula, bool isMacro, int name, char *source);
+  void cleanUp();
   PredLibEntry *lookup(Ident);
   TestResult    testTypes(Ident name, ASTList *acts, int *no = NULL);
   PredLibEntry *first();

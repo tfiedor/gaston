@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 2.8)
-project(dip2014)
+project(dWiNA2014)
 
 set(REQUIRED_G++_VERSION 4.8.0)
 # forcing 4.8 compilers
@@ -11,7 +11,7 @@ include_directories(src/app)
 include_directories(src/app/Frontend)
 include_directories(include)
 
-add_executable(dip
+add_executable(dWiNA
 	src/app/main.cpp
 	src/app/Frontend/ast.cpp
 	src/app/Frontend/astdump.cpp
@@ -44,12 +44,13 @@ add_executable(dip
 	src/app/DecisionProcedure/containers/VarToTrackMap.cpp
 	src/app/DecisionProcedure/containers/StateSet.cpp
 )
+
 link_directories(${CMAKE_SOURCE_DIR}/src/libs/)
-target_link_libraries(dip ${CMAKE_SOURCE_DIR}/src/libs/libmonabdd.so)
-target_link_libraries(dip ${CMAKE_SOURCE_DIR}/src/libs/libmonadfa.so)
-target_link_libraries(dip ${CMAKE_SOURCE_DIR}/src/libs/libmonagta.so)
-target_link_libraries(dip ${CMAKE_SOURCE_DIR}/src/libs/libmonamem.so)
-target_link_libraries(dip ${CMAKE_SOURCE_DIR}/src/libs/libvata.a)
+target_link_libraries(dWiNA ${CMAKE_SOURCE_DIR}/src/libs/libmonabdd.a)
+target_link_libraries(dWiNA ${CMAKE_SOURCE_DIR}/src/libs/libmonadfa.a)
+target_link_libraries(dWiNA ${CMAKE_SOURCE_DIR}/src/libs/libmonagta.a)
+target_link_libraries(dWiNA ${CMAKE_SOURCE_DIR}/src/libs/libmonamem.a)
+target_link_libraries(dWiNA ${CMAKE_SOURCE_DIR}/src/libs/libvata.a)
 
 if (UNIX)
 	message(STATUS "Setting G++ flags")

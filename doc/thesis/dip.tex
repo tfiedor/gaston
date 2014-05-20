@@ -11,8 +11,8 @@
 %============================================================================
 %\documentclass[cover]{fitthesis} % odevzdani do wisu - odkazy, na ktere se da klikat
 %\documentclass[cover,print]{fitthesis} % pro tisk - na odkazy se neda klikat
-\documentclass[english,cover]{fitthesis}
-%\documentclass[english,cover,print]{fitthesis} % pro tisk - na odkazy se neda klikat
+%\documentclass[english,cover]{fitthesis}
+\documentclass[english,cover,print]{fitthesis} % pro tisk - na odkazy se neda klikat
 %      \documentclass[english]{fitthesis}
 % * Je-li prace psana v anglickem jazyce, je zapotrebi u tridy pouzit 
 %   parametr english nasledovne:
@@ -33,12 +33,13 @@
 \usepackage{amssymb}
 \usepackage{amsthm}
 \usepackage{amsmath}
+\usepackage{subcaption}
 \usepackage{mathtools}
 \usepackage{mathdots}
 \usepackage{dsfont}
 \usepackage{textcomp}   
 \usepackage{multirow}
-\usepackage[ruled,noline]{algorithm2e}
+\usepackage[ruled,noend]{algorithm2e}
 \newtheorem{prop}{Proposition}[chapter]
 \newtheorem{theorem}{Theorem}[chapter]
 \newtheorem{lemma}{Lemma}[chapter]
@@ -93,12 +94,12 @@
   keywords.cs={formální verifikace, stromové automaty, WSkS, rozhodovací procedury}, %klicova slova v ceskem jazyce
   keywords.en={formal verification, tree automata, WSkS, decision procedures}, %klicova slova v anglickem jazyce
   %Abstract
-  abstract.cs={Rùzné typy logik se èasto pou¾ívají jako prostøedky pro formální specifikaci systémù. Slabá monadická logika druhého øádu s~$k$ následníky (WS$k$S) je jednou z~nich a by» má pomìrnì velkou vyjadøovací silu, stále je rozhodnutelná. Aèkoliv slo¾itost testování splnitelnosti WS$k$S formule není ani ve tøídì ELEMENTARY, tak existují pøístupy k~tomuto problému zalo¾ené na deterministických stromových automatech, v~praxi výkonné. Cílem práce je vyu¾ít nedávno vyvinutých technik pro efektivní manipulaci s~nedeterministickými stromovými automaty (jako je napøíklad testování universality jazyka pomocí pøístupu zalo¾eného na antichainech) a navrhnout a implementovat rozhodovací proceduru pro WS$k$S vyu¾ívající nedeterministické automaty.}, % abstrakt v ceskem jazyce
+  abstract.cs={Rùzné typy logik se èasto pou¾ívají jako prostøedky pro formální specifikaci systémù. Slabá monadická logika druhého øádu s~$k$ následníky (WS$k$S) je jednou z~nich a by» má pomìrnì velkou vyjadøovací silu, stále je rozhodnutelná. Aèkoliv slo¾itost testování splnitelnosti WS$k$S formule není ani ve tøídì ELEMENTARY, tak existují v~praxi výkonné pøístupy k~tomuto problému zalo¾ené na deterministických stromových automatech. Cílem práce je vyu¾ít nedávno vyvinutých technik pro efektivní manipulaci s~nedeterministickými stromovými automaty (jako je napøíklad testování universality jazyka pomocí pøístupu zalo¾eného na antichainech) a navrhnout a implementovat rozhodovací proceduru pro WS$k$S vyu¾ívající nedeterministické automaty.}, % abstrakt v ceskem jazyce
   abstract.en={Various types of logics are often used as a means for formal specification of systems. The weak monadic second-order logic of $k$ successors (WS$k$S) is one of these logics with quite high expressivity, yet still decidable. Although the complexity of checking satisfiability of a WS$k$S formula is not even in the ELEMENTARY class, there are approaches to this problem based on deterministic tree automata that perform well in practice. The main goal of this work is to exploit recently developed techniques for efficient manipulation of non-deterministic tree automata (such as the antichains algorithm for testing universality) and design and implement a decision procedure for WS$k$S based on non-deterministic tree automata.}, % abstrakt v anglickem jazyce
   %Prohlaseni
   declaration={Prohla¹uji, ¾e jsem tuto diplomovou práci vypracoval samostatnì pod vedením pana in¾enýra Ondøeje Lengála. Uvedl jsem v¹echny literární prameny a publikace, ze kterých jsem èerpal.},
   %Podekovani (nepovinne)
-  acknowledgment={Dìkuji vedoucímu práce, Ing.\ Ondøeji Lengálovi, za odborné vedení, ochotu konzultovat, motivaci a pøedev¹ím za trpìlivost. Dále bych chtìl podìkovat Prof.\ Ing.\ Tomá¹i Vojnarovi, Ph.\ D.\ a Mgr.\ Luká¹i Holíkovi, Ph.\ D.\ za poskytnuté konzultace a sezení. Rovnì¾ bych chtìl podìkovat bratrovi Ing.\ Janu Fiedorovi za ve¹keré diskuze a rodinì za podporu ve studiu.} % nepovinne
+  acknowledgment={Dìkuji vedoucímu práce, Ing.\ Ondøeji Lengálovi, za odborné vedení, ochotu konzultovat, motivaci a pøedev¹ím za trpìlivost. Dále bych chtìl podìkovat Prof.\ Ing.\ Tomá¹i Vojnarovi,~Ph.\ D.\ a Mgr.\ Luká¹i Holíkovi, Ph.\ D.\ za poskytnuté konzultace a sezení. Rovnì¾ bych chtìl podìkovat bratrovi Ing.\ Janu Fiedorovi za ve¹keré diskuze a rodinì za podporu ve studiu.} % nepovinne
 }
 
 %Abstrakt (cesky, anglicky)

@@ -57,9 +57,12 @@ IdentList inFirstOrder;
 int numTypes = 0;
 bool regenerate = false;
 
+#ifdef USE_STATECACHE
 MultiLevelMCache<bool> StateCache;
+#endif
+#ifdef USE_BDDCACHE
 MultiLevelMCache<MacroTransMTBDD> BDDCache;
-MultiLevelMCache<bool> OccurenceCache;
+#endif
 
 extern int yyparse(void);
 extern void loadFile(char *filename);
@@ -71,13 +74,13 @@ extern Ident lastPosVar, allPosVar;
 
 void PrintUsage()
 {
-  cout << "Usage: dip [options] <filename>\n\n"
+  cout << "Usage: dWiNA [options] <filename>\n\n"
     << "Options:\n"
     << " -t, --time 		Print elapsed time\n"
     << " -d, --dump-all		Dump AST, symboltable, and code DAG\n"
-    << " -q, --quite		Quiet, don't print progress\n"
+    << " -q, --quiet		Quiet, don't print progress\n"
     << " --reorder-bdd		Disable BDD index reordering [no, random, heuristic]\n"
-    << "Example: ./dip -t -d --reorder-bdd=random foo.mona\n\n";
+    << "Example: ./dWiNA -t -d --reorder-bdd=random foo.mona\n\n";
 }
 
 bool 
@@ -196,7 +199,9 @@ void noReorder(IdentList *free, IdentList *bound) {
  * given formula
  */
 void heuristicReorder(IdentList *free, IdentList *bound) {
-	cout << "[*] Variables reordered by heuristic approach" << std::endl;
+	if(options.dump) {
+		cout << "[*] Variables reordered by heuristic approach" << std::endl;
+	}
 	varMap.initializeFromLists(free, bound);
 }
 
@@ -215,7 +220,9 @@ IdentList* shuffle(IdentList* list) {
  * Does random reordering of variables
  */
 void randomReorder(IdentList *free, IdentList *bound) {
-	cout << "[*] Variables reorder randomly" << std::endl;
+	if(options.dump) {
+		cout << "[*] Variables reorder randomly" << std::endl;
+	}
 	IdentList *vars = ident_union(free, bound);
 	if (vars != 0) {
 		vars = shuffle(vars);
@@ -275,23 +282,23 @@ main(int argc, char *argv[])
   timer_parsing.stop();
 
   if (options.printProgress) {
-    cout << "Time: ";
+	cout << "[*] Parsing input formula " << inputFileName << "\n";
+    cout << "[*] Elapsed time: ";
     timer_parsing.print();
   }
 
   delete untypedAST;
 
   if (options.dump) {
-	symbolTable.dump();
 	// Dump AST for main formula, verify formulas, and assertion
-	cout << "Main formula:\n";
+	cout << "[*] Main formula:\n";
 	(ast->formula)->dump();
   }
 
   // Flattening of the formula
   ast->formula = (ASTForm*) (ast->formula)->toSecondOrder();
   if(options.dump) {
-    cout << "\nFlattening of the formula:\n";
+    cout << "\n\n[*] Flattened formula:\n";
     (ast->formula)->dump();
   }
 
@@ -299,70 +306,26 @@ main(int argc, char *argv[])
   ast->formula = (ASTForm*) (ast->formula)->toExistentionalPNF();
 
   if(options.dump) {
-    cout << "\nAfter transformation:\n";
+    cout << "\n\n[*] Formula in exPNF:\n";
     (ast->formula)->dump();
 
-    Deque<ASTForm *>::iterator vf;
-    Deque<char *>::iterator vt;
-    for (vf = ast->verifyformlist.begin(), vt = ast->verifytitlelist.begin();
-	 vf != ast->verifyformlist.end(); vf++, vt++) {
-      cout << "\n\nFormula " << *vt << ":\n";
-      (*vf)->dump();
-    }
-    cout << "\n\nAssertions:\n";
-    (ast->assertion)->dump();
-    cout << "\n";
-
-    if (lastPosVar != -1)
-      cout << "\nLastPos variable: " 
-	   << symbolTable.lookupSymbol(lastPosVar) << "\n";
-    if (allPosVar != -1)
-      cout << "\nAllPos variable: " 
-	   << symbolTable.lookupSymbol(allPosVar) << "\n";
+    // dumping symbol table
+    cout << "\n\n[*] Created symbol table:";
+  	symbolTable.dump();
+  	cout << "\n";
     
     // Dump ASTs for predicates and macros
     PredLibEntry *pred = predicateLib.first();
     while (pred != NULL) {
       if (pred->isMacro)
-	cout << "\nMacro '";
+	cout << "\n[*] Dumping Macro '";
       else
-	cout << "\nPredicate '";
+	cout << "\n[*] Dumping Predicate '";
       cout << symbolTable.lookupSymbol(pred->name) 
 	   << "':\n";
       (pred->ast)->dump();
       cout << "\n";
       pred = predicateLib.next();
-    }
-
-    // Dump restrictions
-    if (symbolTable.defaultRestriction1) {
-      cout << "\nDefault first-order restriction (" 
-	   << symbolTable.lookupSymbol(symbolTable.defaultIdent1) << "):\n";
-      symbolTable.defaultRestriction1->dump();
-      cout << "\n";
-    }
-    if (symbolTable.defaultRestriction2) {
-      cout << "\nDefault second-order restriction (" 
-	   << symbolTable.lookupSymbol(symbolTable.defaultIdent2) << "):\n";
-      symbolTable.defaultRestriction2->dump();
-      cout << "\n";
-    }
-
-    Ident id;
-    for (id = 0; id < (Ident) symbolTable.noIdents; id++) {
-      Ident t;
-      ASTForm *f = symbolTable.getRestriction(id, &t);
-      if (f) {
-	cout << "\nRestriction for #" << id << " (" 
-	     << symbolTable.lookupSymbol(id) << "):";
-	if (t != -1)
-	  cout << " default\n";
-	else {
-	  cout << "\n";
-	  f->dump();
-	  cout << "\n";
-	}
-      }
     }
   }
   
@@ -370,9 +333,6 @@ main(int argc, char *argv[])
 
   // Table or BDD tracks are reordered
   reorder(options.reorder, ast->formula);
-#ifdef DEBUG
-  varMap.dumpMap();
-#endif
 
   IdentList freeVars, bound;
   (ast->formula)->freeVars(&freeVars, &bound);
@@ -382,36 +342,10 @@ main(int argc, char *argv[])
   splitMatrixAndPrefix(ast, matrix, prefix);
 
   // Transform prefix to set of sets of second-order variables
-#ifdef DEBUG
-  cout << "Converting prefix to list of lists: \n";
-  prefix->dump();
-#endif
-
   PrefixListType plist = convertPrefixFormulaToList(prefix);
   PrefixListType nplist(plist);
   closePrefix(plist, &freeVars, (prefix->kind == aNot));
   closePrefix(nplist, &freeVars, (prefix->kind != aNot));
-
-#ifdef DEBUG
-  cout << "\n";
-  for(PrefixListType::iterator it = plist.begin(); it != plist.end(); ++it) {
-	  cout << "[";
-	  for(VariableSet::iterator jt = it->begin(); jt != it->end(); ++jt) {
-		  cout << *jt << " ";
-	  }
-	  cout << "], ";
-  }
-  cout << "\n";
-  cout << "\n";
-  for(PrefixListType::iterator it = nplist.begin(); it != nplist.end(); ++it) {
-	  cout << "[";
-	  for(VariableSet::iterator jt = it->begin(); jt != it->end(); ++jt) {
-		  cout << *jt << " ";
-	  }
-	  cout << "], ";
-  }
-  cout << "\n";
-#endif
 
   Automaton formulaAutomaton;
   // WS1S formula is transformed to unary NTA
@@ -422,12 +356,14 @@ main(int argc, char *argv[])
 	  matrix->toBinaryAutomaton(formulaAutomaton, false);
   }
 
-  std::cout << "I'm done\n";
+  if(options.dump) {
+	  std::cout << "[*] Formula transformed into non-determinsitic tree automaton\n";
+  }
 
   StateHT reachable;
   formulaAutomaton = formulaAutomaton.RemoveUnreachableStates(&reachable);
 
-  // reindex the states, since it sux
+  // reindex the states, for space optimizations for bitsets
   StateType stateCnt = 0;
   StateToStateMap translMap;
   StateToStateTranslator stateTransl(translMap,
@@ -436,29 +372,26 @@ main(int argc, char *argv[])
 
   formulaAutomaton = formulaAutomaton.ReindexStates(stateTransl);
 
-  VATA::Serialization::AbstrSerializer* serializer =
-		  new VATA::Serialization::TimbukSerializer();
-  std::cout << formulaAutomaton.DumpToString(*serializer);
-
-  if (options.dump) {
-	  symbolTable.dump();
+  if(options.dump) {
+	  VATA::Serialization::AbstrSerializer* serializer =
+			  new VATA::Serialization::TimbukSerializer();
+	  std::cout << formulaAutomaton.DumpToString(*serializer) << "\n";
+	  delete serializer;
   }
 
   ///////// DECISION PROCEDURE /////////////////////////////////////////////
   int decided;
-  TSatExample example;
-  TUnSatExample counterExample;
   try {
 	  // Deciding WS1S formula
 	  if(options.mode != TREE) {
-		  decided = decideWS1S(formulaAutomaton, example, counterExample, plist, nplist);
+		  decided = decideWS1S(formulaAutomaton, plist, nplist);
 	  // Deciding WS2S formula
 	  } else {
-		  decided = decideWS2S(formulaAutomaton, example, counterExample);
+		  decided = decideWS2S(formulaAutomaton);
 	  }
 
 	  // Outing the results of decision procedure
-	  cout << "Formula is ";
+	  cout << "[!] Formula is ";
 	  switch(decided) {
 	  case SATISFIABLE:
 		  cout << "'SATISFIABLE'\n";
@@ -470,41 +403,43 @@ main(int argc, char *argv[])
 		  cout << "'VALID'\n";
 		  break;
 	  default:
-		  cout << "Undecidable due to unforeseen error.\n";
+		  cout << "undecidable due to unforeseen error.\n";
 		  break;
 	  }
   } catch (NotImplementedException& e) {
 	  std::cerr << e.what() << std::endl;
   }
 
-  // TODO: delete this
-  std::cout << "StateCache\n";
-  StateCache.dumpStats();
-  std::cout << "BDDCache\n";
-  BDDCache.dumpStats();
-
   ///////// CLEAN UP ///////////////////////////////////////////////////////
 
-  //delete ast;
-
+  delete ast->assertion;
   delete matrix;
   delete prefix;
 
-  /*StateCache.clear();
-  BDDCache.clear();*/
+  /*predicateLib.cleanUp();
+  symbolTable.cleanUp();
+
+  //StateCache.clear();
+  //BDDCache.clear();
+
+  Deque<FileSource *>::iterator i;
+  for (i = source.begin(); i != source.end(); i++)
+    delete *i;*/
     
   if (options.statistics)
     print_statistics();
 
   if (options.time) {
     timer_total.stop();
-    cout << "\nTotal time:     ";
+    cout << "\n[*] Total elapsed time:     ";
     timer_total.print();
     print_timing();
   }
   else if (options.printProgress) { 
     timer_total.stop();
-    cout << "\nTotal time: ";
+    cout << "\n[*] Total elapsed time: ";
     timer_total.print();
   }
+
+  return 0;
 }

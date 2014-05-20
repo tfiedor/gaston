@@ -139,6 +139,7 @@ public:
    SymbolTable(int size);
   ~SymbolTable();
 
+  void cleanUp();
   char  *insertString(char *);
 
   Ident  insertPred(Name*);

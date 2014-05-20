@@ -4,9 +4,12 @@
 
 // Global Variables
 
+#ifdef USE_STATECACHE
 extern MultiLevelMCache<bool> StateCache;
+#endif
+#ifdef USE_BDDCACHE
 extern MultiLevelMCache<MacroTransMTBDD> BDDCache;
-extern MultiLevelMCache<bool> OccurenceCache;
+#endif
 
 /**
  * Computes the final states from automaton
@@ -36,7 +39,6 @@ bool isNotEnqueued(StateSetList & queue, TStateSet*& state, unsigned level) {
 			[state, level](TStateSet* s) {
 #ifdef PRUNE_BY_RELATION
 				return state->CanBePruned(s, level);
-				//return s->CanBePruned(state, level);
 #else
 				return s->DoCompare(state);
 #endif
@@ -54,7 +56,6 @@ bool isNotEnqueued(StateSetList & queue, MacroStateSet*& state, unsigned level) 
 			[state, level](TStateSet* s) {
 #ifdef PRUNE_BY_RELATION
 				return state->CanBePruned(s, level);
-				//return s->CanBePruned(state, level);
 #else
 				return s->DoCompare(state);
 #endif
@@ -69,7 +70,6 @@ bool isNotEnqueued(StateSetList & queue, MacroStateSet*& state, unsigned level) 
  * @return: true if there exists a sat example
  */
 bool existsSatisfyingExample(Automaton & aut, MacroStateSet* initialState, PrefixListType formulaPrefixSet) {
-	//std::cout << "Does SAT example exist?\n";
 	unsigned int determinizationNo = formulaPrefixSet.size();
 	bool stateIsFinal;
 
@@ -82,12 +82,8 @@ bool existsSatisfyingExample(Automaton & aut, MacroStateSet* initialState, Prefi
 		worklist.pop_back();
 		processed.push_back(q);
 
-		/*std::cout << "Getting state from worklist: ";
-		q->dump();
-		std::cout << "\n";*/
-
 		if(StateIsFinal(aut, q, determinizationNo, formulaPrefixSet)) {
-			std::cout << "\nYes, there exist!\n";
+			//delete q;
 			return true;
 		// TODO: here should antichains take place
 		} else {
@@ -97,28 +93,18 @@ bool existsSatisfyingExample(Automaton & aut, MacroStateSet* initialState, Prefi
 			// collect reachable state to one macro state which is the successor of this procedure
 			StateSetList reachable;
 			MacroStateCollectorFunctor msc(reachable);
-			//std::cout << "Dumping MTBDD:\n" << MacroTransMTBDD::DumpToDot({&postMTBDD}) << "\n";
 			msc(postMTBDD);
 
-			//std::cout << "Generating new post:\n";
-			TStateSet *newPost = reachable[0];
-			//newPost->dump();
-			//std::cout << "\n";
-			/*for (auto it = reachable.begin(); it != reachable.end(); ++it) {
-				(*it)->dump();
-				std::cout << "\n";
-			}*/
 			for (auto it = reachable.begin(); it != reachable.end(); ++it) {
 				if (isNotEnqueued(processed, *it, determinizationNo)) {
-					/*std::cout << "New post = \n";
-					(*it)->dump();
-					std::cout << "\n";*/
 					worklist.push_back(*it);
+				} else {
+					//delete *it;
 				}
 			}
 		}
+		//delete q;
 	}
-	std::cout << "\nNo, there is not T_T!\n";
 	return false;
 }
 
@@ -128,27 +114,8 @@ bool existsSatisfyingExample(Automaton & aut, MacroStateSet* initialState, Prefi
  * @return: true if there exists an unsat example
  */
 bool existsUnsatisfyingExample(Automaton & aut, MacroStateSet* initialState, PrefixListType negFormulaPrefixSet) {
-	std::cout << "Does UNSAT example exist?\n";
 	// Yes this is confusing :) should be renamed
 	return existsSatisfyingExample(aut, initialState, negFormulaPrefixSet);
-}
-
-/**
- * Tries to construct a satisfiable example from automaton
- *
- * @return: satisfying example for formula
- */
-TSatExample findSatisfyingExample() {
-	return 0;
-}
-
-/**
- * Tries to construct an unsatisfiable example for automaton
- *
- * @return: unsatisfiable example for formula
- */
-TUnSatExample findUnsatisfyingExample() {
-	return 1;
 }
 
 /**
@@ -161,70 +128,77 @@ TUnSatExample findUnsatisfyingExample() {
  * example, valid if there does not exists a unsatisfiable counterexample
  * and else it is satisfiable.
  *
- * @param example: satisfiable example for WS1S formula
- * @param counterExample: unsatisfiable counter-example for formula
  * @param formulaPrefixSet: set of second-order variables corresponding to
  * 		the prefix of the closed formula phi
  * @param negFormulaPrefixSet: set of second-order variables corresponding to
  * 		the prefix of the closed negation of formula phi
  * @return: Decision procedure results
  */
-int decideWS1S(Automaton & aut, TSatExample & example, TUnSatExample & counterExample, PrefixListType formulaPrefixSet, PrefixListType negFormulaPrefixSet) {
-	std::cout << "Deciding WS1S formula transformed to automaton" << std::endl;
-
+int decideWS1S(Automaton & aut, PrefixListType formulaPrefixSet, PrefixListType negFormulaPrefixSet) {
 	// Number of determinizations
 	unsigned formulaDeterminizations = formulaPrefixSet.size();
 	unsigned negFormulaDeterminizations = negFormulaPrefixSet.size();
 	unsigned cacheSize = (formulaDeterminizations >= negFormulaDeterminizations) ? formulaDeterminizations : negFormulaDeterminizations;
+
+#ifdef USE_STATECACHE
 	StateCache.extend(cacheSize);
+#endif
+#ifdef USE_BDDCACHE
 	BDDCache.extend(cacheSize);
-	OccurenceCache.extend(cacheSize);
+#endif
+
+	if(options.dump) {
+		std::cout << "[*] Commencing decision procedure for WS1S\n";
+	}
 
 	// Construct initial state of final automaton
 	MacroStateSet* initialState = constructInitialState(aut, formulaDeterminizations);
-	initialState->dump();
-	std::cout << "\n";
 	MacroStateSet* negInitialState = constructInitialState(aut, negFormulaDeterminizations);
-	negInitialState->dump();
-	std::cout << "\n";
 
 	// Compute the final states
 	StateHT allStates;
 	aut.RemoveUnreachableStates(&allStates);
 
-	/*TransMTBDD * tbdd = getMTBDDForStateTuple(aut, Automaton::StateTuple({}));
-	std::cout << "Leaf : bdd\n";
-	std::cout << TransMTBDD::DumpToDot({tbdd}) << "\n\n";
-	// Dump bdds
-	for (auto state : allStates) {
-		TransMTBDD* bdd = getMTBDDForStateTuple(aut, Automaton::StateTuple({state}));
-		std::cout << state << " : bdd\n";
-		std::cout << TransMTBDD::DumpToDot({bdd}) << "\n\n";
-	}*/
-
-	FinalStatesType fm;
-	fm = computeFinalStates(aut);
-
 	bool hasExample = existsSatisfyingExample(aut, initialState, formulaPrefixSet);
+	if(options.dump) {
+		if(hasExample) {
+			std::cout << "[!] Found Satisfying example in formula\n";
+		} else {
+			std::cout << "[-] Satisfying example not found in formula\n";
+		}
+	}
 	bool hasCounterExample = existsUnsatisfyingExample(aut, negInitialState, negFormulaPrefixSet);
+	if(options.dump) {
+		if(hasCounterExample) {
+			std::cout << "[!] Found Unsatisfying example in formula\n";
+		} else {
+			std::cout << "[-] Unsatisfying example not found in formula\n";
+		}
+	}
 
+	int answer;
 	// No satisfiable solution was found
 	if(!hasExample) {
 		//counterExample = findUnsatisfyingExample();
-		return UNSATISFIABLE;
+		answer = UNSATISFIABLE;
 	// There exists a satisfiable solution and does not exist an unsatisfiable solution
 	} else if (!hasCounterExample) {
 		//example = findSatisfyingExample();
-		return VALID;
+		answer = VALID;
 	// else there only exists a satisfiable solution
 	} else if (hasExample) {
 		//example = findSatisfyingExample();
 		//counterExample = findUnsatisfyingExample();
-		return SATISFIABLE;
+		answer = SATISFIABLE;
 	// THIS SHOULD NOT HAPPEN
 	} else {
-		return -1;
+		answer = -1;
 	}
+
+	delete initialState;
+	delete negInitialState;
+
+	return answer;
 }
 
 /**
@@ -251,9 +225,8 @@ bool StateIsFinal(Automaton & aut, TStateSet* state, unsigned level, PrefixListT
 
 		// Look into Cache
 		bool isFinal;
-#ifdef USE_CACHE
+#ifdef USE_STATECACHE
 		if(StateCache.retrieveFromCache(macroState, isFinal, level)) {
-			//std::cout << "In cache = " << isFinal << "\n";
 			return isFinal;
 		}
 #endif
@@ -268,53 +241,36 @@ bool StateIsFinal(Automaton & aut, TStateSet* state, unsigned level, PrefixListT
 			worklist.pop_back();
 			processed.push_back(q);
 
-			/*std::cout << "Got from queue\n";
-			q->dump();
-			std::cout << "\n";*/
-
 			if (StateIsFinal(aut, q, level - 1, prefix)) {
-				/*state->dump();
-				std::cout << " is NONFINAL\n";*/
-#ifdef USE_CACHE
+#ifdef USE_STATECACHE
 				StateCache.storeIn(macroState, false, level);
 #endif
 				return false;
 			} else {
 				// Enqueue all its successors
 				MacroStateSet* zeroSuccessor = GetZeroPost(aut, q, level-1, prefix);
-				/*std::cout << "Dumping zero successor: \n";
-				q->dump();
-				std::cout << " ---00--->\n";
-				zeroSuccessor->dump();
-				std::cout << "\n\n";*/
 				if ((level - 1) == 0) {
 					StateSetList s = zeroSuccessor->getMacroStates();
 					for(auto it = s.begin(); it != s.end(); ++it) {
 						if(isNotEnqueued(processed, *it, level-1)) {
 							StateType leafState = reinterpret_cast<LeafStateSet*>(*it)->getState();
 							worklist.push_back(*it);
+						} else {
+							//delete zeroSuccessor;
 						}
 					}
 				} else {
 					if (isNotEnqueued(processed, zeroSuccessor, level-1)) {
-						/*std::cout << "Enqueing zero successor:\n";
-						zeroSuccessor->dump();
-						std::cout << "\n";
-						q->dump();
-						std::cout << "\n\n";*/
+
 						worklist.push_back(zeroSuccessor);
 					} else {
-						/*zeroSuccessor->dump();
-						std::cout << " is in queue\n";*/
+						//delete zeroSuccessor;
 					}
 				}
-				//////////////////////////////////////////////////////////
 			}
 		}
 
-		/*state->dump();
-		std::cout << " is FINAL\n";*/
-#ifdef USE_CACHE
+#ifdef USE_STATECACHE
 		StateCache.storeIn(macroState, true, level);
 #endif
 		return true;
@@ -429,7 +385,6 @@ TransMTBDD* getMTBDDForStateTuple(Automaton & aut, const StateTuple & states) {
 void getInitialStatesOfAutomaton(Automaton & aut, MTBDDLeafStateSet & initialStates) {
 	TransMTBDD* bdd = getMTBDDForStateTuple(aut, Automaton::StateTuple());
 
-	// TODO: solve sink state
 	StateCollectorFunctor scf(initialStates);
 	scf(*bdd);
 }
@@ -478,16 +433,8 @@ MacroStateSet* constructInitialState(Automaton & aut, unsigned numberOfDetermini
  */
 MacroStateSet* GetZeroPost(Automaton & aut, TStateSet*& state, unsigned level, PrefixListType & prefix) {
 	const MacroTransMTBDD & transPost = GetMTBDDForPost(aut, state, level, prefix);
-
-	/*std::cout << "Getting Zero Post for ";
-	state->dump();
-	std::cout << "\n\n";
-	std::cout << "Post BDD: " << MacroTransMTBDD::DumpToDot({&transPost}) << "\n\n";*/
-
-	// should return value for 0^k according to the implementation of GetValue()
 	MacroStateSet *postStates = transPost.GetValue(constructUniversalTrack());
-	/*postStates->dump();
-	std::cout << "---\n\n";*/
+
 	return postStates;
 }
 
@@ -518,15 +465,12 @@ MacroTransMTBDD GetMTBDDForPost(Automaton & aut, TStateSet* state, unsigned leve
 		StateType stateValue = lState->getState();
 		TransMTBDD *stateTransition = getMTBDDForStateTuple(aut, Automaton::StateTuple({stateValue}));
 
-		//std::cout << "Before proj BDD: " << TransMTBDD::DumpToDot({stateTransition}) << "\n\n";
 		int projecting = getProjectionVariable(level, prefix);
-		//std::cout << "Projecting: " << projecting << " on level " << level << "\n";
 		StateDeterminizatorFunctor sdf;
 		if (projecting > 0) {
 			AdditionApplyFunctor adder;
 			TransMTBDD projected = stateTransition->Project(
 				[stateTransition, projecting](size_t var) {return var < projecting;}, adder);
-			//std::cout << "After proj BDD: " << TransMTBDD::DumpToDot({&projected}) << "\n\n";
 			return sdf(projected);
 		} else {
 		// Convert to TStateSet representation
@@ -535,17 +479,10 @@ MacroTransMTBDD GetMTBDDForPost(Automaton & aut, TStateSet* state, unsigned leve
 	} else {
 		MacroStateSet* mState = reinterpret_cast<MacroStateSet*>(state);
 
-		/*std::cout << "Computing post for:\n";
-		mState->dump();
-		std::cout << "\n";*/
-
 		// Look into cache
-#ifdef USE_CACHE
+#ifdef USE_BDDCACHE
 		if(BDDCache.inCache(mState, level)) {
 			return BDDCache.lookUp(mState, level);
-		}
-		if(!OccurenceCache.inCache(mState, level)) {
-			OccurenceCache.storeIn(mState, level, true);
 		}
 #endif
 
@@ -560,13 +497,10 @@ MacroTransMTBDD GetMTBDDForPost(Automaton & aut, TStateSet* state, unsigned leve
 		const MacroTransMTBDD & frontPost = GetMTBDDForPost(aut, front, level-1, prefix);
 		int projecting = getProjectionVariable(level-1, prefix);
 
-		//std::cout << "Projecting: " << projecting << " on level " << level << "\n";
-
 		MacroTransMTBDD detResultMtbdd = (level == 1) ? frontPost : (msdf(frontPost)).Project(
 				[&frontPost, projecting](size_t var) {return var < projecting;}, muf);
 		// do the union of posts represented as mtbdd
 
-		// TODO: do the caching of union metaproducts
 		while(!states.empty()) {
 			front = states.back();
 			states.pop_back();
@@ -575,10 +509,8 @@ MacroTransMTBDD GetMTBDDForPost(Automaton & aut, TStateSet* state, unsigned leve
 					[&nextPost, projecting](size_t var) {return var < projecting;}, muf));
 		}
 
-		//std::cout << MacroTransMTBDD::DumpToDot({&detResultMtbdd}) << "\n";
-
 		// cache the results
-#ifdef USE_CACHE
+#ifdef USE_BDDCACHE
 		BDDCache.storeIn(mState, detResultMtbdd, level);
 #endif
 
@@ -589,13 +521,9 @@ MacroTransMTBDD GetMTBDDForPost(Automaton & aut, TStateSet* state, unsigned leve
 
 /**
  * Similar decision procedure, we'll not be solving WS2S at the moment
- * since it's probably far too hard than expected
  *
- * @param example: satisfiable example for WS1S formula
- * @param counterExample: unsatisfiable counter-example for formula
  * @return: Decision procedure results
  */
-int decideWS2S(Automaton & aut, TSatExample & example, TUnSatExample & counterExample) {
-	std::cout << "Deciding WS2S formula transformed to automaton" << std::endl;
+int decideWS2S(Automaton & aut) {
 	throw NotImplementedException();
 }

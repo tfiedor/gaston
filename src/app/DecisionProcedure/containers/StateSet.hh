@@ -37,7 +37,6 @@ public:
 	unsigned int type;
 	TLeafMask leaves;
 
-
 	// < Public Methods >
 	virtual void dump() {}
 	virtual bool DoCompare(TStateSet*) {return false;};
@@ -68,6 +67,8 @@ public:
 
 	StateType getState();
 	StateType getState() const {return this->getState();}
+
+	~LeafStateSet() {leaves.reset();}
 
 	/**
 	 * Overloaded comparison operator
@@ -134,6 +135,8 @@ public:
 		for(StateSetIterator it = this->macroStates.begin(); it != this->macroStates.end(); ++it) {
 			delete (*it);
 		}
+		macroStates.clear();
+		leaves.reset();
 	}
 
 	void dump();
@@ -141,6 +144,24 @@ public:
 	StateSetList getMacroStates();
 	StateSetList getMacroStates() const;
 	void addState(TStateSet* state);
+
+	MacroStateSet(const MacroStateSet &mSet) {
+		this->leaves = mSet.leaves;
+		StateSetList states = mSet.getMacroStates();
+		for (auto state : states) {
+			this->macroStates.push_back(state);
+		}
+	}
+
+	MacroStateSet& operator=(const MacroStateSet &mSet) {
+		this->leaves = mSet.leaves;
+		StateSetList states = mSet.getMacroStates();
+		for (auto state : states) {
+			this->macroStates.push_back(state);
+		}
+
+		return *this;
+	}
 
 	/**
 	 * Overloaded comparison operator
