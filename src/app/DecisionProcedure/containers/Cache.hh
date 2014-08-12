@@ -1,3 +1,13 @@
+/*****************************************************************************
+ *  dWiNA - Deciding WSkS using non-deterministic automata
+ *
+ *  Copyright (c) 2014  Tomas Fiedor <xfiedo01@stud.fit.vutbr.cz>
+ *
+ *  Description:
+ *    Implementation of generic cache
+ *
+ *****************************************************************************/
+
 #ifndef __CACHE__H__
 #define __CACHE__H__
 
@@ -6,17 +16,32 @@
 #include <unordered_map>
 #include "StateSet.hh"
 
+/**
+ * Structure used for comparing two states so we can use it for unordered map
+ */
 struct SetCompare : public std::binary_function<MacroStateSet*, MacroStateSet*, bool>
 {
+	/**
+	 * @param lhs: left operand
+	 * @param rhs: right operand
+	 * @return true if lhs = rhs
+	 */
     bool operator()(MacroStateSet* lhs, MacroStateSet* rhs) const
     {
         return lhs->DoCompare(rhs);
     }
 };
 
+/**
+ * Structure for computing hash of set - returns the number of states in
+ * the macro-state
+ */
 struct MacroStateSet_Hash{
+	/**
+	 * @param set: set we are computing hash of
+	 * @return hash of @p set
+	 */
 	int operator()(MacroStateSet * set) const {
-		//StateSetList macroStates = set->getMacroStates();
 		return set->getMacroStates().size();
 	}
 };
@@ -41,16 +66,22 @@ private:
 	unsigned int cacheMisses = 0;
 public:
 	// < Public Methods >
+	/**
+	 * @param key: key of the looked up macro state
+	 * @return: data corresponding to the @p key
+	 */
 	CacheData lookUp(MacroStateSet* key){
-		//return this->_cache[key];
 		ConstInterator_CacheMap search = this->_cache.find(key);
 		if (search != this->_cache.end()) {
 			return search->second;
 		}
 	}
 
+	/**
+	 * @param key: key we are storing to
+	 * @param data: data we are storing
+	 */
 	void storeIn(MacroStateSet* key, const CacheData & data){
-		//this->_cache[key] = data;
 		auto itBoolPair = _cache.insert(std::make_pair(key, data));
 		if (!itBoolPair.second)
 		{
@@ -58,6 +89,11 @@ public:
 		}
 	}
 
+	/**
+	 * @param key: kew we are looking for
+	 * @param data: reference to the data
+	 * @return true if found;
+	 */
 	bool retrieveFromCache(MacroStateSet* key, CacheData & data) {
 		ConstInterator_CacheMap search = this->_cache.find(key);
 		if (search == this->_cache.end()) {
@@ -70,6 +106,10 @@ public:
 		}
 	}
 
+	/**
+	 * @param key:
+	 * @return true if @p key in cache
+	 */
 	bool inCache(MacroStateSet* key) {
 		bool inC = (this->_cache.find(key)) != this->_cache.end();
 		if(inC) {
@@ -79,6 +119,9 @@ public:
 		}
 	}
 
+	/**
+	 * Clears the cache
+	 */
 	void clear() {
 		for(auto itPair = this->_cache.begin(); itPair != this->_cache.end(); ++itPair) {
 			delete itPair->first;
@@ -86,6 +129,10 @@ public:
 		}
 	}
 
+	/**
+	 * @param level: level of cache
+	 * @return number of dumped keys
+	 */
 	unsigned int dumpStats(unsigned int level) {
 		unsigned int size = this->_cache.size();
 		std::cout << "Level " << level << " cache: " << size;
@@ -109,32 +156,64 @@ public:
 	MultiLevelMCache(unsigned levels) : _mlCache(levels) { this->levels = levels;}
 
 	// < Public Methods >
+	/**
+	 * @param key: looked up key
+	 * @param level: level of looked up key
+	 * @return looked up data
+	 */
 	CacheData lookUp(MacroStateSet* key, unsigned level) {
 		return this->_mlCache[level].lookUp(key);
 	}
 
+	/**
+	 * @param key: key we are storing
+	 * @param data: reference to data we are storing
+	 * @param level: level where we are storing
+	 */
 	void storeIn(MacroStateSet* key, const CacheData & data, unsigned level) {
 		this->_mlCache[level].storeIn(key, data);
 	}
 
+	/**
+	 * @param key: key we are looking for
+	 * @param data: reference to lookedup data
+	 * @param level: level of looking up data
+	 * @return true if @p key on @p level found
+	 */
 	bool retrieveFromCache(MacroStateSet* key, CacheData & data, unsigned level) {
 		return this->_mlCache[level].retrieveFromCache(key, data);
 	}
 
+	/**
+	 * Extends cache up to @p level
+	 *
+	 * @param level: level we are extending to
+	 */
 	void extend(unsigned level) {
 		this->_mlCache.resize(level+1);
 	}
 
+	/**
+	 * @param key: key we are looking for
+	 * @param level: level of the key
+	 * @return true if @p key on level @level is in cache
+	 */
 	bool inCache(MacroStateSet* key, unsigned level) {
 		return this->_mlCache[level].inCache(key);
 	}
 
+	/**
+	 * Clears the cache
+	 */
 	void clear() {
 		for(auto it = this->_mlCache.begin(); it != this->_mlCache.end(); ++it) {
 			it->clear();
 		}
 	}
 
+	/**
+	 * Dumps statistic of all cache levels
+	 */
 	void dumpStats() {
 		unsigned int count = 0;
 		unsigned int index = 0;

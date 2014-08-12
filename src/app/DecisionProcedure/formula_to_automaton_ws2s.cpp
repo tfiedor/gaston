@@ -1,3 +1,13 @@
+/*****************************************************************************
+ *  dWiNA - Deciding WSkS using non-deterministic automata
+ *
+ *  Copyright (c) 2014  Tomas Fiedor <xfiedo01@stud.fit.vutbr.cz>
+ *
+ *  Description:
+ *    Conversion of formula to automaton
+ *
+ *****************************************************************************/
+
 #include "../Frontend/ast.h"
 #include "../Frontend/symboltable.h"
 

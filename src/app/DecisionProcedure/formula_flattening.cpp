@@ -1,3 +1,13 @@
+/*****************************************************************************
+ *  dWiNA - Deciding WSkS using non-deterministic automata
+ *
+ *  Copyright (c) 2014  Tomas Fiedor <xfiedo01@stud.fit.vutbr.cz>
+ *
+ *  Description:
+ *    Flattening of formula
+ *
+ *****************************************************************************/
+
 #include "../Frontend/ast.h"
 #include "../Frontend/symboltable.h"
 #include "../Frontend/env.h"
@@ -55,6 +65,7 @@ ASTForm* ASTForm::toSecondOrder() {
 	if (allVars != 0) {
 		Ident* it = allVars->begin();
 		while(it != allVars->end()) {
+			// only variables that are not already singletoned are appended to formula
 			if (symbolTable.lookupType(*it) == Varname1 && !inFirstOrder.exists(*it)) {
 				singleton = new ASTForm_FirstOrder(new ASTTerm1_Var1((*it), Pos()), Pos());
 				flattenedFormula = new ASTForm_And(singleton, flattenedFormula, Pos());
@@ -72,11 +83,8 @@ ASTForm* ASTForm::toSecondOrder() {
  *  xi = yi -> ex z: z = xi & z = yj
  *  s = ti  -> ex z: z = t & zi = s
  *  y = xi  -> Xy = Xx i
- * x = e   -> Xx = e
+ *  x = e   -> Xx = e
  *  x = y   -> Xx = Xy
- *
- * TODO: WS2S flattening??
- * TODO: second-order flattening?
  *
  * @return: flattened formula
  */
@@ -119,8 +127,9 @@ ASTForm* ASTForm_Equal1::flatten() {
 	// x = e ???
 	} else if(this->t1->kind == aVar1 && this->t2->kind == aInt) {
 #ifdef SMART_FLATTEN
-//TODO:
+		// smart flattening will deal with this during construction of automaton
 #else
+		// other ints are specially handled
 		unsigned int val = ((ASTTerm1_Int*) this->t2)->value();
 		if(val == 0) {
 			x = new ASTTerm2_Var2(((ASTTerm1_Var1*)this->t1)->getVar(), Pos());
@@ -136,7 +145,6 @@ ASTForm* ASTForm_Equal1::flatten() {
 			return new ASTForm_Ex2(0, new IdentList(z->getVar()), conjuction, Pos());
 		}
 #endif
-	// TODO: This is not solved
 	} else {
 		std::cerr << "Not Implemented yet!\n";
 	}
@@ -236,7 +244,6 @@ ASTForm* substituteFreshLessEq(ASTTerm1* leftTerm, ASTTerm1* rightTerm, bool sub
  * only certain atomic formulae. Is variable according to the ws1s and ws2s
  *
  * x <= y  -> forall X: (y in X & (forall Z: z1 in X | z2 in X) => z in X) => x in X
- * TODO: xi < yi and stuff is valid? fuck yes -.-
  *
  * @return: flattened formula
  */
@@ -253,8 +260,6 @@ ASTForm* ASTForm_LessEq::flatten() {
 #else
 		ASTTerm2_Var2* X = generateFreshSecondOrder();
 		ASTTerm1_Var1* z = generateFreshFirstOrder();
-
-		// Now we are getting serious and s**t will hit the fan
 
 		// construction of innerDisjunction (forall Z: z1 in X | z2 in X)
 		ASTForm_All1* innerDisjunction;
@@ -537,7 +542,6 @@ ASTForm* ASTForm_Not::unfoldMacro(IdentList* fParams, ASTList* rParams) {
 
 /**
  * Unfolds formal parameters to real parameters
- * TODO: may segfault
  *
  * @param fParams: list of formal parameters
  * @param rParams: list of real parameters
@@ -555,7 +559,6 @@ ASTTerm1* ASTTerm1_Var1::unfoldMacro(IdentList* fParams, ASTList* rParams) {
 
 /**
  * Unfolds formal parameters to real parameters
- * TODO: may segfault
  *
  * @param fParams: list of formal parameters
  * @param rParams: list of real parameters
@@ -573,7 +576,6 @@ ASTTerm2* ASTTerm2_Var2::unfoldMacro(IdentList* fParams, ASTList* rParams) {
 
 /**
  * Unfolds formal parameters to real parameters
- * TODO: may segfault
  *
  * @param fParams: list of formal parameters
  * @param rParams: list of real parameters

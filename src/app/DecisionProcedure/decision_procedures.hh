@@ -1,3 +1,13 @@
+/*****************************************************************************
+ *  dWiNA - Deciding WSkS using non-deterministic automata
+ *
+ *  Copyright (c) 2014  Tomas Fiedor <xfiedo01@stud.fit.vutbr.cz>
+ *
+ *  Description:
+ *    WSkS Decision Procedure
+ *
+ *****************************************************************************/
+
 #ifndef __DEC_PROC__H__
 #define __DEC_PROC__H__
 

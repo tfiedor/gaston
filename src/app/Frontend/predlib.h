@@ -34,7 +34,9 @@ public:
     formals(eFormals), frees(eFrees), bound(eBound), ast(eFormula),
     isMacro(eIsMacro), name(eName), source(eSource) {}
   ~PredLibEntry() 
-  {delete formals; delete frees; delete bound; delete ast;}
+  {delete formals; delete frees; delete bound;
+  //delete ast;
+  }
 
   IdentList *formals;
   IdentList *frees;

@@ -1,3 +1,13 @@
+/*****************************************************************************
+ *  dWiNA - Deciding WSkS using non-deterministic automata
+ *
+ *  Copyright (c) 2014  Tomas Fiedor <xfiedo01@stud.fit.vutbr.cz>
+ *
+ *  Description:
+ *    WSkS Decision Procedure
+ *
+ *****************************************************************************/
+
 #include <cstdio>
 #include "environment.hh"
 #include "decision_procedures.hh"
@@ -16,8 +26,6 @@ extern MultiLevelMCache<MacroTransMTBDD> BDDCache;
  *
  * @param aut: Automaton for matrix
  * @return: final states of automaton corresponding to final formula
- *
- * TODO: StateHT for now, this is not how it should work :)
  */
 FinalStatesType computeFinalStates(Automaton & aut) {
 	return aut.GetFinalStates();
@@ -34,7 +42,7 @@ bool isNotEnqueued(StateSetList & queue, TStateSet*& state, unsigned level) {
 	// tries to find matching state in list/queue/wtv
 	// if not found .end() is returned
 
-	// TODO: ADD PRUNING BY RELATIONS
+	// pruning of states
 	auto matching_iter = std::find_if(queue.begin(), queue.end(),
 			[state, level](TStateSet* s) {
 #ifdef PRUNE_BY_RELATION
@@ -51,7 +59,6 @@ bool isNotEnqueued(StateSetList & queue, MacroStateSet*& state, unsigned level) 
 	// tries to find matching state in list/queue/wtv
 	// if not found .end() is returned
 
-	// TODO: ADD PRUNING BY RELATIONS
 	auto matching_iter = std::find_if(queue.begin(), queue.end(),
 			[state, level](TStateSet* s) {
 #ifdef PRUNE_BY_RELATION
@@ -77,15 +84,15 @@ bool existsSatisfyingExample(Automaton & aut, MacroStateSet* initialState, Prefi
 	StateSetList processed;
 	worklist.push_back(initialState);
 
+	// while we have states to handle
 	while(worklist.size() != 0) {
 		TStateSet* q = worklist.back();
 		worklist.pop_back();
 		processed.push_back(q);
 
+		// if some state is final then, there exists a satisfying example
 		if(StateIsFinal(aut, q, determinizationNo, formulaPrefixSet)) {
-			//delete q;
 			return true;
-		// TODO: here should antichains take place
 		} else {
 			// construct the post of the state
 			const MacroTransMTBDD & postMTBDD = GetMTBDDForPost(aut, q, determinizationNo, formulaPrefixSet);
@@ -95,16 +102,16 @@ bool existsSatisfyingExample(Automaton & aut, MacroStateSet* initialState, Prefi
 			MacroStateCollectorFunctor msc(reachable);
 			msc(postMTBDD);
 
+			// push all successors to workilst
 			for (auto it = reachable.begin(); it != reachable.end(); ++it) {
 				if (isNotEnqueued(processed, *it, determinizationNo)) {
 					worklist.push_back(*it);
-				} else {
-					//delete *it;
 				}
 			}
 		}
-		//delete q;
 	}
+
+	// didn't find a accepting state, ending
 	return false;
 }
 
@@ -159,6 +166,7 @@ int decideWS1S(Automaton & aut, PrefixListType formulaPrefixSet, PrefixListType 
 	StateHT allStates;
 	aut.RemoveUnreachableStates(&allStates);
 
+	// checks if there exists a satisfying example in formula
 	bool hasExample = existsSatisfyingExample(aut, initialState, formulaPrefixSet);
 	if(options.dump) {
 		if(hasExample) {
@@ -167,6 +175,8 @@ int decideWS1S(Automaton & aut, PrefixListType formulaPrefixSet, PrefixListType 
 			std::cout << "[-] Satisfying example not found in formula\n";
 		}
 	}
+
+	// checks if there exists a unsatisfying example in formula
 	bool hasCounterExample = existsUnsatisfyingExample(aut, negInitialState, negFormulaPrefixSet);
 	if(options.dump) {
 		if(hasCounterExample) {
@@ -179,16 +189,12 @@ int decideWS1S(Automaton & aut, PrefixListType formulaPrefixSet, PrefixListType 
 	int answer;
 	// No satisfiable solution was found
 	if(!hasExample) {
-		//counterExample = findUnsatisfyingExample();
 		answer = UNSATISFIABLE;
 	// There exists a satisfiable solution and does not exist an unsatisfiable solution
 	} else if (!hasCounterExample) {
-		//example = findSatisfyingExample();
 		answer = VALID;
 	// else there only exists a satisfiable solution
 	} else if (hasExample) {
-		//example = findSatisfyingExample();
-		//counterExample = findUnsatisfyingExample();
 		answer = SATISFIABLE;
 	// THIS SHOULD NOT HAPPEN
 	} else {
@@ -231,6 +237,7 @@ bool StateIsFinal(Automaton & aut, TStateSet* state, unsigned level, PrefixListT
 		}
 #endif
 
+		// enqueue initial states
 		StateSetList states = macroState->getMacroStates();
 		for (auto state : states) {
 			worklist.push_back(state);
@@ -255,16 +262,12 @@ bool StateIsFinal(Automaton & aut, TStateSet* state, unsigned level, PrefixListT
 						if(isNotEnqueued(processed, *it, level-1)) {
 							StateType leafState = reinterpret_cast<LeafStateSet*>(*it)->getState();
 							worklist.push_back(*it);
-						} else {
-							//delete zeroSuccessor;
 						}
 					}
 				} else {
 					if (isNotEnqueued(processed, zeroSuccessor, level-1)) {
 
 						worklist.push_back(zeroSuccessor);
-					} else {
-						//delete zeroSuccessor;
 					}
 				}
 			}
@@ -438,6 +441,13 @@ MacroStateSet* GetZeroPost(Automaton & aut, TStateSet*& state, unsigned level, P
 	return postStates;
 }
 
+/**
+ * Returns variable we are projecting on level
+ *
+ * @param level: level of projection
+ * @param prefix: prefix of formula
+ * @return: number of projected variable
+ */
 int getProjectionVariable(unsigned level, PrefixListType & prefix) {
 	int index = level;
 	if (prefix[index].size() == 0) {

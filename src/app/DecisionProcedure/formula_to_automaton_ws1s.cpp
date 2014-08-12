@@ -1,3 +1,13 @@
+/*****************************************************************************
+ *  dWiNA - Deciding WSkS using non-deterministic automata
+ *
+ *  Copyright (c) 2014  Tomas Fiedor <xfiedo01@stud.fit.vutbr.cz>
+ *
+ *  Description:
+ *    Conversion of formula to automaton
+ *
+ *****************************************************************************/
+
 #include "../Frontend/ast.h"
 #include "../Frontend/symboltable.h"
 
@@ -82,6 +92,7 @@ void ASTForm_And::toUnaryAutomaton(Automaton &andAutomaton, bool doComplement) {
 	Automaton left, right;
 	this->f1->toUnaryAutomaton(left, doComplement);
 	this->f2->toUnaryAutomaton(right, doComplement);
+
 	andAutomaton = Automaton::Intersection(left, right);
 }
 
@@ -109,8 +120,6 @@ void ASTForm_Or::toUnaryAutomaton(Automaton &orAutomaton, bool doComplement) {
  *  2) T1 = T2
  *  3) X = e
  *
- * TODO: Y1 = X? Switch?
- * TODO: Determinize
  *  Constructs template automaton, that does acceptance of the formula
  *
  *  @return Automaton corresponding to the formula phi or psi

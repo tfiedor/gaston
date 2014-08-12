@@ -11,8 +11,8 @@
 %============================================================================
 %\documentclass[cover]{fitthesis} % odevzdani do wisu - odkazy, na ktere se da klikat
 %\documentclass[cover,print]{fitthesis} % pro tisk - na odkazy se neda klikat
-%\documentclass[english,cover]{fitthesis}
-\documentclass[english,cover,print]{fitthesis} % pro tisk - na odkazy se neda klikat
+\documentclass[english,cover]{fitthesis}
+%\documentclass[english,cover,print]{fitthesis} % pro tisk - na odkazy se neda klikat
 %      \documentclass[english]{fitthesis}
 % * Je-li prace psana v anglickem jazyce, je zapotrebi u tridy pouzit 
 %   parametr english nasledovne:
@@ -73,7 +73,7 @@
   %Prace
   project=DP,            %typ prace BP/SP/DP/DR
   year=2014,             %rok
-  date=\today,           %datum odevzdani
+  date={23. kvìtna 2014},           %datum odevzdani
   %Nazev prace
   title.cs={Rozhodovací procedura pro logiku WSkS},  %nazev prace v cestine
   title.en={A Decision Procedure for the WSkS Logic}, %nazev prace v anglictine
@@ -94,8 +94,8 @@
   keywords.cs={formální verifikace, stromové automaty, WSkS, rozhodovací procedury}, %klicova slova v ceskem jazyce
   keywords.en={formal verification, tree automata, WSkS, decision procedures}, %klicova slova v anglickem jazyce
   %Abstract
-  abstract.cs={Rùzné typy logik se èasto pou¾ívají jako prostøedky pro formální specifikaci systémù. Slabá monadická logika druhého øádu s~$k$ následníky (WS$k$S) je jednou z~nich a by» má pomìrnì velkou vyjadøovací silu, stále je rozhodnutelná. Aèkoliv slo¾itost testování splnitelnosti WS$k$S formule není ani ve tøídì ELEMENTARY, tak existují v~praxi výkonné pøístupy k~tomuto problému zalo¾ené na deterministických stromových automatech. Cílem práce je vyu¾ít nedávno vyvinutých technik pro efektivní manipulaci s~nedeterministickými stromovými automaty (jako je napøíklad testování universality jazyka pomocí pøístupu zalo¾eného na antichainech) a navrhnout a implementovat rozhodovací proceduru pro WS$k$S vyu¾ívající nedeterministické automaty.}, % abstrakt v ceskem jazyce
-  abstract.en={Various types of logics are often used as a means for formal specification of systems. The weak monadic second-order logic of $k$ successors (WS$k$S) is one of these logics with quite high expressivity, yet still decidable. Although the complexity of checking satisfiability of a WS$k$S formula is not even in the ELEMENTARY class, there are approaches to this problem based on deterministic tree automata that perform well in practice. The main goal of this work is to exploit recently developed techniques for efficient manipulation of non-deterministic tree automata (such as the antichains algorithm for testing universality) and design and implement a decision procedure for WS$k$S based on non-deterministic tree automata.}, % abstrakt v anglickem jazyce
+  abstract.cs={Rùzné typy logik se èasto pou¾ívají jako prostøedky pro formální specifikaci systémù. Slabá monadická logika druhého øádu s~$k$ následníky (WS$k$S) je jednou z~nich a by» má pomìrnì velkou vyjadøovací sílu, stále je rozhodnutelná. Aèkoliv slo¾itost testování splnitelnosti WS$k$S formule není ani ve tøídì ELEMENTARY, tak existují pøístupy zalo¾ené na deterministických automatech, implementované napø. v nástroji \textsc{MONA}, které efektnì øe¹í omezenou tøídu praktických pøíkladù, nicménì nefungují pro jiné. Tato práce roz¹iøuje tøídu prakticky øe¹itelných pøíkladù, a to tak, ¾e vyu¾ívá nedávno vyvinutých technik pro efektní manipulaci s nedeterministickými automaty (jako je napøíklad testování universality jazyka pomocí pøístupu zalo¾eného na antichainech) a navrhuje novou rozhodovací proceduru pro WS$k$S vyu¾ívající právì nedeterministické automaty. Procedura je implementována a ve srovnání s nástrojem \textsc{MONA} dosahuje v nìkterých pøípadech øádovì lep¹ích výsledkù.}, % abstrakt v ceskem jazyce
+  abstract.en={Various types of logics are often used as a means for formal specification of systems. The weak monadic second-order logic of $k$ successors (WS$k$S) is one of these logics with quite high expressivity, yet still decidable. Although the complexity of checking satisfiability of a WS$k$S formula is not even in the ELEMENTARY class, there are approaches to this problem based on deterministic tree automata that perform well in practice, like the \textsc{MONA} tool that efficiently solves the class of practical formulae, but fails for some others. This work extends the class of practically solvable formulae with the use of recently developed techniques for efficient manipulation of non-deterministic automata (such as the antichains algorithm for testing universality) and designs a new decision procedure using non-deterministic automata. The procedure is implemented and is compared with the \textsc{MONA} tool and for some cases yield better results than \textsc{MONA}.}, % abstrakt v anglickem jazyce
   %Prohlaseni
   declaration={Prohla¹uji, ¾e jsem tuto diplomovou práci vypracoval samostatnì pod vedením pana in¾enýra Ondøeje Lengála. Uvedl jsem v¹echny literární prameny a publikace, ze kterých jsem èerpal.},
   %Podekovani (nepovinne)

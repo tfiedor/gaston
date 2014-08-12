@@ -1,3 +1,13 @@
+/*****************************************************************************
+ *  dWiNA - Deciding WSkS using non-deterministic automata
+ *
+ *  Copyright (c) 2014  Tomas Fiedor <xfiedo01@stud.fit.vutbr.cz>
+ *
+ *  Description:
+ *    Implementation of generic cache
+ *
+ *****************************************************************************/
+
 #ifndef __STATE_SET__
 #define __STATE_SET__
 
@@ -87,6 +97,13 @@ public:
 		}
 	}
 
+	/**
+	 * Implementation of simulation pruning bounded up to @p pruneUpTo
+	 *
+	 * @param lhs: state we are comparing with
+	 * @param pruneUpTo: how much we prune
+	 * @return true if can be pruned
+	 */
 	bool CanBePruned(TStateSet* lhs, unsigned pruneUpTo) {
 		if(lhs->type == MACROSTATE) {
 			return false;
@@ -212,7 +229,11 @@ public:
 	}
 
 	/**
-	 * @return True, if lhs is bigger and thus can be pruned
+	 * Implementation of simulation pruning bounded up to @p pruneUpTo
+	 *
+	 * @param lhs: state we are comparing with
+	 * @param pruneUpTo: how much we prune
+	 * @return true if can be pruned
 	 */
 	bool CanBePruned(TStateSet* lhs, unsigned pruneUpTo) {
 		if(pruneUpTo == -1) {
@@ -235,14 +256,12 @@ public:
 					auto matching_iter = std::find_if(this->macroStates.begin(), this->macroStates.end(),
 							[state, pruneUpTo](TStateSet* s) {
 								return state->CanBePruned(s, pruneUpTo -1);
-								//return s->CanBePruned(state, pruneUpTo-1);
 							});
 					if (matching_iter == this->macroStates.end()) {
 						return false;
 					}
 				}
 
-				//std::cout << "Can be pruned lol\n";
 				return true;
 			}
 		}

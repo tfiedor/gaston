@@ -1,3 +1,13 @@
+/*****************************************************************************
+ *  dWiNA - Deciding WSkS using non-deterministic automata
+ *
+ *  Copyright (c) 2014  Tomas Fiedor <xfiedo01@stud.fit.vutbr.cz>
+ *
+ *  Description:
+ *    Implementation of Var to Track Map
+ *
+ *****************************************************************************/
+
 #include "VarToTrackMap.hh"
 
 #include <iostream>

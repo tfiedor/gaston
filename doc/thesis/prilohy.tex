@@ -8,22 +8,22 @@ compilation of the application.
 Contains \LaTeX\ sources with \texttt{Makefile} for the compilation of
 this thesis.
 
-\paragraph{Directory \texttt{/examples/formulae}}
+\paragraph{Directory \texttt{/examples}}
 
 Contains examples written in \textsc{MONA} syntax for deciding. Ranging from
 simple examples used for testing functionality to more complex ones used for
-evaluation of created code.
+evaluation of the created code.
 
 \paragraph{Directory \texttt{/include/vata}}
 
-Contains headers needed to be included during compilation of program for part of
-the functions that are used from the \texttt{libvata} library.
+Contains headers needed to be included during the compilation of program for
+part of the functions that are used from the \texttt{libvata} library.
 
 \paragraph{Directory \texttt{/src/app/DecisionProcedure}}
 
 Contains main part of the application sources that does the conversion of given
-representation of formulae into automaton and afterwards the procedure of
-deciding validity or satisfiability.
+representation of formulae into the non-deterministic automaton and the
+procedure for deciding validity or satisfiability.
 
 \paragraph{Directory \texttt{/src/app/Frontend}}
 
@@ -39,7 +39,8 @@ library for manipulating with NTA.
 \chapter{WS$k$S specification syntax}\label{syntax}
 
 The following grammar describes supported subset of \textsc{MONA} syntax
-for specification of verified formulae. It uses the classical BNF-like notation.
+for the specification of verified formulae. It uses the classical BNF-like
+notation.
 For full syntax for \textsc{MONA} program consult the tool manual \cite{monamanual}.
 
 \subsubsection{Specification}
@@ -95,9 +96,6 @@ first-order-term ::= varname | (first-order-term)
 \subsubsection{Second-order terms in WS1S}
 \begin{verbatim}
 second-order-term ::= varname | (second-order-term)
-                   |  second-order-term union second-order-term
-                   |  second-order-term inter second-order-term
-                   |  second-order-term \ second-order-term
                    |  second-order-term + int
 \end{verbatim}
 
@@ -121,17 +119,32 @@ that can be further set are following:
   \texttt{no} or random reordering can be done by option \texttt{random}.
 \end{itemize}
 
+\section{Instalation}
+
+To compile the application run the following command from the main directory:
+
+\begin{verbatim}
+  $ make release
+\end{verbatim}
+
+\noindent To run the application use the following command or consult the usage:
+\begin{verbatim}
+  $ ./dWiNA ./examples/formulae/in.mona
+\end{verbatim}
+
 \chapter{List of Atomic Formulae}
 
-We list in this Appendix automata corresponding to the atomic formulae of WS$k$S
+We list in this Appendix automata corresponding to atomic formulae of WS$k$S
 logic used in decision procedure. These automata are further used for
-construction of initial base automaton as described in Section \ref{wsks}. This
-appendinx is structured into two parts: first describes basic set of atomic
-formulae defined for restricted syntax (see \ref{restricted}) and the other
+the construction of initial base automaton as described in Section \ref{wsks}.
+This appendinx is structured into two parts: first describes the basic set of
+atomic formulae defined for restricted syntax (see \ref{restricted}) and the other
 lists automata for the extension of syntax we are supporting to optimize size of
 used automata.
 
-Note that all shown automata are non-deterministic.
+Note that all shown automata are non-deterministic and we use symbol
+$\overline{X}$ as a substitute for any symbol of $\Sigma$, i.e. we do not care
+about its value.
 
 \section{Atomic formulae for restricted syntax}
 

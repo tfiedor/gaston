@@ -16,13 +16,17 @@
   \tikzstyle{every state}=[fill=none,draw=black,text=black,minimum size=60pt]
 
   \node[initial,state,fill={rgb:black,1;white,4}] (A)                      
-  {$\{1\}$}; \node[state,fill={rgb:black,1;white,4}]         (AD) [right of=A]  
+  {$\{1\}$}; 
+  \node[state,fill={rgb:black,1;white,4}]         (AD) [right of=A]  
   {$\{1, 4\}$};
-  \node[state,fill={rgb:black,1;white,4}]         (AB) [below right of=A]  
-  {$\{1, 2\}$}; \node[state]         (ADE) [right of=AD]       {$\{1, 4, 5\}$};
+  \node[state,fill={rgb:black,1;white,4}]         (AB) [below right
+  of=A] {$\{1, 2\}$}; 
+  \node[state]         (ADE) [right of=AD]       {$\{1, 4, 5\}$};
   \node[state]         (ABC) [below right of=AB] {$\{1, 2, 3\}$};
-  \node[state]         (ABDE) [below right of=AD]    {$\{1, 2, 4, 5\}$}; 
-  \node[state]         (ABCDE) [below right of=ABDE] {$\{1, 2, 3, 4, 5\}$};
+  \node[state]         (ABDE) [below right of=AD]    {$\{1, 2, 4,
+  5\}$}; 
+  \node[state]         (ABCDE) [below right of=ABDE] {$\{1, 2,
+  3, 4, 5\}$};
   
   \path (A) edge                 node {X: 0}   (AD)
             edge                 node {X: 1}   (AB)

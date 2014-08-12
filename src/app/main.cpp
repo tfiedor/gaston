@@ -1,5 +1,13 @@
+/*****************************************************************************
+ *  dWiNA - Deciding WSkS using non-deterministic automata
+ *
+ *  Copyright (c) 2014  Tomas Fiedor <xfiedo01@stud.fit.vutbr.cz>
+ *
+ *****************************************************************************/
+
 #define _LANGUAGE_C_PLUS_PLUS
 
+// < System Headers >
 #include <iostream>
 #include <new>
 #include <sys/time.h>
@@ -7,13 +15,13 @@
 #include <signal.h>
 #include <map>
 
-// VATA headers
+// < VATA Headers >
 #include <vata/bdd_bu_tree_aut.hh>
 #include <vata/parsing/timbuk_parser.hh>
 #include <vata/serialization/timbuk_serializer.hh>
 #include <vata/util/binary_relation.hh>
 
-// MONA Frontend headers
+// < MONA Frontend Headers >
 #include "Frontend/env.h"
 #include "Frontend/untyped.h"
 #include "Frontend/predlib.h"
@@ -28,22 +36,21 @@
 #include "Frontend/offsets.h"
 #include "Frontend/ident.h"
 
-// DecProc headers
+// < dWiNA Headers >
 #include <DecisionProcedure/environment.hh>
 #include <DecisionProcedure/decision_procedures.hh>
 #include <DecisionProcedure/containers/VarToTrackMap.hh>
 #include "DecisionProcedure/containers/Cache.hh"
 
-#define DEBUG
-
+// < Typedefs and usings >
 using std::cout;
-
 using StateToStateTranslator = VATA::AutBase::StateToStateTranslWeak;
 using StateToStateMap         = std::unordered_map<StateType, StateType>;
 using Automaton = VATA::BDDBottomUpTreeAut;
 
 typedef unsigned int uint;
 
+// < Global variables >
 Options options;
 MonaUntypedAST *untypedAST;
 SymbolTable symbolTable(1019);
@@ -72,6 +79,9 @@ char *inputFileName = NULL;
 
 extern Ident lastPosVar, allPosVar;
 
+/**
+ * Prints usage of the program to the standard output.
+ */
 void PrintUsage()
 {
   cout << "Usage: dWiNA [options] <filename>\n\n"
@@ -83,8 +93,14 @@ void PrintUsage()
     << "Example: ./dWiNA -t -d --reorder-bdd=random foo.mona\n\n";
 }
 
-bool 
-ParseArguments(int argc, char *argv[])
+/**
+ * Parses input arguments into options
+ *
+ * @param argc: number of arguments
+ * @param argv: list of arguments
+ * @return: false if arguments are wrong
+ */
+bool ParseArguments(int argc, char *argv[])
 {
   options.printProgress = true;
   options.analysis = true;
@@ -158,6 +174,10 @@ void splitMatrixAndPrefix(MonaAST* formula, ASTForm* &matrix, ASTForm* &prefix) 
 	matrix = formula->formula;
 	prefix = formula->formula;
 
+	/**
+	 * While we didn't encounter an atomic formula we iterate through quantifiers
+	 * and negations and construct the prefix
+	 */
 	while(true) {
 		if(formIter->kind == aEx2) {
 			previous = formIter;
@@ -167,6 +187,7 @@ void splitMatrixAndPrefix(MonaAST* formula, ASTForm* &matrix, ASTForm* &prefix) 
 			formIter = ((ASTForm_Not*) formIter)->f;
 		} else {
 			if (previous != 0) {
+				// use the True as the last formula
 				if (previous->kind == aEx2) {
 					ASTForm_Ex2* q = (ASTForm_Ex2*) previous;
 					q->f = new ASTForm_True(q->pos);
@@ -185,6 +206,9 @@ void splitMatrixAndPrefix(MonaAST* formula, ASTForm* &matrix, ASTForm* &prefix) 
 
 /**
  * No reordering
+ *
+ * @param free: list of free variables
+ * @param bound: list of bounded variables
  */
 void noReorder(IdentList *free, IdentList *bound) {
 	IdentList *vars = ident_union(free, bound);
@@ -197,6 +221,9 @@ void noReorder(IdentList *free, IdentList *bound) {
  * Does reordering of variables so in output BDD tracks it is easier to remove
  * the track and reorder the BDD afterwards. This is done by the prefix of
  * given formula
+ *
+ * @param free: list of free variables
+ * @param bound: list of bounded variables
  */
 void heuristicReorder(IdentList *free, IdentList *bound) {
 	if(options.dump) {
@@ -218,12 +245,16 @@ IdentList* shuffle(IdentList* list) {
 
 /**
  * Does random reordering of variables
+ *
+ * @param free: list of free variables
+ * @param bound: list of bounded variables
  */
 void randomReorder(IdentList *free, IdentList *bound) {
 	if(options.dump) {
 		cout << "[*] Variables reorder randomly" << std::endl;
 	}
 	IdentList *vars = ident_union(free, bound);
+	// TODO: Not implemented, not needed at all
 	if (vars != 0) {
 		vars = shuffle(vars);
 		varMap.initializeFromList(vars);
@@ -255,8 +286,7 @@ void reorder(ReorderMode mode, ASTForm* formula) {
 	}
 }
 
-int 
-main(int argc, char *argv[])
+int main(int argc, char *argv[])
 {
   /* Parse initial arguments */
   if (!ParseArguments(argc, argv)) {
@@ -281,6 +311,7 @@ main(int argc, char *argv[])
 
   timer_parsing.stop();
 
+  // Prints progress if dumping is set
   if (options.printProgress) {
 	cout << "[*] Parsing input formula " << inputFileName << "\n";
     cout << "[*] Elapsed time: ";
@@ -360,6 +391,7 @@ main(int argc, char *argv[])
 	  std::cout << "[*] Formula transformed into non-determinsitic tree automaton\n";
   }
 
+  // Remove unreachable states (probably not needed)
   StateHT reachable;
   formulaAutomaton = formulaAutomaton.RemoveUnreachableStates(&reachable);
 
@@ -372,6 +404,7 @@ main(int argc, char *argv[])
 
   formulaAutomaton = formulaAutomaton.ReindexStates(stateTransl);
 
+  // Dump automaton
   if(options.dump) {
 	  VATA::Serialization::AbstrSerializer* serializer =
 			  new VATA::Serialization::TimbukSerializer();
@@ -406,36 +439,19 @@ main(int argc, char *argv[])
 		  cout << "undecidable due to unforeseen error.\n";
 		  break;
 	  }
+  // Something that was used is not supported by dWiNA
   } catch (NotImplementedException& e) {
 	  std::cerr << e.what() << std::endl;
   }
 
-  ///////// CLEAN UP ///////////////////////////////////////////////////////
-
-  delete ast->assertion;
-  delete matrix;
-  delete prefix;
-
-  /*predicateLib.cleanUp();
-  symbolTable.cleanUp();
-
-  //StateCache.clear();
-  //BDDCache.clear();
-
-  Deque<FileSource *>::iterator i;
-  for (i = source.begin(); i != source.end(); i++)
-    delete *i;*/
-    
-  if (options.statistics)
-    print_statistics();
-
+  // Prints timing
   if (options.time) {
     timer_total.stop();
     cout << "\n[*] Total elapsed time:     ";
     timer_total.print();
-    print_timing();
   }
-  else if (options.printProgress) { 
+
+  else if (options.printProgress) {
     timer_total.stop();
     cout << "\n[*] Total elapsed time: ";
     timer_total.print();
