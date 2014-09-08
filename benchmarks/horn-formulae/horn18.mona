@@ -1,0 +1,3 @@
+ws1s;
+
+ex2 X: all1 x1, x2, x3, x4, x5, x6, x7, x8, x9, x10, x11, x12, x13, x14, x15, x16, x17, x18: (x1 in X => x2 in X) & (x2 in X => x3 in X) & (x3 in X => x4 in X) & (x4 in X => x5 in X) & (x5 in X => x6 in X) & (x6 in X => x7 in X) & (x7 in X => x8 in X) & (x8 in X => x9 in X) & (x9 in X => x10 in X) & (x10 in X => x11 in X) & (x11 in X => x12 in X) & (x12 in X => x13 in X) & (x13 in X => x14 in X) & (x14 in X => x15 in X) & (x15 in X => x16 in X) & (x16 in X => x17 in X) & (x17 in X => x18 in X);

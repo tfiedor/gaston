@@ -1,0 +1,101 @@
+/* R := singly linked list, with a binary relations next, two variables, head and nil */
+
+/* D := a binary relations reach:
+	reach(x, y) := ex2 S : (x in S & y in S /\ all1 z . (z in S => ex1 u . (next(z, u) & u in S))) */
+
+/* F := a single data field called key */
+
+/* P:= sorted /\ existk
+	sorted := all1 x y . (reach(x, y) => key(x) <= key(y)) 
+	existk := ex1 x . (reach(head, y) /\ x=/=nil /\ key(x) = k) */
+
+/* S :=
+Node sllSearch(Node head, Node nil, int k){
+
+
+
+		Node curr = head;
+	(loop invariant: sll /\ sorted /\ /\ reach(head, curr) /\ ex1 x: reach(curr,x) & x=/=nil & key(x)=k)
+
+		while (key(curr) =/= k /\ curr =/= nil){
+			curr = curr.next;
+		}
+
+} */
+
+/* Q := sll /\ sorted /\ key(curr) = k
+	sll := head /\ nil /\ total-order /\ antisymmetry
+	head := all1 y : (reach(head, y))
+	nil := all1 y : (reach(y, nil))
+	total-order := all1 x, y : (reach(x, y) \/ reach(y, x))
+	antisymmetry := all1 x, y : (reach(x, y) <=> ~reach(y, x)) */
+
+ws1s;
+
+
+pred close(var1 x, var1 y, var2 M) =
+	x<y & (~ex1 z: (z in M & x<z & z<y)) ;
+
+
+pred before(var1 end, var1 x, var1 y) =
+	x<y & y<end ;
+
+
+
+
+pred validmodel(var1 end, var1 curr, var1 exdv1, var1 exdv2, var1 nodek) =
+	(end~=0 &
+	curr <= end & exdv1 <= end & exdv2 <= end & nodek <= end
+	);
+
+
+pred validcomputation(var2 $, var1 curr) = curr=0 ;
+
+
+
+pred validmodel'(var1 end, var2 M) = 
+	end in M & (ex1 s where s in M : s < end) ;
+
+
+/*
+formula: ex1 curr,exdv1,exdv2,nodek :
+		validcomputation &
+		all1 v1,v2: (before(v1,v2) => data(v1)<=data(v2)) &
+		data(nodek)=k & 
+		(
+			(before(exdv1,exdv2) & data(exdv2)>data(exdv1)) |
+			all v: (curr<=v => data(v)~=k)
+		) ;
+*/
+
+
+
+pred minimalmodel(var1 end, var1 curr, var1 exdv1, var1 exdv2, var1 nodek) =
+	~ex2 M :(
+		(all1 s where s in M : s <= end) & 
+		(ex1 s : s <= end & s notin M) &
+		curr in M & exdv1 in M & exdv2 in M & nodek in M &
+		validmodel'(end,M) &
+		(curr=0 => (~ex1 s where s in M : s < curr))
+	 );
+
+
+var1 end;
+
+ex1 curr,exdv1,exdv2,nodek : (
+	validmodel(end,curr,exdv1,exdv2,nodek) & minimalmodel(end,curr,exdv1,exdv2,nodek) ) ;
+
+
+
+/* var1 Bound;
+
+
+pred bd(var1 Bound) =
+all1 end: (
+all1 curr,exdv1,exdv2,nodek: (
+	(validmodel(end,curr,exdv1,exdv2,nodek) & minimalmodel(end,curr,exdv1,exdv2,nodek))
+	=> 
+	(end <= Bound))) ;
+
+bd(Bound) & ~ex1 Bound': (bd(Bound') & Bound' < Bound) ; */
+

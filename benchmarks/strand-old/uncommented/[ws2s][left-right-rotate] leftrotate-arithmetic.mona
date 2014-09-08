@@ -1,0 +1,185 @@
+
+ws2s;
+var2 $ where all1 p where true: (p in $) => ((p^ in $) | (p^=p));
+allpos $;
+defaultwhere1(p) = p in $;
+defaultwhere2(P) = P sub $;
+
+#var2 bound;
+
+var2 red;
+var1 newr,m,exdv1,exdv2;
+var0 pc12,pc22;
+
+macro leftchild'(var1 x, var1 y, var2 M) =
+	x.0<=y & (~ex1 z where z in M : x<z & z<y) ;
+macro rightchild'(var1 x, var1 y, var2 M) =
+	x.1<=y & (~ex1 z where z in M : x<z & z<y) ;
+
+macro leftchild1(var1 x, var1 y) =
+	(x~=m.1 & x~=m^ & x.0=y) | (x=m.1 & y=m) | (x=m^ & y=m.1 & m^.0=m) | (x=m^ & y=m^.0 & m^.1=m) ;
+
+macro rightchild1(var1 x, var1 y) =
+	(x~=m & x~=m^ & x.1=y) | (x=m & y=m.1.0) | (x=m^ & y=m.1 & m^.1=m) | (x=m^ & y=m^.1 & m^.0=m) ;
+
+macro leftchild1'(var1 x, var1 y, var2 M) =
+	(x~=m.1 & x~=m^ & leftchild'(x,y,M)) | (x=m.1 & y=m) | (x=m^ & y=m.1 & m^.0=m) | (x=m^ & y=m^.0 & m^.1=m) ;
+
+macro rightchild1'(var1 x, var1 y, var2 M) =
+	(x~=m & x~=m^ & rightchild'(x,y,M)) | (x=m & y=m.1.0) | (x=m^ & y=m.1 & m^.1=m) | (x=m^ & y=m^.1 & m^.0=m) ;
+
+macro left(var1 x, var1 y) =
+	(root<=x & y=x.0 & y in $) | (root<=x & x.0 notin $ & y=root);
+macro left'(var1 x, var1 y, var2 M) =
+	(root<=x & leftchild'(x,y,M)) | (root<=x & (~ex1 z where z in M: (leftchild'(x,z,M))) & y=root);
+
+macro left1(var1 x, var1 y) =
+	(leftchild1(x,y) & x in $ & y in $) | (x in $ & (all1 z: (leftchild1(x,z) => z notin $)) & y=newr);
+macro left1'(var1 x, var1 y, var2 M) =
+	(newr<=x & leftchild1'(x,y,M)) | (newr<=x & (~ex1 z where z in M: (leftchild1'(x,z,M))) & y=newr);
+
+macro right(var1 x, var1 y) =
+	(root<=x & y=x.1 & y in $) | (root<=x & x.1 notin $ & y=root);
+macro right'(var1 x, var1 y, var2 M) =
+	(root<=x & rightchild'(x,y,M)) | (root<=x & (~ex1 z where z in M: (rightchild'(x,z,M))) & y=root);
+
+macro right1(var1 x, var1 y) =
+	(rightchild1(x,y) & x in $ & y in $) | (x in $ & (all1 z: (rightchild1(x,z) => z notin $)) & y=newr);
+macro right1'(var1 x, var1 y, var2 M) =
+	(newr<=x & rightchild1'(x,y,M)) | (newr<=x & (~ex1 z where z in M: (rightchild1'(x,z,M))) & y=newr);
+
+macro reach(var1 x, var1 y) =
+	((root<=x & x<=y & y in $) | (root<=x & y=root)) ;
+
+macro reach'(var1 x, var1 y, var2 M) =
+	((root<=x & x<=y & y in $) | (root<=x & y=root)) ;
+
+macro validmodel =
+	m.1.0 in $ &
+	(root=m => newr=m.1) &
+	(root~=m => newr=root) &
+	m in red ;
+
+macro lcp(var1 x, var1 y, var1 z) =
+	z<=x & z<=y & (~ex1 u: (u<=x & u<=y & z<u)) ;
+
+macro validmodel'(var2 M) = 
+	(root in M & (m ~= root => m^ in M) & newr in M & m in M & m.1 in M & m.1.0 in M) &
+	(exdv1 in M & exdv2 in M) &
+	(root=m => newr=m.1) &
+	(root~=m => newr=root) &
+	m in red &
+	(all1 x,y,z: (x in M & y in M & lcp(x,y,z)) => z in M);
+
+macro next1(var1 x, var1 y) = y~=newr & (left1(x, y) | right1(x, y)) ;
+macro next1'(var1 x, var1 y, var2 M) = y~=newr & (left1'(x,y,M) | right1'(x,y,M)) ;
+
+macro reach1(var1 x, var1 y) =
+	all2 P: ((x in P &
+		all1 z1,z2: ((z1 in P & next1(z1,z2)) => z2 in P)) => y in P) ;
+macro reach1'(var1 x, var1 y, var2 M) =
+	all2 P where P sub M : ((x in P &
+		all1 z1,z2 where z1 in M & z2 in M: ((z1 in P & next1'(z1,z2,M)) => z2 in P)) => y in P) ;
+
+macro fork(var1 r) =
+	all1 x,y,z,u,v: ((reach(r,x) & reach(r,u) & reach(r,v)) => ((left(x, u) & right(x, v) & reach(u,y) & reach(v,z) & u~=r & v~=r & y~=r & z~=r) => y ~= z));
+macro fork'(var1 r, var2 M) =
+	all1 x,y,z,u,v: (x in M & y in M & z in M & reach'(r,x,M) & reach'(r,u,M) & reach'(r,v,M)) => ((left'(x, u, M) & right'(x, v, M) & reach'(u,y,M) & reach'(v,z,M) & u~=r & v~=r & y~=r & z~=r) => y ~= z);
+macro nomerge(var1 r) =
+	all1 x,y,z: ((reach(r,x) & reach(r,y) & reach(r,z) & z~=root) => ((reach(x, z) & reach(y,z)) => (reach(x, y) | reach(y, x))));
+macro nomerge'(var1 r, var2 M) =
+	all1 x,y,z: ((x in M & y in M & z in M & reach'(r,x,M) & reach'(r,y,M) & reach'(r,z,M) & z~=root) => ((reach'(x,z,M) & reach'(y,z,M)) => (reach'(x,y,M) | reach'(y,x,M))));
+macro antisymmetry(var1 r) =
+	all1 x,y: ((reach(r,x) & reach(r,y) & x ~= y & x ~= r & y ~= r) => ~(reach(x, y) & reach(y, x)));
+macro antisymmetry'(var1 r, var2 M) =
+	all1 x,y: ((x in M & y in M & reach'(r,x,M) & reach'(r,y,M) & x ~= y & x ~= r & y ~= r) => ~(reach'(x,y,M) & reach'(y,x,M)));
+
+macro postfork(var1 r) =
+	ex1 x,y,z,u,v: ((reach1(r,x) & reach1(r,u) & reach1(r,v)) & ((left1(x, u) & right1(x, v) & reach1(u,y) & reach1(v,z) & u~=r & v~=r & y~=r & z~=r) & y = z));
+macro postfork'(var1 r, var2 M) =
+	ex1 x,y,z,u,v: (x in M & y in M & z in M & reach1'(r,x,M) & reach1'(r,u,M) & reach1'(r,v,M)) & ((left1'(x, u, M) & right1'(x, v, M) & reach1'(u,y,M) & reach1'(v,z,M) & u~=r & v~=r & y~=r & z~=r) & y = z);
+macro postnomerge(var1 r) =
+	ex1 x,y,z: ((reach1(r,x) & reach1(r,y) & reach1(r,z) & z~=r) & ((reach1(x, z) & reach1(y,z)) & (~reach1(x, y) & ~reach1(y, x))));
+macro postnomerge'(var1 r, var2 M) =
+	ex1 x,y,z: ((x in M & y in M & z in M & reach1'(r,x,M) & reach1'(r,y,M) & reach1'(r,z,M) & z~=r) & ((reach1'(x,z,M) & reach1'(y,z,M)) & (~reach1'(x,y,M) | ~reach1'(y,x,M))));
+macro postantisymmetry(var1 r) =
+	ex1 x,y: ((reach1(r,x) & reach1(r,y) & x ~= y & x ~= r & y ~= r) & (reach1(x, y) & reach1(y, x)));
+macro postantisymmetry'(var1 r, var2 M) =
+	ex1 x,y: ((x in M & y in M & reach1'(r,x,M) & reach1'(r,y,M) & x ~= y & x ~= r & y ~= r) & (reach1'(x,y,M) & reach1'(y,x,M)));
+
+macro binarytree =
+	fork(root) & nomerge(root) & antisymmetry(root) ;
+macro binarytree'(var2 M) =
+	fork'(root,M) & nomerge'(root,M) & antisymmetry'(root,M);
+
+macro postbinarytree =
+	postfork(newr) | postnomerge(newr) | postantisymmetry(newr) ;
+macro postbinarytree'(var2 M) =
+	postfork'(newr,M) | postnomerge'(newr,M) | postantisymmetry'(newr,M) ;
+
+macro presorted(var1 alldv1, var1 alldv2, var0 p11, var0 p21) =
+	alldv2=root | all1 z where z in $ & z~=root : (((left(alldv1, z) & reach(z, alldv2)) => p11) & ((right(alldv1, z) & reach(z, alldv2)) => p21));
+macro presorted'(var1 alldv1, var1 alldv2, var0 p11, var0 p21, var2 M) =
+	alldv2=root | all1 z where z in M & z~=root : (((left'(alldv1, z, M) & reach'(z, alldv2, M)) => p11) & ((right'(alldv1, z, M) & reach'(z, alldv2, M)) => p21));
+
+macro postsorted =
+	exdv2~=newr & ex1 z where z in $ & z~=newr : ((left1(exdv1,z) & reach1(z,exdv2) & pc12) | (right1(exdv1,z) & reach1(z,exdv2) & pc22)) ;
+macro postsorted'(var2 M) =
+	exdv2~=newr & ex1 z where z in M & z~=newr : ((left1'(exdv1,z,M) & reach1'(z,exdv2,M) & pc12) | (right1'(exdv1,z,M) & reach1'(z,exdv2,M) & pc22)) ;
+
+macro almostinv1(var1 r, var1 c) =
+	all1 q1,q2: ((reach(r,q1) & q1 in red & q2 in red) => ((left(q1,q2) => q2=c) & (right(q1,q2) => q2=c))) ;
+macro almostinv1'(var1 r, var1 c, var2 M) =
+	all1 q1,q2 where q1 in M & q2 in M : ((reach'(r,q1,M) & q1 in red & q2 in red) => ((left'(q1,q2,M) => q2=c) & (right'(q1,q2,M) => q2=c))) ;
+
+macro postalmostinv2(var1 r, var1 c) =
+	ex1 e1,e2: ((reach1(r,e1) & next1(e1,e2) & e1 in red & e2 in red) & e1~=c & e2~=c) ;
+macro postalmostinv2'(var1 r, var1 c, var2 M) =
+	ex1 e1,e2: ((reach1'(r,e1,M) & next1'(e1,e2,M) & e1 in red & e2 in red) & e1~=c & e2~=c) ;
+
+	
+
+macro precondition(var1 alldv1, var1 alldv2, var0 p11, var0 p21) =
+	binarytree & presorted(alldv1,alldv2,p11,p21)  ; 
+
+macro precondition'(var1 alldv1, var1 alldv2, var0 p11, var0 p21, var2 M) =
+	binarytree'(M) & presorted'(alldv1,alldv2,p11,p21,M)  ;
+
+macro negpostcondition =
+	postsorted ;
+
+macro negpostcondition'(var2 M) =
+	postsorted'(M) ;
+
+macro minimalmodel =
+~ex2 M: (
+	(M~=$ & validmodel'(M)) &
+	((~negpostcondition) |
+		((negpostcondition & negpostcondition'(M)) & 
+			all1 dv1,dv2 where dv1 in M & dv2 in M: (
+			(all0 p11,p21: (
+				(~precondition(dv1,dv2,p11,p21) | precondition'(dv1,dv2,p11,p21,M))
+			)))
+		) |
+		((negpostcondition & ~negpostcondition'(M)) & 
+			all1 dv1,dv2 where dv1 in M & dv2 in M: (
+			(all0 p11,p21: (
+				~precondition(dv1,dv2,p11,p21)
+			)))
+		)
+	) 
+);
+
+macro existmodel =
+	validmodel &
+	negpostcondition &
+	all1 alldv1,alldv2 : (	
+		ex0 p11,p21: (
+			precondition(alldv1,alldv2,p11,p21) &
+			((alldv1=exdv1 & alldv2=exdv2) => ((pc12 <=> ~p11) & (pc22 <=> ~p21))) &
+			((alldv1=exdv2 & alldv2=exdv1) => ((pc22 <=> ~p11) & (pc12 <=> ~p21)))
+		));
+	
+
+export("rbt-leftrotate-arithmetic", existmodel & minimalmodel);
+

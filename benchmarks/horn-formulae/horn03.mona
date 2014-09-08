@@ -1,0 +1,6 @@
+ws1s;
+
+#ex2 X: all1 x1, x2, x3: (x1 in X => x2 in X) & (x2 in X => x3 in X);
+#ex2 X: all1 x1: ex1 x2, x3: (x1 in X => x2 in X) & (x2 in X => x3 in X);
+ex2 X: all1 x1: ex1 x2: all1 x3: (x1 in X => x2 in X) & (x2 in X => x3 in X);
+

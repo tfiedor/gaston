@@ -1,0 +1,63 @@
+
+benchmarks/strand/uncommented/[ws1s][bubblesort] else.mona ->
+Total time: 00:00:00.11
+
+benchmarks/strand/uncommented/[ws1s][bubblesort] if-else.mona ->
+Total time: 00:00:00.26
+
+benchmarks/strand/uncommented/[ws1s][bubblesort] if-if.mona ->
+Total time: 00:00:00.67
+
+benchmarks/strand/uncommented/[ws1s][left-right-rotate] left-rotate.mona ->
+Total time: 00:00:00.31
+
+benchmarks/strand/uncommented/[ws1s][sorted-list-insert] after-loop.mona ->
+Total time: 00:00:00.03
+
+benchmarks/strand/uncommented/[ws1s][sorted-list-insert] before-head.mona ->
+Total time: 00:00:00.00
+
+benchmarks/strand/uncommented/[ws1s][sorted-list-insert] before-loop.mona ->
+Total time: 00:00:00.00
+
+benchmarks/strand/uncommented/[ws1s][sorted-list-insert-error] error.mona ->
+Total time: 00:00:00.01
+
+benchmarks/strand/uncommented/[ws1s][sorted-list-insert] in-loop.mona ->
+Total time: 00:00:00.04
+
+benchmarks/strand/uncommented/[ws1s][sorted-list-reverse] after-loop.mona ->
+Total time: 00:00:00.01
+
+benchmarks/strand/uncommented/[ws1s][sorted-list-reverse] before-loop.mona ->
+Total time: 00:00:00.01
+
+benchmarks/strand/uncommented/[ws1s][sorted-list-reverse] in-loop.mona ->
+Total time: 00:00:00.08
+
+benchmarks/strand/uncommented/[ws1s][sorted-list-search] after-loop.mona ->
+Total time: 00:00:00.00
+
+benchmarks/strand/uncommented/[ws1s][sorted-list-search] before-loop.mona ->
+Total time: 00:00:00.01
+
+benchmarks/strand/uncommented/[ws1s][sorted-list-search] in-loop.mona ->
+Total time: 00:00:00.09
+
+benchmarks/strand/uncommented/[ws2s][bst-insert] after-loop.mona ->
+Total time: 00:00:00.29
+
+benchmarks/strand/uncommented/[ws2s][bst-insert] before-loop.mona ->
+Total time: 00:00:00.21
+
+benchmarks/strand/uncommented/[ws2s][bst-insert] in-loop.mona ->
+Total time: 00:00:00.74
+
+benchmarks/strand/uncommented/[ws2s][bst-search] after-loop.mona ->
+Total time: 00:00:00.21
+
+benchmarks/strand/uncommented/[ws2s][bst-search] before-loop.mona ->
+Total time: 00:00:00.20
+
+benchmarks/strand/uncommented/[ws2s][bst-search] in-loop.mona ->
+Total time: 00:00:01.32

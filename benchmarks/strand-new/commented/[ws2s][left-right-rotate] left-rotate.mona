@@ -1,0 +1,173 @@
+/*
+proc leftrotate(pointer x:Node):void
+  pointer B,M,N,P,Q:Node;
+[bst & root!=null & root<(left+right)*>m & (almostinv1(root,n) | almostinv1(root,m)) & 
+ red(m) & (p.left=m | p.right=m) & n=m.right & b=n.left]
+{
+  m.right = b;
+
+  if (root(m)) {
+    root = n;
+  }
+  else {
+    if (m=p.left) {
+      p.left = n;
+    }
+    else {
+      p.right = n;
+    }
+  }
+  n.left = m;
+
+}
+[bst & n.left=m & m.right=b & p=n.p & reach(root,m) & 
+ almostinv2(root,m) & red(m) & (p=null => root=n) & (p!=null => root=p)] */
+
+
+
+ws2s;
+
+/*pred leftchild(var1 x, var1 y, var2 M) =
+	x.0<=y & (~ex1 z: z in M & x<z & z<y) ;
+pred rightchild(var1 x, var1 y, var2 M) =
+	x.1<=y & (~ex1 z: z in M & x<z & z<y) ;
+
+pred left(var2 $, var1 x, var1 y) =
+	(root.0<=x & y=x.0 & y in $) ;
+pred left'(var2 $, var1 x, var1 y, var2 M) =
+	(root.0<=x & leftchild(x,y,M)) ;
+
+pred right(var2 $, var1 x, var1 y) =
+	(root.0<=x & y=x.1 & y in $) ;
+pred right'(var2 $, var1 x, var1 y, var2 M) =
+	(root.0<=x & rightchild(x,y,M)) ;
+
+pred leftnil(var2 $, var1 x, var1 y) = root.0<=x & x.0 notin $ & y=root ;
+pred leftnil'(var2 $, var1 x, var1 y, var2 M) = root.0<=x & (~ex1 z where z in M: (leftchild(x,z,M))) & (~ex1 s where s in M : (leftchild(s,y,M) | rightchild(s,y,M))) ;
+
+pred rightnil(var2 $, var1 x, var1 y) = root.0<=x & x.1 notin $ & y=root ;
+pred rightnil'(var2 $, var1 x, var1 y, var2 M) = root.0<=x & (~ex1 z where z in M: (rightchild(x,z,M))) & (~ex1 s where s in M : (leftchild(s,y,M) | rightchild(s,y,M))) ;
+
+
+pred isroot(var1 x, var2 M) = all1 s where s in M : (s<x => s=root) ;*/
+
+
+/*pred left1(var2 $, var1 x, var1 y) =
+	(x~=p & x~=n & left($,x,y)) | (x=n & y=m) | (x~=n & x=p & m~=root.0 & (left(p,m) | leftnil(p,m)) & y=n) | (x~=n & x=p & (m=root.0 | (~left(p,m) & ~leftnil(p,m))) & left(x,y)) ;
+
+pred right1(var2 $, var1 x, var1 y) =
+	(x~=p & x~=m & right($,x,y)) | (x=m & (m=root.0 | left($,p,m) | leftnil($,p,m) | x~=p) & y=b) | (m~=root.0 & ~left($,p,m) & ~leftnil($,p,m) & x=p & y=n) ;
+
+pred rightnil1(var2 $, var1 x, var1 y) =
+	(x~=p & x~=m & rightnil($,x,y)) | (x=m & (m=root.0 | left($,p,m) | leftnil($,p,m) | x~=p) & y=root) | (m~=root.0 & ~left($,p,m) & ~leftnil($,p,m) & x=p & n=root) ;*/
+
+
+/*pred almostinv(var2 $, var1 c) =
+	all1 q1,q2: ((reach(root.0,q1) & q1 in red & q2 in red) => ((left($,q1,q2) => q2=c) & (right($,q1,q2) => q2=c))) ;
+
+pred almostinv1(var2 $, var1 c) =
+	all1 q1,q2: ((reach1(root.0,q1) & q1 in red & q2 in red) => ((left1($,q1,q2) => q2=c) & (right1($,q1,q2) => q2=c))) ;*/
+
+/*
+pred leftbranch1 = ...
+
+pred rightbranch1 = ...
+
+pred reach1(var1 x, var1 y) =
+	leftbranch1(x,y) | rightbranch1(x,y) ;
+
+pred fork1 =
+	all1 x,y,z,u,v: ((leftbranch1(x, u) & rightbranch1(x, v) & reach1(u,y) & reach1(v,z)) => y ~= z);
+
+pred nomerge1 =
+	all1 x,y,z: ((reach1(x, z) & reach1(y,z)) => (reach1(x, y) | reach1(y, x) | x=y)) ;
+
+pred antisymmetry1 =
+	all1 x,y: (x ~= y => ~(reach1(x, y) & reach1(y, x)));
+
+
+
+pred binarytree1 =
+	fork1 & nomerge1 & antisymmetry1 ;
+*/
+
+
+
+
+
+
+
+pred validmodel(var2 $, var1 m, var1 b, var1 exdv1, var1 exdv2) =
+	all1 x where true: (x in $) => ((x^ in $) | (x^=x)) &
+	m in $ & m.1 in $ & m^ in $ & b in $ & exdv1 in $ & exdv2 in $ &
+	root.0 in $ & root.1 notin $ ;
+
+
+
+
+pred lcp(var2 $, var1 x, var1 y, var1 z) =
+	z<=x & z<=y & (~ex1 u where u in $ : (u<=x & u<=y & z<u)) ;
+
+pred validmodel'(var2 $, var2 M) = 
+	root in M & root.1 notin M & (ex1 s where s in M : root.0<=s) & 
+	(all1 x,y,z where x in $ & y in $ & z in $ : (x in M & y in M & lcp($,x,y,z)) => z in M);
+
+
+/*
+formula: ex1 m,r1,exdv1,exdv2 :
+		validcomputation &
+		all1 v1,v2: ((leftbranch($,v1,v2) => data(v1)>=data(v2)) & (rightbranch($,v1,v2) => data(v1)<=data(v2))) &
+		root.0<=m &
+		(left(m.1,b) | leftnil(m.1,b)) &
+		(
+			(leftbranch1($,exdv1,exdv2) & data(exdv2)>data(exdv1)) |
+			(rightbranch1($,exdv1,exdv2) & data(exdv2)<data(exdv1)) |
+			#~binarytree1 |
+			#~left1(n,m) | (~right1(m,b) & ~rightnil1(m,b)) | (~left1(p,n) & ~right1(p,n)) | (~leftbranch1(r1,m) & ~rightbranch1(r1,m)) |
+			#(p=root & r1~=n) | (p~=root & r1=p)
+		) ;
+*/
+
+
+/*
+let p=m^, n=m.1
+*/
+
+
+pred minimalmodel(var2 $, var1 m, var1 b, var1 exdv1, var1 exdv2) =
+	~ex2 M where M sub $ & M~=$ & m in M & m^ in M & m.1 in M & b in M & exdv1 in M & exdv2 in M :(
+		validmodel'($,M) 
+		#(r1=m.1 => rightchild(m,r1,M)) &
+		#(m=root.0 <=> isroot(m,M)) &
+		#(r1=root.0 => isroot(r1,M)) &
+		#(left($,m^,m) <=> (ex1 p where p in M : (left'($,p,m,M) | right'($,p,m,M)) & left'($,p,m,M))) &
+		#(left($,m.1,b) => (ex1 n where n in M : right'($,m,n,M) & left'($,n,b,M))) &
+		#(leftnil($,m.1,b) => (ex1 n where n in M : right'($,m,n,M) & leftnil'($,n,b,M))) &
+		#((ex1 n where n in M : right'($,m,n,M) & left'($,n,m,M)) => left($,m.1,m)) &
+		#(leftnil($,m^,m) <=> (ex1 p where p in M : (left'($,p,m,M) | right'($,p,m,M)) & leftnil'($,p,m,M))) &
+		#((ex1 p,n where p in M & n in M : (left'($,p,m,M) | right'($,p,m,M)) & right'($,m,n,M) & left'($,p,n,M)) => left($,m^,m.1)) &
+		#(right'($,m,b,M) => right($,m,b)) &
+		#((ex1 p,n where p in M & n in M : (left'($,p,m,M) | right'($,p,m,M)) & right'($,m,n,M) & right'($,p,n,M)) => right($,m^,m.1)) &
+		#(rightnil'($,m,b,M) => rightnil($,m,b))
+	 );
+
+
+
+var2 $;
+
+ex1 m,b,exdv1,exdv2 : (
+	validmodel($,m,b,exdv1,exdv2) & minimalmodel($,m,b,exdv1,exdv2) ) ;
+
+
+/*var2 Bound;
+
+
+pred bd(var2 Bound) =
+all2 $ :( $ sub Bound | 
+(all1 m,b,exdv1,exdv2: (
+	~validmodel($,m,b,exdv1,exdv2) | ~minimalmodel($,m,b,exdv1,exdv2)))) ;
+
+
+
+bd(Bound) & ~ex2 Bound': (bd(Bound') & Bound'~=Bound & Bound' sub Bound) ;*/
+
