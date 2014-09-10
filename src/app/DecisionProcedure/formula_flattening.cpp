@@ -527,6 +527,32 @@ ASTForm* ASTForm_tT::unfoldMacro(IdentList* fParams, ASTList* rParams) {
  * @param rParams: list of real parameters
  * @return: unfolded macro
  */
+ASTForm* ASTForm_tt::unfoldMacro(IdentList* fParams, ASTList* rParams) {
+	t1 = t1->unfoldMacro(fParams, rParams);
+	t2 = t2->unfoldMacro(fParams, rParams);
+	return this;
+}
+
+/**
+ * Unfolds formal parameters to real parameters
+ *
+ * @param fParams: list of formal parameters
+ * @param rParams: list of real parameters
+ * @return: unfolded macro
+ */
+ASTForm* ASTForm_TT::unfoldMacro(IdentList *fParams, ASTList* rParams) {
+	T1 = T1->unfoldMacro(fParams, rParams);
+	T2 = T2->unfoldMacro(fParams, rParams);
+	return this;
+}
+
+/**
+ * Unfolds formal parameters to real parameters
+ *
+ * @param fParams: list of formal parameters
+ * @param rParams: list of real parameters
+ * @return: unfolded macro
+ */
 ASTTerm2* ASTTerm2_TT::unfoldMacro(IdentList* fParams, ASTList* rParams) {
 	T1 = T1->unfoldMacro(fParams, rParams);
 	T2 = T2->unfoldMacro(fParams, rParams);
@@ -558,6 +584,18 @@ ASTForm* ASTForm_Not::unfoldMacro(IdentList* fParams, ASTList* rParams) {
 }
 
 /**
+ * Unfolds formal parameters to real parameters in called function
+ *
+ * @param fParams: list of formal parameters
+ * @param rParams: list of real parameters
+ * @return: unfolded macro
+ */
+ASTForm* ASTForm_Call::unfoldMacro(IdentList* fParams, ASTList* rParams) {
+	ASTForm* unfoldedCall = this->flatten();
+	return unfoldedCall->unfoldMacro(fParams, rParams);
+}
+
+/**
  * Unfolds formal parameters to real parameters
  *
  * @param fParams: list of formal parameters
@@ -566,6 +604,7 @@ ASTForm* ASTForm_Not::unfoldMacro(IdentList* fParams, ASTList* rParams) {
  */
 ASTTerm1* ASTTerm1_Var1::unfoldMacro(IdentList* fParams, ASTList* rParams) {
 	int index = fParams->index(this->n);
+
 	if (index != -1) {
 		(rParams->get(index))->dump();
 		return (ASTTerm1*) rParams->get(index);

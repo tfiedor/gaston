@@ -160,14 +160,14 @@ public:
   virtual ASTForm* removeUniversalQuantifier() { return this; }
   virtual ASTForm* unfoldNegations() { return this; }
   virtual ASTForm* flatten() { return this;}
-  virtual ASTForm* unfoldMacro(IdentList* i, ASTList* a) { return this; }
+  virtual ASTForm* unfoldMacro(IdentList* i, ASTList* a) { std::cerr << "\nMissing unfolding for this formula\n"; this->dump(); return this; }
 
   ASTForm* toExistentionalPNF();
   ASTForm* toSecondOrder();
 
   // Conversion of AST representation of formula to Automaton
-  virtual void toUnaryAutomaton(Automaton &aut, bool doComplement) { std::cout << "Missing automaton for this formula\n"; this->dump();}
-  virtual void toBinaryAutomaton(Automaton &aut, bool doComplement) { std::cout << "Missing automaton for this formula\n"; this->dump(); }
+  virtual void toUnaryAutomaton(Automaton &aut, bool doComplement) { std::cerr << "Missing automaton for this formula\n"; this->dump();}
+  virtual void toBinaryAutomaton(Automaton &aut, bool doComplement) { std::cerr << "Missing automaton for this formula\n"; this->dump(); }
 };
 
 class FormList: public DequeGC<ASTForm*> {};
@@ -333,6 +333,7 @@ public:
   ~ASTForm_TT() {delete T1; delete T2;}
 
   void freeVars(IdentList*, IdentList*);
+  ASTForm* unfoldMacro(IdentList*, ASTList*);
 
   ASTTerm2 *T1;
   ASTTerm2 *T2;
@@ -345,6 +346,7 @@ public:
   ~ASTForm_tt() {delete t1; delete t2;}
 
   void freeVars(IdentList*, IdentList*);
+  ASTForm* unfoldMacro(IdentList*, ASTList*);
 
   ASTTerm1 *t1;
   ASTTerm1 *t2;
@@ -1190,6 +1192,7 @@ public:
   void dump();
   ASTForm* clone() { return new ASTForm_Call(this->n, this->args, this->pos); }
   ASTForm* flatten();
+  ASTForm* unfoldMacro(IdentList*, ASTList*);
 
 protected:
   ASTList *args;

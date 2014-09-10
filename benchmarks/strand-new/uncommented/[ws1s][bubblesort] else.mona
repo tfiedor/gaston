@@ -1,4 +1,3 @@
-
 ws1s;
 
 pred close(var1 x, var1 y, var2 M) =
