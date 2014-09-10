@@ -46,6 +46,7 @@ public:
   bool analysis;
   bool separateCompilation;
   bool dump;
+  bool dontDumpAutomaton;
   bool intermediate;
   bool treemodeOutput;
   bool m2l;

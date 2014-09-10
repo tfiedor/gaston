@@ -99,6 +99,13 @@ ASTForm* ASTForm_Equal1::flatten() {
 		y = new ASTTerm2_Var2(((ASTTerm1_Var1*)this->t1)->getVar(), Pos());
 		x = new ASTTerm2_Var2(((ASTTerm1_Var1*)this->t2)->getVar(), Pos());
 		return new ASTForm_Equal2(y, x, Pos());
+	// TODO: Not tested yet
+	} else if (this->t1->kind == aPlus1 && this->t2->kind == aVar1) {
+		ASTTerm1* temp;
+		temp = this->t2;
+		this->t2 = this->t1;
+		this->t1 = temp;
+		return this->flatten();
 	} else if (this->t1->kind == aVar1 && this->t2->kind == aPlus1) {
 		ASTTerm1_Plus* temp = (ASTTerm1_Plus*) this->t2;
 		// y = xi -> Xy = Xx i
@@ -145,8 +152,18 @@ ASTForm* ASTForm_Equal1::flatten() {
 			return new ASTForm_Ex2(0, new IdentList(z->getVar()), conjuction, Pos());
 		}
 #endif
+	// TODO: not fully tested
+	} else if(this->t1->kind == aInt && this->t2->kind == aVar1) {
+		ASTTerm1* temp;
+		temp = this->t2;
+		this->t2 = this->t1;
+		this->t1 = temp;
+		return this->flatten();
 	} else {
-		std::cerr << "Not Implemented yet!\n";
+		std::cerr << "Other forms of Equal1 not Implemented yet!\n";
+		std::cerr << "Dumping formula: ";
+		this->dump();
+		std::cerr << "\n";
 	}
 	return this;
 }

@@ -166,8 +166,8 @@ public:
   ASTForm* toSecondOrder();
 
   // Conversion of AST representation of formula to Automaton
-  virtual void toUnaryAutomaton(Automaton &aut, bool doComplement) { std::cout << "Converting formula to unary automaton \n"; }
-  virtual void toBinaryAutomaton(Automaton &aut, bool doComplement) { std::cout << "Converting formula to binary automaton \n"; }
+  virtual void toUnaryAutomaton(Automaton &aut, bool doComplement) { std::cout << "Missing automaton for this formula\n"; this->dump();}
+  virtual void toBinaryAutomaton(Automaton &aut, bool doComplement) { std::cout << "Missing automaton for this formula\n"; this->dump(); }
 };
 
 class FormList: public DequeGC<ASTForm*> {};
@@ -885,6 +885,9 @@ public:
   void dump();
   ASTForm* clone() { return new ASTForm_Equal1(this->t1, this->t2, this->pos); }
   ASTForm* flatten();
+
+  // Conversion of AST representation of formula to Automaton
+  void toUnaryAutomaton(Automaton &aut, bool doComplement);
 };
 
 class ASTForm_Equal2: public ASTForm_TT {

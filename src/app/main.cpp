@@ -88,6 +88,7 @@ void PrintUsage()
     << "Options:\n"
     << " -t, --time 		Print elapsed time\n"
     << " -d, --dump-all		Dump AST, symboltable, and code DAG\n"
+    << " -n, --no-automaton Don't dump Automaton"
     << " -q, --quiet		Quiet, don't print progress\n"
     << " --reorder-bdd		Disable BDD index reordering [no, random, heuristic]\n"
     << "Example: ./dWiNA -t -d --reorder-bdd=random foo.mona\n\n";
@@ -105,6 +106,7 @@ bool ParseArguments(int argc, char *argv[])
   options.printProgress = true;
   options.analysis = true;
   options.optimize = 1;
+  options.dontDumpAutomaton = false;
   options.reorder = HEURISTIC; //true;
 
   switch (argc) {
@@ -135,6 +137,8 @@ bool ParseArguments(int argc, char *argv[])
     	  options.reorder = RANDOM;
       else if(strcmp(argv[i], "--reorder-bdd=heuristic") == 0)
     	  options.reorder = HEURISTIC;
+      else if(strcmp(argv[i], "--no-automaton") == 0)
+    	  options.dontDumpAutomaton = true;
       else {
 		switch (argv[i][1]) {
 		  case 'd':
@@ -145,6 +149,9 @@ bool ParseArguments(int argc, char *argv[])
 			break;
 		  case 'q':
 			options.printProgress = false;
+			break;
+		  case 'n':
+			options.dontDumpAutomaton = true;
 			break;
 		  default:
 			return false;
@@ -229,6 +236,10 @@ void heuristicReorder(IdentList *free, IdentList *bound) {
 	if(options.dump) {
 		cout << "[*] Variables reordered by heuristic approach" << std::endl;
 	}
+	std::cout << "Dumping free variables:";
+	free->dump();
+	std::cout << "\nDumping bound variables:";
+	bound->dump();
 	varMap.initializeFromLists(free, bound);
 }
 
@@ -368,6 +379,9 @@ int main(int argc, char *argv[])
   IdentList freeVars, bound;
   (ast->formula)->freeVars(&freeVars, &bound);
 
+  // dump
+  varMap.dumpMap();
+
   // First formula in AST representation is split into matrix and prefix part.
   ASTForm *matrix, *prefix;
   splitMatrixAndPrefix(ast, matrix, prefix);
@@ -401,11 +415,14 @@ int main(int argc, char *argv[])
   StateToStateTranslator stateTransl(translMap,
 	[&stateCnt](const StateType&){return stateCnt++;});
   TStateSet::stateNo = reachable.size();
+  if(options.dump) {
+	  std::cout<< "[*] Number of states in resulting automaton: " << TStateSet::stateNo << "\n";
+  }
 
   formulaAutomaton = formulaAutomaton.ReindexStates(stateTransl);
 
   // Dump automaton
-  if(options.dump) {
+  if(options.dump && !options.dontDumpAutomaton) {
 	  VATA::Serialization::AbstrSerializer* serializer =
 			  new VATA::Serialization::TimbukSerializer();
 	  std::cout << formulaAutomaton.DumpToString(*serializer) << "\n";
