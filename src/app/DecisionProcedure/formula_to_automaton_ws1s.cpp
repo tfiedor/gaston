@@ -10,6 +10,7 @@
 
 #include "../Frontend/ast.h"
 #include "../Frontend/symboltable.h"
+#include "../Frontend/env.h"
 
 #include <cstring>
 #include <list>
@@ -26,10 +27,11 @@
 using std::cout;
 
 extern SymbolTable symbolTable;
+extern Options options;
 
 using Automaton = VATA::BDDBottomUpTreeAut;
 
-#define ALWAYS_DETERMINISTIC_ATOMIC_AUTOMATA
+//#define ALWAYS_DETERMINISTIC_ATOMIC_AUTOMATA
 
 /**
  * Constructs automaton for unary automaton True
@@ -101,10 +103,14 @@ void ASTForm_And::toUnaryAutomaton(Automaton &andAutomaton, bool doComplement) {
 	// use the smaller one
 	// ????
 	// Profit!
-	if (Automaton::CheckInclusion(left, right) == 1) {
-		andAutomaton = left;
-	} else if(Automaton::CheckInclusion(right, left) == 1) {\
-		andAutomaton = right;
+	if(options.optimize > 1) {
+		if (Automaton::CheckInclusion(left, right) == 1) {
+			andAutomaton = left;
+		} else if(Automaton::CheckInclusion(right, left) == 1) {\
+			andAutomaton = right;
+		} else {
+			andAutomaton = Automaton::Intersection(left, right);
+		}
 	} else {
 		andAutomaton = Automaton::Intersection(left, right);
 	}
@@ -129,10 +135,14 @@ void ASTForm_Or::toUnaryAutomaton(Automaton &orAutomaton, bool doComplement) {
 	// if CheckInclusion(left,right) returns 1, that means that right
 	// is bigger and so for union of automata we only have to use the
 	// bigger one
-	if (Automaton::CheckInclusion(left, right) == 1) {
-		orAutomaton = right;
-	} else if(Automaton::CheckInclusion(right, left) == 1) {
-		orAutomaton = left;
+	if(options.optimize > 1) {
+		if (Automaton::CheckInclusion(left, right) == 1) {
+			orAutomaton = right;
+		} else if(Automaton::CheckInclusion(right, left) == 1) {
+			orAutomaton = left;
+		} else {
+			orAutomaton = Automaton::Union(left, right);
+		}
 	} else {
 		orAutomaton = Automaton::Union(left, right);
 	}

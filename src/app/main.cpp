@@ -88,8 +88,9 @@ void PrintUsage()
     << "Options:\n"
     << " -t, --time 		Print elapsed time\n"
     << " -d, --dump-all		Dump AST, symboltable, and code DAG\n"
-    << " -n, --no-automaton Don't dump Automaton"
+    << "     --no-automaton Don't dump Automaton"
     << " -q, --quiet		Quiet, don't print progress\n"
+    << " -oX -              Optimization level (1 = safe optimizations [default], 2 = heuristic)"
     << " --reorder-bdd		Disable BDD index reordering [no, random, heuristic]\n"
     << "Example: ./dWiNA -t -d --reorder-bdd=random foo.mona\n\n";
 }
@@ -150,8 +151,8 @@ bool ParseArguments(int argc, char *argv[])
 		  case 'q':
 			options.printProgress = false;
 			break;
-		  case 'n':
-			options.dontDumpAutomaton = true;
+		  case 'o':
+			options.optimize = argv[i][2] - '0';
 			break;
 		  default:
 			return false;
