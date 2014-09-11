@@ -259,6 +259,7 @@ public:
   ~ASTTerm1_tn() {delete t;}
 
   void freeVars(IdentList*, IdentList*);
+  ASTTerm1* unfoldMacro(IdentList*, ASTList*);
 
   ASTTerm1 *t;
   int n;
@@ -297,6 +298,7 @@ public:
   ~ASTTerm2_Tn() {delete T;}
 
   void freeVars(IdentList*, IdentList*);
+  ASTTerm2 *unfoldMacro(IdentList*, ASTList*);
 
   ASTTerm2 *T;
   int n;
@@ -322,6 +324,7 @@ public:
   ~ASTForm_T() {delete T;}
     
   void freeVars(IdentList*, IdentList*);
+  ASTForm *unfoldMacro(IdentList*, ASTList*);
 
   ASTTerm2 *T;
 };

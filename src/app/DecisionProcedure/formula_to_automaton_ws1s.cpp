@@ -29,7 +29,7 @@ extern SymbolTable symbolTable;
 
 using Automaton = VATA::BDDBottomUpTreeAut;
 
-//#define ALWAYS_DETERMINISTIC_ATOMIC_AUTOMATA
+#define ALWAYS_DETERMINISTIC_ATOMIC_AUTOMATA
 
 /**
  * Constructs automaton for unary automaton True

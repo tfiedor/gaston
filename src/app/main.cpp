@@ -380,6 +380,7 @@ int main(int argc, char *argv[])
   (ast->formula)->freeVars(&freeVars, &bound);
 
   // dump
+  std::cout<< "\n";
   varMap.dumpMap();
 
   // First formula in AST representation is split into matrix and prefix part.
