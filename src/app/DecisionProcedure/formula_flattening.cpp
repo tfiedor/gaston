@@ -219,10 +219,14 @@ ASTForm* ASTForm_Equal2::flatten() {
  * @return: flattened formula
  */
 ASTForm* ASTForm_Less::flatten() {
+#ifdef SMART_FLATTEN
+	return this;
+#else
 	ASTForm_NotEqual1* leftSide = new ASTForm_NotEqual1(this->t1, this->t2, Pos());
 	ASTForm_LessEq* rightSide = new ASTForm_LessEq(this->t1, this->t2, Pos());
 	ASTForm_And* conjuction = new ASTForm_And(leftSide, rightSide, Pos());
 	return conjuction->flatten();
+#endif
 }
 
 /**

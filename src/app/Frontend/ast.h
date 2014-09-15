@@ -939,6 +939,7 @@ public:
 
   VarCode makeCode(SubstCode *subst = NULL);
   void dump();
+  void toUnaryAutomaton(Automaton &aut, bool doComplement);
   ASTForm* clone() { return new ASTForm_Less(this->t1, this->t2, this->pos); }
   ASTForm* flatten();
 };

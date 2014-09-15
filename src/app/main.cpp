@@ -237,10 +237,10 @@ void heuristicReorder(IdentList *free, IdentList *bound) {
 	if(options.dump) {
 		cout << "[*] Variables reordered by heuristic approach" << std::endl;
 	}
-	std::cout << "Dumping free variables:";
+	/*std::cout << "Dumping free variables:";
 	free->dump();
 	std::cout << "\nDumping bound variables:";
-	bound->dump();
+	bound->dump();*/
 	varMap.initializeFromLists(free, bound);
 }
 
@@ -308,7 +308,7 @@ int main(int argc, char *argv[])
 
   /* Initialization of timer used for statistics */
   initTimer();
-  Timer timer_total;
+  Timer timer_total, timer_formula, timer_automaton, timer_deciding;
   timer_total.start();
   
   ///////// PARSING ////////////////////////////////////////////////////////
@@ -338,6 +338,7 @@ int main(int argc, char *argv[])
 	(ast->formula)->dump();
   }
 
+  timer_formula.start();
   // Flattening of the formula
   ast->formula = (ASTForm*) (ast->formula)->toSecondOrder();
   if(options.dump) {
@@ -347,6 +348,7 @@ int main(int argc, char *argv[])
 
   // Transform AST to existentional Prenex Normal Form
   ast->formula = (ASTForm*) (ast->formula)->toExistentionalPNF();
+  timer_formula.stop();
 
   if(options.dump) {
     cout << "\n\n[*] Formula in exPNF:\n";
@@ -370,6 +372,11 @@ int main(int argc, char *argv[])
       cout << "\n";
       pred = predicateLib.next();
     }
+
+    cout << "[*] Input file transformed into formula in Existential Prenex Normal Form\n";
+    cout << "[*] Elapsed time: ";
+    timer_formula.print();
+	  cout << "\n";
   }
   
   ///////// Conversion to Tree Automata ////////
@@ -379,10 +386,6 @@ int main(int argc, char *argv[])
 
   IdentList freeVars, bound;
   (ast->formula)->freeVars(&freeVars, &bound);
-
-  // dump
-  std::cout<< "\n";
-  varMap.dumpMap();
 
   // First formula in AST representation is split into matrix and prefix part.
   ASTForm *matrix, *prefix;
@@ -395,6 +398,7 @@ int main(int argc, char *argv[])
   closePrefix(nplist, &freeVars, (prefix->kind != aNot));
 
   Automaton formulaAutomaton;
+  timer_automaton.start();
   // WS1S formula is transformed to unary NTA
   if(options.mode != TREE) {
 	  matrix->toUnaryAutomaton(formulaAutomaton, false);
@@ -402,9 +406,13 @@ int main(int argc, char *argv[])
   } else {
 	  matrix->toBinaryAutomaton(formulaAutomaton, false);
   }
+  timer_automaton.stop();
 
   if(options.dump) {
 	  std::cout << "[*] Formula transformed into non-determinsitic tree automaton\n";
+	  cout << "[*] Elapsed time: ";
+	  timer_automaton.print();
+	  cout << "\n";
   }
 
   // Remove unreachable states (probably not needed)
@@ -435,12 +443,14 @@ int main(int argc, char *argv[])
   int decided;
   try {
 	  // Deciding WS1S formula
+	  timer_deciding.start();
 	  if(options.mode != TREE) {
 		  decided = decideWS1S(formulaAutomaton, plist, nplist);
 	  // Deciding WS2S formula
 	  } else {
 		  decided = decideWS2S(formulaAutomaton);
 	  }
+	  timer_deciding.stop();
 
 	  // Outing the results of decision procedure
 	  cout << "[!] Formula is ";
@@ -458,6 +468,9 @@ int main(int argc, char *argv[])
 		  cout << "undecidable due to unforeseen error.\n";
 		  break;
 	  }
+	  cout << "[*] Elapsed time: ";
+	  timer_deciding.print();
+	  cout << "\n";
   // Something that was used is not supported by dWiNA
   } catch (NotImplementedException& e) {
 	  std::cerr << e.what() << std::endl;

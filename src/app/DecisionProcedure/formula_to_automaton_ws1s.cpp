@@ -23,6 +23,7 @@
 #include <vata/util/binary_relation.hh>
 
 #include "automata.hh"
+#include "decision_procedures.hh"
 
 using std::cout;
 
@@ -114,6 +115,9 @@ void ASTForm_And::toUnaryAutomaton(Automaton &andAutomaton, bool doComplement) {
 	} else {
 		andAutomaton = Automaton::Intersection(left, right);
 	}
+
+	/*StateHT reachable;
+	andAutomaton.RemoveUnreachableStates(&reachable);*/
 }
 
 /**
@@ -146,6 +150,9 @@ void ASTForm_Or::toUnaryAutomaton(Automaton &orAutomaton, bool doComplement) {
 	} else {
 		orAutomaton = Automaton::Union(left, right);
 	}
+
+	/*StateHT reachable;
+	orAutomaton.RemoveUnreachableStates(&reachable);*/
 }
 
 /**
@@ -161,21 +168,21 @@ void ASTForm_Or::toUnaryAutomaton(Automaton &orAutomaton, bool doComplement) {
 void ASTForm_Equal2::toUnaryAutomaton(Automaton &aut, bool doComplement) {
 	// 1) X = Y1
 	if(this->T1->kind == aVar2 && this->T2->kind == aPlus2) {
-		ASTTerm2_Var2* YTerm = (ASTTerm2_Var2*) this->T1;
-		unsigned int Y = YTerm->n;
-		ASTTerm2_Var2* XTerm = (ASTTerm2_Var2*) ((ASTTerm2_Plus*) this->T2)->T;
+		ASTTerm2_Var2* XTerm = (ASTTerm2_Var2*) this->T1;
 		unsigned int X = XTerm->n;
+		ASTTerm2_Var2* YTerm = (ASTTerm2_Var2*) ((ASTTerm2_Plus*) this->T2)->T;
+		unsigned int Y = YTerm->n;
 		// (xxxx) -> q0
 		addUniversalTransition(aut, Automaton::StateTuple(), 0);
 
 		// q0 -(x00x)-> q0
 		addTransition(aut, Automaton::StateTuple({0}), X, Y, (char *) "00", 0);
 
-		// q0 -(x10x)-> q1
-		addTransition(aut, Automaton::StateTuple({0}), X, Y, (char *) "10", 1);
+		// q0 -(x01x)-> q1
+		addTransition(aut, Automaton::StateTuple({0}), X, Y, (char *) "01", 1);
 
-		// q1 -(x01x)-> q2
-		addTransition(aut, Automaton::StateTuple({1}), X, Y, (char *) "01", 2);
+		// q1 -(x10x)-> q2
+		addTransition(aut, Automaton::StateTuple({1}), X, Y, (char *) "10", 2);
 
 		// q2 -(x00x)-> q2
 		addTransition(aut, Automaton::StateTuple({2}), X, Y, (char *) "00", 2);
@@ -405,6 +412,7 @@ void ASTForm_FirstOrder::toUnaryAutomaton(Automaton &aut, bool doComplement) {
 	// final state q1
 	setNonFinalState(aut, doComplement, 0);
 	setFinalState(aut, doComplement, 1);
+
 #ifndef ALWAYS_DETERMINISTIC_ATOMIC_AUTOMATA
 	if(doComplement) {
 #endif
@@ -437,14 +445,17 @@ void ASTForm_LessEq::toUnaryAutomaton(Automaton &aut, bool doComplement) {
 	// q0 -(x00x)-> q0
 	addTransition(aut, Automaton::StateTuple({0}), x, y, (char *) "00", 0);
 
-	// q0 -(x10x)-> q2
-	addTransition(aut, Automaton::StateTuple({0}), x, y, (char *) "10", 2);
-
 	// q1 -(x00x)-> q1
 	addTransition(aut, Automaton::StateTuple({1}), x, y, (char *) "00", 1);
 
 	// q2 -(x00x)-> q2
-	addTransition(aut, Automaton::StateTuple({0}), x, y, (char *) "00", 2);
+	addTransition(aut, Automaton::StateTuple({2}), x, y, (char *) "00", 2);
+
+	// q0 -(x10x)-> q2
+	addTransition(aut, Automaton::StateTuple({0}), x, y, (char *) "10", 2);
+
+	// q0 -(x11x)-> q1
+	addTransition(aut, Automaton::StateTuple({0}), x, y, (char *) "11", 1);
 
 	// q2 -(x01x)-> q1
 	addTransition(aut, Automaton::StateTuple({2}), x, y, (char *) "01", 1);
@@ -458,9 +469,6 @@ void ASTForm_LessEq::toUnaryAutomaton(Automaton &aut, bool doComplement) {
 #endif
 		// q0 -(x01x)-> q3
 		addTransition(aut, Automaton::StateTuple({0}), x, y, (char *) "01", 3);
-
-		// q0 -(x11x)-> q3
-		addTransition(aut, Automaton::StateTuple({0}), x, y, (char *) "11", 3);
 
 		// q1 -(x01x)-> q3
 		addTransition(aut, Automaton::StateTuple({1}), x, y, (char *) "01", 3);
@@ -484,6 +492,49 @@ void ASTForm_LessEq::toUnaryAutomaton(Automaton &aut, bool doComplement) {
 	}
 #endif
 
+}
+
+/**
+ * Constructs automaton for formula denoting that x is less or equal than yX
+ *
+ * @return Automaton corresponding to the formula x <= y
+ */
+void ASTForm_Less::toUnaryAutomaton(Automaton &aut, bool doComplement) {
+	ASTTerm1_Var1 *xVar = (ASTTerm1_Var1*) this->t1;
+	unsigned int x = (unsigned int) xVar->n;
+	ASTTerm1_Var1 *yVar = (ASTTerm1_Var1*) this->t2;
+	unsigned int y = (unsigned int) yVar->n;
+
+	// -(xxx)-> q0
+	addUniversalTransition(aut, Automaton::StateTuple({}), 0);
+
+	// q0 -(x00x)-> q0
+	addTransition(aut, Automaton::StateTuple({0}), x, y, (char *) "00", 0);
+
+	// q1 -(x00x)-> q1
+	addTransition(aut, Automaton::StateTuple({1}), x, y, (char *) "00", 1);
+
+	// q2 -(x00x)-> q2
+	addTransition(aut, Automaton::StateTuple({2}), x, y, (char *) "00", 2);
+
+	if(doComplement) {
+		// q0 -(x11x)-> q1
+		addTransition(aut, Automaton::StateTuple({0}), x, y, (char *) "11", 1);
+
+		// q0 -(x01x)-> q2
+		addTransition(aut, Automaton::StateTuple({0}), x, y, (char *) "01", 2);
+
+		// q2 -(x10x)-> q1
+		addTransition(aut, Automaton::StateTuple({2}), x, y, (char *) "10", 1);
+	} else {
+		// q0 -(x10x)-> q2
+		addTransition(aut, Automaton::StateTuple({0}), x, y, (char *) "10", 2);
+
+		// q2 -(x01x)-> q1
+		addTransition(aut, Automaton::StateTuple({2}), x, y, (char *) "01", 1);
+	}
+
+	aut.SetStateFinal(1);
 }
 
 /**
@@ -611,8 +662,13 @@ void ASTForm_In::toUnaryAutomaton(Automaton &aut, bool doComplement) {
 		// q0 -(x01x)-> q0
 		addTransition(aut, Automaton::StateTuple({0}), x, X, (char *) "01", 0);
 
-		// q0 -(x11x)-> q1
-		addTransition(aut, Automaton::StateTuple({0}), x, X, (char *) "11", 1);
+		if(doComplement) {
+			// q0 -(x10x)-> q1
+			addTransition(aut, Automaton::StateTuple({0}), x, X, (char *) "10", 1);
+		} else {
+			// q0 -(x11x)-> q1
+			addTransition(aut, Automaton::StateTuple({0}), x, X, (char *) "11", 1);
+		}
 
 		// q1 -(x00x)-> q1
 		addTransition(aut, Automaton::StateTuple({1}), x, X, (char *) "00", 1);
@@ -620,27 +676,6 @@ void ASTForm_In::toUnaryAutomaton(Automaton &aut, bool doComplement) {
 		// q1 -(x01x)-> q1
 		addTransition(aut, Automaton::StateTuple({1}), x, X, (char *) "01", 1);
 
-		setNonFinalState(aut, doComplement, 0);
-		setFinalState(aut, doComplement, 1);
-
-#ifndef ALWAYS_DETERMINISTIC_ATOMIC_AUTOMATA
-		if(doComplement) {
-#endif
-			// q0 -(x10x)-> q2
-			addTransition(aut, Automaton::StateTuple({0}), x, X, (char *) "10", 2);
-
-			// q1 -(x10x)-> q2
-			addTransition(aut, Automaton::StateTuple({1}), x, X, (char *) "10", 2);
-
-			// q1 -(x11x)-> q2
-			addTransition(aut, Automaton::StateTuple({1}), x, X, (char *) "11", 2);
-
-			// q2 -(xXXx)-> q2
-			addUniversalTransition(aut, Automaton::StateTuple({2}), 2);
-
-			setNonFinalState(aut, doComplement, 2);
-#ifndef ALWAYS_DETERMINISTIC_ATOMIC_AUTOMATA
-		}
-#endif
+		aut.SetStateFinal(1);
 	}
 }
