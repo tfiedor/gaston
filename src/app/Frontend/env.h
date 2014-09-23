@@ -36,7 +36,10 @@ public:
     graphvizSatisfyingEx(false), graphvizCounterEx(false), 
     externalWhole(false), demo(false), 
     inheritedAcceptance(false), unrestrict(false), 
-    alternativeM2LStr(false), reorder(HEURISTIC), optimize(0) {}
+    alternativeM2LStr(false), reorder(HEURISTIC), optimize(0),
+    useMonaDFA(false) {}
+
+  bool useMonaDFA;
 
   bool time;
   bool whole;

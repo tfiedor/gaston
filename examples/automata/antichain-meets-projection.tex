@@ -12,21 +12,23 @@
 %\begin{figure}
 % \begin{center}
 \begin{tikzpicture}[->,>=stealth',shorten >=1pt,auto,node distance=5cm,
-                    semithick, transform shape,initial text={}]
+                    very thick, transform shape,initial text={}]
   \tikzstyle{every state}=[fill=none,draw=black,text=black,minimum size=60pt]
 
-  \node[initial,state,fill={rgb:black,1;white,4}] (A)                      
+  \node[initial,state] (A)                      
   {$\{1\}$}; 
-  \node[state,fill={rgb:black,1;white,4}]         (AD) [right of=A]  
+  \node[state]         (AD) [right of=A]  
   {$\{1, 4\}$};
-  \node[state,fill={rgb:black,1;white,4}]         (AB) [below right
+  \node[state]         (AB) [below right
   of=A] {$\{1, 2\}$}; 
-  \node[state]         (ADE) [right of=AD]       {$\{1, 4, 5\}$};
-  \node[state]         (ABC) [below right of=AB] {$\{1, 2, 3\}$};
-  \node[state]         (ABDE) [below right of=AD]    {$\{1, 2, 4,
-  5\}$}; 
-  \node[state]         (ABCDE) [below right of=ABDE] {$\{1, 2,
-  3, 4, 5\}$};
+  \node[state]         (ADE) [right of=AD]      
+  {$\{1, 4, 5\}$}; 
+  \node[state]         (ABC) [below right of=AB]
+  {$\{1, 2, 3\}$};
+  \node[state]         (ABDE) [below right of=AD]   
+  {$\{1, 2, 4, 5\}$}; 
+  \node[state]         (ABCDE) [below right of=ABDE]
+  {$\{1, 2, 3, 4, 5\}$};
   
   \path (A) edge                 node {X: 0}   (AD)
             edge                 node {X: 1}   (AB)
@@ -37,7 +39,7 @@
         (ADE) edge [loop right]  node {X: 0}   (ADE)
               edge               node {X: 1}   (ABDE)
         (ABC) edge               node {X: 0}   (ABCDE)
-              edge [loop left]  node {X: 1}   (ABC)
+              edge [loop left]   node {X: 1}   (ABC)
         (ABDE) edge [loop right] node {X: 0}   (ABDE)
                edge              node {X: 1}   (ABCDE)
         (ABCDE) edge [loop right]node {X: 1\textbar 0}   (ABCDE);

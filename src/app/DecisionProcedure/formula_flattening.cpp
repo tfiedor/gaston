@@ -646,7 +646,6 @@ ASTTerm1* ASTTerm1_Var1::unfoldMacro(IdentList* fParams, ASTList* rParams) {
 	int index = fParams->index(this->n);
 
 	if (index != -1) {
-		(rParams->get(index))->dump();
 		return (ASTTerm1*) rParams->get(index);
 	} else {
 		return (ASTTerm1*) this;
@@ -663,7 +662,6 @@ ASTTerm1* ASTTerm1_Var1::unfoldMacro(IdentList* fParams, ASTList* rParams) {
 ASTTerm2* ASTTerm2_Var2::unfoldMacro(IdentList* fParams, ASTList* rParams) {
 	int index = fParams->index(this->n);
 	if (index != -1) {
-		(rParams->get(index))->dump();
 		return (ASTTerm2*) rParams->get(index);
 	} else {
 		return (ASTTerm2*) this;

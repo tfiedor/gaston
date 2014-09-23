@@ -173,6 +173,11 @@ int decideWS1S(Automaton & aut, PrefixListType formulaPrefixSet, PrefixListType 
 			std::cout << "[!] Found Satisfying example in formula\n";
 		} else {
 			std::cout << "[-] Satisfying example not found in formula\n";
+
+			delete initialState;
+			delete negInitialState;
+
+			return UNSATISFIABLE;
 		}
 	}
 

@@ -86,12 +86,13 @@ void PrintUsage()
 {
   cout << "Usage: dWiNA [options] <filename>\n\n"
     << "Options:\n"
-    << " -t, --time 		Print elapsed time\n"
-    << " -d, --dump-all		Dump AST, symboltable, and code DAG\n"
-    << "     --no-automaton Don't dump Automaton"
-    << " -q, --quiet		Quiet, don't print progress\n"
-    << " -oX -              Optimization level (1 = safe optimizations [default], 2 = heuristic)"
-    << " --reorder-bdd		Disable BDD index reordering [no, random, heuristic]\n"
+    << " -t, --time 		 Print elapsed time\n"
+    << " -d, --dump-all		 Dump AST, symboltable, and code DAG\n"
+    << "     --no-automaton  Don't dump Automaton\n"
+    << "     --use-mona-dfa  Uses MONA for building base automaton\n"
+    << " -q, --quiet		 Quiet, don't print progress\n"
+    << " -oX                 Optimization level (1 = safe optimizations [default], 2 = heuristic)\n"
+    << " --reorder-bdd		 Disable BDD index reordering [no, random, heuristic]\n"
     << "Example: ./dWiNA -t -d --reorder-bdd=random foo.mona\n\n";
 }
 
@@ -140,6 +141,8 @@ bool ParseArguments(int argc, char *argv[])
     	  options.reorder = HEURISTIC;
       else if(strcmp(argv[i], "--no-automaton") == 0)
     	  options.dontDumpAutomaton = true;
+      else if(strcmp(argv[i], "--use-mona-dfa") == 0)
+    	  options.useMonaDFA = true;
       else {
 		switch (argv[i][1]) {
 		  case 'd':
@@ -399,12 +402,57 @@ int main(int argc, char *argv[])
 
   Automaton formulaAutomaton;
   timer_automaton.start();
-  // WS1S formula is transformed to unary NTA
-  if(options.mode != TREE) {
-	  matrix->toUnaryAutomaton(formulaAutomaton, false);
-  // WS2S formula is transformed to binary NTA
+  // Use mona for building automaton instead of VATA
+  // -> this may fail on insufficient memory
+  if(options.useMonaDFA) {
+	  std::cout << "[*] Using MONA DFA (with minimizations) to build base automaton\n";
+
+	  // First code is generated, should be in DAG
+	  codeTable = new CodeTable;
+	  VarCode formulaCode = matrix->makeCode();
+
+	  DFA *dfa = 0;
+
+	  // Initialization
+	  bdd_init();
+	  codeTable->init_print_progress();
+
+	  dfa = formulaCode.DFATranslate();
+	  formulaCode.remove();
+
+	  // unrestrict automata
+	  DFA *temp = dfaCopy(dfa);
+	  dfaUnrestrict(temp);
+	  dfa = dfaMinimize(temp);
+	  dfaFree(temp);
+
+	  // some freaking crappy initializations
+	  IdentList::iterator id;
+	  int ix = 0;
+	  int numVars = varMap.TrackLength();
+	  char **vnames = new char*[numVars];
+	  unsigned *offs = new unsigned[numVars];
+
+	  IdentList free, bounded;
+	  matrix->freeVars(&free, &bounded);
+	  IdentList* vars = ident_union(&free, &bounded);
+
+	  // iterate through all variables
+	  for (id = vars->begin();id != vars->end(); id++, ix++) {
+		  vnames[ix] = symbolTable.lookupSymbol(*id);
+		  offs[ix] = offsets.off(*id);
+	  }
+
+	  convertMonaToVataAutomaton(formulaAutomaton, dfa, numVars, offs);
+  // Build automaton by ourselves, may build huge automata
   } else {
-	  matrix->toBinaryAutomaton(formulaAutomaton, false);
+	  // WS1S formula is transformed to unary NTA
+	  if(options.mode != TREE) {
+		  matrix->toUnaryAutomaton(formulaAutomaton, false);
+	  // WS2S formula is transformed to binary NTA
+	  } else {
+		  matrix->toBinaryAutomaton(formulaAutomaton, false);
+	  }
   }
   timer_automaton.stop();
 
@@ -474,6 +522,11 @@ int main(int argc, char *argv[])
   // Something that was used is not supported by dWiNA
   } catch (NotImplementedException& e) {
 	  std::cerr << e.what() << std::endl;
+  }
+
+  if(options.dump) {
+	  std::cout << "[*] State cache statisitics:\n";
+	  StateCache.dumpStats();
   }
 
   // Prints timing

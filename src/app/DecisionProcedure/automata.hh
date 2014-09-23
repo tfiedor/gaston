@@ -18,6 +18,7 @@
 #include <vata/util/binary_relation.hh>
 
 #include "../Frontend/symboltable.h"
+#include "../Frontend/st_dfa.h"
 #include "containers/VarToTrackMap.hh"
 
 extern VarToTrackMap varMap;
@@ -29,6 +30,7 @@ char charToAsgn(char c);
 void addTransition(Automaton& aut, Automaton::StateTuple q, int x, int y, char* track, int qf);
 void addTransition(Automaton& aut, Automaton::StateTuple q, int x, char track, int qf);
 void addUniversalTransition(Automaton& automaton, Automaton::StateTuple from, Automaton::StateType to);
+void convertMonaToVataAutomaton(Automaton& v_aut, DFA* m_aut, int varNum, unsigned* offsets);
 
 Automaton::SymbolType constructUniversalTrack();
 
