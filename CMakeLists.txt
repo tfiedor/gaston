@@ -41,6 +41,7 @@ add_executable(dWiNA
 	src/app/DecisionProcedure/formula_to_automaton_ws1s.cpp
 	src/app/DecisionProcedure/formula_to_automaton_ws2s.cpp
 	src/app/DecisionProcedure/decision_procedures.cpp
+	src/app/DecisionProcedure/backward_decision_procedure.cpp
 	src/app/DecisionProcedure/containers/VarToTrackMap.cpp
 	src/app/DecisionProcedure/containers/StateSet.cpp
 )

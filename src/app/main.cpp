@@ -84,16 +84,17 @@ extern Ident lastPosVar, allPosVar;
  */
 void PrintUsage()
 {
-  cout << "Usage: dWiNA [options] <filename>\n\n"
-    << "Options:\n"
-    << " -t, --time 		 Print elapsed time\n"
-    << " -d, --dump-all		 Dump AST, symboltable, and code DAG\n"
-    << "     --no-automaton  Don't dump Automaton\n"
-    << "     --use-mona-dfa  Uses MONA for building base automaton\n"
-    << " -q, --quiet		 Quiet, don't print progress\n"
-    << " -oX                 Optimization level (1 = safe optimizations [default], 2 = heuristic)\n"
-    << " --reorder-bdd		 Disable BDD index reordering [no, random, heuristic]\n"
-    << "Example: ./dWiNA -t -d --reorder-bdd=random foo.mona\n\n";
+	cout << "Usage: dWiNA [options] <filename>\n\n"
+		<< "Options:\n"
+		<< " -t, --time 		 Print elapsed time\n"
+		<< " -d, --dump-all		 Dump AST, symboltable, and code DAG\n"
+		<< "     --no-automaton  Don't dump Automaton\n"
+		<< "     --use-mona-dfa  Uses MONA for building base automaton\n"
+		<< " -q, --quiet		 Quiet, don't print progress\n"
+		<< " -oX                 Optimization level [1 = safe optimizations [default], 2 = heuristic]\n"
+		<< " --method            Use either forward or backward method [backward [default], forward]\n"
+		<< " --reorder-bdd		 Disable BDD index reordering [no, random, heuristic]\n"
+		<< "Example: ./dWiNA -t -d --reorder-bdd=random foo.mona\n\n";
 }
 
 /**
@@ -110,6 +111,7 @@ bool ParseArguments(int argc, char *argv[])
   options.optimize = 1;
   options.dontDumpAutomaton = false;
   options.reorder = HEURISTIC; //true;
+  options.method = FORWARD; // TODO: For now
 
   switch (argc) {
   // missing file with formula
@@ -143,7 +145,12 @@ bool ParseArguments(int argc, char *argv[])
     	  options.dontDumpAutomaton = true;
       else if(strcmp(argv[i], "--use-mona-dfa") == 0)
     	  options.useMonaDFA = true;
-      else {
+      else if(strcmp(argv[i], "--method=forward") == 0)
+    	  options.method = FORWARD;
+      else if(strcmp(argv[i], "--method=backward") == 0) {
+    	  options.method = BACKWARD;
+    	  std::cout << "Backwaaaaaaaaard\n";
+      } else {
 		switch (argv[i][1]) {
 		  case 'd':
 			options.dump = true;
@@ -390,6 +397,8 @@ int main(int argc, char *argv[])
   IdentList freeVars, bound;
   (ast->formula)->freeVars(&freeVars, &bound);
 
+  bool formulaIsGround = freeVars.empty();
+
   // First formula in AST representation is split into matrix and prefix part.
   ASTForm *matrix, *prefix;
   splitMatrixAndPrefix(ast, matrix, prefix);
@@ -493,7 +502,11 @@ int main(int argc, char *argv[])
 	  // Deciding WS1S formula
 	  timer_deciding.start();
 	  if(options.mode != TREE) {
-		  decided = decideWS1S(formulaAutomaton, plist, nplist);
+		  if(options.method == FORWARD) {
+			  decided = decideWS1S(formulaAutomaton, plist, nplist);
+		  } else {
+			  decided = decideWS1S_backwards(formulaAutomaton, plist, nplist, formulaIsGround);
+		  }
 	  // Deciding WS2S formula
 	  } else {
 		  decided = decideWS2S(formulaAutomaton);

@@ -23,6 +23,7 @@
 
 enum Mode {LINEAR, TREE};
 enum ReorderMode {NO, RANDOM, HEURISTIC};
+enum Method {FORWARD, BACKWARD};
 
 class Options {
 public:
@@ -40,6 +41,7 @@ public:
     useMonaDFA(false) {}
 
   bool useMonaDFA;
+  Method method;
 
   bool time;
   bool whole;

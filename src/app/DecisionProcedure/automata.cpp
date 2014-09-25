@@ -37,6 +37,41 @@ char charToAsgn(char c) {
 }
 
 /**
+ * Constructs following transition for automaton
+ *   q -(transition)-> qf
+ *
+ *   @param[in] aut: automaton, where we are adding track
+ *   @param[in] q: initial state
+ *   @param[in] transition: track of state
+ *   @param[in] qf: post state
+ */
+void addTransition(Automaton& aut, unsigned int q, Automaton::SymbolType transition, unsigned int qf) {
+	if(options.method == FORWARD) {
+		aut.AddTransition(Automaton::StateTuple({q}), transition, qf);
+	} else if (options.method == BACKWARD) {
+		aut.AddTransition(Automaton::StateTuple({qf}), transition, q);
+	} else {
+		std::cerr << "Method not implemented\n";
+		throw NotImplementedException();
+	}
+}
+
+/**
+ * Constructs following transition for automaton
+ *   q -(transition)-> qf
+ *
+ *   @param[in] aut: automaton, where we are adding track
+ *   @param[in] q: initial state
+ *   @param[in] transition: track of state
+ *   @param[in] qf: post state
+ *
+ *   TODO: Is this needed?
+ */
+void addTransition(Automaton& aut, unsigned int q, char* transition, unsigned int qf) {
+	addTransition(aut, q, Automaton::SymbolType(transition), qf);
+}
+
+/**
  * Constructs following transition for automaton:
  *   q -(xx'XY'xx)-> qf
  *
@@ -47,12 +82,12 @@ char charToAsgn(char c) {
  * @param track: transition string
  * @param qf: state where we head
  */
-void addTransition(Automaton& aut, Automaton::StateTuple q, int x, int y, char* track, int qf) {
+void addTransition(Automaton& aut, unsigned int q, int x, int y, char* track, int qf) {
 	// TODO: add assert to tracklen
 	Automaton::SymbolType bddTrack = constructUniversalTrack();
 	bddTrack.SetIthVariableValue(varMap[x], charToAsgn(track[0]));
 	bddTrack.SetIthVariableValue(varMap[y], charToAsgn(track[1]));
-	aut.AddTransition(q, bddTrack, qf);
+	addTransition(aut, q, bddTrack, qf);
 }
 
 /**
@@ -65,10 +100,10 @@ void addTransition(Automaton& aut, Automaton::StateTuple q, int x, int y, char* 
  * @param track: transition string
  * @param qf: state where we head
  */
-void addTransition(Automaton& aut, Automaton::StateTuple q, int x, char track, int qf) {
+void addTransition(Automaton& aut, unsigned int q, int x, char track, int qf) {
 	Automaton::SymbolType bddTrack = constructUniversalTrack();
 	bddTrack.SetIthVariableValue(varMap[x], charToAsgn(track));
-	aut.AddTransition(q, bddTrack, qf);
+	addTransition(aut, q, bddTrack, qf);
 }
 
 /**
@@ -80,11 +115,10 @@ void addTransition(Automaton& aut, Automaton::StateTuple q, int x, char track, i
  */
 void addUniversalTransition(
 		Automaton& automaton,
-		Automaton::StateTuple from,
-		Automaton::StateType to) {
-	automaton.AddTransition(from, constructUniversalTrack(), to);
+		unsigned int from,
+		unsigned int to) {
+	addTransition(automaton, from, constructUniversalTrack(), to);
 }
-
 
 /**
  * Constructs universal track X^k according to the number of variables used

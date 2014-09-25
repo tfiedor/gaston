@@ -56,7 +56,8 @@ using StateTuple = std::vector<StateType>;
 using MTBDDLeafStateSet = VATA::Util::OrdVector<StateType>;
 using TransMTBDD = VATA::MTBDDPkg::OndriksMTBDD<MTBDDLeafStateSet>;
 using MacroTransMTBDD = VATA::MTBDDPkg::OndriksMTBDD<MacroStateSet*>;
-typedef StateHT FinalStatesType;
+typedef StateHT BaseFinalStatesType;
+typedef MacroStateSet* FinalStateType;
 typedef StateHT StateSetType;
 
 // < Module Functions >
@@ -66,7 +67,7 @@ bool existsSatisfyingExample(Automaton & aut, MacroStateSet* initialState, Prefi
 bool existsUnsatisfyingExample(Automaton & aut, MacroStateSet* initialState, PrefixListType negFormulaPrefixSet);
 PrefixListType convertPrefixFormulaToList(ASTForm* formula);
 void closePrefix(PrefixListType & prefix, IdentList* freeVars, bool negationIsTopmonst);
-FinalStatesType computeFinalStates(Automaton & aut);
+BaseFinalStatesType getBaseFinalStates(Automaton & aut);
 TransMTBDD* getMTBDDForStateTuple(Automaton & aut, const StateTuple & states);
 void getInitialStatesOfAutomaton(Automaton & aut, MTBDDLeafStateSet &);
 MacroStateSet* constructInitialState(Automaton &  aut, unsigned numberOfDeterminizations);
@@ -75,5 +76,11 @@ MacroStateSet* GetZeroPost(Automaton & aut, TStateSet*& state, unsigned level, P
 int getProjectionVariable(unsigned level, PrefixListType & prefix);
 MacroTransMTBDD GetMTBDDForPost(Automaton & aut, TStateSet* state, unsigned level, PrefixListType & prefix);
 bool isNotEnqueued(StateSetList & queue, TStateSet*& state);
+
+// < Backward decision procedure functions >
+int decideWS1S_backwards(Automaton &aut, PrefixListType formulaPrefixSet, PrefixListType negFormulaPrefixSet, bool formulaIsGround);
+bool testValidity(Automaton &aut, PrefixListType prefix);
+FinalStateType computeFinalStates(Automaton &aut, PrefixListType prefix, unsigned int detNo);
+bool initialStateIsInFinalStates(MacroStateSet *initial, MacroStateSet *finalStates);
 
 #endif

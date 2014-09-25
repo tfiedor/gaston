@@ -138,6 +138,30 @@ src/app/DecisionProcedure/automata.cpp.s:
 	$(MAKE) -f CMakeFiles/dWiNA.dir/build.make CMakeFiles/dWiNA.dir/src/app/DecisionProcedure/automata.cpp.s
 .PHONY : src/app/DecisionProcedure/automata.cpp.s
 
+src/app/DecisionProcedure/backward_decision_procedure.o: src/app/DecisionProcedure/backward_decision_procedure.cpp.o
+.PHONY : src/app/DecisionProcedure/backward_decision_procedure.o
+
+# target to build an object file
+src/app/DecisionProcedure/backward_decision_procedure.cpp.o:
+	$(MAKE) -f CMakeFiles/dWiNA.dir/build.make CMakeFiles/dWiNA.dir/src/app/DecisionProcedure/backward_decision_procedure.cpp.o
+.PHONY : src/app/DecisionProcedure/backward_decision_procedure.cpp.o
+
+src/app/DecisionProcedure/backward_decision_procedure.i: src/app/DecisionProcedure/backward_decision_procedure.cpp.i
+.PHONY : src/app/DecisionProcedure/backward_decision_procedure.i
+
+# target to preprocess a source file
+src/app/DecisionProcedure/backward_decision_procedure.cpp.i:
+	$(MAKE) -f CMakeFiles/dWiNA.dir/build.make CMakeFiles/dWiNA.dir/src/app/DecisionProcedure/backward_decision_procedure.cpp.i
+.PHONY : src/app/DecisionProcedure/backward_decision_procedure.cpp.i
+
+src/app/DecisionProcedure/backward_decision_procedure.s: src/app/DecisionProcedure/backward_decision_procedure.cpp.s
+.PHONY : src/app/DecisionProcedure/backward_decision_procedure.s
+
+# target to generate assembly for a file
+src/app/DecisionProcedure/backward_decision_procedure.cpp.s:
+	$(MAKE) -f CMakeFiles/dWiNA.dir/build.make CMakeFiles/dWiNA.dir/src/app/DecisionProcedure/backward_decision_procedure.cpp.s
+.PHONY : src/app/DecisionProcedure/backward_decision_procedure.cpp.s
+
 src/app/DecisionProcedure/containers/StateSet.o: src/app/DecisionProcedure/containers/StateSet.cpp.o
 .PHONY : src/app/DecisionProcedure/containers/StateSet.o
 
@@ -870,6 +894,9 @@ help:
 	@echo "... src/app/DecisionProcedure/automata.o"
 	@echo "... src/app/DecisionProcedure/automata.i"
 	@echo "... src/app/DecisionProcedure/automata.s"
+	@echo "... src/app/DecisionProcedure/backward_decision_procedure.o"
+	@echo "... src/app/DecisionProcedure/backward_decision_procedure.i"
+	@echo "... src/app/DecisionProcedure/backward_decision_procedure.s"
 	@echo "... src/app/DecisionProcedure/containers/StateSet.o"
 	@echo "... src/app/DecisionProcedure/containers/StateSet.i"
 	@echo "... src/app/DecisionProcedure/containers/StateSet.s"

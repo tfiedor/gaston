@@ -27,7 +27,7 @@ extern MultiLevelMCache<MacroTransMTBDD> BDDCache;
  * @param aut: Automaton for matrix
  * @return: final states of automaton corresponding to final formula
  */
-FinalStatesType computeFinalStates(Automaton & aut) {
+BaseFinalStatesType getBaseFinalStates(Automaton & aut) {
 	return aut.GetFinalStates();
 }
 
