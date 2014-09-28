@@ -75,12 +75,12 @@ bool StateIsFinal(Automaton & aut, TStateSet* state, unsigned level, PrefixListT
 MacroStateSet* GetZeroPost(Automaton & aut, TStateSet*& state, unsigned level, PrefixListType & prefix);
 int getProjectionVariable(unsigned level, PrefixListType & prefix);
 MacroTransMTBDD GetMTBDDForPost(Automaton & aut, TStateSet* state, unsigned level, PrefixListType & prefix);
-bool isNotEnqueued(StateSetList & queue, TStateSet*& state);
+bool isNotEnqueued(StateSetList & queue, TStateSet*& state, unsigned level);
 
 // < Backward decision procedure functions >
 int decideWS1S_backwards(Automaton &aut, PrefixListType formulaPrefixSet, PrefixListType negFormulaPrefixSet, bool formulaIsGround);
 bool testValidity(Automaton &aut, PrefixListType prefix);
-FinalStateType computeFinalStates(Automaton &aut, PrefixListType prefix, unsigned int detNo);
+MacroStateSet* computeFinalStates(Automaton &aut, PrefixListType prefix, unsigned int detNo);
 bool initialStateIsInFinalStates(MacroStateSet *initial, MacroStateSet *finalStates);
 
 #endif

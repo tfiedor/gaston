@@ -6,6 +6,7 @@
  *****************************************************************************/
 
 #define _LANGUAGE_C_PLUS_PLUS
+#define DEBUG_DP
 
 // < System Headers >
 #include <iostream>
@@ -147,10 +148,9 @@ bool ParseArguments(int argc, char *argv[])
     	  options.useMonaDFA = true;
       else if(strcmp(argv[i], "--method=forward") == 0)
     	  options.method = FORWARD;
-      else if(strcmp(argv[i], "--method=backward") == 0) {
+      else if(strcmp(argv[i], "--method=backward") == 0)
     	  options.method = BACKWARD;
-    	  std::cout << "Backwaaaaaaaaard\n";
-      } else {
+      else {
 		switch (argv[i][1]) {
 		  case 'd':
 			options.dump = true;
@@ -406,8 +406,12 @@ int main(int argc, char *argv[])
   // Transform prefix to set of sets of second-order variables
   PrefixListType plist = convertPrefixFormulaToList(prefix);
   PrefixListType nplist(plist);
-  closePrefix(plist, &freeVars, (prefix->kind == aNot));
-  closePrefix(nplist, &freeVars, (prefix->kind != aNot));
+
+  // If formula is not ground, we close it
+  if(freeVars.size() != 0) {
+	  closePrefix(plist, &freeVars, (prefix->kind == aNot));
+	  closePrefix(nplist, &freeVars, (prefix->kind != aNot));
+  }
 
   Automaton formulaAutomaton;
   timer_automaton.start();
@@ -495,6 +499,20 @@ int main(int argc, char *argv[])
 	  std::cout << formulaAutomaton.DumpToString(*serializer) << "\n";
 	  delete serializer;
   }
+
+#ifdef DEBUG_DP
+	StateHT allStates;
+	formulaAutomaton.RemoveUnreachableStates(&allStates);
+	TransMTBDD * tbdd = getMTBDDForStateTuple(formulaAutomaton, Automaton::StateTuple({}));
+	std::cout << "Leaf : bdd\n";
+	std::cout << TransMTBDD::DumpToDot({tbdd}) << "\n\n";
+	// Dump bdds
+	for (auto state : allStates) {
+		TransMTBDD* bdd = getMTBDDForStateTuple(formulaAutomaton, Automaton::StateTuple({state}));
+		std::cout << state << " : bdd\n";
+		std::cout << TransMTBDD::DumpToDot({bdd}) << "\n\n";
+	}
+#endif
 
   ///////// DECISION PROCEDURE /////////////////////////////////////////////
   int decided;

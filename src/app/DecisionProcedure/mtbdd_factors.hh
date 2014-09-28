@@ -46,7 +46,7 @@ public:
 				mask.set(state, true);
 			}
 		} else {
-			states.push_back(new LeafStateSet());
+			//states.push_back(new LeafStateSet());
 		}
 
 		return new MacroStateSet(states, mask);

@@ -46,9 +46,11 @@ public:
 	// < Public Members >
 	unsigned int type;
 	TLeafMask leaves;
+	bool stateIsSink;
 
 	// < Public Methods >
 	virtual void dump() {}
+	virtual void closed_dump(unsigned int level) {}
 	virtual bool DoCompare(TStateSet*) {return false;};
 	virtual bool CanBePruned(TStateSet*, unsigned) {return false;};
 	virtual std::string ToString() {}
@@ -72,6 +74,7 @@ public:
 	LeafStateSet () : state(-1), stateIsSink(true) {type = STATE;}
 
 	void dump();
+	void closed_dump(unsigned int level);
 	std::string ToString();
 	bool isSink() {return this->stateIsSink; }
 
@@ -157,10 +160,13 @@ public:
 	}
 
 	void dump();
+	void closed_dump(unsigned int level);
 	std::string ToString();
 	StateSetList getMacroStates();
 	StateSetList getMacroStates() const;
 	void addState(TStateSet* state);
+	void unionMacroSets(MacroStateSet* state);
+	bool isEmpty() { return this->macroStates.size() == 0; }
 
 	MacroStateSet(const MacroStateSet &mSet) {
 		this->leaves = mSet.leaves;

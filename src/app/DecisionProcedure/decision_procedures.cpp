@@ -102,7 +102,7 @@ bool existsSatisfyingExample(Automaton & aut, MacroStateSet* initialState, Prefi
 			MacroStateCollectorFunctor msc(reachable);
 			msc(postMTBDD);
 
-			// push all successors to workilst
+			// push all successors to worklist
 			for (auto it = reachable.begin(); it != reachable.end(); ++it) {
 				if (isNotEnqueued(processed, *it, determinizationNo)) {
 					worklist.push_back(*it);
@@ -407,13 +407,21 @@ void getInitialStatesOfAutomaton(Automaton & aut, MTBDDLeafStateSet & initialSta
  */
 MacroStateSet* constructInitialState(Automaton & aut, unsigned numberOfDeterminizations) {
 	// Getting initial states
-	MTBDDLeafStateSet matrixInitialStates;
-	getInitialStatesOfAutomaton(aut, matrixInitialStates);
-
-	// first construct the set of leaf states
 	StateSetList states;
-	for (auto state : matrixInitialStates) {
-		states.push_back(new LeafStateSet(state));
+	if(options.method == FORWARD) {
+		MTBDDLeafStateSet matrixInitialStates;
+		getInitialStatesOfAutomaton(aut, matrixInitialStates);
+
+		// first construct the set of leaf states
+		for (auto state : matrixInitialStates) {
+			states.push_back(new LeafStateSet(state));
+		}
+	// backward procedure treats final states as initial
+	} else if(options.method == BACKWARD) {
+		StateHT initialStates = aut.GetFinalStates();
+		for (auto state : initialStates) {
+			states.push_back(new LeafStateSet(state));
+		}
 	}
 
 	// now add some levels

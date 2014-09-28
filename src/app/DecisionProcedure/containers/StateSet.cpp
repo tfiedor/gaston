@@ -19,6 +19,10 @@ void LeafStateSet::dump() {
 	std::cout << this->state;
 }
 
+void LeafStateSet::closed_dump(unsigned int level) {
+	std::cout << this->state;
+}
+
 /**
  * Overloaded function for conversion to string
  *
@@ -80,6 +84,28 @@ void MacroStateSet::dump() {
 }
 
 /**
+ * Prints representation according to the upward and downward closures
+ */
+void MacroStateSet::closed_dump(unsigned int level) {
+	if((level-1) % 2 == 0) {
+		std::cout << "v{ ";
+	} else {
+		std::cout << "^"  << "{ ";
+	}
+
+	unsigned int numberOfStates = this->macroStates.size();
+
+	for (TStateSet* macroState : this->macroStates) {
+		--numberOfStates;
+		macroState->closed_dump(level - 1);
+		if (numberOfStates != 0) {
+			std::cout << ", ";
+		}
+	}
+	std::cout << "}";
+}
+
+/**
  * Retrieves list of states contained in macro state
  *
  * @return: list of state sets
@@ -100,10 +126,26 @@ StateSetList MacroStateSet::getMacroStates() const {
 /**
  * Adds state to the macro set
  *
+ * TODO: Should add antichain pruning
  * @param state: state to be added
  */
 void MacroStateSet::addState(TStateSet* state) {
-	this->macroStates.push_back(state);
+	if(!(state->type == STATE && state->stateIsSink)) {
+		auto matching_iter = std::find_if(this->macroStates.begin(), this->macroStates.end(),
+			[state](TStateSet* s) {
+				return s->DoCompare(state);
+			});
+		this->macroStates.push_back(state);
+	}
+}
+
+/**
+ * Does union of two macrostates
+ *
+ * @param[in] state: Macro state set we are adding (unioning with)
+ */
+void MacroStateSet::unionMacroSets(MacroStateSet* state) {
+
 }
 
 unsigned int TStateSet::stateNo = 0;
