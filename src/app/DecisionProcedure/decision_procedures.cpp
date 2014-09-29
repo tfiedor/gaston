@@ -449,9 +449,46 @@ MacroStateSet* constructInitialState(Automaton & aut, unsigned numberOfDetermini
  */
 MacroStateSet* GetZeroPost(Automaton & aut, TStateSet*& state, unsigned level, PrefixListType & prefix) {
 	const MacroTransMTBDD & transPost = GetMTBDDForPost(aut, state, level, prefix);
+std::cout << "BDD: \n";
+std::cout << MacroTransMTBDD::DumpToDot({&transPost}) << "\n\n";
 	MacroStateSet *postStates = transPost.GetValue(constructUniversalTrack());
 
 	return postStates;
+}
+
+/**
+ * Constructs a post through zero tracks for backwards procedure which is
+ * a little bit different to handle.
+ *
+ * @param aut: base automaton
+ * @param state: initial state we are getting zero post for
+ * @param level: level of macro inception
+ * @param prefix: list of variables for projection
+ * @return zero post of initial @p state
+ */
+MacroStateSet* GetZeroMacroPost(Automaton & aut, TStateSet*& state, unsigned level, PrefixListType & prefix) {
+	if(level == 0) {
+		return GetZeroPost(aut, state, level, prefix);
+	} else {
+		if(level == 1 && (((MacroStateSet*)state)->getMacroStates()).size() == 0) {
+			return new MacroStateSet();
+		} else {
+			const MacroTransMTBDD & transPost = GetMTBDDForPost(aut, state, level, prefix);
+			int projecting = getProjectionVariable(level, prefix);
+			MacroUnionFunctor muf;
+			MacroStateDeterminizatorFunctor msdf;
+
+			MacroTransMTBDD projectedMtbdd = (msdf(transPost)).Project(
+					[&transPost, projecting](size_t var) { return var < projecting;}, muf);
+
+			std::cout << "BDD: \n";
+			std::cout << MacroTransMTBDD::DumpToDot({&projectedMtbdd}) << "\n\n";
+
+			MacroStateSet *postStates = projectedMtbdd.GetValue(constructUniversalTrack());
+
+			return postStates;
+		}
+	}
 }
 
 /**

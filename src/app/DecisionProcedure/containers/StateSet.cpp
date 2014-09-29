@@ -87,7 +87,7 @@ void MacroStateSet::dump() {
  * Prints representation according to the upward and downward closures
  */
 void MacroStateSet::closed_dump(unsigned int level) {
-	if((level-1) % 2 == 0) {
+	if(level % 2 == 0) {
 		std::cout << "v{ ";
 	} else {
 		std::cout << "^"  << "{ ";

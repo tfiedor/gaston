@@ -393,6 +393,10 @@ int main(int argc, char *argv[])
 
   // Table or BDD tracks are reordered
   reorder(options.reorder, ast->formula);
+#ifdef DEBUG_DP
+  varMap.dumpMap();
+  std::cout << "\n";
+#endif
 
   IdentList freeVars, bound;
   (ast->formula)->freeVars(&freeVars, &bound);

@@ -35,7 +35,7 @@
 #include "automata.hh"
 #include "mtbdd_factors.hh"
 
-#define PRUNE_BY_RELATION
+//#define PRUNE_BY_RELATION
 #define SMART_FLATTEN
 #define USE_STATECACHE
 // BDD Cache is temporary disable due to the memory leaks
@@ -73,6 +73,7 @@ void getInitialStatesOfAutomaton(Automaton & aut, MTBDDLeafStateSet &);
 MacroStateSet* constructInitialState(Automaton &  aut, unsigned numberOfDeterminizations);
 bool StateIsFinal(Automaton & aut, TStateSet* state, unsigned level, PrefixListType & prefix);
 MacroStateSet* GetZeroPost(Automaton & aut, TStateSet*& state, unsigned level, PrefixListType & prefix);
+MacroStateSet* GetZeroMacroPost(Automaton & aut, TStateSet*& state, unsigned level, PrefixListType & prefix);
 int getProjectionVariable(unsigned level, PrefixListType & prefix);
 MacroTransMTBDD GetMTBDDForPost(Automaton & aut, TStateSet* state, unsigned level, PrefixListType & prefix);
 bool isNotEnqueued(StateSetList & queue, TStateSet*& state, unsigned level);
