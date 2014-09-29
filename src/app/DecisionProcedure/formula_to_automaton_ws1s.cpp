@@ -184,9 +184,8 @@ void ASTForm_Equal2::toUnaryAutomaton(Automaton &aut, bool doComplement) {
 		// q1 -(x10x)-> q2
 		addTransition(aut, 1, X, Y, (char *) "10", 2);
 
-		// TODO: UNCOMMENT!
 		// q1 -(x11x)-> q1
-		//addTransition(aut, 1, X, Y, (char *) "11", 1);
+		addTransition(aut, 1, X, Y, (char *) "11", 1);
 
 		// q2 -(x00x)-> q2
 		addTransition(aut, 2, X, Y, (char *) "00", 2);
@@ -209,7 +208,7 @@ void ASTForm_Equal2::toUnaryAutomaton(Automaton &aut, bool doComplement) {
 			addTransition(aut, 1, X, Y, (char *) "00", 3);
 
 			// q1 -(x10x)-> q3
-			//addTransition(aut, 1, X, Y, (char *) "10", 3);
+			addTransition(aut, 1, X, Y, (char *) "10", 3);
 
 			// q1 -(x11x)-> q3
 			addTransition(aut, 1, X, Y, (char *) "11", 3);
