@@ -51,6 +51,8 @@ using Automaton = VATA::BDDBottomUpTreeAut;
 
 typedef unsigned int uint;
 
+#define DEBUG_BDDS
+
 // < Global variables >
 Options options;
 MonaUntypedAST *untypedAST;

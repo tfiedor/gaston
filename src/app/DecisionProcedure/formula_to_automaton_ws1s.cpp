@@ -519,7 +519,7 @@ void ASTForm_Less::toUnaryAutomaton(Automaton &aut, bool doComplement) {
 		addTransition(aut, 2, x, y, (char *) "01", 1);
 	}
 
-	aut.SetStateFinal(1);
+	setFinalState(aut, doComplement, 1);
 }
 
 /**
@@ -661,7 +661,7 @@ void ASTForm_In::toUnaryAutomaton(Automaton &aut, bool doComplement) {
 		// q1 -(x01x)-> q1
 		addTransition(aut, 1, x, X, (char *) "01", 1);
 
-		aut.SetStateFinal(1);
+		setFinalState(aut, doComplement, 1);
 	}
 }
 
@@ -687,7 +687,7 @@ void convertMonaToVataAutomaton(Automaton& v_aut, DFA* m_aut, int varNum, unsign
 	for (unsigned int i = 0; i < m_aut->ns; ++i) {
 		// set final states
 		if(m_aut->f[i] == 1) {
-			v_aut.SetStateFinal(i);
+			setFinalState(v_aut, false, i);
 		}
 
 		state_paths = pp = make_paths(m_aut->bddm, m_aut->q[i]);
