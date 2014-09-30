@@ -82,6 +82,6 @@ bool isNotEnqueued(StateSetList & queue, TStateSet*& state, unsigned level);
 int decideWS1S_backwards(Automaton &aut, PrefixListType formulaPrefixSet, PrefixListType negFormulaPrefixSet, bool formulaIsGround);
 bool testValidity(Automaton &aut, PrefixListType prefix);
 MacroStateSet* computeFinalStates(Automaton &aut, PrefixListType prefix, unsigned int detNo);
-bool initialStateIsInFinalStates(MacroStateSet *initial, MacroStateSet *finalStates);
+bool initialStateIsInFinalStates(MacroStateSet *initial, MacroStateSet *finalStates, unsigned int level);
 
 #endif

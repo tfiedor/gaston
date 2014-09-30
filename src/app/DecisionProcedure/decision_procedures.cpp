@@ -449,8 +449,6 @@ MacroStateSet* constructInitialState(Automaton & aut, unsigned numberOfDetermini
  */
 MacroStateSet* GetZeroPost(Automaton & aut, TStateSet*& state, unsigned level, PrefixListType & prefix) {
 	const MacroTransMTBDD & transPost = GetMTBDDForPost(aut, state, level, prefix);
-std::cout << "BDD: \n";
-std::cout << MacroTransMTBDD::DumpToDot({&transPost}) << "\n\n";
 	MacroStateSet *postStates = transPost.GetValue(constructUniversalTrack());
 
 	return postStates;
@@ -480,9 +478,10 @@ MacroStateSet* GetZeroMacroPost(Automaton & aut, TStateSet*& state, unsigned lev
 
 			MacroTransMTBDD projectedMtbdd = (msdf(transPost)).Project(
 					[&transPost, projecting](size_t var) { return var < projecting;}, muf);
-
+#ifdef DEBUG_BDDS
 			std::cout << "BDD: \n";
 			std::cout << MacroTransMTBDD::DumpToDot({&projectedMtbdd}) << "\n\n";
+#endif
 
 			MacroStateSet *postStates = projectedMtbdd.GetValue(constructUniversalTrack());
 

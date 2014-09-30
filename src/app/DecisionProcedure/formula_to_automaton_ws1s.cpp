@@ -167,6 +167,7 @@ void ASTForm_Or::toUnaryAutomaton(Automaton &orAutomaton, bool doComplement) {
  */
 void ASTForm_Equal2::toUnaryAutomaton(Automaton &aut, bool doComplement) {
 	// 1) X = Y1
+	// TODO: This is not right
 	if(this->T1->kind == aVar2 && this->T2->kind == aPlus2) {
 		ASTTerm2_Var2* XTerm = (ASTTerm2_Var2*) this->T1;
 		unsigned int X = XTerm->n;
@@ -181,48 +182,29 @@ void ASTForm_Equal2::toUnaryAutomaton(Automaton &aut, bool doComplement) {
 		// q0 -(x01x)-> q1
 		addTransition(aut, 0, X, Y, (char *) "01", 1);
 
-		// q1 -(x10x)-> q2
-		addTransition(aut, 1, X, Y, (char *) "10", 2);
-
 		// q1 -(x11x)-> q1
 		addTransition(aut, 1, X, Y, (char *) "11", 1);
 
-		// q2 -(x00x)-> q2
-		addTransition(aut, 2, X, Y, (char *) "00", 2);
+		// q1 -(x10x)-> q0
+		addTransition(aut, 1, X, Y, (char *) "10", 0);
 
-		// set q2 final
-		setNonFinalState(aut, doComplement, 0);
+		setFinalState(aut, doComplement, 0);
 		setNonFinalState(aut, doComplement, 1);
-		setFinalState(aut, doComplement, 2);
+
 
 #ifndef ALWAYS_DETERMINISTIC_ATOMIC_AUTOMATA
 		if(doComplement) {
 #endif
-			// q0 -(x01x)-> q3
-			addTransition(aut, 0, X, Y, (char *) "01", 3);
+			// q0 -(x1Xx)-> q2
+			addTransition(aut, 0, X, Y, (char *) "1X", 2);
 
-			// q0 -(x11x)-> q3
-			addTransition(aut, 0, X, Y, (char *) "11", 3);
+			// q1 -(x0Xx)-> q2
+			addTransition(aut, 1, X, Y, (char *) "0X", 2);
 
-			// q1 -(x00x)-> q3
-			addTransition(aut, 1, X, Y, (char *) "00", 3);
+			// q2 -(xXXx)-> q2
+			addUniversalTransition(aut, 2, 2);
 
-			// q1 -(x10x)-> q3
-			addTransition(aut, 1, X, Y, (char *) "10", 3);
-
-			// q1 -(x11x)-> q3
-			addTransition(aut, 1, X, Y, (char *) "11", 3);
-
-			// q2 -(x01x)-> q3
-			addTransition(aut, 2, X, Y, (char *) "01", 3);
-
-			// q2 -(x10x)-> q3
-			addTransition(aut, 2, X, Y, (char *) "10", 3);
-
-			// q2 -(x11x)-> q3
-			addTransition(aut, 2, X, Y, (char *) "11", 3);
-
-			setNonFinalState(aut, doComplement, 3);
+			setNonFinalState(aut, doComplement, 2);
 #ifndef ALWAYS_DETERMINISTIC_ATOMIC_AUTOMATA
 		}
 #endif
