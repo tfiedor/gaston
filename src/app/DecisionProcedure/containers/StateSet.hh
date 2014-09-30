@@ -53,6 +53,7 @@ public:
 	virtual void closed_dump(unsigned int level) {}
 	virtual bool DoCompare(TStateSet*) {return false;};
 	virtual bool CanBePruned(TStateSet*, unsigned) {return false;};
+	virtual bool isEmpty() {}
 	virtual std::string ToString() {}
 	friend inline std::ostream& operator<<(std::ostream& os, const TStateSet& tss) {os << "";}
 };
@@ -77,6 +78,7 @@ public:
 	void closed_dump(unsigned int level);
 	std::string ToString();
 	bool isSink() {return this->stateIsSink; }
+	bool isEmpty() { return this->stateIsSink; }
 
 	StateType getState();
 	StateType getState() const {return this->getState();}

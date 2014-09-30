@@ -661,7 +661,7 @@ void ASTForm_In::toUnaryAutomaton(Automaton &aut, bool doComplement) {
 		// q1 -(x01x)-> q1
 		addTransition(aut, 1, x, X, (char *) "01", 1);
 
-		setFinalState(aut, doComplement, 1);
+		setFinalState(aut, false, 1);
 	}
 }
 
