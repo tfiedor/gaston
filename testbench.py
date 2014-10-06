@@ -6,7 +6,7 @@
 '''
 
 import argparse
-from datetime import date, time
+from datetime import datetime
 import os
 import re
 import subprocess
@@ -100,8 +100,9 @@ def exportToCSV(data):
         for benchmark in data.keys():
             csvFile.write(benchmark + ", ")
             for bin in ['mona', 'mona-expnf', 'dwina', 'dwina-dfa']:
-                for i in range(0, data[benchmark][bin]):
-                    csvFile.write(data[benchmark][bin][i] + ", ")
+                for i in range(0, len(data[benchmark][bin])):
+                    csvFile.write(str(data[benchmark][bin][i]) + ", ")
+            csvFile.write('\n')
 
 def generateCSVname():
     '''
@@ -109,7 +110,8 @@ def generateCSVname():
     
     @returned generated name yyyy.mm.dd-hh:mm-timing.csv
     '''
-    return "{0}.{1}.{2}-{3}:{4}-timing.csv".format(date.year, date.month, date.day, time.hour, time.min)
+    today = datetime.today()
+    return "{0:02}.{1:02}.{2:02}-{3:02}.{4:02}-timing.csv".format(today.year, today.month, today.day, today.hour, today.minute)
 
 def parseTotalTime(line):
     '''
@@ -219,5 +221,5 @@ if __name__ == '__main__':
                 method_name = "_".join(["run"] + bin.split('-'))
                 method_call = getattr(sys.modules[__name__], method_name)
                 data[benchmark][bin] = method_call(benchmark)
-    print(data)
+    exportToCSV(data)
             
