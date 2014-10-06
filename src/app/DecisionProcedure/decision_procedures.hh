@@ -79,8 +79,8 @@ MacroTransMTBDD GetMTBDDForPost(Automaton & aut, TStateSet* state, unsigned leve
 bool isNotEnqueued(StateSetList & queue, TStateSet*& state, unsigned level);
 
 // < Backward decision procedure functions >
-int decideWS1S_backwards(Automaton &aut, PrefixListType formulaPrefixSet, PrefixListType negFormulaPrefixSet, bool formulaIsGround);
-bool testValidity(Automaton &aut, PrefixListType prefix);
+int decideWS1S_backwards(Automaton &aut, PrefixListType formulaPrefixSet, PrefixListType negFormulaPrefixSet, bool formulaIsGround, bool topmostIsNegation);
+bool testValidity(Automaton &aut, PrefixListType prefix, bool topmostIsNegation);
 MacroStateSet* computeFinalStates(Automaton &aut, PrefixListType prefix, unsigned int detNo);
 bool initialStateIsInFinalStates(MacroStateSet *initial, MacroStateSet *finalStates, unsigned int level);
 

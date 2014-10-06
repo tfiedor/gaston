@@ -148,4 +148,15 @@ void MacroStateSet::unionMacroSets(MacroStateSet* state) {
 
 }
 
+/**
+ * Counts number of states in state space
+ */
+unsigned int MacroStateSet::measureStateSpace() {
+	unsigned int count = 1;
+	for(auto state : this->macroStates) {
+		count += state->measureStateSpace();
+	}
+	return count;
+}
+
 unsigned int TStateSet::stateNo = 0;

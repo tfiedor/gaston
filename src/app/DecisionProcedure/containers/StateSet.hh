@@ -55,7 +55,10 @@ public:
 	virtual bool CanBePruned(TStateSet*, unsigned) {return false;};
 	virtual bool isEmpty() {}
 	virtual std::string ToString() {}
+	virtual unsigned int measureStateSpace() {}
 	friend inline std::ostream& operator<<(std::ostream& os, const TStateSet& tss) {os << "";}
+
+	virtual bool isSubsumed(TStateSet*, unsigned int level) { return false;};
 };
 
 /**
@@ -79,6 +82,7 @@ public:
 	std::string ToString();
 	bool isSink() {return this->stateIsSink; }
 	bool isEmpty() { return this->stateIsSink; }
+	unsigned int measureStateSpace() {return 0;}
 
 	StateType getState();
 	StateType getState() const {return this->getState();}
@@ -110,6 +114,18 @@ public:
 	 * @return true if can be pruned
 	 */
 	bool CanBePruned(TStateSet* lhs, unsigned pruneUpTo) {
+		if(lhs->type == MACROSTATE) {
+			return false;
+		} else {
+			LeafStateSet* lhss = (LeafStateSet*)(lhs);
+			return this->state == lhss->getState();
+		}
+	}
+
+	/**
+	 * Implementation of state subsumption
+	 */
+	bool isSubsumed(TStateSet* lhs, unsigned int level) {
 		if(lhs->type == MACROSTATE) {
 			return false;
 		} else {
@@ -169,6 +185,7 @@ public:
 	void addState(TStateSet* state);
 	void unionMacroSets(MacroStateSet* state);
 	bool isEmpty() { return this->macroStates.size() == 0; }
+	unsigned int measureStateSpace();
 
 	MacroStateSet(const MacroStateSet &mSet) {
 		this->leaves = mSet.leaves;
@@ -274,6 +291,58 @@ public:
 			}
 		}
 	}
+
+	/**
+	 * Implementation of subsumption
+	 *
+	 * @param lhs: other operand
+	 * @param level: level of sumbsumption
+	 * @return: true if subsumption holds
+	 */
+    bool isSubsumed(TStateSet* lhs, unsigned int level) {
+    	if(lhs->type == STATE) {
+    		return false;
+    	} else {
+    		if(level == 1) {
+				if(this->leaves.any() && lhs->leaves.any()) {
+					return lhs->leaves.is_subset_of(this->leaves);
+				}
+    		}
+    		MacroStateSet *lhss = (MacroStateSet*) (lhs);
+    		StateSetList lhsStates = lhss->getMacroStates();
+
+    		// downward closed, which contains upward closed, we prune smaller
+    		if(level % 2 == 0) {
+
+    			// forall x in X: exists y in Y: x is subsumed by y
+    			for (auto state : this->macroStates) {
+    				auto matching_iter = std::find_if(lhsStates.begin(), lhsStates.end(),
+    						[state, level](TStateSet *s) {
+    							return state->isSubsumed(s, level-1);
+    						});
+    				if (matching_iter == lhsStates.end()) {
+    					return false;
+    				}
+    			}
+
+    			return true;
+    		// upward closed, which contains downward closed things, we prune bigger
+    		} else {
+    			// forall y in Y: exists x in X: x is subsumed by y
+    			for (auto state : lhsStates) {
+    				auto matching_iter = std::find_if(this->macroStates.begin(), this->macroStates.end(),
+    						[state, level](TStateSet *s) {
+    							return state->isSubsumed(s, level-1);
+    						});
+    				if (matching_iter == this->macroStates.end()) {
+    					return false;
+    				}
+    			}
+
+    			return true;
+    		}
+    	}
+    }
 
 	/**
 	 * Overloading of the << operator for Macrostate Class

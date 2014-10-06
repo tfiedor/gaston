@@ -49,7 +49,6 @@ void addTransition(Automaton& aut, unsigned int q, Automaton::SymbolType transit
 	if(options.method == FORWARD) {
 		aut.AddTransition(Automaton::StateTuple({q}), transition, qf);
 	} else if (options.method == BACKWARD) {
-		std::cout << q << " -> " << qf << "\n";
 		aut.AddTransition(Automaton::StateTuple({qf}), transition, q);
 	} else {
 		std::cerr << "Method not implemented\n";

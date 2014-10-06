@@ -549,19 +549,16 @@ MacroTransMTBDD GetMTBDDForPost(Automaton & aut, TStateSet* state, unsigned leve
 		// get post for all states under lower level
 
 		TStateSet* front;
-		do {
-			front = states.back();
-			states.pop_back();
-		} while (front->isEmpty());
 		MacroStateDeterminizatorFunctor msdf;
 		MacroUnionFunctor muf;
+		MacroTransMTBDD detResultMtbdd(new MacroStateSet());
 
 		// get first and determinize it
-		const MacroTransMTBDD & frontPost = GetMTBDDForPost(aut, front, level-1, prefix);
+		//const MacroTransMTBDD & frontPost = GetMTBDDForPost(aut, front, level-1, prefix);
 		int projecting = getProjectionVariable(level-1, prefix);
 
-		MacroTransMTBDD detResultMtbdd = (level == 1) ? frontPost : (msdf(frontPost)).Project(
-				[&frontPost, projecting](size_t var) {return var < projecting;}, muf);
+		/*MacroTransMTBDD detResultMtbdd = (level == 1) ? frontPost : (msdf(frontPost)).Project(
+				[&frontPost, projecting](size_t var) {return var < projecting;}, muf);*/
 		// do the union of posts represented as mtbdd
 
 		while(!states.empty()) {

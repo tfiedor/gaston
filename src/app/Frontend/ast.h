@@ -160,10 +160,11 @@ public:
   virtual ASTForm* removeUniversalQuantifier() { return this; }
   virtual ASTForm* unfoldNegations() { return this; }
   virtual ASTForm* flatten() { return this;}
-  virtual ASTForm* unfoldMacro(IdentList* i, ASTList* a) { std::cerr << "\nMissing unfolding for this formula\n"; this->dump(); return this; }
+  virtual ASTForm* unfoldMacro(IdentList* i, ASTList* a) { /*std::cerr << "\nMissing unfolding for this formula\n"; this->dump();*/ return this; }
 
   ASTForm* toExistentionalPNF();
   ASTForm* toSecondOrder();
+  ASTForm* restrictFormula();
 
   // Conversion of AST representation of formula to Automaton
   virtual void toUnaryAutomaton(Automaton &aut, bool doComplement) { std::cerr << "Missing automaton for this formula\n"; this->dump();}

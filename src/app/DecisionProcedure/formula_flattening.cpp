@@ -55,7 +55,17 @@ ASTTerm2_Var2* generateFreshSecondOrder() {
  * @return: Flattened formula in second order
  */
 ASTForm* ASTForm::toSecondOrder() {
-	ASTForm* flattenedFormula = (ASTForm*) this->flatten();
+	return this->flatten();
+}
+
+/**
+ * Adds constraints for first-order variables to be singletons, i.e. contain
+ * only one element
+ *
+ * @return: restricted formula
+ */
+ASTForm* ASTForm::restrictFormula() {
+	ASTForm* restrictedFormula = this;
 
 	// For all used first-order variables FirstOrder(x) is appended to formulae
 	IdentList free, bound;
@@ -68,12 +78,12 @@ ASTForm* ASTForm::toSecondOrder() {
 			// only variables that are not already singletoned are appended to formula
 			if (symbolTable.lookupType(*it) == Varname1 && !inFirstOrder.exists(*it)) {
 				singleton = new ASTForm_FirstOrder(new ASTTerm1_Var1((*it), Pos()), Pos());
-				flattenedFormula = new ASTForm_And(singleton, flattenedFormula, Pos());
+				restrictedFormula = new ASTForm_And(singleton, restrictedFormula, Pos());
 			}
 			++it;
 		}
 	}
-	return flattenedFormula;
+	return restrictedFormula;
 }
 
 /**
@@ -275,8 +285,6 @@ ASTForm* ASTForm_LessEq::flatten() {
 		return substituteFreshLessEq(this->t1, this->t2, false);
 	} else {
 #ifdef SMART_FLATTEN
-		inFirstOrder.insert(((ASTTerm1_Var1*)this->t1)->getVar());
-		inFirstOrder.insert(((ASTTerm1_Var1*)this->t2)->getVar());
 		return this;
 #else
 		ASTTerm2_Var2* X = generateFreshSecondOrder();
@@ -359,7 +367,7 @@ ASTForm* ASTForm_In::flatten() {
 #endif
 	} else {
 #ifdef SMART_FLATTEN
-		inFirstOrder.insert(((ASTTerm1_Var1*)this->t1)->n);
+		//inFirstOrder.insert(((ASTTerm1_Var1*)this->t1)->n);
 		return this;
 #else
 		ASTTerm2_Var2 *secondOrderX = new ASTTerm2_Var2(((ASTTerm1_Var1*)this->t1)->n, Pos());
@@ -391,7 +399,21 @@ ASTForm* ASTForm_Notin::flatten() {
  */
 ASTForm* ASTForm_Ex1::flatten() {
 	this->f = this->f->flatten();
-	return new ASTForm_Ex2(this->ul, this->vl, this->f, this->pos);
+
+	Ident* it = this->vl->begin();
+	ASTForm_And* conjuction;
+	ASTForm* restrictedFormula = new ASTForm_FirstOrder(new ASTTerm1_Var1(*it, Pos()), Pos());
+	inFirstOrder.insert(*it);
+	++it;
+	while(it != this->vl->end()) {
+		ASTForm_FirstOrder *singleton = new ASTForm_FirstOrder(new ASTTerm1_Var1(*it, Pos()), Pos());
+		inFirstOrder.insert(*it);
+		restrictedFormula = new ASTForm_And(restrictedFormula, singleton, Pos());
+		++it;
+	}
+	restrictedFormula = new ASTForm_And(restrictedFormula, this->f, Pos());
+
+	return new ASTForm_Ex2(this->ul, this->vl, restrictedFormula, this->pos);
 }
 
 /**
@@ -401,7 +423,22 @@ ASTForm* ASTForm_Ex1::flatten() {
  */
 ASTForm* ASTForm_All1::flatten() {
 	this->f = this->f->flatten();
-	return new ASTForm_All2(this->ul, this->vl, this->f, this->pos);
+
+	Ident* it = this->vl->begin();
+	ASTForm_Impl* implication;
+	ASTForm* restrictedFormula = new ASTForm_FirstOrder(new ASTTerm1_Var1(*it, Pos()), Pos());
+	inFirstOrder.insert(*it);
+	++it;
+
+	while(it != this->vl->end()) {
+		ASTForm_FirstOrder *singleton = new ASTForm_FirstOrder(new ASTTerm1_Var1(*it, Pos()), Pos());
+		inFirstOrder.insert(*it);
+		restrictedFormula = new ASTForm_Impl(restrictedFormula, singleton, Pos());
+		++it;
+	}
+	restrictedFormula = new ASTForm_Impl(restrictedFormula, this->f, Pos());
+
+	return new ASTForm_All2(this->ul, this->vl, restrictedFormula, this->pos);
 }
 
 /**

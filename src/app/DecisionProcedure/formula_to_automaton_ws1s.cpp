@@ -29,6 +29,7 @@ using std::cout;
 
 extern SymbolTable symbolTable;
 extern Options options;
+extern VarToTrackMap varMap;
 
 using Automaton = VATA::BDDBottomUpTreeAut;
 
@@ -694,6 +695,8 @@ void convertMonaToVataAutomaton(Automaton& v_aut, DFA* m_aut, int varNum, unsign
 
 		while(pp) {
 			// construct the transition
+			// TODO: this may need few augmentation, because mona probably
+			// has different order of variables
 			int j;
 			for (j = 0; j < varNum; ++j) {
 				for (tp = pp->trace; tp && (tp->index != offsets[j]); tp = tp->next);
@@ -710,6 +713,7 @@ void convertMonaToVataAutomaton(Automaton& v_aut, DFA* m_aut, int varNum, unsign
 			}
 			transition[j] = '\0';
 
+			std::cout << i << " -(" << transition << ")-> " << pp->to << "\n";
 			addTransition(v_aut, i, transition, pp->to);
 
 			pp = pp->next;

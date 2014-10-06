@@ -51,7 +51,6 @@ inline void setFinalState(Automaton &automaton, bool complement, unsigned int st
 	// @see setInitialState for comment
 	if(!complement) {
 		if(options.method == FORWARD) {
-			std::cout << state << " is final\n";
 			automaton.SetStateFinal(state);
 		} else if(options.method == BACKWARD) {
 			automaton.AddTransition(Automaton::StateTuple({}), constructUniversalTrack(), state);
@@ -73,7 +72,6 @@ inline void setFinalState(Automaton &automaton, bool complement, unsigned int st
 inline void setNonFinalState(Automaton &automaton, bool complement, unsigned int state) {
 	if(complement) {
 		if(options.method == FORWARD) {
-			std::cout << state << " is final\n";
 			automaton.SetStateFinal(state);
 		} else if(options.method == BACKWARD) {
 			automaton.AddTransition(Automaton::StateTuple({}), constructUniversalTrack(), state);
@@ -99,7 +97,6 @@ inline void setInitialState(Automaton &automaton, unsigned int state) {
 	// In backward construction, we want to work with pres, so every initial
 	// state is a final one here
 	} else if(options.method == BACKWARD) {
-		std::cout << state << " is final\n";
 		automaton.SetStateFinal(state);
 	} else {
 		std::cerr << "Method not implemented yet!";

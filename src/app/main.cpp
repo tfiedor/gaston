@@ -6,7 +6,8 @@
  *****************************************************************************/
 
 #define _LANGUAGE_C_PLUS_PLUS
-#define DEBUG_DP
+//#define DEBUG_DP
+//#define DEBUG_BDDS
 
 // < System Headers >
 #include <iostream>
@@ -50,8 +51,6 @@ using StateToStateMap         = std::unordered_map<StateType, StateType>;
 using Automaton = VATA::BDDBottomUpTreeAut;
 
 typedef unsigned int uint;
-
-#define DEBUG_BDDS
 
 // < Global variables >
 Options options;
@@ -408,6 +407,14 @@ int main(int argc, char *argv[])
   // First formula in AST representation is split into matrix and prefix part.
   ASTForm *matrix, *prefix;
   splitMatrixAndPrefix(ast, matrix, prefix);
+  bool topmostIsNegation = (prefix->kind == aNot);
+  matrix = matrix->restrictFormula();
+
+  if(options.dump) {
+	  std::cout << "[*] Dumping restricted matrix\n";
+	  matrix->dump();
+	  std::cout << "\n";
+  }
 
   // Transform prefix to set of sets of second-order variables
   PrefixListType plist = convertPrefixFormulaToList(prefix);
@@ -415,8 +422,9 @@ int main(int argc, char *argv[])
 
   // If formula is not ground, we close it
   if(freeVars.size() != 0) {
-	  closePrefix(plist, &freeVars, (prefix->kind == aNot));
+	  closePrefix(plist, &freeVars, topmostIsNegation);
 	  closePrefix(nplist, &freeVars, (prefix->kind != aNot));
+	  topmostIsNegation = false;
   }
 
   Automaton formulaAutomaton;
@@ -529,7 +537,7 @@ int main(int argc, char *argv[])
 		  if(options.method == FORWARD) {
 			  decided = decideWS1S(formulaAutomaton, plist, nplist);
 		  } else {
-			  decided = decideWS1S_backwards(formulaAutomaton, plist, nplist, formulaIsGround);
+			  decided = decideWS1S_backwards(formulaAutomaton, plist, nplist, formulaIsGround, topmostIsNegation);
 		  }
 	  // Deciding WS2S formula
 	  } else {
@@ -553,7 +561,7 @@ int main(int argc, char *argv[])
 		  cout << "undecidable due to unforeseen error.\n";
 		  break;
 	  }
-	  cout << "[*] Elapsed time: ";
+	  cout << "[*] Decision procedure elapsed time: ";
 	  timer_deciding.print();
 	  cout << "\n";
   // Something that was used is not supported by dWiNA
