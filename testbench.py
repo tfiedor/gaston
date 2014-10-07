@@ -12,6 +12,9 @@ import re
 import subprocess
 import sys
 
+dwina_error = (-1, -1, -1, -1)
+mona_error = (-1, -1, -1)
+
 def createArgumentParser():
     '''
     Creates Argument Parser object
@@ -21,6 +24,8 @@ def createArgumentParser():
     parser.add_argument('--skip', '-s', action='append', default=['ws2s'], help='skips benchmarks with tag [SKIP]')
     parser.add_argument('--only', '-o', default=None, help='only test the benchmarks containing string ONLY')
     parser.add_argument('--bin', '-b', default=None, help='binary that will be used for executing script')
+    parser.add_argument('--generate', '-g', default=None, nargs=2, help='generates parametrized benchmark up to n')
+    parser.add_argument('--no-export-to-csv', '-x', action='store_true', help='will not export to csv')
     return parser
 
 def run_mona(test):
@@ -29,7 +34,15 @@ def run_mona(test):
     '''
     args = ('./mona', '-s', test)
     output = runProcess(args)
-    return parseMonaOutput(output)
+    return parseMonaOutput(output, False)
+
+def run_mona_expnf(test):
+    '''
+    Runs raped MONA with following arguments:
+    '''
+    args = ('./mona-expnf', '-s', test)
+    output = runProcess(args)
+    return parseMonaOutput(output, True)
 
 def run_dwina(test):
     '''
@@ -51,13 +64,6 @@ def run_dwina_dfa(test):
     output2 = runProcess(args2)
     return parsedWiNAOutput(output, output2)
 
-def run_mona_expnf(test):
-    '''
-    Runs raped MONA with following arguments:
-    '''
-    args = ('./mona-expnf', '-s', test)
-    output = runProcess(args)
-    return parseMonaOutput(output)
 
 def runProcess(args):
     '''
@@ -84,7 +90,7 @@ def exportToCSV(data):
     
     data should be like this:
     data[benchmark]['mona'] = (time, space)
-                   ['mona-expnf'] = (time, space)
+                   ['mona-expnf'] = (time, space, prefix-space)
                    ['dwina'] = (time, time-dp-only, space, space-pruned)
                    ['dwina-dfa'] = (time, time-dp-only, space, space-pruned) 
     
@@ -93,15 +99,16 @@ def exportToCSV(data):
     with open(saveTo, 'w') as csvFile:
         # header of the file
         csvFile.write('benchmark, '
-                      'mona-time, mona-space,'                  # MONA time 
-                      'mona-expnf-time, mona-expnf-space, '     # MONA spice
-                      'dwina-time, dwina-time-dp-only, dwina-space, dwina-space-pruned,'
+                      'mona-time, mona-space, ' 
+                      'mona-expnf-time, mona-expnf-space, mona-expnf-prefix-space '
+                      'dwina-time, dwina-time-dp-only, dwina-space, dwina-space-pruned, '
                       'dwina-dfa-time, dwina-dfa-time-dp-only, dwina-dfa-space, dwina-dfa-space-pruned\n')
-        for benchmark in data.keys():
-            csvFile.write(benchmark + ", ")
+        for benchmark in sorted(data.keys()):
+            bench_list = [benchmark]            
             for bin in ['mona', 'mona-expnf', 'dwina', 'dwina-dfa']:
                 for i in range(0, len(data[benchmark][bin])):
-                    csvFile.write(str(data[benchmark][bin][i]) + ", ")
+                    bench_list = bench_list + [str(data[benchmark][bin][i])]
+            csvFile.write(", ".join(bench_list))
             csvFile.write('\n')
 
 def generateCSVname():
@@ -121,7 +128,7 @@ def parseTotalTime(line):
     match = re.search("([0-9][0-9]):([0-9][0-9]):([0-9][0-9].[0-9][0-9])", line)
     return 3600*float(match.group(1)) + 60*float(match.group(2)) + float(match.group(3))
 
-def parseMonaOutput(output):
+def parseMonaOutput(output, isExPNF):
     '''
     Gets mona or mona-expnf output, strips all whitespaces from start then
     gets a line with "Total time:", parses the time in seconds, in float,
@@ -136,8 +143,14 @@ def parseMonaOutput(output):
     # get total time
     times = [line for line in strippedLines if line.startswith('Total time:')]
     
-    assert(len(times) == 1)
+    if len(times) != 1:
+        return mona_error
     time = parseTotalTime(times[0])
+    
+    # get all minimizings
+    minimizations = [line for line in strippedLines if line.startswith('Minimizing')]    
+    automata_sizes = [int((re.search('\(([0-9]+),[0-9]+\)', min)).group(1)) for min in minimizations]
+    output_size = sum(automata_sizes)
     
     # filter out half of the output till the crap
     index = 0
@@ -148,9 +161,12 @@ def parseMonaOutput(output):
     # get all minimizings
     minimizations = [line for line in strippedLines if line.startswith('Minimizing')]    
     automata_sizes = [int((re.search('\(([0-9]+),[0-9]+\)', min)).group(1)) for min in minimizations]
-    output_size = sum(automata_sizes)
+    output_prefix_only_size = sum(automata_sizes)
 
-    return (time, output_size)
+    if isExPNF:
+        return (time, output_size, output_prefix_only_size)
+    else:
+        return (time, output_size)
 
 def parsedWiNAOutput(output, unprunedOutput):
     '''
@@ -161,7 +177,8 @@ def parsedWiNAOutput(output, unprunedOutput):
     
     # get total time
     times = [line for line in strippedLines if line.startswith('[*] Total elapsed time:')]
-    assert(len(times) == 1)
+    if (len(times) != 1):
+        return 
     time = parseTotalTime(times[0])
     
     # get dp time
@@ -191,35 +208,81 @@ def parseArguments():
         quit()
     else:
         return parser.parse_args()
+    
+# methods for generating
+
+def generate_horn_sub(n):
+    '''
+    Generate simple horn formula in form of:
+    
+    ws1s;
+    ex2 X: all2 X1...Xn: & (Xi sub X => Xi+1 sub X)
+    
+    @param n: parameter n    
+    '''
+    if n < 2:
+        print("[*] Skipping n = {}".format(n))
+        return None
+    string = "ws1s;\n" + "ex2 X: all2 "
+    string += ", ".join(["X" + str(i) for i in range(1, n+1)]) + ": "
+    string += " & ".join(["(X{0} sub X => X{1} sub X)".format(i, i+1) for i in range(1, n)]) + ";"
+    return string
 
 if __name__ == '__main__':
     print("[*] WSkS Test Bench")
     print("[c] Tomas Fiedor, ifiedortom@fit.vutbr.cz")
     
     options = parseArguments()
-    data = {}
-    bins = ['dwina', 'dwina-dfa', 'mona', 'mona-expnf'] if (options.bin is None) else [options.bin] 
     
-    # iterate through all files in dir
-    executing_string = options.bin
-    for root, dirs, filenames in os.walk(options.dir):
-        for f in filenames:
-            benchmark = os.path.join(root, f)
-            data[benchmark] = {}
-            tags = getTagsFromString(benchmark)
-            if not benchmark.endswith('.mona'):
-                continue
-            # skips some benchmarks according to the tag
-            if any([tag in options.skip for tag in tags]):
-                continue
-            # skips benchmarks that are not specified by only
-            if options.only is not None and re.search(options.only, benchmark) is None:
-                continue
-            
-            print("[*] Running test bench: '{}'".format(benchmark))
-            for bin in bins:
-                method_name = "_".join(["run"] + bin.split('-'))
-                method_call = getattr(sys.modules[__name__], method_name)
-                data[benchmark][bin] = method_call(benchmark)
-    exportToCSV(data)
+    # we will generate stuff
+    if options.generate is not None:
+        print("[*] Generating benchmarks '{}' up to parameter n = {}".format(options.generate[0], options.generate[1]))
+        benchmark_name = options.generate[0]
+        up_to = int(options.generate[1])
+        
+        try:
+            method_name = "generate_" + benchmark_name
+            generator = getattr(sys.modules[__name__], method_name)
+        except AttributeError:
+            print("[!] No benchmark template for '{}'".format(benchmark_name))
+            quit()
+        zeroFill = len(str(up_to))
+        zeroFill = 2 if zeroFill < 2 else zeroFill
+        
+        for i in range(1, up_to+1):
+            formula = generator(i)
+            if formula is not None:
+                output_name = benchmark_name + str(i).zfill(zeroFill) + ".mona"
+                output_path = os.path.join(options.dir, output_name)
+                with open(output_path, 'w') as file:
+                    file.write(formula)
+        
+    else:
+        data = {}
+        bins = ['dwina', 'dwina-dfa', 'mona', 'mona-expnf'] if (options.bin is None) else [options.bin] 
+        
+        # iterate through all files in dir
+        executing_string = options.bin
+        for root, dirs, filenames in os.walk(options.dir):
+            for f in filenames:
+                benchmark = os.path.join(root, f)
+                data[benchmark] = {}
+                tags = getTagsFromString(benchmark)
+                if not benchmark.endswith('.mona'):
+                    continue
+                # skips some benchmarks according to the tag
+                if any([tag in options.skip for tag in tags]):
+                    continue
+                # skips benchmarks that are not specified by only
+                if options.only is not None and re.search(options.only, benchmark) is None:
+                    continue
+                
+                print("[*] Running test bench: '{}'".format(benchmark))
+                for bin in bins:
+                    method_name = "_".join(["run"] + bin.split('-'))
+                    method_call = getattr(sys.modules[__name__], method_name)
+                    data[benchmark][bin] = method_call(benchmark)
+        if not options.no_export_to_csv and len(bins) == 4:
+            exportToCSV(data)
+        print(data)
             

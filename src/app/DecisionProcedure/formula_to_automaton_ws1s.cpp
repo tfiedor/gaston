@@ -713,7 +713,7 @@ void convertMonaToVataAutomaton(Automaton& v_aut, DFA* m_aut, int varNum, unsign
 			}
 			transition[j] = '\0';
 
-			std::cout << i << " -(" << transition << ")-> " << pp->to << "\n";
+			//std::cout << i << " -(" << transition << ")-> " << pp->to << "\n";
 			addTransition(v_aut, i, transition, pp->to);
 
 			pp = pp->next;
