@@ -11,9 +11,11 @@ import os
 import re
 import subprocess
 import sys
+from threading import Timer
 
-dwina_error = (-1, -1, -1, -1)
-mona_error = (-1, -1, -1)
+dwina_error = (-1, -1, -1, -1, -1)
+mona_error = (-1, -1)
+mona_expnf_error = (-1, -1, -1)
 
 def createArgumentParser():
     '''
@@ -26,53 +28,66 @@ def createArgumentParser():
     parser.add_argument('--bin', '-b', default=None, help='binary that will be used for executing script')
     parser.add_argument('--generate', '-g', default=None, nargs=2, help='generates parametrized benchmark up to n')
     parser.add_argument('--no-export-to-csv', '-x', action='store_true', help='will not export to csv')
+    parser.add_argument('--timeout', '-t', default=None, help='timeouts in minutes')
     return parser
 
-def run_mona(test):
+def run_mona(test, timeout):
     '''
     Runs MONA with following arguments:
     '''
-    args = ('./mona', '-s', test)
-    output = runProcess(args)
+    args = ('./mona', '-s', '"{}"'.format(test))
+    output, retcode = runProcess(args, timeout)
+    if(retcode != 0):
+        return mona_error
     return parseMonaOutput(output, False)
 
-def run_mona_expnf(test):
+def run_mona_expnf(test, timeout):
     '''
     Runs raped MONA with following arguments:
     '''
-    args = ('./mona-expnf', '-s', test)
-    output = runProcess(args)
+    args = ('./mona-expnf', '-s', '"{}"'.format(test))
+    output, retcode = runProcess(args, timeout)
+    if(retcode != 0):
+        return mona_expnf_error
     return parseMonaOutput(output, True)
 
-def run_dwina(test):
+def run_dwina(test, timeout):
     '''
     Runs dWiNA with following arguments: --method=backward
     '''
-    args = ('./dWiNA', '--method=backward', test)
-    args2 = ('./dWiNA-no-prune', '--method=backward', test)
-    output = runProcess(args)
-    output2 = runProcess(args2)
+    args = ('./dWiNA', '--method=backward', '"{}"'.format(test))
+    args2 = ('./dWiNA-no-prune', '--method=backward', '"{}"'.format(test))
+    output, retcode = runProcess(args, timeout)
+    output2, retcode2 = runProcess(args2, timeout)
+    if (retcode != 0) and (retcode2 != 0):
+        return dwina_error
     return parsedWiNAOutput(output, output2)
 
-def run_dwina_dfa(test):
+def run_dwina_dfa(test, timeout):
     '''
     Runs dWiNA with following arguments: --method=backward --use-mona-dfa
     '''
-    args =('./dWiNA', '--method=backward', '--use-mona-dfa', test)
-    args2 = ('./dWiNA-no-prune', '--method=backward', '--use-mona-dfa', test)
-    output = runProcess(args)
-    output2 = runProcess(args2)
+    args =('./dWiNA', '--method=backward', '--use-mona-dfa', '"{}"'.format(test))
+    args2 = ('./dWiNA-no-prune', '--method=backward', '--use-mona-dfa', '"{}"'.format(test))
+    output, retcode = runProcess(args, timeout)
+    output2, retcode2 = runProcess(args2, timeout)
+    if (retcode != 0) and (retcode2 != 0):
+        return dwina_error
     return parsedWiNAOutput(output, output2)
 
 
-def runProcess(args):
+def runProcess(args, timeout):
     '''
     Opens new subprocess and runs the arguments 
     
     @param: arguments to be run in subprocess
     @return read output
     '''
-    return subprocess.Popen(" ".join(args), shell=True, stdout=subprocess.PIPE).stdout.readlines()
+    timeout = "timeout {0}m".format(timeout) if (timeout is not None) else None
+    proc = subprocess.Popen(" ".join((timeout, ) + args), shell=True, stdout=subprocess.PIPE)
+    output = proc.stdout.readlines()
+    proc.wait()
+    return (output, proc.returncode)
 
 def getTagsFromString(string):
     '''
@@ -91,8 +106,8 @@ def exportToCSV(data):
     data should be like this:
     data[benchmark]['mona'] = (time, space)
                    ['mona-expnf'] = (time, space, prefix-space)
-                   ['dwina'] = (time, time-dp-only, space, space-pruned)
-                   ['dwina-dfa'] = (time, time-dp-only, space, space-pruned) 
+                   ['dwina'] = (time, time-dp-only, base-aut, space, space-unpruned)
+                   ['dwina-dfa'] = (time, time-dp-only, base-aut, space, space-unpruned) 
     
     '''
     saveTo = generateCSVname()
@@ -100,11 +115,11 @@ def exportToCSV(data):
         # header of the file
         csvFile.write('benchmark, '
                       'mona-time, mona-space, ' 
-                      'mona-expnf-time, mona-expnf-space, mona-expnf-prefix-space '
-                      'dwina-time, dwina-time-dp-only, dwina-space, dwina-space-pruned, '
-                      'dwina-dfa-time, dwina-dfa-time-dp-only, dwina-dfa-space, dwina-dfa-space-pruned\n')
+                      'mona-expnf-time, mona-expnf-space, mona-expnf-prefix-space, '
+                      'dwina-time, dwina-time-dp-only, base-aut, dwina-space, dwina-space-pruned, '
+                      'dwina-dfa-time, dwina-dfa-time-dp-only, base-aut, dwina-dfa-space, dwina-dfa-space-pruned\n')
         for benchmark in sorted(data.keys()):
-            bench_list = [benchmark]            
+            bench_list = [os.path.split(benchmark)[1]]            
             for bin in ['mona', 'mona-expnf', 'dwina', 'dwina-dfa']:
                 for i in range(0, len(data[benchmark][bin])):
                     bench_list = bench_list + [str(data[benchmark][bin][i])]
@@ -144,7 +159,10 @@ def parseMonaOutput(output, isExPNF):
     times = [line for line in strippedLines if line.startswith('Total time:')]
     
     if len(times) != 1:
-        return mona_error
+        if isExPNF:
+            return mona_expnf_error 
+        else:
+            return mona_error
     time = parseTotalTime(times[0])
     
     # get all minimizings
@@ -183,20 +201,21 @@ def parsedWiNAOutput(output, unprunedOutput):
     
     # get dp time
     times = [line for line in strippedLines if line.startswith('[*] Decision procedure elapsed time:')]
-    assert(len(times) == 1)
     time_dp = parseTotalTime(times[0])
     
     # get size of state
+    sizes = [line for line in strippedLines if line.startswith('[*] Number of states in resulting automaton:')]
+    base_aut = int(re.search('[0-9]+', sizes[0]).group(0))
+    
+    # get size of state
     sizes = [line for line in strippedLines if line.startswith('[*] Size of the searched space:')]
-    assert(len(sizes) == 1)
     size = int(re.search('[0-9]+', sizes[0]).group(0))
     
     strippedLines = [line.lstrip() for line in unprunedOutput]
     sizes = [line for line in strippedLines if line.startswith('[*] Size of the searched space:')]
-    assert(len(sizes) == 1)
     size_unpruned = int(re.search('[0-9]+', sizes[0]).group(0))
     
-    return (time, time_dp, size, size_unpruned)
+    return (time, time_dp, base_aut, size, size_unpruned)
 
 def parseArguments():
     '''
@@ -226,6 +245,50 @@ def generate_horn_sub(n):
     string = "ws1s;\n" + "ex2 X: all2 "
     string += ", ".join(["X" + str(i) for i in range(1, n+1)]) + ": "
     string += " & ".join(["(X{0} sub X => X{1} sub X)".format(i, i+1) for i in range(1, n)]) + ";"
+    return string
+
+def generate_horn_sub_alt(n):
+    '''
+    Generate simple horn formula in form of:
+    
+    ws1s;
+    ex2 X: all2 X1...Xn: & (Xi sub X => Xi+1 sub X)
+    
+    @param n: parameter n    
+    '''
+    if n < 2:
+        print("[*] Skipping n = {}".format(n))
+        return None
+    string = "ws1s;\n" + "ex2 X: all2 "
+    string += ", ".join(["X" + str(i) for i in range(1, n+1)]) + ": "
+    string += " & ".join(["( (X{0} sub X & X{0} ~= X{1}) => X{1} sub X)".format(i, i+1) for i in range(1, n)]) + ";"
+    return string
+
+def generate_horn_sub_3alt(n):
+    if n < 3:
+        print("[*] Skipping n = {}".format(n))
+        return None
+    string = "ws1s;\n" + "ex2 X: all2 X1: ex2 X2: all2 "
+    string += ", ".join(["X" + str(i) for i in range(3, n+1)]) + ": "
+    string += " & ".join(["( (X{0} sub X & X{0} ~= X{1}) => X{1} sub X)".format(i, i+1) for i in range(1, n)]) + ";"
+    return string
+
+def generate_horn_sub_4alt(n):
+    if n < 4:
+        print("[*] Skipping n = {}".format(n))
+        return None
+    string = "ws1s;\n" + "ex2 X: all2 X1: ex2 X2: all2 X3: ex2  "
+    string += ", ".join(["X" + str(i) for i in range(4, n+1)]) + ": ~("
+    string += " & ".join(["( (X{0} sub X & X{0} ~= X{1}) => X{1} sub X)".format(i, i+1) for i in range(1, n)]) + ");"
+    return string
+
+def generate_horn_sub_5alt(n):
+    if n < 5:
+        print("[*] Skipping n = {}".format(n))
+        return None
+    string = "ws1s;\n" + "ex2 X: all2 X1: ex2 X2: all2 X3: ex2 X4: all2 "
+    string += ", ".join(["X" + str(i) for i in range(5, n+1)]) + ": "
+    string += " & ".join(["( (X{0} sub X & X{0} ~= X{1}) => X{1} sub X)".format(i, i+1) for i in range(1, n)]) + ";"
     return string
 
 if __name__ == '__main__':
@@ -281,8 +344,6 @@ if __name__ == '__main__':
                 for bin in bins:
                     method_name = "_".join(["run"] + bin.split('-'))
                     method_call = getattr(sys.modules[__name__], method_name)
-                    data[benchmark][bin] = method_call(benchmark)
+                    data[benchmark][bin] = method_call(benchmark, options.timeout)
         if not options.no_export_to_csv and len(bins) == 4:
-            exportToCSV(data)
-        print(data)
-            
+            exportToCSV(data)            

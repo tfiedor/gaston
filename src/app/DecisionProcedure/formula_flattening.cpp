@@ -221,6 +221,37 @@ ASTForm* ASTForm_Equal2::flatten() {
 }
 
 /**
+ * Substitutes xi < y or y x < yi to new fresh variable with equality so
+ * final formula is ex z: z = yi & x < z
+ *
+ * @param leftTerm: left side of Less (x)
+ * @param rightTerm: right side of Less (y)
+ * @param substituteLeft: true if left side of expression should be substituted or right
+ * @return flattened and freshened formula
+ */
+
+ASTForm* substituteFreshLess(ASTTerm1* leftTerm, ASTTerm1* rightTerm, bool substituteLeft) {
+	ASTTerm1_Var1* z;
+	ASTForm_Ex1* exists;
+	ASTForm_And* conjuction;
+	ASTForm* left;
+	ASTForm* right;
+
+	z = generateFreshFirstOrder();
+	if(substituteLeft) {
+		left = new ASTForm_Equal1(z, leftTerm,Pos());
+		right = new ASTForm_Less(z, rightTerm, Pos());
+	} else {
+		left = new ASTForm_Equal1(z, rightTerm,Pos());
+		right = new ASTForm_Less(leftTerm, z, Pos());
+	}
+	conjuction = new ASTForm_And(left, right, Pos());
+
+	ASTForm_Ex1* newFormula = new ASTForm_Ex1(0, new IdentList(z->getVar()), conjuction, Pos());
+	return newFormula->flatten();
+}
+
+/**
  * Flattens formula to second-order variables and restricted syntax so it uses
  * only certain atomic formulae
  *
@@ -230,7 +261,13 @@ ASTForm* ASTForm_Equal2::flatten() {
  */
 ASTForm* ASTForm_Less::flatten() {
 #ifdef SMART_FLATTEN
-	return this;
+	if (this->t1->kind != aVar1) {
+		return substituteFreshLess(this->t1, this->t2, true);
+	} else if (this->t2->kind != aVar1) {
+		return substituteFreshLess(this->t1, this->t2, false);
+	} else {
+		return this;
+	}
 #else
 	ASTForm_NotEqual1* leftSide = new ASTForm_NotEqual1(this->t1, this->t2, Pos());
 	ASTForm_LessEq* rightSide = new ASTForm_LessEq(this->t1, this->t2, Pos());

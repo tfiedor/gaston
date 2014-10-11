@@ -17,6 +17,7 @@
 #include <vata/parsing/abstr_parser.hh>
 #include <vata/serialization/abstr_serializer.hh>
 #include <vata/incl_param.hh>
+#include <vata/reduce_param.hh>
 #include <vata/sim_param.hh>
 
 #include <vata/util/ord_vector.hh>
@@ -54,6 +55,10 @@ namespace VATA
 	{
 	public:
 		virtual VATA::AutBase::StateType operator[](const VATA::AutBase::StateType&) = 0;
+		virtual VATA::AutBase::StateType at(const VATA::AutBase::StateType&) const = 0;
+
+		virtual ~AbstractReindexF()
+		{ }
 	};
 }
 
@@ -110,6 +115,9 @@ public:   // public data types
 	{
 	public:
 		virtual bool operator()(const Transition&) = 0;
+
+		virtual ~AbstractCopyF()
+		{ }
 	};
 
 
@@ -156,6 +164,14 @@ public:   // public data types
 				new SymbolBackTranslStrict(symbolDict_.GetReverseMap());
 
 			return BwdTranslatorPtr(bwdTransl);
+		}
+
+		/**
+		 * @brief  Returns the dictionary
+		 */
+		const SymbolDict& GetSymbolDict() const
+		{
+			return symbolDict_;
 		}
 
 		virtual ~OnTheFlyAlphabet() override
@@ -233,9 +249,10 @@ public:   // public data types
 		explicit Iterator(const CoreIterator& coreIter);
 		~Iterator();
 
+		bool operator==(const Iterator& rhs) const;
 		bool operator!=(const Iterator& rhs) const;
 		Iterator& operator++();
-		const Transition& operator*() const;
+		Transition operator*() const;
 	};
 
 	using iterator       = Iterator;
@@ -264,8 +281,7 @@ public:   // public data types
 
 			bool operator==(const Iterator& rhs) const;
 			bool operator!=(const Iterator& rhs) const;
-			const Transition& operator*() const;
-			const Transition* operator->() const;
+			Transition operator*() const;
 
 			/**
 			 * @brief  Prefix increment operator
@@ -321,8 +337,7 @@ public:   // public data types
 
 			bool operator==(const Iterator& rhs) const;
 			bool operator!=(const Iterator& rhs) const;
-			const Transition& operator*() const;
-			const Transition* operator->() const;
+			Transition operator*() const;
 
 			/**
 			 * @brief  Prefix increment operator
@@ -471,7 +486,46 @@ public:   // methods
 	const AlphabetType& GetAlphabet() const;
 
 
+	/**
+	 * @brief  Reduces the automaton while preserving its language
+	 *
+	 * This method provides the preferred way for reducing the automaton w.r.t.
+	 * the number of states and transitions while preserving its language.
+	 *
+	 * @returns  An automaton which is a reduced version of the current object
+	 */
 	ExplicitTreeAut Reduce() const;
+
+
+	/**
+	 * @brief  Reduces the automaton while preserving its language
+	 *
+	 * This method reduces the automaton according to the parameters passed in
+	 * the @p params argument.
+	 *
+	 * @param[in]  params  Parameters setting the reduction method
+	 *
+	 * @returns  An automaton which is a reduced version of the current object
+	 *            w.r.t. the parameters
+	 */
+	ExplicitTreeAut Reduce(
+		const VATA::ReduceParam&    params) const;
+
+
+	/**
+	 * @brief  Collapses states according to the passed map
+	 *
+	 * This method renames the states occuring in the automaton according to the
+	 * @p collapseMap. @p collapseMap does not need to be injective, i.e. there
+	 * may be more than one state mapping to the same state, in which case the two
+	 * states are effectively collapsed into one.
+	 *
+	 * @param[in]  collapseMap  The map according to which the collapsing is done
+	 *
+	 * @returns  An automaton with states collapsed according to @p collapseMap
+	 */
+	ExplicitTreeAut CollapseStates(
+		const StateToStateMap&      collapseMap) const;
 
 
 	ExplicitTreeAut ReindexStates(
@@ -495,7 +549,7 @@ public:   // methods
 
 
 	ExplicitTreeAut RemoveUnreachableStates(
-		AutBase::StateToStateMap*            pTranslMap = nullptr) const;
+		StateToStateMap*            pTranslMap = nullptr) const;
 
 
 	template <
@@ -508,7 +562,7 @@ public:   // methods
 
 
 	ExplicitTreeAut RemoveUselessStates(
-		AutBase::StateToStateMap*          pTranslMap = nullptr) const;
+		StateToStateMap*          pTranslMap = nullptr) const;
 
 
 	ExplicitTreeAut GetCandidateTree() const;
@@ -648,8 +702,8 @@ public:   // methods
 	static ExplicitTreeAut Union(
 		const ExplicitTreeAut&                lhs,
 		const ExplicitTreeAut&                rhs,
-		AutBase::StateToStateMap*             pTranslMapLhs = nullptr,
-		AutBase::StateToStateMap*             pTranslMapRhs = nullptr);
+		StateToStateMap*                      pTranslMapLhs = nullptr,
+		StateToStateMap*                      pTranslMapRhs = nullptr);
 
 
 	/**
@@ -729,22 +783,29 @@ public:   // methods
 	 * @brief  Computes the specified simulation relation on the automaton
 	 *
 	 * This method computes the simulation relation specified in the @p params
-	 * structure among the states of the automaton.
+	 * structure among the states of the automaton. The relation is output as a
+	 * matrix, indexed from 0. The mapping of indices of columns and rows to the
+	 * states of the automaton is output by the @p transl translator.
 	 *
 	 * @param[in]  params  Parameters specifying which simulation is to be computed.
+	 * @param[out] transl  Translator of the output matrix's row and column
+	 *                     numbers to states of the automaton
 	 *
-	 * @returns  The computed simulation relation
+	 * @returns  The computed simulation relation, as a matrix indexed from 0
 	 */
-	AutBase::StateBinaryRelation ComputeSimulation(
+	AutBase::StateDiscontBinaryRelation ComputeSimulation(
 		const VATA::SimParam&                  params) const;
 
 
-	template <class Dict>
-	ExplicitTreeAut Complement(
-		const Dict&                           /*alphabet*/) const
-	{
-		throw NotImplementedException(__func__);
-	}
+	/**
+	 * @brief  Computes the complement of the automaton
+	 *
+	 * This method computes the complement of the automaton with respect to the
+	 * alphabet associated with the automaton.
+	 *
+	 * @returns  The complement of the automaton
+	 */
+	ExplicitTreeAut Complement() const;
 
 
 	/**

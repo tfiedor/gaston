@@ -223,9 +223,7 @@ public:   // methods
 	BDDBottomUpTreeAut GetCandidateTree() const;
 
 
-	template <class Dict>
-	BDDBottomUpTreeAut Complement(
-		const Dict&                  /*alphabet*/) const
+	BDDBottomUpTreeAut Complement() const
 	{
 		throw NotImplementedException(__func__);
 	}
@@ -256,7 +254,7 @@ public:   // methods
 	}
 
 
-	StateBinaryRelation ComputeSimulation(
+	StateDiscontBinaryRelation ComputeSimulation(
 		const VATA::SimParam&              params) const;
 };
 
