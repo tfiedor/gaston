@@ -48,6 +48,8 @@ public:
 	TLeafMask leaves;
 	bool stateIsSink;
 
+	unsigned int id;
+
 	// < Public Methods >
 	virtual void dump() {}
 	virtual void closed_dump(unsigned int level) {}
@@ -74,8 +76,8 @@ private:
 
 public:
 	// < Public Methods >
-	LeafStateSet (StateType q) : state(q), stateIsSink(false) {type = STATE;}
-	LeafStateSet () : state(-1), stateIsSink(true) {type = STATE;}
+	LeafStateSet (StateType q) : state(q), stateIsSink(false) {type = STATE; id = 0;}
+	LeafStateSet () : state(-1), stateIsSink(true) {type = STATE; id = 0;}
 
 	void dump();
 	void closed_dump(unsigned int level);
@@ -138,7 +140,7 @@ public:
 	  * Overloading of the << operator for Macrostate Class
 	  *
 	  * @param os: output stream
-	  * @param mss: macro state to be outputted
+	  * @param mss: macro state to be outputed
 	  * @return: output stream
 	  */
 	friend inline std::ostream& operator<<(std::ostream& os, const LeafStateSet& mss) {
@@ -162,10 +164,11 @@ public:
 
 	// < Public Methods >
 	MacroStateSet () { type = MACROSTATE;}
-	MacroStateSet (StateSetList Q) : macroStates(Q) { type = MACROSTATE;}
-	MacroStateSet (StateSetList Q, TLeafMask l) : macroStates(Q) { type = MACROSTATE; leaves = l;}
+	MacroStateSet (StateSetList Q) : macroStates(Q) { type = MACROSTATE; id = 0;}
+	MacroStateSet (StateSetList Q, TLeafMask l): macroStates(Q) { type = MACROSTATE; leaves = l;  id = 0;}
 	MacroStateSet (StateSetList Q, StateType q): macroStates(Q) {
 		type = MACROSTATE;
+	    id = 0;
 		//leaves.set(q, true);
 	}
 
@@ -214,6 +217,8 @@ public:
 	bool DoCompare(TStateSet* lhs) {
 		if (lhs->type == STATE) {
 			return false;
+		} else if(this->id != 0 & lhs->id != 0) {
+			return this->id == lhs->id;
 		} else {
 			// test if they are same
 			// Optimization: sets of level 1 are compared by bitwise operations
@@ -294,6 +299,7 @@ public:
 
 	/**
 	 * Implementation of subsumption
+	 * TODO: Add logic with IDs
 	 *
 	 * @param lhs: other operand
 	 * @param level: level of sumbsumption
@@ -305,15 +311,15 @@ public:
     	} else {
     		if(level == 1) {
 				if(this->leaves.any() && lhs->leaves.any()) {
-					return lhs->leaves.is_subset_of(this->leaves);
+					return this->leaves.is_subset_of(lhs->leaves);
 				}
     		}
+
     		MacroStateSet *lhss = (MacroStateSet*) (lhs);
     		StateSetList lhsStates = lhss->getMacroStates();
 
     		// downward closed, which contains upward closed, we prune smaller
     		if(level % 2 == 0) {
-
     			// forall x in X: exists y in Y: x is subsumed by y
     			for (auto state : this->macroStates) {
     				auto matching_iter = std::find_if(lhsStates.begin(), lhsStates.end(),

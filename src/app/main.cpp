@@ -47,7 +47,7 @@
 // < Typedefs and usings >
 using std::cout;
 using StateToStateTranslator = VATA::AutBase::StateToStateTranslWeak;
-using StateToStateMap         = std::unordered_map<StateType, StateType>;
+using StateToStateMap        = std::unordered_map<StateType, StateType>;
 using Automaton = VATA::BDDBottomUpTreeAut;
 
 typedef unsigned int uint;
@@ -500,9 +500,9 @@ int main(int argc, char *argv[])
   StateToStateTranslator stateTransl(translMap,
 	[&stateCnt](const StateType&){return stateCnt++;});
   TStateSet::stateNo = reachable.size();
-  if(options.dump) {
+  //if(options.dump) {
 	  std::cout<< "[*] Number of states in resulting automaton: " << TStateSet::stateNo << "\n";
-  }
+  //} FOR NOW
 
   formulaAutomaton = formulaAutomaton.ReindexStates(stateTransl);
 

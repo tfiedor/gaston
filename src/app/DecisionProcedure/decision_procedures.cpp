@@ -473,7 +473,8 @@ MacroStateSet* GetZeroMacroPost(Automaton & aut, TStateSet*& state, unsigned lev
 		} else {
 			const MacroTransMTBDD & transPost = GetMTBDDForPost(aut, state, level, prefix);
 			int projecting = getProjectionVariable(level, prefix);
-			MacroUnionFunctor muf;
+			//MacroUnionFunctor muf;
+			MacroPrunedUnionFunctor muf(level);
 			MacroStateDeterminizatorFunctor msdf;
 
 			MacroTransMTBDD projectedMtbdd = (msdf(transPost)).Project(
@@ -550,7 +551,8 @@ MacroTransMTBDD GetMTBDDForPost(Automaton & aut, TStateSet* state, unsigned leve
 
 		TStateSet* front;
 		MacroStateDeterminizatorFunctor msdf;
-		MacroUnionFunctor muf;
+		MacroPrunedUnionFunctor muf(level);
+		//MacroUnionFunctor muf;
 		MacroTransMTBDD detResultMtbdd(new MacroStateSet());
 
 		// get first and determinize it

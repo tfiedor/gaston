@@ -16,6 +16,7 @@
 #include "mtbdd/void_apply1func.hh"
 #include "containers/StateSet.hh"
 #include "decision_procedures.hh"
+#include <boost/range/join.hpp>
 
 using MTBDDLeafStateSet = VATA::Util::OrdVector<StateType>;
 
@@ -116,6 +117,69 @@ public:
 			return new MacroStateSet(lhsStates);
 		}
 
+	}
+};
+
+
+/**
+ * MacroUnionFunctor does the union of two automata, during the union states inside
+ * are pruned according to the defined simulation relation to yield smaller leaves
+ * in process
+ */
+GCC_DIAG_OFF(effc++)
+class MacroPrunedUnionFunctor : public VATA::MTBDDPkg::Apply2Functor<MacroPrunedUnionFunctor, MacroStateSet*, MacroStateSet*, MacroStateSet*> {
+GCC_DIAG_ON(effc++)
+private:
+
+public:
+	unsigned int level;
+
+	// < Public Constructors>
+	MacroPrunedUnionFunctor(unsigned int l) : level(l) {}
+
+	// < Public Methods >
+	/**
+	 * @param lhs: left operand
+	 * @param rhs: right operand
+	 * @return union of leaf operands
+	 */
+	inline MacroStateSet* ApplyOperation(MacroStateSet* lhs, MacroStateSet* rhs) {
+		StateSetList lhsStates = lhs->getMacroStates();
+		StateSetList rhsStates = rhs->getMacroStates();
+		StateSetList unionStates;
+		// constructs the leaves bit set, if any are set, i.e. bitsets are
+		// supporteted at that level
+		if(lhs->leaves.any() && rhs->leaves.any()) {
+			return new MacroStateSet(lhsStates, lhs->leaves | rhs->leaves);
+		}
+
+		// union of upward closed things
+		auto states = boost::join(lhsStates, rhsStates);
+		auto begin = boost::begin(states);
+		auto end = boost::end(states);
+		if (level % 2 == 0) {
+			for(auto it = begin; it != end; ++it) {
+				auto matching_iter = std::find_if(begin, end,
+						[it, this](TStateSet* s) {
+							return (s != *it) && (*it)->isSubsumed(s, this->level);
+						});
+				if(matching_iter == end) {
+					unionStates.push_back(*it);
+				}
+			}
+		// union of downward closed things
+		} else {
+			for(auto it = begin; it != end; ++it) {
+				auto matching_iter = std::find_if(begin, end,
+						[it, this](TStateSet* s) {
+							return (s != *it) && s->isSubsumed(*it, this->level);
+						});
+				if(matching_iter == end) {
+					unionStates.push_back(*it);
+				}
+			}
+		}
+		return new MacroStateSet(unionStates);
 	}
 };
 

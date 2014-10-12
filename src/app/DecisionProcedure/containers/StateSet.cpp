@@ -80,6 +80,7 @@ void MacroStateSet::dump() {
 			std::cout << ", ";
 		}
 	}
+
 	std::cout << "}";
 }
 
