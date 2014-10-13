@@ -25,7 +25,7 @@ def createArgumentParser():
     parser.add_argument('--dir', '-d', default=(os.path.join(os.curdir, "benchmarks")), help="directory with benchmarks")
     parser.add_argument('--skip', '-s', action='append', default=['ws2s'], help='skips benchmarks with tag [SKIP]')
     parser.add_argument('--only', '-o', default=None, help='only test the benchmarks containing string ONLY')
-    parser.add_argument('--bin', '-b', default=None, help='binary that will be used for executing script')
+    parser.add_argument('--bin', '-b', action='append', default=None, help='binary that will be used for executing script')
     parser.add_argument('--generate', '-g', default=None, nargs=2, help='generates parametrized benchmark up to n')
     parser.add_argument('--no-export-to-csv', '-x', action='store_true', help='will not export to csv')
     parser.add_argument('--timeout', '-t', default=None, help='timeouts in minutes')
@@ -84,7 +84,10 @@ def runProcess(args, timeout):
     @return read output
     '''
     timeout = "timeout {0}m".format(timeout) if (timeout is not None) else None
-    proc = subprocess.Popen(" ".join((timeout, ) + args), shell=True, stdout=subprocess.PIPE)
+    if timeout is None:
+        proc = subprocess.Popen(" ".join(args), shell=True, stdout=subprocess.PIPE)
+    else:
+        proc = subprocess.Popen(" ".join((timeout, ) + args), shell=True, stdout=subprocess.PIPE)
     output = proc.stdout.readlines()
     proc.wait()
     return (output, proc.returncode)
@@ -328,7 +331,10 @@ if __name__ == '__main__':
         
     else:
         data = {}
-        bins = ['dwina', 'dwina-dfa', 'mona', 'mona-expnf'] if (options.bin is None) else [options.bin] 
+        if len(options.bin) > 4:
+            print("[!] Invalid number of binaries")
+            quit()
+        bins = ['dwina', 'dwina-dfa', 'mona', 'mona-expnf'] if (options.bin is None) else options.bin
         
         # iterate through all files in dir
         executing_string = options.bin
