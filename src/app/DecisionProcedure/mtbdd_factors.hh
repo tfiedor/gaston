@@ -154,28 +154,79 @@ public:
 		}
 
 		// union of upward closed things
-		auto states = boost::join(lhsStates, rhsStates);
-		auto begin = boost::begin(states);
-		auto end = boost::end(states);
+		auto lbegin = lhsStates.begin();
+		auto rbegin = rhsStates.begin();
+		auto lend = lhsStates.end();
+		auto rend = rhsStates.end();
 		if (level % 2 == 0) {
-			for(auto it = begin; it != end; ++it) {
-				auto matching_iter = std::find_if(begin, end,
+			for (auto it = lbegin; it != lend; ++it) {
+				auto matching_iter = std::find_if(lbegin, lend,
 						[it, this](TStateSet* s) {
 							return (s != *it) && (*it)->isSubsumed(s, this->level);
 						});
-				if(matching_iter == end) {
-					unionStates.push_back(*it);
+				if(matching_iter != lend) {
+					continue;
+				} else {
+					matching_iter = std::find_if(rbegin, rend,
+						[it, this](TStateSet* s) {
+							return (s != *it) && (*it)->isSubsumed(s, this->level);
+						});
+					if(matching_iter == rend) {
+						unionStates.push_back(*it);
+					}
 				}
 			}
-		// union of downward closed things
-		} else {
-			for(auto it = begin; it != end; ++it) {
-				auto matching_iter = std::find_if(begin, end,
+			for (auto it = rbegin; it != rend; ++it) {
+				auto matching_iter = std::find_if(lbegin, lend,
 						[it, this](TStateSet* s) {
-							return (s != *it) && s->isSubsumed(*it, this->level);
+							return (s != *it) && (*it)->isSubsumed(s, this->level);
 						});
-				if(matching_iter == end) {
-					unionStates.push_back(*it);
+				if(matching_iter != lend) {
+					continue;
+				} else {
+					matching_iter = std::find_if(rbegin, rend,
+						[it, this](TStateSet* s) {
+							return (s != *it) && (*it)->isSubsumed(s, this->level);
+						});
+					if(matching_iter == rend) {
+						unionStates.push_back(*it);
+					}
+				}
+			}
+		} else {
+			for (auto it = lbegin; it != lend; ++it) {
+				auto matching_iter = std::find_if(lbegin, lend,
+						[it, this](TStateSet* s) {
+							return (s != *it) && s->isSubsumed((*it), this->level);
+						});
+				if(matching_iter == lend) {
+					continue;
+				} else {
+					matching_iter = std::find_if(rbegin, rend,
+						[it, this](TStateSet* s) {
+							return (s != *it) && s->isSubsumed((*it), this->level);
+						});
+					if(matching_iter == rend) {
+						unionStates.push_back(*it);
+					}
+				}
+			}
+
+			for (auto it = rbegin; it != rend; ++it) {
+				auto matching_iter = std::find_if(lbegin, lend,
+						[it, this](TStateSet* s) {
+							return (s != *it) && s->isSubsumed((*it), this->level);
+						});
+				if(matching_iter != lend) {
+					continue;
+				} else {
+					matching_iter = std::find_if(rbegin, rend,
+						[it, this](TStateSet* s) {
+							return (s != *it) && s->isSubsumed((*it), this->level);
+						});
+					if(matching_iter == rend) {
+						unionStates.push_back(*it);
+					}
 				}
 			}
 		}

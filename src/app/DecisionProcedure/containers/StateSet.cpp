@@ -10,6 +10,8 @@
 
 #include "StateSet.hh"
 
+unsigned int TStateSet::lastId = 0;
+
 /* Public Methods */
 
 /**
@@ -39,9 +41,19 @@ std::string LeafStateSet::ToString() {
  *
  * @return: state of the leaf
  */
-StateType LeafStateSet::getState() {
+/*StateType LeafStateSet::getState() {
 	return this->state;
-}
+}*/
+
+/**
+ * Return state asociated with macro-state which is nothing
+ * Note: I like to do dirty things to my code
+ *
+ * @return: -1
+ */
+/*StateType MacroStateSet::getState() {
+	return -1;
+}*/
 
 /**
  * Conversion to string representation

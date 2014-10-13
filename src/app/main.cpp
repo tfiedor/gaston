@@ -533,15 +533,20 @@ int main(int argc, char *argv[])
   try {
 	  // Deciding WS1S formula
 	  timer_deciding.start();
-	  if(options.mode != TREE) {
-		  if(options.method == FORWARD) {
-			  decided = decideWS1S(formulaAutomaton, plist, nplist);
+	  try {
+		  if(options.mode != TREE) {
+			  if(options.method == FORWARD) {
+				  decided = decideWS1S(formulaAutomaton, plist, nplist);
+			  } else {
+				  decided = decideWS1S_backwards(formulaAutomaton, plist, nplist, formulaIsGround, topmostIsNegation);
+			  }
+		  // Deciding WS2S formula
 		  } else {
-			  decided = decideWS1S_backwards(formulaAutomaton, plist, nplist, formulaIsGround, topmostIsNegation);
+			  decided = decideWS2S(formulaAutomaton);
 		  }
-	  // Deciding WS2S formula
-	  } else {
-		  decided = decideWS2S(formulaAutomaton);
+	  } catch (std::bad_alloc) {
+		  std::cout << "[!] Insufficient memory for deciding\n";
+		  decided = -1;
 	  }
 	  timer_deciding.stop();
 
@@ -558,7 +563,7 @@ int main(int argc, char *argv[])
 		  cout << "'VALID'\n";
 		  break;
 	  default:
-		  cout << "undecidable due to unforeseen error.\n";
+		  cout << "undecided due to an error.\n";
 		  break;
 	  }
 	  cout << "[*] Decision procedure elapsed time: ";

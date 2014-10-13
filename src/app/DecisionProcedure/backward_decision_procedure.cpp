@@ -332,13 +332,13 @@ int decideWS1S_backwards(Automaton &aut, PrefixListType formulaPrefixSet, Prefix
 		std::cout << "[*] Commencing backward decision procedure for WS1S\n";
 	}
 
-#ifdef DEBUG_DP
+//#ifdef DEBUG_DP
 	if(formulaIsGround) {
 		std::cout << "[*] Formula is ground\n";
 	} else {
 		std::cout << "[*] Formula is not ground\n";
 	}
-#endif
+//#endif
 
 	// If formula is ground, then we only test validity/unsat and not satisfiablity
 	if(formulaIsGround) {

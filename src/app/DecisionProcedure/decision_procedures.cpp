@@ -226,7 +226,7 @@ bool StateIsFinal(Automaton & aut, TStateSet* state, unsigned level, PrefixListT
 	// return whether the state is final in automaton
 	if (level == 0) {
 		LeafStateSet* leaf = reinterpret_cast<LeafStateSet*>(state);
-		StateType q = leaf->getState();
+		StateType q = leaf->state;
 		return aut.IsStateFinal(q);
 	// level > 0
 	} else {
@@ -265,7 +265,7 @@ bool StateIsFinal(Automaton & aut, TStateSet* state, unsigned level, PrefixListT
 					StateSetList s = zeroSuccessor->getMacroStates();
 					for(auto it = s.begin(); it != s.end(); ++it) {
 						if(isNotEnqueued(processed, *it, level-1)) {
-							StateType leafState = reinterpret_cast<LeafStateSet*>(*it)->getState();
+							StateType leafState = reinterpret_cast<LeafStateSet*>(*it)->state;
 							worklist.push_back(*it);
 						}
 					}
@@ -522,7 +522,7 @@ MacroTransMTBDD GetMTBDDForPost(Automaton & aut, TStateSet* state, unsigned leve
 	if (level == 0) {
 		// Is Leaf State set
 		LeafStateSet* lState = reinterpret_cast<LeafStateSet*>(state);
-		StateType stateValue = lState->getState();
+		StateType stateValue = lState->state;
 		TransMTBDD *stateTransition = getMTBDDForStateTuple(aut, Automaton::StateTuple({stateValue}));
 
 		int projecting = getProjectionVariable(level, prefix);

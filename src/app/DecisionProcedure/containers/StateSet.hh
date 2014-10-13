@@ -44,17 +44,20 @@ public:
 	static unsigned int stateNo;
 
 	// < Public Members >
+	StateType state;
 	unsigned int type;
 	TLeafMask leaves;
 	bool stateIsSink;
 
 	unsigned int id;
 
+	static unsigned int lastId;
+
 	// < Public Methods >
 	virtual void dump() {}
 	virtual void closed_dump(unsigned int level) {}
-	virtual bool DoCompare(TStateSet*) {return false;};
-	virtual bool CanBePruned(TStateSet*, unsigned) {return false;};
+	virtual bool DoCompare(TStateSet*) {return false;}
+	virtual bool CanBePruned(TStateSet*, unsigned) {return false;}
 	virtual bool isEmpty() {}
 	virtual std::string ToString() {}
 	virtual unsigned int measureStateSpace() {}
@@ -71,13 +74,12 @@ public:
 class LeafStateSet : public TStateSet {
 private:
 	// < Private Members >
-	StateType state;
 	bool stateIsSink;
 
 public:
 	// < Public Methods >
-	LeafStateSet (StateType q) : state(q), stateIsSink(false) {type = STATE; id = 0;}
-	LeafStateSet () : state(-1), stateIsSink(true) {type = STATE; id = 0;}
+	LeafStateSet (StateType q) : stateIsSink(false) {type = STATE; id = 0; state = q;}
+	LeafStateSet () : stateIsSink(true) {type = STATE; id = 0; state = -1;}
 
 	void dump();
 	void closed_dump(unsigned int level);
@@ -85,9 +87,6 @@ public:
 	bool isSink() {return this->stateIsSink; }
 	bool isEmpty() { return this->stateIsSink; }
 	unsigned int measureStateSpace() {return 0;}
-
-	StateType getState();
-	StateType getState() const {return this->getState();}
 
 	~LeafStateSet() {leaves.reset();}
 
@@ -103,8 +102,8 @@ public:
 		} else {
 			// TODO: THIS MAY BE SUICIDAL!!!!
 			//LeafStateSet *lhss = reinterpret_cast<LeafStateSet*>(lhs);
-			LeafStateSet* lhss = (LeafStateSet*)(lhs);
-			return this->state == lhss->getState();
+			//LeafStateSet* lhss = (LeafStateSet*)(lhs);
+			return this->state == lhs->state;
 		}
 	}
 
@@ -120,7 +119,7 @@ public:
 			return false;
 		} else {
 			LeafStateSet* lhss = (LeafStateSet*)(lhs);
-			return this->state == lhss->getState();
+			return this->state == lhss->state;
 		}
 	}
 
@@ -131,8 +130,8 @@ public:
 		if(lhs->type == MACROSTATE) {
 			return false;
 		} else {
-			LeafStateSet* lhss = (LeafStateSet*)(lhs);
-			return this->state == lhss->getState();
+			//LeafStateSet* lhss = (LeafStateSet*)(lhs);
+			return this->state == lhs->state;
 		}
 	}
 
@@ -145,7 +144,7 @@ public:
 	  */
 	friend inline std::ostream& operator<<(std::ostream& os, const LeafStateSet& mss) {
 		std::ostringstream ss;
-		ss << mss.getState();
+		ss << mss.state;
 		os << ss.str();
 	}
 };
@@ -344,7 +343,7 @@ public:
     			for (auto state : lhsStates) {
     				auto matching_iter = std::find_if(this->macroStates.begin(), this->macroStates.end(),
     						[state, level](TStateSet *s) {
-    							return state->isSubsumed(s, level-1);
+    							return s->isSubsumed(state, level-1);
     						});
     				if (matching_iter == this->macroStates.end()) {
     					return false;
