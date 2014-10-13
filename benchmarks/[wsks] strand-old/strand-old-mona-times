@@ -1,0 +1,63 @@
+
+benchmarks/strand-old/uncommented/[ws1s][bubblesort] loop-else.mona
+Total time: 00:00:01.17
+
+benchmarks/strand-old/uncommented/[ws1s][bubblesort] loop-if-else.mona
+Total time: 00:00:02.97
+
+benchmarks/strand-old/uncommented/[ws1s][bubblesort] loop-if-if.mona
+Total time: 00:00:03.48
+
+benchmarks/strand-old/uncommented/[ws1s][sorted-list-insert] after-loop.mona
+Total time: 00:00:07.11
+
+benchmarks/strand-old/uncommented/[ws1s][sorted-list-insert] before-head.mona
+Total time: 00:00:00.67
+
+benchmarks/strand-old/uncommented/[ws1s][sorted-list-insert] before-loop.mona
+Total time: 00:00:00.15
+
+benchmarks/strand-old/uncommented/[ws1s][sorted-list-insert-error] before-loop.mona
+Total time: 00:00:00.13
+
+benchmarks/strand-old/uncommented/[ws1s][sorted-list-insert] in-loop.mona
+Total time: 00:00:02.11
+
+benchmarks/strand-old/uncommented/[ws1s][sorted-list-reverse] after-loop.mona
+Total time: 00:00:00.09
+
+benchmarks/strand-old/uncommented/[ws1s][sorted-list-reverse] before-loop.mona
+Total time: 00:00:00.06
+
+benchmarks/strand-old/uncommented/[ws1s][sorted-list-reverse] in-loop.mona
+Total time: 00:00:01.09
+
+benchmarks/strand-old/uncommented/[ws1s][sorted-list-search] after-loop.mona
+Total time: 00:00:00.06
+
+benchmarks/strand-old/uncommented/[ws1s][sorted-list-search] before-loop.mona
+Total time: 00:00:00.13
+
+benchmarks/strand-old/uncommented/[ws1s][sorted-list-search] in-loop.mona
+Total time: 00:00:00.24
+
+benchmarks/strand-old/uncommented/[ws2s][bst-insert] after-loop.mona
+Total time: 00:00:00.78
+
+benchmarks/strand-old/uncommented/[ws2s][bst-insert] before-loop.mona
+Total time: 00:00:00.49
+
+benchmarks/strand-old/uncommented/[ws2s][bst-insert] in-loop.mona
+Total time: 00:00:05.03
+
+benchmarks/strand-old/uncommented/[ws2s][bst-search] after-loop.mona
+Total time: 00:00:01.69
+
+benchmarks/strand-old/uncommented/[ws2s][bst-search] before-loop.mona
+Total time: 00:00:02.51
+
+benchmarks/strand-old/uncommented/[ws2s][bst-search] in-loop.mona
+Total time: 00:00:14.71
+
+benchmarks/strand-old/uncommented/[ws2s][left-right-rotate] leftrotate-arithmetic.mona
+Total time: 00:00:00.59

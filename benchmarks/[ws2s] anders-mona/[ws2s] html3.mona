@@ -1,0 +1,1390 @@
+ws2s;
+
+type yak_property_value = 
+     yak_property_value_1(),
+     yak_property_value_10(),
+     yak_property_value_9(),
+     yak_property_value_8(),
+     yak_property_value_7(),
+     yak_property_value_6(),
+     yak_property_value_5(),
+     yak_property_value_4(),
+     yak_property_value_3(),
+     yak_property_value_2();
+
+type yak_property_values = 
+     yak_property_values_1(x1: yak_property_value),
+     yak_property_values_3(x1: yak_property_value, x3: yak_property_values),
+     yak_property_values_2(x1: yak_property_value, x2: yak_property_values);
+
+type yak_property_spec = 
+     yak_property_spec_1(),
+     yak_property_spec_2(x3: yak_property_spec);
+
+type yak_property_assignment = 
+     yak_property_assignment_1(x1: yak_property_spec, x3: yak_property_values);
+
+type yak_property_assignments = 
+     yak_property_assignments_1(x1: yak_property_assignment),
+     yak_property_assignments_3(x1: yak_property_assignment, x3: yak_property_assignments),
+     yak_property_assignments_2(x1: yak_property_assignment);
+
+type yak_class_specs = 
+     yak_class_specs_1(),
+     yak_class_specs_2(x3: yak_class_specs);
+
+type yak_element = 
+     yak_element_1(),
+     yak_element_3(),
+     yak_element_2(x3: yak_class_specs);
+
+type yak_elements = 
+     yak_elements_1(x1: yak_element),
+     yak_elements_2(x1: yak_element, x2: yak_elements);
+
+type yak_hierarchical_pattern = 
+     yak_hierarchical_pattern_1(x2: yak_element),
+     yak_hierarchical_pattern_2(x2: yak_element, x3: yak_hierarchical_pattern);
+
+type yak_element_spec = 
+     yak_element_spec_1(),
+     yak_element_spec_4(x1: yak_hierarchical_pattern),
+     yak_element_spec_3(x2: yak_elements),
+     yak_element_spec_2(x1: yak_element);
+
+type yak_element_specs = 
+     yak_element_specs_1(x1: yak_element_spec),
+     yak_element_specs_2(x1: yak_element_spec, x3: yak_element_specs);
+
+type yak_style_clause = 
+     yak_style_clause_1(x1: yak_element_specs, x3: yak_property_assignments);
+
+type yak_style_stuff = 
+     yak_style_stuff_1(),
+     yak_style_stuff_3(x2: yak_style_stuff),
+     yak_style_stuff_2(x1: yak_style_clause, x2: yak_style_stuff);
+
+type yak_bold_upright = 
+     yak_bold_upright_1(x2: yak_atleast_one_formula);
+
+type yak_upright = 
+     yak_upright_1(x2: yak_atleast_one_formula);
+
+type yak_math_bold = 
+     yak_math_bold_1(x2: yak_atleast_one_formula);
+
+type yak_array_row_item = 
+     yak_array_row_item_1(x2: yak_formulas),
+     yak_array_row_item_2(x2: yak_formulas);
+
+type yak_array_row_items = 
+     yak_array_row_items_1(),
+     yak_array_row_items_3(x2: yak_array_row_items),
+     yak_array_row_items_2(x1: yak_array_row_item, x2: yak_array_row_items);
+
+type yak_array_row = 
+     yak_array_row_1(x2: yak_array_row_items),
+     yak_array_row_2(x2: yak_array_row_items);
+
+type yak_array_rows = 
+     yak_array_rows_1(),
+     yak_array_rows_3(x2: yak_array_rows),
+     yak_array_rows_2(x1: yak_array_row, x2: yak_array_rows);
+
+type yak_array = 
+     yak_array_1(x2: yak_array_rows);
+
+type yak_sqrt = 
+     yak_sqrt_1(x2: yak_formulas);
+
+type yak_root = 
+     yak_root_1(x2: yak_atleast_one_formula, x4: yak_atleast_one_formula),
+     yak_root_2();
+
+type yak_tilde = 
+     yak_tilde_1(x2: yak_atleast_one_formula);
+
+type yak_hat = 
+     yak_hat_1(x2: yak_atleast_one_formula);
+
+type yak_ddot = 
+     yak_ddot_1(x2: yak_atleast_one_formula);
+
+type yak_dot = 
+     yak_dot_1(x2: yak_atleast_one_formula);
+
+type yak_bar = 
+     yak_bar_1(x2: yak_atleast_one_formula);
+
+type yak_vector = 
+     yak_vector_1(x2: yak_atleast_one_formula);
+
+type yak_below = 
+     yak_below_1(x2: yak_atleast_one_formula);
+
+type yak_above = 
+     yak_above_1(x2: yak_atleast_one_formula);
+
+type yak_topover_clause = 
+     yak_topover_clause_1(),
+     yak_topover_clause_4(x2: yak_formulas),
+     yak_topover_clause_3(x2: yak_formulas),
+     yak_topover_clause_2(x2: yak_formulas);
+
+type yak_right_clause = 
+     yak_right_clause_1(),
+     yak_right_clause_2(x2: yak_formulas);
+
+type yak_left_clause = 
+     yak_left_clause_1(),
+     yak_left_clause_2(x2: yak_formulas);
+
+type yak_box = 
+     yak_box_1(x2: yak_formulas, x3: yak_left_clause, x4: yak_topover_clause, x5: yak_right_clause),
+     yak_box_2();
+
+type yak_math_sup = 
+     yak_math_sup_1(x2: yak_formulas);
+
+type yak_math_sub = 
+     yak_math_sub_1(x2: yak_formulas);
+
+type yak_math_text = 
+     yak_math_text_1(),
+     yak_math_text_2();
+
+type yak_math_face = 
+     yak_math_face_1(x1: yak_math_bold),
+     yak_math_face_3(x1: yak_bold_upright),
+     yak_math_face_2(x1: yak_upright);
+
+type yak_math_vec = 
+     yak_math_vec_1(x1: yak_vector),
+     yak_math_vec_6(x1: yak_tilde),
+     yak_math_vec_5(x1: yak_hat),
+     yak_math_vec_4(x1: yak_ddot),
+     yak_math_vec_3(x1: yak_dot),
+     yak_math_vec_2(x1: yak_bar);
+
+type yak_formula = 
+     yak_formula_1(x1: yak_box),
+     yak_formula_12(),
+     yak_formula_11(x1: yak_math_face),
+     yak_formula_10(x1: yak_math_vec),
+     yak_formula_9(x1: yak_math_sup),
+     yak_formula_8(x1: yak_math_sub),
+     yak_formula_7(x1: yak_math_text),
+     yak_formula_6(x1: yak_array),
+     yak_formula_5(x1: yak_sqrt),
+     yak_formula_4(x1: yak_root),
+     yak_formula_3(x1: yak_below),
+     yak_formula_2(x1: yak_above);
+
+type yak_formulas = 
+     yak_formulas_1(),
+     yak_formulas_3(x2: yak_formulas),
+     yak_formulas_2(x1: yak_formula, x2: yak_formulas);
+
+type yak_atleast_one_formula = 
+     yak_atleast_one_formula_1(x1: yak_formula, x2: yak_formulas);
+
+type yak_math = 
+     yak_math_1(x2: yak_formulas);
+
+type yak_table_data = 
+     yak_table_data_1(x2: yak_body_contents),
+     yak_table_data_2(x2: yak_body_contents);
+
+type yak_table_heading = 
+     yak_table_heading_1(x2: yak_body_contents),
+     yak_table_heading_2(x2: yak_body_contents);
+
+type yak_cell = 
+     yak_cell_1(x1: yak_table_heading),
+     yak_cell_2(x1: yak_table_data);
+
+type yak_cells = 
+     yak_cells_1(),
+     yak_cells_3(x2: yak_cells),
+     yak_cells_2(x1: yak_cell, x2: yak_cells);
+
+type yak_table_row_tail = 
+     yak_table_row_tail_1(x1: yak_cells),
+     yak_table_row_tail_2(x1: yak_cell, x2: yak_cells);
+
+type yak_table_row = 
+     yak_table_row_1(x2: yak_cells),
+     yak_table_row_2(x2: yak_cells);
+
+type yak_complete_table_rows = 
+     yak_complete_table_rows_1(),
+     yak_complete_table_rows_3(x2: yak_complete_table_rows),
+     yak_complete_table_rows_2(x1: yak_table_row, x2: yak_complete_table_rows);
+
+type yak_table_rows = 
+     yak_table_rows_1(x1: yak_table_row_tail, x2: yak_complete_table_rows),
+     yak_table_rows_2(x1: yak_complete_table_rows);
+
+type yak_table = 
+     yak_table_1(x2: yak_caption, x3: yak_table_rows);
+
+type yak_textarea = 
+     yak_textarea_1(),
+     yak_textarea_2();
+
+type yak_option = 
+     yak_option_1(),
+     yak_option_3(),
+     yak_option_2();
+
+type yak_options = 
+     yak_options_1(),
+     yak_options_3(x2: yak_options),
+     yak_options_2(x1: yak_option, x2: yak_options);
+
+type yak_select = 
+     yak_select_1(x2: yak_options);
+
+type yak_form_content = 
+     yak_form_content_1(x1: yak_body_content),
+     yak_form_content_4(x1: yak_textarea),
+     yak_form_content_3(x1: yak_select),
+     yak_form_content_2();
+
+type yak_form_contents = 
+     yak_form_contents_1(),
+     yak_form_contents_3(x2: yak_form_contents),
+     yak_form_contents_2(x1: yak_form_content, x2: yak_form_contents);
+
+type yak_form = 
+     yak_form_1(x2: yak_form_contents);
+
+type yak_dir_list_contents = 
+     yak_dir_list_contents_1(),
+     yak_dir_list_contents_3(x2: yak_dir_list_contents),
+     yak_dir_list_contents_2(x1: yak_list_item, x2: yak_dir_list_contents);
+
+type yak_menu_list = 
+     yak_menu_list_1(x2: yak_dir_list_contents);
+
+type yak_dir_list = 
+     yak_dir_list_1(x2: yak_dir_list_contents);
+
+type yak_def_definition = 
+     yak_def_definition_1(x2: yak_flows),
+     yak_def_definition_2(x2: yak_flows);
+
+type yak_def_title = 
+     yak_def_title_1(x2: yak_texts),
+     yak_def_title_2(x2: yak_texts);
+
+type yak_def_list_content = 
+     yak_def_list_content_1(x1: yak_def_title),
+     yak_def_list_content_2(x1: yak_def_definition);
+
+type yak_def_list_contents = 
+     yak_def_list_contents_1(),
+     yak_def_list_contents_3(x2: yak_def_list_contents),
+     yak_def_list_contents_2(x1: yak_def_list_content, x2: yak_def_list_contents);
+
+type yak_definition_list = 
+     yak_definition_list_1(x2: yak_list_header, x3: yak_def_list_contents);
+
+type yak_list_header = 
+     yak_list_header_1(),
+     yak_list_header_3(x2: yak_texts),
+     yak_list_header_2(x2: yak_texts);
+
+type yak_list_item = 
+     yak_list_item_1(x2: yak_flows),
+     yak_list_item_2(x2: yak_flows);
+
+type yak_list_content = 
+     yak_list_content_1(),
+     yak_list_content_3(x2: yak_list_content),
+     yak_list_content_2(x1: yak_list_item, x2: yak_list_content);
+
+type yak_ordered_list = 
+     yak_ordered_list_1(x2: yak_list_header, x3: yak_list_content);
+
+type yak_unordered_list = 
+     yak_unordered_list_1(x2: yak_list_header, x3: yak_list_content);
+
+type yak_list = 
+     yak_list_1(x1: yak_unordered_list),
+     yak_list_4(x1: yak_menu_list),
+     yak_list_3(x1: yak_dir_list),
+     yak_list_2(x1: yak_ordered_list);
+
+type yak_small = 
+     yak_small_1(x2: yak_texts);
+
+type yak_big = 
+     yak_big_1(x2: yak_texts);
+
+type yak_italic = 
+     yak_italic_1(x2: yak_texts);
+
+type yak_teletype = 
+     yak_teletype_1(x2: yak_texts);
+
+type yak_strike_through = 
+     yak_strike_through_1(x2: yak_texts);
+
+type yak_underline = 
+     yak_underline_1(x2: yak_texts);
+
+type yak_bold = 
+     yak_bold_1(x2: yak_texts);
+
+type yak_font = 
+     yak_font_1(x1: yak_underline),
+     yak_font_6(x1: yak_small),
+     yak_font_5(x1: yak_big),
+     yak_font_4(x1: yak_italic),
+     yak_font_3(x1: yak_teletype),
+     yak_font_2(x1: yak_strike_through);
+
+type yak_cite = 
+     yak_cite_1(x2: yak_texts);
+
+type yak_variable = 
+     yak_variable_1(x2: yak_texts);
+
+type yak_keyboard = 
+     yak_keyboard_1(x2: yak_texts);
+
+type yak_sample = 
+     yak_sample_1(x2: yak_texts);
+
+type yak_code = 
+     yak_code_1(x2: yak_texts);
+
+type yak_strong = 
+     yak_strong_1(x2: yak_texts);
+
+type yak_emphasis = 
+     yak_emphasis_1(x2: yak_texts);
+
+type yak_phrase = 
+     yak_phrase_1(x1: yak_emphasis),
+     yak_phrase_7(x1: yak_cite),
+     yak_phrase_6(x1: yak_variable),
+     yak_phrase_5(x1: yak_keyboard),
+     yak_phrase_4(x1: yak_sample),
+     yak_phrase_3(x1: yak_code),
+     yak_phrase_2(x1: yak_strong);
+
+type yak_deletion = 
+     yak_deletion_1(x2: yak_texts);
+
+type yak_insertion = 
+     yak_insertion_1(x2: yak_texts);
+
+type yak_abbreviation = 
+     yak_abbreviation_1(x2: yak_texts);
+
+type yak_acronym = 
+     yak_acronym_1(x2: yak_texts);
+
+type yak_person = 
+     yak_person_1(x2: yak_texts);
+
+type yak_definition = 
+     yak_definition_1(x2: yak_texts);
+
+type yak_author = 
+     yak_author_1(x2: yak_texts);
+
+type yak_lang = 
+     yak_lang_1(x2: yak_texts);
+
+type yak_short_quote = 
+     yak_short_quote_1(x2: yak_texts);
+
+type yak_misc = 
+     yak_misc_1(x1: yak_short_quote),
+     yak_misc_9(x1: yak_deletion),
+     yak_misc_8(x1: yak_insertion),
+     yak_misc_7(x1: yak_abbreviation),
+     yak_misc_6(x1: yak_acronym),
+     yak_misc_5(x1: yak_person),
+     yak_misc_4(x1: yak_definition),
+     yak_misc_3(x1: yak_author),
+     yak_misc_2(x1: yak_lang);
+
+type yak_superscript = 
+     yak_superscript_1(x2: yak_texts);
+
+type yak_subscript = 
+     yak_subscript_1(x2: yak_texts);
+
+type yak_special = 
+     yak_special_1(),
+     yak_special_5(),
+     yak_special_4(),
+     yak_special_3(x1: yak_anchor),
+     yak_special_2(x1: yak_math);
+
+type yak_notmath = 
+     yak_notmath_1(x1: yak_font),
+     yak_notmath_4(x1: yak_misc),
+     yak_notmath_3(x1: yak_special),
+     yak_notmath_2(x1: yak_phrase);
+
+type yak_text = 
+     yak_text_1(x1: yak_subscript),
+     yak_text_5(),
+     yak_text_4(x1: yak_notmath),
+     yak_text_3(x1: yak_bold),
+     yak_text_2(x1: yak_superscript);
+
+type yak_block = 
+     yak_block_1(x1: yak_paragraph),
+     yak_block_11(),
+     yak_block_10(x1: yak_note),
+     yak_block_9(x1: yak_figure),
+     yak_block_8(x1: yak_table),
+     yak_block_7(x1: yak_footnote),
+     yak_block_6(x1: yak_form),
+     yak_block_5(x1: yak_blockquote),
+     yak_block_4(x1: yak_preformatted),
+     yak_block_3(x1: yak_definition_list),
+     yak_block_2(x1: yak_list);
+
+type yak_flow = 
+     yak_flow_1(x1: yak_text),
+     yak_flow_2(x1: yak_block);
+
+type yak_flows = 
+     yak_flows_1(),
+     yak_flows_3(x2: yak_flows),
+     yak_flows_2(x1: yak_flow, x2: yak_flows);
+
+type yak_texts = 
+     yak_texts_1(),
+     yak_texts_3(x2: yak_texts),
+     yak_texts_2(x1: yak_text, x2: yak_texts);
+
+type yak_plaintext_container = 
+     yak_plaintext_container_1(),
+     yak_plaintext_container_3(),
+     yak_plaintext_container_2();
+
+type yak_listing_container = 
+     yak_listing_container_1(),
+     yak_listing_container_2();
+
+type yak_xmp_container = 
+     yak_xmp_container_1(),
+     yak_xmp_container_2();
+
+type yak_pre_allowed = 
+     yak_pre_allowed_1(x1: yak_phrase),
+     yak_pre_allowed_10(),
+     yak_pre_allowed_9(x1: yak_anchor),
+     yak_pre_allowed_8(),
+     yak_pre_allowed_7(x1: yak_bold),
+     yak_pre_allowed_6(x1: yak_italic),
+     yak_pre_allowed_5(x1: yak_teletype),
+     yak_pre_allowed_4(x1: yak_strike_through),
+     yak_pre_allowed_3(x1: yak_underline),
+     yak_pre_allowed_2(x1: yak_misc);
+
+type yak_pre_contents = 
+     yak_pre_contents_1(),
+     yak_pre_contents_3(x2: yak_pre_contents),
+     yak_pre_contents_2(x1: yak_pre_allowed, x2: yak_pre_contents);
+
+type yak_pre_container = 
+     yak_pre_container_1(x2: yak_pre_contents);
+
+type yak_preformatted = 
+     yak_preformatted_1(x1: yak_pre_container),
+     yak_preformatted_4(x1: yak_plaintext_container),
+     yak_preformatted_3(x1: yak_listing_container),
+     yak_preformatted_2(x1: yak_xmp_container);
+
+type yak_note = 
+     yak_note_1(x2: yak_body_contents);
+
+type yak_footnote = 
+     yak_footnote_1(x2: yak_body_contents);
+
+type yak_caption = 
+     yak_caption_1(),
+     yak_caption_2(x2: yak_texts);
+
+type yak_credit = 
+     yak_credit_1(),
+     yak_credit_2(x2: yak_texts);
+
+type yak_overlays = 
+     yak_overlays_1(),
+     yak_overlays_2(x2: yak_overlays);
+
+type yak_blockquote = 
+     yak_blockquote_1(x2: yak_body_contents, x3: yak_credit),
+     yak_blockquote_2(x2: yak_body_contents, x3: yak_credit);
+
+type yak_figure = 
+     yak_figure_1(x2: yak_overlays, x3: yak_caption, x4: yak_body_contents, x5: yak_credit);
+
+type yak_anchor = 
+     yak_anchor_1(x2: yak_texts);
+
+type yak_address_content = 
+     yak_address_content_1(x1: yak_text),
+     yak_address_content_2(x1: yak_paragraph);
+
+type yak_address_contents = 
+     yak_address_contents_1(),
+     yak_address_contents_3(x2: yak_address_contents),
+     yak_address_contents_2(x1: yak_address_content, x2: yak_address_contents);
+
+type yak_address_container = 
+     yak_address_container_1(x2: yak_address_contents);
+
+type yak_div_container = 
+     yak_div_container_1(x2: yak_body_contents);
+
+type yak_paragraph = 
+     yak_paragraph_1(x2: yak_texts),
+     yak_paragraph_2(x2: yak_texts);
+
+type yak_h6_container = 
+     yak_h6_container_1(x2: yak_texts);
+
+type yak_h5_container = 
+     yak_h5_container_1(x2: yak_texts);
+
+type yak_h4_container = 
+     yak_h4_container_1(x2: yak_texts);
+
+type yak_h3_container = 
+     yak_h3_container_1(x2: yak_texts);
+
+type yak_h2_container = 
+     yak_h2_container_1(x2: yak_texts);
+
+type yak_h1_container = 
+     yak_h1_container_1(x2: yak_texts);
+
+type yak_heading = 
+     yak_heading_1(x1: yak_h1_container),
+     yak_heading_6(x1: yak_h6_container),
+     yak_heading_5(x1: yak_h5_container),
+     yak_heading_4(x1: yak_h4_container),
+     yak_heading_3(x1: yak_h3_container),
+     yak_heading_2(x1: yak_h2_container);
+
+type yak_body_content = 
+     yak_body_content_1(x1: yak_div_container),
+     yak_body_content_6(x1: yak_heading),
+     yak_body_content_5(x1: yak_block),
+     yak_body_content_4(x1: yak_text),
+     yak_body_content_3(x1: yak_address_container),
+     yak_body_content_2();
+
+type yak_body_contents = 
+     yak_body_contents_1(),
+     yak_body_contents_3(x2: yak_body_contents),
+     yak_body_contents_2(x1: yak_body_content, x2: yak_body_contents);
+
+type yak_banner = 
+     yak_banner_1(),
+     yak_banner_2(x2: yak_body_contents);
+
+type yak_html_doc_body = 
+     yak_html_doc_body_1(x2: yak_banner, x3: yak_body_contents),
+     yak_html_doc_body_4(x1: yak_banner, x2: yak_body_contents),
+     yak_html_doc_body_3(x1: yak_banner, x2: yak_body_contents),
+     yak_html_doc_body_2(x2: yak_banner, x3: yak_body_contents);
+
+type yak_style_container = 
+     yak_style_container_1(x2: yak_style_stuff),
+     yak_style_container_2();
+
+type yak_title_container = 
+     yak_title_container_1(),
+     yak_title_container_2();
+
+type yak_head_tag = 
+     yak_head_tag_1(),
+     yak_head_tag_8(),
+     yak_head_tag_7(x1: yak_title_container),
+     yak_head_tag_6(),
+     yak_head_tag_5(x1: yak_style_container),
+     yak_head_tag_4(),
+     yak_head_tag_3(),
+     yak_head_tag_2();
+
+type yak_head_tags = 
+     yak_head_tags_1(x1: yak_head_tag, x2: yak_head_tags),
+     yak_head_tags_3(x1: yak_head_tag),
+     yak_head_tags_2(x2: yak_head_tags);
+
+type yak_html_doc_head = 
+     yak_html_doc_head_1(x2: yak_head_tags),
+     yak_html_doc_head_4(x1: yak_head_tags),
+     yak_html_doc_head_3(x2: yak_head_tags),
+     yak_html_doc_head_2();
+
+type yak_html_document = 
+     yak_html_document_1(x2: yak_html_doc_head, x3: yak_html_doc_body),
+     yak_html_document_9(x1: yak_html_doc_head, x3: yak_html_doc_body),
+     yak_html_document_8(x1: yak_html_doc_head, x2: yak_html_doc_body),
+     yak_html_document_7(x1: yak_html_doc_head, x2: yak_html_doc_body),
+     yak_html_document_6(x2: yak_html_doc_head, x4: yak_html_doc_body),
+     yak_html_document_5(x2: yak_html_doc_head, x3: yak_html_doc_body),
+     yak_html_document_4(x2: yak_html_doc_head, x3: yak_html_doc_body),
+     yak_html_document_3(x2: yak_html_doc_head, x4: yak_html_doc_body),
+     yak_html_document_2(x2: yak_html_doc_head, x3: yak_html_doc_body);
+
+type yak_start = 
+     yak_start_1(x2: yak_html_document);
+
+
+# Variable and universe declarations
+universe uT:yak_start;
+tree [uT] T where root(uT)=tree_root(T);
+var1 [uT] $$ where $$ in T;
+
+# Variables for functions
+var2 [uT] pred_here;
+
+
+pred DOT_h4_container_2 (var1 p, var1 q) = 
+     type(p,yak_h4_container) & (
+     succ(p,yak_h4_container,yak_h4_container_1,x2)=q);
+
+
+
+pred DOT_list_item_2 (var1 p, var1 q) = 
+     type(p,yak_list_item) & (
+     succ(p,yak_list_item,yak_list_item_1,x2)=q |
+           succ(p,yak_list_item,yak_list_item_2,x2)=q);
+
+
+
+pred DOT_below_2 (var1 p, var1 q) = 
+     type(p,yak_below) & (
+     succ(p,yak_below,yak_below_1,x2)=q);
+
+
+
+pred DOT_html_doc_body_2 (var1 p, var1 q) = 
+     type(p,yak_html_doc_body) & (
+     succ(p,yak_html_doc_body,yak_html_doc_body_1,x2)=q |
+           succ(p,yak_html_doc_body,yak_html_doc_body_2,x2)=q |
+           succ(p,yak_html_doc_body,yak_html_doc_body_3,x2)=q |
+           succ(p,yak_html_doc_body,yak_html_doc_body_4,x2)=q);
+
+
+
+pred DOT_table_rows_1 (var1 p, var1 q) = 
+     type(p,yak_table_rows) & (
+     succ(p,yak_table_rows,yak_table_rows_1,x1)=q |
+           succ(p,yak_table_rows,yak_table_rows_2,x1)=q);
+
+
+
+pred DOT_math_sub_2 (var1 p, var1 q) = 
+     type(p,yak_math_sub) & (
+     succ(p,yak_math_sub,yak_math_sub_1,x2)=q);
+
+
+
+pred DOT_atleast_one_formula_1 (var1 p, var1 q) = 
+     type(p,yak_atleast_one_formula) & (
+     succ(p,yak_atleast_one_formula,yak_atleast_one_formula_1,x1)=q);
+
+
+
+pred DOT_atleast_one_formula_2 (var1 p, var1 q) = 
+     type(p,yak_atleast_one_formula) & (
+     succ(p,yak_atleast_one_formula,yak_atleast_one_formula_1,x2)=q);
+
+
+
+pred DOT_heading_1 (var1 p, var1 q) = 
+     type(p,yak_heading) & (
+     succ(p,yak_heading,yak_heading_1,x1)=q |
+           succ(p,yak_heading,yak_heading_2,x1)=q |
+           succ(p,yak_heading,yak_heading_3,x1)=q |
+           succ(p,yak_heading,yak_heading_4,x1)=q |
+           succ(p,yak_heading,yak_heading_5,x1)=q |
+           succ(p,yak_heading,yak_heading_6,x1)=q);
+
+
+
+pred DOT_element_specs_1 (var1 p, var1 q) = 
+     type(p,yak_element_specs) & (
+     succ(p,yak_element_specs,yak_element_specs_1,x1)=q |
+           succ(p,yak_element_specs,yak_element_specs_2,x1)=q);
+
+
+
+pred DOT_lang_2 (var1 p, var1 q) = 
+     type(p,yak_lang) & (
+     succ(p,yak_lang,yak_lang_1,x2)=q);
+
+
+
+pred DOT_h2_container_2 (var1 p, var1 q) = 
+     type(p,yak_h2_container) & (
+     succ(p,yak_h2_container,yak_h2_container_1,x2)=q);
+
+
+
+pred DOT_address_content_1 (var1 p, var1 q) = 
+     type(p,yak_address_content) & (
+     succ(p,yak_address_content,yak_address_content_1,x1)=q |
+           succ(p,yak_address_content,yak_address_content_2,x1)=q);
+
+
+
+pred DOT_pre_container_2 (var1 p, var1 q) = 
+     type(p,yak_pre_container) & (
+     succ(p,yak_pre_container,yak_pre_container_1,x2)=q);
+
+
+
+pred DOT_abbreviation_2 (var1 p, var1 q) = 
+     type(p,yak_abbreviation) & (
+     succ(p,yak_abbreviation,yak_abbreviation_1,x2)=q);
+
+
+
+pred DOT_math_sup_2 (var1 p, var1 q) = 
+     type(p,yak_math_sup) & (
+     succ(p,yak_math_sup,yak_math_sup_1,x2)=q);
+
+
+
+pred DOT_author_2 (var1 p, var1 q) = 
+     type(p,yak_author) & (
+     succ(p,yak_author,yak_author_1,x2)=q);
+
+
+
+pred DOT_flow_1 (var1 p, var1 q) = 
+     type(p,yak_flow) & (
+     succ(p,yak_flow,yak_flow_1,x1)=q |
+           succ(p,yak_flow,yak_flow_2,x1)=q);
+
+
+
+pred DOT_dir_list_2 (var1 p, var1 q) = 
+     type(p,yak_dir_list) & (
+     succ(p,yak_dir_list,yak_dir_list_1,x2)=q);
+
+
+
+pred DOT_address_container_2 (var1 p, var1 q) = 
+     type(p,yak_address_container) & (
+     succ(p,yak_address_container,yak_address_container_1,x2)=q);
+
+
+
+pred DOT_vector_2 (var1 p, var1 q) = 
+     type(p,yak_vector) & (
+     succ(p,yak_vector,yak_vector_1,x2)=q);
+
+
+
+pred DOT_math_2 (var1 p, var1 q) = 
+     type(p,yak_math) & (
+     succ(p,yak_math,yak_math_1,x2)=q);
+
+
+
+pred DOT_font_1 (var1 p, var1 q) = 
+     type(p,yak_font) & (
+     succ(p,yak_font,yak_font_1,x1)=q |
+           succ(p,yak_font,yak_font_2,x1)=q |
+           succ(p,yak_font,yak_font_3,x1)=q |
+           succ(p,yak_font,yak_font_4,x1)=q |
+           succ(p,yak_font,yak_font_5,x1)=q |
+           succ(p,yak_font,yak_font_6,x1)=q);
+
+
+
+pred DOT_form_2 (var1 p, var1 q) = 
+     type(p,yak_form) & (
+     succ(p,yak_form,yak_form_1,x2)=q);
+
+
+
+pred DOT_table_2 (var1 p, var1 q) = 
+     type(p,yak_table) & (
+     succ(p,yak_table,yak_table_1,x2)=q);
+
+
+
+pred DOT_table_3 (var1 p, var1 q) = 
+     type(p,yak_table) & (
+     succ(p,yak_table,yak_table_1,x3)=q);
+
+
+
+pred DOT_start_2 (var1 p, var1 q) = 
+     type(p,yak_start) & (
+     succ(p,yak_start,yak_start_1,x2)=q);
+
+
+
+pred DOT_table_row_2 (var1 p, var1 q) = 
+     type(p,yak_table_row) & (
+     succ(p,yak_table_row,yak_table_row_1,x2)=q |
+           succ(p,yak_table_row,yak_table_row_2,x2)=q);
+
+
+
+pred DOT_array_row_item_2 (var1 p, var1 q) = 
+     type(p,yak_array_row_item) & (
+     succ(p,yak_array_row_item,yak_array_row_item_1,x2)=q |
+           succ(p,yak_array_row_item,yak_array_row_item_2,x2)=q);
+
+
+
+pred DOT_property_assignments_1 (var1 p, var1 q) = 
+     type(p,yak_property_assignments) & (
+     succ(p,yak_property_assignments,yak_property_assignments_1,x1)=q |
+           succ(p,yak_property_assignments,yak_property_assignments_2,x1)=q |
+           succ(p,yak_property_assignments,yak_property_assignments_3,x1)=q);
+
+
+
+pred DOT_strike_through_2 (var1 p, var1 q) = 
+     type(p,yak_strike_through) & (
+     succ(p,yak_strike_through,yak_strike_through_1,x2)=q);
+
+
+
+pred DOT_deletion_2 (var1 p, var1 q) = 
+     type(p,yak_deletion) & (
+     succ(p,yak_deletion,yak_deletion_1,x2)=q);
+
+
+
+pred DOT_superscript_2 (var1 p, var1 q) = 
+     type(p,yak_superscript) & (
+     succ(p,yak_superscript,yak_superscript_1,x2)=q);
+
+
+
+pred DOT_property_assignment_1 (var1 p, var1 q) = 
+     type(p,yak_property_assignment) & (
+     succ(p,yak_property_assignment,yak_property_assignment_1,x1)=q);
+
+
+
+pred DOT_property_assignment_3 (var1 p, var1 q) = 
+     type(p,yak_property_assignment) & (
+     succ(p,yak_property_assignment,yak_property_assignment_1,x3)=q);
+
+
+
+pred DOT_underline_2 (var1 p, var1 q) = 
+     type(p,yak_underline) & (
+     succ(p,yak_underline,yak_underline_1,x2)=q);
+
+
+
+pred DOT_misc_1 (var1 p, var1 q) = 
+     type(p,yak_misc) & (
+     succ(p,yak_misc,yak_misc_1,x1)=q |
+           succ(p,yak_misc,yak_misc_2,x1)=q |
+           succ(p,yak_misc,yak_misc_3,x1)=q |
+           succ(p,yak_misc,yak_misc_4,x1)=q |
+           succ(p,yak_misc,yak_misc_5,x1)=q |
+           succ(p,yak_misc,yak_misc_6,x1)=q |
+           succ(p,yak_misc,yak_misc_7,x1)=q |
+           succ(p,yak_misc,yak_misc_8,x1)=q |
+           succ(p,yak_misc,yak_misc_9,x1)=q);
+
+
+
+pred DOT_property_values_1 (var1 p, var1 q) = 
+     type(p,yak_property_values) & (
+     succ(p,yak_property_values,yak_property_values_1,x1)=q |
+           succ(p,yak_property_values,yak_property_values_2,x1)=q |
+           succ(p,yak_property_values,yak_property_values_3,x1)=q);
+
+
+
+pred DOT_acronym_2 (var1 p, var1 q) = 
+     type(p,yak_acronym) & (
+     succ(p,yak_acronym,yak_acronym_1,x2)=q);
+
+
+
+pred DOT_list_1 (var1 p, var1 q) = 
+     type(p,yak_list) & (
+     succ(p,yak_list,yak_list_1,x1)=q |
+           succ(p,yak_list,yak_list_2,x1)=q |
+           succ(p,yak_list,yak_list_3,x1)=q |
+           succ(p,yak_list,yak_list_4,x1)=q);
+
+
+
+pred DOT_math_face_1 (var1 p, var1 q) = 
+     type(p,yak_math_face) & (
+     succ(p,yak_math_face,yak_math_face_1,x1)=q |
+           succ(p,yak_math_face,yak_math_face_2,x1)=q |
+           succ(p,yak_math_face,yak_math_face_3,x1)=q);
+
+
+
+pred DOT_upright_2 (var1 p, var1 q) = 
+     type(p,yak_upright) & (
+     succ(p,yak_upright,yak_upright_1,x2)=q);
+
+
+
+pred DOT_h5_container_2 (var1 p, var1 q) = 
+     type(p,yak_h5_container) & (
+     succ(p,yak_h5_container,yak_h5_container_1,x2)=q);
+
+
+
+pred DOT_definition_2 (var1 p, var1 q) = 
+     type(p,yak_definition) & (
+     succ(p,yak_definition,yak_definition_1,x2)=q);
+
+
+
+pred DOT_sample_2 (var1 p, var1 q) = 
+     type(p,yak_sample) & (
+     succ(p,yak_sample,yak_sample_1,x2)=q);
+
+
+
+pred DOT_def_list_content_1 (var1 p, var1 q) = 
+     type(p,yak_def_list_content) & (
+     succ(p,yak_def_list_content,yak_def_list_content_1,x1)=q |
+           succ(p,yak_def_list_content,yak_def_list_content_2,x1)=q);
+
+
+
+pred DOT_insertion_2 (var1 p, var1 q) = 
+     type(p,yak_insertion) & (
+     succ(p,yak_insertion,yak_insertion_1,x2)=q);
+
+
+
+pred DOT_def_title_2 (var1 p, var1 q) = 
+     type(p,yak_def_title) & (
+     succ(p,yak_def_title,yak_def_title_1,x2)=q |
+           succ(p,yak_def_title,yak_def_title_2,x2)=q);
+
+
+
+pred DOT_array_row_2 (var1 p, var1 q) = 
+     type(p,yak_array_row) & (
+     succ(p,yak_array_row,yak_array_row_1,x2)=q |
+           succ(p,yak_array_row,yak_array_row_2,x2)=q);
+
+
+
+pred DOT_select_2 (var1 p, var1 q) = 
+     type(p,yak_select) & (
+     succ(p,yak_select,yak_select_1,x2)=q);
+
+
+
+pred DOT_phrase_1 (var1 p, var1 q) = 
+     type(p,yak_phrase) & (
+     succ(p,yak_phrase,yak_phrase_1,x1)=q |
+           succ(p,yak_phrase,yak_phrase_2,x1)=q |
+           succ(p,yak_phrase,yak_phrase_3,x1)=q |
+           succ(p,yak_phrase,yak_phrase_4,x1)=q |
+           succ(p,yak_phrase,yak_phrase_5,x1)=q |
+           succ(p,yak_phrase,yak_phrase_6,x1)=q |
+           succ(p,yak_phrase,yak_phrase_7,x1)=q);
+
+
+
+pred DOT_h3_container_2 (var1 p, var1 q) = 
+     type(p,yak_h3_container) & (
+     succ(p,yak_h3_container,yak_h3_container_1,x2)=q);
+
+
+
+pred DOT_style_clause_1 (var1 p, var1 q) = 
+     type(p,yak_style_clause) & (
+     succ(p,yak_style_clause,yak_style_clause_1,x1)=q);
+
+
+
+pred DOT_style_clause_3 (var1 p, var1 q) = 
+     type(p,yak_style_clause) & (
+     succ(p,yak_style_clause,yak_style_clause_1,x3)=q);
+
+
+
+pred DOT_div_container_2 (var1 p, var1 q) = 
+     type(p,yak_div_container) & (
+     succ(p,yak_div_container,yak_div_container_1,x2)=q);
+
+
+
+pred DOT_array_2 (var1 p, var1 q) = 
+     type(p,yak_array) & (
+     succ(p,yak_array,yak_array_1,x2)=q);
+
+
+
+pred DOT_bar_2 (var1 p, var1 q) = 
+     type(p,yak_bar) & (
+     succ(p,yak_bar,yak_bar_1,x2)=q);
+
+
+
+pred DOT_teletype_2 (var1 p, var1 q) = 
+     type(p,yak_teletype) & (
+     succ(p,yak_teletype,yak_teletype_1,x2)=q);
+
+
+
+pred DOT_figure_2 (var1 p, var1 q) = 
+     type(p,yak_figure) & (
+     succ(p,yak_figure,yak_figure_1,x2)=q);
+
+
+
+pred DOT_figure_3 (var1 p, var1 q) = 
+     type(p,yak_figure) & (
+     succ(p,yak_figure,yak_figure_1,x3)=q);
+
+
+
+pred DOT_figure_4 (var1 p, var1 q) = 
+     type(p,yak_figure) & (
+     succ(p,yak_figure,yak_figure_1,x4)=q);
+
+
+
+pred DOT_figure_5 (var1 p, var1 q) = 
+     type(p,yak_figure) & (
+     succ(p,yak_figure,yak_figure_1,x5)=q);
+
+
+
+pred DOT_anchor_2 (var1 p, var1 q) = 
+     type(p,yak_anchor) & (
+     succ(p,yak_anchor,yak_anchor_1,x2)=q);
+
+
+
+pred DOT_blockquote_2 (var1 p, var1 q) = 
+     type(p,yak_blockquote) & (
+     succ(p,yak_blockquote,yak_blockquote_1,x2)=q |
+           succ(p,yak_blockquote,yak_blockquote_2,x2)=q);
+
+
+
+pred DOT_blockquote_3 (var1 p, var1 q) = 
+     type(p,yak_blockquote) & (
+     succ(p,yak_blockquote,yak_blockquote_1,x3)=q |
+           succ(p,yak_blockquote,yak_blockquote_2,x3)=q);
+
+
+
+pred DOT_variable_2 (var1 p, var1 q) = 
+     type(p,yak_variable) & (
+     succ(p,yak_variable,yak_variable_1,x2)=q);
+
+
+
+pred DOT_big_2 (var1 p, var1 q) = 
+     type(p,yak_big) & (
+     succ(p,yak_big,yak_big_1,x2)=q);
+
+
+
+pred DOT_note_2 (var1 p, var1 q) = 
+     type(p,yak_note) & (
+     succ(p,yak_note,yak_note_1,x2)=q);
+
+
+
+pred DOT_italic_2 (var1 p, var1 q) = 
+     type(p,yak_italic) & (
+     succ(p,yak_italic,yak_italic_1,x2)=q);
+
+
+
+pred DOT_h1_container_2 (var1 p, var1 q) = 
+     type(p,yak_h1_container) & (
+     succ(p,yak_h1_container,yak_h1_container_1,x2)=q);
+
+
+
+pred DOT_short_quote_2 (var1 p, var1 q) = 
+     type(p,yak_short_quote) & (
+     succ(p,yak_short_quote,yak_short_quote_1,x2)=q);
+
+
+
+pred DOT_paragraph_2 (var1 p, var1 q) = 
+     type(p,yak_paragraph) & (
+     succ(p,yak_paragraph,yak_paragraph_1,x2)=q |
+           succ(p,yak_paragraph,yak_paragraph_2,x2)=q);
+
+
+
+pred DOT_strong_2 (var1 p, var1 q) = 
+     type(p,yak_strong) & (
+     succ(p,yak_strong,yak_strong_1,x2)=q);
+
+
+
+pred DOT_menu_list_2 (var1 p, var1 q) = 
+     type(p,yak_menu_list) & (
+     succ(p,yak_menu_list,yak_menu_list_1,x2)=q);
+
+
+
+pred DOT_emphasis_2 (var1 p, var1 q) = 
+     type(p,yak_emphasis) & (
+     succ(p,yak_emphasis,yak_emphasis_1,x2)=q);
+
+
+
+pred DOT_math_bold_2 (var1 p, var1 q) = 
+     type(p,yak_math_bold) & (
+     succ(p,yak_math_bold,yak_math_bold_1,x2)=q);
+
+
+
+pred DOT_unordered_list_2 (var1 p, var1 q) = 
+     type(p,yak_unordered_list) & (
+     succ(p,yak_unordered_list,yak_unordered_list_1,x2)=q);
+
+
+
+pred DOT_unordered_list_3 (var1 p, var1 q) = 
+     type(p,yak_unordered_list) & (
+     succ(p,yak_unordered_list,yak_unordered_list_1,x3)=q);
+
+
+
+pred DOT_person_2 (var1 p, var1 q) = 
+     type(p,yak_person) & (
+     succ(p,yak_person,yak_person_1,x2)=q);
+
+
+
+pred DOT_subscript_2 (var1 p, var1 q) = 
+     type(p,yak_subscript) & (
+     succ(p,yak_subscript,yak_subscript_1,x2)=q);
+
+
+
+pred DOT_def_definition_2 (var1 p, var1 q) = 
+     type(p,yak_def_definition) & (
+     succ(p,yak_def_definition,yak_def_definition_1,x2)=q |
+           succ(p,yak_def_definition,yak_def_definition_2,x2)=q);
+
+
+
+pred DOT_definition_list_2 (var1 p, var1 q) = 
+     type(p,yak_definition_list) & (
+     succ(p,yak_definition_list,yak_definition_list_1,x2)=q);
+
+
+
+pred DOT_definition_list_3 (var1 p, var1 q) = 
+     type(p,yak_definition_list) & (
+     succ(p,yak_definition_list,yak_definition_list_1,x3)=q);
+
+
+
+pred DOT_hat_2 (var1 p, var1 q) = 
+     type(p,yak_hat) & (
+     succ(p,yak_hat,yak_hat_1,x2)=q);
+
+
+
+pred DOT_cell_1 (var1 p, var1 q) = 
+     type(p,yak_cell) & (
+     succ(p,yak_cell,yak_cell_1,x1)=q |
+           succ(p,yak_cell,yak_cell_2,x1)=q);
+
+
+
+pred DOT_small_2 (var1 p, var1 q) = 
+     type(p,yak_small) & (
+     succ(p,yak_small,yak_small_1,x2)=q);
+
+
+
+pred DOT_notmath_1 (var1 p, var1 q) = 
+     type(p,yak_notmath) & (
+     succ(p,yak_notmath,yak_notmath_1,x1)=q |
+           succ(p,yak_notmath,yak_notmath_2,x1)=q |
+           succ(p,yak_notmath,yak_notmath_3,x1)=q |
+           succ(p,yak_notmath,yak_notmath_4,x1)=q);
+
+
+
+pred DOT_table_row_tail_1 (var1 p, var1 q) = 
+     type(p,yak_table_row_tail) & (
+     succ(p,yak_table_row_tail,yak_table_row_tail_1,x1)=q |
+           succ(p,yak_table_row_tail,yak_table_row_tail_2,x1)=q);
+
+
+
+pred DOT_elements_1 (var1 p, var1 q) = 
+     type(p,yak_elements) & (
+     succ(p,yak_elements,yak_elements_1,x1)=q |
+           succ(p,yak_elements,yak_elements_2,x1)=q);
+
+
+
+pred DOT_tilde_2 (var1 p, var1 q) = 
+     type(p,yak_tilde) & (
+     succ(p,yak_tilde,yak_tilde_1,x2)=q);
+
+
+
+pred DOT_keyboard_2 (var1 p, var1 q) = 
+     type(p,yak_keyboard) & (
+     succ(p,yak_keyboard,yak_keyboard_1,x2)=q);
+
+
+
+pred DOT_dot_2 (var1 p, var1 q) = 
+     type(p,yak_dot) & (
+     succ(p,yak_dot,yak_dot_1,x2)=q);
+
+
+
+pred DOT_above_2 (var1 p, var1 q) = 
+     type(p,yak_above) & (
+     succ(p,yak_above,yak_above_1,x2)=q);
+
+
+
+pred DOT_table_data_2 (var1 p, var1 q) = 
+     type(p,yak_table_data) & (
+     succ(p,yak_table_data,yak_table_data_1,x2)=q |
+           succ(p,yak_table_data,yak_table_data_2,x2)=q);
+
+
+
+pred DOT_code_2 (var1 p, var1 q) = 
+     type(p,yak_code) & (
+     succ(p,yak_code,yak_code_1,x2)=q);
+
+
+
+pred DOT_ddot_2 (var1 p, var1 q) = 
+     type(p,yak_ddot) & (
+     succ(p,yak_ddot,yak_ddot_1,x2)=q);
+
+
+
+pred DOT_bold_2 (var1 p, var1 q) = 
+     type(p,yak_bold) & (
+     succ(p,yak_bold,yak_bold_1,x2)=q);
+
+
+
+pred DOT_cite_2 (var1 p, var1 q) = 
+     type(p,yak_cite) & (
+     succ(p,yak_cite,yak_cite_1,x2)=q);
+
+
+
+pred DOT_footnote_2 (var1 p, var1 q) = 
+     type(p,yak_footnote) & (
+     succ(p,yak_footnote,yak_footnote_1,x2)=q);
+
+
+
+pred DOT_math_vec_1 (var1 p, var1 q) = 
+     type(p,yak_math_vec) & (
+     succ(p,yak_math_vec,yak_math_vec_1,x1)=q |
+           succ(p,yak_math_vec,yak_math_vec_2,x1)=q |
+           succ(p,yak_math_vec,yak_math_vec_3,x1)=q |
+           succ(p,yak_math_vec,yak_math_vec_4,x1)=q |
+           succ(p,yak_math_vec,yak_math_vec_5,x1)=q |
+           succ(p,yak_math_vec,yak_math_vec_6,x1)=q);
+
+
+
+pred DOT_h6_container_2 (var1 p, var1 q) = 
+     type(p,yak_h6_container) & (
+     succ(p,yak_h6_container,yak_h6_container_1,x2)=q);
+
+
+
+pred DOT_bold_upright_2 (var1 p, var1 q) = 
+     type(p,yak_bold_upright) & (
+     succ(p,yak_bold_upright,yak_bold_upright_1,x2)=q);
+
+
+
+pred DOT_hierarchical_pattern_2 (var1 p, var1 q) = 
+     type(p,yak_hierarchical_pattern) & (
+     succ(p,yak_hierarchical_pattern,yak_hierarchical_pattern_1,x2)=q |
+           succ(p,yak_hierarchical_pattern,yak_hierarchical_pattern_2,x2)=q);
+
+
+
+pred DOT_ordered_list_2 (var1 p, var1 q) = 
+     type(p,yak_ordered_list) & (
+     succ(p,yak_ordered_list,yak_ordered_list_1,x2)=q);
+
+
+
+pred DOT_ordered_list_3 (var1 p, var1 q) = 
+     type(p,yak_ordered_list) & (
+     succ(p,yak_ordered_list,yak_ordered_list_1,x3)=q);
+
+
+
+pred DOT_table_heading_2 (var1 p, var1 q) = 
+     type(p,yak_table_heading) & (
+     succ(p,yak_table_heading,yak_table_heading_1,x2)=q |
+           succ(p,yak_table_heading,yak_table_heading_2,x2)=q);
+
+
+
+pred DOT_sqrt_2 (var1 p, var1 q) = 
+     type(p,yak_sqrt) & (
+     succ(p,yak_sqrt,yak_sqrt_1,x2)=q);
+
+
+
+pred DOT_preformatted_1 (var1 p, var1 q) = 
+     type(p,yak_preformatted) & (
+     succ(p,yak_preformatted,yak_preformatted_1,x1)=q |
+           succ(p,yak_preformatted,yak_preformatted_2,x1)=q |
+           succ(p,yak_preformatted,yak_preformatted_3,x1)=q |
+           succ(p,yak_preformatted,yak_preformatted_4,x1)=q);
+
+
+execute export ("formula0.gta", (all1 a: $$<=a & a in T & type(a,yak_anchor) => ((~(ex1 b: $$<=b & b in T & type(b,yak_anchor) & (ex1 var_1, var_2: type(var_1,yak_anchor) & type(var_2,yak_anchor) & var_1 = a & var_2 = b & (var_1 < var_2)))))));
+
+execute export ("formula1.gta", (~((ex1 a: $$<=a & a in T & type(a,yak_list) & ((ex1 b: $$<=b & b in T & type(b,yak_list) & ((ex1 c: $$<=c & c in T & type(c,yak_list) & ((ex1 d: $$<=d & d in T & type(d,yak_list) & ((((ex1 var_3, var_4: type(var_3,yak_list) & type(var_4,yak_list) & var_3 = a & var_4 = b & (var_3 < var_4)) & (ex1 var_5, var_6: type(var_5,yak_list) & type(var_6,yak_list) & var_5 = b & var_6 = c & (var_5 < var_6))) & (ex1 var_7, var_8: type(var_7,yak_list) & type(var_8,yak_list) & var_7 = c & var_8 = d & (var_7 < var_8))))))))))))));
+
+execute export ("formula2.gta", (((ex1 a: $$<=a & a in T & type(a,yak_anchor) & ((ex1 b: $$<=b & b in T & type(b,yak_bold) & ((ex1 w: $$<=w & w in T & type(w,yak_texts) & (((ex1 var_9, var_10: type(var_9,yak_anchor) & type(var_10,yak_texts) & var_9 = a & var_10 = w & (var_9 < var_10)) & (ex1 var_11, var_12: type(var_11,yak_bold) & type(var_12,yak_texts) & var_11 = b & var_12 = w & (var_11 < var_12)))))))))) => ((all1 w: $$<=w & w in T & type(w,yak_texts) => ((((ex1 a: $$<=a & a in T & type(a,yak_anchor) & (ex1 var_13, var_14: type(var_13,yak_anchor) & type(var_14,yak_texts) & var_13 = a & var_14 = w & (var_13 < var_14)))) => ((ex1 b: $$<=b & b in T & type(b,yak_bold) & (ex1 var_15, var_16: type(var_15,yak_bold) & type(var_16,yak_texts) & var_15 = b & var_16 = w & (var_15 < var_16))))))))));
+
+execute export ("formula3.gta", (~(ex1 a: $$<=a & a in T & type(a,yak_anchor) & ((all1 t: $$<=t & t in T & type(t,yak_texts) => (((ex1 var_17, var_18: type(var_17,yak_anchor) & type(var_18,yak_texts) & var_17 = a & var_18 = t & (var_17 <= var_18)) => (ex1 var_19: type(var_19,yak_texts) &  var_19 = t & var_19 in pred_here))))))));
+
+execute export ("formula4.gta", (all1 l: $$<=l & l in T & type(l,yak_list) => ((~(ex1 h: $$<=h & h in T & type(h,yak_heading) & (ex1 var_20, var_21: type(var_20,yak_list) & type(var_21,yak_heading) & var_20 = l & var_21 = h & (var_20 <= var_21)))))));
+
+execute export ("formula5.gta", (all1 b: $$<=b & b in T & type(b,yak_bold) => ((~(ex1 p: $$<=p & p in T & type(p,yak_paragraph) & (ex1 var_22, var_23: type(var_22,yak_bold) & type(var_23,yak_paragraph) & var_22 = b & var_23 = p & (var_22 <= var_23)))))));
+
+execute export ("formula6.gta", (all1 l: $$<=l & l in T & type(l,yak_list) => ((ex1 i: $$<=i & i in T & type(i,yak_list_item) & (ex1 var_24, var_25: type(var_24,yak_list) & type(var_25,yak_list_item) & var_24 = l & var_25 = i & (var_24 <= var_25))))));
+
+execute export ("formula7.gta", (all1 b1: $$<=b1 & b1 in T & type(b1,yak_bold) => ((~(ex1 b2: $$<=b2 & b2 in T & type(b2,yak_bold) & (ex1 var_26, var_27: type(var_26,yak_bold) & type(var_27,yak_bold) & var_26 = b1 & var_27 = b2 & (var_26 < var_27)))))));
+
+execute export ("formula8.gta", (all1 l: $$<=l & l in T & type(l,yak_list_item) => ((((ex1 f: $$<=f & f in T & variant(f,T,yak_flows,yak_flows_2) & (ex1 var_28, var_29: type(var_28,yak_list_item) & type(var_29,yak_flows) & var_28 = l & var_29 = f & (var_28 <= var_29)))) | ((ex1 f: $$<=f & f in T & variant(f,T,yak_flows,yak_flows_3) & (ex1 var_30, var_31: type(var_30,yak_list_item) & type(var_31,yak_flows) & var_30 = l & var_31 = f & (var_30 <= var_31))))))));
+
+execute export ("formula9.gta", (all1 t: $$<=t & t in T & type(t,yak_table_data) => ((((ex1 b: $$<=b & b in T & variant(b,T,yak_body_contents,yak_body_contents_2) & (ex1 var_32, var_33: type(var_32,yak_table_data) & type(var_33,yak_body_contents) & var_32 = t & var_33 = b & (var_32 <= var_33)))) | ((ex1 b: $$<=b & b in T & variant(b,T,yak_body_contents,yak_body_contents_3) & (ex1 var_34, var_35: type(var_34,yak_table_data) & type(var_35,yak_body_contents) & var_34 = t & var_35 = b & (var_34 <= var_35))))))));
+

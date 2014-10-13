@@ -1,0 +1,52 @@
+
+ws2s;
+
+pred leftchild(var1 x, var1 y, var2 M) =
+	x.0<=y & (~ex1 z: z in M & x<z & z<y) ;
+pred rightchild(var1 x, var1 y, var2 M) =
+	x.1<=y & (~ex1 z: z in M & x<z & z<y) ;
+
+pred left(var2 $, var1 x, var1 y) =
+	(root.0<=x & y=x.0 & y in $) ;
+pred left'(var2 $, var1 x, var1 y, var2 M) =
+	(root.0<=x & leftchild(x,y,M)) ;
+
+pred right(var2 $, var1 x, var1 y) =
+	(root.0<=x & y=x.1 & y in $) ;
+pred right'(var2 $, var1 x, var1 y, var2 M) =
+	(root.0<=x & rightchild(x,y,M)) ;
+
+pred leftnil(var2 $, var1 x, var1 y) = root.0<=x & x.0 notin $ & y=root ;
+pred leftnil'(var2 $, var1 x, var1 y, var2 M) = root.0<=x & (~ex1 z where z in M: (leftchild(x,z,M))) & (~ex1 s where s in M : (leftchild(s,y,M) | rightchild(s,y,M))) ;
+
+pred rightnil(var2 $, var1 x, var1 y) = root.0<=x & x.1 notin $ & y=root ;
+pred rightnil'(var2 $, var1 x, var1 y, var2 M) = root.0<=x & (~ex1 z where z in M: (rightchild(x,z,M))) & (~ex1 s where s in M : (leftchild(s,y,M) | rightchild(s,y,M))) ;
+
+pred validmodel(var2 $, var1 p, var1 n, var1 exdv1, var1 exdv2) =
+	all1 x where true: (x in $) => ((x^ in $) | (x^=x)) &
+	p in $ & n in $ & exdv1 in $ & exdv2 in $ &
+	n = root.1 & root.0<=p &
+	root.0 in $ & root.1 in $ & root.1.0 notin $ & root.1.1 notin $ ;
+
+pred lcp(var2 $, var1 x, var1 y, var1 z) =
+	z<=x & z<=y & (~ex1 u where u in $ : (u<=x & u<=y & z<u)) ;
+
+pred validmodel'(var2 $, var1 p, var1 n, var2 M) = 
+	root in M & root.1 in M & root.1.0 notin M & root.1.1 notin M &
+	root.0<=p & n=root.1 & 
+	(all1 x,y,z where x in $ & y in $ & z in $ : (x in M & y in M & lcp($,x,y,z)) => z in M);
+
+pred minimalmodel(var2 $, var1 p, var1 n, var1 exdv1, var1 exdv2) =
+	~ex2 M where M sub $ & M~=$ & p in M & n in M & exdv1 in M & exdv2 in M :(
+		validmodel'($,p,n,M) &
+		(leftnil($,p,n) => leftnil'($,p,n,M)) &
+		(rightnil($,p,n) => rightnil'($,p,n,M)) &
+		(leftnil($,p,root) => leftnil'($,p,root,M)) &
+		(rightnil($,p,root) => rightnil'($,p,root,M))
+	 );
+
+var2 $ ;
+
+ex1 p,n,exdv1,exdv2 : (
+	validmodel($,p,n,exdv1,exdv2) & minimalmodel($,p,n,exdv1,exdv2) ) ;
+

@@ -1,0 +1,117 @@
+/* R := singly linked list, with a binary relations next, two variables, head and nil */
+
+/* D := a binary relations reach:
+	reach(x, y) := ex2 S : (x in S & y in S /\ all1 z . (z in S => ex1 u . (next(z, u) & u in S))) */
+
+/* F := a single data field called key */
+
+/* P:= sorted
+	sorted := all1 x y . (reach(x, y) => key(x) <= key(y)) */
+
+/* S :=
+Node sllInsert(Node head, Node nil, int k){
+
+	if (key(head) > k){
+		new Node inserted;
+		key(inserted) = k;
+		next(inserted) = head;
+		head = inserted;
+	}
+	else{
+		Node prev = head;
+		Node curr = next(prev);
+	(loop invariant:
+	sll & sorted & all1 x: (~reach(x, prev) | key(x) <= k) & reach(head, prev) & reach (curr, nil) & next(prev) = curr)
+
+		while (key(curr) <= k /\ curr =/= nil){
+			prev = curr;
+			curr = next(curr);
+		}
+
+		new Node inserted;
+		key(inserted) = k;
+		next(inserted) = curr;
+		next(prev) = inserted;
+	}
+} */
+
+/* Q := sll /\ sorted /\ ex1 x: key(x) = k
+	sll := head /\ nil /\ total-order /\ antisymmetry
+	head := all1 y : (reach(head, y))
+	nil := all1 y : (reach(y, nil))
+	total-order := all1 x, y : (reach(x, y) \/ reach(y, x))
+	antisymmetry := all1 x, y : (reach(x, y) <=> ~reach(y, x)) */
+
+ws1s;
+
+
+
+
+pred close(var1 x, var1 y, var2 M) =
+	x<y & (~ex1 z: (z in M & x<z & z<y)) ;
+
+
+pred before(var1 end, var1 x, var1 y) =
+	x<y & y<end ;
+
+
+
+
+pred validmodel(var1 end, var1 curr, var1 prev, var1 curr1, var1 prev1, var1 exdv1, var1 exdv2) =
+	end~=0 &
+	curr<=end & prev<=end & curr1<=end & prev1<=end & exdv1<=end & exdv2<=end ;
+
+
+pred validcomputation(var1 end, var1 curr, var1 prev, var1 curr1, var1 prev1) = prev1=curr & curr+1=curr1 ;
+
+
+
+pred validmodel'(var1 end, var2 M) = 
+	end in M & (ex1 s where s in M : s < end) ;
+
+
+/*
+formula: ex1 curr,prev,curr1,prev1,exdv1,exdv2 :
+		validcomputation & data(curr) <= k & curr ~= end &
+		all1 v1,v2: (before(v1,v2) => data(v1)<=data(v2)) &
+		all1 v: (before(v,curr) => data(v)<=k) &
+		prev+1=curr &
+		(
+			(before(exdv1,exdv2) & data(exdv1)>data(exdv2)) |
+			(before(exdv1,curr1) & data(exdv1)>k) |
+			prev1+1~=curr1
+		) ;
+*/
+
+
+
+pred minimalmodel(var1 end, var1 curr, var1 prev, var1 curr1, var1 prev1, var1 exdv1, var1 exdv2) =
+	~ex2 M :(
+		(all1 s where s in M : s <= end) & 
+		(ex1 s : s <= end & s notin M) &
+		curr in M & prev in M & curr1 in M & prev1 in M & exdv1 in M & exdv2 in M &
+		validmodel'(end,M) &
+		(curr+1=curr1 => close(curr,curr1,M)) &
+		(prev+1=curr => close(prev,curr,M)) &
+		(close(prev1,curr1,M) => prev1+1=curr1)
+	 );
+
+
+var1 end;
+
+ex1 curr,prev,curr1,prev1,exdv1,exdv2 : (
+	validmodel(end,curr,prev,curr1,prev1,exdv1,exdv2) & minimalmodel(end,curr,prev,curr1,prev1,exdv1,exdv2) ) ;
+
+
+/*var1 Bound;
+
+
+pred bd(var1 Bound) =
+all1 end: (
+all1 curr,prev,curr1,prev1,exdv1,exdv2: (
+	(validmodel(end,curr,prev,curr1,prev1,exdv1,exdv2) & minimalmodel(end,curr,prev,curr1,prev1,exdv1,exdv2))
+	=> 
+	(end <= Bound))) ;
+
+bd(Bound) & ~ex1 Bound': (bd(Bound') & Bound' < Bound) ; */
+

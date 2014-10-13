@@ -1,0 +1,120 @@
+
+ws1s;
+var2 $ where ~ex1 p where true: p notin $ & p+1 in $;
+allpos $;
+defaultwhere1(p) = p in $;
+defaultwhere2(P) = P sub $ ;
+
+var0 change,pc1,pc12;
+var1 head, end, p, c, cn;
+
+var1 c1, cn1, p1;
+
+macro next(var1 x, var1 y) =
+	head<=x & x+1=y & y<=end;
+
+macro close(var1 x, var1 y, var2 M) =
+	x<y & (~ex1 z: (z in M & x<z & z<y)) ;
+macro next'(var1 x, var1 y, var2 M) =
+	close(x, y, M) & head<=x & y<=end ;
+
+macro reach(var1 x, var1 y) =
+	head<=x & x<=y & y<=end ;
+
+macro sll(var1 h, var1 t) =
+	(reach(h, t)) &
+	(all1 x: (~reach(x, h) | x=h)) &
+	(all1 x: (~reach(t, x) | x=t)) &
+	(all1 x,y: (reach(h, x) & reach(h, y) & reach(x, t) & reach(y, t))
+			=> (reach(x, y) | reach(y, x)));
+macro sll'(var1 h, var1 t, var2 M) =
+	(reach(h, t)) &
+	(all1 x where x in M: (~reach(x, h) | x=h)) &
+	(all1 x where x in M: (~reach(t, x) | x=t)) &
+	(all1 x,y where x in M & y in M: (reach(h, x) & reach(h, y) & reach(x, t) & reach(y, t))
+			=> (reach(x, y) | reach(y, x)));
+
+var1 exdv1, exdv2;
+
+macro validmodel =
+	(head = 0 &
+	head ~= end &
+	next(c,cn) &
+	(c~=head => next(p,c)) &
+	(c=head => p=end) &
+        p1 = c &
+        c1 = cn &
+	next(cn,cn1) &
+	~ex1 x: (end<x));
+
+macro first(var1 x, var2 M) =
+	x in M & ~ex1 y: (y in M & y<x) ;
+macro second(var1 x, var2 M) =
+	x in M & ex1 y: (x~=y & first(y, M) & all1 z: (z notin M | z=y | x<=z)) ;
+
+macro validmodel'(var2 M) =
+	((0 in M & head in M & end in M) &
+	(p in M & c in M & cn in M) &
+	(p1 in M & c1 in M & cn1 in M) &
+	(exdv1 in M & exdv2 in M) &
+	first(head, M) &
+	head~=end &
+	next'(c,cn,M) &
+	(c~=head => next'(p,c,M)) &
+	(c=head => p=end) &
+        p1 = c &
+        c1 = cn &
+	next'(cn,cn1,M) &
+	~ex1 x where x in M: (end<x));
+
+macro preinorder2(var1 alldv1, var1 alldv2, var0 p11) =
+	alldv1=alldv2 | ~reach(alldv1, alldv2) | ~reach(head,alldv1) | ~reach(alldv2,c) | p11;
+macro postinorder2 = exdv1~=exdv2 & reach(exdv1, exdv2) & reach(head,exdv1) & reach(exdv2,c1) & pc12;
+macro preinorder2'(var1 alldv1, var1 alldv2, var0 p11, var2 M) =
+	alldv1=alldv2 | ~reach(alldv1, alldv2) | ~reach(head,alldv1) | ~reach(alldv2,c) | p11;
+macro postinorder2'(var2 M) = exdv1~=exdv2 & reach(exdv1, exdv2) & reach(head,exdv1) & reach(exdv2,c1) & pc12;
+
+macro precondition(var1 alldv1, var1 alldv2, var0 p11) =
+	
+	sll(head, end) & c ~= end & next(c,cn) & (c~=head => next(p,c)) & (c=head => p=end) & reach(head, c) &
+	(change | preinorder2(alldv1,alldv2,p11)) &
+	cn ~= end & pc1 ;
+
+macro precondition'(var1 alldv1, var1 alldv2, var0 p11, var2 M) =
+
+	sll'(head, end, M) & c ~= end & next'(c,cn,M) & (c~=head => next'(p,c,M)) & (c=head => p=end) & reach(head, c) &
+	(change | preinorder2'(alldv1,alldv2,p11,M)) &
+	cn ~= end & pc1 ;
+
+macro negpostcondition =
+	
+	~sll(head, end) | c1=end | ~next(c1,cn1) | (c1~=head & ~next(p1,c1)) | (c1=head & p1~=end) | ~reach(head, c1) |
+	(~change & postinorder2) ;
+
+macro negpostcondition'(var2 M) =
+
+	~sll'(head, end, M) | c1=end | ~next'(c1,cn1,M) | (c1~=head & ~next'(p1,c1,M)) | (c1=head & p1~=end) | ~reach(head,c1) |
+	(~change & postinorder2'(M)) ;
+
+macro minimalmodel =
+	~ex2 M where M~=$:(
+	validmodel'(M) &
+	all1 dv1,dv2 where dv1 in M & dv2 in M : (
+		all0 p11: (
+			((~precondition(dv1,dv2,p11) | precondition'(dv1,dv2,p11,M)) | ~negpostcondition) &
+			(~precondition(dv1,dv2,p11) | (~negpostcondition | negpostcondition'(M)))
+		)));
+
+macro existmodel =
+	validmodel &
+	all1 alldv1,alldv2 : (
+		ex0 p11: (
+			precondition(alldv1,alldv2,p11) &
+			negpostcondition &
+			((alldv1=exdv1 & alldv2=exdv2) => (pc12 <=> ~p11)) &
+			((c=exdv1 & cn=exdv2) => (pc1 <=> ~pc12)) &
+			((c=alldv1 & cn=alldv2) => (pc1 <=> p11))
+		));
+
+export("bubblesort-loop-else", existmodel & minimalmodel);
+

@@ -1,0 +1,130 @@
+/* pred inorder(pointer x:Node) = 
+  allpos p of Node: x<next*>p & p.next!=null => p.next_ge=true;
+
+pred inorder2(pointer x,y:Node) = 
+  (y=null => inorder(x)) &
+  (y!=null => allpos p of Node: x<next*>p & p<next.next*>y => p.next_ge=true);
+
+pred consistent(pointer x:Node) = 
+  allpos p of Node: reach(p,x) & p.next!=null => p.next_ge | p.next_le; */
+
+/* proc bubblesort(data head:Node):Node
+[true]
+{
+  pointer h,p,c,cn,t:Node;
+  bool change;
+  change := true;
+
+  
+  while [sll(head,end) /\ (!change => inorder(h))] (change) {
+            
+    p := null;
+    change := false;
+    c := h;
+    cn := c.next;
+    
+    while [sll(head) /\ c != null /\ cn=c.next /\ (c!=head => p.next=c) /\ (c=head => p=null) /\ reach(head, c) /\ (!change => inorder2(h,c))]
+          (cn!=null) {
+      if (! c.value <= cn.value) {
+        t := cn.next;
+
+        change = true;
+        c.next = t;
+        cn.next = c;
+
+	if (p=null) head:=cn;
+        else p.next:=cn;
+        
+        p = cn;
+        cn = t;
+      }
+      else {
+        p = c;
+        c = cn;
+        cn = c.next;
+      }
+    }
+  }
+  return h;
+}*/
+
+
+
+ws1s;
+
+
+
+
+
+pred close(var1 x, var1 y, var2 M) =
+	x<y & (~ex1 z: (z in M & x<z & z<y)) ;
+
+
+pred before(var1 nil, var1 x, var1 y) =
+	x<y & y<nil ;
+
+
+
+
+pred validmodel(var1 end, var1 c, var1 cn, var1 p, var1 c1, var1 cn1, var1 p1, var1 exdv1, var1 exdv2) =
+	0<end &
+	c<=end & cn<=end & p<=end & c1=end & cn1<=end & p1<=end & exdv1<=end & exdv2<=end ;
+
+
+pred validcomputation(var1 c, var1 cn, var1 p, var1 c1, var1 cn1, var1 p1, var0 change, var0 change1) = p1=c & c1=cn & cn1=c1+1 ;
+
+
+
+pred validmodel'(var1 end, var2 M) = 
+	end in M & (ex1 s where s in M : s < end) ;
+
+
+/*
+formula: ex1 c,cn,p,c1,cn1,p1,exdv1,exdv2 :
+	ex0 change :
+		validcomputation & data(c)<=data(cn) & cn~=end &
+		c~=end & cn=c+1 &
+		(c~=head => p+1=c) & (c=head => p=end) &
+		(change | all1 v1,v2: (before(v1,v2) & before(v2,cn) => data(v1)<=data(v2))) & 
+		(
+			~sll() |
+			c1=end | cn1~=c1+1 |
+			(c1~=0 & p1+1~=c1) | (c1=0 & p1~=end) |
+			(~change & before(exdv1,exdv2) & before(exdv2,cn1) & data(exdv1)>data(exdv2))
+		) ;
+*/
+
+
+
+pred minimalmodel(var1 end, var1 c, var1 cn, var1 p, var1 c1, var1 cn1, var1 p1, var1 exdv1, var1 exdv2) =
+	~ex2 M :(
+		(all1 s where s in M : s <= end) & 
+		(ex1 s : s <= end & s notin M) &
+		c in M & cn in M & p in M & c1 in M & cn1 in M & p1 in M & exdv1 in M & exdv2 in M &
+		validmodel'(end,M) &
+		(c1+1=cn1 => close(c1,cn,M)) &
+		(c+1=cn => close(c,cn,M)) &
+		(p+1=c => close(p,c,M)) &
+		(close(c1,cn1,M) => c1+1=cn1) &
+		(close(p1,c1,M) => p1+1=c1)
+	 );
+
+
+var1 end;
+ex1 c,cn,p,c1,cn1,p1,exdv1,exdv2 : (
+	validmodel(end,c,cn,p,c1,cn1,p1,exdv1,exdv2) & minimalmodel(end,c,cn,p,c1,cn1,p1,exdv1,exdv2) ) ;
+
+
+
+/*var1 Bound;
+
+
+pred bd(var1 Bound) =
+all1 end: (
+all1 c,cn,p,c1,cn1,p1,exdv1,exdv2: (
+	(validmodel(end,c,cn,p,c1,cn1,p1,exdv1,exdv2) & minimalmodel(end,c,cn,p,c1,cn1,p1,exdv1,exdv2))
+	=> 
+	(end <= Bound))) ;
+
+bd(Bound) & ~ex1 Bound': (bd(Bound') & Bound' < Bound) ;*/
+

@@ -311,7 +311,13 @@ public:
     	} else {
     		if(level == 1) {
 				if(this->leaves.any() && lhs->leaves.any()) {
-					return this->leaves.is_subset_of(lhs->leaves);
+					unsigned size = TStateSet::stateNo;
+					for(unsigned i = 0; i < size; ++i) {
+						if(this->leaves[i] ^ lhs->leaves[i]) {
+							return false;
+						}
+					}
+					return true;
 				}
     		}
 

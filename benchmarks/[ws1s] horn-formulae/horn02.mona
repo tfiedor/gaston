@@ -1,0 +1,8 @@
+ws1s;
+
+var1 x1, x2;
+var2 X;
+
+#~(x1 in X => x2 in X);
+ex2 X: all1 x1, x2: (x1 in X => x2 in X);
+#ex2 X: all1 x1: ex1 x2: (x1 in X => x2 in X);

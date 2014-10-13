@@ -1,0 +1,637 @@
+/* Generated from search_tree_delete.mc */
+
+ws2s;
+
+/************************************************************************/
+/*   Types                                                              */
+/************************************************************************/
+
+type TreeNode = Black(left:TreeNode, right:TreeNode), Red(left:TreeNode, right:TreeNode), Null;
+type Free_TreeNode = Black(next_0:Free_TreeNode) , Red(next_0:Free_TreeNode) , Null;
+
+/************************************************************************/
+/*   Variables                                                          */
+/************************************************************************/
+
+universe univ_free_TreeNode:Free_TreeNode;
+tree [univ_free_TreeNode] free_TreeNode where tree_root(free_TreeNode)=root(univ_free_TreeNode);
+universe univ_treeRoot:TreeNode;
+tree [univ_treeRoot] treeRoot where tree_root(treeRoot)=root(univ_treeRoot);
+
+macro isTypeTreeNode(var1 mu_0) =
+  (mu_0 in treeRoot) & type(mu_0,TreeNode);
+
+macro isTypeFreeTreeNode(var1 mu_0) =
+  mu_0 in free_TreeNode & type(mu_0,Free_TreeNode);
+
+var1 x where isTypeTreeNode(x) | isTypeFreeTreeNode(x);
+
+var1 y where isTypeTreeNode(y) | isTypeFreeTreeNode(y);
+
+var1 z where isTypeTreeNode(z) | isTypeFreeTreeNode(z);
+
+var1 q where isTypeTreeNode(q) | isTypeFreeTreeNode(q);
+
+
+/************************************************************************/
+/*   Initial predicates                                                 */
+/************************************************************************/
+
+macro Root_treeRoot_0(var1 mu_0) =
+  mu_0 = tree_root(treeRoot);
+
+macro Pos_x_0(var1 mu_0) =
+  mu_0 = x;
+
+macro Pos_y_0(var1 mu_0) =
+  mu_0 = y;
+
+macro Pos_z_0(var1 mu_0) =
+  mu_0 = z;
+
+macro Pos_q_0(var1 mu_0) =
+  mu_0 = q;
+
+macro Alloc_TreeNode_0(var1 mu_0) =
+  mu_0 = tree_root(free_TreeNode);
+
+macro is_Black_0(var1 mu_0) =
+  variant(mu_0, treeRoot, TreeNode, Black) |
+  variant(mu_0, free_TreeNode, Free_TreeNode, Black);
+
+macro is_Red_0(var1 mu_0) =
+  variant(mu_0, treeRoot, TreeNode, Red) |
+  variant(mu_0, free_TreeNode, Free_TreeNode, Red);
+
+pred Succ_left_0(var1 mu_0, mu_1) =
+  isTypeTreeNode(mu_0) & isTypeTreeNode(mu_1) &
+  (mu_1 = succ(mu_0, TreeNode, Black, left) |
+  mu_1 = succ(mu_0, TreeNode, Red, left));
+
+pred Succ_right_0(var1 mu_0, mu_1) =
+  isTypeTreeNode(mu_0) & isTypeTreeNode(mu_1) &
+  (mu_1 = succ(mu_0, TreeNode, Black, right) |
+  mu_1 = succ(mu_0, TreeNode, Red, right));
+
+macro Array_0() =
+  true;
+
+
+/************************************************************************/
+/*   Misc. predicates                                                   */
+/************************************************************************/
+
+macro True() = true;
+
+macro False() = false;
+
+macro DeAlloc_0(var1 mu_0) = false;
+
+macro New_0(var1 mu_0) = false;
+
+macro DeAllocCheck_0() = true;
+
+macro NullCheck_0() = true;
+
+pred isNull(var1 mu_0) =
+  (isTypeTreeNode(mu_0) => (variant(mu_0,treeRoot,TreeNode,Null))) &
+  (isTypeFreeTreeNode(mu_0) => variant(mu_0,free_TreeNode,Free_TreeNode,Null));
+
+
+/************************************************************************/
+/*   Assertions and statements                                          */
+/************************************************************************/
+
+pred Successors_0(var1 mu_0, mu_1) =
+  Succ_left_0(mu_0, mu_1) | Succ_right_0(mu_0, mu_1);
+
+pred RootTest_0(var1 mu_0) =
+  Root_treeRoot_0(mu_0);
+
+/************************************************************************/
+/*   assert(rel(q, y, _) & y != NULL & rel(y, NULL, _) & z != NULL);    */
+/************************************************************************/
+
+pred Relation_0() =
+  ex1 mu_0: (Pos_q_0(mu_0) &
+  ex1 mu_1: Pos_y_0(mu_1) & 
+  Successors_0(mu_0, mu_1));
+
+pred NeqEqual_0() = 
+  ~(ex1 mu_0: (Pos_y_0(mu_0) & isNull(mu_0)));
+
+pred And_0() = 
+  Relation_0() & NeqEqual_0();
+
+pred Relation_1() =
+  ex1 mu_0: (Pos_y_0(mu_0) &
+  ex1 mu_1: isNull(mu_1) & 
+  Successors_0(mu_0, mu_1));
+
+pred And_1() = 
+  And_0() & Relation_1();
+
+pred NeqEqual_1() = 
+  ~(ex1 mu_0: (Pos_z_0(mu_0) & isNull(mu_0)));
+
+pred And_2() = 
+  And_1() & NeqEqual_1();
+
+pred Assert_0() =
+  And_2();
+
+pred Succ_left_1(var1 mu_0, mu_1) =
+  Succ_left_0(mu_0,mu_1) & Assert_0();
+
+pred Succ_right_1(var1 mu_0, mu_1) =
+  Succ_right_0(mu_0,mu_1) & Assert_0();
+
+/************************************************************************/
+/*   if (y->left != NULL) {                                             */
+/*     x = y->left;                                                     */
+/*   } else {                                                           */
+/*     x = y->right;                                                    */
+/*   }                                                                  */
+/************************************************************************/
+
+pred DeAllocCheck_1() =
+  DeAllocCheck_0() & ex1 mu_0: Pos_y_0(mu_0) & ~DeAlloc_0(mu_0);
+
+pred NullCheck_1() =
+  NullCheck_0() & ex1 mu_0: Pos_y_0(mu_0) & ~isNull(mu_0);
+
+pred Deref_0(var1 mu_0) =
+  ex1 mu_1: Pos_y_0(mu_1) & Succ_left_1(mu_1,mu_0);
+
+pred DeAllocCheck_2() =
+  DeAllocCheck_1() & ex1 mu_0: Deref_0(mu_0) & ~DeAlloc_0(mu_0);
+
+pred NeqEqual_2() = 
+  ~(ex1 mu_0: (Deref_0(mu_0) & isNull(mu_0)));
+
+pred Cond_0() =
+  NeqEqual_2();
+
+/************************************************************************/
+/*   x = y->left;                                                       */
+/************************************************************************/
+pred DeAllocCheck_3() =
+  DeAllocCheck_2() & ex1 mu_0: Pos_y_0(mu_0) & ~DeAlloc_0(mu_0);
+
+pred NullCheck_2() =
+  NullCheck_1() & ex1 mu_0: Pos_y_0(mu_0) & ~isNull(mu_0);
+
+pred Deref_1(var1 mu_0) =
+  ex1 mu_1: Pos_y_0(mu_1) & Succ_left_1(mu_1,mu_0);
+
+pred DeAllocCheck_4() =
+  DeAllocCheck_3() & ex1 mu_0: Deref_1(mu_0) & ~DeAlloc_0(mu_0);
+
+pred Pos_x_1(var1 mu_0) =
+  Deref_1(mu_0);
+
+/************************************************************************/
+/*   x = y->right;                                                      */
+/************************************************************************/
+pred DeAllocCheck_5() =
+  DeAllocCheck_2() & ex1 mu_0: Pos_y_0(mu_0) & ~DeAlloc_0(mu_0);
+
+pred NullCheck_3() =
+  NullCheck_1() & ex1 mu_0: Pos_y_0(mu_0) & ~isNull(mu_0);
+
+pred Deref_2(var1 mu_0) =
+  ex1 mu_1: Pos_y_0(mu_1) & Succ_right_1(mu_1,mu_0);
+
+pred DeAllocCheck_6() =
+  DeAllocCheck_5() & ex1 mu_0: Deref_2(mu_0) & ~DeAlloc_0(mu_0);
+
+pred Pos_x_2(var1 mu_0) =
+  Deref_2(mu_0);
+
+/*===========================End of if===========================*/
+
+pred Pos_x_3(var1 mu_0) =
+  (Cond_0() & Pos_x_1(mu_0)) |
+  (~Cond_0() & Pos_x_2(mu_0));
+
+pred DeAllocCheck_7() =
+  (Cond_0() & DeAllocCheck_4()) |
+  (~Cond_0() & DeAllocCheck_6());
+
+pred NullCheck_4() =
+  (Cond_0() & NullCheck_2()) |
+  (~Cond_0() & NullCheck_3());
+
+/************************************************************************/
+/*   if (q == NULL) {                                                   */
+/*     treeRoot = x;                                                    */
+/*   } else {                                                           */
+/*     if (y == q->left) {                                              */
+/*       q->left = x;                                                   */
+/*     } else {                                                         */
+/*       q->right = x;                                                  */
+/*     }                                                                */
+/*   }                                                                  */
+/************************************************************************/
+
+pred DeAllocCheck_8() =
+  DeAllocCheck_7() & ex1 mu_0: Pos_q_0(mu_0) & ~DeAlloc_0(mu_0);
+
+pred Equal_0() = 
+  ex1 mu_0: (Pos_q_0(mu_0) & isNull(mu_0));
+
+pred Cond_1() =
+  Equal_0();
+
+/************************************************************************/
+/*   treeRoot = x;                                                      */
+/************************************************************************/
+pred DeAllocCheck_9() =
+  DeAllocCheck_8() & ex1 mu_0: Pos_x_3(mu_0) & ~DeAlloc_0(mu_0);
+
+pred Root_treeRoot_1(var1 mu_0) =
+  Pos_x_3(mu_0);
+
+/************************************************************************/
+/*   if (y == q->left) {                                                */
+/*     q->left = x;                                                     */
+/*   } else {                                                           */
+/*     q->right = x;                                                    */
+/*   }                                                                  */
+/************************************************************************/
+
+pred DeAllocCheck_10() =
+  DeAllocCheck_8() & ex1 mu_0: Pos_y_0(mu_0) & ~DeAlloc_0(mu_0);
+
+pred DeAllocCheck_11() =
+  DeAllocCheck_10() & ex1 mu_0: Pos_q_0(mu_0) & ~DeAlloc_0(mu_0);
+
+pred NullCheck_5() =
+  NullCheck_4() & ex1 mu_0: Pos_q_0(mu_0) & ~isNull(mu_0);
+
+pred Deref_3(var1 mu_0) =
+  ex1 mu_1: Pos_q_0(mu_1) & Succ_left_1(mu_1,mu_0);
+
+pred DeAllocCheck_12() =
+  DeAllocCheck_11() & ex1 mu_0: Deref_3(mu_0) & ~DeAlloc_0(mu_0);
+
+pred Equal_1() = 
+  ex1 mu_0: (Pos_y_0(mu_0) & Deref_3(mu_0));
+
+pred Cond_2() =
+  Equal_1();
+
+/************************************************************************/
+/*   q->left = x;                                                       */
+/************************************************************************/
+pred DeAllocCheck_13() =
+  DeAllocCheck_12() & ex1 mu_0: Pos_x_3(mu_0) & ~DeAlloc_0(mu_0);
+
+pred DeAllocCheck_14() =
+  DeAllocCheck_13() & ex1 mu_0: Pos_q_0(mu_0) & ~DeAlloc_0(mu_0);
+
+pred NullCheck_6() =
+  NullCheck_5() & ex1 mu_0: Pos_q_0(mu_0) & ~isNull(mu_0);
+
+pred Succ_left_2(var1 mu_0, mu_1) =
+  (Pos_q_0(mu_0) & Pos_x_3(mu_1)) |
+  (~Pos_q_0(mu_0) & Succ_left_1(mu_0, mu_1));
+
+/************************************************************************/
+/*   q->right = x;                                                      */
+/************************************************************************/
+pred DeAllocCheck_15() =
+  DeAllocCheck_12() & ex1 mu_0: Pos_x_3(mu_0) & ~DeAlloc_0(mu_0);
+
+pred DeAllocCheck_16() =
+  DeAllocCheck_15() & ex1 mu_0: Pos_q_0(mu_0) & ~DeAlloc_0(mu_0);
+
+pred NullCheck_7() =
+  NullCheck_5() & ex1 mu_0: Pos_q_0(mu_0) & ~isNull(mu_0);
+
+pred Succ_right_2(var1 mu_0, mu_1) =
+  (Pos_q_0(mu_0) & Pos_x_3(mu_1)) |
+  (~Pos_q_0(mu_0) & Succ_right_1(mu_0, mu_1));
+
+/*===========================End of if===========================*/
+
+pred Succ_left_3(var1 mu_0, mu_1) =
+  (Cond_2() & Succ_left_2(mu_0, mu_1)) |
+  (~Cond_2() & Succ_left_1(mu_0, mu_1));
+
+pred Succ_right_3(var1 mu_0, mu_1) =
+  (Cond_2() & Succ_right_1(mu_0, mu_1)) |
+  (~Cond_2() & Succ_right_2(mu_0, mu_1));
+
+pred DeAllocCheck_17() =
+  (Cond_2() & DeAllocCheck_14()) |
+  (~Cond_2() & DeAllocCheck_16());
+
+pred NullCheck_8() =
+  (Cond_2() & NullCheck_6()) |
+  (~Cond_2() & NullCheck_7());
+
+/*===========================End of if===========================*/
+
+pred Root_treeRoot_2(var1 mu_0) =
+  (Cond_1() & Root_treeRoot_1(mu_0)) |
+  (~Cond_1() & Root_treeRoot_0(mu_0));
+
+pred DeAllocCheck_18() =
+  (Cond_1() & DeAllocCheck_9()) |
+  (~Cond_1() & DeAllocCheck_17());
+
+pred NullCheck_9() =
+  (Cond_1() & NullCheck_4()) |
+  (~Cond_1() & NullCheck_8());
+
+pred Succ_left_4(var1 mu_0, mu_1) =
+  (Cond_1() & Succ_left_1(mu_0, mu_1)) |
+  (~Cond_1() & Succ_left_3(mu_0, mu_1));
+
+pred Succ_right_4(var1 mu_0, mu_1) =
+  (Cond_1() & Succ_right_1(mu_0, mu_1)) |
+  (~Cond_1() & Succ_right_3(mu_0, mu_1));
+
+/************************************************************************/
+/*   if (y != z) {                                                      */
+/*     z->e = y->e;                                                     */
+/*   }                                                                  */
+/************************************************************************/
+
+pred DeAllocCheck_19() =
+  DeAllocCheck_18() & ex1 mu_0: Pos_y_0(mu_0) & ~DeAlloc_0(mu_0);
+
+pred DeAllocCheck_20() =
+  DeAllocCheck_19() & ex1 mu_0: Pos_z_0(mu_0) & ~DeAlloc_0(mu_0);
+
+pred NeqEqual_3() = 
+  ~(ex1 mu_0: (Pos_y_0(mu_0) & Pos_z_0(mu_0)));
+
+pred Cond_3() =
+  NeqEqual_3();
+
+/************************************************************************/
+/*   z->e = y->e;                                                       */
+/************************************************************************/
+pred DeAllocCheck_21() =
+  DeAllocCheck_20() & ex1 mu_0: Pos_y_0(mu_0) & ~DeAlloc_0(mu_0);
+
+pred NullCheck_10() =
+  NullCheck_9() & ex1 mu_0: Pos_y_0(mu_0) & ~isNull(mu_0);
+
+pred DeAllocCheck_22() =
+  DeAllocCheck_21() & ex1 mu_0: Pos_z_0(mu_0) & ~DeAlloc_0(mu_0);
+
+pred NullCheck_11() =
+  NullCheck_10() & ex1 mu_0: Pos_z_0(mu_0) & ~isNull(mu_0);
+
+pred is_Black_1(var1 mu_0) =
+  (Pos_z_0(mu_0) & ex1 mu_1: is_Black_0(mu_1) & Pos_y_0(mu_1)) |
+  (~Pos_z_0(mu_0) & is_Black_0(mu_0));
+
+pred is_Red_1(var1 mu_0) =
+  (Pos_z_0(mu_0) & ex1 mu_1: is_Red_0(mu_1) & Pos_y_0(mu_1)) |
+  (~Pos_z_0(mu_0) & is_Red_0(mu_0));
+
+/*===========================End of if===========================*/
+
+pred is_Black_2(var1 mu_0) =
+  (Cond_3() & is_Black_1(mu_0)) |
+  (~Cond_3() & is_Black_0(mu_0));
+
+pred is_Red_2(var1 mu_0) =
+  (Cond_3() & is_Red_1(mu_0)) |
+  (~Cond_3() & is_Red_0(mu_0));
+
+pred DeAllocCheck_23() =
+  (Cond_3() & DeAllocCheck_22()) |
+  (~Cond_3() & DeAllocCheck_20());
+
+pred NullCheck_12() =
+  (Cond_3() & NullCheck_11()) |
+  (~Cond_3() & NullCheck_9());
+
+/************************************************************************/
+/*   free(y);                                                           */
+/************************************************************************/
+
+pred DeAllocCheck_24() =
+  DeAllocCheck_23() & ex1 mu_0: Pos_y_0(mu_0) & ~DeAlloc_0(mu_0);
+
+pred DeAlloc_1(var1 mu_0) =
+  DeAlloc_0(mu_0) | Pos_y_0(mu_0);
+
+pred Successors_1(var1 mu_0, mu_1) =
+  Succ_left_4(mu_0, mu_1) | Succ_right_4(mu_0, mu_1);
+
+pred RootTest_1(var1 mu_0) =
+  Root_treeRoot_2(mu_0);
+
+/************************************************************************/
+/*   assert(true);                                                      */
+/************************************************************************/
+
+pred Assert_1() =
+  True();
+
+pred OK_0() =
+  DeAllocCheck_24() & NullCheck_12();
+
+pred NonMallocCells_0(var2 P_0) =
+  all1 mu_0:(~isTypeFreeTreeNode(mu_0) & ~DeAlloc_1(mu_0) & ~isNull(mu_0)) <=> mu_0 in P_0;
+
+pred MallocCells_0(var2 P_0) =
+  all1 mu_0:(New_0(mu_0) & ~isNull(mu_0) & ~DeAlloc_1(mu_0)) <=> mu_0 in P_0;
+
+pred Cells_0(var2 P_0) =
+  ex2 P_1: NonMallocCells_0(P_1) &
+  ex2 P_2: MallocCells_0(P_2) &
+  P_0 = P_1 union P_2;
+
+pred Cellsneeded_0() =
+  variant(tree_root(free_TreeNode) ,free_TreeNode, Free_TreeNode, Null);
+
+pred ReachSucc_0(var1 mu_0, var2 P_0) =
+  all1 mu_1: ((Successors_1(mu_0, mu_1) &
+  ~isNull(mu_1)) => mu_1 in P_0);
+
+pred Reachable_0(var1 mu_0, var2 P_0) =
+  ReachSucc_0(mu_0, P_0) &
+  all2 P_1:(
+  ReachSucc_0(mu_0, P_1) => P_0 sub P_1);
+
+pred Closure_treeRoot_0(var2 P_0) =
+  ex1 mu_0:(Root_treeRoot_2(mu_0) &
+  (isNull(mu_0) <=> mu_0 notin P_0)) &
+  all1 mu_0:(mu_0 in P_0 =>
+  ReachSucc_0(mu_0, P_0));
+
+pred Structure_treeRoot_0(var2 P_0) =
+  Closure_treeRoot_0(P_0) &
+  all2 P_1:Closure_treeRoot_0(P_1) => P_0 sub P_1;
+
+pred isFreed_0(var1 p) =
+  ex1 mu_0:mu_0 = p & DeAlloc_1(mu_0);
+
+pred Not_0(var1 p) = 
+  ~isFreed_0(p);
+
+pred isFreed_1(var1 p,q) =
+  ex1 mu_0:mu_0 = q & DeAlloc_1(mu_0);
+
+pred Not_1(var1 p,q) = 
+  ~isFreed_1(p,q);
+
+pred isFreed_2(var1 p,q,r) =
+  ex1 mu_0:mu_0 = r & DeAlloc_1(mu_0);
+
+pred Not_2(var1 p,q,r) = 
+  ~isFreed_2(p,q,r);
+
+pred Relation_2(var1 p,q,r) =
+  ex1 mu_0: (mu_0 = p &
+  ex1 mu_1: mu_1 = r & 
+  Successors_1(mu_0, mu_1));
+
+pred Relation_3(var1 p,q,r) =
+  ex1 mu_0: (mu_0 = q &
+  ex1 mu_1: mu_1 = r & 
+  Successors_1(mu_0, mu_1));
+
+pred And_3(var1 p,q,r) = 
+  Relation_2(p,q,r) & Relation_3(p,q,r);
+
+pred Equal_2(var1 p,q,r) = 
+  ex1 mu_0: (mu_0 = p & mu_0 = q);
+
+pred Equal_3(var1 p,q,r) = 
+  ex1 mu_0: (mu_0 = r & isNull(mu_0));
+
+pred Or_0(var1 p,q,r) = 
+  Equal_2(p,q,r) | Equal_3(p,q,r);
+
+pred Impl_0(var1 p,q,r) = 
+  And_3(p,q,r) => Or_0(p,q,r);
+
+pred Impl_1(var1 p,q,r) = 
+  Not_2(p,q,r) => Impl_0(p,q,r);
+
+pred All_0(var1 p,q) =
+  all1 r where isTypeTreeNode(r) | isTypeFreeTreeNode(r):
+  (~(isTypeFreeTreeNode(r) & variant(r,free_TreeNode,Free_TreeNode,Null))) =>
+  Impl_1(p,q,r);
+
+pred Impl_2(var1 p,q) = 
+  Not_1(p,q) => All_0(p,q);
+
+pred All_1(var1 p) =
+  all1 q where isTypeTreeNode(q) | isTypeFreeTreeNode(q):
+  (~(isTypeFreeTreeNode(q) & variant(q,free_TreeNode,Free_TreeNode,Null))) =>
+  Impl_2(p,q);
+
+pred Impl_3(var1 p) = 
+  Not_0(p) => All_1(p);
+
+pred All_2() =
+  all1 p where isTypeTreeNode(p) | isTypeFreeTreeNode(p):
+  (~(isTypeFreeTreeNode(p) & variant(p,free_TreeNode,Free_TreeNode,Null))) =>
+  Impl_3(p);
+
+pred isFreed_3(var1 p) =
+  ex1 mu_0:mu_0 = p & DeAlloc_1(mu_0);
+
+pred Not_3(var1 p) = 
+  ~isFreed_3(p);
+
+pred isFreed_4(var1 p,q) =
+  ex1 mu_0:mu_0 = q & DeAlloc_1(mu_0);
+
+pred Not_4(var1 p,q) = 
+  ~isFreed_4(p,q);
+
+pred isFreed_5(var1 p,q,r) =
+  ex1 mu_0:mu_0 = r & DeAlloc_1(mu_0);
+
+pred Not_5(var1 p,q,r) = 
+  ~isFreed_5(p,q,r);
+
+pred Relation_4(var1 p,q,r) =
+  ex1 mu_0: (mu_0 = p &
+  ex1 mu_1: mu_1 = q & 
+  Succ_left_4(mu_0, mu_1));
+
+pred Relation_5(var1 p,q,r) =
+  ex1 mu_0: (mu_0 = p &
+  ex1 mu_1: mu_1 = r & 
+  Succ_right_4(mu_0, mu_1));
+
+pred And_4(var1 p,q,r) = 
+  Relation_4(p,q,r) & Relation_5(p,q,r);
+
+pred NeqEqual_4(var1 p,q,r) = 
+  ~(ex1 mu_0: (mu_0 = q & mu_0 = r));
+
+pred Equal_4(var1 p,q,r) = 
+  ex1 mu_0: (mu_0 = q & isNull(mu_0));
+
+pred Equal_5(var1 p,q,r) = 
+  ex1 mu_0: (mu_0 = r & isNull(mu_0));
+
+pred And_5(var1 p,q,r) = 
+  Equal_4(p,q,r) & Equal_5(p,q,r);
+
+pred Or_1(var1 p,q,r) = 
+  NeqEqual_4(p,q,r) | And_5(p,q,r);
+
+pred Impl_4(var1 p,q,r) = 
+  And_4(p,q,r) => Or_1(p,q,r);
+
+pred Impl_5(var1 p,q,r) = 
+  Not_5(p,q,r) => Impl_4(p,q,r);
+
+pred All_3(var1 p,q) =
+  all1 r where isTypeTreeNode(r) | isTypeFreeTreeNode(r):
+  (~(isTypeFreeTreeNode(r) & variant(r,free_TreeNode,Free_TreeNode,Null))) =>
+  Impl_5(p,q,r);
+
+pred Impl_6(var1 p,q) = 
+  Not_4(p,q) => All_3(p,q);
+
+pred All_4(var1 p) =
+  all1 q where isTypeTreeNode(q) | isTypeFreeTreeNode(q):
+  (~(isTypeFreeTreeNode(q) & variant(q,free_TreeNode,Free_TreeNode,Null))) =>
+  Impl_6(p,q);
+
+pred Impl_7(var1 p) = 
+  Not_3(p) => All_4(p);
+
+pred All_5() =
+  all1 p where isTypeTreeNode(p) | isTypeFreeTreeNode(p):
+  (~(isTypeFreeTreeNode(p) & variant(p,free_TreeNode,Free_TreeNode,Null))) =>
+  Impl_7(p);
+
+pred And_6() = 
+  All_2() & All_5();
+
+pred noShare_0() =
+  And_6();
+
+pred Wellformed_0() =
+  ex2 cells_in_treeRoot: Structure_treeRoot_0(cells_in_treeRoot) &
+  Cells_0(cells_in_treeRoot) &
+  all1 mu_0: (ex2 P_1:(
+  Reachable_0(mu_0, P_1) & mu_0 notin P_1)) &
+  noShare_0();
+
+pred Assumptions_0() =
+   Array_0() & Cellsneeded_0();
+
+pred Check_Validity_0() =
+  (Assert_0() & Assumptions_0())
+  =>
+  (Assert_1() & Wellformed_0() & OK_0());
+
+  Check_Validity_0();
+
+/* Result: Valid */

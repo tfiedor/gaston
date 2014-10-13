@@ -1,0 +1,329 @@
+#                               -*- Mode: Sh -*- 
+# rogers.mona --- 
+# Author          : Frank Morawietz
+# Created On      : Mon Dec  8 11:48:53 1997
+# Last Modified By: Frank Morawietz
+# Last Modified On: Mon Nov 15 15:54:24 1999
+# Update Count    : 58
+# Status          : Unknown, Use with caution!
+# 
+
+
+# switch to tree mode
+#tree;
+ws2s;
+
+############################################################################
+# VARIABLE DECLARATIONS
+var1 x,y,z,a,b,c;
+var2 Bar0,Bar1,Bar2,John,Sleeps,
+     X,Y, Adj, N, V, I1,I2,I3,I4,I5,I6, Base, Trace, Parse;
+
+############################################################################
+#
+# PREDICATE DECLARATIONS
+#
+############################################################################
+
+############################################################################
+# tree logic signature
+# immediate dominance
+pred id (var1 x, var1 y) = (x.0 = y) | (x.1 = y);
+# transitive closure of immediate dominance
+pred d (var1 x, var1 y) = (x < y);
+# transitive reflexive closure of immediate dominance
+pred rd (var1 x, var1 y) = (x <= y);
+# precedence
+pred p (var1 x, var1 y) = ex1 z,u,v: rd(u,x) & rd(v,y) & 
+                                     (z.0 = u) & (z.1 = v) & 
+	                             x ~= y;
+############################################################################
+# auxiliary definitions
+
+# all sets are a subset of the set in the first argument 
+pred Subs11( var2 X, var2 A, var2 B, var2 C, var2 D, var2 E, var2 F, 
+                     var2 G, var2 H, var2 I, var2 J ) =
+	   A sub X & B sub X & C sub X & D sub X & E sub X & F sub X &
+	   G sub X & H sub X & I sub X & J sub X;
+
+# disjointN: N the number of disjoint sets
+pred disjoint2(var2 A, var2 B) =
+	      (~ (ex1 t: ( t in A & t in B )) );
+pred disjoint3(var2 A, var2 B, var2 C) =
+	      (~ (ex1 t: ( t in A & t in B )) &
+	       ~ (ex1 t: ( t in A & t in C )) &
+	       ~ (ex1 t: ( t in B & t in C )) );
+pred disjoint4(var2 A, var2 B, var2 C, var2 D) =
+	      (~ (ex1 t: ( t in A & t in B )) &
+	       ~ (ex1 t: ( t in A & t in C )) &
+	       ~ (ex1 t: ( t in A & t in D )) &
+	       ~ (ex1 t: ( t in B & t in C )) &
+	       ~ (ex1 t: ( t in B & t in D )) &
+	       ~ (ex1 t: ( t in C & t in D )) );
+pred disjoint5(var2 A, var2 B, var2 C, var2 D, var2 E) =
+	      (~ (ex1 t: ( t in A & t in B )) &
+	       ~ (ex1 t: ( t in A & t in C )) &
+	       ~ (ex1 t: ( t in A & t in D )) &
+	       ~ (ex1 t: ( t in A & t in E )) &
+	       ~ (ex1 t: ( t in B & t in C )) &
+	       ~ (ex1 t: ( t in B & t in D )) &
+	       ~ (ex1 t: ( t in B & t in E )) &
+	       ~ (ex1 t: ( t in C & t in D )) &
+	       ~ (ex1 t: ( t in C & t in E )) &
+	       ~ (ex1 t: ( t in D & t in E )) );
+pred disjoint6(var2 A, var2 B, var2 C, var2 D, var2 E, var2 F) =
+	      (~ (ex1 t: ( t in A & t in B )) &
+	       ~ (ex1 t: ( t in A & t in C )) &
+	       ~ (ex1 t: ( t in A & t in D )) &
+	       ~ (ex1 t: ( t in A & t in E )) &
+	       ~ (ex1 t: ( t in A & t in F )) &
+	       ~ (ex1 t: ( t in B & t in C )) &
+	       ~ (ex1 t: ( t in B & t in D )) &
+	       ~ (ex1 t: ( t in B & t in E )) &
+	       ~ (ex1 t: ( t in B & t in F )) &
+	       ~ (ex1 t: ( t in C & t in D )) &
+	       ~ (ex1 t: ( t in C & t in E )) &
+	       ~ (ex1 t: ( t in C & t in F )) &
+	       ~ (ex1 t: ( t in D & t in E )) &
+	       ~ (ex1 t: ( t in D & t in F )) &
+	       ~ (ex1 t: ( t in E & t in F )) );
+
+# Rogers' thesis page 49/50
+pred myroot( var1 x ) = (all1 y: rd(x,y));
+pred InclRoot ( var2 X ) = ex1 x: (x in X & myroot(x));
+pred Rooted ( var2 X ) = ex1 x: ( all1 y: (x in X & (y in X => rd(x,y))));
+pred Connected ( var2 X ) = 
+    all1 x,y,z: ((x in X & y in X & rd(x,z) & rd(z,y)) => z in X);
+pred Path( var2 X ) = Connected(X) & 
+    all1 x,y: ((x in X & y in X) => (rd(x,y) | rd(y,x)));
+pred Subset( var2 X, var2 Y ) = X sub Y;
+
+# trees are connected sets which contain the root
+pred Tree (var2 Parse) =
+    Connected( Parse ) & InclRoot( Parse );
+
+# the frontier are the terminal nodes of a tree
+# pred frontier( var2 P, var2 F) =
+#     (all1 x where ( x in P ): ~(ex1 y where ( y in P ): id(x,y) <=> x in F)) &
+#     F sub P;
+
+############################################################################
+#
+# LINGUISTICALLY MOTIVATED DEFINITIONS
+#
+############################################################################
+
+
+
+###########################################################################
+# LEXICON: a naive and small one
+pred Lexicon ( var1 x, var2 N, var2 V, var2 John, var2 Sleeps ) =
+    disjoint2(John,Sleeps) &
+    ( x in John & x in N & x notin V ) |
+    ( x in Sleeps & x in V & x notin N);
+
+
+# c-command: a node x c-commands another one y in case all nodes which
+# properly dominate it, also dominate the other and it does not dominate
+# or equal y.
+pred c_com (var1 x, var1 y) = all1 z: ( d(z,x) => d(z,y) ) & ~(rd(x,y));
+
+# technical definitions to ensure equality of feature bundles on nodes
+pred FEq (var1 x, var1 y, var2 N, var2 V ) =
+    (x in N <=> y in N) & 
+    (x in V <=> y in V) ;
+pred Projects (var1 x, var1 y, var2 N, var2 V ) =
+    (x in N <=> y in N) & 
+    (x in V <=> y in V) ;
+
+###########################################################################
+# Xbar - THEORY
+#        on catories not on nodes
+
+# auxiliary for category
+pred Component ( var2 X, var2 Adj, var2 N, var2 V ) =
+    Path(X) &
+    all1 x,y: ((x in X & y in X) => FEq(x,y,N,V)) &
+    all1 x,v: ex1 y: all1 z: ( (x in X & v in X & id(x,v)) =>
+              (v notin Adj & id(x,y) & v ~= y & y in Adj & 
+	          (id(x,z) => (z = v | z = y))));
+# a category is a maximal component
+pred Category ( var2 X, var2 Adj, var2 N, var2 V ) =
+    Component(X,Adj,N,V) &
+    all2 Y: ((Subset(X,Y) & ~(Subset(Y,X))) => ~(Component(Y,Adj,N,V)));
+pred Category1 ( var2 X, var1 x, var2 Adj, var2 N, var2 V ) =
+    Category(X,Adj,N,V) & x in X;
+pred Cat ( var1 x, var1 y, var2 Adj, var2 N, var2 V ) =
+    ex2 X: Category1(X,x,Adj,N,V) & Category1(X,y,Adj,N,V);
+# highest and lowest element of a category
+pred MaxSeg ( var1 x, var2 Adj, var2 N, var2 V ) =
+    ex2 X: (Category1(X,x,Adj,N,V) & all1 y: (y in X => rd(x,y)));
+pred MinSeg ( var1 x, var2 Adj, var2 N, var2 V ) =
+    ex2 X: (Category1(X,x,Adj,N,V) & all1 y: (y in X => rd(y,x)));
+
+# relations among categories
+pred D( var1 x, var1 y, var2 Adj, var2 N, var2 V ) =
+    all1 v: (Cat(x,v,Adj,N,V) => d(v,y));
+pred Excludes( var1 x, var1 y, var2 Adj, var2 N, var2 V ) =
+    all1 v: (Cat(x,v,Adj,N,V) => ~(rd(v,y)));
+pred Includes( var1 x, var1 y, var2 Adj, var2 N, var2 V ) =
+    ~(Excludes(x,y,Adj,N,V));
+pred LeftOf( var1 x, var1 y, var2 Adj, var2 N, var2 V ) =
+    Excludes(x,y,Adj,N,V) & Excludes(y,x,Adj,N,V) & p(x,y);
+pred ID( var1 x, var1 y, var2 Adj, var2 N, var2 V ) =
+    D(x,y,Adj,N,V) &
+    ~( ex1 z: ((Excludes(z,x,Adj,N,V) & D(z,y,Adj,N,V)) |
+               (z in Adj & Excludes(z,x,Adj,N,V) & Includes(z,y,Adj,N,V))));
+# command relations again
+pred CCom( var1 x, var1 y, var2 Adj, var2 N, var2 V ) =
+    ~(D(x,y,Adj,N,V)) & ~(D(y,x,Adj,N,V)) &
+    all1 z: (D(z,x,Adj,N,V) => D(z,y,Adj,N,V));
+pred MCom( var1 x, var1 y, var2 Adj, var2 N, var2 V, var2 Bar2 ) =
+    ~(D(x,y,Adj,N,V)) & ~(D(y,x,Adj,N,V)) &
+    all1 z: ((x in Bar2 & D(z,x,Adj,N,V)) => D(z,y,Adj,N,V));
+pred ACCom( var1 x, var1 y, var2 Adj, var2 N, var2 V ) =
+    CCom(x,y,Adj,N,V) & ~(CCom(y,x,Adj,N,V));
+
+# identifying nodes with certain properties
+pred HeadXP( var1 x, var1 y, var2 Adj, var2 N, var2 V ) =
+    ID(y,x,Adj,N,V) &
+    all1 z: ID(y,z,Adj,N,V) => ~(LeftOf(x,z,Adj,N,V));
+pred HeadXBar( var1 x, var1 y, var2 Adj, var2 N, var2 V ) =
+    ID(y,x,Adj,N,V) &
+    all1 z: ID(y,z,Adj,N,V) => ~(LeftOf(z,x,Adj,N,V));
+
+pred MaxProjection( var1 x, var1 y, var2 Bar2, var2 Adj, var2 N, var2 V, var2 Base ) =
+    ( y in Base | y in Bar2 ) &
+    x in Bar2 & Includes(x,y,Adj,N,V) &
+    all1 z: ((z in Bar2 & Includes(z,y,Adj,N,V)) => 
+              Includes(z,x,Adj,N,V));
+pred MaxProj( var1 x, var2 Bar2 ) =
+    x in Bar2;
+
+pred Head ( var1 x, var1 y, var2 Bar2, var2 Adj, var2 N, var2 V, var2 Base ) = 
+    ( y in Base | y in Bar2 ) &
+    ex1 v,w: ( MaxProjection(w,y,Bar2,Adj,N,V,Base) & HeadXP(v,w,Adj,N,V) &
+               HeadXBar(x,v,Adj,N,V));
+pred Hea (var1 x, var2 Bar2, var2 Adj, var2 N, var2 V, var2 Base ) = 
+    ex1 y: Head(x,y,Bar2,Adj,N,V,Base);
+
+pred Comp ( var1 x, var1 y, var2 Bar2, var2 Adj, var2 N, var2 V, var2 Base ) = 
+    ( y in Base | y in Bar2 ) &
+    ex1 v,w: ( MaxProjection(w,y,Bar2,Adj,N,V,Base) & HeadXP(v,w,Adj,N,V) &
+               ID(v,x,Adj,N,V) & ~(HeadXBar(x,v,Adj,N,V)));
+pred Com(var1 x, var2 Bar2, var2 Adj, var2 N, var2 V, var2 Base ) = 
+    ex1 y: Comp(x,y,Bar2,Adj,N,V,Base);
+
+pred Spec( var1 x, var1 y, var2 Bar2, var2 Adj, var2 N, var2 V, var2 Base ) = 
+    ( y in Base | y in Bar2 ) &
+    ex1 w: ( MaxProjection(w,y,Bar2,Adj,N,V,Base) & ID(w,x,Adj,N,V) & 
+             ~(HeadXP(x,w,Adj,N,V)));               
+pred Spe(var1 x, var2 Bar2, var2 Adj, var2 N, var2 V, var2 Base ) = 
+    ex1 y: Spec(x,y,Bar2,Adj,N,V,Base);
+
+###########################################################################
+# PRINCIPLES
+# distribution of the Adj feature
+pred adj( var2 Parse, var2 Adj, var2 N, var2 V ) = 
+    all1 x where ( x in Parse ): ( x in Adj =>
+            ( ex1 y,z where ( y in Parse & z in Parse): 
+                 ( ex2 Y: id(y,x) & id(y,z) & Category(Y,Adj,N,V) & 
+                    y in Y & z in Y )));
+# some more restrictions on Adjuncts
+pred adjres( var2 Parse, var2 Bar0, var2 Bar2, var2 Adj, var2 N, var2 V, 
+              var2 Base, var2 Trace, var2 John, var2 Sleeps ) =
+    all1 x,y where ( x in Parse & y in Parse): ( ( x in Adj & id(x,y)) =>
+                ( y notin Trace & ~ Lexicon(y,N,V,John,Sleeps) &
+		  ( (x in Bar0 & y in Bar0) | (x in Bar2 & y notin Bar0)))) &
+#    ~(ex1 x,y: (id(x,y) & Apos(x) & y in Adj & y notin Base) ) &
+    ~(ex1 x,y where ( x in Parse & y in Parse): ( x in  Bar0 & id(x,y) & y in Adj & y notin Base) );
+
+# every node has to have a barlevel or be lexical
+pred bar( var2 Parse, var2 Bar0, var2 Bar1, var2 Bar2, var2 N, var2 V, 
+          var2 John, var2 Sleeps  ) =
+    all1 x where ( x in Parse ): ( x in Bar0 | x in Bar1 | x in Bar2 | 
+          Lexicon(x,N,V,John,Sleeps) );  
+# conditions on xbar structure depending on barlevel
+pred barZero( var2 Parse, var2 Bar0, var2 Adj, var2 N, var2 V, 
+              var2 Base, var2 John, var2 Sleeps  ) =
+    all1 x where ( x in Parse ): (x in Bar0 =>
+            (( ex1 y where ( y in Parse ): 
+               ( ID(x,y,Adj,N,V) & 
+                 all1 v where ( v in Parse ): 
+                        ( ID(x,v,Adj,N,V) =>
+                          v = y ))) &
+	     ( all1 y where ( y in Parse ): ( ID(x,y,Adj,N,V) =>
+	              (Lexicon(y,N,V,John,Sleeps) & Projects(x,y,N,V) & 
+                       (x in Base <=> y in Base))))));
+pred barOne( var2 Parse, var2 Bar0, var2 Bar1, var2 Bar2, var2 Adj, 
+             var2 N, var2 V ) =
+    all1 x where ( x in Parse ): (x in Bar1 =>
+            ( (ex1 y where ( y in Parse ): ( HeadXBar(y,x,Adj,N,V) & y in Bar0 & 
+                     Projects(x,y,N,V))) &
+	      (all1 y where ( y in Parse ): ( 
+                       (ID(x,y,Adj,N,V) & ~(HeadXBar(y,x,Adj,N,V))) =>
+	               y in Bar2 ))));
+pred barTwo( var2 Parse, var2 Bar1, var2 Bar2, var2 Adj, var2 N, 
+             var2 V, var2 Trace ) =
+    all1 x where ( x in Parse ): (x in Bar2 =>
+            (( x in Trace & (all1 y where ( y in Parse ): (~(D(x,y,Adj,N,V))))) |
+	     ( ex1 y where ( y in Parse ): ( HeadXP(y,x,Adj,N,V) & y in Bar1 & 
+                     Projects(x,y,N,V)) &
+	       all1 y where ( y in Parse ): ( 
+                       (ID(x,y,Adj,N,V) & ~(HeadXP(y,x,Adj,N,V))) =>
+	               y in Bar2 ))));
+# the xbar principle
+pred XBar ( var2 Parse, var2 Bar0, var2 Bar1, var2 Bar2, 
+            var2 Adj, var2 N, var2 V, 
+            var2 Base, var2 Trace, var2 John, var2 Sleeps  ) =
+    adj(Parse,Adj,N,V) &
+    adjres(Parse,Bar0,Bar2,Adj,N,V,Base,Trace,John,Sleeps) &
+    bar(Parse,Bar0,Bar1,Bar2,N,V,John,Sleeps) &
+    barZero(Parse,Bar0,Adj,N,V,Base,John,Sleeps) &
+    barOne(Parse,Bar0,Bar1,Bar2,Adj,N,V) &
+    barTwo(Parse,Bar1,Bar2,Adj,N,V,Trace);
+
+###########################################################################
+# FEATURE PRINCIPLES
+pred Features( var2 Parse, var2 Bar0, var2 Bar1, var2 Bar2, var2 Adj, 
+                     var2 N, var2 V, var2 Base, var2 Trace, var2 John, 
+                     var2 Sleeps ) =
+    Subs11( Parse, Bar0,Bar1,Bar2,Adj,N,V,Base,Trace,John,Sleeps) &
+    (~(ex1 x,y where ( x in Parse & y in Parse): (x in John | x in Sleeps) & id(x,y)));
+#    (ex2 Front: 
+#      frontier( Parse, Front ) &
+#      John sub Front & Sleeps sub Front);
+
+#    disjoint3(Bar0,Bar1,Bar2);
+
+###########################################################################
+# GRAMMAR FORMULA
+# we are interested only in a certain part of the result -> a labeled 
+# parse tree which has to be
+#  -- finite
+#  -- a tree
+#  -- restrictions on the variables representing features
+#      + all labels appear only in the tree (this makes the automaton 
+#        smaller)  
+#      + Bar levels are disjoint
+#  -- linguistic modules
+#      + X-Bar theory
+#      + Government
+#      + Lexicon (lexical entries are represented as disjoint sets)
+#      + Binding & Control
+#      + Chains
+#     (+ Reconstruction )
+pred Gram( var2 Parse, var2 Bar0, var2 Bar1, var2 Bar2, 
+            var2 Adj, var2 N, var2 V, 
+            var2 Base, var2 Trace, var2 John, var2 Sleeps  ) =
+    Tree(Parse) &
+    Features( Parse, Bar0,Bar1,Bar2,Adj,N,V,Base,Trace,John,Sleeps) &
+    XBar(Parse,Bar0,Bar1,Bar2,Adj,N,V,Base,Trace,John,Sleeps);
+
+
+###########################################################################
+# formula to compile
+
+
+Gram(Parse,Bar0,Bar1,Bar2,Adj,N,V,Base,Trace,John,Sleeps);
+

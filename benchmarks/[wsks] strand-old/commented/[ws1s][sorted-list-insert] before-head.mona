@@ -1,0 +1,179 @@
+/* R := singly linked list, with a binary relations next, two variables, head and nil */
+
+/* D := a binary relations reach:
+	reach(x, y) := ex2 S : (x in S & y in S /\ all1 z . (z in S => ex1 u . (next(z, u) & u in S))) */
+
+/* F := a single data field called key */
+
+/* P:= sorted
+	sorted := all1 x y . (reach(x, y) => key(x) <= key(y)) */
+
+/* S :=
+Node sllInsert(Node head, Node nil, int k){
+
+	if (key(head) > k){
+		new Node inserted;
+		key(inserted) = k;
+		next(inserted) = head;
+		head = inserted;
+	}
+	else{
+		Node prev = head;
+		Node curr = next(prev);
+	(loop invariant:
+	sll & sorted & all1 x: (~reach(x, prev) | key(x) <= k) & reach(head, prev) & reach (curr, nil) & next(prev) = curr)
+
+		while (key(curr) < k /\ curr =/= nil){
+			prev = curr;
+			curr = next(curr);
+		}
+
+		new Node inserted;
+		key(inserted) = k;
+		next(inserted) = curr;
+		next(prev) = inserted;
+	}
+} */
+
+/* Q := sll /\ sorted /\ ex1 x: key(x) = k
+	sll := head /\ nil /\ total-order /\ antisymmetry
+	head := all1 y : (reach(head, y))
+	nil := all1 y : (reach(y, nil))
+	total-order := all1 x, y : (reach(x, y) \/ reach(y, x))
+	antisymmetry := all1 x, y : (reach(x, y) <=> ~reach(y, x)) */
+
+/*ws1s;
+
+var2 $ where ~ex1 p where true: p notin $ & p+1 in $;
+
+allpos $;
+defaultwhere1(p) = p in $;
+
+defaultwhere2(P) = P sub $;*/
+
+m2l-str;
+
+var0 pc12,pc3,pc4;
+
+
+var1 head,inserted,end,head1,exdv1,exdv2;
+
+
+
+macro next(var1 x, var1 y) =
+	head<=x & x+1=y & y<end;
+macro next1(var1 x, var1 y) =
+	(x~=inserted & next(x,y)) | (x=inserted & y=head);
+macro close(var1 x, var1 y, var2 M) =
+	x<y & (~ex1 z: (z in M & x<z & z<y)) ;
+macro next'(var1 x, var1 y, var2 M) =
+	close(x, y, M) & head<=x & y<end ;
+macro next1'(var1 x, var1 y, var2 M) =
+	(x~=inserted & next'(x,y,M)) | (x=inserted & y=head);
+macro reach(var1 x, var1 y) =
+	head<=x & x<=y & y<end ;
+macro reach1(var1 x, var1 y) =
+	all2 P: ((x in P &
+		all1 z1,z2: ((z1 in P & next1(z1,z2)) => z2 in P)) => y in P) ;
+macro reach1'(var1 x, var1 y, var2 M) =
+		all2 P where P sub M: ((x in P &
+		all1 z1,z2 where z1 in M & z2 in M: ((z1 in P & next1'(z1,z2,M)) => z2 in P)) => y in P) ;
+
+macro sll(var1 h, var1 t) =
+	(reach(h, t)) &
+	(all1 x: (~reach(x, h) | x=h)) &
+	(all1 x: (~reach(t, x) | x=t)) &
+	(all1 x,y: (reach(h, x) & reach(h, y) & reach(x, t) & reach(y, t))
+			=> (reach(x, y) | reach(y, x)));
+macro sll'(var1 h, var1 t, var2 M) =
+	(reach(h, t)) &
+	(all1 x where x in M: (~reach(x, h) | x=h)) &
+	(all1 x where x in M: (~reach(t, x) | x=t)) &
+	(all1 x,y where x in M & y in M: (reach(h, x) & reach(h, y) & reach(x, t) & reach(y, t))
+			=> (reach(x, y) | reach(y, x)));
+macro sll1(var1 h, var1 t) =
+	(reach1(h, t)) &
+	(all1 x: (~reach1(x, h) | x=h)) &
+	(all1 x: (~reach1(t, x) | x=t)) &
+	(all1 x,y: (reach1(h, x) & reach1(h, y) & reach1(x, t) & reach1(y, t))
+			=> (reach1(x, y) | reach1(y, x)));
+macro sll1'(var1 h, var1 t, var2 M) =
+	(reach1'(h, t, M)) &
+	(all1 x where x in M: (~reach1'(x, h, M) | x=h)) &
+	(all1 x where x in M: (~reach1'(t, x, M) | x=t)) &
+	(all1 x,y where x in M & y in M: (reach1'(h, x, M) & reach1'(h, y, M) & reach1'(x, t, M) & reach1'(y, t, M))
+			=> (reach1'(x, y, M) | reach1'(y, x, M)));
+
+
+
+/* to check:
+p4 & p3 & sorted & ~postcondition */
+
+
+
+macro validmodel =
+	(head=1 &
+	inserted = end &
+	head < end-1 &
+	head1 = inserted &
+	exdv1 <= end &
+	exdv2 <= end &
+	~ex1 x: (end<x));
+
+
+pred first(var1 x, var2 M) =
+	x in M & ~ex1 y: (y in M & y<x) ;
+pred second(var1 x, var2 M) =
+	x in M & ex1 y: (x~=y & first(y, M) & all1 z: (z notin M | z=y | x<=z)) ;
+
+macro validmodel'(var2 M) =
+	((0 in M & head in M & head1 in M & (end-1) in M & end in M) &
+	(inserted in M & exdv1 in M & exdv2 in M) &
+	second(head, M) &
+	head < end-1 &
+	inserted = end &
+	head1 = inserted &
+	exdv1 <= end &
+	exdv2 <= end &
+	~ex1 x where x in M: (end<x));
+
+macro presorted(var1 alldv1, var1 alldv2, var0 p11) =
+	alldv1=alldv2 | ~reach(alldv1, alldv2) | alldv2=end-1 | p11;
+macro postsorted = exdv1~=exdv2 & reach1(exdv1, exdv2) & exdv2~=end-1 & pc12;
+macro presorted'(var1 alldv1, var1 alldv2, var0 p11, var2 M) =
+	alldv1=alldv2 | ~reach(alldv1, alldv2) | alldv2=end-1 | p11;
+macro postsorted'(var2 M) = exdv1~=exdv2 & reach1'(exdv1, exdv2, M) & exdv2~=end-1 & pc12;
+
+macro precondition(var1 alldv1, var1 alldv2, var1 alldv3, var0 p11, var0 p2) =
+	pc3 & pc4 & presorted(alldv1,alldv2,p11) ;
+macro precondition'(var1 alldv1, var1 alldv2, var1 alldv3, var0 p11, var0 p2, var2 M) =
+	pc3 & pc4 & presorted'(alldv1,alldv2,p11,M) ;
+
+
+macro negpostcondition(var1 alldv1, var1 alldv2, var1 alldv3, var0 p11, var0 p2) = 
+	postsorted | ~sll1(head1, end-1) | p2 | ~reach1(head1,alldv3) | alldv3=end-1 ;
+macro negpostcondition'(var1 alldv1, var1 alldv2, var1 alldv3, var0 p11, var0 p2, var2 M) =
+	postsorted'(M) | ~sll1'(head1, end-1, M) | p2 | ~reach1'(head1,alldv3, M) | alldv3=end-1;
+
+
+macro minimalmodel =
+	~ex2 M where M~=$:(
+	validmodel'(M) &
+	all1 dv1,dv2,dv3 where dv1 in M & dv2 in M & dv3 in M: (
+		all0 p11,p2: (
+			((~precondition(dv1,dv2,dv3,p11,p2) | precondition'(dv1,dv2,dv3,p11,p2,M)) | ~negpostcondition(dv1,dv2,dv3,p11,p2)) &
+			(~precondition(dv1,dv2,dv3,p11,p2) | (~negpostcondition(dv1,dv2,dv3,p11,p2) | negpostcondition'(dv1,dv2,dv3,p11,p2,M)))
+		)));
+
+macro existmodel =
+	validmodel &
+	all1 alldv1,alldv2,alldv3 : (
+		ex0 p11,p2: (
+			precondition(alldv1,alldv2,alldv3,p11,p2) &
+			negpostcondition(alldv1,alldv2,alldv3,p11,p2) &
+			((alldv1=exdv1 & alldv2=exdv2) => (pc12 <=> ~p11)) &
+			((alldv1=head & alldv2=0) => (pc4 <=> ~p11)) &
+			((inserted=alldv3) => (p2 <=> ~pc3))
+		));
+
+export("sllins-if", existmodel & minimalmodel);

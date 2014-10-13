@@ -1,0 +1,123 @@
+/* R := binary search tree, with two binary relations, left and right, a variable root */
+
+/* D := a binary relation reach is defined as follows:
+	reach(x, y) := \exist2 S . (x \in S /\ y \in S /\ \forall z . (z \in S => exist u . ((left(z, u) \/ right(z, u)) /\ u \in S)))
+	leaf(x) := \not \exist y . (x =/= y /\ reach(x, y)) */
+
+/* F := a single data field called key */
+
+/* P := left-branch /\ right-branch /\ notexistk
+	left-branch := \forall x y z . ((left(x, z) /\ reach(z, y)) => key(x) > key(y))
+	right-branch := \forall x y z . ((right(x, z) /\ reach(z, y)) => key(x) < key(y))
+	notexistk := \not \exist x . (root--> x & key(x) == key(ak)) */
+
+/* S :=
+ bstInsert(Node root, Node ak){
+
+	Node p = root;
+
+	(loop invariant: binarytree /\ left-branch /\ right-branch /\ all1 x,y where y~=nil : ((left(x,y)/\reach(y,p)) => key(x)>key(ak) /\ (right(x,y)/\reach(y,p)) => key(x)<key(ak))  )
+
+	while ((k < key(p) & p.left~=nil) | (k >= key(p) & p.right~=nil)){
+		if (key(ak) < key(p)) p = left(p);
+		else p = right(p);
+	}
+	new(n);
+	data(n)=k;
+	if (k < key(p)) left(p) = n;
+	else right(p) = n;
+} */
+
+/* Q := binarytree /\ left-branch /\ right-branch /\ reach(root, ak)
+	binarytree := root /\ fork /\ no-merge /\ antisymmetry
+	root := \forall x . (reach(root, x))
+	fork := \forall x y z . ((left(x, y) /\ right(x, z)) => y =/= z)
+	no-merge := \forall x y z . ((x --> z /\ y --> z) => (x --> y \/ y --> x))
+	antisymmetry := \forall x y . (~reach(x, y) \/ ~reach(y, x)) */
+
+ws2s;
+
+pred leftchild(var1 x, var1 y, var2 M) =
+	x.0<=y & (~ex1 z: z in M & x<z & z<y) ;
+pred rightchild(var1 x, var1 y, var2 M) =
+	x.1<=y & (~ex1 z: z in M & x<z & z<y) ;
+
+pred left(var2 $, var1 x, var1 y) =
+	(root.0<=x & y=x.0 & y in $) ;
+pred left'(var2 $, var1 x, var1 y, var2 M) =
+	(root.0<=x & leftchild(x,y,M)) ;
+
+pred right(var2 $, var1 x, var1 y) =
+	(root.0<=x & y=x.1 & y in $) ;
+pred right'(var2 $, var1 x, var1 y, var2 M) =
+	(root.0<=x & rightchild(x,y,M)) ;
+
+pred leftnil(var2 $, var1 x, var1 y) = root.0<=x & x.0 notin $ & y=root ;
+pred leftnil'(var2 $, var1 x, var1 y, var2 M) = root.0<=x & (~ex1 z where z in M: (leftchild(x,z,M))) & (~ex1 s where s in M : (leftchild(s,y,M) | rightchild(s,y,M))) ;
+
+pred rightnil(var2 $, var1 x, var1 y) = root.0<=x & x.1 notin $ & y=root ;
+pred rightnil'(var2 $, var1 x, var1 y, var2 M) = root.0<=x & (~ex1 z where z in M: (rightchild(x,z,M))) & (~ex1 s where s in M : (leftchild(s,y,M) | rightchild(s,y,M))) ;
+
+
+pred validmodel(var2 $, var1 p, var1 n, var1 exdv1, var1 exdv2) =
+	all1 x where true: (x in $) => ((x^ in $) | (x^=x)) &
+	p in $ & n in $ & exdv1 in $ & exdv2 in $ &
+	n = root.1 & root.0<=p &
+	root.0 in $ & root.1 in $ & root.1.0 notin $ & root.1.1 notin $ ;
+
+
+/*pred validcomputation(var2 $, var1 p, var1 newp) = data(n)=k & ((k<data(p) & left(p,n)) | (k>=data(p) & right(p,n))) ;*/
+
+
+pred lcp(var2 $, var1 x, var1 y, var1 z) =
+	z<=x & z<=y & (~ex1 u where u in $ : (u<=x & u<=y & z<u)) ;
+
+pred validmodel'(var2 $, var1 p, var1 n, var2 M) = 
+	root in M & root.1 in M & root.1.0 notin M & root.1.1 notin M &
+	root.0<=p & n=root.1 & 
+	(all1 x,y,z where x in $ & y in $ & z in $ : (x in M & y in M & lcp($,x,y,z)) => z in M);
+
+
+/*
+formula: ex1 p,newp,exdv1,exdv2 :
+		validcomputation & ((k >= key(p) | left(p,root)) & (k < key(p) | right(p,root))) & 
+		all1 v1,v2: ((leftbranch($,v1,v2) => data(v1)>=data(v2)) & (rightbranch($,v1,v2) => data(v1)<=data(v2))) &
+		all1 v: ((leftbranch(v,p) => data(v)>k) & (rightbranch(v,p) => data(v)<k)) &
+		(
+			(leftbranch1($,exdv1,exdv2) & data(exdv2)>data(exdv1)) |
+			(rightbranch1($,exdv1,exdv2) & data(exdv2)<data(exdv1)) |
+			~binarytree1() |
+			data(n)~=k
+		) ;
+*/
+
+
+
+pred minimalmodel(var2 $, var1 p, var1 n, var1 exdv1, var1 exdv2) =
+	~ex2 M where M sub $ & M~=$ & p in M & n in M & exdv1 in M & exdv2 in M :(
+		validmodel'($,p,n,M) &
+		(leftnil($,p,n) => leftnil'($,p,n,M)) &
+		(rightnil($,p,n) => rightnil'($,p,n,M)) &
+		(leftnil($,p,root) => leftnil'($,p,root,M)) &
+		(rightnil($,p,root) => rightnil'($,p,root,M))
+	 );
+
+
+var2 $ ;
+
+ex1 p,n,exdv1,exdv2 : (
+	validmodel($,p,n,exdv1,exdv2) & minimalmodel($,p,n,exdv1,exdv2) ) ;
+
+
+/*var2 Bound;
+
+
+pred bd(var2 Bound) =
+all2 $: (
+all1 p,n,exdv1,exdv2: (
+	(validmodel($,p,n,exdv1,exdv2) & minimalmodel($,p,n,exdv1,exdv2))
+	=> 
+	($ sub Bound))) ;
+
+bd(Bound) & ~ex2 Bound': (bd(Bound') & Bound'~=Bound & Bound' sub Bound) ;*/
+

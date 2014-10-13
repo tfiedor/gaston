@@ -1,0 +1,156 @@
+
+ws2s;
+var2 $ where all1 p where true: (p in $) => ((p^ in $) | (p^=p));
+allpos $;
+defaultwhere1(p) = p in $;
+defaultwhere2(P) = P sub $;
+
+var1 p,q,exdv1,exdv2;
+var0 pc3,pc12,pc22;
+
+macro validmodel =
+	root.1 in $ & root.0 in $ &
+	root.1.0 notin $ & root.1.1 notin $ ; 
+
+macro leftchild(var1 x, var1 y, var2 M) =
+	x.0<=y & (~ex1 z: z in M & x<z & z<y) ;
+macro rightchild(var1 x, var1 y, var2 M) =
+	x.1<=y & (~ex1 z: z in M & x<z & z<y) ;
+
+macro left(var1 x, var1 y) =
+	(root.0<=x & y=x.0 & y in $) | (root.0<=x & x.0 notin $ & y=root);
+macro left'(var1 x, var1 y, var2 M) =
+	(root.0<=x & leftchild(x,y,M)) | (root.0<=x & (~ex1 z where z in M: (leftchild(x,z,M))) & y=root);
+
+macro right(var1 x, var1 y) =
+	(root.0<=x & y=x.1 & y in $) | (root.0<=x & x.1 notin $ & y=root);
+macro right'(var1 x, var1 y, var2 M) =
+	(root.0<=x & rightchild(x,y,M)) | (root.0<=x & (~ex1 z where z in M: (rightchild(x,z,M))) & y=root);
+
+macro reach(var1 x, var1 y) =
+	((root.0<=x & x<=y & y in $) | (root.0<=x & y=root) | (x=root & y=root)) ;
+
+macro fork =
+	all1 x,y,z: ((reach(root.0,x) & reach(root.0,y) & reach(root.0,z)) => ((left(x, y) & right(x, z) & y~=root & z~=root) => y ~= z));
+macro fork'(var2 M) =
+	all1 x,y,z: (x in M & y in M & z in M & reach(root.0,x) & reach(root.0,y) & reach(root.0,z)) => ((left'(x, y, M) & right'(x, z, M) & y~=root & z~=root) => y ~= z);
+macro nomerge =
+	all1 x,y,z: (reach(root.0,x) & reach(root.0,y) & reach(root.0,z) & z~=root) => ((reach(x, z) & reach(y,z)) => (reach(x, y) | reach(y, x)));
+macro nomerge'(var2 M) =
+	all1 x,y,z: (x in M & y in M & z in M & reach(root.0,x) & reach(root.0,y) & reach(root.0,z) & z~=root) => ((reach(x, z) & reach(y,z)) => (reach(x, y) | reach(y, x)));
+macro antisymmetry =
+	all1 x,y: (reach(root.0,x) & reach(root.0,y) & x ~= y) => ~(reach(x, y) & reach(y, x));
+macro antisymmetry'(var2 M) =
+	all1 x,y: (x in M & y in M & reach(root.0,x) & reach(root.0,y) & x ~= y) => ~(reach(x, y) & reach(y, x));
+
+macro binarytree =
+	fork & nomerge & antisymmetry;
+macro binarytree'(var2 M) =
+	fork'(M) & nomerge'(M) & antisymmetry'(M);
+
+macro left1(var1 x, var1 y) =
+	((x~=q | ~pc3) & left(x,y)) | (x=q & pc3 & y=root.1) ;
+macro left1'(var1 x, var1 y, var2 M) =
+	((x~=q | ~pc3) & left'(x,y,M)) | (x=q & pc3 & y=root.1) ;
+
+macro right1(var1 x, var1 y) =
+	((x~=q | pc3) & right(x,y)) | (x=q & ~pc3 & y=root.1) ;
+macro right1'(var1 x, var1 y, var2 M) =
+	((x~=q | pc3) & right'(x,y,M)) | (x=q & ~pc3 & y=root.1) ;
+
+macro next1(var1 x, var1 y) = left1(x, y) | right1(x, y) ;
+macro next1'(var1 x, var1 y, var2 M) = left1'(x,y,M) | right1'(x,y,M) ;
+
+macro reach1(var1 x, var1 y) =
+	all2 P: ((x in P &
+		all1 z1,z2: ((z1 in P & next1(z1,z2)) => z2 in P)) => y in P) ;
+macro reach1'(var1 x, var1 y, var2 M) =
+	all2 P where P sub M: ((x in P &
+		all1 z1,z2 where z1 in M & z2 in M: ((z1 in P & next1'(z1,z2,M)) => z2 in P)) => y in P) ;
+
+macro fork1 =
+	all1 x,y,z: ((reach1(root.0,x) & reach1(root.0,y) & reach1(root.0,z)) => ((left1(x, y) & right1(x, z) & y~=root & z~=root) => y ~= z));
+macro fork1'(var2 M) =
+	all1 x,y,z: (x in M & y in M & z in M & reach1'(root.0,x,M) & reach1'(root.0,y,M) & reach1'(root.0,z,M)) => ((left1'(x, y, M) & right1'(x, z, M) & y~=root & z~=root) => y ~= z);
+macro nomerge1 =
+	all1 x,y,z: (reach1(root.0,x) & reach1(root.0,y) & reach1(root.0,z) & z~=root) => ((reach1(x, z) & reach1(y,z)) => (reach1(x, y) | reach1(y, x)));
+macro nomerge1'(var2 M) =
+	all1 x,y,z: (x in M & y in M & z in M & reach1'(root.0,x,M) & reach1'(root.0,y,M) & reach1'(root.0,z,M) & z~=root) => ((reach1'(x, z,M) & reach1'(y,z,M)) => (reach1'(x, y,M) | reach1'(y, x,M)));
+macro antisymmetry1 =
+	all1 x,y: (reach1(root.0,x) & reach1(root.0,y) & x ~= y) => ~(reach1(x, y) & reach1(y, x));
+macro antisymmetry1'(var2 M) =
+	all1 x,y: (x in M & y in M & reach1'(root.0,x,M) & reach1'(root.0,y,M) & x ~= y) => ~(reach1'(x, y,M) & reach1'(y, x,M));
+
+macro binarytree1 =
+	fork1 & nomerge1 & antisymmetry1 ;
+macro binarytree1'(var2 M) =
+	fork1'(M) & nomerge1'(M) & antisymmetry1'(M);
+
+macro lcp(var1 x, var1 y, var1 z) =
+	z<=x & z<=y & (~ex1 u: (u<=x & u<=y & z<u)) ;
+
+macro validmodel'(var2 M) = 
+	(root in M & root.1 in M & root.0 in M & p in M & q in M) &
+	(exdv1 in M & exdv2 in M) &
+	(all1 x,y,z: (x in M & y in M & lcp(x,y,z)) => z in M);
+
+macro presorted(var1 alldv1, var1 alldv2, var0 p11, var0 p21) =
+	alldv2=root | all1 z where z in $ : (((left(alldv1, z) & reach(z, alldv2)) => p11) & ((right(alldv1, z) & reach(z, alldv2)) => p21));
+macro presorted'(var1 alldv1, var1 alldv2, var0 p11, var0 p21, var2 M) =
+	alldv2=root | all1 z where z in M : (((left'(alldv1, z, M) & reach(z, alldv2)) => p11) & ((right'(alldv1, z, M) & reach(z, alldv2)) => p21));
+
+macro postsorted =
+	exdv2~=root & ex1 z where z in $ : ((left(exdv1,z) & reach(z,exdv2) & pc12) | (right(exdv1,z) & reach(z,exdv2) & pc22)) ;
+macro postsorted'(var2 M) =
+	exdv2~=root & ex1 z where z in M : ((left'(exdv1,z,M) & reach(z,exdv2) & pc12) | (right'(exdv1,z,M) & reach(z,exdv2) & pc22)) ;
+
+macro prenotexistk(var1 alldv1,var0 p4) =
+	~reach(root.0,alldv1) | p4 | alldv1=root ;
+
+macro preloopinv(var1 alldv1, var0 p61) =
+	(q=root | all1 y: ((y=root | ((~left(alldv1,y) | ~reach(y,q)) & (~left(alldv1,p) | p=root)) | p61) & (y=root | ((~right(alldv1,y) | ~reach(y,q)) & (~right(alldv1,p) | p=root)) | ~p61))) & ((q=root & p=root.0) | left(q,p) | right(q,p)) ;
+macro preloopinv'(var1 alldv1, var0 p61, var2 M) =
+	(q=root | all1 y where y in M: ((y=root | ((~left'(alldv1,y,M) | ~reach(y,q)) & (~left'(alldv1,p,M) | p=root)) | p61) & (y=root | ((~right'(alldv1,y,M) | ~reach(y,q)) & (~right'(alldv1,p,M) | p=root)) | ~p61))) & ((q=root & p=root.0) | left'(q,p,M) | right'(q,p,M)) ;
+
+macro precondition(var1 alldv1, var1 alldv2, var0 p11, var0 p21, var0 p4, var0 p61) =
+	validmodel & binarytree & presorted(alldv1,alldv2,p11,p21) & prenotexistk(alldv1,p4) & preloopinv(alldv1, p61) & p=root ;
+macro precondition'(var1 alldv1, var1 alldv2, var0 p11, var0 p21, var0 p4, var0 p61, var2 M) =
+	binarytree'(M) & presorted'(alldv1,alldv2,p11,p21,M) & prenotexistk(alldv1,p4) & preloopinv'(alldv1, p61, M) & p=root ;
+
+macro negpostcondition =
+	validmodel & (~binarytree | postsorted | ~reach1(root.0, root.1)) ;
+macro negpostcondition'(var2 M) =
+	~binarytree'(M) | postsorted'(M) | ~reach1'(root.0, root.1, M) ;
+
+macro minimalmodel =
+~ex2 M: (
+	(M~=$ & validmodel'(M)) &
+	((~negpostcondition) |
+		((negpostcondition & negpostcondition'(M)) & 
+			all1 dv1,dv2 where dv1 in M & dv2 in M: (
+			(all0 p11,p21,p4,p61: (
+				(~precondition(dv1,dv2,p11,p21,p4,p61) | precondition'(dv1,dv2,p11,p21,p4,p61,M))
+			)))
+		) |
+		((negpostcondition & ~negpostcondition'(M)) & 
+			all1 dv1,dv2 where dv1 in M & dv2 in M: (
+			(all0 p11,p21,p4,p61: (
+				~precondition(dv1,dv2,p11,p21,p4,p61)
+			)))
+		)
+	) 
+);
+
+macro existmodel =
+	validmodel &
+	negpostcondition &
+	all1 alldv1,alldv2 : (	
+		ex0 p11,p21,p4,p61: (
+			precondition(alldv1,alldv2,p11,p21,p4,p61) &
+			((alldv1=exdv1 & alldv2=exdv2) => ((pc12 <=> ~p11) & (pc22 <=> ~p21))) &
+			((q=alldv1) => (pc3 <=> p61))
+		));
+	 
+
+export("bstins-afterloop", existmodel & minimalmodel);
+
