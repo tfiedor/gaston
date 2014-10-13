@@ -113,7 +113,7 @@ bool ParseArguments(int argc, char *argv[])
   options.optimize = 1;
   options.dontDumpAutomaton = false;
   options.reorder = HEURISTIC; //true;
-  options.method = FORWARD; // TODO: For now
+  options.method = BACKWARD; //
 
   switch (argc) {
   // missing file with formula

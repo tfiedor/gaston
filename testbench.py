@@ -99,7 +99,7 @@ def getTagsFromString(string):
     tags = re.findall("[[][a-zA-Z0-9]+[]]", string)
     return [tag[1:-1] for tag in tags]
 
-def exportToCSV(data):
+def exportToCSV(data, bins):
     '''
     Exports data to csv file
     
@@ -113,14 +113,20 @@ def exportToCSV(data):
     saveTo = generateCSVname()
     with open(saveTo, 'w') as csvFile:
         # header of the file
-        csvFile.write('benchmark, '
-                      'mona-time, mona-space, ' 
-                      'mona-expnf-time, mona-expnf-space, mona-expnf-prefix-space, '
-                      'dwina-time, dwina-time-dp-only, base-aut, dwina-space, dwina-space-pruned, '
-                      'dwina-dfa-time, dwina-dfa-time-dp-only, base-aut, dwina-dfa-space, dwina-dfa-space-pruned\n')
+        csvFile.write('benchmark, ')
+        if 'mona' in bins:
+            csvFile.write('mona-time, mona-space, ')
+        if 'mona-expnf' in bins:
+            csvFile.write('mona-expnf-time, mona-expnf-space, mona-expnf-prefix-space, ')
+        if 'dwina' in bins:
+            csvFile.write('dwina-time, dwina-time-dp-only, base-aut, dwina-space, dwina-space-pruned, ')
+        if 'dwina-dfa' in bins:
+            csvFile.write('dwina-dfa-time, dwina-dfa-time-dp-only, base-aut, dwina-dfa-space, dwina-dfa-space-pruned')
+        csvFile.write('\n')
+            
         for benchmark in sorted(data.keys()):
             bench_list = [os.path.split(benchmark)[1]]            
-            for bin in ['mona', 'mona-expnf', 'dwina', 'dwina-dfa']:
+            for bin in bins:
                 for i in range(0, len(data[benchmark][bin])):
                     bench_list = bench_list + [str(data[benchmark][bin][i])]
             csvFile.write(", ".join(bench_list))
@@ -345,5 +351,5 @@ if __name__ == '__main__':
                     method_name = "_".join(["run"] + bin.split('-'))
                     method_call = getattr(sys.modules[__name__], method_name)
                     data[benchmark][bin] = method_call(benchmark, options.timeout)
-        if not options.no_export_to_csv and len(bins) == 4:
-            exportToCSV(data)            
+        if not options.no_export_to_csv:
+            exportToCSV(data, bins)            
