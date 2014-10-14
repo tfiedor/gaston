@@ -164,6 +164,13 @@ def parseMonaOutput(output, isExPNF):
     '''
     strippedLines = [line.lstrip() for line in output]
     
+    ret = ""
+    for line in strippedLines:
+        match = re.search("Formula is ([a-zA-Z]+)", line)
+        if match is not None:
+            ret = match.group(1)
+            break
+    
     # get total time
     times = [line for line in strippedLines if line.startswith('Total time:')]
     
@@ -191,9 +198,9 @@ def parseMonaOutput(output, isExPNF):
     output_prefix_only_size = sum(automata_sizes)
 
     if isExPNF:
-        return (time, output_size, output_prefix_only_size)
+        return (time, output_size, output_prefix_only_size), ret
     else:
-        return (time, output_size)
+        return (time, output_size), ret
 
 def parsedWiNAOutput(output, unprunedOutput):
     '''
@@ -201,6 +208,12 @@ def parsedWiNAOutput(output, unprunedOutput):
     @param output: lines with dwina output
     '''
     strippedLines = [line.lstrip() for line in output]
+    ret = ""
+    for line in strippedLines:
+        match = re.search("\[!\] Formula is '([A-Z]+)'", line)
+        if match is not None:
+            ret = match.group(1)
+            break
     
     # get total time
     times = [line for line in strippedLines if line.startswith('[*] Total elapsed time:')]
@@ -224,7 +237,7 @@ def parsedWiNAOutput(output, unprunedOutput):
     sizes = [line for line in strippedLines if line.startswith('[*] Size of the searched space:')]
     size_unpruned = int(re.search('[0-9]+', sizes[0]).group(0))
     
-    return (time, time_dp, base_aut, size, size_unpruned)
+    return (time, time_dp, base_aut, size, size_unpruned), ret
 
 def parseArguments():
     '''
@@ -353,9 +366,14 @@ if __name__ == '__main__':
                     continue
                 
                 print("[*] Running test bench: '{}'".format(benchmark))
+                rets = {}
                 for bin in bins:
                     method_name = "_".join(["run"] + bin.split('-'))
                     method_call = getattr(sys.modules[__name__], method_name)
-                    data[benchmark][bin] = method_call(benchmark, options.timeout)
+                    data[benchmark][bin], rets[bin] = method_call(benchmark, options.timeout)
+                if rets['mona'].upper() != rets['dwina']:
+                    print("\t-> FAIL; Formula is '{}' (dWiNA returned '{}')".format(rets['mona'], rets['dwina'].lower()))
+                else:
+                    print("\t-> OK; Formula is '{}'".format(rets['mona']))
         if not options.no_export_to_csv:
             exportToCSV(data, bins)            
