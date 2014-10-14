@@ -331,10 +331,10 @@ if __name__ == '__main__':
         
     else:
         data = {}
-        if len(options.bin) > 4:
+        if options.bin is not None and len(options.bin) > 4:
             print("[!] Invalid number of binaries")
             quit()
-        bins = ['dwina', 'dwina-dfa', 'mona', 'mona-expnf'] if (options.bin is None) else options.bin
+        bins = ['mona', 'mona-expnf', 'dwina', 'dwina-dfa'] if (options.bin is None) else options.bin
         
         # iterate through all files in dir
         executing_string = options.bin

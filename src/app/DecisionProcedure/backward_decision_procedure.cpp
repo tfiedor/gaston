@@ -8,6 +8,8 @@
  *
  *****************************************************************************/
 
+#include <boost/dynamic_bitset.hpp>
+
 #include "environment.hh"
 #include "decision_procedures.hh"
 
@@ -41,6 +43,8 @@ MacroStateSet* computeFinalStates(Automaton &aut, PrefixListType prefix, unsigne
 	StateSetList worklist;
 	StateSetList processed;
 	StateSetList states;
+	boost::dynamic_bitset<> leafQueue;
+	leafQueue.resize(TStateSet::stateNo+1);
 
 	if (detNo == 0) {
 		// Since we are working with pre, final states are actual initial
@@ -49,6 +53,7 @@ MacroStateSet* computeFinalStates(Automaton &aut, PrefixListType prefix, unsigne
 
 		for (auto state : matrixInitialStates) {
 			LeafStateSet *newLeaf = new LeafStateSet(state);
+			leafQueue.set(newLeaf->state+1);
 			worklist.push_back(newLeaf);
 			states.push_back(newLeaf);
 		}
@@ -85,9 +90,11 @@ MacroStateSet* computeFinalStates(Automaton &aut, PrefixListType prefix, unsigne
 		for(auto state : ((MacroStateSet*)predecessors)->getMacroStates()) {
 #ifdef PRUNE_BY_SUBSUMPTION
 			if (detNo == 0) {
-				if(isNotEnqueued(processed, state, detNo)) {
+				unsigned int pos = state->state+1;
+				if(!leafQueue.test(pos)) {
 					worklist.push_back(state);
 					states.push_back(state);
+					leafQueue.set(pos, true);
 				}
 			// pruning upward closed things
 			} else if(detNo % 2 == 0) {
@@ -122,7 +129,7 @@ MacroStateSet* computeFinalStates(Automaton &aut, PrefixListType prefix, unsigne
 					MacroStateSet* z = new MacroStateSet(states);
 					//std::cout << "\n";
 					//z->dump();
-					delete state;
+					//delete state;
 				    //std::cout << "\n";
 #endif
 				}

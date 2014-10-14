@@ -97,14 +97,7 @@ public:
 	 * @return: true if they are the same
 	 */
 	bool DoCompare(TStateSet* lhs) {
-		if (lhs->type == MACROSTATE) {
-			return false;
-		} else {
-			// TODO: THIS MAY BE SUICIDAL!!!!
-			//LeafStateSet *lhss = reinterpret_cast<LeafStateSet*>(lhs);
-			//LeafStateSet* lhss = (LeafStateSet*)(lhs);
-			return this->state == lhs->state;
-		}
+		return this->state == lhs->state;
 	}
 
 	/**
