@@ -13,7 +13,7 @@
 #include "environment.hh"
 #include "decision_procedures.hh"
 
-#define DEBUG_BDP
+//#define DEBUG_BDP
 #define PRUNE_BY_SUBSUMPTION
 
 // Global Variables

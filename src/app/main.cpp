@@ -6,7 +6,7 @@
  *****************************************************************************/
 
 #define _LANGUAGE_C_PLUS_PLUS
-//#define DEBUG_DP
+#define DEBUG_DP
 //#define DEBUG_BDDS
 
 // < System Headers >
@@ -403,12 +403,6 @@ int main(int argc, char *argv[])
   (ast->formula)->freeVars(&freeVars, &bound);
 
   bool formulaIsGround = freeVars.empty();
-  freeVars.dump();
-  std::cout << "\n";
-  bound.dump();
-  std::cout << "\n";
-  formulaIsGround = true;
-  // TODO: FOR NOW !!!!
 
   // First formula in AST representation is split into matrix and prefix part.
   ASTForm *matrix, *prefix;

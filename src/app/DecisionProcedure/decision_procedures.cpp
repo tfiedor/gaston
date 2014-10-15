@@ -300,6 +300,9 @@ PrefixListType convertPrefixFormulaToList(ASTForm* formula) {
 	unsigned int value;
 	bool isFirstNeg = true;
 
+std::cout << "dumping prefix\n";
+std::cout <<  "\n\n";
+
 	// empty prefix is just one empty list
 	if (formula->kind == aTrue) {
 		list.push_front(set);
@@ -309,13 +312,16 @@ PrefixListType convertPrefixFormulaToList(ASTForm* formula) {
 	ASTForm* iterator = formula;
 	// while we are not at the end of the prefix
 	while (iterator->kind != aTrue) {
+		//iterator->dump();
+		//std::cout << "\n";
 		// Add to set
 		if (iterator->kind == aEx2) {
 			ASTForm_Ex2* exf = (ASTForm_Ex2*) iterator;
 
 			quantifiedSize = (exf->vl)->size();
 			for (unsigned i = 0; i < quantifiedSize; ++i) {
-				value = (exf->vl)->pop_front();
+				value = (exf->vl)->get(i);
+				//std::cout << value << " -> " << varMap[value] << "\n";
 				set.push_back(varMap[value]);
 			}
 			iterator = exf->f;
