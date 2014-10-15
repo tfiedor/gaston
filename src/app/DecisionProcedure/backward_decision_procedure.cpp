@@ -13,7 +13,7 @@
 #include "environment.hh"
 #include "decision_procedures.hh"
 
-//#define DEBUG_BDP
+#define DEBUG_BDP
 #define PRUNE_BY_SUBSUMPTION
 
 // Global Variables
@@ -76,7 +76,7 @@ MacroStateSet* computeFinalStates(Automaton &aut, PrefixListType prefix, unsigne
 
 #ifdef DEBUG_BDP
 		std::cout << "[computeFinalStates] Dumping actual working state, iteration " << i++ << "\n";
-		//q->dump();
+		q->dump();
 		std::cout << "\n\n";
 #endif
 
@@ -125,12 +125,12 @@ MacroStateSet* computeFinalStates(Automaton &aut, PrefixListType prefix, unsigne
 #ifdef DEBUG_BDP
 
 					std::cout << "[isSubsumed] Pruning downward closed state\n";
-					//state->dump();
+					state->dump();
 					MacroStateSet* z = new MacroStateSet(states);
-					//std::cout << "\n";
-					//z->dump();
+					std::cout << "\n";
+					z->dump();
 					//delete state;
-				    //std::cout << "\n";
+				    std::cout << "\n";
 #endif
 				}
 			}
@@ -164,7 +164,9 @@ MacroStateSet* computeFinalStates(Automaton &aut, PrefixListType prefix, unsigne
 					pruned.push_back(front);
 					//std::cout << "Fuck you dimwit\n";
 				} else {
-					//std::cout << "[isSubsumed] Pruning state at last\n";
+					std::cout << "[isSubsumed] Pruning state at last\n";
+					front->dump();
+					std::cout << "\n";
 				}
 			}
 		} else {
@@ -179,7 +181,9 @@ MacroStateSet* computeFinalStates(Automaton &aut, PrefixListType prefix, unsigne
 					pruned.push_back(front);
 					//std::cout << "Fuck you dimwit\n";
 				} else {
-					//std::cout << "[isSubsumed] Pruning state at last\n";
+					std::cout << "[isSubsumed] Pruning state at last\n";
+					front->dump();
+					std::cout << "\n";
 				}
 			}
 		}
@@ -192,7 +196,7 @@ MacroStateSet* computeFinalStates(Automaton &aut, PrefixListType prefix, unsigne
 
 #ifdef DEBUG_BDP
 	std::cout << "[computeFinalStates] Returning Z:";
-	//z->dump();
+	z->dump();
 	std::cout << "\n";
 	std::cout << "[-----------------------------------------------------------------]\n";
 #endif

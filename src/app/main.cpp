@@ -408,7 +408,7 @@ int main(int argc, char *argv[])
   bound.dump();
   std::cout << "\n";
   formulaIsGround = true;
-  // TODO: FOR NOW
+  // TODO: FOR NOW !!!!
 
   // First formula in AST representation is split into matrix and prefix part.
   ASTForm *matrix, *prefix;
@@ -497,13 +497,16 @@ int main(int argc, char *argv[])
   }
 
   // reindex the states, for space optimizations for bitsets
+  StateHT reachable;
+  formulaAutomaton = formulaAutomaton.RemoveUnreachableStates(&reachable);
+
   StateType stateCnt = 0;
   StateToStateMap translMap;
   StateToStateTranslator stateTransl(translMap,
 	[&stateCnt](const StateType&){return stateCnt++;});
 
   formulaAutomaton = formulaAutomaton.ReindexStates(stateTransl);
-  TStateSet::stateNo = stateCnt;
+  TStateSet::stateNo = reachable.size();
 
   //if(options.dump) {
 	  std::cout<< "[*] Number of states in resulting automaton: " << TStateSet::stateNo << "\n";
