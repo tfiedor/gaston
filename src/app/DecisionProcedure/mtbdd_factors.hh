@@ -147,11 +147,6 @@ public:
 		StateSetList lhsStates = lhs->getMacroStates();
 		StateSetList rhsStates = rhs->getMacroStates();
 		StateSetList unionStates;
-		// constructs the leaves bit set, if any are set, i.e. bitsets are
-		// supporteted at that level
-		if(lhs->leaves.any() && rhs->leaves.any()) {
-			return new MacroStateSet(lhsStates, lhs->leaves | rhs->leaves);
-		}
 
 		// union of upward closed things
 		auto lbegin = lhsStates.begin();
@@ -230,6 +225,10 @@ public:
 				}
 			}
 		}
+
+		// constructs the leaves bit set, if any are set, i.e. bitsets are
+		// supporteted at that level
+
 		return new MacroStateSet(unionStates);
 	}
 };
