@@ -3,6 +3,7 @@
 
     @author: Tomas Fiedor, ifiedortom@fit.vutbr.cz
     @summary: Test Bench script for running several benchmarks on binaries
+
 '''
 
 import argparse
@@ -26,7 +27,8 @@ def createArgumentParser():
     parser.add_argument('--skip', '-s', action='append', default=['ws2s'], help='skips benchmarks with tag [SKIP]')
     parser.add_argument('--only', '-o', default=None, help='only test the benchmarks containing string ONLY')
     parser.add_argument('--bin', '-b', action='append', default=None, help='binary that will be used for executing script')
-    parser.add_argument('--generate', '-g', default=None, nargs=2, help='generates parametrized benchmark up to n')
+    parser.add_argument('--generate', '-g', default=None, nargs=2, help='generates parametrized benchmark up to N')
+    parser.add_argument('--generate-alt', '-a', default=None, nargs=3, help='generates parametrized benchmarks up to N with ALT alternation')
     parser.add_argument('--no-export-to-csv', '-x', action='store_true', help='will not export to csv')
     parser.add_argument('--timeout', '-t', default=None, help='timeouts in minutes')
     return parser
@@ -286,32 +288,47 @@ def generate_horn_sub_alt(n):
     string += " & ".join(["( (X{0} sub X & X{0} ~= X{1}) => X{1} sub X)".format(i, i+1) for i in range(1, n)]) + ";"
     return string
 
-def generate_horn_sub_3alt(n):
-    if n < 3:
+def generate_horn_sub_odd_alts(n, alt):
+    if n < alt+1:
         print("[*] Skipping n = {}".format(n))
         return None
-    string = "ws1s;\n" + "ex2 X: all2 X1: ex2 X2: all2 "
-    string += ", ".join(["X" + str(i) for i in range(3, n+1)]) + ": "
-    string += " & ".join(["( (X{0} sub X & X{0} ~= X{1}) => X{1} sub X)".format(i, i+1) for i in range(1, n)]) + ";"
+    string = "ws1s;\n" + "ex2 X: "
+    for i in range(1, alt+1):
+        if i % 2 == 0:
+            string += "ex2"
+        else:
+            string += "all2"
+        string += " X{}: ".format(i) if i != alt else " "
+    string += ", ".join(["X" + str(i) for i in range(alt, n+1)]) + ": "
+    string += " & ".join(["( (X{0} sub X & X{0} sub X{1} & X{0} ~= X{1}) => X{1} sub X)".format(i, i+1) for i in range(1, n)]) + ";"
     return string
 
-def generate_horn_sub_4alt(n):
-    if n < 4:
+def generate_horn_sub_even_alts(n, alt):
+    if n < alt+1:
         print("[*] Skipping n = {}".format(n))
         return None
-    string = "ws1s;\n" + "ex2 X: all2 X1: ex2 X2: all2 X3: ex2  "
-    string += ", ".join(["X" + str(i) for i in range(4, n+1)]) + ": ~("
-    string += " & ".join(["( (X{0} sub X & X{0} ~= X{1}) => X{1} sub X)".format(i, i+1) for i in range(1, n)]) + ");"
+    string = "ws1s;\n" + "ex2 X: "
+    for i in range(1, alt+1):
+        if i % 2 == 0:
+            string += "ex2"
+        else:
+            string += "all2"
+        string += " X{}: ".format(i) if i != alt else " "
+    string += ", ".join(["X" + str(i) for i in range(alt, n+1)]) + ": ~("
+    string += " & ".join(["( (X{0} sub X & X{0} sub X{1} & X{0} ~= X{1}) => X{1} sub X)".format(i, i+1) for i in range(1, n)]) + ");"
     return string
 
-def generate_horn_sub_5alt(n):
-    if n < 5:
-        print("[*] Skipping n = {}".format(n))
-        return None
-    string = "ws1s;\n" + "ex2 X: all2 X1: ex2 X2: all2 X3: ex2 X4: all2 "
-    string += ", ".join(["X" + str(i) for i in range(5, n+1)]) + ": "
-    string += " & ".join(["( (X{0} sub X & X{0} ~= X{1}) => X{1} sub X)".format(i, i+1) for i in range(1, n)]) + ";"
-    return string
+def generate_formulae(options, benchmark_name, up_to, alts, generator, zeroFill):
+    for i in range(1, up_to + 1):
+        if alts == 0:
+            formula = generator(i)
+        else:
+            formula = generator(i, alts);
+        if formula is not None:
+            output_name = benchmark_name + str(i).zfill(zeroFill) + ("_{}alts".format(alts) if alts != 0 else "") + ".mona"
+            output_path = os.path.join(options.dir, output_name)
+            with open(output_path, 'w') as file:
+                file.write(formula)
 
 if __name__ == '__main__':
     print("[*] WSkS Test Bench")
@@ -320,13 +337,25 @@ if __name__ == '__main__':
     options = parseArguments()
     
     # we will generate stuff
-    if options.generate is not None:
-        print("[*] Generating benchmarks '{}' up to parameter n = {}".format(options.generate[0], options.generate[1]))
-        benchmark_name = options.generate[0]
-        up_to = int(options.generate[1])
+    if options.generate is not None or options.generate_alt is not None:
+        generate_alternating = options.generate_alt is not None
+        if not generate_alternating:
+            print("[*] Generating benchmarks '{}' up to parameter n = {}".format(options.generate[0], options.generate[1]))
+        else:
+            print("[*] Generating benchmarks '{}' up to parameter n = {} with {} alternations".format(options.generate_alt[0], options.generate_alt[1], options.generate_alt[2]))
+        benchmark_name = options.generate[0] if not generate_alternating else options.generate_alt[0]
+        up_to = int(options.generate[1]) if not generate_alternating else int(options.generate_alt[1])
+        alts = 0 if not generate_alternating else int(options.generate_alt[2])
         
         try:
-            method_name = "generate_" + benchmark_name
+            if generate_alternating:
+                method_name = "generate_" + benchmark_name + "_"
+                if alts % 2 == 0:
+                    method_name += "even_alts"
+                else:
+                    method_name += "odd_alts"
+            else:
+                method_name = "generate_" + benchmark_name
             generator = getattr(sys.modules[__name__], method_name)
         except AttributeError:
             print("[!] No benchmark template for '{}'".format(benchmark_name))
@@ -334,13 +363,7 @@ if __name__ == '__main__':
         zeroFill = len(str(up_to))
         zeroFill = 2 if zeroFill < 2 else zeroFill
         
-        for i in range(1, up_to+1):
-            formula = generator(i)
-            if formula is not None:
-                output_name = benchmark_name + str(i).zfill(zeroFill) + ".mona"
-                output_path = os.path.join(options.dir, output_name)
-                with open(output_path, 'w') as file:
-                    file.write(formula)
+        generate_formulae(options, benchmark_name, up_to, alts, generator, zeroFill)
         
     else:
         data = {}

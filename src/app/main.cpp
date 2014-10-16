@@ -6,8 +6,8 @@
  *****************************************************************************/
 
 #define _LANGUAGE_C_PLUS_PLUS
-#define DEBUG_DP
-#define DEBUG_PREFIX
+//#define DEBUG_DP
+//#define DEBUG_PREFIX
 //#define DEBUG_BDDS
 
 // < System Headers >
