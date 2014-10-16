@@ -676,7 +676,7 @@ void ASTForm_In::toUnaryAutomaton(Automaton &aut, bool doComplement) {
  * @param[in] varNum: numberof variables in automaton
  * @param[in] offsets: offsets of concrete variables
  */
-void convertMonaToVataAutomaton(Automaton& v_aut, DFA* m_aut, int varNum, unsigned* offsets) {
+void convertMonaToVataAutomaton(Automaton& v_aut, DFA* m_aut, IdentList* vars, int varNum, unsigned* offsets) {
 	char* transition = new char[varNum];
 
 	paths state_paths, pp;
@@ -684,6 +684,10 @@ void convertMonaToVataAutomaton(Automaton& v_aut, DFA* m_aut, int varNum, unsign
 
 	// add initial transition
 	setInitialState(v_aut, 0);
+
+	if(options.dump) {
+		std::cout << "[*] Number of states in MONA deterministic automaton: " << m_aut->ns << "\n";
+	}
 
 	for (unsigned int i = 0; i < m_aut->ns; ++i) {
 		// set final states
@@ -700,15 +704,14 @@ void convertMonaToVataAutomaton(Automaton& v_aut, DFA* m_aut, int varNum, unsign
 			int j;
 			for (j = 0; j < varNum; ++j) {
 				for (tp = pp->trace; tp && (tp->index != offsets[j]); tp = tp->next);
-
 				if(tp) {
 					if (tp->value) {
-						transition[j] = '1';
+						transition[varMap[vars->get(j)]] = '1';
 					} else {
-						transition[j] = '0';
+						transition[varMap[vars->get(j)]] = '0';
 					}
 				} else {
-					transition[j] = 'X';
+					transition[varMap[vars->get(j)]] = 'X';
 				}
 			}
 			transition[j] = '\0';

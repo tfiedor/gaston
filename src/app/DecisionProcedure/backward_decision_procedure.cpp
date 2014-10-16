@@ -165,9 +165,9 @@ MacroStateSet* computeFinalStates(Automaton &aut, PrefixListType prefix, unsigne
 					pruned.push_back(front);
 					//std::cout << "Fuck you dimwit\n";
 				} else {
-					std::cout << "[isSubsumed] Pruning state at last\n";
+					/*std::cout << "[isSubsumed] Pruning state at last\n";
 					front->dump();
-					std::cout << "\n";
+					std::cout << "\n";*/
 				}
 			}
 		} else {
@@ -182,9 +182,9 @@ MacroStateSet* computeFinalStates(Automaton &aut, PrefixListType prefix, unsigne
 					pruned.push_back(front);
 					//std::cout << "Fuck you dimwit\n";
 				} else {
-					std::cout << "[isSubsumed] Pruning state at last\n";
+					/*std::cout << "[isSubsumed] Pruning state at last\n";
 					front->dump();
-					std::cout << "\n";
+					std::cout << "\n";*/
 				}
 			}
 		}
@@ -237,11 +237,11 @@ bool initialStateIsInFinalStates(MacroStateSet *initial, MacroStateSet *finalSta
 				}
 			}
 			if(!isCovered) {
-				std::cout << "return false, something not covered;\n";
+				//std::cout << "return false, something not covered;\n";
 				return false;
 			}
 		}
-		std::cout << "return true;\n";
+		//std::cout << "return true;\n";
 		return true;
 	} else {
 		// is singleton, so we get the first

@@ -38,9 +38,10 @@ public:
     externalWhole(false), demo(false), 
     inheritedAcceptance(false), unrestrict(false), 
     alternativeM2LStr(false), reorder(HEURISTIC), optimize(0),
-    useMonaDFA(false) {}
+    useMonaDFA(false), noExpnf(false) {}
 
   bool useMonaDFA;
+  bool noExpnf;
   Method method;
 
   bool time;

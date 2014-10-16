@@ -35,7 +35,7 @@ void addTransition(Automaton& aut, unsigned int q, int x, char track, int qf);
 void addTransition(Automaton& aut, unsigned int q, char* transition, unsigned qf);
 void addTransition(Automaton& aut, unsigned int q, Automaton::SymbolType transition, unsigned qf);
 void addUniversalTransition(Automaton& automaton, unsigned int from, unsigned int to);
-void convertMonaToVataAutomaton(Automaton& v_aut, DFA* m_aut, int varNum, unsigned* offsets);
+void convertMonaToVataAutomaton(Automaton& v_aut, DFA* m_aut, IdentList* vars, int varNum, unsigned* offsets);
 
 Automaton::SymbolType constructUniversalTrack();
 

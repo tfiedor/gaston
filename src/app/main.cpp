@@ -6,8 +6,8 @@
  *****************************************************************************/
 
 #define _LANGUAGE_C_PLUS_PLUS
-//#define DEBUG_DP
-//#define DEBUG_PREFIX
+#define DEBUG_DP
+#define DEBUG_PREFIX
 //#define DEBUG_BDDS
 
 // < System Headers >
@@ -93,6 +93,7 @@ void PrintUsage()
 		<< " -d, --dump-all		 Dump AST, symboltable, and code DAG\n"
 		<< "     --no-automaton  Don't dump Automaton\n"
 		<< "     --use-mona-dfa  Uses MONA for building base automaton\n"
+		<< "     --no-expnf      Implies --use-mona-dfa, does not convert formula to exPNF\n"
 		<< " -q, --quiet		 Quiet, don't print progress\n"
 		<< " -oX                 Optimization level [1 = safe optimizations [default], 2 = heuristic]\n"
 		<< " --method            Use either forward or backward method [backward [default], forward]\n"
@@ -152,7 +153,10 @@ bool ParseArguments(int argc, char *argv[])
     	  options.method = FORWARD;
       else if(strcmp(argv[i], "--method=backward") == 0)
     	  options.method = BACKWARD;
-      else {
+      else if(strcmp(argv[i], "--no-expnf") == 0) {
+    	  options.noExpnf = true;
+    	  options.useMonaDFA = true;
+      } else {
 		switch (argv[i][1]) {
 		  case 'd':
 			options.dump = true;
@@ -351,15 +355,28 @@ int main(int argc, char *argv[])
   }
 
   timer_formula.start();
-  // Flattening of the formula
-  ast->formula = (ASTForm*) (ast->formula)->toSecondOrder();
-  if(options.dump) {
-    cout << "\n\n[*] Flattened formula:\n";
-    (ast->formula)->dump();
-  }
+  if(options.noExpnf == false) {
+	  // Flattening of the formula
+	  ast->formula = (ASTForm*) (ast->formula)->toSecondOrder();
+	  if(options.dump) {
+		cout << "\n\n[*] Flattened formula:\n";
+		(ast->formula)->dump();
+	  }
 
-  // Transform AST to existentional Prenex Normal Form
-  ast->formula = (ASTForm*) (ast->formula)->toExistentionalPNF();
+	  // Transform AST to existentional Prenex Normal Form
+	  ast->formula = (ASTForm*) (ast->formula)->toExistentionalPNF();
+  } else {
+	  if(ast->formula->kind = aAnd) {
+		  ASTForm_And* andFormula = (ASTForm_And*) ast->formula;
+		  if(andFormula->f1->kind == aTrue) {
+			  ast->formula = (ASTForm *) andFormula->f2;
+		  } else if(andFormula->f2->kind == aTrue) {
+			  ast->formula = (ASTForm *) andFormula->f1;
+		  }
+	  }
+	  ast->formula = (ASTForm*) (ast->formula)->removeUniversalQuantifier();
+	  ast->formula = (ASTForm*) (ast->formula)->prefixToSecondOrder();
+  }
   timer_formula.stop();
 
   if(options.dump) {
@@ -417,7 +434,9 @@ int main(int argc, char *argv[])
   ASTForm *matrix, *prefix;
   splitMatrixAndPrefix(ast, matrix, prefix);
   bool topmostIsNegation = (prefix->kind == aNot);
-  matrix = matrix->restrictFormula();
+  if(options.noExpnf == false) {
+	  matrix = matrix->restrictFormula();
+  }
 
   if(options.dump) {
 	  std::cout << "[*] Dumping restricted matrix\n";
@@ -498,7 +517,7 @@ int main(int argc, char *argv[])
 		  offs[ix] = offsets.off(*id);
 	  }
 
-	  convertMonaToVataAutomaton(formulaAutomaton, dfa, numVars, offs);
+	  convertMonaToVataAutomaton(formulaAutomaton, dfa, vars, numVars, offs);
   // Build automaton by ourselves, may build huge automata
   } else {
 	  // WS1S formula is transformed to unary NTA
@@ -512,7 +531,7 @@ int main(int argc, char *argv[])
   timer_automaton.stop();
 
   if(options.dump) {
-	  std::cout << "[*] Formula transformed into non-determinsitic tree automaton\n";
+	  std::cout << "[*] Formula transformed into non-deterministic tree automaton\n";
 	  cout << "[*] Elapsed time: ";
 	  timer_automaton.print();
 	  cout << "\n";
@@ -603,7 +622,7 @@ int main(int argc, char *argv[])
   }
 
   if(options.dump) {
-	  std::cout << "[*] State cache statisitics:\n";
+	  std::cout << "[*] State cache statistics:\n";
 	  StateCache.dumpStats();
   }
 

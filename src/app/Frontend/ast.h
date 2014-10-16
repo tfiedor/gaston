@@ -164,6 +164,7 @@ public:
   virtual ASTForm* unfoldNegations() { return this; }
   virtual ASTForm* flatten() { return this;}
   virtual ASTForm* unfoldMacro(IdentList* i, ASTList* a) { /*std::cerr << "\nMissing unfolding for this formula\n"; this->dump();*/ return this; }
+  virtual ASTForm* prefixToSecondOrder() { return this;}
 
   ASTForm* toExistentionalPNF();
   ASTForm* toSecondOrder();
@@ -1056,6 +1057,7 @@ public:
   ASTForm* toPrenexNormalForm();
   ASTForm* unfoldNegations();
   ASTForm* removeUniversalQuantifier();
+  ASTForm* prefixToSecondOrder();
 
   void toUnaryAutomaton(Automaton &aut, bool doComplement);
   void toBinaryAutomaton(Automaton &aut, bool doComplement);
@@ -1086,6 +1088,7 @@ public:
 
   ASTForm* toRestrictedSyntax();
   ASTForm* flatten();
+  ASTForm* prefixToSecondOrder();
 };
 
 class ASTForm_Ex2: public ASTForm_uvf {
@@ -1098,6 +1101,7 @@ public:
   ASTForm* clone() { return new ASTForm_Ex2(this->ul, this->vl->copy(), this->f->clone(), this->pos); }
 
   ASTForm* toRestrictedSyntax();
+  ASTForm* prefixToSecondOrder();
 };
 
 class ASTForm_All0: public ASTForm_vf {

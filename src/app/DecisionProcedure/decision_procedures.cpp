@@ -12,6 +12,8 @@
 #include "environment.hh"
 #include "decision_procedures.hh"
 
+//#define USE_MPUF
+
 // Global Variables
 
 #ifdef USE_STATECACHE
@@ -482,8 +484,11 @@ MacroStateSet* GetZeroMacroPost(Automaton & aut, TStateSet*& state, unsigned lev
 		} else {
 			const MacroTransMTBDD & transPost = GetMTBDDForPost(aut, state, level, prefix);
 			int projecting = getProjectionVariable(level, prefix);
-			//MacroUnionFunctor muf;
+#ifdef USE_MPUF
 			MacroPrunedUnionFunctor muf(level-1);
+#else
+			MacroUnionFunctor muf;
+#endif
 			MacroStateDeterminizatorFunctor msdf;
 
 			MacroTransMTBDD projectedMtbdd = (msdf(transPost)).Project(
@@ -560,8 +565,11 @@ MacroTransMTBDD GetMTBDDForPost(Automaton & aut, TStateSet* state, unsigned leve
 
 		TStateSet* front;
 		MacroStateDeterminizatorFunctor msdf;
+#ifdef USE_MPUF
 		MacroPrunedUnionFunctor muf(level-1);
-		//MacroUnionFunctor muf;
+#else
+		MacroUnionFunctor muf;
+#endif
 		MacroTransMTBDD detResultMtbdd(new MacroStateSet());
 
 		// get first and determinize it

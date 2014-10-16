@@ -456,6 +456,36 @@ ASTForm* ASTForm_uvf::removeUniversalQuantifier() {
 }
 
 /**
+ * Transforms prefix into second order
+ *
+ * @return; formula with prefix in second order
+ */
+ASTForm* ASTForm_Not::prefixToSecondOrder() {
+	f = f->prefixToSecondOrder();
+	return this;
+}
+
+/**
+ * Transforms prefix into second order
+ *
+ * @return; formula with prefix in second order
+ */
+ASTForm* ASTForm_Ex2::prefixToSecondOrder() {
+	f = f->prefixToSecondOrder();
+	return this;
+}
+
+/**
+ * Transforms prefix into second order
+ *
+ * @return; formula with prefix in second order
+ */
+ASTForm* ASTForm_Ex1::prefixToSecondOrder() {
+	f = f->prefixToSecondOrder();
+	return new ASTForm_Ex2(this->ul, this->vl, this->f, pos);
+}
+
+/**
  * Unfolds negations to the atomic formulae and shift them to the atoms
  *
  * @return: Formula with negations in atomic formulae
