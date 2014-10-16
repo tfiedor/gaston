@@ -14,6 +14,7 @@
 #include "decision_procedures.hh"
 
 //#define DEBUG_BDP
+//#define DEBUG_PREFIX
 #define PRUNE_BY_SUBSUMPTION
 
 // Global Variables
@@ -277,7 +278,7 @@ bool initialStateIsInFinalStates(MacroStateSet *initial, MacroStateSet *finalSta
  */
 bool testValidity(Automaton &aut, PrefixListType prefix, bool topmostIsNegation) {
 	unsigned int determinizationNumber = prefix.size();
-#ifdef DEBUG_BDP
+#ifdef DEBUG_PREFIX
 	for(auto it = prefix.begin(); it != prefix.end(); ++it) {
 		std::cout << "[";
 		for(auto itt = (*it).begin(); itt != (*it).end(); ++itt) {

@@ -300,9 +300,6 @@ PrefixListType convertPrefixFormulaToList(ASTForm* formula) {
 	unsigned int value;
 	bool isFirstNeg = true;
 
-std::cout << "dumping prefix\n";
-std::cout <<  "\n\n";
-
 	// empty prefix is just one empty list
 	if (formula->kind == aTrue) {
 		list.push_front(set);
@@ -364,18 +361,24 @@ void closePrefix(PrefixListType & prefix, IdentList* freeVars, bool negationIsTo
 	unsigned int prefixSize = prefix.size();
 
 	// phi = neg exists X ...
-	if (negationIsTopmost) {
-		VariableSet s;
-		prefix.push_back(s);
-	}
 	// we will add new level of quantification
-	VariableSet set;
-	quantifiedSize = freeVars->size();
-	for (unsigned i = 0; i < quantifiedSize; ++i) {
-		value = freeVars->get(i);
-		//set.push_back(varMap[value]);
+	if (negationIsTopmost) {
+		VariableSet set;
+		quantifiedSize = freeVars->size();
+		for (unsigned i = 0; i < quantifiedSize; ++i) {
+			value = freeVars->get(i);
+			set.push_back(varMap[value]);
+		}
+		prefix.push_back(set);
+	} else {
+		int index = prefix.size() - 1;
+		quantifiedSize = freeVars->size();
+		for (unsigned i = 0; i < quantifiedSize; ++i) {
+			value = freeVars->get(i);
+			prefix[index].insert(prefix[index].begin(), varMap[value]);
+		}
 	}
-	prefix.push_back(set);
+
 }
 
 /**

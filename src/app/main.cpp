@@ -6,7 +6,8 @@
  *****************************************************************************/
 
 #define _LANGUAGE_C_PLUS_PLUS
-#define DEBUG_DP
+//#define DEBUG_DP
+//#define DEBUG_PREFIX
 //#define DEBUG_BDDS
 
 // < System Headers >
@@ -404,6 +405,14 @@ int main(int argc, char *argv[])
 
   bool formulaIsGround = freeVars.empty();
 
+#ifdef DEBUG_DP
+  std::cout << "freeVars:\n";
+  freeVars.dump();
+  std::cout << "\nbound:\n";
+  bound.dump();
+  std::cout << "\n";
+#endif
+
   // First formula in AST representation is split into matrix and prefix part.
   ASTForm *matrix, *prefix;
   splitMatrixAndPrefix(ast, matrix, prefix);
@@ -426,6 +435,25 @@ int main(int argc, char *argv[])
 	  closePrefix(nplist, &freeVars, (prefix->kind != aNot));
 	  topmostIsNegation = false;
   }
+
+#ifdef DEBUG_PREFIX
+	for(auto it = plist.begin(); it != plist.end(); ++it) {
+		std::cout << "[";
+		for(auto itt = (*it).begin(); itt != (*it).end(); ++itt) {
+			std::cout << (*itt) << ", ";
+		}
+		std::cout << "] ";
+	}
+	std::cout << "\n";
+	for(auto it = nplist.begin(); it != nplist.end(); ++it) {
+		std::cout << "[";
+		for(auto itt = (*it).begin(); itt != (*it).end(); ++itt) {
+			std::cout << (*itt) << ", ";
+		}
+		std::cout << "] ";
+	}
+	std::cout << "\n";
+#endif
 
   Automaton formulaAutomaton;
   timer_automaton.start();
