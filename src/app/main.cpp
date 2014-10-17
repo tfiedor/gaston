@@ -366,7 +366,7 @@ int main(int argc, char *argv[])
 	  // Transform AST to existentional Prenex Normal Form
 	  ast->formula = (ASTForm*) (ast->formula)->toExistentionalPNF();
   } else {
-	  if(ast->formula->kind = aAnd) {
+	  if(ast->formula->kind == aAnd) {
 		  ASTForm_And* andFormula = (ASTForm_And*) ast->formula;
 		  if(andFormula->f1->kind == aTrue) {
 			  ast->formula = (ASTForm *) andFormula->f2;

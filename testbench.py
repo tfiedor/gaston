@@ -40,7 +40,7 @@ def run_mona(test, timeout):
     args = ('./mona', '-s', '"{}"'.format(test))
     output, retcode = runProcess(args, timeout)
     if(retcode != 0):
-        return mona_error
+        return mona_error, ""
     return parseMonaOutput(output, False)
 
 def run_mona_expnf(test, timeout):
@@ -50,7 +50,7 @@ def run_mona_expnf(test, timeout):
     args = ('./mona-expnf', '-s', '"{}"'.format(test))
     output, retcode = runProcess(args, timeout)
     if(retcode != 0):
-        return mona_expnf_error
+        return mona_expnf_error, ""
     return parseMonaOutput(output, True)
 
 def run_dwina(test, timeout):
@@ -62,19 +62,19 @@ def run_dwina(test, timeout):
     output, retcode = runProcess(args, timeout)
     output2, retcode2 = runProcess(args2, timeout)
     if (retcode != 0) and (retcode2 != 0):
-        return dwina_error
+        return dwina_error, ""
     return parsedWiNAOutput(output, output2)
 
 def run_dwina_dfa(test, timeout):
     '''
     Runs dWiNA with following arguments: --method=backward --use-mona-dfa
     '''
-    args =('./dWiNA', '--method=backward', '--use-mona-dfa', '"{}"'.format(test))
-    args2 = ('./dWiNA-no-prune', '--method=backward', '--use-mona-dfa', '"{}"'.format(test))
+    args =('./dWiNA', '--method=backward', '--no-expnf', '"{}"'.format(test))
+    args2 = ('./dWiNA-no-prune', '--method=backward', '--no-expnf', '"{}"'.format(test))
     output, retcode = runProcess(args, timeout)
     output2, retcode2 = runProcess(args2, timeout)
     if (retcode != 0) and (retcode2 != 0):
-        return dwina_error
+        return dwina_error, ""
     return parsedWiNAOutput(output, output2)
 
 
@@ -389,12 +389,16 @@ if __name__ == '__main__':
                     continue
                 
                 print("[*] Running test bench: '{}'".format(benchmark))
-                rets = {}
+                rets = {'dwina' : ""}
                 for bin in bins:
                     method_name = "_".join(["run"] + bin.split('-'))
                     method_call = getattr(sys.modules[__name__], method_name)
                     data[benchmark][bin], rets[bin] = method_call(benchmark, options.timeout)
-                if rets['mona'].upper() != rets['dwina']:
+                    if rets['dwina'] == "" and 'dwina-dfa' in rets.keys():
+                        rets['dwina'] = rets['dwina-dfa']
+                if rets['mona'] == -1:
+                    print("\t-> MONA failed")
+                elif rets['mona'].upper() != rets['dwina']:
                     print("\t-> FAIL; Formula is '{}' (dWiNA returned '{}')".format(rets['mona'], rets['dwina'].lower()))
                 else:
                     print("\t-> OK; Formula is '{}'".format(rets['mona']))
