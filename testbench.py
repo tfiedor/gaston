@@ -8,6 +8,7 @@
 
 import argparse
 from datetime import datetime
+import itertools
 import os
 import re
 import subprocess
@@ -286,6 +287,77 @@ def generate_horn_sub_alt(n):
     string = "ws1s;\n" + "ex2 X: all2 "
     string += ", ".join(["X" + str(i) for i in range(1, n+1)]) + ": "
     string += " & ".join(["( (X{0} sub X & X{0} ~= X{1}) => X{1} sub X)".format(i, i+1) for i in range(1, n)]) + ";"
+    return string
+
+def generate_set_singletons(n):
+    '''
+    Generate simple horn formula in form of:
+    
+    ws1s;
+    ex2 X: all2 X1...Xn: & (Xi sub X => Xi+1 sub X)
+    
+    @param n: parameter n    
+    '''
+    if n < 1:
+        print("[*] Skipping n = {}".format(n))
+        return None
+    string = "ws1s;\n"
+    string += "ex2 " + ", ".join(["X" + str(i) for i in range(1, n+1)]) + ": "
+    string += "all1 x1, x2: "
+    string += " & ".join(["((x1 in X{0} & x2 in X{0}) => x1 = x2)".format(i) for i in range(1, n+1)]) + ";"
+    return string
+
+def generate_set_obvious(n):
+    '''
+    Generate simple horn formula in form of:
+    
+    ws1s;
+    ex2 X: all2 X1...Xn: & (Xi sub X => Xi+1 sub X)
+    
+    @param n: parameter n    
+    '''
+    if n < 1:
+        print("[*] Skipping n = {}".format(n))
+        return None
+    string = "ws1s;\n"
+    string += "ex2 " + ", ".join(["X" + str(i) for i in range(1, n+1)]) + ": "
+    string += "all2 X: ("
+    string += " & ".join(["((X sub X{0} & X ~= X{0}) => ~X{0} sub X)".format(i) for i in range(1, n+1)]) + ");"
+    return string
+
+def generate_set_closed(n):
+    '''
+    Generate simple horn formula in form of:
+    
+    ws1s;
+    ex2 X: all2 X1...Xn: & (Xi sub X => Xi+1 sub X)
+    
+    @param n: parameter n    
+    '''
+    if n < 1:
+        print("[*] Skipping n = {}".format(n))
+        return None
+    string = "ws1s;\n"
+    string += "ex2 " + ", ".join(["X" + str(i) for i in range(1, n+1)]) + ": "
+    string += "all1 x: ex1 y, z: ~("
+    string += " & ".join(["( (x in X{0} & x <= y & y <= z & z in X{0}) => y in X{0} )".format(i) for i in range(1, n+1)]) + ");"
+    return string
+
+def generate_horn_trans(n):
+    '''
+    
+    '''
+    if n < 3:
+        print("[*] Skipping n = {}".format(n))
+        return None
+    
+    all_combinations = list(itertools.permutations(range(1, n+1), 3))
+    
+    string = "ws1s;\n" + "all2 X: ex2 "
+    string += ", ".join(["X" + str(i) for i in range(1, n+1)]) + ": ~("
+    string += " & ".join(["( (X{0} sub X{1} & X{1} sub X{2}) => X{0} sub X{2})".format(a, b, c) for (a, b, c) in all_combinations])
+    string += ") & "
+    string += " & ".join(["X{0} sub X".format(i) for i in range(1, n+1)]) + ";" 
     return string
 
 def generate_horn_sub_odd_alts(n, alt):
