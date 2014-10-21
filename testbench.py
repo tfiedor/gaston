@@ -32,6 +32,7 @@ def createArgumentParser():
     parser.add_argument('--generate-alt', '-a', default=None, nargs=3, help='generates parametrized benchmarks up to N with ALT alternation')
     parser.add_argument('--no-export-to-csv', '-x', action='store_true', help='will not export to csv')
     parser.add_argument('--timeout', '-t', default=None, help='timeouts in minutes')
+    parser.add_argument('--check', '-c', action='store_true', help='no timing prints various statistics')
     return parser
 
 def run_mona(test, timeout):
@@ -446,6 +447,8 @@ if __name__ == '__main__':
         
         # iterate through all files in dir
         executing_string = options.bin
+        cases = 0
+        fails = 0
         for root, dirs, filenames in os.walk(options.dir):
             for f in filenames:
                 benchmark = os.path.join(root, f)
@@ -468,11 +471,16 @@ if __name__ == '__main__':
                     data[benchmark][bin], rets[bin] = method_call(benchmark, options.timeout)
                     if rets['dwina'] == "" and 'dwina-dfa' in rets.keys():
                         rets['dwina'] = rets['dwina-dfa']
-                if rets['mona'] == -1:
-                    print("\t-> MONA failed")
+                cases += 1
+                if rets['mona'] == -1 or rets['mona'] == "":
+                    print("\t-> MONA failed or could not be determined")
                 elif rets['mona'].upper() != rets['dwina']:
                     print("\t-> FAIL; Formula is '{}' (dWiNA returned '{}')".format(rets['mona'], rets['dwina'].lower()))
+                    fails += 1
                 else:
                     print("\t-> OK; Formula is '{}'".format(rets['mona']))
+        if(options.check):
+            print("[*] Running statistics of tests:")
+            print("[!] {0}/{1} passes".format(cases-fails, cases))
         if not options.no_export_to_csv:
             exportToCSV(data, bins)            

@@ -3,8 +3,9 @@ project(dWiNA2014)
 
 set(REQUIRED_G++_VERSION 4.8.0)
 # forcing 4.8 compilers
-set(CMAKE_C_COMPILER "gcc-4.8")
-set(CMAKE_CXX_COMPILER "g++-4.8")
+set(CMAKE_C_COMPILER "gcc")
+set(GCC_ALTERNATIVES g++ g++-4.8)
+#set(CMAKE_CXX_COMPILER "g++")
 
 include_directories(src)
 include_directories(src/app)
