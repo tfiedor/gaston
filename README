@@ -28,6 +28,16 @@
  	flex (>= 2.5.35)
  	bison (>= 2.7.1)
  	
+ * Download *
+ ************
+ 
+ In order to compile and work with our tool we highly recommend to clone the repository
+ to the local repository. You need to have the git version control system installed.
+ 
+ To download the library, run
+ 
+   $ git clone https://github.com/Raph-Stash/dWiNA.git
+ 	
  * Compilation *
  ***************
  
@@ -39,4 +49,64 @@
  To further compile the source files to runable binary issue the following command:
  
    $ make
+   
+ * Input file syntax *
+ *********************
+
+The following grammar describes supported subset of MONA syntax
+for the specification of verified formulae. It uses the classical BNF-like
+notation.
+
+For full syntax for MONA tool consult the tool manual at http://www.brics.dk/mona/mona14.pdf.
+
+program ::= (header;)? (declaration;)+
+header ::=  ws1s | ws2s
+
+declaration ::= formula
+             |  var0 (varname)+
+             |  var1 (varname)+
+             |  var2 (varname)+
+             |  'pred' varname (params)? = formula
+             |  'macro' varname (params)? = formula
+
+formula ::= 'true' | 'false' | (formula)
+         |  zero-order-var
+         | ~formula
+         | formula | formula
+         | formula & formula
+         | formula => formula
+         | formula <=> formula
+         | first-order-term = first-order-term 
+         | first-order-term ~= first-order-term 
+         | first-order-term < first-order-term 
+         | first-order-term > first-order-term
+         | first-order-term <= first-order-term 
+         | first-order-term >= first-order-term
+         | second-order-term = second-order-term
+         | second-order-term = { (int)+ }
+         | second-order-term ~= second-order-term
+         | second-order-term 'sub' second-order-term
+         | first-order-term 'in' second-order-term
+         | ex1 (varname)+ : formula
+         | all1 (varname)+ : formula
+         | ex2 (varname)+ : formula
+         | all2 (varname)+ : formula
+
+first-order-term ::= varname | (first-order-term)
+                  |  int
+                  | first-order-term + int
+
+second-order-term ::= varname | (second-order-term)
+                   |  second-order-term + int
+
  
+ 
+ * Contact *
+ ***********
+ 
+ If you have any questions, do not hesitate to contact the tool/method authors:
+ 
+   * Tomas Fiedor <ifiedortom@fit.vutbr.cz> (corresponding author of dWiNA)
+   * Ondrej Lengal <ilengal@fit.vutbr.cz> (corresponding author of VATA)
+   * Lukas Holik <holik@fit.vutbr.cz>
+   * Tomas Vojnar <vojnar@fit.vutbr.cz> 
