@@ -1,0 +1,42 @@
+ **
+ * dWiNA - Deciding WSkS using non-deterministic automata 
+ * 
+ * Copyright (c) 2014  Tomas Fiedor <ifiedortom@fit.vutbr.cz>
+ **************************************************************
+ 
+ * About *
+ *********
+  
+  dWiNA is an implementation of backward decision procedure for WSkS logic 
+  (weak second-order theory of k successors). The tool is using libvata a 
+  highly optimised non-deterministic finite tree automata library that supports 
+  semi-symbolic encoding using multi-terminal binary decision diagrams (MTBDDs) for
+  storing transition table of the automaton. Procedure generates state space on-the-fly
+  and prunes the states using the antichain-based approach. State space is represented 
+  by downward and upward closed represenation of states. The tool computes the 
+  representation of final states and test if initial states are included in final states 
+  and thus (dis)prove validity.
+  
+ * Prerequisities *
+ ******************
+ 
+ Following packages are needed in order to compile and run dWiNA on your system:
+
+ 	git (>= 1.6.0.0)
+ 	cmake (>= 2.8.2)
+ 	gcc (>= 4.8.0)
+ 	flex (>= 2.5.35)
+ 	bison (>= 2.7.1)
+ 	
+ * Compilation *
+ ***************
+ 
+ In order to prepare the tool for compilation and commiting a background check for
+ prerequisite package issue the following command in the root directory of the tool:
+ 
+   $ cmake CMakeLists.txt
+   
+ To further compile the source files to runable binary issue the following command:
+ 
+   $ make
+ 
