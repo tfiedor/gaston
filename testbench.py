@@ -501,7 +501,6 @@ if __name__ == '__main__':
 					if rets['dwina'] == "" and 'dwina-dfa' in rets.keys():
 						rets['dwina'] = rets['dwina-dfa']
 				cases += 1
-				all_cases.append("'{}': dWiNA ('{}') vs mona ('{}')".format(benchmark, rets['dwina'], rets['mona'].lower()))	
 				if rets['mona'] == -1 or rets['mona'] == "":
 					print("\t-> MONA failed or could not be determined")
 				elif rets['mona'].upper() != rets['dwina']:
@@ -514,7 +513,9 @@ if __name__ == '__main__':
 					print(")")
 					fails += 1
 					failed_cases.append("'{}': dWiNA ('{}') vs mona ('{}')".format(benchmark, rets['dwina'], rets['mona'].lower()))	
+					all_cases.append("FAIL : '{}': dWiNA ('{}') vs mona ('{}')".format(benchmark, rets['dwina'], rets['mona'].lower()))	
 				else:
+					all_cases.append("OK : '{}': dWiNA ('{}') vs mona ('{}')".format(benchmark, rets['dwina'], rets['mona'].lower()))	
 					print("\t->"),
 					print(colored("OK","green")),
 					print("; Formula is"),

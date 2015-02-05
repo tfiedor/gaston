@@ -377,7 +377,7 @@ void closePrefix(PrefixListType & prefix, IdentList* freeVars, bool negationIsTo
 		quantifiedSize = freeVars->size();
 		for (unsigned i = 0; i < quantifiedSize; ++i) {
 			value = freeVars->get(i);
-			prefix[index].insert(prefix[index].begin(), varMap[value]);
+			prefix[index].push_back(varMap[value]);
 		}
 	}
 

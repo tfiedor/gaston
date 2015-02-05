@@ -15,7 +15,7 @@
 
 //#define DEBUG_BDP
 //#define DEBUG_PREFIX
-#define PRUNE_BY_SUBSUMPTION
+//#define PRUNE_BY_SUBSUMPTION
 
 // Global Variables
 
@@ -344,13 +344,13 @@ int decideWS1S_backwards(Automaton &aut, PrefixListType formulaPrefixSet, Prefix
 		std::cout << "[*] Commencing backward decision procedure for WS1S\n";
 	}
 
-//#ifdef DEBUG_DP
+#ifdef DEBUG_BDP
 	if(formulaIsGround) {
 		std::cout << "[*] Formula is ground\n";
 	} else {
 		std::cout << "[*] Formula is not ground\n";
 	}
-//#endif
+#endif
 
 	// If formula is ground, then we only test validity/unsat and not satisfiablity
 	if(formulaIsGround) {
