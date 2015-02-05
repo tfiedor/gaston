@@ -206,7 +206,7 @@ ASTForm* ASTForm_NotEqual2::flatten() {
 /*
  * X = {1, 2, 3...} -> 1 \in X & ....
  *
- * TODO: X+1 = Y+1
+ * TODO: X = Y+1+1
  */
 ASTForm* ASTForm_Equal2::flatten() {
 	if(this->T2->kind == aSet) {
@@ -220,6 +220,17 @@ ASTForm* ASTForm_Equal2::flatten() {
 	// Switch the plus
 	} else if(this->T1->kind == aPlus2 && this->T2->kind != aPlus2) {
 		return new ASTForm_Equal2(this->T2, this->T1, this->pos);
+	} else if(this->T1->kind == aPlus2 && this->T2->kind == aPlus2) {
+		ASTForm_And* conj;
+		ASTForm_Equal2* eqXZ;
+		ASTForm_Equal2* eqZY;
+		ASTTerm2_Var2* Z = generateFreshSecondOrder();
+
+		eqXZ = new ASTForm_Equal2(Z, this->T1, this->pos);
+		eqZY = new ASTForm_Equal2(Z, this->T2, this->pos);
+		conj = new ASTForm_And(eqXZ, eqZY, this->pos);
+
+		return new ASTForm_Ex2(0, new IdentList(Z->getVar()), conj, this->pos);
 	} else {
 		return this;
 	}
