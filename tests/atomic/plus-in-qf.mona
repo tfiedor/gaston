@@ -1,0 +1,8 @@
+# WSkS Benchmarks
+# Batch: Atomic
+# Validity: valid
+
+ws1s;
+var1 x;
+var2 Y;
+x + 1 in Y;

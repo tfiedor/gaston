@@ -91,13 +91,13 @@ void PrintUsage()
 		<< "Options:\n"
 		<< " -t, --time 		 Print elapsed time\n"
 		<< " -d, --dump-all		 Dump AST, symboltable, and code DAG\n"
-		<< "     --no-automaton  Don't dump Automaton\n"
-		<< "     --use-mona-dfa  Uses MONA for building base automaton\n"
-		<< "     --no-expnf      Implies --use-mona-dfa, does not convert formula to exPNF\n"
+		<< "     --no-automaton  	 Don't dump Automaton\n"
+		<< "     --use-mona-dfa  	 Uses MONA for building base automaton\n"
+		<< "     --no-expnf      	 Implies --use-mona-dfa, does not convert formula to exPNF\n"
 		<< " -q, --quiet		 Quiet, don't print progress\n"
-		<< " -oX                 Optimization level [1 = safe optimizations [default], 2 = heuristic]\n"
-		<< " --method            Use either forward or backward method [backward [default], forward]\n"
-		<< " --reorder-bdd		 Disable BDD index reordering [no, random, heuristic]\n"
+		<< " -oX                 	 Optimization level [1 = safe optimizations [default], 2 = heuristic]\n"
+		<< " --method            	 Use either forward or backward method [backward [default], forward]\n"
+		<< " --reorder-bdd		 Disable BDD index reordering [no, random, heuristic]\n\n"
 		<< "Example: ./dWiNA -t -d --reorder-bdd=random foo.mona\n\n";
 }
 

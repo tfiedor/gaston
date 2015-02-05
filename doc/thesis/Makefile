@@ -12,7 +12,7 @@ pdf: $(CO).pdf
 $(CO).ps: $(CO).dvi
 	dvips $(CO)
 
-$(CO).pdf: obsah.tex prilohy.tex literatura.bib
+$(CO).pdf: dip.tex obsah.tex prilohy.tex literatura.bib
 	pdflatex $(CO)
 	bibtex $(CO)
 	pdflatex $(CO)
@@ -34,9 +34,9 @@ desky:
 #	dvipdf desky
 	pdflatex desky
 
-clean:
+clean:        
+	rm -f dip.pdf
 	rm -f *.dvi *.log $(CO).blg $(CO).bbl $(CO).toc *.aux $(CO).out $(CO).lof
-	rm -f $(CO).pdf
 	rm -f *~
 
 pack:

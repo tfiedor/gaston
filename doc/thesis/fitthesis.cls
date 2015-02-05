@@ -52,8 +52,8 @@
 %-----------------------------------------------------------------------------
 %Sazebni obrazec
 %-----------------------------------------------------------------------------
-\setlength{\hoffset}{-0.7cm}
-\setlength{\voffset}{-1.5cm}
+%\setlength{\hoffset}{-0.7cm}
+%\setlength{\voffset}{-1.5cm}
 \setlength{\textheight}{23.0cm}
 \setlength{\textwidth}{15.2cm}
 
@@ -78,7 +78,7 @@
 \def\@copyright@CS{Tato práce vznikla jako ¹kolní dílo na Vysokém uèení technickém v Brnì, Fakultì informaèních technologií. 
 Práce je chránìna autorským zákonem a její u¾ití bez udìlení oprávnìní autorem je nezákonné, s výjimkou zákonem definovaných pøípadù.}
 \def\@tdecl@CS{Prohlá¹ení}
-\def\@tackn@CS{Podìkování}
+\def\@tackn@CS{Acknowlegement}
 
 \newif\ifnasel
 \def\ifEqString#1#2#3#4{\def\testa{#1}\def\testb{#2}%
@@ -174,13 +174,13 @@ Práce je chránìna autorským zákonem a její u¾ití bez udìlení oprávnìní autorem j
 
 %Abstrakt
 \renewcommand{\abstract}[2][cs]{%
- \ifEqString{#1}{cs}{#2}{\@tabstract@CS}%
+ %\ifEqString{#1}{cs}{#2}{\@tabstract@CS}%
  \ifEqString{#1}{en}{#2}{\@tabstract@EN}%
 }
 
 %Klicova slova
 \newcommand{\keywords}[2][cs]{%
- \ifEqString{#1}{cs}{#2}{\@tkeywords@CS}%
+ %\ifEqString{#1}{cs}{#2}{\@tkeywords@CS}%
  \ifEqString{#1}{en}{#2}{\@tkeywords@EN}%
 }
 
@@ -240,26 +240,26 @@ Práce je chránìna autorským zákonem a její u¾ití bez udìlení oprávnìní autorem j
 \newcommand\makeabstract{%
 \thispagestyle{empty}\null%
 
-\mktxt@b{16}{\@abstract@CS}\noindent\@tabstract@CS
+%\mktxt@b{16}{\@abstract@CS}\noindent\@tabstract@CS
 
-\vfill
+%\vfill
 
-\mktxt@b{16}{\@abstract@EN}\noindent\@tabstract@EN
+%\mktxt@b{16}{\@abstract@EN}\noindent\@tabstract@EN
 
-\vfill
+%\vfill
 
-\mktxt@b{16}{\@keywords@CS}\noindent\@tkeywords@CS
+%\mktxt@b{16}{\@keywords@CS}\noindent\@tkeywords@CS
 
-\vfill
+%\vfill
 
-\mktxt@b{16}{\@keywords@EN}\noindent\@tkeywords@EN
+%\mktxt@b{16}{\@keywords@EN}\noindent\@tkeywords@EN
 
-\vfill
+%\vfill
 
-\mktxt@b{16}{\@cite@CS}
-\noindent\@author: \@title, \MakeLowercase{\@projecttype@CS}, Brno, FIT VUT v~Brnì, \@year
+%\mktxt@b{16}{\@cite@CS}
+%\noindent\@author: \@title, \MakeLowercase{\@projecttype@CS}, Brno, FIT VUT v~Brnì, \@year
 %===================================================
-\newpage
+%\newpage
 }
 
 %-----------------------------------------------------------------------------
@@ -267,29 +267,29 @@ Práce je chránìna autorským zákonem a její u¾ití bez udìlení oprávnìní autorem j
 %-----------------------------------------------------------------------------
 \newcommand\makedeclaration{
 \thispagestyle{empty}%
-\mktxt@b{18}{\@title}
+%\mktxt@b{18}{\@title}
 
-\vspace{10mm}
-\mktxt@b{16}{\@tdecl@CS}
-\noindent\@declaration
+%\vspace{10mm}
+%\mktxt@b{16}{\@tdecl@CS}
+%\noindent\@declaration
 
-  \begin{flushright}
-      \makebox[4cm]{\dotfill} \\
-      \@author\\
-      \@date
-  \end{flushright}
+  %\begin{flushright}
+  %    \makebox[4cm]{\dotfill} \\
+  %    \@author\\
+  %    \@date
+  %\end{flushright}
 
 \ifx\undefined\@acknowledgment
 \else
-\vspace{20mm}
+%\vspace{20mm}
 \mktxt@b{16}{\@tackn@CS}
 \noindent\@acknowledgment
 \fi
 
-\vfill
+%\vfill
 
-\noindent\copyright\ \@author, \@year.\newline
-{\em \@copyright@CS}
+%\noindent\copyright\ \@author, \@year.\newline
+%{\em \@copyright@CS}
 %===================================================
 \newpage
 }

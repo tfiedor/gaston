@@ -12,14 +12,14 @@
 %\begin{figure}
 % \begin{center}
 \begin{tikzpicture}[->,>=stealth',shorten >=1pt,auto,node distance=5cm,
-                    very thick, transform shape,initial text={}]
-  \tikzstyle{every state}=[fill=none,draw=black,text=black,minimum size=60pt]
+                    very thick, transform shape,initial text={}, font=\LARGE]
+  \tikzstyle{every state}=[fill=none,draw=black,text=black,minimum size=60pt, font=\LARGE]
 
-  \node[initial,state] (A)                      
+  \node[initial,state,fill={rgb:black,1;white,3}] (A)                      
   {$\{1\}$}; 
-  \node[state]         (AD) [right of=A]  
+  \node[state,fill={rgb:black,1;white,3}]         (AD) [right of=A]  
   {$\{1, 4\}$};
-  \node[state]         (AB) [below right
+  \node[state,fill={rgb:black,1;white,3}]         (AB) [below right
   of=A] {$\{1, 2\}$}; 
   \node[state]         (ADE) [right of=AD]      
   {$\{1, 4, 5\}$}; 

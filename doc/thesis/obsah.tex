@@ -196,7 +196,7 @@ $\mathcal{A}$ such that $L(\mathcal{A}) = L$.
 	\end{example}
 	
 	\noindent\hrulefill
-	
+	\newpage
  \subsection{Closure Properties of Regular Languages}
 
 \begin{theorem}
@@ -519,7 +519,6 @@ follows, using $\overline{x}$ as an~abbreviation for $x_1\ldots x_n$:
  (x_i \wedge \text{\textlbrackdbl} v.high\text{\textrbrackdbl}(\overline{x}))\\
        & \text{where} & \mathit{var}(v) = x_i
 \end{eqnarray*}
-\newpage
 We can further extend the notion of these functions to an arbitrary nonempty
 codomain $S$, $f : \{0,1\}^k \longrightarrow
 S$.
@@ -562,6 +561,7 @@ binary leaf operator $\mathit{op}_2$ as follows:
 \overline{x}\,.\,\mathit{op}_2(\text{\textlbrackdbl}f(\overline{x})\text{\textrbrackdbl}, \text{\textlbrackdbl}g(\overline{x})\text{\textrbrackdbl}).
 \end{eqnarray}
 
+\newpage
 \subsection[Usage
 of MTBDDs with TA]{Using Shared MTBDDs for Encoding Transition Function of Tree Automata} Let $\mathcal{A} = (Q, \Sigma, \delta, F)$
 be a~tree automaton, such that $\Sigma = \{0, 1\}^n$, for some $n$. Each
@@ -588,7 +588,6 @@ $\delta^{td}$ then represents the function \textlbrackdbl $\delta^{td}$
 \lambda q\ a .
 \{(q_1,\ldots,q_p) \mid q \overset{a}{\longrightarrow} (q_1,\ldots,q_p)\}.
 \end{equation}
-
 \noindent\hrulefill
 \begin{example}
  Consider the word automaton $\mathcal{A}$ from Example
@@ -718,7 +717,7 @@ translation $T'$ from the restricted syntax to WS$k$S such that \begin{equation}
 	\begin{proof}
 We will only present a~short sketch of the proof for this proposition. For
 further details see~\cite{tata}.
-	\newpage
+
 We can suppose that formulae will be built only upon the atomic formulae $t \in
 X$ and $s = t$ and so flatten the rest of the atomic formulae. Every first-order
 variable $y$ will be mapped to a~second-order variable $X_y$ as follows:
@@ -738,6 +737,7 @@ variable $y$ will be mapped to a~second-order variable $X_y$ as follows:
 	in~\cite{tata}.
 	\end{proof}
 	
+		\newpage
 	  \noindent\hrulefill
   \begin{example}
   The following example WS$k$S formula $\phi$ is in the restricted syntax and is
@@ -770,7 +770,7 @@ $\exists\mathcal{X}_i$, for $\mathcal{X}_i \subseteq \mathds{X}$, is a~(possibly
 empty) sequence $\exists X_a\ldots\exists X_b$ of consecutive existential
 quantifications and $\psi$ is again a~quantifier-free formula in the restricted
 syntax over $\mathds{X}$.
-\newpage	
+
 	\begin{prop}
 There is a~translation from WS$k$S formulae in the restricted syntax to
 equivalent formulae in $\exists$PNF.
@@ -973,9 +973,9 @@ $\wedge$, $\neg$ and $\exists$ (as defined in the restricted syntax):
  
  \begin{figure}[h!]
  \begin{center}
-  \scalebox{0.55}{\includegraphics{fig/formula-singleton-and-subset.pdf}}
-  \scalebox{0.55}{\includegraphics{fig/formula-automaton-product.pdf}}
-  \scalebox{0.55}{\includegraphics{fig/formula-automaton.pdf}}
+  \scalebox{0.7}{\includegraphics{fig/formula-singleton-and-subset.pdf}}
+  \scalebox{0.7}{\includegraphics{fig/formula-automaton-product.pdf}}
+  \scalebox{0.7}{\includegraphics{fig/formula-automaton.pdf}}
  \end{center}
  \caption{Finite automata corresponding to all the subformulae of the given
  formula $\rho \overset{\mathit{def}}{=} \exists P:
@@ -1133,7 +1133,7 @@ are isomorphic in the sense that only node labels differ, which means these
 representations can be reused simply by renaming variable nodes. Thus MONA
 represents input formulae in the form of \emph{directed acyclic graph} and not a
 tree.
-
+\newpage
 \subsection{Three-valued logic and automata}
 Since formulae are translated to the restricted syntax that uses only
 second-order variables, first-order variables are encoded as singletons. This
@@ -1171,7 +1171,7 @@ which removes quantifiers where they are not useful, as following:
 \begin{equation}\exists X . \phi \mapsto \phi[T/X]
 \end{equation}
 provided that $\phi \Rightarrow X = T$ is valid formula and the term $T$ is
-satisfying that $\mathit{freeVars}(T)~\subseteq~\mathit{freeVars}(\phi)$, where
+satisfying the constraint that $\mathit{freeVars}(T)~\subseteq~\mathit{freeVars}(\phi)$, where
 $\mathit{freeVars}(T)$ denotes the set of free variables in some subformula $T$.
 This is further restricted to a different rewrite rule: \begin{equation} \exists
 X_i .\phi \mapsto \phi[X_j/X_i]
@@ -1386,11 +1386,11 @@ $\overline{\mathcal{A}_D}$.
 
 \begin{lemma}
 The language of an automaton $\mathcal{A} = (Q, \Sigma, \delta, I, F)$ is
-universal iff the function \texttt{IsFinalReachable}($I$, $\leqq \in \mathcal{A}^\sqsubseteq$,
+universal iff the function from
+Algorithm~\ref{universality} \texttt{IsFinalReachable}($I$, $\leqq \in \mathcal{A}^\sqsubseteq$,
  $(\lambda R.\ \{\{s\} \mid \exists r \in R:\, r \overset{a}{\longrightarrow} s
  \in \delta\})$, ($\lambda\ R.
- R \cap F \neq \emptyset$)) from
-Algorithm \ref{universality} returns
+ R \cap F \neq \emptyset$)) returns
 \textsc{TRUE}.
 \end{lemma}
 
@@ -1495,7 +1495,7 @@ projection of an automaton.
 
 Note that in the following we will use the symbol $\overline{0}$ as the
 substitute for the symbol $0^k$ for some known $k$.
-
+\newpage
 \noindent\hrulefill
 \begin{example}
  Consider the formula $P \not\subseteq X$ and its corresponding automaton
@@ -1842,7 +1842,6 @@ the search for an~accepting or a~rejecting state.
  \overset{x}{\rightarrow} B' \wedge A' \leq_{n+1} B')) \wedge (A \in F_{n+1}
  \Rightarrow B \in F_{n+1}).
  \end{equation}
- \newpage
  We consider the following case split:
  
  \begin{itemize}
@@ -2018,7 +2017,7 @@ $L_\Sigma^\square$. Further we use the notation $\overset{\rightarrow}{q_n}[e
 \mapsto s]$, where $1 \leq e \leq n$, to denote the vector
 $(q_1,\ldots,q_{e-1}, s, q_{e+1},\ldots,q_n)$. This notion can be further
 extended to vectors of sets of states.
-\newpage
+
 Further we extent the notion of pruning states as defined in previous sections
 over the languages of open trees by the following lemmas.
 
@@ -2098,7 +2097,7 @@ which decides whether the formula is either $(i)$ \emph{valid}, $(ii)$
 
 \begin{figure}[hb]
 \begin{center}
- \scalebox{0.42}{\includegraphics{fig/flow.pdf}}
+ \scalebox{0.47}{\includegraphics{fig/flow.pdf}}
  \caption{Transformation of data through the decision procedure}\label{flow}
  \end{center}
 \end{figure}
@@ -2348,7 +2347,7 @@ representation of automata, we have chosen the bottom-up representation.
  denotes that number of states cannot be measured or described by mathematical
  equation.}\label{atomic-formulae}
  \end{table}
- 
+ \newpage
  \noindent\hrulefill
  \begin{example}
  Let us take the formula $\varphi \overset{\mathit{def}}{=} x \leq y$ for
@@ -2371,7 +2370,7 @@ representation of automata, we have chosen the bottom-up representation.
 \end{figure}
  \end{example}
  \noindent\hrulefill
-\newpage
+
  Even though some of the reductions can seem to be
  insignificant, due to their frequent occurrences in many practical formulae the
  overall reduction can be enormous in result. Another reduction comes from
@@ -2547,7 +2546,7 @@ for a~greater $n$.
 
 \begin{figure}[h!]
  \begin{center}
-  \scalebox{0.43}{\includegraphics{fig/graf-alt-n-time}}
+  \scalebox{0.47}{\includegraphics{fig/graf-alt-n-time}}
  \end{center}
  \caption{Speed performance of \texttt{dWiNA} based on
  the parameter $n$ and the number of alternations in the formula. For
@@ -2607,7 +2606,7 @@ time, but requires additional optimizations to take place.
 
 \begin{figure}[h!]
  \begin{center}
-  \scalebox{0.5}{\includegraphics{fig/graf-alt-size}}
+  \scalebox{0.6}{\includegraphics{fig/graf-alt-size}}
  \end{center}
  \caption{Alternative speed comparison of \texttt{dWiNA} and \textsc{MONA}
  based on the size of the automaton.}\label{size-n}
@@ -2615,7 +2614,7 @@ time, but requires additional optimizations to take place.
 
 \begin{figure}[h!]
  \begin{center}
-  \scalebox{0.5}{\includegraphics{fig/graf-states}}
+  \scalebox{0.6}{\includegraphics{fig/graf-states}}
  \end{center}
  \caption{Comparison of the number of the generated/evaluated states between
  \texttt{dWiNA} and \textsc{MONA} on the base automaton with $36$

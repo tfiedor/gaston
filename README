@@ -100,7 +100,6 @@ second-order-term ::= varname | (second-order-term)
                    |  second-order-term + int
 
  
- 
  * Contact *
  ***********
  
