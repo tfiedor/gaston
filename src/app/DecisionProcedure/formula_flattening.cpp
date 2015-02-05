@@ -205,6 +205,8 @@ ASTForm* ASTForm_NotEqual2::flatten() {
 
 /*
  * X = {1, 2, 3...} -> 1 \in X & ....
+ *
+ * TODO: X+1 = Y+1
  */
 ASTForm* ASTForm_Equal2::flatten() {
 	if(this->T2->kind == aSet) {
@@ -215,6 +217,9 @@ ASTForm* ASTForm_Equal2::flatten() {
 			formula = new ASTForm_And(formula, newIn, Pos());
 		}
 		return formula;
+	// Switch the plus
+	} else if(this->T1->kind == aPlus2 && this->T2->kind != aPlus2) {
+		return new ASTForm_Equal2(this->T2, this->T1, this->pos);
 	} else {
 		return this;
 	}
@@ -427,6 +432,40 @@ ASTForm* ASTForm_In::flatten() {
 ASTForm* ASTForm_Notin::flatten() {
 	ASTForm_In *newIn = new ASTForm_In(this->t1, this->T2, Pos());
 	return new ASTForm_Not(newIn->flatten(), Pos());
+}
+
+/**
+ * Flattens formula to second-order and restricted syntax. In case the
+ * formulae is in form X sub Y + 1 or X + 1 sub Y, it is flatten as follows:
+ *
+ * X sub Y + 1 -> ex2 Z: X sub Z & Z = Y + 1
+ */
+ASTForm* ASTForm_Sub::flatten() {
+	if(this->T1->kind == aPlus2) {
+		ASTForm_And* conj;
+		ASTForm_Equal2* subEq;
+		ASTForm_Sub* newSub;
+		ASTTerm2_Var2* Z = generateFreshSecondOrder();
+
+		subEq = new ASTForm_Equal2(Z, this->T1, this->pos);
+		newSub = new ASTForm_Sub(Z, this->T2, this->pos);
+		conj = new ASTForm_And(subEq->flatten(), newSub->flatten(), this->pos);
+
+		return new ASTForm_Ex2(0, new IdentList(Z->getVar()), conj, this->pos);
+	} else if(this->T2->kind == aPlus2) {
+		ASTForm_And* conj;
+		ASTForm_Equal2* subEq;
+		ASTForm_Sub* newSub;
+		ASTTerm2_Var2* Z = generateFreshSecondOrder();
+
+		subEq = new ASTForm_Equal2(Z, this->T2, this->pos);
+		newSub = new ASTForm_Sub(Z, this->T1, this->pos);
+		conj = new ASTForm_And(subEq->flatten(), newSub->flatten(), this->pos);
+
+		return new ASTForm_Ex2(0, new IdentList(Z->getVar()), conj, this->pos);
+	} else {
+		return this;
+	}
 }
 
 /**
