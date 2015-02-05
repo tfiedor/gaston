@@ -401,14 +401,26 @@ ASTForm* substituteFreshIn(ASTTerm1* leftTerm, ASTTerm2* rightTerm) {
 }
 
 /**
- * Flattens formula to second-order variables and restricted sytnax.
+ * Flattens formula to second-order variables and restricted syntax.
  *
  * t in X -> Xy subseteq X
  *
  * @return: flattened formula
  */
 ASTForm* ASTForm_In::flatten() {
-	if (this->t1->kind != aVar1) {
+	// x in X + i => ex2 Z: x in Z & Z = X + i
+	if(this->T2->kind != aVar2) {
+		ASTForm_Equal2* zSub;
+		ASTForm_In* inSub;
+		ASTForm_And* conj;
+		ASTTerm2_Var2* Z;
+
+		Z = generateFreshSecondOrder();
+		zSub = new ASTForm_Equal2(Z, this->T2, this->pos);
+		inSub = new ASTForm_In(this->t1, Z, this->pos);
+		conj = new ASTForm_And(inSub->flatten(), zSub->flatten(), this->pos);
+		return new ASTForm_Ex2(0, new IdentList(Z->getVar()), conj, this->pos);
+	}else if (this->t1->kind != aVar1) {
 #ifdef SMART_FLATTEN
 		if(this->t1->kind == aInt) {
 			return this;
@@ -434,7 +446,7 @@ ASTForm* ASTForm_In::flatten() {
 }
 
 /**
- * Flattens formula to second-order variables and restricted sytnax.
+ * Flattens formula to second-order variables and restricted syntax.
  *
  * t notin X -> not Xy subseteq X
  *

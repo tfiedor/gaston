@@ -6,8 +6,8 @@
  *****************************************************************************/
 
 #define _LANGUAGE_C_PLUS_PLUS
-//#define DEBUG_DP
-//#define DEBUG_PREFIX
+#define DEBUG_DP
+#define DEBUG_PREFIX
 //#define DEBUG_BDDS
 
 // < System Headers >
@@ -448,6 +448,26 @@ int main(int argc, char *argv[])
   PrefixListType plist = convertPrefixFormulaToList(prefix);
   PrefixListType nplist(plist);
 
+#ifdef DEBUG_PREFIX
+  std::cout << "[?] Prefixes before closing\n";
+	for(auto it = plist.begin(); it != plist.end(); ++it) {
+		std::cout << "[";
+		for(auto itt = (*it).begin(); itt != (*it).end(); ++itt) {
+			std::cout << (*itt) << ", ";
+		}
+		std::cout << "] ";
+	}
+	std::cout << "\n";
+	for(auto it = nplist.begin(); it != nplist.end(); ++it) {
+		std::cout << "[";
+		for(auto itt = (*it).begin(); itt != (*it).end(); ++itt) {
+			std::cout << (*itt) << ", ";
+		}
+		std::cout << "] ";
+	}
+	std::cout << "\n";
+#endif
+
   // If formula is not ground, we close it
   if(freeVars.size() != 0) {
 	  closePrefix(plist, &freeVars, topmostIsNegation);
@@ -456,6 +476,7 @@ int main(int argc, char *argv[])
   }
 
 #ifdef DEBUG_PREFIX
+  std::cout << "[?] Prefixes after closing\n";
 	for(auto it = plist.begin(); it != plist.end(); ++it) {
 		std::cout << "[";
 		for(auto itt = (*it).begin(); itt != (*it).end(); ++itt) {
