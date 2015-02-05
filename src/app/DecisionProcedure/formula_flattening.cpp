@@ -459,7 +459,7 @@ ASTForm* ASTForm_Sub::flatten() {
 		ASTTerm2_Var2* Z = generateFreshSecondOrder();
 
 		subEq = new ASTForm_Equal2(Z, this->T2, this->pos);
-		newSub = new ASTForm_Sub(Z, this->T1, this->pos);
+		newSub = new ASTForm_Sub(this->T1, Z, this->pos);
 		conj = new ASTForm_And(subEq->flatten(), newSub->flatten(), this->pos);
 
 		return new ASTForm_Ex2(0, new IdentList(Z->getVar()), conj, this->pos);
