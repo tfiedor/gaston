@@ -584,7 +584,7 @@ int main(int argc, char *argv[])
 	  delete serializer;
   }
 
-#ifdef DEBUG_BDDS
+#if (DEBUG_BDDS == true)
 	StateHT allStates;
 	formulaAutomaton.RemoveUnreachableStates(&allStates);
 	TransMTBDD * tbdd = getMTBDDForStateTuple(formulaAutomaton, Automaton::StateTuple({}));

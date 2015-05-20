@@ -273,7 +273,7 @@ bool initialStateIsInFinalStates(MacroStateSet *initial, MacroStateSet *finalSta
  */
 bool testValidity(Automaton &aut, PrefixListType prefix, bool topmostIsNegation) {
 	unsigned int determinizationNumber = prefix.size();
-#ifdef DEBUG_FORMULA_PREFIX
+#if (DEBUG_FORMULA_PREFIX == true)
 	for(auto it = prefix.begin(); it != prefix.end(); ++it) {
 		std::cout << "[";
 		for(auto itt = (*it).begin(); itt != (*it).end(); ++itt) {
@@ -298,7 +298,7 @@ bool testValidity(Automaton &aut, PrefixListType prefix, bool topmostIsNegation)
 	MacroStateSet* finalStates = new MacroStateSet(states);
 	std::cout << "[*] Size of the searched space: " << finalStates->measureStateSpace() << "\n";
 
-#ifdef (DEBUG_VALIDITY_TEST == true)
+#if (DEBUG_VALIDITY_TEST == true)
 	std::cout << "[testValidity] Dumping computed final states:\n";
 	finalStates->closed_dump(determinizationNumber);
 	std::cout << "\n";
