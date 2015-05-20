@@ -19,7 +19,7 @@ from termcolor import colored
 dwina_error = (-1, -1, -1, -1, -1)
 mona_error = (-1, -1)
 mona_expnf_error = (-1, -1, -1)
-test_dir="./tests/"
+test_dir="./tests/basic"
 
 def createArgumentParser():
 	'''
@@ -58,7 +58,7 @@ def run_mona_expnf(test, timeout, checkonly=False):
 		return mona_expnf_error, ""
 	return parseMonaOutput(output, True, checkonly)
 
-def run_dwina(test, timeout, check, checkonly=False):
+def run_dwina(test, timeout, checkonly=False):
 	'''
 	Runs dWiNA with following arguments: --method=backward
 	'''
@@ -67,7 +67,7 @@ def run_dwina(test, timeout, check, checkonly=False):
 	output, retcode = runProcess(args, timeout)
 	if checkonly:
 		output2, retcode2 = "", 0
-	else:	
+	else:
 		output2, retcode2 = runProcess(args2, timeout)
 	if (retcode != 0) and (retcode2 != 0):
 		return dwina_error, ""

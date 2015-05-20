@@ -12,14 +12,12 @@
 #include "environment.hh"
 #include "decision_procedures.hh"
 
-//#define USE_MPUF
-
 // Global Variables
 
-#ifdef USE_STATECACHE
+#if (USE_STATECACHE == true)
 extern MultiLevelMCache<bool> StateCache;
 #endif
-#ifdef USE_BDDCACHE
+#if (USE_BDDCACHE == true)
 extern MultiLevelMCache<MacroTransMTBDD> BDDCache;
 #endif
 
@@ -47,7 +45,7 @@ bool isNotEnqueued(StateSetList & queue, TStateSet*& state, unsigned level) {
 	// pruning of states
 	auto matching_iter = std::find_if(queue.begin(), queue.end(),
 			[state, level](TStateSet* s) {
-#ifdef PRUNE_BY_RELATION
+#if (PRUNE_BY_RELATION == true)
 				return state->CanBePruned(s, level);
 #else
 				return s->DoCompare(state);
@@ -63,7 +61,7 @@ bool isNotEnqueued(StateSetList & queue, MacroStateSet*& state, unsigned level) 
 
 	auto matching_iter = std::find_if(queue.begin(), queue.end(),
 			[state, level](TStateSet* s) {
-#ifdef PRUNE_BY_RELATION
+#if (PRUNE_BY_RELATION == true)
 				return state->CanBePruned(s, level);
 #else
 				return s->DoCompare(state);
@@ -149,10 +147,10 @@ int decideWS1S(Automaton & aut, PrefixListType formulaPrefixSet, PrefixListType 
 	unsigned negFormulaDeterminizations = negFormulaPrefixSet.size();
 	unsigned cacheSize = (formulaDeterminizations >= negFormulaDeterminizations) ? formulaDeterminizations : negFormulaDeterminizations;
 
-#ifdef USE_STATECACHE
+#if (USE_STATECACHE == true)
 	StateCache.extend(cacheSize);
 #endif
-#ifdef USE_BDDCACHE
+#if (USE_BDDCACHE == true)
 	BDDCache.extend(cacheSize);
 #endif
 
@@ -484,7 +482,7 @@ MacroStateSet* GetZeroMacroPost(Automaton & aut, TStateSet*& state, unsigned lev
 		} else {
 			const MacroTransMTBDD & transPost = GetMTBDDForPost(aut, state, level, prefix);
 			int projecting = getProjectionVariable(level, prefix);
-#ifdef USE_MPUF
+#if USE_PRUNED_UNION_FUNCTOR
 			MacroPrunedUnionFunctor muf(level-1);
 #else
 			MacroUnionFunctor muf;
@@ -554,7 +552,7 @@ MacroTransMTBDD GetMTBDDForPost(Automaton & aut, TStateSet* state, unsigned leve
 		MacroStateSet* mState = reinterpret_cast<MacroStateSet*>(state);
 
 		// Look into cache
-#ifdef USE_BDDCACHE
+#if (USE_BDDCACHE == true)
 		if(BDDCache.inCache(mState, level)) {
 			return BDDCache.lookUp(mState, level);
 		}
@@ -565,7 +563,7 @@ MacroTransMTBDD GetMTBDDForPost(Automaton & aut, TStateSet* state, unsigned leve
 
 		TStateSet* front;
 		MacroStateDeterminizatorFunctor msdf;
-#ifdef USE_MPUF
+#if USE_PRUNED_UNION_FUNCTOR
 		MacroPrunedUnionFunctor muf(level-1);
 #else
 		MacroUnionFunctor muf;
@@ -592,7 +590,7 @@ MacroTransMTBDD GetMTBDDForPost(Automaton & aut, TStateSet* state, unsigned leve
 		}
 
 		// cache the results
-#ifdef USE_BDDCACHE
+#if (USE_BDDCACHE == true)
 		BDDCache.storeIn(mState, detResultMtbdd, level);
 #endif
 

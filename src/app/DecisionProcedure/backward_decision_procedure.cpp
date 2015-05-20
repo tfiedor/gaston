@@ -13,13 +13,9 @@
 #include "environment.hh"
 #include "decision_procedures.hh"
 
-//#define DEBUG_BDP
-//#define DEBUG_PREFIX
-//#define PRUNE_BY_SUBSUMPTION
-
 // Global Variables
 
-#ifdef USE_BDDCACHE
+#if (USE_BDDCACHE == true)
 extern MultiLevelMCache<MacroTransMTBDD> BDDCache;
 #endif
 
@@ -60,7 +56,7 @@ MacroStateSet* computeFinalStates(Automaton &aut, PrefixListType prefix, unsigne
 		}
 	} else {
 		MacroStateSet *finalStatesBelow = computeFinalStates(aut, prefix, detNo-1);
-#ifdef DEBUG_BDP
+#if (DEBUG_FINAL_STATES == true)
 		std::cout << "[computeFinalStates] Dumping final states from level " << detNo - 1 << "\n";
 		finalStatesBelow->dump();
 		std::cout << "\n";
@@ -75,21 +71,21 @@ MacroStateSet* computeFinalStates(Automaton &aut, PrefixListType prefix, unsigne
 		worklist.pop_back();
 		processed.push_back(q);
 
-#ifdef DEBUG_BDP
+#if (DEBUG_FINAL_STATES == true)
 		std::cout << "[computeFinalStates] Dumping actual working state, iteration " << i++ << "\n";
 		q->dump();
 		std::cout << "\n\n";
 #endif
 
 		TStateSet* predecessors = GetZeroMacroPost(aut, q, detNo, prefix);
-#ifdef DEBUG_BDP
+#if (DEBUG_FINAL_STATES == true)
 		std::cout << "[computeFinalStates] Dumping predecessor of current working state: \n";
 		predecessors->dump();
 		std::cout << "\n";
 #endif
 
 		for(auto state : ((MacroStateSet*)predecessors)->getMacroStates()) {
-#ifdef PRUNE_BY_SUBSUMPTION
+#if (PRUNE_BY_SUBSUMPTION == true)
 			if (detNo == 0) {
 				unsigned int pos = state->state+1;
 				if(!leafQueue.test(pos)) {
@@ -107,7 +103,7 @@ MacroStateSet* computeFinalStates(Automaton &aut, PrefixListType prefix, unsigne
 					worklist.push_back(state);
 					states.push_back(state);
 				} else {
-#ifdef DEBUG_BDP
+#if (DEBUG_PRUNING_OF_FINAL_STATES == true)
 					std::cout << "[isSubsumed] Pruning upward closed state\n";
 					state->dump();
 				    std::cout << "\n";
@@ -123,7 +119,7 @@ MacroStateSet* computeFinalStates(Automaton &aut, PrefixListType prefix, unsigne
 					worklist.push_back(state);
 					states.push_back(state);
 				} else {
-#ifdef DEBUG_BDP
+#if (DEBUG_PRUNING_OF_FINAL_STATES == true)
 
 					std::cout << "[isSubsumed] Pruning downward closed state\n";
 					state->dump();
@@ -140,13 +136,12 @@ MacroStateSet* computeFinalStates(Automaton &aut, PrefixListType prefix, unsigne
 				worklist.push_back(state);
 				states.push_back(state);
 			}
-			std::cout << "\n";
 #endif
 		}
 
 	}
 
-#ifdef PRUNE_BY_SUBSUMPTION
+#if (PRUNE_BY_SUBSUMPTION == true)
 	StateSetList pruned;
 	MacroStateSet* z;
 	if(detNo == 0) {
@@ -195,7 +190,7 @@ MacroStateSet* computeFinalStates(Automaton &aut, PrefixListType prefix, unsigne
 	MacroStateSet* z = new MacroStateSet(states);
 #endif
 
-#ifdef DEBUG_BDP
+#if (DEBUG_FINAL_STATES == true)
 	std::cout << "[computeFinalStates] Returning Z:";
 	z->dump();
 	std::cout << "\n";
@@ -278,7 +273,7 @@ bool initialStateIsInFinalStates(MacroStateSet *initial, MacroStateSet *finalSta
  */
 bool testValidity(Automaton &aut, PrefixListType prefix, bool topmostIsNegation) {
 	unsigned int determinizationNumber = prefix.size();
-#ifdef DEBUG_PREFIX
+#ifdef DEBUG_FORMULA_PREFIX
 	for(auto it = prefix.begin(); it != prefix.end(); ++it) {
 		std::cout << "[";
 		for(auto itt = (*it).begin(); itt != (*it).end(); ++itt) {
@@ -290,7 +285,7 @@ bool testValidity(Automaton &aut, PrefixListType prefix, bool topmostIsNegation)
 #endif
 
 	MacroStateSet* initialState = constructInitialState(aut, determinizationNumber);
-#ifdef DEBUG_BDP
+#if (DEBUG_VALIDITY_TEST == true)
 	std::cout << "[testValidity] Dumping initial state:\n";
 	initialState->dump();
 	std::cout << "\n";
@@ -303,7 +298,7 @@ bool testValidity(Automaton &aut, PrefixListType prefix, bool topmostIsNegation)
 	MacroStateSet* finalStates = new MacroStateSet(states);
 	std::cout << "[*] Size of the searched space: " << finalStates->measureStateSpace() << "\n";
 
-#ifdef DEBUG_BDP
+#ifdef (DEBUG_VALIDITY_TEST == true)
 	std::cout << "[testValidity] Dumping computed final states:\n";
 	finalStates->closed_dump(determinizationNumber);
 	std::cout << "\n";
@@ -344,7 +339,7 @@ int decideWS1S_backwards(Automaton &aut, PrefixListType formulaPrefixSet, Prefix
 		std::cout << "[*] Commencing backward decision procedure for WS1S\n";
 	}
 
-#ifdef DEBUG_BDP
+#if (DEBUG_GROUDNESS == true)
 	if(formulaIsGround) {
 		std::cout << "[*] Formula is ground\n";
 	} else {

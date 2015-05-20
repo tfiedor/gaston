@@ -13,7 +13,6 @@
 #include "../Frontend/env.h"
 #include "../Frontend/predlib.h"
 #include "environment.hh"
-#include <cstring>
 #include <vector>
 #include "decision_procedures.hh"
 
@@ -87,6 +86,25 @@ ASTForm* ASTForm::restrictFormula() {
 }
 
 /**
+ * Flattens formula by unfolding the n to the base case 1
+ *
+ * @return: flattened formula
+ */
+ASTTerm* ASTTerm1_Plus::flatten() {
+	assert(this->n >= 1); // ASSERTION = y = x + i; i in N
+	// Return this, cannot unfold anymore
+	int n = this->n;
+
+	ASTTerm1 *prev = (ASTTerm1*) (this->t)->flatten();
+	while(n != 1) {
+		prev = new ASTTerm1_Plus(prev, 1, Pos());
+		--n;
+	}
+
+	return (ASTTerm*) new ASTTerm1_Plus(prev, 1, Pos());
+}
+
+/**
  * Flattens formula to second-order variables and restricted syntax so it uses
  * only certain atomic formulae
  *
@@ -117,8 +135,9 @@ ASTForm* ASTForm_Equal1::flatten() {
 		this->t1 = temp;
 		return this->flatten();
 	} else if (this->t1->kind == aVar1 && this->t2->kind == aPlus1) {
-		ASTTerm1_Plus* temp = (ASTTerm1_Plus*) this->t2;
+		ASTTerm1_Plus* temp = (ASTTerm1_Plus*) (this->t2->flatten());
 		// y = xi -> Xy = Xx i
+		assert(temp->n == 1 && "Expected Plus(Var, 1)"); // ASSERTION = {y = x + 1}
 		if (temp->t->kind == aVar1) {
 			y = new ASTTerm2_Var2(((ASTTerm1_Var1*)this->t1)->getVar(), Pos());
 			x = new ASTTerm2_Var2(((ASTTerm1_Var1*)temp->t)->getVar(), Pos());
@@ -140,10 +159,10 @@ ASTForm* ASTForm_Equal1::flatten() {
 		leftEqual = new ASTForm_Equal1(zVar, this->t1, Pos());
 		rightEqual = new ASTForm_Equal1(zVar, this->t2, Pos());
 		conjuction = new ASTForm_And(leftEqual, rightEqual, Pos());
-		return (new ASTForm_Ex2(0, new IdentList(z), conjuction, Pos()))->flatten();
+		return (new ASTForm_Ex1(0, new IdentList(z), conjuction, Pos()))->flatten();
 	// x = e ???
 	} else if(this->t1->kind == aVar1 && this->t2->kind == aInt) {
-#ifdef SMART_FLATTEN
+#if (SMART_FLATTEN == true)
 		// smart flattening will deal with this during construction of automaton
 #else
 		// other ints are specially handled
@@ -169,11 +188,22 @@ ASTForm* ASTForm_Equal1::flatten() {
 		this->t2 = this->t1;
 		this->t1 = temp;
 		return this->flatten();
+	// x = y - C => x + C = y
+	} else if(this->t1->kind == aVar1 && this->t2->kind == aMinus1) {
+		ASTTerm1_Plus* subPlus = new ASTTerm1_Plus(this->t1, ((ASTTerm1_tn*) this->t2)->n, this->pos);
+		this->t1 = subPlus;
+		this->t2 = ((ASTTerm1_tn*) this->t2)->t;
+		return this->flatten();
+	// x - C = y => x = y + C
+	// TODO: This is probably not valid
+	} else if(this->t1->kind == aMinus1 && this->t2->kind == aVar1) {
+		ASTTerm1_Plus* subPlus = new ASTTerm1_Plus(this->t2, ((ASTTerm1_tn*) this->t1)->n, this->pos);
+		this->t2 = subPlus;
+		this->t1 = ((ASTTerm1_tn*) this->t1)->t;
+		return this->flatten();
 	} else {
-		std::cerr << "Other forms of Equal1 not Implemented yet!\n";
-		std::cerr << "Dumping formula: ";
-		this->dump();
-		std::cerr << "\n";
+		std::cerr << "[!] Unsupported 'Equal1' operation\n";
+		throw NotImplementedException();
 	}
 	return this;
 }
@@ -184,11 +214,44 @@ ASTForm* ASTForm_Equal1::flatten() {
  *
  * x ~= y  -> not x = y
  *
+ * TODO: This is fucking incorrect
  * @return: flattened formula
  */
 ASTForm* ASTForm_NotEqual1::flatten() {
-	ASTForm_Equal1* eq = new ASTForm_Equal1(this->t1, this->t2, Pos());
-	return new ASTForm_Not(eq->flatten(), Pos());
+	ASTTerm2_Var2* y;
+	ASTTerm2_Var2* x;
+	ASTForm_NotEqual1* leftEqual;
+	ASTForm_NotEqual1* rightEqual;
+	ASTForm_And* conjuction;
+	// substitute the plus on left side
+	if(this->t1->kind == aPlus1) {
+		ASTTerm1_Var1* z = generateFreshFirstOrder();
+		ASTForm_Equal1* zEq;
+		ASTForm_NotEqual1 *zNeq;
+		ASTForm_And* conj;
+
+		zEq = new ASTForm_Equal1(z, this->t1, this->pos);
+		zNeq = new ASTForm_NotEqual1(z, this->t2, this->pos);
+
+		conj = new ASTForm_And(zEq, zNeq, this->pos);
+
+		return (new ASTForm_Ex1(0, new IdentList(z->getVar()), conj, this->pos))->flatten();
+	} else if(this->t2->kind == aPlus1) {
+		ASTTerm1_Var1* z = generateFreshFirstOrder();
+		ASTForm_Equal1* zEq;
+		ASTForm_NotEqual1 *zNeq;
+		ASTForm_And* conj;
+
+		zEq = new ASTForm_Equal1(z, this->t2, this->pos);
+		zNeq = new ASTForm_NotEqual1(z, this->t1, this->pos);
+
+		conj = new ASTForm_And(zEq, zNeq, this->pos);
+
+		return (new ASTForm_Ex1(0, new IdentList(z->getVar()), conj, this->pos))->flatten();
+	} else {
+		ASTForm_Equal1* eq = new ASTForm_Equal1(this->t1, this->t2, Pos());
+		return new ASTForm_Not(eq->flatten(), Pos());
+	}
 }
 
 /**
@@ -209,6 +272,7 @@ ASTForm* ASTForm_NotEqual2::flatten() {
  * TODO: X = Y+1+1
  */
 ASTForm* ASTForm_Equal2::flatten() {
+	// TODO: Flattening of +X
 	if(this->T2->kind == aSet) {
 		ASTList* vars = ((ASTTerm2_Set*)this->T2)->elements;
 		ASTForm* formula = new ASTForm_True(Pos());
@@ -276,7 +340,7 @@ ASTForm* substituteFreshLess(ASTTerm1* leftTerm, ASTTerm1* rightTerm, bool subst
  * @return: flattened formula
  */
 ASTForm* ASTForm_Less::flatten() {
-#ifdef SMART_FLATTEN
+#if (SMART_FLATTEN == true)
 	if (this->t1->kind != aVar1) {
 		return substituteFreshLess(this->t1, this->t2, true);
 	} else if (this->t2->kind != aVar1) {
@@ -337,7 +401,7 @@ ASTForm* ASTForm_LessEq::flatten() {
 	} else if (this->t2->kind != aVar1) {
 		return substituteFreshLessEq(this->t1, this->t2, false);
 	} else {
-#ifdef SMART_FLATTEN
+#if (SMART_FLATTEN == true)
 		return this;
 #else
 		ASTTerm2_Var2* X = generateFreshSecondOrder();
@@ -420,8 +484,8 @@ ASTForm* ASTForm_In::flatten() {
 		inSub = new ASTForm_In(this->t1, Z, this->pos);
 		conj = new ASTForm_And(inSub->flatten(), zSub->flatten(), this->pos);
 		return new ASTForm_Ex2(0, new IdentList(Z->getVar()), conj, this->pos);
-	}else if (this->t1->kind != aVar1) {
-#ifdef SMART_FLATTEN
+	} else if (this->t1->kind != aVar1) {
+#if (SMART_FLATTEN == true)
 		if(this->t1->kind == aInt) {
 			return this;
 		} else {
@@ -431,7 +495,7 @@ ASTForm* ASTForm_In::flatten() {
 		return substituteFreshIn(this->t1, this->T2);
 #endif
 	} else {
-#ifdef SMART_FLATTEN
+#if (SMART_FLATTEN == true)
 		//inFirstOrder.insert(((ASTTerm1_Var1*)this->t1)->n);
 		return this;
 #else
@@ -453,8 +517,32 @@ ASTForm* ASTForm_In::flatten() {
  * @return: flattened formula
  */
 ASTForm* ASTForm_Notin::flatten() {
-	ASTForm_In *newIn = new ASTForm_In(this->t1, this->T2, Pos());
-	return new ASTForm_Not(newIn->flatten(), Pos());
+	if (this->t1->kind != aVar1) {
+		ASTForm_Equal1* zSub;
+		ASTForm_Notin* inSub;
+		ASTForm_And* conj;
+		ASTTerm1_Var1* z;
+
+		z = generateFreshFirstOrder();
+		zSub = new ASTForm_Equal1(z, this->t1, this->pos);
+		inSub = new ASTForm_Notin(z, this->T2, this->pos);
+		conj = new ASTForm_And(inSub, zSub, this->pos);
+		return (new ASTForm_Ex1(0, new IdentList(z->getVar()), conj, this->pos))->flatten();
+	} else if(this->T2->kind != aVar2) {
+		ASTForm_Equal2* zSub;
+		ASTForm_Notin* inSub;
+		ASTForm_And* conj;
+		ASTTerm2_Var2* Z;
+
+		Z = generateFreshSecondOrder();
+		zSub = new ASTForm_Equal2(Z, this->T2, this->pos);
+		inSub = new ASTForm_Notin(this->t1, Z, this->pos);
+		conj = new ASTForm_And(inSub->flatten(), zSub->flatten(), this->pos);
+		return new ASTForm_Ex2(0, new IdentList(Z->getVar()), conj, this->pos);
+	} else {
+		ASTForm_In *newIn = new ASTForm_In(this->t1, this->T2, Pos());
+		return new ASTForm_Not(newIn->flatten(), Pos());
+	}
 }
 
 /**

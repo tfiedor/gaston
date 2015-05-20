@@ -128,6 +128,7 @@ public:
   ASTTermCode *makeCode(SubstCode *subst = NULL) = 0;
   virtual ASTTerm1* unfoldMacro(IdentList*, ASTList*) { return this;}
   virtual ASTTerm1* clone() { return this; }
+  virtual ASTTerm* flatten() { return this; }
   void dump() = 0; 
 };
 
@@ -524,6 +525,7 @@ public:
     ASTTerm1_tn(aPlus1, t, n, p) {}
 
   ASTTermCode *makeCode(SubstCode *subst = NULL);
+  ASTTerm* flatten();
   void dump();
 }; 
 

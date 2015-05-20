@@ -34,13 +34,7 @@
 #include "containers/Cache.hh"
 #include "automata.hh"
 #include "mtbdd_factors.hh"
-
-//#define PRUNE_BY_RELATION
-#define SMART_FLATTEN
-#define USE_STATECACHE
-// BDD Cache is temporary disable due to the memory leaks
-//#define USE_BDDCACHE
-#define SMART_BINARY
+#include "environment.hh"
 
 extern VarToTrackMap varMap;
 extern Options options;

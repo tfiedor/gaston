@@ -97,8 +97,9 @@ public:
 			// compare with other states if we can prune
 			auto matching_iter = std::find_if(lhsStates.begin(), lhsStates.end(),
 					[state](TStateSet* s) {
-#ifdef PRUNE_BY_RELATION
-						return state->CanBePruned(s);
+#if (PRUNE_BY_RELATION == true)
+						// [TODO] Not sure if OK
+						return state->CanBePruned(s, 0);
 #else
 						return s->DoCompare(state);
 #endif

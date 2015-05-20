@@ -6,9 +6,6 @@
  *****************************************************************************/
 
 #define _LANGUAGE_C_PLUS_PLUS
-#define DEBUG_DP
-#define DEBUG_PREFIX
-//#define DEBUG_BDDS
 
 // < System Headers >
 #include <iostream>
@@ -67,10 +64,10 @@ IdentList inFirstOrder;
 int numTypes = 0;
 bool regenerate = false;
 
-#ifdef USE_STATECACHE
+#if (USE_STATECACHE == true)
 MultiLevelMCache<bool> StateCache;
 #endif
-#ifdef USE_BDDCACHE
+#if (USE_BDDCACHE == true)
 MultiLevelMCache<MacroTransMTBDD> BDDCache;
 #endif
 
@@ -357,7 +354,12 @@ int main(int argc, char *argv[])
   timer_formula.start();
   if(options.noExpnf == false) {
 	  // Flattening of the formula
-	  ast->formula = (ASTForm*) (ast->formula)->toSecondOrder();
+	  try {
+		  ast->formula = (ASTForm*) (ast->formula)->toSecondOrder();
+	  } catch (NotImplementedException e) {
+		  cout << "[!] Formula is 'UNSUPPORTED'\n";
+		  return 0;
+	  }
 	  if(options.dump) {
 		cout << "\n\n[*] Flattened formula:\n";
 		(ast->formula)->dump();
@@ -412,7 +414,7 @@ int main(int argc, char *argv[])
 
   // Table or BDD tracks are reordered
   reorder(options.reorder, ast->formula);
-#ifdef DEBUG_DP
+#if (DEBUG_VARIABLE_SETS == true)
   varMap.dumpMap();
   std::cout << "\n";
 #endif
@@ -422,10 +424,10 @@ int main(int argc, char *argv[])
 
   bool formulaIsGround = freeVars.empty();
 
-#ifdef DEBUG_DP
-  std::cout << "freeVars:\n";
+#if (DEBUG_VARIABLE_SETS == true)
+  std::cout << "Free Vars:\n";
   freeVars.dump();
-  std::cout << "\nbound:\n";
+  std::cout << "\nBound:\n";
   bound.dump();
   std::cout << "\n";
 #endif
@@ -448,7 +450,7 @@ int main(int argc, char *argv[])
   PrefixListType plist = convertPrefixFormulaToList(prefix);
   PrefixListType nplist(plist);
 
-#ifdef DEBUG_PREFIX
+#if (DEBUG_FORMULA_PREFIX == true)
   std::cout << "[?] Prefixes before closing\n";
 	for(auto it = plist.begin(); it != plist.end(); ++it) {
 		std::cout << "[";
@@ -475,7 +477,7 @@ int main(int argc, char *argv[])
 	  topmostIsNegation = false;
   }
 
-#ifdef DEBUG_PREFIX
+#if (DEBUG_FORMULA_PREFIX == true)
   std::cout << "[?] Prefixes after closing\n";
 	for(auto it = plist.begin(); it != plist.end(); ++it) {
 		std::cout << "[";

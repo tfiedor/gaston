@@ -8,8 +8,8 @@
  *
  *****************************************************************************/
 
-#ifndef __DIP__H__
-#define __DIP__H__
+#ifndef __DWINA_ENV__H__
+#define __DWINA_ENV__H__
 
 #include <exception>
 #include <iostream>
@@ -22,5 +22,33 @@ class NotImplementedException : public std::exception {
 };
 
 enum Decision {SATISFIABLE, UNSATISFIABLE, VALID, INVALID};
+
+/**
+ * Configuration macros
+ */
+#define CONSTRUCT_ALWAYS_DTA false
+
+/**
+ * Enabling debugging
+ */
+#define USE_PRUNED_UNION_FUNCTOR false
+
+#define DEBUG_FORMULA_PREFIX false
+#define DEBUG_VALIDITY_TEST false
+#define DEBUG_GROUDNESS false
+#define DEBUG_FINAL_STATES false
+#define DEBUG_PRUNING_OF_FINAL_STATES false
+#define DEBUG_VARIABLE_SETS false
+#define DEBUG_BDDS false
+
+/**
+ * Enabling the optimizations
+ */
+#define PRUNE_BY_RELATION false		// [TODO] What's the difference with BY_SUBSUMPTION?
+#define PRUNE_BY_SUBSUMPTION false
+#define SMART_FLATTEN true
+#define USE_STATECACHE true
+#define USE_BDDCACHE false 			// BDD Cache is temporary disable due to the memory leaks
+#define SMART_BINARY true
 
 #endif
