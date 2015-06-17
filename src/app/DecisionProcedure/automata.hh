@@ -50,13 +50,16 @@ Automaton::SymbolType constructUniversalTrack();
 inline void setFinalState(Automaton &automaton, bool complement, unsigned int state) {
 	// @see setInitialState for comment
 	if(!complement) {
-		if(options.method == FORWARD) {
-			automaton.SetStateFinal(state);
-		} else if(options.method == BACKWARD) {
-			automaton.AddTransition(Automaton::StateTuple({}), constructUniversalTrack(), state);
-		} else {
-			std::cerr << "Method not implemented yet!";
-			throw NotImplementedException();
+		switch(options.method) {
+			case FORWARD:
+				automaton.SetStateFinal(state);
+				break;
+			case BACKWARD:
+				automaton.AddTransition(Automaton::StateTuple({}), constructUniversalTrack(), state);
+				break;
+			default:
+				std::cerr << "Method not implemented yet!";
+				throw NotImplementedException();
 		}
 	}
 }
@@ -71,13 +74,16 @@ inline void setFinalState(Automaton &automaton, bool complement, unsigned int st
  */
 inline void setNonFinalState(Automaton &automaton, bool complement, unsigned int state) {
 	if(complement) {
-		if(options.method == FORWARD) {
-			automaton.SetStateFinal(state);
-		} else if(options.method == BACKWARD) {
-			automaton.AddTransition(Automaton::StateTuple({}), constructUniversalTrack(), state);
-		} else {
-			std::cerr << "Method not implemented yet!";
-			throw NotImplementedException();
+		switch(options.method) {
+			case FORWARD:
+				automaton.SetStateFinal(state);
+				break;
+			case BACKWARD:
+				automaton.AddTransition(Automaton::StateTuple({}), constructUniversalTrack(), state);
+				break;
+			default:
+				std::cerr << "Method not implemented yet!";
+				throw NotImplementedException();
 		}
 	}
 }
@@ -90,17 +96,20 @@ inline void setNonFinalState(Automaton &automaton, bool complement, unsigned int
  * @param[in] state: which state should be initial
  */
 inline void setInitialState(Automaton &automaton, unsigned int state) {
-	// In forward construction, we are working with posts, so every initial
-	// state has a transition over tracks X from initial tuple {}
-	if(options.method == FORWARD){
-		automaton.AddTransition(Automaton::StateTuple({}), constructUniversalTrack(), state);
-	// In backward construction, we want to work with pres, so every initial
-	// state is a final one here
-	} else if(options.method == BACKWARD) {
-		automaton.SetStateFinal(state);
-	} else {
-		std::cerr << "Method not implemented yet!";
-		throw NotImplementedException();
+	switch(options.method) {
+		case FORWARD:
+			// In forward construction, we are working with posts, so every initial
+			// state has a transition over tracks X from initial tuple {}
+			automaton.AddTransition(Automaton::StateTuple({}), constructUniversalTrack(), state);
+			break;
+		case BACKWARD:
+			// In backward construction, we want to work with pres, so every initial
+			// state is a final one here
+			automaton.SetStateFinal(state);
+			break;
+		default:
+			std::cerr << "Method not implemented yet!";
+			throw NotImplementedException();
 	}
 }
 
