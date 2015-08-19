@@ -89,17 +89,14 @@ enum ASTKind {
 enum ASTOrder {oTerm1, oTerm2, oForm, oUniv};
 
 class ASTList;
-template <typename R = void>
-class ASTVisitor;
+class VoidVisitor;
+class ASTTransformer;
 
 class AST {
 public:
   AST(ASTOrder o, ASTKind k, Pos p) :
 		  order(o), kind(k), pos(p) {}
   virtual ~AST() {};
-
-  virtual void accept(ASTVisitor<> &v) = 0;
-  virtual AST* accept(ASTVisitor<AST*> &v) = 0;
 
   virtual AST* unfoldMacro(IdentList*, ASTList*) { return this;};
   virtual void freeVars(IdentList*, IdentList*) {};
@@ -120,8 +117,8 @@ public:
   ASTTerm(ASTOrder o, ASTKind kind, Pos p) :
 		  AST(o, kind, p) {}
 
-  virtual void accept(ASTVisitor<> &v);
-  virtual AST* accept(ASTVisitor<AST*> &v);
+  virtual void accept(VoidVisitor &v);
+  virtual AST* accept(ASTTransformer &v);
 
   virtual ASTTermCode *makeCode(SubstCode *subst = NULL) = 0;
   virtual ASTTerm* unfoldMacro(IdentList*, ASTList*) { return this;}
@@ -160,11 +157,11 @@ public:
   ASTForm(ASTKind kind, Pos p) :
 		  AST(oForm, kind, p) {}
 
+  virtual void accept(VoidVisitor &v);
+  virtual AST* accept(ASTTransformer &v);
+
   virtual VarCode makeCode(SubstCode *subst = NULL) = 0;
   void dump() = 0;
-
-  virtual void accept(ASTVisitor<> &v);
-  virtual AST* accept(ASTVisitor<AST*> &v);
 
   // Function for cloning formulae
   virtual ASTForm* clone() { return this; }
@@ -194,10 +191,10 @@ public:
   ASTUniv(Ident univ, Pos p) :
 		  AST(oUniv, aUniv, p), u(univ) {}
 
-  void dump();
+  virtual void accept(VoidVisitor &v);
+  virtual AST* accept(ASTTransformer &v);
 
-  virtual void accept(ASTVisitor<> &v);
-  virtual AST* accept(ASTVisitor<AST*> &v);
+  void dump();
 
   Ident u;
 };
@@ -247,6 +244,9 @@ public:
   ASTTerm1_n(ASTKind kind, int c, Pos p) :
 		  ASTTerm1(kind, p), n(c) {}
 
+  virtual void accept(VoidVisitor &v);
+  virtual AST* accept(ASTTransformer &v);
+
   int n;
 };
 
@@ -255,6 +255,9 @@ public:
   ASTTerm1_T(ASTKind kind, ASTTerm2 *TT, Pos p) :
 		  ASTTerm1(kind, p), T(TT) {}
   ~ASTTerm1_T() {delete T;}
+
+  virtual void accept(VoidVisitor &v);
+  virtual AST* accept(ASTTransformer &v);
 
   void freeVars(IdentList*, IdentList*);
 
@@ -267,6 +270,9 @@ public:
 		  ASTTerm1(kind, p), t(tt) {}
   ~ASTTerm1_t() {delete t;}
 
+  virtual void accept(VoidVisitor &v);
+  virtual AST* accept(ASTTransformer &v);
+
   void freeVars(IdentList*, IdentList*);
 
   ASTTerm1 *t;
@@ -277,6 +283,9 @@ public:
   ASTTerm1_tn(ASTKind kind, ASTTerm1 *tt, int nn, Pos p) :
 		  ASTTerm1(kind, p), t(tt), n(nn) {}
   ~ASTTerm1_tn() {delete t;}
+
+  virtual void accept(VoidVisitor &v);
+  virtual AST* accept(ASTTransformer &v);
 
   void freeVars(IdentList*, IdentList*);
   ASTTerm1* unfoldMacro(IdentList*, ASTList*);
@@ -291,6 +300,9 @@ public:
 		  ASTTerm1(kind, p), t1(tt1), t2(tt2), n(nn) {}
   ~ASTTerm1_tnt() {delete t1; delete t2;}
 
+  virtual void accept(VoidVisitor &v);
+  virtual AST* accept(ASTTransformer &v);
+
   void freeVars(IdentList*, IdentList*);
 
   ASTTerm1 *t1;
@@ -303,6 +315,9 @@ public:
   ASTTerm2_TT(ASTKind kind, ASTTerm2 *TT1, ASTTerm2 *TT2, Pos p) :
 		  ASTTerm2(kind, p), T1(TT1), T2(TT2) {}
   ~ASTTerm2_TT() {delete T1; delete T2;}
+
+  virtual void accept(VoidVisitor &v);
+  virtual AST* accept(ASTTransformer &v);
 
   void freeVars(IdentList*, IdentList*);
   ASTTerm2* unfoldMacro(IdentList*, ASTList*);
@@ -317,6 +332,9 @@ public:
 		  ASTTerm2(kind, p), T(TT), n(nn) {}
   ~ASTTerm2_Tn() {delete T;}
 
+  virtual void accept(VoidVisitor &v);
+  virtual AST* accept(ASTTransformer &v);
+
   void freeVars(IdentList*, IdentList*);
   ASTTerm2 *unfoldMacro(IdentList*, ASTList*);
 
@@ -329,6 +347,9 @@ public:
   ASTForm_tT(ASTKind kind, ASTTerm1 *tt1, ASTTerm2 *TT2, Pos p) :
 		  ASTForm(kind, p), t1(tt1), T2(TT2) {}
   ~ASTForm_tT() {delete t1; delete T2;}
+
+  virtual void accept(VoidVisitor &v);
+  virtual AST* accept(ASTTransformer &v);
 
   void freeVars(IdentList*, IdentList*);
   ASTForm* unfoldMacro(IdentList*, ASTList*);
@@ -343,6 +364,9 @@ public:
 		  ASTForm(kind, p), T(TT) {}
   ~ASTForm_T() {delete T;}
 
+  virtual void accept(VoidVisitor &v);
+  virtual AST* accept(ASTTransformer &v);
+
   void freeVars(IdentList*, IdentList*);
   ASTForm *unfoldMacro(IdentList*, ASTList*);
 
@@ -354,6 +378,9 @@ public:
   ASTForm_TT(ASTKind kind, ASTTerm2 *TT1, ASTTerm2 *TT2, Pos p) :
 		  ASTForm(kind, p), T1(TT1), T2(TT2) {}
   ~ASTForm_TT() {delete T1; delete T2;}
+
+  virtual void accept(VoidVisitor &v);
+  virtual AST* accept(ASTTransformer &v);
 
   void freeVars(IdentList*, IdentList*);
   ASTForm* unfoldMacro(IdentList*, ASTList*);
@@ -368,6 +395,9 @@ public:
 		  ASTForm(kind, p), t1(tt1), t2(tt2) {}
   ~ASTForm_tt() {delete t1; delete t2;}
 
+  virtual void accept(VoidVisitor &v);
+  virtual AST* accept(ASTTransformer &v);
+
   void freeVars(IdentList*, IdentList*);
   ASTForm* unfoldMacro(IdentList*, ASTList*);
 
@@ -381,6 +411,9 @@ public:
 		  ASTForm(kind, p), n(nn), t(tt) {}
   ~ASTForm_nt() {delete t;}
 
+  virtual void accept(VoidVisitor &v);
+  virtual AST* accept(ASTTransformer &v);
+
   void freeVars(IdentList*, IdentList*);
 
   int n;
@@ -392,6 +425,9 @@ public:
   ASTForm_nT(ASTKind kind, int nn, ASTTerm2 *TT, Pos p) :
 		  ASTForm(kind, p), n(nn), T(TT) {}
   ~ASTForm_nT() {delete T;}
+
+  virtual void accept(VoidVisitor &v);
+  virtual AST* accept(ASTTransformer &v);
 
   void freeVars(IdentList*, IdentList*);
 
@@ -405,6 +441,9 @@ public:
 		  ASTForm(kind, p), f(ff) {}
   ~ASTForm_f() {delete f;}
 
+  virtual void accept(VoidVisitor &v);
+  virtual AST* accept(ASTTransformer &v);
+
   void freeVars(IdentList*, IdentList*);
   ASTForm* flatten();
   ASTForm* unfoldMacro(IdentList*, ASTList*);
@@ -417,6 +456,9 @@ public:
   ASTForm_ff(ASTKind kind, ASTForm *ff1, ASTForm *ff2, Pos p) :
 		  ASTForm(kind, p), f1(ff1), f2(ff2) {}
   ~ASTForm_ff() {delete f1; delete f2;}
+
+  virtual void accept(VoidVisitor &v);
+  virtual AST* accept(ASTTransformer &v);
 
   void freeVars(IdentList*, IdentList*);
   ASTForm* toPrenexNormalForm();
@@ -444,6 +486,9 @@ public:
 		  ASTForm_q(kind, ff, p), vl(vll) {}
   ~ASTForm_vf() {delete vl;}
 
+  virtual void accept(VoidVisitor &v);
+  virtual AST* accept(ASTTransformer &v);
+
   void freeVars(IdentList*, IdentList*);
   ASTForm* toPrenexNormalForm();
   ASTForm* removeUniversalQuantifier();
@@ -459,6 +504,9 @@ public:
 			  ASTForm *ff, Pos p) :
 		  ASTForm_q(kind, ff, p), ul(ull), vl(vll) {}
   ~ASTForm_uvf() {delete ul; delete vl;}
+
+  virtual void accept(VoidVisitor &v);
+  virtual AST* accept(ASTTransformer &v);
 
   void freeVars(IdentList*, IdentList*);
   ASTForm* toPrenexNormalForm();
@@ -795,9 +843,6 @@ public:
   ASTForm_True(Pos p) :
 		  ASTForm(aTrue, p) {}
 
-  virtual void accept(ASTVisitor<> &v);
-  virtual AST* accept(ASTVisitor<AST*> &v);
-
   VarCode makeCode(SubstCode *subst = NULL);
   void dump();
   ASTForm* clone() { return new ASTForm_True(this->pos); }
@@ -1028,9 +1073,6 @@ public:
 
   ASTForm* toRestrictedSyntax();
 
-  virtual void accept(ASTVisitor<> &v);
-  virtual AST* accept(ASTVisitor<AST*> &v);
-
   ASTForm* flatten();
   void toUnaryAutomaton(Automaton &aut, bool doComplement);
   void toBinaryAutomaton(Automaton &aut, bool doComplement);
@@ -1052,9 +1094,6 @@ class ASTForm_Or: public ASTForm_ff {
 public:
   ASTForm_Or(ASTForm *f1, ASTForm *f2, Pos p) :
 		  ASTForm_ff(aOr, f1, f2, p) {}
-
-  virtual void accept(ASTVisitor<> &v);
-  virtual AST* accept(ASTVisitor<AST*> &v);
 
   VarCode makeCode(SubstCode *subst = NULL);
   void dump();

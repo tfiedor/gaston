@@ -352,16 +352,7 @@ int main(int argc, char *argv[])
 	(ast->formula)->dump();
   }
 
-	PrettyPrintVisitor p;
-	NegateTruthVisitor nv;
-	cout << "First visit:\n";
-	ASTForm_True* tt = new ASTForm_True(Pos());
-	ASTForm_True* ttt = new ASTForm_True(Pos());
-	ASTForm_And* aa = new ASTForm_And(tt, ttt, Pos());
-	aa->dump();
-	cout << "\nSecond visit:\n";
-	(aa->accept(nv))->dump();
-	cout << "\n";
+	// INSERT FUN HERE
 
   timer_formula.start();
   if(options.noExpnf == false) {
