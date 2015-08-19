@@ -26,6 +26,7 @@
 #include "Frontend/untyped.h"
 #include "Frontend/predlib.h"
 #include "Frontend/ast.h"
+#include "Frontend/ast_visitor.h"
 #include "Frontend/code.h"
 #include "Frontend/st_dfa.h"
 #include "Frontend/st_gta.h"
@@ -351,6 +352,17 @@ int main(int argc, char *argv[])
 	(ast->formula)->dump();
   }
 
+	PrettyPrintVisitor p;
+	NegateTruthVisitor nv;
+	cout << "First visit:\n";
+	ASTForm_True* tt = new ASTForm_True(Pos());
+	ASTForm_True* ttt = new ASTForm_True(Pos());
+	ASTForm_And* aa = new ASTForm_And(tt, ttt, Pos());
+	aa->dump();
+	cout << "\nSecond visit:\n";
+	(aa->accept(nv))->dump();
+	cout << "\n";
+
   timer_formula.start();
   if(options.noExpnf == false) {
 	  // Flattening of the formula
@@ -409,6 +421,8 @@ int main(int argc, char *argv[])
     timer_formula.print();
 	  cout << "\n";
   }
+
+	// TEMPORARY TRYINGS
   
   ///////// Conversion to Tree Automata ////////
 
