@@ -15,6 +15,7 @@ include_directories(include)
 add_executable(dWiNA
 	src/app/main.cpp
 	src/app/Frontend/ast.cpp
+	src/app/Frontend/ast_visitor.cpp
 	src/app/Frontend/astdump.cpp
 	src/app/Frontend/code.cpp
 	src/app/Frontend/codedump.cpp
@@ -45,6 +46,7 @@ add_executable(dWiNA
 	src/app/DecisionProcedure/backward_decision_procedure.cpp
 	src/app/DecisionProcedure/containers/VarToTrackMap.cpp
 	src/app/DecisionProcedure/containers/StateSet.cpp
+	src/app/DecisionProcedure/visitors/PrettyPrinter.cpp
 )
 
 link_directories(${CMAKE_SOURCE_DIR}/src/libs/)

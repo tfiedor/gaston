@@ -29,6 +29,9 @@
 
 using Automaton = VATA::BDDBottomUpTreeAut;
 
+#define VISITABLE() virtual void accept(VoidVisitor& v); \
+  virtual AST* accept(ASTTransformer &v)
+
 ////////// Bit list ///////////////////////////////////////////////////////////
 
 enum Bit {
@@ -117,8 +120,7 @@ public:
   ASTTerm(ASTOrder o, ASTKind kind, Pos p) :
 		  AST(o, kind, p) {}
 
-  virtual void accept(VoidVisitor &v);
-  virtual AST* accept(ASTTransformer &v);
+  VISITABLE();
 
   virtual ASTTermCode *makeCode(SubstCode *subst = NULL) = 0;
   virtual ASTTerm* unfoldMacro(IdentList*, ASTList*) { return this;}
@@ -157,8 +159,7 @@ public:
   ASTForm(ASTKind kind, Pos p) :
 		  AST(oForm, kind, p) {}
 
-  virtual void accept(VoidVisitor &v);
-  virtual AST* accept(ASTTransformer &v);
+  VISITABLE();
 
   virtual VarCode makeCode(SubstCode *subst = NULL) = 0;
   void dump() = 0;
@@ -244,8 +245,7 @@ public:
   ASTTerm1_n(ASTKind kind, int c, Pos p) :
 		  ASTTerm1(kind, p), n(c) {}
 
-  virtual void accept(VoidVisitor &v);
-  virtual AST* accept(ASTTransformer &v);
+  VISITABLE();
 
   int n;
 };
@@ -270,8 +270,7 @@ public:
 		  ASTTerm1(kind, p), t(tt) {}
   ~ASTTerm1_t() {delete t;}
 
-  virtual void accept(VoidVisitor &v);
-  virtual AST* accept(ASTTransformer &v);
+  VISITABLE();
 
   void freeVars(IdentList*, IdentList*);
 
@@ -284,8 +283,7 @@ public:
 		  ASTTerm1(kind, p), t(tt), n(nn) {}
   ~ASTTerm1_tn() {delete t;}
 
-  virtual void accept(VoidVisitor &v);
-  virtual AST* accept(ASTTransformer &v);
+  VISITABLE();
 
   void freeVars(IdentList*, IdentList*);
   ASTTerm1* unfoldMacro(IdentList*, ASTList*);
@@ -300,8 +298,7 @@ public:
 		  ASTTerm1(kind, p), t1(tt1), t2(tt2), n(nn) {}
   ~ASTTerm1_tnt() {delete t1; delete t2;}
 
-  virtual void accept(VoidVisitor &v);
-  virtual AST* accept(ASTTransformer &v);
+  VISITABLE();
 
   void freeVars(IdentList*, IdentList*);
 
@@ -316,8 +313,7 @@ public:
 		  ASTTerm2(kind, p), T1(TT1), T2(TT2) {}
   ~ASTTerm2_TT() {delete T1; delete T2;}
 
-  virtual void accept(VoidVisitor &v);
-  virtual AST* accept(ASTTransformer &v);
+  VISITABLE();
 
   void freeVars(IdentList*, IdentList*);
   ASTTerm2* unfoldMacro(IdentList*, ASTList*);
@@ -332,8 +328,7 @@ public:
 		  ASTTerm2(kind, p), T(TT), n(nn) {}
   ~ASTTerm2_Tn() {delete T;}
 
-  virtual void accept(VoidVisitor &v);
-  virtual AST* accept(ASTTransformer &v);
+  VISITABLE();
 
   void freeVars(IdentList*, IdentList*);
   ASTTerm2 *unfoldMacro(IdentList*, ASTList*);
@@ -348,8 +343,7 @@ public:
 		  ASTForm(kind, p), t1(tt1), T2(TT2) {}
   ~ASTForm_tT() {delete t1; delete T2;}
 
-  virtual void accept(VoidVisitor &v);
-  virtual AST* accept(ASTTransformer &v);
+  VISITABLE();
 
   void freeVars(IdentList*, IdentList*);
   ASTForm* unfoldMacro(IdentList*, ASTList*);
@@ -364,8 +358,7 @@ public:
 		  ASTForm(kind, p), T(TT) {}
   ~ASTForm_T() {delete T;}
 
-  virtual void accept(VoidVisitor &v);
-  virtual AST* accept(ASTTransformer &v);
+  VISITABLE();
 
   void freeVars(IdentList*, IdentList*);
   ASTForm *unfoldMacro(IdentList*, ASTList*);
@@ -395,8 +388,7 @@ public:
 		  ASTForm(kind, p), t1(tt1), t2(tt2) {}
   ~ASTForm_tt() {delete t1; delete t2;}
 
-  virtual void accept(VoidVisitor &v);
-  virtual AST* accept(ASTTransformer &v);
+  VISITABLE();
 
   void freeVars(IdentList*, IdentList*);
   ASTForm* unfoldMacro(IdentList*, ASTList*);
@@ -411,8 +403,7 @@ public:
 		  ASTForm(kind, p), n(nn), t(tt) {}
   ~ASTForm_nt() {delete t;}
 
-  virtual void accept(VoidVisitor &v);
-  virtual AST* accept(ASTTransformer &v);
+  VISITABLE();
 
   void freeVars(IdentList*, IdentList*);
 
@@ -426,8 +417,7 @@ public:
 		  ASTForm(kind, p), n(nn), T(TT) {}
   ~ASTForm_nT() {delete T;}
 
-  virtual void accept(VoidVisitor &v);
-  virtual AST* accept(ASTTransformer &v);
+  VISITABLE();
 
   void freeVars(IdentList*, IdentList*);
 
@@ -441,8 +431,7 @@ public:
 		  ASTForm(kind, p), f(ff) {}
   ~ASTForm_f() {delete f;}
 
-  virtual void accept(VoidVisitor &v);
-  virtual AST* accept(ASTTransformer &v);
+  VISITABLE();;
 
   void freeVars(IdentList*, IdentList*);
   ASTForm* flatten();
@@ -457,8 +446,7 @@ public:
 		  ASTForm(kind, p), f1(ff1), f2(ff2) {}
   ~ASTForm_ff() {delete f1; delete f2;}
 
-  virtual void accept(VoidVisitor &v);
-  virtual AST* accept(ASTTransformer &v);
+  VISITABLE();
 
   void freeVars(IdentList*, IdentList*);
   ASTForm* toPrenexNormalForm();
@@ -486,8 +474,7 @@ public:
 		  ASTForm_q(kind, ff, p), vl(vll) {}
   ~ASTForm_vf() {delete vl;}
 
-  virtual void accept(VoidVisitor &v);
-  virtual AST* accept(ASTTransformer &v);
+  VISITABLE();
 
   void freeVars(IdentList*, IdentList*);
   ASTForm* toPrenexNormalForm();
@@ -505,8 +492,7 @@ public:
 		  ASTForm_q(kind, ff, p), ul(ull), vl(vll) {}
   ~ASTForm_uvf() {delete ul; delete vl;}
 
-  virtual void accept(VoidVisitor &v);
-  virtual AST* accept(ASTTransformer &v);
+  VISITABLE();
 
   void freeVars(IdentList*, IdentList*);
   ASTForm* toPrenexNormalForm();
@@ -526,6 +512,8 @@ public:
   ASTTerm1_Var1(int n, Pos p) :
 		  ASTTerm1_n(aVar1, n, p) {}
 
+  VISITABLE();
+
   void freeVars(IdentList*, IdentList*);
   ASTTermCode *makeCode(SubstCode *subst = NULL);
   Ident getVar() {return n;};
@@ -542,6 +530,8 @@ public:
 		  ASTTerm1_t(aDot1, tt, p), bits(bts) {}
   ~ASTTerm1_Dot() {delete bits;}
 
+  VISITABLE();
+
   ASTTermCode *makeCode(SubstCode *subst = NULL);
   void dump();
 
@@ -554,6 +544,8 @@ public:
   ASTTerm1_Up(ASTTerm1 *tt, Pos p) :
 		  ASTTerm1_t(aUp1, tt, p) {}
 
+  VISITABLE();
+
   ASTTermCode *makeCode(SubstCode *subst = NULL);
   void dump();
 };
@@ -562,6 +554,8 @@ class ASTTerm1_Root: public ASTTerm1 {
 public:
   ASTTerm1_Root(Ident u, Pos p) :
 		  ASTTerm1(aRoot, p), univ(u) {}
+
+  VISITABLE();
 
   ASTTermCode *makeCode(SubstCode *subst = NULL);
   void dump();
@@ -575,6 +569,8 @@ public:
   ASTTerm1_Int(int n, Pos p) :
 		  ASTTerm1_n(aInt, n, p) {}
 
+  VISITABLE();
+
   void freeVars(IdentList*, IdentList*) {}
   int value();
   ASTTermCode *makeCode(SubstCode *subst = NULL);
@@ -586,6 +582,8 @@ public:
   ASTTerm1_Plus(ASTTerm1 *t, int n, Pos p) :
 		  ASTTerm1_tn(aPlus1, t, n, p) {}
 
+  VISITABLE();
+
   ASTTermCode *makeCode(SubstCode *subst = NULL);
   ASTTerm* flatten();
   void dump();
@@ -595,6 +593,8 @@ class ASTTerm1_Minus: public ASTTerm1_tn {
 public:
   ASTTerm1_Minus(ASTTerm1 *t, int n, Pos p) :
 		  ASTTerm1_tn(aMinus1, t, n, p) {}
+
+  VISITABLE();
 
   ASTTermCode *makeCode(SubstCode *subst = NULL);
   VarCode unfold(int v1, int v2, int n, SubstCode *subst, Pos pos);
@@ -606,6 +606,8 @@ public:
   ASTTerm1_PlusModulo(ASTTerm1 *t1, int n, ASTTerm1 *t2, Pos p) :
 		  ASTTerm1_tnt(aPlusModulo1, t1, n, t2, p) {}
 
+  VISITABLE();
+
   ASTTermCode *makeCode(SubstCode *subst = NULL);
   VarCode unfold(int v1, int v2, int n, int v3, SubstCode *subst, Pos pos);
   void dump();
@@ -615,6 +617,8 @@ class ASTTerm1_MinusModulo: public ASTTerm1_tnt {
 public:
   ASTTerm1_MinusModulo(ASTTerm1 *t1, int n, ASTTerm1 *t2, Pos p) :
 		  ASTTerm1_tnt(aMinusModulo1, t1, n, t2, p) {}
+
+  VISITABLE();
 
   ASTTermCode *makeCode(SubstCode *subst = NULL);
   VarCode unfold(int v1, int v2, int n, int v3, SubstCode *subst, Pos pos);
@@ -626,6 +630,8 @@ public:
   ASTTerm1_Min(ASTTerm2 *T, Pos p) :
 		  ASTTerm1_T(aMin, T, p) {}
 
+  VISITABLE();
+
   ASTTermCode *makeCode(SubstCode *subst = NULL);
   void dump();
 };
@@ -635,6 +641,8 @@ public:
   ASTTerm1_Max(ASTTerm2 *T, Pos p) :
 		  ASTTerm1_T(aMax, T, p) {}
 
+  VISITABLE();
+
   ASTTermCode *makeCode(SubstCode *subst = NULL);
   void dump();
 };
@@ -643,6 +651,8 @@ class ASTTerm1_TreeRoot: public ASTTerm1_T {
 public:
   ASTTerm1_TreeRoot(ASTTerm2 *T, Pos p) :
 		  ASTTerm1_T(aTreeRoot, T, p) {}
+
+  VISITABLE();
 
   ASTTermCode *makeCode(SubstCode *subst = NULL);
   void dump();
@@ -654,6 +664,8 @@ class ASTTerm2_Var2: public ASTTerm2 {
 public:
   ASTTerm2_Var2(int nn, Pos p) :
 		  ASTTerm2(aVar2, p), n(nn) {}
+
+  VISITABLE();
 
   void freeVars(IdentList*, IdentList*);
   ASTTermCode *makeCode(SubstCode *subst = NULL);
@@ -671,6 +683,8 @@ public:
   ASTTerm2_VarTree(int nn, Pos p) :
 		  ASTTerm2(aTree, p), n(nn) {}
 
+  VISITABLE();
+
   void freeVars(IdentList*, IdentList*);
   ASTTermCode *makeCode(SubstCode *subst = NULL);
   Ident getVar() {return n;};
@@ -685,6 +699,8 @@ public:
   ASTTerm2_Dot(ASTTerm2 *TT, BitList *bts, Pos p) :
 		  ASTTerm2(aDot2, p), bits(bts), T(TT) {}
   ~ASTTerm2_Dot() {delete bits; delete T;}
+
+  VISITABLE();
 
   void freeVars(IdentList*, IdentList*);
   ASTTermCode *makeCode(SubstCode *subst = NULL);
@@ -701,6 +717,8 @@ public:
 		  ASTTerm2(aUp2, p), T(TT) {}
   ~ASTTerm2_Up() {delete T;}
 
+  VISITABLE();
+
   ASTTermCode *makeCode(SubstCode *subst = NULL);
   void freeVars(IdentList*, IdentList*);
   void dump();
@@ -714,6 +732,8 @@ public:
   ASTTerm2_Empty(Pos p) :
 		  ASTTerm2(aEmpty, p) {}
 
+  VISITABLE();
+
   ASTTermCode *makeCode(SubstCode *subst = NULL);
   void dump();
 };
@@ -722,6 +742,8 @@ class ASTTerm2_Union: public ASTTerm2_TT {
 public:
   ASTTerm2_Union(ASTTerm2 *T1, ASTTerm2 *T2, Pos p) :
 		  ASTTerm2_TT(aUnion, T1, T2, p) {}
+
+  VISITABLE();
 
   ASTTermCode *makeCode(SubstCode *subst = NULL);
   void dump();
@@ -732,6 +754,8 @@ public:
   ASTTerm2_Inter(ASTTerm2 *T1, ASTTerm2 *T2, Pos p) :
 		  ASTTerm2_TT(aInter, T1, T2, p) {}
 
+  VISITABLE();
+
   ASTTermCode *makeCode(SubstCode *subst = NULL);
   void dump();
 };
@@ -740,6 +764,8 @@ class ASTTerm2_Setminus: public ASTTerm2_TT {
 public:
   ASTTerm2_Setminus(ASTTerm2 *T1, ASTTerm2 *T2, Pos p) :
 		  ASTTerm2_TT(aSetminus, T1, T2, p) {}
+
+  VISITABLE();
 
   ASTTermCode *makeCode(SubstCode *subst = NULL);
   void dump();
@@ -750,6 +776,8 @@ public:
   ASTTerm2_Set(ASTList *elms, Pos p) :
 		  ASTTerm2(aSet, p), elements(elms) {}
   ~ASTTerm2_Set() {delete elements;}
+
+  VISITABLE();
 
   void freeVars(IdentList*, IdentList*);
   ASTTermCode *makeCode(SubstCode *subst = NULL);
@@ -764,6 +792,8 @@ public:
   ASTTerm2_Plus(ASTTerm2 *T, int n, Pos p) :
 		  ASTTerm2_Tn(aPlus2, T, n, p) {}
 
+  VISITABLE();
+
   ASTTermCode *makeCode(SubstCode *subst = NULL);
   VarCode unfold(int v1, int v2, int n, SubstCode *subst, Pos pos);
   void dump();
@@ -773,6 +803,8 @@ class ASTTerm2_Minus: public ASTTerm2_Tn {
 public:
   ASTTerm2_Minus(ASTTerm2 *T, int n, Pos p) :
 		  ASTTerm2_Tn(aMinus2, T, n, p) {}
+
+  VISITABLE();
 
   ASTTermCode *makeCode(SubstCode *subst = NULL);
   VarCode unfold(int v1, int v2, int n, SubstCode *subst, Pos pos);
@@ -784,6 +816,8 @@ public:
   ASTTerm2_Interval(ASTTerm1 *tt1, ASTTerm1 *tt2, Pos p) :
 		  ASTTerm2(aInterval, p), t1(tt1), t2(tt2) {}
   ~ASTTerm2_Interval() {delete t1; delete t2;}
+
+  VISITABLE();
 
   void freeVars(IdentList*, IdentList*);
   ASTTermCode *makeCode(SubstCode *subst = NULL);
@@ -799,6 +833,8 @@ public:
   ASTTerm2_PresbConst(int v, Pos p) :
 		  ASTTerm2(aPresbConst, p), value(v) {}
 
+  VISITABLE();
+
   ASTTermCode *makeCode(SubstCode *subst = NULL);
   void dump();
 
@@ -811,6 +847,8 @@ public:
   ASTTerm2_Formula(Ident id, ASTForm *ff, Pos p) :
 		  ASTTerm2(aTerm2Formula, p), fresh(id), f(ff) {}
   ~ASTTerm2_Formula() {delete f;}
+
+  VISITABLE();
 
   void freeVars(IdentList*, IdentList*);
   ASTTermCode *makeCode(SubstCode *subst = NULL);
@@ -828,6 +866,8 @@ public:
   ASTForm_Var0(int nn, Pos p) :
 		  ASTForm(aVar0, p), n(nn) {}
 
+  VISITABLE();
+
   void freeVars(IdentList*, IdentList*);
   VarCode makeCode(SubstCode *subst = NULL);
   void dump();
@@ -843,6 +883,8 @@ public:
   ASTForm_True(Pos p) :
 		  ASTForm(aTrue, p) {}
 
+  VISITABLE();
+
   VarCode makeCode(SubstCode *subst = NULL);
   void dump();
   ASTForm* clone() { return new ASTForm_True(this->pos); }
@@ -857,6 +899,8 @@ public:
   ASTForm_False(Pos p) :
 		  ASTForm(aFalse, p) {}
 
+  VISITABLE();
+
   VarCode makeCode(SubstCode *subst = NULL);
   void dump();
   ASTForm* clone() { return new ASTForm_False(this->pos); }
@@ -870,6 +914,8 @@ class ASTForm_In: public ASTForm_tT {
 public:
   ASTForm_In(ASTTerm1 *t1, ASTTerm2 *T2, Pos p) :
 		  ASTForm_tT(aIn, t1, T2, p) {}
+
+  VISITABLE();
 
   VarCode makeCode(SubstCode *subst = NULL);
   void dump();
@@ -886,6 +932,8 @@ public:
   ASTForm_Notin(ASTTerm1 *t1, ASTTerm2 *T2, Pos p) :
 		  ASTForm_tT(aNotin, t1, T2, p) {}
 
+  VISITABLE();
+
   VarCode makeCode(SubstCode *subst = NULL);
   void dump();
   ASTForm* clone() { return new ASTForm_Notin(this->t1, this->T2, this->pos); }
@@ -898,6 +946,8 @@ public:
   ASTForm_RootPred(ASTTerm1 *tt, IdentList *ull, Pos p) :
 		  ASTForm(aRootPred, p), ul(ull), t(tt) {}
   ~ASTForm_RootPred() {delete t; delete ul;}
+
+  VISITABLE();
 
   void freeVars(IdentList*, IdentList*);
   VarCode makeCode(SubstCode *subst = NULL);
@@ -914,6 +964,8 @@ public:
   ASTForm_EmptyPred(ASTTerm2 *T, Pos p) :
 		  ASTForm_T(aEmptyPred, T, p) {}
 
+  VISITABLE();
+
   VarCode makeCode(SubstCode *subst = NULL);
   void dump();
   ASTForm* clone() { return new ASTForm_EmptyPred(this->T, this->pos); }
@@ -924,6 +976,8 @@ public:
   ASTForm_FirstOrder(ASTTerm1 *tt, Pos p) :
 		  ASTForm(aFirstOrder, p), t(tt) {}
   ~ASTForm_FirstOrder() {delete t;}
+
+  VISITABLE();
 
   VarCode makeCode(SubstCode *subst = NULL);
   void freeVars(IdentList*, IdentList*);
@@ -943,6 +997,8 @@ public:
   ASTForm_Sub(ASTTerm2 *T1, ASTTerm2 *T2, Pos p) :
 		  ASTForm_TT(aSub, T1, T2, p) {}
 
+  VISITABLE();
+
   VarCode makeCode(SubstCode *subst = NULL);
   void dump();
   ASTForm* clone() { return new ASTForm_Sub(this->T1->clone(), this->T2->clone(), this->pos); }
@@ -958,6 +1014,8 @@ public:
   ASTForm_Equal1(ASTTerm1 *t1, ASTTerm1 *t2, Pos p) :
 		  ASTForm_tt(aEqual1, t1, t2, p) {}
 
+  VISITABLE();
+
   VarCode makeCode(SubstCode *subst = NULL);
   void dump();
   ASTForm* clone() { return new ASTForm_Equal1(this->t1->clone(), this->t2->clone(), this->pos); }
@@ -971,6 +1029,8 @@ class ASTForm_Equal2: public ASTForm_TT {
 public:
   ASTForm_Equal2(ASTTerm2 *T1, ASTTerm2 *T2, Pos p) :
 		  ASTForm_TT(aEqual2, T1, T2, p) {}
+
+  VISITABLE();
 
   VarCode makeCode(SubstCode *subst = NULL);
   void dump();
@@ -987,6 +1047,8 @@ public:
   ASTForm_NotEqual1(ASTTerm1 *t1, ASTTerm1 *t2, Pos p) :
 		  ASTForm_tt(aNotEqual1, t1, t2, p) {}
 
+  VISITABLE();
+
   VarCode makeCode(SubstCode *subst = NULL);
   void dump();
   ASTForm* clone() { return new ASTForm_NotEqual1(this->t1->clone(), this->t2->clone(), this->pos); }
@@ -998,6 +1060,8 @@ public:
   ASTForm_NotEqual2(ASTTerm2 *T1, ASTTerm2 *T2, Pos p) :
 		  ASTForm_TT(aNotEqual2, T1, T2, p) {}
 
+  VISITABLE();
+
   VarCode makeCode(SubstCode *subst = NULL);
   void dump();
   ASTForm* clone() { return new ASTForm_NotEqual2(this->T1->clone(), this->T2->clone(), this->pos); }
@@ -1008,6 +1072,8 @@ class ASTForm_Less: public ASTForm_tt {
 public:
   ASTForm_Less(ASTTerm1 *t1, ASTTerm1 *t2, Pos p) :
 		  ASTForm_tt(aLess, t1, t2, p) {}
+
+  VISITABLE();
 
   VarCode makeCode(SubstCode *subst = NULL);
   void dump();
@@ -1021,6 +1087,8 @@ public:
   ASTForm_LessEq(ASTTerm1 *t1, ASTTerm1 *t2, Pos p) :
 		  ASTForm_tt(aLessEq, t1, t2, p) {}
 
+  VISITABLE();
+
   VarCode makeCode(SubstCode *subst = NULL);
   void dump();
   void toUnaryAutomaton(Automaton &aut, bool doComplement);
@@ -1033,6 +1101,8 @@ public:
   ASTForm_WellFormedTree(ASTTerm2 *t, Pos p) :
 		  ASTForm_T(aWellFormedTree, t, p) {}
 
+  VISITABLE();
+
   VarCode makeCode(SubstCode *subst = NULL);
   void dump();
   ASTForm* clone() { return new ASTForm_WellFormedTree(this->T->clone(), this->pos); }
@@ -1042,6 +1112,8 @@ class ASTForm_Impl: public ASTForm_ff {
 public:
   ASTForm_Impl(ASTForm *f1, ASTForm *f2, Pos p) :
 		  ASTForm_ff(aImpl, f1, f2, p) {}
+
+  VISITABLE();
 
   VarCode makeCode(SubstCode *subst = NULL);
   void dump();
@@ -1055,6 +1127,8 @@ public:
   ASTForm_Biimpl(ASTForm *f1, ASTForm *f2, Pos p) :
 		  ASTForm_ff(aBiimpl, f1, f2, p) {}
 
+  VISITABLE();
+
   VarCode makeCode(SubstCode *subst = NULL);
   void dump();
   ASTForm* clone() { return new ASTForm_Biimpl(this->f1->clone(), this->f2->clone(), this->pos); }
@@ -1066,6 +1140,8 @@ class ASTForm_And: public ASTForm_ff {
 public:
   ASTForm_And(ASTForm *f1, ASTForm *f2, Pos p) :
 		  ASTForm_ff(aAnd, f1, f2, p) {}
+
+  VISITABLE();
 
   VarCode makeCode(SubstCode *subst = NULL);
   void dump();
@@ -1083,6 +1159,8 @@ public:
   ASTForm_IdLeft(ASTForm *f1, ASTForm *f2, Pos p) :
 		  ASTForm_ff(aIdLeft, f1, f2, p) {}
 
+  VISITABLE();
+
   VarCode makeCode(SubstCode *subst = NULL);
   void dump();
   ASTForm* clone() { return new ASTForm_IdLeft(this->f1->clone(), this->f2->clone(), this->pos); }
@@ -1094,6 +1172,8 @@ class ASTForm_Or: public ASTForm_ff {
 public:
   ASTForm_Or(ASTForm *f1, ASTForm *f2, Pos p) :
 		  ASTForm_ff(aOr, f1, f2, p) {}
+
+  VISITABLE();
 
   VarCode makeCode(SubstCode *subst = NULL);
   void dump();
@@ -1110,6 +1190,8 @@ public:
   ASTForm_Not(ASTForm *ff, Pos p) :
 		  ASTForm(aNot, p), f(ff) {}
   ~ASTForm_Not() {delete f;}
+
+  VISITABLE();
 
   void freeVars(IdentList*, IdentList*);
   VarCode makeCode(SubstCode *subst = NULL);
@@ -1135,6 +1217,8 @@ public:
   ASTForm_Ex0(IdentList *vl, ASTForm *f, Pos p) :
 		  ASTForm_vf(aEx0, vl, f, p) {}
 
+  VISITABLE();
+
   VarCode makeCode(SubstCode *subst = NULL);
   void dump();
   ASTForm* clone() { return new ASTForm_Ex0(this->vl->copy(), this->f->clone(), this->pos); }
@@ -1146,6 +1230,8 @@ class ASTForm_Ex1: public ASTForm_uvf {
 public:
   ASTForm_Ex1(IdentList *ul, IdentList *vl, ASTForm *f, Pos p) :
 		  ASTForm_uvf(aEx1, ul, vl, f, p) {}
+
+  VISITABLE();
 
   VarCode makeCode(SubstCode *subst = NULL);
   void dump();
@@ -1161,6 +1247,8 @@ public:
   ASTForm_Ex2(IdentList *ul, IdentList *vl, ASTForm *f, Pos p) :
 		  ASTForm_uvf(aEx2, ul, vl, f, p) {}
 
+  VISITABLE();
+
   VarCode makeCode(SubstCode *subst = NULL);
   void dump();
   ASTForm* clone() { return new ASTForm_Ex2(this->ul, this->vl->copy(), this->f->clone(), this->pos); }
@@ -1174,6 +1262,8 @@ public:
   ASTForm_All0(IdentList *vl, ASTForm *f, Pos p) :
 		  ASTForm_vf(aAll0, vl, f, p) {}
 
+  VISITABLE();
+
   VarCode makeCode(SubstCode *subst = NULL);
   void dump();
   ASTForm* clone() { return new ASTForm_All0(this->vl->copy(), this->f->clone(), this->pos); }
@@ -1186,6 +1276,8 @@ class ASTForm_All1: public ASTForm_uvf {
 public:
   ASTForm_All1(IdentList *ul, IdentList *vl, ASTForm *f, Pos p) :
 		  ASTForm_uvf(aAll1, ul, vl, f, p) {}
+
+  VISITABLE();
 
   VarCode makeCode(SubstCode *subst = NULL);
   void dump();
@@ -1201,6 +1293,8 @@ public:
   ASTForm_All2(IdentList *ul, IdentList *vl, ASTForm *f, Pos p) :
 		  ASTForm_uvf(aAll2, ul, vl, f, p) {}
 
+  VISITABLE();
+
   VarCode makeCode(SubstCode *subst = NULL);
   void dump();
   ASTForm* clone() { return new ASTForm_All2(this->ul, this->vl->copy(), this->f->clone(), this->pos); }
@@ -1214,6 +1308,8 @@ public:
   ASTForm_Let0(IdentList *ids, FormList *fs, ASTForm *ff, Pos p) :
 		  ASTForm(aLet0, p), defIdents(ids), defForms(fs), f(ff) {}
   ~ASTForm_Let0() {delete f;}
+
+  VISITABLE();
 
   void freeVars(IdentList*, IdentList*);
   VarCode makeCode(SubstCode *subst = NULL);
@@ -1232,6 +1328,8 @@ public:
 		  ASTForm(aLet1, p), defIdents(ids), defTerms(ts), f(ff) {}
   ~ASTForm_Let1() {delete f;}
 
+  VISITABLE();
+
   void freeVars(IdentList*, IdentList*);
   VarCode makeCode(SubstCode *subst = NULL);
   void dump();
@@ -1249,6 +1347,8 @@ public:
 		  ASTForm(aLet2, p), defIdents(ids), defTerms(ts), f(ff) {}
   ~ASTForm_Let2() {delete f;}
 
+  VISITABLE();
+
   void freeVars(IdentList*, IdentList*);
   VarCode makeCode(SubstCode *subst = NULL);
   void dump();
@@ -1265,6 +1365,8 @@ public:
   ASTForm_Call(int nn, ASTList *alist, Pos p) :
 		  ASTForm(aCall, p), args(alist), n(nn) {}
   ~ASTForm_Call() {delete args;}
+
+  VISITABLE();
 
   void freeVars(IdentList*, IdentList*);
   VarCode makeCode(SubstCode *subst = NULL);
@@ -1287,6 +1389,8 @@ public:
 		  ASTForm(aImport, p), file(fil), fileVars(fv), idents(ids) {}
   ~ASTForm_Import() {delete idents;}
 
+  VISITABLE();
+
   void freeVars(IdentList*, IdentList*);
   VarCode makeCode(SubstCode *subst = NULL);
   void dump();
@@ -1303,6 +1407,8 @@ public:
   ASTForm_Export(ASTForm *ff, char* fil, Pos p) :
 		  ASTForm_f(aExport, ff, p), file(fil) {}
 
+  VISITABLE();
+
   VarCode makeCode(SubstCode *subst = NULL);
   void dump();
   ASTForm* clone() { return new ASTForm_Export(*this); }
@@ -1316,6 +1422,8 @@ public:
   ASTForm_Prefix(ASTForm *ff, Pos p) :
 		  ASTForm_f(aPrefix, ff, p) {}
 
+  VISITABLE();
+
   VarCode makeCode(SubstCode *subst = NULL);
   void dump();
   ASTForm* clone() { return new ASTForm_Prefix(*this); }
@@ -1325,6 +1433,8 @@ class ASTForm_Restrict: public ASTForm_f {
 public:
   ASTForm_Restrict(ASTForm *ff, Pos p) :
 		  ASTForm_f(aRestrict, ff, p) {}
+
+  VISITABLE();
 
   VarCode makeCode(SubstCode *subst = NULL);
   void dump();
@@ -1336,6 +1446,8 @@ public:
   ASTForm_InStateSpace1(ASTTerm1 *tt, IdentList *s, Pos p) :
 		  ASTForm(aInStateSpace1, p), t(tt), ss(s) {}
   ~ASTForm_InStateSpace1() {delete t; delete ss;}
+
+  VISITABLE();
 
   void freeVars(IdentList*, IdentList*);
   VarCode makeCode(SubstCode *subst = NULL);
@@ -1353,6 +1465,8 @@ public:
 		  ASTForm(aInStateSpace2, p), T(TT), ss(s) {}
   ~ASTForm_InStateSpace2() {delete T; delete ss;}
 
+  VISITABLE();
+
   void freeVars(IdentList*, IdentList*);
   VarCode makeCode(SubstCode *subst = NULL);
   void dump();
@@ -1368,6 +1482,8 @@ public:
   ASTForm_SomeType(ASTTerm *tt, Pos p) :
 		  ASTForm(aSomeType, p), t(tt) {}
   ~ASTForm_SomeType() {delete t;}
+
+  VISITABLE();
 
   void freeVars(IdentList*, IdentList*);
   VarCode makeCode(SubstCode *subst = NULL);

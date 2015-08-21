@@ -330,6 +330,30 @@ src/app/DecisionProcedure/formula_to_automaton_ws2s.cpp.s:
 	$(MAKE) -f CMakeFiles/dWiNA.dir/build.make CMakeFiles/dWiNA.dir/src/app/DecisionProcedure/formula_to_automaton_ws2s.cpp.s
 .PHONY : src/app/DecisionProcedure/formula_to_automaton_ws2s.cpp.s
 
+src/app/DecisionProcedure/visitors/PrettyPrinter.o: src/app/DecisionProcedure/visitors/PrettyPrinter.cpp.o
+.PHONY : src/app/DecisionProcedure/visitors/PrettyPrinter.o
+
+# target to build an object file
+src/app/DecisionProcedure/visitors/PrettyPrinter.cpp.o:
+	$(MAKE) -f CMakeFiles/dWiNA.dir/build.make CMakeFiles/dWiNA.dir/src/app/DecisionProcedure/visitors/PrettyPrinter.cpp.o
+.PHONY : src/app/DecisionProcedure/visitors/PrettyPrinter.cpp.o
+
+src/app/DecisionProcedure/visitors/PrettyPrinter.i: src/app/DecisionProcedure/visitors/PrettyPrinter.cpp.i
+.PHONY : src/app/DecisionProcedure/visitors/PrettyPrinter.i
+
+# target to preprocess a source file
+src/app/DecisionProcedure/visitors/PrettyPrinter.cpp.i:
+	$(MAKE) -f CMakeFiles/dWiNA.dir/build.make CMakeFiles/dWiNA.dir/src/app/DecisionProcedure/visitors/PrettyPrinter.cpp.i
+.PHONY : src/app/DecisionProcedure/visitors/PrettyPrinter.cpp.i
+
+src/app/DecisionProcedure/visitors/PrettyPrinter.s: src/app/DecisionProcedure/visitors/PrettyPrinter.cpp.s
+.PHONY : src/app/DecisionProcedure/visitors/PrettyPrinter.s
+
+# target to generate assembly for a file
+src/app/DecisionProcedure/visitors/PrettyPrinter.cpp.s:
+	$(MAKE) -f CMakeFiles/dWiNA.dir/build.make CMakeFiles/dWiNA.dir/src/app/DecisionProcedure/visitors/PrettyPrinter.cpp.s
+.PHONY : src/app/DecisionProcedure/visitors/PrettyPrinter.cpp.s
+
 src/app/Frontend/ast.o: src/app/Frontend/ast.cpp.o
 .PHONY : src/app/Frontend/ast.o
 
@@ -353,6 +377,30 @@ src/app/Frontend/ast.s: src/app/Frontend/ast.cpp.s
 src/app/Frontend/ast.cpp.s:
 	$(MAKE) -f CMakeFiles/dWiNA.dir/build.make CMakeFiles/dWiNA.dir/src/app/Frontend/ast.cpp.s
 .PHONY : src/app/Frontend/ast.cpp.s
+
+src/app/Frontend/ast_visitor.o: src/app/Frontend/ast_visitor.cpp.o
+.PHONY : src/app/Frontend/ast_visitor.o
+
+# target to build an object file
+src/app/Frontend/ast_visitor.cpp.o:
+	$(MAKE) -f CMakeFiles/dWiNA.dir/build.make CMakeFiles/dWiNA.dir/src/app/Frontend/ast_visitor.cpp.o
+.PHONY : src/app/Frontend/ast_visitor.cpp.o
+
+src/app/Frontend/ast_visitor.i: src/app/Frontend/ast_visitor.cpp.i
+.PHONY : src/app/Frontend/ast_visitor.i
+
+# target to preprocess a source file
+src/app/Frontend/ast_visitor.cpp.i:
+	$(MAKE) -f CMakeFiles/dWiNA.dir/build.make CMakeFiles/dWiNA.dir/src/app/Frontend/ast_visitor.cpp.i
+.PHONY : src/app/Frontend/ast_visitor.cpp.i
+
+src/app/Frontend/ast_visitor.s: src/app/Frontend/ast_visitor.cpp.s
+.PHONY : src/app/Frontend/ast_visitor.s
+
+# target to generate assembly for a file
+src/app/Frontend/ast_visitor.cpp.s:
+	$(MAKE) -f CMakeFiles/dWiNA.dir/build.make CMakeFiles/dWiNA.dir/src/app/Frontend/ast_visitor.cpp.s
+.PHONY : src/app/Frontend/ast_visitor.cpp.s
 
 src/app/Frontend/astdump.o: src/app/Frontend/astdump.cpp.o
 .PHONY : src/app/Frontend/astdump.o
@@ -918,9 +966,15 @@ help:
 	@echo "... src/app/DecisionProcedure/formula_to_automaton_ws2s.o"
 	@echo "... src/app/DecisionProcedure/formula_to_automaton_ws2s.i"
 	@echo "... src/app/DecisionProcedure/formula_to_automaton_ws2s.s"
+	@echo "... src/app/DecisionProcedure/visitors/PrettyPrinter.o"
+	@echo "... src/app/DecisionProcedure/visitors/PrettyPrinter.i"
+	@echo "... src/app/DecisionProcedure/visitors/PrettyPrinter.s"
 	@echo "... src/app/Frontend/ast.o"
 	@echo "... src/app/Frontend/ast.i"
 	@echo "... src/app/Frontend/ast.s"
+	@echo "... src/app/Frontend/ast_visitor.o"
+	@echo "... src/app/Frontend/ast_visitor.i"
+	@echo "... src/app/Frontend/ast_visitor.s"
 	@echo "... src/app/Frontend/astdump.o"
 	@echo "... src/app/Frontend/astdump.i"
 	@echo "... src/app/Frontend/astdump.s"

@@ -42,6 +42,7 @@
 #include <DecisionProcedure/decision_procedures.hh>
 #include <DecisionProcedure/containers/VarToTrackMap.hh>
 #include "DecisionProcedure/containers/Cache.hh"
+#include "DecisionProcedure/visitors/PrettyPrinter.h"
 
 // < Typedefs and usings >
 using std::cout;
@@ -353,6 +354,15 @@ int main(int argc, char *argv[])
   }
 
 	// INSERT FUN HERE
+	PrettyPrinter pp;
+	ASTForm_True *t = new ASTForm_True(Pos());
+	ASTForm_True *tt = new ASTForm_True(Pos());
+	ASTForm_And* a = new ASTForm_And(t, tt, Pos());
+	cout << "Print True:\n";
+	t->accept(pp);
+	cout << "Print whole:\n";
+	a->accept(pp);
+	delete a;
 
   timer_formula.start();
   if(options.noExpnf == false) {

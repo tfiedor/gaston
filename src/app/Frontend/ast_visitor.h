@@ -1,5 +1,5 @@
-#ifndef WSKS_AST_VISITOR_H
-#define WSKS_AST_VISITOR_H
+#ifndef __WSKS_AST_VISITOR_H
+#define __WSKS_AST_VISITOR_H
 
 #include "ast.h"
 
@@ -8,9 +8,9 @@ class ASTVisitor {
 public:
     typedef R ReturnType;
 
-    virtual ReturnType visit(ASTForm *e) {};
-    virtual ReturnType visit(ASTTerm *e) {};
-    virtual ReturnType visit(ASTUniv *e) {};
+    virtual ReturnType visit(ASTForm *e) { std::cout << "Default visit(ASTForm)\n"; };
+    virtual ReturnType visit(ASTTerm *e) { std::cout << "Default visit(ASTTerm)\n"; };
+    virtual ReturnType visit(ASTUniv *e) { std::cout << "Default visit(ASTUniv)\n"; };
 };
 
 /**
@@ -41,134 +41,78 @@ public:
     virtual AST* visit(ASTForm_ff* form) { return form; }
     virtual AST* visit(ASTForm_vf* form) { return form; }
     virtual AST* visit(ASTForm_uvf* form) { return form; }
+
+    // < ASTTerm1 Specific > //
+    virtual AST* visit(ASTTerm1_Var1* term) { return term; }
+    virtual AST* visit(ASTTerm1_Dot* term) { return term; }
+    virtual AST* visit(ASTTerm1_Up* term) { return term; }
+    virtual AST* visit(ASTTerm1_Root* term) { return term; }
+    virtual AST* visit(ASTTerm1_Int* term) { return term; }
+    virtual AST* visit(ASTTerm1_Plus* term) { return term; }
+    virtual AST* visit(ASTTerm1_Minus* term) { return term; }
+    virtual AST* visit(ASTTerm1_PlusModulo* term) { return term; }
+    virtual AST* visit(ASTTerm1_MinusModulo* term) { return term; }
+    virtual AST* visit(ASTTerm1_Min* term) { return term; }
+    virtual AST* visit(ASTTerm1_Max* term) { return term; }
+    virtual AST* visit(ASTTerm1_TreeRoot* term) { return term; }
+
+    // < ASTTerm2 Specific > //
+    virtual AST* visit(ASTTerm2_Var2* Term) { return Term; }
+    virtual AST* visit(ASTTerm2_VarTree* Term) { return Term; }
+    virtual AST* visit(ASTTerm2_Dot* Term) { return Term; }
+    virtual AST* visit(ASTTerm2_Up* Term) { return Term; }
+    virtual AST* visit(ASTTerm2_Empty* Term) { return Term; }
+    virtual AST* visit(ASTTerm2_Union* Term) { return Term; }
+    virtual AST* visit(ASTTerm2_Inter* Term) { return Term; }
+    virtual AST* visit(ASTTerm2_Setminus* Term) { return Term; }
+    virtual AST* visit(ASTTerm2_Set* Term) { return Term; }
+    virtual AST* visit(ASTTerm2_Plus* Term) { return Term; }
+    virtual AST* visit(ASTTerm2_Minus* Term) { return Term; }
+    virtual AST* visit(ASTTerm2_Interval* Term) { return Term; }
+    virtual AST* visit(ASTTerm2_PresbConst* Term) { return Term; }
+    virtual AST* visit(ASTTerm2_Formula* Term) { return Term; }
+
+    // < ASTForm Specific > //
+    virtual AST* visit(ASTForm_Var0* form) { return form; }
+    virtual AST* visit(ASTForm_True* form) { return form; }
+    virtual AST* visit(ASTForm_False* form) { return form; }
+    virtual AST* visit(ASTForm_In* form) { return form; }
+    virtual AST* visit(ASTForm_Notin* form) { return form; }
+    virtual AST* visit(ASTForm_RootPred* form) { return form; }
+    virtual AST* visit(ASTForm_EmptyPred* form) { return form; }
+    virtual AST* visit(ASTForm_FirstOrder* form) { return form; }
+    virtual AST* visit(ASTForm_Sub* form) { return form; }
+    virtual AST* visit(ASTForm_Equal1* form) { return form; }
+    virtual AST* visit(ASTForm_Equal2* form) { return form; }
+    virtual AST* visit(ASTForm_NotEqual1* form) { return form; }
+    virtual AST* visit(ASTForm_NotEqual2* form) { return form; }
+    virtual AST* visit(ASTForm_Less* form) { return form; }
+    virtual AST* visit(ASTForm_LessEq* form) { return form; }
+    virtual AST* visit(ASTForm_WellFormedTree* form) { return form; }
+    virtual AST* visit(ASTForm_Impl* form) { return form; }
+    virtual AST* visit(ASTForm_Biimpl* form) { return form; }
+    virtual AST* visit(ASTForm_And* form) { return form; }
+    virtual AST* visit(ASTForm_IdLeft* form) { return form; }
+    virtual AST* visit(ASTForm_Or* form) { return form; }
+    virtual AST* visit(ASTForm_Not* form) { return form; }
+    virtual AST* visit(ASTForm_Ex0* form) { return form; }
+    virtual AST* visit(ASTForm_Ex1* form) { return form; }
+    virtual AST* visit(ASTForm_Ex2* form) { return form; }
+    virtual AST* visit(ASTForm_All0* form) { return form; }
+    virtual AST* visit(ASTForm_All1* form) { return form; }
+    virtual AST* visit(ASTForm_All2* form) { return form; }
+    virtual AST* visit(ASTForm_Let0* form) { return form; }
+    virtual AST* visit(ASTForm_Let1* form) { return form; }
+    virtual AST* visit(ASTForm_Let2* form) { return form; }
+    virtual AST* visit(ASTForm_Call* form) { return form; }
+    virtual AST* visit(ASTForm_Import* form) { return form; }
+    virtual AST* visit(ASTForm_Export* form) { return form; }
+    virtual AST* visit(ASTForm_Prefix* form) { return form; }
+    virtual AST* visit(ASTForm_Restrict* form) { return form; }
+    virtual AST* visit(ASTForm_InStateSpace1* form) { return form; }
+    virtual AST* visit(ASTForm_InStateSpace2* form) { return form; }
+    virtual AST* visit(ASTForm_SomeType* form) { return form;}
 };
-
-/**
- * Traverses sons, modifies them and then return this node
- *
- * @param[in] v:    visitor returning AST without parameters
- * @return:         modified AST
- */
-AST* ASTTerm::accept(ASTTransformer &v) {
-    return this;
-}
-
-AST* ASTForm::accept(ASTTransformer &v) {
-    return this;
-}
-
-AST* ASTUniv::accept(ASTTransformer &v) {
-    return this;
-}
-
-// < ASTTerm1 Accepts > //
-AST* ASTTerm1_n::accept(ASTTransformer &v) {
-    return v.visit(this);
-}
-
-AST* ASTTerm1_T::accept(ASTTransformer &v) {
-    this->T = static_cast<ASTTerm2*>(this->T->accept(v));
-
-    return v.visit(this);
-}
-
-AST* ASTTerm1_t::accept(ASTTransformer &v) {
-    this->t = static_cast<ASTTerm1*>(this->t->accept(v));
-
-    return v.visit(this);
-}
-
-AST* ASTTerm1_tn::accept(ASTTransformer &v) {
-    this->t = static_cast<ASTTerm1*>(this->t->accept(v));
-
-    return v.visit(this);
-}
-
-AST* ASTTerm1_tnt::accept(ASTTransformer &v) {
-    this->t1 = static_cast<ASTTerm1*>(this->t1->accept(v));
-    this->t2 = static_cast<ASTTerm1*>(this->t2->accept(v));
-
-    return v.visit(this);
-}
-
-// < ASTTerm2 Accepts > //
-AST* ASTTerm2_TT::accept(ASTTransformer &v) {
-    this->T1 = static_cast<ASTTerm2*>(this->T1->accept(v));
-    this->T2 = static_cast<ASTTerm2*>(this->T2->accept(v));
-
-    return v.visit(this);
-}
-
-AST* ASTTerm2_Tn::accept(ASTTransformer &v) {
-    this->T = static_cast<ASTTerm2*>(this->T->accept(v));
-
-    return v.visit(this);
-}
-
-// < ASTForm Accepts > //
-AST* ASTForm_tT::accept(ASTTransformer &v) {
-    this->t1 = static_cast<ASTTerm1*>(this->t1->accept(v));
-    this->T2 = static_cast<ASTTerm2*>(this->T2->accept(v));
-
-    return v.visit(this);
-}
-
-AST* ASTForm_T::accept(ASTTransformer &v) {
-    this->T = static_cast<ASTTerm2*>(this->T->accept(v));
-
-    return v.visit(this);
-}
-
-AST* ASTForm_TT::accept(ASTTransformer &v){
-    this->T1 = static_cast<ASTTerm2*>(this->T1->accept(v));
-    this->T2 = static_cast<ASTTerm2*>(this->T2->accept(v));
-
-    return v.visit(this);
-}
-
-AST* ASTForm_tt::accept(ASTTransformer &v) {
-    this->t1 = static_cast<ASTTerm1*>(this->t1->accept(v));
-    this->t2 = static_cast<ASTTerm1*>(this->t2->accept(v));
-
-    return v.visit(this);
-}
-
-AST* ASTForm_nt::accept(ASTTransformer &v) {
-    this->t = static_cast<ASTTerm1*>(this->t->accept(v));
-
-    return v.visit(this);
-}
-
-AST* ASTForm_nT::accept(ASTTransformer &v) {
-    this->T = static_cast<ASTTerm2*>(this->T->accept(v));
-
-    return v.visit(this);
-}
-
-AST* ASTForm_f::accept(ASTTransformer &v) {
-    this->f = static_cast<ASTForm*>(this->f->accept(v));
-
-    return v.visit(this);
-}
-
-AST* ASTForm_ff::accept(ASTTransformer &v) {
-    this->f1 = static_cast<ASTForm*>(this->f1->accept(v));
-    this->f2 = static_cast<ASTForm*>(this->f2->accept(v));
-
-    return v.visit(this);
-}
-
-AST* ASTForm_vf::accept(ASTTransformer &v) {
-    this->f = static_cast<ASTForm*>(this->f->accept(v));
-
-    return v.visit(this);
-}
-
-AST* ASTForm_uvf::accept(ASTTransformer &v) {
-    this->f = static_cast<ASTForm*>(this->f->accept(v));
-
-    return v.visit(this);
-}
 
 /**
  * An implementation of visitor pattern for traversing without
@@ -177,6 +121,10 @@ AST* ASTForm_uvf::accept(ASTTransformer &v) {
  */
 class VoidVisitor : public ASTVisitor<> {
 public:
+    virtual void visit(ASTTerm* term) {}
+    virtual void visit(ASTForm* form) {}
+    virtual void visit(ASTUniv* univ) {}
+
     // < ASTTerm1 Derives > //
     virtual void visit(ASTTerm1_n* term) {}
     virtual void visit(ASTTerm1_T* term) {}
@@ -185,8 +133,8 @@ public:
     virtual void visit(ASTTerm1_tnt* term) {}
 
     // < ASTTerm2 Derives > //
-    virtual void visit(ASTTerm2_TT* term) {}
-    virtual void visit(ASTTerm2_Tn* term) {}
+    virtual void visit(ASTTerm2_TT* Term) {}
+    virtual void visit(ASTTerm2_Tn* Term) {}
 
     // < ASTForm Derives > //
     virtual void visit(ASTForm_tT* form) {}
@@ -199,125 +147,77 @@ public:
     virtual void visit(ASTForm_ff* form) {}
     virtual void visit(ASTForm_vf* form) {}
     virtual void visit(ASTForm_uvf* form) {}
+
+    // < ASTTerm1 Specific > //
+    virtual void visit(ASTTerm1_Var1* term) {}
+    virtual void visit(ASTTerm1_Dot* term) {}
+    virtual void visit(ASTTerm1_Up* term) {}
+    virtual void visit(ASTTerm1_Root* term) {}
+    virtual void visit(ASTTerm1_Int* term) {}
+    virtual void visit(ASTTerm1_Plus* term) {}
+    virtual void visit(ASTTerm1_Minus* term) {}
+    virtual void visit(ASTTerm1_PlusModulo* term) {}
+    virtual void visit(ASTTerm1_MinusModulo* term) {}
+    virtual void visit(ASTTerm1_Min* term) {}
+    virtual void visit(ASTTerm1_Max* term) {}
+    virtual void visit(ASTTerm1_TreeRoot* term) {}
+
+    // < ASTTerm2 Specific > //
+    virtual void visit(ASTTerm2_Var2* Term) {}
+    virtual void visit(ASTTerm2_VarTree* Term) {}
+    virtual void visit(ASTTerm2_Dot* Term) {}
+    virtual void visit(ASTTerm2_Up* Term) {}
+    virtual void visit(ASTTerm2_Empty* Term) {}
+    virtual void visit(ASTTerm2_Union* Term) {}
+    virtual void visit(ASTTerm2_Inter* Term) {}
+    virtual void visit(ASTTerm2_Setminus* Term) {}
+    virtual void visit(ASTTerm2_Set* Term) {}
+    virtual void visit(ASTTerm2_Plus* Term) {}
+    virtual void visit(ASTTerm2_Minus* Term) {}
+    virtual void visit(ASTTerm2_Interval* Term) {}
+    virtual void visit(ASTTerm2_PresbConst* Term) {}
+    virtual void visit(ASTTerm2_Formula* Term) {}
+
+    // < ASTForm Specific > //
+    virtual void visit(ASTForm_Var0* form) {}
+    virtual void visit(ASTForm_True* form) {}
+    virtual void visit(ASTForm_False* form) {}
+    virtual void visit(ASTForm_In* form) {}
+    virtual void visit(ASTForm_Notin* form) {}
+    virtual void visit(ASTForm_RootPred* form) {}
+    virtual void visit(ASTForm_EmptyPred* form) {}
+    virtual void visit(ASTForm_FirstOrder* form) {}
+    virtual void visit(ASTForm_Sub* form) {}
+    virtual void visit(ASTForm_Equal1* form) {}
+    virtual void visit(ASTForm_Equal2* form) {}
+    virtual void visit(ASTForm_NotEqual1* form) {}
+    virtual void visit(ASTForm_NotEqual2* form) {}
+    virtual void visit(ASTForm_Less* form) {}
+    virtual void visit(ASTForm_LessEq* form) {}
+    virtual void visit(ASTForm_WellFormedTree* form) {}
+    virtual void visit(ASTForm_Impl* form) {}
+    virtual void visit(ASTForm_Biimpl* form) {}
+    virtual void visit(ASTForm_And* form) {}
+    virtual void visit(ASTForm_IdLeft* form) {}
+    virtual void visit(ASTForm_Or* form) {}
+    virtual void visit(ASTForm_Not* form) {}
+    virtual void visit(ASTForm_Ex0* form) {}
+    virtual void visit(ASTForm_Ex1* form) {}
+    virtual void visit(ASTForm_Ex2* form) {}
+    virtual void visit(ASTForm_All0* form) {}
+    virtual void visit(ASTForm_All1* form) {}
+    virtual void visit(ASTForm_All2* form) {}
+    virtual void visit(ASTForm_Let0* form) {}
+    virtual void visit(ASTForm_Let1* form) {}
+    virtual void visit(ASTForm_Let2* form) {}
+    virtual void visit(ASTForm_Call* form) {}
+    virtual void visit(ASTForm_Import* form) {}
+    virtual void visit(ASTForm_Export* form) {}
+    virtual void visit(ASTForm_Prefix* form) {}
+    virtual void visit(ASTForm_Restrict* form) {}
+    virtual void visit(ASTForm_InStateSpace1* form) {}
+    virtual void visit(ASTForm_InStateSpace2* form) {}
+    virtual void visit(ASTForm_SomeType* form) {}
 };
-
-/**
- * Traverses sons and visits the nodes before
- *
- * @param[in] v:    visitor without parameters returning void
- */
-
-void ASTTerm::accept(VoidVisitor &v) {}
-void ASTForm::accept(VoidVisitor &v) {}
-void ASTUniv::accept(VoidVisitor &v) {}
-
-// < ASTTerm1 Derives > //
-void ASTTerm1_n::accept(VoidVisitor &v) {
-    v.visit(this);
-}
-
-void ASTTerm1_T::accept(VoidVisitor &v) {
-    v.visit(this);
-
-    this->T->accept(v);
-}
-
-void ASTTerm1_t::accept(VoidVisitor &v) {
-    v.visit(this);
-
-    this->t->accept(v);
-}
-
-void ASTTerm1_tn::accept(VoidVisitor &v) {
-    v.visit(this);
-
-    this->t->accept(v);
-}
-
-void ASTTerm1_tnt::accept(VoidVisitor &v) {
-    v.visit(this);
-
-    this->t1->accept(v);
-    this->t2->accept(v);
-}
-
-// < ASTTerm2 Derives > //
-void ASTTerm2_TT::accept(VoidVisitor &v) {
-    v.visit(this);
-
-    this->T1->accept(v);
-    this->T2->accept(v);
-}
-
-void ASTTerm2_Tn::accept(VoidVisitor &v) {
-    v.visit(this);
-
-    this->T->accept(v);
-}
-
-// < ASTForm Derives > //
-void ASTForm_tT::accept(VoidVisitor &v) {
-    v.visit(this);
-
-    this->t1->accept(v);
-    this->T2->accept(v);
-}
-
-void ASTForm_T::accept(VoidVisitor &v) {
-    v.visit(this);
-
-    this->T->accept(v);
-}
-
-void ASTForm_TT::accept(VoidVisitor &v) {
-    v.visit(this);
-
-    this->T1->accept(v);
-    this->T2->accept(v);
-}
-
-void ASTForm_tt::accept(VoidVisitor &v) {
-    v.visit(this);
-
-    this->t1->accept(v);
-    this->t2->accept(v);
-}
-
-void ASTForm_nt::accept(VoidVisitor &v) {
-    v.visit(this);
-
-    this->t->accept(v);
-}
-
-void ASTForm_nT::accept(VoidVisitor &v) {
-    v.visit(this);
-
-    this->T->accept(v);
-}
-
-void ASTForm_f::accept(VoidVisitor &v) {
-    v.visit(this);
-
-    this->f->accept(v);
-}
-
-void ASTForm_ff::accept(VoidVisitor &v) {
-    v.visit(this);
-
-    this->f1->accept(v);
-    this->f2->accept(v);
-}
-
-void ASTForm_vf::accept(VoidVisitor &v) {
-    v.visit(this);
-
-    this->f->accept(v);
-}
-
-void ASTForm_uvf::accept(VoidVisitor &v) {
-    v.visit(this);
-
-    this->f->accept(v);
-}
 
 #endif //WSKS_AST_VISITOR_H
