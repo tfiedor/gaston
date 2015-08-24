@@ -43,6 +43,8 @@
 #include <DecisionProcedure/containers/VarToTrackMap.hh>
 #include "DecisionProcedure/containers/Cache.hh"
 #include "DecisionProcedure/visitors/BooleanUnfolder.h"
+#include "DecisionProcedure/visitors/UniversalQuantifierRemover.h"
+#include "DecisionProcedure/visitors/SecondOrderRestricter.h"
 
 // < Typedefs and usings >
 using std::cout;
@@ -387,8 +389,11 @@ int main(int argc, char *argv[])
 			  ast->formula = (ASTForm *) andFormula->f1;
 		  }
 	  }
-	  ast->formula = (ASTForm*) (ast->formula)->removeUniversalQuantifier();
-	  ast->formula = (ASTForm*) (ast->formula)->prefixToSecondOrder();
+
+	  UniversalQuantifierRemover uqr_visitor;
+	  SecondOrderRestricter sor_visitor;
+	  ast->formula = static_cast<ASTForm*>(ast->formula->accept(uqr_visitor));
+	  ast->formula = static_cast<ASTForm*>(ast->formula->accept(sor_visitor));
   }
   timer_formula.stop();
 

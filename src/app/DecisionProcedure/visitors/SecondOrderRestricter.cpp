@@ -16,8 +16,8 @@
  * @param[in] form:     traversed Ex1 node
  */
 AST* SecondOrderRestricter::visit(ASTForm_Ex1* form) {
-    // TODO: implement
-    return form;
+    ASTForm_Ex2 *ex = new ASTForm_Ex2(form->ul, form->vl, form->f, form->pos);
+    return ex;
 }
 
 /**
@@ -26,6 +26,6 @@ AST* SecondOrderRestricter::visit(ASTForm_Ex1* form) {
  * @param[in] form:     traversed All1 node
  */
 AST* SecondOrderRestricter::visit(ASTForm_All1* form) {
-    // TODO: implement
-    return form;
+    ASTForm_All2 *all = new ASTForm_All2(form->ul, form->vl, form->f, form->pos);
+    return all;
 }

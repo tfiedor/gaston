@@ -169,11 +169,8 @@ public:
 
   // AST Transformations
   virtual ASTForm* toPrenexNormalForm() { return this; }
-  virtual ASTForm* removeUniversalQuantifier() { return this; }
-  virtual ASTForm* unfoldNegations() { return this; }
   virtual ASTForm* flatten() { return this;}
   virtual ASTForm* unfoldMacro(IdentList* i, ASTList* a) { /*std::cerr << "\nMissing unfolding for this formula\n"; this->dump();*/ return this; }
-  virtual ASTForm* prefixToSecondOrder() { return this;}
 
   ASTForm* toExistentionalPNF();
   ASTForm* toSecondOrder();
@@ -449,8 +446,6 @@ public:
 
   void freeVars(IdentList*, IdentList*);
   ASTForm* toPrenexNormalForm();
-  ASTForm* removeUniversalQuantifier();
-  ASTForm* unfoldNegations();
   ASTForm* flatten();
   ASTForm* unfoldMacro(IdentList*, ASTList*);
 
@@ -477,8 +472,6 @@ public:
 
   void freeVars(IdentList*, IdentList*);
   ASTForm* toPrenexNormalForm();
-  ASTForm* removeUniversalQuantifier();
-  ASTForm* unfoldNegations();
   ASTForm* flatten();
   ASTForm* unfoldMacro(IdentList*, ASTList*);
 
@@ -495,8 +488,6 @@ public:
 
   void freeVars(IdentList*, IdentList*);
   ASTForm* toPrenexNormalForm();
-  ASTForm* removeUniversalQuantifier();
-  ASTForm* unfoldNegations();
   ASTForm* flatten();
   ASTForm* unfoldMacro(IdentList*, ASTList*);
 
@@ -1190,9 +1181,6 @@ public:
   ASTForm* unfoldMacro(IdentList*, ASTList*);
 
   ASTForm* toPrenexNormalForm();
-  ASTForm* unfoldNegations();
-  ASTForm* removeUniversalQuantifier();
-  ASTForm* prefixToSecondOrder();
 
   void toUnaryAutomaton(Automaton &aut, bool doComplement);
   void toBinaryAutomaton(Automaton &aut, bool doComplement);
@@ -1224,7 +1212,6 @@ public:
   ASTForm* clone() { return new ASTForm_Ex1(this->ul, this->vl->copy(), this->f->clone(), this->pos); }
 
   ASTForm* flatten();
-  ASTForm* prefixToSecondOrder();
 };
 
 class ASTForm_Ex2: public ASTForm_uvf {
@@ -1237,8 +1224,6 @@ public:
   VarCode makeCode(SubstCode *subst = NULL);
   void dump();
   ASTForm* clone() { return new ASTForm_Ex2(this->ul, this->vl->copy(), this->f->clone(), this->pos); }
-
-  ASTForm* prefixToSecondOrder();
 };
 
 class ASTForm_All0: public ASTForm_vf {
@@ -1251,8 +1236,6 @@ public:
   VarCode makeCode(SubstCode *subst = NULL);
   void dump();
   ASTForm* clone() { return new ASTForm_All0(this->vl->copy(), this->f->clone(), this->pos); }
-
-  ASTForm* removeUniversalQuantifier();
 };
 
 class ASTForm_All1: public ASTForm_uvf {
@@ -1266,7 +1249,6 @@ public:
   void dump();
   ASTForm* clone() { return new ASTForm_All1(this->ul, this->vl->copy(), this->f->clone(), this->pos); }
 
-  ASTForm* removeUniversalQuantifier();
   ASTForm* flatten();
 };
 
@@ -1280,8 +1262,6 @@ public:
   VarCode makeCode(SubstCode *subst = NULL);
   void dump();
   ASTForm* clone() { return new ASTForm_All2(this->ul, this->vl->copy(), this->f->clone(), this->pos); }
-    
-  ASTForm* removeUniversalQuantifier();
 };
 
 class ASTForm_Let0: public ASTForm {

@@ -16,8 +16,10 @@
  * @param[in] form      traversed All node
  */
 AST* UniversalQuantifierRemover::visit(ASTForm_All0* form) {
-    // TODO: implement
-    return form;
+    ASTForm_Not* negPhi = new ASTForm_Not(form->f, form->f->pos);
+    ASTForm_Ex0* exNegPhi = new ASTForm_Ex0(form->vl, negPhi, form->pos);
+    ASTForm_Not* negExNegPhi = new ASTForm_Not(exNegPhi, form->pos);
+    return negExNegPhi;
 }
 
 /**
@@ -27,8 +29,10 @@ AST* UniversalQuantifierRemover::visit(ASTForm_All0* form) {
  * @param[in] form      traversed All node
  */
 AST* UniversalQuantifierRemover::visit(ASTForm_All1* form) {
-    // TODO: implement
-    return form;
+    ASTForm_Not* negPhi = new ASTForm_Not(form->f, form->f->pos);
+    ASTForm_Ex1* exNegPhi = new ASTForm_Ex1(form->ul, form->vl, negPhi, form->pos);
+    ASTForm_Not* negExNegPhi = new ASTForm_Not(exNegPhi, form->pos);
+    return negExNegPhi;
 }
 
 /**
@@ -38,6 +42,8 @@ AST* UniversalQuantifierRemover::visit(ASTForm_All1* form) {
  * @param[in] form      traversed All node
  */
 AST* UniversalQuantifierRemover::visit(ASTForm_All2* form) {
-    // TODO: implement
-    return form;
+    ASTForm_Not* negPhi = new ASTForm_Not(form->f, form->f->pos);
+    ASTForm_Ex2* exNegPhi = new ASTForm_Ex2(form->ul, form->vl, negPhi, form->pos);
+    ASTForm_Not* negExNegPhi = new ASTForm_Not(exNegPhi, form->pos);
+    return negExNegPhi;
 }
