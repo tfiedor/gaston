@@ -122,7 +122,7 @@ AST* BooleanUnfolder::visit(ASTForm_Biimpl* form) {
     // False <=> phi = not phi
     } else if(form->f1->kind == aFalse) {
         return new ASTForm_Not(form->f2, form->pos);
-    } else if(form->f2->kind = aFalse) {
+    } else if(form->f2->kind == aFalse) {
         return new ASTForm_Not(form->f1, form->pos);
     // Else do nothing
     } else {

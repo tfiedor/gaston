@@ -354,7 +354,7 @@ int main(int argc, char *argv[])
   }
 
 	// INSERT FUN HERE
-	cout << "[*] Main formula:\n";
+	cout << "\n[*] Main formula:\n";
 	(ast->formula)->dump();
 	BooleanUnfolder bu_visitor;
 	ast->formula = static_cast<ASTForm*>((ast->formula)->accept(bu_visitor));

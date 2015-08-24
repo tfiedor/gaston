@@ -10,176 +10,13 @@
 
 #include "../Frontend/ast.h"
 #include "../Frontend/symboltable.h"
+#include "visitors/SyntaxRestricter.h"
 
 #include <cstring>
 
 using std::cout;
 
 extern SymbolTable symbolTable;
-
-
-/**
- * Set of functions used for conversion of input formula to the restricted
- * syntax as defined in diploma thesis. Restricted syntax takes only few
- * types of atomic formulae (thanks to flattening) and only uses logical
- * connectives &, |, ~ and Exists.
- */
-
-
-/**
- * Transformation of formula to the restricted syntax, according to the
- * rules for transformation to restricted syntax.
- *
- * Rule: A -> B ~= ~ A | B
- *
- * @return: AST Formula in restricted syntax
- */
-ASTForm* ASTForm_Impl::toRestrictedSyntax() {
-   f1 = f1->toRestrictedSyntax();
-   f2 = f2->toRestrictedSyntax();
-
-   ASTForm* not_f1 = new ASTForm_Not(f1, pos);
-   return (ASTForm*) new ASTForm_Or(not_f1, f2, pos);
-}
-
-/**
- * Transformation of formula to the restricted syntax, according to the
- * rules for transformation to restricted syntax.
- *
- * Rule: A <-> B = (~A | B) & (A | ~B)
- *
- * @return: AST Formula in restricted syntax
- */
-ASTForm* ASTForm_Biimpl::toRestrictedSyntax() {
-   f1 = f1->toRestrictedSyntax();
-   f2 = f2->toRestrictedSyntax();
-   
-   ASTForm* not_f1 = new ASTForm_Not(f1, pos);
-   ASTForm* not_f2 = new ASTForm_Not(f2, pos);
-   ASTForm* ff1 = f1->clone();
-   ASTForm* ff2 = f2->clone();
-   ASTForm* impl1 = new ASTForm_Or(not_f1, ff2, pos);
-   ASTForm* impl2 = new ASTForm_Or(ff1, not_f2, pos);
-
-   return (ASTForm*) new ASTForm_And(impl1, impl2, pos);
-}
-
-/**
- * Transformation of formula to the restricted syntax, according to the
- * rules for transformation to restricted syntax.
- *
- * @return: AST Formula in restricted syntax
- */
-ASTForm* ASTForm_IdLeft::toRestrictedSyntax() {
-   f1 = f1->toRestrictedSyntax();
-   f2 = f2->toRestrictedSyntax();
-   return this;
-}
-
-/**
- * Transformation of formula to the restricted syntax, according to the
- * rules for transformation to restricted syntax. Or is left as it is,
- * as it is one of the valid logical connectives.
- *
- * @return: AST Formula in restricted syntax
- */
-ASTForm* ASTForm_Or::toRestrictedSyntax() {
-   f1 = f1->toRestrictedSyntax();
-   f2 = f2->toRestrictedSyntax();
-   return this;
-}
-
-/**
- * Transformation of formula to the restricted syntax, according to the
- * rules for transformation to restricted syntax. And is also used in
- * restricted syntax, as with this, we can get negation straight to the
- * atoms and thus not needing complementation of automaton.
- *
- * @return: AST Formula in restricted syntax
- */
-ASTForm* ASTForm_And::toRestrictedSyntax() {
-   f1 = f1->toRestrictedSyntax();
-   f2 = f2->toRestrictedSyntax();
-   return this;
-}
-
-/**
- * Transformation of formula to the restricted syntax, according to the
- * rules for transformation to restricted syntax.
- *
- * @return: AST Formula in restricted syntax
- */
-ASTForm* ASTForm_Ex0::toRestrictedSyntax() {
-   f = f->toRestrictedSyntax();
-   return this;
-}
-
-/**
- * Transformation of formula to the restricted syntax, according to the
- * rules for transformation to restricted syntax.
- * TODO: This shouldn't be needed, as first order should be flattened
- *
- * @return: AST Formula in restricted syntax
- */
-ASTForm* ASTForm_Ex1::toRestrictedSyntax() {
-   f = f->toRestrictedSyntax();
-   return this;
-}
-
-/**
- * Transformation of formula to the restricted syntax, according to the
- * rules for transformation to restricted syntax.
- *
- * @return: AST Formula in restricted syntax
- */
-ASTForm* ASTForm_Ex2::toRestrictedSyntax() {
-   f = f->toRestrictedSyntax();
-   return this;
-}
-
-/**
- * Transformation of formula to the restricted syntax, according to the
- * rules for transformation to restricted syntax.
- *
- * @return: AST Formula in restricted syntax
- */
-ASTForm* ASTForm_All0::toRestrictedSyntax() {
-   f = f->toRestrictedSyntax();
-   return this;
-}
-
-/**
- * Transformation of formula to the restricted syntax, according to the
- * rules for transformation to restricted syntax.
- *
- * @return: AST Formula in restricted syntax
- */
-ASTForm* ASTForm_All1::toRestrictedSyntax() {
-   f = f->toRestrictedSyntax();
-   return this;
-}
-
-/**
- * Transformation of formula to the restricted syntax, according to the
- * rules for transformation to restricted syntax.
- *
- * @return: AST Formula in restricted syntax
- */
-ASTForm* ASTForm_All2::toRestrictedSyntax() {
-   f = f->toRestrictedSyntax();
-   return this;
-}
-
-/**
- * Transformation of formula to the restricted syntax, according to the
- * rules for transformation to restricted syntax.
- *
- * @return: AST Formula in restricted syntax
- */
-ASTForm* ASTForm_Not::toRestrictedSyntax() {
-   f = f->toRestrictedSyntax();
-   return this;
-}
 
 /* Transformations to Prenex Normal Form */
 //  1) childs are transformed to prenex normal form 
@@ -557,9 +394,13 @@ ASTForm* ASTForm_uvf::unfoldNegations() {
  * @return: AST representation of formula in Existentional Normal Form
  */
 ASTForm* ASTForm::toExistentionalPNF() {
-   ASTForm* temp;
-   temp = this->toRestrictedSyntax();
-   temp = temp->toPrenexNormalForm();
-   temp = temp->removeUniversalQuantifier();
-   return temp->unfoldNegations();
+    ASTForm* temp;
+    //temp = this->toRestrictedSyntax();
+
+    SyntaxRestricter sr_visitor;
+    temp = static_cast<ASTForm*>(this->accept(sr_visitor));
+
+    temp = temp->toPrenexNormalForm();
+    temp = temp->removeUniversalQuantifier();
+    return temp->unfoldNegations();
 }

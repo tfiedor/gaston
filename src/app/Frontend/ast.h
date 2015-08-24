@@ -168,7 +168,6 @@ public:
   virtual ASTForm* clone() { return this; }
 
   // AST Transformations
-  virtual ASTForm* toRestrictedSyntax() { return this; }
   virtual ASTForm* toPrenexNormalForm() { return this; }
   virtual ASTForm* removeUniversalQuantifier() { return this; }
   virtual ASTForm* unfoldNegations() { return this; }
@@ -1118,8 +1117,6 @@ public:
   VarCode makeCode(SubstCode *subst = NULL);
   void dump();
   ASTForm* clone() { return new ASTForm_Impl(this->f1->clone(), this->f2->clone(), this->pos); }
-
-  ASTForm* toRestrictedSyntax();
 };
 
 class ASTForm_Biimpl: public ASTForm_ff {
@@ -1132,8 +1129,6 @@ public:
   VarCode makeCode(SubstCode *subst = NULL);
   void dump();
   ASTForm* clone() { return new ASTForm_Biimpl(this->f1->clone(), this->f2->clone(), this->pos); }
-
-  ASTForm* toRestrictedSyntax();
 };
 
 class ASTForm_And: public ASTForm_ff {
@@ -1146,8 +1141,6 @@ public:
   VarCode makeCode(SubstCode *subst = NULL);
   void dump();
   ASTForm* clone() { return new ASTForm_And(this->f1->clone(), this->f2->clone(), this->pos); }
-
-  ASTForm* toRestrictedSyntax();
 
   ASTForm* flatten();
   void toUnaryAutomaton(Automaton &aut, bool doComplement);
@@ -1164,8 +1157,6 @@ public:
   VarCode makeCode(SubstCode *subst = NULL);
   void dump();
   ASTForm* clone() { return new ASTForm_IdLeft(this->f1->clone(), this->f2->clone(), this->pos); }
-
-  ASTForm* toRestrictedSyntax();
 };
 
 class ASTForm_Or: public ASTForm_ff {
@@ -1178,8 +1169,6 @@ public:
   VarCode makeCode(SubstCode *subst = NULL);
   void dump();
   ASTForm* clone() { return new ASTForm_Or(this->f1->clone(), this->f2->clone(), this->pos); }
-
-  ASTForm* toRestrictedSyntax();
 
   void toUnaryAutomaton(Automaton &aut, bool doComplement);
   void toBinaryAutomaton(Automaton &aut, bool doComplement);
@@ -1200,7 +1189,6 @@ public:
   ASTForm* flatten();
   ASTForm* unfoldMacro(IdentList*, ASTList*);
 
-  ASTForm* toRestrictedSyntax();
   ASTForm* toPrenexNormalForm();
   ASTForm* unfoldNegations();
   ASTForm* removeUniversalQuantifier();
@@ -1222,8 +1210,6 @@ public:
   VarCode makeCode(SubstCode *subst = NULL);
   void dump();
   ASTForm* clone() { return new ASTForm_Ex0(this->vl->copy(), this->f->clone(), this->pos); }
-
-  ASTForm* toRestrictedSyntax();
 };
 
 class ASTForm_Ex1: public ASTForm_uvf {
@@ -1237,7 +1223,6 @@ public:
   void dump();
   ASTForm* clone() { return new ASTForm_Ex1(this->ul, this->vl->copy(), this->f->clone(), this->pos); }
 
-  ASTForm* toRestrictedSyntax();
   ASTForm* flatten();
   ASTForm* prefixToSecondOrder();
 };
@@ -1253,7 +1238,6 @@ public:
   void dump();
   ASTForm* clone() { return new ASTForm_Ex2(this->ul, this->vl->copy(), this->f->clone(), this->pos); }
 
-  ASTForm* toRestrictedSyntax();
   ASTForm* prefixToSecondOrder();
 };
 
@@ -1268,7 +1252,6 @@ public:
   void dump();
   ASTForm* clone() { return new ASTForm_All0(this->vl->copy(), this->f->clone(), this->pos); }
 
-  ASTForm* toRestrictedSyntax();
   ASTForm* removeUniversalQuantifier();
 };
 
@@ -1283,7 +1266,6 @@ public:
   void dump();
   ASTForm* clone() { return new ASTForm_All1(this->ul, this->vl->copy(), this->f->clone(), this->pos); }
 
-  ASTForm* toRestrictedSyntax();
   ASTForm* removeUniversalQuantifier();
   ASTForm* flatten();
 };
@@ -1298,8 +1280,7 @@ public:
   VarCode makeCode(SubstCode *subst = NULL);
   void dump();
   ASTForm* clone() { return new ASTForm_All2(this->ul, this->vl->copy(), this->f->clone(), this->pos); }
-
-  ASTForm* toRestrictedSyntax();
+    
   ASTForm* removeUniversalQuantifier();
 };
 
