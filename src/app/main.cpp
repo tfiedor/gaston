@@ -42,7 +42,7 @@
 #include <DecisionProcedure/decision_procedures.hh>
 #include <DecisionProcedure/containers/VarToTrackMap.hh>
 #include "DecisionProcedure/containers/Cache.hh"
-#include "DecisionProcedure/visitors/PrettyPrinter.h"
+#include "DecisionProcedure/visitors/BooleanUnfolder.h"
 
 // < Typedefs and usings >
 using std::cout;
@@ -354,15 +354,13 @@ int main(int argc, char *argv[])
   }
 
 	// INSERT FUN HERE
-	PrettyPrinter pp;
-	ASTForm_True *t = new ASTForm_True(Pos());
-	ASTForm_True *tt = new ASTForm_True(Pos());
-	ASTForm_And* a = new ASTForm_And(t, tt, Pos());
-	cout << "Print True:\n";
-	t->accept(pp);
-	cout << "Print whole:\n";
-	a->accept(pp);
-	delete a;
+	cout << "[*] Main formula:\n";
+	(ast->formula)->dump();
+	BooleanUnfolder bu_visitor;
+	ast->formula = static_cast<ASTForm*>((ast->formula)->accept(bu_visitor));
+	cout << "\n[*] Main formula after Boolean unfolding:\n";
+	(ast->formula)->dump();
+	cout << "\n";
 
   timer_formula.start();
   if(options.noExpnf == false) {
@@ -423,8 +421,6 @@ int main(int argc, char *argv[])
 	  cout << "\n";
   }
 
-	// TEMPORARY TRYINGS
-  
   ///////// Conversion to Tree Automata ////////
 
   // Table or BDD tracks are reordered

@@ -47,6 +47,7 @@ add_executable(dWiNA
 	src/app/DecisionProcedure/containers/VarToTrackMap.cpp
 	src/app/DecisionProcedure/containers/StateSet.cpp
 	src/app/DecisionProcedure/visitors/PrettyPrinter.cpp
+	src/app/DecisionProcedure/visitors/BooleanUnfolder.cpp
 )
 
 link_directories(${CMAKE_SOURCE_DIR}/src/libs/)

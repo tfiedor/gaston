@@ -330,6 +330,30 @@ src/app/DecisionProcedure/formula_to_automaton_ws2s.cpp.s:
 	$(MAKE) -f CMakeFiles/dWiNA.dir/build.make CMakeFiles/dWiNA.dir/src/app/DecisionProcedure/formula_to_automaton_ws2s.cpp.s
 .PHONY : src/app/DecisionProcedure/formula_to_automaton_ws2s.cpp.s
 
+src/app/DecisionProcedure/visitors/BooleanUnfolder.o: src/app/DecisionProcedure/visitors/BooleanUnfolder.cpp.o
+.PHONY : src/app/DecisionProcedure/visitors/BooleanUnfolder.o
+
+# target to build an object file
+src/app/DecisionProcedure/visitors/BooleanUnfolder.cpp.o:
+	$(MAKE) -f CMakeFiles/dWiNA.dir/build.make CMakeFiles/dWiNA.dir/src/app/DecisionProcedure/visitors/BooleanUnfolder.cpp.o
+.PHONY : src/app/DecisionProcedure/visitors/BooleanUnfolder.cpp.o
+
+src/app/DecisionProcedure/visitors/BooleanUnfolder.i: src/app/DecisionProcedure/visitors/BooleanUnfolder.cpp.i
+.PHONY : src/app/DecisionProcedure/visitors/BooleanUnfolder.i
+
+# target to preprocess a source file
+src/app/DecisionProcedure/visitors/BooleanUnfolder.cpp.i:
+	$(MAKE) -f CMakeFiles/dWiNA.dir/build.make CMakeFiles/dWiNA.dir/src/app/DecisionProcedure/visitors/BooleanUnfolder.cpp.i
+.PHONY : src/app/DecisionProcedure/visitors/BooleanUnfolder.cpp.i
+
+src/app/DecisionProcedure/visitors/BooleanUnfolder.s: src/app/DecisionProcedure/visitors/BooleanUnfolder.cpp.s
+.PHONY : src/app/DecisionProcedure/visitors/BooleanUnfolder.s
+
+# target to generate assembly for a file
+src/app/DecisionProcedure/visitors/BooleanUnfolder.cpp.s:
+	$(MAKE) -f CMakeFiles/dWiNA.dir/build.make CMakeFiles/dWiNA.dir/src/app/DecisionProcedure/visitors/BooleanUnfolder.cpp.s
+.PHONY : src/app/DecisionProcedure/visitors/BooleanUnfolder.cpp.s
+
 src/app/DecisionProcedure/visitors/PrettyPrinter.o: src/app/DecisionProcedure/visitors/PrettyPrinter.cpp.o
 .PHONY : src/app/DecisionProcedure/visitors/PrettyPrinter.o
 
@@ -966,6 +990,9 @@ help:
 	@echo "... src/app/DecisionProcedure/formula_to_automaton_ws2s.o"
 	@echo "... src/app/DecisionProcedure/formula_to_automaton_ws2s.i"
 	@echo "... src/app/DecisionProcedure/formula_to_automaton_ws2s.s"
+	@echo "... src/app/DecisionProcedure/visitors/BooleanUnfolder.o"
+	@echo "... src/app/DecisionProcedure/visitors/BooleanUnfolder.i"
+	@echo "... src/app/DecisionProcedure/visitors/BooleanUnfolder.s"
 	@echo "... src/app/DecisionProcedure/visitors/PrettyPrinter.o"
 	@echo "... src/app/DecisionProcedure/visitors/PrettyPrinter.i"
 	@echo "... src/app/DecisionProcedure/visitors/PrettyPrinter.s"
