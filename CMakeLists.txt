@@ -46,8 +46,13 @@ add_executable(dWiNA
 	src/app/DecisionProcedure/backward_decision_procedure.cpp
 	src/app/DecisionProcedure/containers/VarToTrackMap.cpp
 	src/app/DecisionProcedure/containers/StateSet.cpp
-	src/app/DecisionProcedure/visitors/PrettyPrinter.cpp
 	src/app/DecisionProcedure/visitors/BooleanUnfolder.cpp
+	src/app/DecisionProcedure/visitors/Flattener.cpp
+	src/app/DecisionProcedure/visitors/NegationUnfolder.cpp
+	src/app/DecisionProcedure/visitors/PrenexNormalFormTransformer.cpp
+	src/app/DecisionProcedure/visitors/SecondOrderRestricter.cpp
+	src/app/DecisionProcedure/visitors/SyntaxRestricter.cpp
+	src/app/DecisionProcedure/visitors/UniversalQuantifierRemover.cpp
 )
 
 link_directories(${CMAKE_SOURCE_DIR}/src/libs/)

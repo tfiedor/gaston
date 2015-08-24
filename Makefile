@@ -354,29 +354,149 @@ src/app/DecisionProcedure/visitors/BooleanUnfolder.cpp.s:
 	$(MAKE) -f CMakeFiles/dWiNA.dir/build.make CMakeFiles/dWiNA.dir/src/app/DecisionProcedure/visitors/BooleanUnfolder.cpp.s
 .PHONY : src/app/DecisionProcedure/visitors/BooleanUnfolder.cpp.s
 
-src/app/DecisionProcedure/visitors/PrettyPrinter.o: src/app/DecisionProcedure/visitors/PrettyPrinter.cpp.o
-.PHONY : src/app/DecisionProcedure/visitors/PrettyPrinter.o
+src/app/DecisionProcedure/visitors/Flattener.o: src/app/DecisionProcedure/visitors/Flattener.cpp.o
+.PHONY : src/app/DecisionProcedure/visitors/Flattener.o
 
 # target to build an object file
-src/app/DecisionProcedure/visitors/PrettyPrinter.cpp.o:
-	$(MAKE) -f CMakeFiles/dWiNA.dir/build.make CMakeFiles/dWiNA.dir/src/app/DecisionProcedure/visitors/PrettyPrinter.cpp.o
-.PHONY : src/app/DecisionProcedure/visitors/PrettyPrinter.cpp.o
+src/app/DecisionProcedure/visitors/Flattener.cpp.o:
+	$(MAKE) -f CMakeFiles/dWiNA.dir/build.make CMakeFiles/dWiNA.dir/src/app/DecisionProcedure/visitors/Flattener.cpp.o
+.PHONY : src/app/DecisionProcedure/visitors/Flattener.cpp.o
 
-src/app/DecisionProcedure/visitors/PrettyPrinter.i: src/app/DecisionProcedure/visitors/PrettyPrinter.cpp.i
-.PHONY : src/app/DecisionProcedure/visitors/PrettyPrinter.i
+src/app/DecisionProcedure/visitors/Flattener.i: src/app/DecisionProcedure/visitors/Flattener.cpp.i
+.PHONY : src/app/DecisionProcedure/visitors/Flattener.i
 
 # target to preprocess a source file
-src/app/DecisionProcedure/visitors/PrettyPrinter.cpp.i:
-	$(MAKE) -f CMakeFiles/dWiNA.dir/build.make CMakeFiles/dWiNA.dir/src/app/DecisionProcedure/visitors/PrettyPrinter.cpp.i
-.PHONY : src/app/DecisionProcedure/visitors/PrettyPrinter.cpp.i
+src/app/DecisionProcedure/visitors/Flattener.cpp.i:
+	$(MAKE) -f CMakeFiles/dWiNA.dir/build.make CMakeFiles/dWiNA.dir/src/app/DecisionProcedure/visitors/Flattener.cpp.i
+.PHONY : src/app/DecisionProcedure/visitors/Flattener.cpp.i
 
-src/app/DecisionProcedure/visitors/PrettyPrinter.s: src/app/DecisionProcedure/visitors/PrettyPrinter.cpp.s
-.PHONY : src/app/DecisionProcedure/visitors/PrettyPrinter.s
+src/app/DecisionProcedure/visitors/Flattener.s: src/app/DecisionProcedure/visitors/Flattener.cpp.s
+.PHONY : src/app/DecisionProcedure/visitors/Flattener.s
 
 # target to generate assembly for a file
-src/app/DecisionProcedure/visitors/PrettyPrinter.cpp.s:
-	$(MAKE) -f CMakeFiles/dWiNA.dir/build.make CMakeFiles/dWiNA.dir/src/app/DecisionProcedure/visitors/PrettyPrinter.cpp.s
-.PHONY : src/app/DecisionProcedure/visitors/PrettyPrinter.cpp.s
+src/app/DecisionProcedure/visitors/Flattener.cpp.s:
+	$(MAKE) -f CMakeFiles/dWiNA.dir/build.make CMakeFiles/dWiNA.dir/src/app/DecisionProcedure/visitors/Flattener.cpp.s
+.PHONY : src/app/DecisionProcedure/visitors/Flattener.cpp.s
+
+src/app/DecisionProcedure/visitors/NegationUnfolder.o: src/app/DecisionProcedure/visitors/NegationUnfolder.cpp.o
+.PHONY : src/app/DecisionProcedure/visitors/NegationUnfolder.o
+
+# target to build an object file
+src/app/DecisionProcedure/visitors/NegationUnfolder.cpp.o:
+	$(MAKE) -f CMakeFiles/dWiNA.dir/build.make CMakeFiles/dWiNA.dir/src/app/DecisionProcedure/visitors/NegationUnfolder.cpp.o
+.PHONY : src/app/DecisionProcedure/visitors/NegationUnfolder.cpp.o
+
+src/app/DecisionProcedure/visitors/NegationUnfolder.i: src/app/DecisionProcedure/visitors/NegationUnfolder.cpp.i
+.PHONY : src/app/DecisionProcedure/visitors/NegationUnfolder.i
+
+# target to preprocess a source file
+src/app/DecisionProcedure/visitors/NegationUnfolder.cpp.i:
+	$(MAKE) -f CMakeFiles/dWiNA.dir/build.make CMakeFiles/dWiNA.dir/src/app/DecisionProcedure/visitors/NegationUnfolder.cpp.i
+.PHONY : src/app/DecisionProcedure/visitors/NegationUnfolder.cpp.i
+
+src/app/DecisionProcedure/visitors/NegationUnfolder.s: src/app/DecisionProcedure/visitors/NegationUnfolder.cpp.s
+.PHONY : src/app/DecisionProcedure/visitors/NegationUnfolder.s
+
+# target to generate assembly for a file
+src/app/DecisionProcedure/visitors/NegationUnfolder.cpp.s:
+	$(MAKE) -f CMakeFiles/dWiNA.dir/build.make CMakeFiles/dWiNA.dir/src/app/DecisionProcedure/visitors/NegationUnfolder.cpp.s
+.PHONY : src/app/DecisionProcedure/visitors/NegationUnfolder.cpp.s
+
+src/app/DecisionProcedure/visitors/PrenexNormalFormTransformer.o: src/app/DecisionProcedure/visitors/PrenexNormalFormTransformer.cpp.o
+.PHONY : src/app/DecisionProcedure/visitors/PrenexNormalFormTransformer.o
+
+# target to build an object file
+src/app/DecisionProcedure/visitors/PrenexNormalFormTransformer.cpp.o:
+	$(MAKE) -f CMakeFiles/dWiNA.dir/build.make CMakeFiles/dWiNA.dir/src/app/DecisionProcedure/visitors/PrenexNormalFormTransformer.cpp.o
+.PHONY : src/app/DecisionProcedure/visitors/PrenexNormalFormTransformer.cpp.o
+
+src/app/DecisionProcedure/visitors/PrenexNormalFormTransformer.i: src/app/DecisionProcedure/visitors/PrenexNormalFormTransformer.cpp.i
+.PHONY : src/app/DecisionProcedure/visitors/PrenexNormalFormTransformer.i
+
+# target to preprocess a source file
+src/app/DecisionProcedure/visitors/PrenexNormalFormTransformer.cpp.i:
+	$(MAKE) -f CMakeFiles/dWiNA.dir/build.make CMakeFiles/dWiNA.dir/src/app/DecisionProcedure/visitors/PrenexNormalFormTransformer.cpp.i
+.PHONY : src/app/DecisionProcedure/visitors/PrenexNormalFormTransformer.cpp.i
+
+src/app/DecisionProcedure/visitors/PrenexNormalFormTransformer.s: src/app/DecisionProcedure/visitors/PrenexNormalFormTransformer.cpp.s
+.PHONY : src/app/DecisionProcedure/visitors/PrenexNormalFormTransformer.s
+
+# target to generate assembly for a file
+src/app/DecisionProcedure/visitors/PrenexNormalFormTransformer.cpp.s:
+	$(MAKE) -f CMakeFiles/dWiNA.dir/build.make CMakeFiles/dWiNA.dir/src/app/DecisionProcedure/visitors/PrenexNormalFormTransformer.cpp.s
+.PHONY : src/app/DecisionProcedure/visitors/PrenexNormalFormTransformer.cpp.s
+
+src/app/DecisionProcedure/visitors/SecondOrderRestricter.o: src/app/DecisionProcedure/visitors/SecondOrderRestricter.cpp.o
+.PHONY : src/app/DecisionProcedure/visitors/SecondOrderRestricter.o
+
+# target to build an object file
+src/app/DecisionProcedure/visitors/SecondOrderRestricter.cpp.o:
+	$(MAKE) -f CMakeFiles/dWiNA.dir/build.make CMakeFiles/dWiNA.dir/src/app/DecisionProcedure/visitors/SecondOrderRestricter.cpp.o
+.PHONY : src/app/DecisionProcedure/visitors/SecondOrderRestricter.cpp.o
+
+src/app/DecisionProcedure/visitors/SecondOrderRestricter.i: src/app/DecisionProcedure/visitors/SecondOrderRestricter.cpp.i
+.PHONY : src/app/DecisionProcedure/visitors/SecondOrderRestricter.i
+
+# target to preprocess a source file
+src/app/DecisionProcedure/visitors/SecondOrderRestricter.cpp.i:
+	$(MAKE) -f CMakeFiles/dWiNA.dir/build.make CMakeFiles/dWiNA.dir/src/app/DecisionProcedure/visitors/SecondOrderRestricter.cpp.i
+.PHONY : src/app/DecisionProcedure/visitors/SecondOrderRestricter.cpp.i
+
+src/app/DecisionProcedure/visitors/SecondOrderRestricter.s: src/app/DecisionProcedure/visitors/SecondOrderRestricter.cpp.s
+.PHONY : src/app/DecisionProcedure/visitors/SecondOrderRestricter.s
+
+# target to generate assembly for a file
+src/app/DecisionProcedure/visitors/SecondOrderRestricter.cpp.s:
+	$(MAKE) -f CMakeFiles/dWiNA.dir/build.make CMakeFiles/dWiNA.dir/src/app/DecisionProcedure/visitors/SecondOrderRestricter.cpp.s
+.PHONY : src/app/DecisionProcedure/visitors/SecondOrderRestricter.cpp.s
+
+src/app/DecisionProcedure/visitors/SyntaxRestricter.o: src/app/DecisionProcedure/visitors/SyntaxRestricter.cpp.o
+.PHONY : src/app/DecisionProcedure/visitors/SyntaxRestricter.o
+
+# target to build an object file
+src/app/DecisionProcedure/visitors/SyntaxRestricter.cpp.o:
+	$(MAKE) -f CMakeFiles/dWiNA.dir/build.make CMakeFiles/dWiNA.dir/src/app/DecisionProcedure/visitors/SyntaxRestricter.cpp.o
+.PHONY : src/app/DecisionProcedure/visitors/SyntaxRestricter.cpp.o
+
+src/app/DecisionProcedure/visitors/SyntaxRestricter.i: src/app/DecisionProcedure/visitors/SyntaxRestricter.cpp.i
+.PHONY : src/app/DecisionProcedure/visitors/SyntaxRestricter.i
+
+# target to preprocess a source file
+src/app/DecisionProcedure/visitors/SyntaxRestricter.cpp.i:
+	$(MAKE) -f CMakeFiles/dWiNA.dir/build.make CMakeFiles/dWiNA.dir/src/app/DecisionProcedure/visitors/SyntaxRestricter.cpp.i
+.PHONY : src/app/DecisionProcedure/visitors/SyntaxRestricter.cpp.i
+
+src/app/DecisionProcedure/visitors/SyntaxRestricter.s: src/app/DecisionProcedure/visitors/SyntaxRestricter.cpp.s
+.PHONY : src/app/DecisionProcedure/visitors/SyntaxRestricter.s
+
+# target to generate assembly for a file
+src/app/DecisionProcedure/visitors/SyntaxRestricter.cpp.s:
+	$(MAKE) -f CMakeFiles/dWiNA.dir/build.make CMakeFiles/dWiNA.dir/src/app/DecisionProcedure/visitors/SyntaxRestricter.cpp.s
+.PHONY : src/app/DecisionProcedure/visitors/SyntaxRestricter.cpp.s
+
+src/app/DecisionProcedure/visitors/UniversalQuantifierRemover.o: src/app/DecisionProcedure/visitors/UniversalQuantifierRemover.cpp.o
+.PHONY : src/app/DecisionProcedure/visitors/UniversalQuantifierRemover.o
+
+# target to build an object file
+src/app/DecisionProcedure/visitors/UniversalQuantifierRemover.cpp.o:
+	$(MAKE) -f CMakeFiles/dWiNA.dir/build.make CMakeFiles/dWiNA.dir/src/app/DecisionProcedure/visitors/UniversalQuantifierRemover.cpp.o
+.PHONY : src/app/DecisionProcedure/visitors/UniversalQuantifierRemover.cpp.o
+
+src/app/DecisionProcedure/visitors/UniversalQuantifierRemover.i: src/app/DecisionProcedure/visitors/UniversalQuantifierRemover.cpp.i
+.PHONY : src/app/DecisionProcedure/visitors/UniversalQuantifierRemover.i
+
+# target to preprocess a source file
+src/app/DecisionProcedure/visitors/UniversalQuantifierRemover.cpp.i:
+	$(MAKE) -f CMakeFiles/dWiNA.dir/build.make CMakeFiles/dWiNA.dir/src/app/DecisionProcedure/visitors/UniversalQuantifierRemover.cpp.i
+.PHONY : src/app/DecisionProcedure/visitors/UniversalQuantifierRemover.cpp.i
+
+src/app/DecisionProcedure/visitors/UniversalQuantifierRemover.s: src/app/DecisionProcedure/visitors/UniversalQuantifierRemover.cpp.s
+.PHONY : src/app/DecisionProcedure/visitors/UniversalQuantifierRemover.s
+
+# target to generate assembly for a file
+src/app/DecisionProcedure/visitors/UniversalQuantifierRemover.cpp.s:
+	$(MAKE) -f CMakeFiles/dWiNA.dir/build.make CMakeFiles/dWiNA.dir/src/app/DecisionProcedure/visitors/UniversalQuantifierRemover.cpp.s
+.PHONY : src/app/DecisionProcedure/visitors/UniversalQuantifierRemover.cpp.s
 
 src/app/Frontend/ast.o: src/app/Frontend/ast.cpp.o
 .PHONY : src/app/Frontend/ast.o
@@ -993,9 +1113,24 @@ help:
 	@echo "... src/app/DecisionProcedure/visitors/BooleanUnfolder.o"
 	@echo "... src/app/DecisionProcedure/visitors/BooleanUnfolder.i"
 	@echo "... src/app/DecisionProcedure/visitors/BooleanUnfolder.s"
-	@echo "... src/app/DecisionProcedure/visitors/PrettyPrinter.o"
-	@echo "... src/app/DecisionProcedure/visitors/PrettyPrinter.i"
-	@echo "... src/app/DecisionProcedure/visitors/PrettyPrinter.s"
+	@echo "... src/app/DecisionProcedure/visitors/Flattener.o"
+	@echo "... src/app/DecisionProcedure/visitors/Flattener.i"
+	@echo "... src/app/DecisionProcedure/visitors/Flattener.s"
+	@echo "... src/app/DecisionProcedure/visitors/NegationUnfolder.o"
+	@echo "... src/app/DecisionProcedure/visitors/NegationUnfolder.i"
+	@echo "... src/app/DecisionProcedure/visitors/NegationUnfolder.s"
+	@echo "... src/app/DecisionProcedure/visitors/PrenexNormalFormTransformer.o"
+	@echo "... src/app/DecisionProcedure/visitors/PrenexNormalFormTransformer.i"
+	@echo "... src/app/DecisionProcedure/visitors/PrenexNormalFormTransformer.s"
+	@echo "... src/app/DecisionProcedure/visitors/SecondOrderRestricter.o"
+	@echo "... src/app/DecisionProcedure/visitors/SecondOrderRestricter.i"
+	@echo "... src/app/DecisionProcedure/visitors/SecondOrderRestricter.s"
+	@echo "... src/app/DecisionProcedure/visitors/SyntaxRestricter.o"
+	@echo "... src/app/DecisionProcedure/visitors/SyntaxRestricter.i"
+	@echo "... src/app/DecisionProcedure/visitors/SyntaxRestricter.s"
+	@echo "... src/app/DecisionProcedure/visitors/UniversalQuantifierRemover.o"
+	@echo "... src/app/DecisionProcedure/visitors/UniversalQuantifierRemover.i"
+	@echo "... src/app/DecisionProcedure/visitors/UniversalQuantifierRemover.s"
 	@echo "... src/app/Frontend/ast.o"
 	@echo "... src/app/Frontend/ast.i"
 	@echo "... src/app/Frontend/ast.s"

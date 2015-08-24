@@ -563,4 +563,3 @@ ASTForm* ASTForm::toExistentionalPNF() {
    temp = temp->removeUniversalQuantifier();
    return temp->unfoldNegations();
 }
-
