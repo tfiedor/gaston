@@ -168,9 +168,8 @@ public:
   virtual ASTForm* clone() { return this; }
 
   // AST Transformations
-  virtual ASTForm* toPrenexNormalForm() { return this; }
   virtual ASTForm* flatten() { return this;}
-  virtual ASTForm* unfoldMacro(IdentList* i, ASTList* a) { /*std::cerr << "\nMissing unfolding for this formula\n"; this->dump();*/ return this; }
+  virtual ASTForm* unfoldMacro(IdentList* i, ASTList* a) { return this; }
 
   ASTForm* toExistentionalPNF();
   ASTForm* toSecondOrder();
@@ -445,7 +444,6 @@ public:
   VISITABLE();
 
   void freeVars(IdentList*, IdentList*);
-  ASTForm* toPrenexNormalForm();
   ASTForm* flatten();
   ASTForm* unfoldMacro(IdentList*, ASTList*);
 
@@ -471,7 +469,6 @@ public:
   VISITABLE();
 
   void freeVars(IdentList*, IdentList*);
-  ASTForm* toPrenexNormalForm();
   ASTForm* flatten();
   ASTForm* unfoldMacro(IdentList*, ASTList*);
 
@@ -487,7 +484,6 @@ public:
   VISITABLE();
 
   void freeVars(IdentList*, IdentList*);
-  ASTForm* toPrenexNormalForm();
   ASTForm* flatten();
   ASTForm* unfoldMacro(IdentList*, ASTList*);
 
@@ -1179,8 +1175,6 @@ public:
   ASTForm* clone() { return new ASTForm_Not(this->f->clone(), this->pos); }
   ASTForm* flatten();
   ASTForm* unfoldMacro(IdentList*, ASTList*);
-
-  ASTForm* toPrenexNormalForm();
 
   void toUnaryAutomaton(Automaton &aut, bool doComplement);
   void toBinaryAutomaton(Automaton &aut, bool doComplement);

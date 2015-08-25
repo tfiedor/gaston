@@ -50,7 +50,7 @@
 using std::cout;
 using StateToStateTranslator = VATA::AutBase::StateToStateTranslWeak;
 using StateToStateMap        = std::unordered_map<StateType, StateType>;
-using Automaton = VATA::BDDBottomUpTreeAut;
+using Automaton 			 = VATA::BDDBottomUpTreeAut;
 
 typedef unsigned int uint;
 
