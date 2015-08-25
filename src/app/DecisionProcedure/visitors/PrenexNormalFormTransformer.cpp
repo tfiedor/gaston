@@ -20,7 +20,9 @@
  * @return: true if childs has quantifier, i.e. forall or exists.
  */
 bool hasQuantifier(ASTForm* child) {
-    return (child->kind == aEx0) | (child->kind == aEx1) | (child->kind == aEx2) |
+    assert(child != nullptr);
+
+    return (child->kind == aEx0)  | (child->kind == aEx1)  | (child->kind == aEx2) |
            (child->kind == aAll0) | (child->kind == aAll1) | (child->kind == aAll2);
 }
 
@@ -33,32 +35,12 @@ bool hasQuantifier(ASTForm* child) {
  *	@param parent: parent, that is switched with quantifier
  *	@return: formula with switched quantifier
  */
-ASTForm* switchNodeWithQuantifier(ASTForm_vf* quantifier, ASTForm* & current, ASTForm_ff* & parent) {
+ASTForm* switchNodeWithQuantifier(ASTForm_q* quantifier, ASTForm* & current, ASTForm_ff* & parent) {
     ASTForm* formula;
     formula = quantifier->f;
     quantifier->f = parent;
-    if(current != 0) {
-        ((ASTForm_q*)current)->f = quantifier;
-    }
-    current = quantifier;
-    return formula;
-}
-
-/**
- * Moves quantifier up, i.e. quantifier is moved from being child to
- * being a parent of its parent.
- *
- *	@param quantifier: node with quantifier
- *	@param current: current node, that is processed
- *	@param parent: parent, that is switched with quantifier
- *	@return: formula with switched quantifier
- */
-ASTForm *switchNodeWithQuantifier(ASTForm_uvf* quantifier, ASTForm* & current, ASTForm_ff* & parent) {
-    ASTForm* formula;
-    formula = quantifier->f;
-    quantifier->f = parent;
-    if(current != 0) {
-        ((ASTForm_q*)current)->f = quantifier;
+    if(current != nullptr) {
+        static_cast<ASTForm_q*>(current)->f = quantifier;
     }
     current = quantifier;
     return formula;
@@ -72,45 +54,74 @@ ASTForm *switchNodeWithQuantifier(ASTForm_uvf* quantifier, ASTForm* & current, A
 AST* PrenexNormalFormTransformer::visit(ASTForm_ff* form) {
     bool leftHasQuantifier, rightHasQuantifier;
 
-    std::cout << "Visiting ASTForm_ff:";
-    form->dump();
-    std::cout << "\n";
-
     ASTForm* root, *current;
-    root = 0;
-    current = 0;
+    root = nullptr;
+    current = nullptr;
 
     do {
         leftHasQuantifier = hasQuantifier(form->f1);
         rightHasQuantifier = hasQuantifier(form->f2);
 
         if(leftHasQuantifier) {
-            form->f1 = (form->f1->kind == aEx0 | form->f1->kind == aAll0) ?
-                 switchNodeWithQuantifier((ASTForm_vf*)form->f1, current, form) :
-                 switchNodeWithQuantifier((ASTForm_uvf*)form->f1, current, form);
-            root = (root == 0) ? current : root;
+            form->f1 = switchNodeWithQuantifier(static_cast<ASTForm_q*>(form->f1), current, form);
+            root = (root == nullptr) ? current : root;
             continue;
         }
 
         if(rightHasQuantifier) {
-            form->f2 = (form->f2->kind == aEx0 | form->f2->kind == aAll0) ?
-                 switchNodeWithQuantifier((ASTForm_vf*)form->f2, current, form) :
-                 switchNodeWithQuantifier((ASTForm_uvf*)form->f2, current, form);
-            root = (root == 0) ? current : root;
+            form->f2 = switchNodeWithQuantifier(static_cast<ASTForm_q*>(form->f2), current, form);
+            root = (root == nullptr) ? current : root;
         }
     } while (leftHasQuantifier | rightHasQuantifier);
-    std::cout << "Done visiting: ";
-    if (root != 0) {
-        std::cout << "Dumping root:";
-        root->dump();
-        std::cout << "\n";
-    }
-    std::cout << "Dumping form:";
-    form->dump();
-    std::cout << "\n";
 
-    return (root == 0) ? form : root;
+    return (root == nullptr) ? form : root;
 }
+
+/**
+ * Performs the transformation of the node to the negated version. This funcion is
+ * templated and types are restricted to ASTForm_q, class representing quantifiers,
+ * moreover this function is restricted to zero order, that has one less parameter.
+ *
+ * @class FromQuantifier    type of Quantifier class we are negating
+ * @class ToQuantifier      type of oposite quantifier
+ *
+ * @param[in] from      node we are negating
+ * @param[in] visitor   visitor for further transformation
+ */
+template <class FromQuantifier, class ToQuantifier>
+ToQuantifier* createNegatedQuantifier(ASTForm* from, ASTTransformer &visitor) {
+    static_assert(std::is_base_of<ASTForm_q, FromQuantifier>::value, "FromQuantifier is not derived from ASTForm_q");
+    static_assert(std::is_base_of<ASTForm_q, ToQuantifier>::value, "ToQuantifier is not derived from ASTForm_q");
+
+    // ex not phi = not all phi
+    // all not phi = ex not phi
+    FromQuantifier* q = static_cast<FromQuantifier*>(from);
+    ASTForm_Not* not_q = new ASTForm_Not(q->f, q->pos);
+    return new ToQuantifier(q->ul, q->vl, static_cast<ASTForm*>(not_q->accept(visitor)), q->pos);
+};
+
+/**
+ * Performs the transformation of the node to the negated version. This funcion is
+ * templated and types are restricted to ASTForm_q, class representing quantifiers.
+ *
+ * @class FromQuantifier    type of Quantifier class we are negating
+ * @class ToQuantifier      type of oposite quantifier
+ *
+ * @param[in] from      node we are negating
+ * @param[in] visitor   visitor for further transformation
+ */
+template <class FromQuantifier, class ToQuantifier>
+ToQuantifier* createZeroOrderNegatedQuantifier(ASTForm* from, ASTTransformer &visitor) {
+    static_assert(std::is_base_of<ASTForm_vf, FromQuantifier>::value, "FromQuantifier is not derived from ASTForm_q");
+    static_assert(std::is_base_of<ASTForm_vf, ToQuantifier>::value, "ToQuantifier is not derived from ASTForm_q");
+    assert(from != nullptr);
+
+    // ex not phi = not all phi
+    // all not phi = ex not phi
+    FromQuantifier* q = static_cast<FromQuantifier*>(from);
+    ASTForm_Not* not_q = new ASTForm_Not(q->f, q->pos);
+    return new ToQuantifier(q->vl, static_cast<ASTForm*>(not_q->accept(visitor)), q->pos);
+};
 
 /**
  * Moves quantifier through the negation, so exists is transformed to forall
@@ -120,32 +131,29 @@ AST* PrenexNormalFormTransformer::visit(ASTForm_ff* form) {
  * @return: formula with negated quantifier
  */
 ASTForm* negateQuantifier(ASTForm_Not* node, ASTTransformer &visitor) {
+    assert(node != nullptr);
+    assert(node->f != nullptr);
+
     ASTForm* formula, *q;
     q = node->f;
     switch(q->kind) {
         case aEx0:
-            formula = new ASTForm_Not(((ASTForm_Ex0*)q)->f, node->pos);
-            return new ASTForm_All0(((ASTForm_Ex0*)q)->vl, static_cast<ASTForm*>(formula->accept(visitor)), ((ASTForm_Ex0*)q)->pos);
+            return createZeroOrderNegatedQuantifier<ASTForm_Ex0, ASTForm_All0>(q, visitor);
             break;
         case aEx1:
-            formula = new ASTForm_Not(((ASTForm_Ex1*)q)->f, node->pos);
-            return new ASTForm_All1(((ASTForm_Ex1*)q)->ul, ((ASTForm_Ex1*)q)->vl, static_cast<ASTForm*>(formula->accept(visitor)), ((ASTForm_Ex1*)q)->pos);
+            return createNegatedQuantifier<ASTForm_Ex1, ASTForm_All1>(q, visitor);
             break;
         case aEx2:
-            formula = new ASTForm_Not(((ASTForm_Ex2*)q)->f, node->pos);
-            return new ASTForm_All2(((ASTForm_Ex2*)q)->ul, ((ASTForm_Ex2*)q)->vl, static_cast<ASTForm*>(formula->accept(visitor)), ((ASTForm_Ex2*)q)->pos);
+            return createNegatedQuantifier<ASTForm_Ex2, ASTForm_All2>(q, visitor);
             break;
         case aAll0:
-            formula = new ASTForm_Not(((ASTForm_All0*)q)->f, node->pos);
-            return new ASTForm_Ex0(((ASTForm_All0*)q)->vl, static_cast<ASTForm*>(formula->accept(visitor)), ((ASTForm_All0*)q)->pos);
+            return createZeroOrderNegatedQuantifier<ASTForm_All0, ASTForm_All0>(q, visitor);
             break;
         case aAll1:
-            formula = new ASTForm_Not(((ASTForm_All1*)q)->f, node->pos);
-            return new ASTForm_Ex1(((ASTForm_All1*)q)->ul, ((ASTForm_All1*)q)->vl,static_cast<ASTForm*>(formula->accept(visitor)), ((ASTForm_All1*)q)->pos);
+            return createNegatedQuantifier<ASTForm_All1, ASTForm_Ex1>(q, visitor);
             break;
         case aAll2:
-            formula = new ASTForm_Not(((ASTForm_All2*)q)->f, node->pos);
-            return new ASTForm_Ex2(((ASTForm_All2*)q)->ul, ((ASTForm_All2*)q)->vl, static_cast<ASTForm*>(formula->accept(visitor)), ((ASTForm_All2*)q)->pos);
+            return createNegatedQuantifier<ASTForm_All2, ASTForm_Ex2>(q, visitor);
             break;
         default:
             return node;
@@ -158,5 +166,7 @@ ASTForm* negateQuantifier(ASTForm_Not* node, ASTTransformer &visitor) {
  * @param[in] form:     traversed Not node
  */
 AST* PrenexNormalFormTransformer::visit(ASTForm_Not* form) {
+    assert(form != nullptr);
+    
     return negateQuantifier(form, *this);
 }
