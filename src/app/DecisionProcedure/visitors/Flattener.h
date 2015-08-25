@@ -12,8 +12,16 @@
 
 #include "../Frontend/ast.h"
 #include "../Frontend/ast_visitor.h"
+#include "../Frontend/env.h"
+#include "../Frontend/predlib.h"
+#include "../Frontend/symboltable.h"
+#include "../environment.hh"
 
 class Flattener : public ASTTransformer {
+public:
+    static ASTTerm1_Var1* generateFreshFirstOrder();
+    static ASTTerm2_Var2* generateFreshSecondOrder();
+
     AST* visit(ASTTerm1_Plus* term);
     AST* visit(ASTForm_Equal1* form);
     AST* visit(ASTForm_Equal2* form);
@@ -26,6 +34,7 @@ class Flattener : public ASTTransformer {
     AST* visit(ASTForm_Sub* form);
     AST* visit(ASTForm_Ex1* form);
     AST* visit(ASTForm_All1* form);
+    AST* visit(ASTForm_Call* form);
 };
 
 

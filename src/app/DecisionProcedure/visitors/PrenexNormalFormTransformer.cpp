@@ -167,6 +167,6 @@ ASTForm* negateQuantifier(ASTForm_Not* node, ASTTransformer &visitor) {
  */
 AST* PrenexNormalFormTransformer::visit(ASTForm_Not* form) {
     assert(form != nullptr);
-    
+
     return negateQuantifier(form, *this);
 }

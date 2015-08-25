@@ -135,7 +135,6 @@ public:
   ASTTermCode *makeCode(SubstCode *subst = NULL) = 0;
   virtual ASTTerm1* unfoldMacro(IdentList*, ASTList*) { return this;}
   virtual ASTTerm1* clone() { return this; }
-  virtual ASTTerm* flatten() { return this; }
   void dump() = 0;
 };
 
@@ -168,7 +167,6 @@ public:
   virtual ASTForm* clone() { return this; }
 
   // AST Transformations
-  virtual ASTForm* flatten() { return this;}
   virtual ASTForm* unfoldMacro(IdentList* i, ASTList* a) { return this; }
 
   ASTForm* toExistentionalPNF();
@@ -429,7 +427,6 @@ public:
   VISITABLE();;
 
   void freeVars(IdentList*, IdentList*);
-  ASTForm* flatten();
   ASTForm* unfoldMacro(IdentList*, ASTList*);
 
   ASTForm *f;
@@ -444,7 +441,6 @@ public:
   VISITABLE();
 
   void freeVars(IdentList*, IdentList*);
-  ASTForm* flatten();
   ASTForm* unfoldMacro(IdentList*, ASTList*);
 
   ASTForm *f1;
@@ -469,7 +465,6 @@ public:
   VISITABLE();
 
   void freeVars(IdentList*, IdentList*);
-  ASTForm* flatten();
   ASTForm* unfoldMacro(IdentList*, ASTList*);
 
   IdentList *vl;
@@ -484,7 +479,6 @@ public:
   VISITABLE();
 
   void freeVars(IdentList*, IdentList*);
-  ASTForm* flatten();
   ASTForm* unfoldMacro(IdentList*, ASTList*);
 
   IdentList *ul;
@@ -571,7 +565,6 @@ public:
   VISITABLE();
 
   ASTTermCode *makeCode(SubstCode *subst = NULL);
-  ASTTerm* flatten();
   void dump();
 };
 
@@ -906,9 +899,6 @@ public:
   VarCode makeCode(SubstCode *subst = NULL);
   void dump();
   ASTForm* clone() { return new ASTForm_In(this->t1, this->T2, this->pos); }
-
-  ASTForm* flatten();
-
   // Conversion of AST representation of formula to Automaton
   void toUnaryAutomaton(Automaton &aut, bool doComplement);
 };
@@ -916,15 +906,15 @@ public:
 class ASTForm_Notin: public ASTForm_tT {
 public:
   ASTForm_Notin(ASTTerm1 *t1, ASTTerm2 *T2, Pos p) :
-		  ASTForm_tT(aNotin, t1, T2, p) {}
+          ASTForm_tT(aNotin, t1, T2, p) { }
 
   VISITABLE();
 
   VarCode makeCode(SubstCode *subst = NULL);
-  void dump();
-  ASTForm* clone() { return new ASTForm_Notin(this->t1, this->T2, this->pos); }
 
-  ASTForm* flatten();
+  void dump();
+
+  ASTForm *clone() { return new ASTForm_Notin(this->t1, this->T2, this->pos); }
 };
 
 class ASTForm_RootPred: public ASTForm {
@@ -988,7 +978,6 @@ public:
   VarCode makeCode(SubstCode *subst = NULL);
   void dump();
   ASTForm* clone() { return new ASTForm_Sub(this->T1->clone(), this->T2->clone(), this->pos); }
-  ASTForm* flatten();
 
   // Conversion of AST representation of formula to Automaton
   void toUnaryAutomaton(Automaton &aut, bool doComplement);
@@ -1005,7 +994,6 @@ public:
   VarCode makeCode(SubstCode *subst = NULL);
   void dump();
   ASTForm* clone() { return new ASTForm_Equal1(this->t1->clone(), this->t2->clone(), this->pos); }
-  ASTForm* flatten();
 
   // Conversion of AST representation of formula to Automaton
   void toUnaryAutomaton(Automaton &aut, bool doComplement);
@@ -1021,7 +1009,6 @@ public:
   VarCode makeCode(SubstCode *subst = NULL);
   void dump();
   ASTForm* clone() { return new ASTForm_Equal2(this->T1->clone(), this->T2->clone(), this->pos); }
-  ASTForm* flatten();
 
   // Conversion of AST representation of formula to Automaton
   void toUnaryAutomaton(Automaton &aut, bool doComplement);
@@ -1038,7 +1025,6 @@ public:
   VarCode makeCode(SubstCode *subst = NULL);
   void dump();
   ASTForm* clone() { return new ASTForm_NotEqual1(this->t1->clone(), this->t2->clone(), this->pos); }
-  ASTForm* flatten();
 };
 
 class ASTForm_NotEqual2: public ASTForm_TT {
@@ -1051,7 +1037,6 @@ public:
   VarCode makeCode(SubstCode *subst = NULL);
   void dump();
   ASTForm* clone() { return new ASTForm_NotEqual2(this->T1->clone(), this->T2->clone(), this->pos); }
-  ASTForm* flatten();
 };
 
 class ASTForm_Less: public ASTForm_tt {
@@ -1065,7 +1050,6 @@ public:
   void dump();
   void toUnaryAutomaton(Automaton &aut, bool doComplement);
   ASTForm* clone() { return new ASTForm_Less(this->t1->clone(), this->t2->clone(), this->pos); }
-  ASTForm* flatten();
 };
 
 class ASTForm_LessEq: public ASTForm_tt {
@@ -1079,7 +1063,6 @@ public:
   void dump();
   void toUnaryAutomaton(Automaton &aut, bool doComplement);
   ASTForm* clone() { return new ASTForm_LessEq(this->t1->clone(), this->t2->clone(), this->pos); }
-  ASTForm* flatten();
 };
 
 class ASTForm_WellFormedTree: public ASTForm_T {
@@ -1129,7 +1112,6 @@ public:
   void dump();
   ASTForm* clone() { return new ASTForm_And(this->f1->clone(), this->f2->clone(), this->pos); }
 
-  ASTForm* flatten();
   void toUnaryAutomaton(Automaton &aut, bool doComplement);
   void toBinaryAutomaton(Automaton &aut, bool doComplement);
 };
@@ -1173,7 +1155,6 @@ public:
   VarCode makeCode(SubstCode *subst = NULL);
   void dump();
   ASTForm* clone() { return new ASTForm_Not(this->f->clone(), this->pos); }
-  ASTForm* flatten();
   ASTForm* unfoldMacro(IdentList*, ASTList*);
 
   void toUnaryAutomaton(Automaton &aut, bool doComplement);
@@ -1204,8 +1185,6 @@ public:
   VarCode makeCode(SubstCode *subst = NULL);
   void dump();
   ASTForm* clone() { return new ASTForm_Ex1(this->ul, this->vl->copy(), this->f->clone(), this->pos); }
-
-  ASTForm* flatten();
 };
 
 class ASTForm_Ex2: public ASTForm_uvf {
@@ -1242,8 +1221,6 @@ public:
   VarCode makeCode(SubstCode *subst = NULL);
   void dump();
   ASTForm* clone() { return new ASTForm_All1(this->ul, this->vl->copy(), this->f->clone(), this->pos); }
-
-  ASTForm* flatten();
 };
 
 class ASTForm_All2: public ASTForm_uvf {
@@ -1327,13 +1304,12 @@ public:
   VarCode makeCode(SubstCode *subst = NULL);
   void dump();
   ASTForm* clone() { return new ASTForm_Call(this->n, this->args, this->pos); }
-  ASTForm* flatten();
   ASTForm* unfoldMacro(IdentList*, ASTList*);
 
-protected:
   ASTList *args;
   int n;
 
+protected:
   VarCode fold(ASTList::iterator iter, IdentList &actuals,
 			   SubstCode *subst = NULL);
 };
