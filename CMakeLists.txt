@@ -53,6 +53,8 @@ add_executable(dWiNA
 	src/app/DecisionProcedure/visitors/SecondOrderRestricter.cpp
 	src/app/DecisionProcedure/visitors/SyntaxRestricter.cpp
 	src/app/DecisionProcedure/visitors/UniversalQuantifierRemover.cpp
+	src/app/DecisionProcedure/visitors/AntiPrenexer.cpp
+	src/app/DecisionProcedure/visitors/Reorderer.cpp
 )
 
 link_directories(${CMAKE_SOURCE_DIR}/src/libs/)

@@ -330,6 +330,30 @@ src/app/DecisionProcedure/formula_to_automaton_ws2s.cpp.s:
 	$(MAKE) -f CMakeFiles/dWiNA.dir/build.make CMakeFiles/dWiNA.dir/src/app/DecisionProcedure/formula_to_automaton_ws2s.cpp.s
 .PHONY : src/app/DecisionProcedure/formula_to_automaton_ws2s.cpp.s
 
+src/app/DecisionProcedure/visitors/AntiPrenexer.o: src/app/DecisionProcedure/visitors/AntiPrenexer.cpp.o
+.PHONY : src/app/DecisionProcedure/visitors/AntiPrenexer.o
+
+# target to build an object file
+src/app/DecisionProcedure/visitors/AntiPrenexer.cpp.o:
+	$(MAKE) -f CMakeFiles/dWiNA.dir/build.make CMakeFiles/dWiNA.dir/src/app/DecisionProcedure/visitors/AntiPrenexer.cpp.o
+.PHONY : src/app/DecisionProcedure/visitors/AntiPrenexer.cpp.o
+
+src/app/DecisionProcedure/visitors/AntiPrenexer.i: src/app/DecisionProcedure/visitors/AntiPrenexer.cpp.i
+.PHONY : src/app/DecisionProcedure/visitors/AntiPrenexer.i
+
+# target to preprocess a source file
+src/app/DecisionProcedure/visitors/AntiPrenexer.cpp.i:
+	$(MAKE) -f CMakeFiles/dWiNA.dir/build.make CMakeFiles/dWiNA.dir/src/app/DecisionProcedure/visitors/AntiPrenexer.cpp.i
+.PHONY : src/app/DecisionProcedure/visitors/AntiPrenexer.cpp.i
+
+src/app/DecisionProcedure/visitors/AntiPrenexer.s: src/app/DecisionProcedure/visitors/AntiPrenexer.cpp.s
+.PHONY : src/app/DecisionProcedure/visitors/AntiPrenexer.s
+
+# target to generate assembly for a file
+src/app/DecisionProcedure/visitors/AntiPrenexer.cpp.s:
+	$(MAKE) -f CMakeFiles/dWiNA.dir/build.make CMakeFiles/dWiNA.dir/src/app/DecisionProcedure/visitors/AntiPrenexer.cpp.s
+.PHONY : src/app/DecisionProcedure/visitors/AntiPrenexer.cpp.s
+
 src/app/DecisionProcedure/visitors/BooleanUnfolder.o: src/app/DecisionProcedure/visitors/BooleanUnfolder.cpp.o
 .PHONY : src/app/DecisionProcedure/visitors/BooleanUnfolder.o
 
@@ -425,6 +449,30 @@ src/app/DecisionProcedure/visitors/PrenexNormalFormTransformer.s: src/app/Decisi
 src/app/DecisionProcedure/visitors/PrenexNormalFormTransformer.cpp.s:
 	$(MAKE) -f CMakeFiles/dWiNA.dir/build.make CMakeFiles/dWiNA.dir/src/app/DecisionProcedure/visitors/PrenexNormalFormTransformer.cpp.s
 .PHONY : src/app/DecisionProcedure/visitors/PrenexNormalFormTransformer.cpp.s
+
+src/app/DecisionProcedure/visitors/Reorderer.o: src/app/DecisionProcedure/visitors/Reorderer.cpp.o
+.PHONY : src/app/DecisionProcedure/visitors/Reorderer.o
+
+# target to build an object file
+src/app/DecisionProcedure/visitors/Reorderer.cpp.o:
+	$(MAKE) -f CMakeFiles/dWiNA.dir/build.make CMakeFiles/dWiNA.dir/src/app/DecisionProcedure/visitors/Reorderer.cpp.o
+.PHONY : src/app/DecisionProcedure/visitors/Reorderer.cpp.o
+
+src/app/DecisionProcedure/visitors/Reorderer.i: src/app/DecisionProcedure/visitors/Reorderer.cpp.i
+.PHONY : src/app/DecisionProcedure/visitors/Reorderer.i
+
+# target to preprocess a source file
+src/app/DecisionProcedure/visitors/Reorderer.cpp.i:
+	$(MAKE) -f CMakeFiles/dWiNA.dir/build.make CMakeFiles/dWiNA.dir/src/app/DecisionProcedure/visitors/Reorderer.cpp.i
+.PHONY : src/app/DecisionProcedure/visitors/Reorderer.cpp.i
+
+src/app/DecisionProcedure/visitors/Reorderer.s: src/app/DecisionProcedure/visitors/Reorderer.cpp.s
+.PHONY : src/app/DecisionProcedure/visitors/Reorderer.s
+
+# target to generate assembly for a file
+src/app/DecisionProcedure/visitors/Reorderer.cpp.s:
+	$(MAKE) -f CMakeFiles/dWiNA.dir/build.make CMakeFiles/dWiNA.dir/src/app/DecisionProcedure/visitors/Reorderer.cpp.s
+.PHONY : src/app/DecisionProcedure/visitors/Reorderer.cpp.s
 
 src/app/DecisionProcedure/visitors/SecondOrderRestricter.o: src/app/DecisionProcedure/visitors/SecondOrderRestricter.cpp.o
 .PHONY : src/app/DecisionProcedure/visitors/SecondOrderRestricter.o
@@ -1110,6 +1158,9 @@ help:
 	@echo "... src/app/DecisionProcedure/formula_to_automaton_ws2s.o"
 	@echo "... src/app/DecisionProcedure/formula_to_automaton_ws2s.i"
 	@echo "... src/app/DecisionProcedure/formula_to_automaton_ws2s.s"
+	@echo "... src/app/DecisionProcedure/visitors/AntiPrenexer.o"
+	@echo "... src/app/DecisionProcedure/visitors/AntiPrenexer.i"
+	@echo "... src/app/DecisionProcedure/visitors/AntiPrenexer.s"
 	@echo "... src/app/DecisionProcedure/visitors/BooleanUnfolder.o"
 	@echo "... src/app/DecisionProcedure/visitors/BooleanUnfolder.i"
 	@echo "... src/app/DecisionProcedure/visitors/BooleanUnfolder.s"
@@ -1122,6 +1173,9 @@ help:
 	@echo "... src/app/DecisionProcedure/visitors/PrenexNormalFormTransformer.o"
 	@echo "... src/app/DecisionProcedure/visitors/PrenexNormalFormTransformer.i"
 	@echo "... src/app/DecisionProcedure/visitors/PrenexNormalFormTransformer.s"
+	@echo "... src/app/DecisionProcedure/visitors/Reorderer.o"
+	@echo "... src/app/DecisionProcedure/visitors/Reorderer.i"
+	@echo "... src/app/DecisionProcedure/visitors/Reorderer.s"
 	@echo "... src/app/DecisionProcedure/visitors/SecondOrderRestricter.o"
 	@echo "... src/app/DecisionProcedure/visitors/SecondOrderRestricter.i"
 	@echo "... src/app/DecisionProcedure/visitors/SecondOrderRestricter.s"

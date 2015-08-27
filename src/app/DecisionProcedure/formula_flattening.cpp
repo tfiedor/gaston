@@ -331,7 +331,7 @@ ASTForm* ASTForm_Var0::unfoldMacro(IdentList* fParams, ASTList* rParams) {
  */
 ASTForm* ASTForm_Call::unfoldMacro(IdentList* fParams, ASTList* rParams) {
 	PredLibEntry* called = predicateLib.lookup(this->n);
-	ASTList* realParams = (ASTList*) this->args->copy();
+	ASTList* realParams = static_cast<ASTList*>(this->args->copy());
 
 	for(AST** ast = realParams->begin(); ast != realParams->end(); ++ast) {
 		(*ast) = (*ast)->unfoldMacro(fParams, rParams);
