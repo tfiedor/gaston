@@ -6,6 +6,12 @@
 template <typename R = void>
 class ASTVisitor {
 public:
+    enum Traverse {PreOrder, PostOrder};
+    const Traverse traverseDirection;
+
+    // < Constructors >
+    ASTVisitor(Traverse tD) : traverseDirection(tD) {}
+
     typedef R ReturnType;
 
     virtual ReturnType visit(ASTForm *e) { std::cout << "Default visit(ASTForm)\n"; };
@@ -19,6 +25,9 @@ public:
  */
 class ASTTransformer : public ASTVisitor<AST*> {
 public:
+    // < Constructors >
+    ASTTransformer() : ASTVisitor<AST*>(PostOrder) {}
+
     // < ASTTerm1 Derives > //
     virtual AST* visit(ASTTerm1_n* term) { return term; }
     virtual AST* visit(ASTTerm1_T* term) { return term; }
@@ -121,6 +130,9 @@ public:
  */
 class VoidVisitor : public ASTVisitor<> {
 public:
+    // < Constructors >
+    VoidVisitor() : ASTVisitor<>(PostOrder) {}
+
     virtual void visit(ASTTerm* term) {}
     virtual void visit(ASTForm* form) {}
     virtual void visit(ASTUniv* univ) {}

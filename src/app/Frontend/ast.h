@@ -930,7 +930,6 @@ public:
   void dump();
   ASTForm* clone() { return new ASTForm_RootPred(this->t, this->ul, this->pos); }
 
-protected:
   IdentList *ul;
   ASTTerm1  *t;
 };
@@ -964,7 +963,6 @@ public:
   void toUnaryAutomaton(Automaton &aut, bool doComplement);
   void toBinaryAutomaton(Automaton &aut, bool doComplement);
 
-protected:
   ASTTerm1 *t;
 };
 
@@ -1248,7 +1246,7 @@ public:
   void dump();
   ASTForm* clone() { return new ASTForm_Let0(this->defIdents, this->defForms, this->f->clone(), this->pos); }
 
-protected:
+
   IdentList *defIdents;
   FormList *defForms;
   ASTForm *f;
@@ -1267,7 +1265,7 @@ public:
   void dump();
   ASTForm* clone() { return new ASTForm_Let1(this->defIdents, this->defTerms, this->f->clone(), this->pos); }
 
-protected:
+
   IdentList *defIdents;
   Term1List *defTerms;
   ASTForm *f;
@@ -1286,7 +1284,7 @@ public:
   void dump();
   ASTForm* clone() { return new ASTForm_Let2(this->defIdents, this->defTerms, this->f->clone(), this->pos); }
 
-protected:
+
   IdentList *defIdents;
   Term2List *defTerms;
   ASTForm *f;
@@ -1309,7 +1307,7 @@ public:
   ASTList *args;
   int n;
 
-protected:
+
   VarCode fold(ASTList::iterator iter, IdentList &actuals,
 			   SubstCode *subst = NULL);
 };
@@ -1327,7 +1325,7 @@ public:
   void dump();
   ASTForm* clone() { return new ASTForm_Import(*this); }
 
-protected:
+
   char *file;
   Deque<char*> *fileVars;
   IdentList *idents;
@@ -1344,7 +1342,7 @@ public:
   void dump();
   ASTForm* clone() { return new ASTForm_Export(*this); }
 
-protected:
+
   char *file;
 };
 
@@ -1385,7 +1383,7 @@ public:
   void dump();
   ASTForm* clone() { return new ASTForm_InStateSpace1(*this); }
 
-protected:
+
   ASTTerm1 *t;
   IdentList *ss;
 };
@@ -1403,7 +1401,7 @@ public:
   void dump();
   ASTForm* clone() { return new ASTForm_InStateSpace2(*this); }
 
-protected:
+
   ASTTerm2 *T;
   IdentList *ss;
 };
@@ -1421,7 +1419,7 @@ public:
   void dump();
   ASTForm* clone() { return new ASTForm_SomeType(*this); }
 
-protected:
+
   ASTTerm *t;
 };
 
