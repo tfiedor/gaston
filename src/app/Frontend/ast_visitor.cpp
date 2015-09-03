@@ -14,14 +14,21 @@
 
 template<class ASTNode>
 AST* traverse_T(ASTNode* node, ASTTransformer &v) {
+    assert(node != nullptr);
+    assert(node->T != nullptr);
+
     ASTNode* temp = nullptr;
 
     switch(v.traverseDirection) {
+        // Here InOrder and PreOrder are actually the same
+        case ASTTransformer::Traverse::InOrder:
         case ASTTransformer::Traverse::PreOrder:
+            // First visit the root then the right child
             temp = static_cast<ASTNode*>(v.visit(node));
             temp->T = static_cast<ASTTerm2*>(temp->T->accept(v));
             return temp;
         case ASTTransformer::Traverse::PostOrder:
+            // First visit the right child, then the root
             node->T = static_cast<ASTTerm2*>(node->T->accept(v));
             return v.visit(node);
         default:
@@ -31,14 +38,21 @@ AST* traverse_T(ASTNode* node, ASTTransformer &v) {
 
 template<class ASTNode>
 AST* traverse_t(ASTNode* node, ASTTransformer &v) {
+    assert(node != nullptr);
+    assert(node->t != nullptr);
+
     ASTNode* temp = nullptr;
 
     switch(v.traverseDirection) {
+        // Here InOrder and PreOrder traversal is the same
+        case ASTTransformer::Traverse::InOrder:
         case ASTTransformer::Traverse::PreOrder:
+            // First traverse the root, then the right child
             temp = static_cast<ASTNode*>(v.visit(node));
             temp->t = static_cast<ASTTerm1*>(temp->t->accept(v));
             return temp;
         case ASTTransformer::Traverse::PostOrder:
+            // First traverse the right childe, then the root
             node->t = static_cast<ASTTerm1*>(node->t->accept(v));
             return v.visit(node);
         default:
@@ -48,18 +62,30 @@ AST* traverse_t(ASTNode* node, ASTTransformer &v) {
 
 template<class ASTNode>
 AST* traverse_tt(ASTNode* node, ASTTransformer &v) {
+    assert(node != nullptr);
+    assert(node->t1 != nullptr);
+    assert(node->t2 != nullptr);
+
     ASTNode* temp = nullptr;
 
     switch(v.traverseDirection) {
         case ASTTransformer::Traverse::PreOrder:
+            // First visit the root, then left and right child
             temp = static_cast<ASTNode*>(v.visit(node));
             temp->t1 = static_cast<ASTTerm1*>(temp->t1->accept(v));
             temp->t2 = static_cast<ASTTerm1*>(temp->t2->accept(v));
             return temp;
         case ASTTransformer::Traverse::PostOrder:
+            // First visit childs, then the root
             node->t1 = static_cast<ASTTerm1*>(node->t1->accept(v));
             node->t2 = static_cast<ASTTerm1*>(node->t2->accept(v));
             return v.visit(node);
+        case ASTTransformer::Traverse::InOrder:
+            // First visit left child, then root and then right child
+            node->t1 = static_cast<ASTTerm1*>(node->t1->accept(v));
+            temp = static_cast<ASTNode*>(v.visit(node));
+            temp->t2 = static_cast<ASTTerm1*>(temp->t2->accept(v));
+            return temp;
         default:
             assert(false && "Traversing AST_tt not implemented yet");
     }
@@ -67,18 +93,30 @@ AST* traverse_tt(ASTNode* node, ASTTransformer &v) {
 
 template<class ASTNode>
 AST* traverse_TT(ASTNode* node, ASTTransformer &v) {
+    assert(node != nullptr);
+    assert(node->T1 != nullptr);
+    assert(node->T2 != nullptr);
+
     ASTNode* temp = nullptr;
 
     switch(v.traverseDirection) {
         case ASTTransformer::Traverse::PreOrder:
+            // First visit the root, then childs
             temp = static_cast<ASTNode*>(v.visit(node));
             temp->T1 = static_cast<ASTTerm2*>(temp->T1->accept(v));
             temp->T2 = static_cast<ASTTerm2*>(temp->T2->accept(v));
             return temp;
         case ASTTransformer::Traverse::PostOrder:
+            // First visit childs, then the root
             node->T1 = static_cast<ASTTerm2*>(node->T1->accept(v));
             node->T2 = static_cast<ASTTerm2*>(node->T2->accept(v));
             return v.visit(node);
+        case ASTTransformer::Traverse::InOrder:
+            // First visit left child, then root and then right child
+            node->T1 = static_cast<ASTTerm2*>(node->T1->accept(v));
+            temp = static_cast<ASTNode*>(v.visit(node));
+            temp->T2 = static_cast<ASTTerm2*>(temp->T2->accept(v));
+            return temp;
         default:
             assert(false && "Traversing AST_TT not implemented yet");
     }
@@ -86,18 +124,30 @@ AST* traverse_TT(ASTNode* node, ASTTransformer &v) {
 
 template<class ASTNode>
 AST* traverse_tT(ASTNode* node, ASTTransformer &v) {
+    assert(node != nullptr);
+    assert(node->t1 != nullptr);
+    assert(node->T2 != nullptr);
+
     ASTNode* temp = nullptr;
 
     switch(v.traverseDirection) {
         case ASTTransformer::Traverse::PreOrder:
+            // First traverse the root, then childs
             temp = static_cast<ASTNode*>(v.visit(node));
             temp->t1 = static_cast<ASTTerm1*>(temp->t1->accept(v));
             temp->T2 = static_cast<ASTTerm2*>(temp->T2->accept(v));
             return temp;
         case ASTTransformer::Traverse::PostOrder:
+            // First traverse the childs then the root
             node->t1 = static_cast<ASTTerm1*>(node->t1->accept(v));
             node->T2 = static_cast<ASTTerm2*>(node->T2->accept(v));
             return v.visit(node);
+        case ASTTransformer::Traverse::InOrder:
+            // First traverse the left child, then root, then right child
+            node->t1 = static_cast<ASTTerm1*>(node->t1->accept(v));
+            temp = static_cast<ASTNode*>(v.visit(node));
+            temp->T2 = static_cast<ASTTerm2*>(temp->T2->accept(v));
+            return temp;
         default:
             assert(false && "Traversing AST_tT not implemented yet");
     }
@@ -105,14 +155,21 @@ AST* traverse_tT(ASTNode* node, ASTTransformer &v) {
 
 template<class ASTNode>
 AST* traverse_f(ASTNode* node, ASTTransformer &v) {
+    assert(node != nullptr);
+    assert(node->f != nullptr);
+
     ASTNode* temp = nullptr;
 
     switch(v.traverseDirection) {
+        // InOrder and PreOrder traversal is the same
+        case ASTTransformer::Traverse::InOrder:
         case ASTTransformer::Traverse::PreOrder:
+            // First traverse the root, then the child
             temp = static_cast<ASTNode*>(v.visit(node));
             temp->f = static_cast<ASTForm*>(temp->f->accept(v));
             return temp;
         case ASTTransformer::Traverse::PostOrder:
+            // First traverse the child, then the root
             node->f = static_cast<ASTForm*>(node->f->accept(v));
             return v.visit(node);
         default:
@@ -122,18 +179,30 @@ AST* traverse_f(ASTNode* node, ASTTransformer &v) {
 
 template<class ASTNode>
 AST* traverse_ff(ASTNode* node, ASTTransformer &v) {
+    assert(node != nullptr);
+    assert(node->f1 != nullptr);
+    assert(node->f2 != nullptr);
+
     ASTNode* temp = nullptr;
 
     switch(v.traverseDirection) {
         case ASTTransformer::Traverse::PreOrder:
+            // First traverse the root, then the childs
             temp = static_cast<ASTNode*>(v.visit(node));
             temp->f1 = static_cast<ASTForm*>(temp->f1->accept(v));
             temp->f2 = static_cast<ASTForm*>(temp->f2->accept(v));
             return temp;
         case ASTTransformer::Traverse::PostOrder:
+            // First traverse the childs, then the root
             node->f1 = static_cast<ASTForm*>(node->f1->accept(v));
             node->f2 = static_cast<ASTForm*>(node->f2->accept(v));
             return v.visit(node);
+        case ASTTransformer::Traverse::InOrder:
+            // First traverse the left child, then the root and then right child
+            node->f1 = static_cast<ASTForm*>(node->f1->accept(v));
+            temp = static_cast<ASTNode*>(v.visit(node));
+            temp->f2 = static_cast<ASTForm*>(temp->f2->accept(v));
+            return temp;
         default:
             assert(false && "Traversing AST_tT not implemented yet");
     }
@@ -490,13 +559,21 @@ AST* ASTForm_SomeType::accept(ASTTransformer &v) {
 
 template<class ASTNode>
 void void_traverse_T(ASTNode* node, VoidVisitor &v) {
+    assert(node != nullptr);
+    assert(node->T != nullptr);
+
     switch(v.traverseDirection) {
+        case ASTTransformer::Traverse::InOrder:
         case ASTTransformer::Traverse::PreOrder:
+            // First traverse the root then the child
             v.visit(node);
             node->T->accept(v);
+            break;
         case ASTTransformer::Traverse::PostOrder:
+            // First traverse the child then the root
             node->T->accept(v);
             v.visit(node);
+            break;
         default:
             assert(false && "Traversing AST_T not implemented yet");
     }
@@ -504,13 +581,21 @@ void void_traverse_T(ASTNode* node, VoidVisitor &v) {
 
 template<class ASTNode>
 void void_traverse_t(ASTNode* node, VoidVisitor &v) {
+    assert(node != nullptr);
+    assert(node->t != nullptr);
+
     switch(v.traverseDirection) {
+        case ASTTransformer::Traverse::InOrder:
         case ASTTransformer::Traverse::PreOrder:
+            // First traverse the root, then the child
             v.visit(node);
             node->t->accept(v);
+            break;
         case ASTTransformer::Traverse::PostOrder:
+            // First traverse the child then the root
             node->t->accept(v);
             v.visit(node);
+            break;
         default:
             assert(false && "Traversing AST_t not implemented yet");
     }
@@ -518,15 +603,29 @@ void void_traverse_t(ASTNode* node, VoidVisitor &v) {
 
 template<class ASTNode>
 void void_traverse_tt(ASTNode* node, VoidVisitor &v) {
+    assert(node != nullptr);
+    assert(node->t1 != nullptr);
+    assert(node->t2 != nullptr);
+
     switch(v.traverseDirection) {
         case ASTTransformer::Traverse::PreOrder:
+            // First traverse the root, then childs
             v.visit(node);
             node->t1->accept(v);
             node->t2->accept(v);
+            break;
         case ASTTransformer::Traverse::PostOrder:
+            // First traverse childs, then the root
             node->t1->accept(v);
             node->t2->accept(v);
             v.visit(node);
+            break;
+        case ASTTransformer::Traverse::InOrder:
+            // First traverse left child, then root and last right child
+            node->t1->accept(v);
+            v.visit(node);
+            node->t2->accept(v);
+            break;
         default:
             assert(false && "Traversing AST_tt not implemented yet");
     }
@@ -534,15 +633,29 @@ void void_traverse_tt(ASTNode* node, VoidVisitor &v) {
 
 template<class ASTNode>
 void void_traverse_TT(ASTNode* node, VoidVisitor &v) {
+    assert(node != nullptr);
+    assert(node->T1 != nullptr);
+    assert(node->T2 != nullptr);
+
     switch(v.traverseDirection) {
         case ASTTransformer::Traverse::PreOrder:
+            // First visit the root then childs
             v.visit(node);
             node->T1->accept(v);
             node->T2->accept(v);
+            break;
         case ASTTransformer::Traverse::PostOrder:
+            // First visit childs, then the root
             node->T1->accept(v);
             node->T2->accept(v);
             v.visit(node);
+            break;
+        case ASTTransformer::Traverse::InOrder:
+            // First left child, then root, then right child
+            node->T1->accept(v);
+            v.visit(node);
+            node->T2->accept(v);
+            break;
         default:
             assert(false && "Traversing AST_TT not implemented yet");
     }
@@ -550,15 +663,29 @@ void void_traverse_TT(ASTNode* node, VoidVisitor &v) {
 
 template<class ASTNode>
 void void_traverse_tT(ASTNode* node, VoidVisitor &v) {
+    assert(node != nullptr);
+    assert(node->t1 != nullptr);
+    assert(node->T2 != nullptr);
+
     switch(v.traverseDirection) {
         case ASTTransformer::Traverse::PreOrder:
+            // First traverse the root, then childs
             v.visit(node);
             node->t1->accept(v);
             node->T2->accept(v);
+            break;
         case ASTTransformer::Traverse::PostOrder:
+            // First traverse childs, then the root
             node->t1->accept(v);
             node->T2->accept(v);
             v.visit(node);
+            break;
+        case ASTTransformer::Traverse::InOrder:
+            // First traverse left child, then root, then right child
+            node->t1->accept(v);
+            v.visit(node);
+            node->T2->accept(v);
+            break;
         default:
             assert(false && "Traversing AST_tT not implemented yet");
     }
@@ -566,13 +693,21 @@ void void_traverse_tT(ASTNode* node, VoidVisitor &v) {
 
 template<class ASTNode>
 void void_traverse_f(ASTNode* node, VoidVisitor &v) {
+    assert(node != nullptr);
+    assert(node->f != nullptr);
+
     switch(v.traverseDirection) {
+        case ASTTransformer::Traverse::InOrder:
         case ASTTransformer::Traverse::PreOrder:
+            // First traverse the root, then childs
             v.visit(node);
             node->f->accept(v);
+            break;
         case ASTTransformer::Traverse::PostOrder:
+            // First traverse childs, then the root
             node->f->accept(v);
             v.visit(node);
+            break;
         default:
             assert(false && "Traversing AST_t not implemented yet");
     }
@@ -580,15 +715,29 @@ void void_traverse_f(ASTNode* node, VoidVisitor &v) {
 
 template<class ASTNode>
 void void_traverse_ff(ASTNode* node, VoidVisitor &v) {
+    assert(node != nullptr);
+    assert(node->f1 != nullptr);
+    assert(node->f2 != nullptr);
+
     switch(v.traverseDirection) {
         case ASTTransformer::Traverse::PreOrder:
+            // First traverse the root, then childs
             v.visit(node);
             node->f1->accept(v);
             node->f2->accept(v);
+            break;
         case ASTTransformer::Traverse::PostOrder:
+            // First traverse childs, then the root
             node->f1->accept(v);
             node->f2->accept(v);
             v.visit(node);
+            break;
+        case ASTTransformer::Traverse::InOrder:
+            // First traverse left childs, then root, then right child
+            node->f1->accept(v);
+            v.visit(node);
+            node->f2->accept(v);
+            break;
         default:
             assert(false && "Traversing AST_tT not implemented yet");
     }
