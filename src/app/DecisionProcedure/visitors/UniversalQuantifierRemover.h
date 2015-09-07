@@ -15,6 +15,9 @@
 #include "../Frontend/ast_visitor.h"
 
 class UniversalQuantifierRemover : public ASTTransformer {
+public:
+    UniversalQuantifierRemover() : ASTTransformer(Traverse::PostOrder) {}
+
     AST* visit(ASTForm_All0* form);
     AST* visit(ASTForm_All1* form);
     AST* visit(ASTForm_All2* form);

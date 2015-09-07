@@ -26,7 +26,7 @@ public:
 class ASTTransformer : public ASTVisitor<AST*> {
 public:
     // < Constructors >
-    ASTTransformer() : ASTVisitor<AST*>(PostOrder) {}
+    ASTTransformer(Traverse tD) : ASTVisitor<AST*>(tD) {}
 
     // < ASTTerm1 Derives > //
     virtual AST* visit(ASTTerm1_n* term) { return term; }
@@ -131,7 +131,7 @@ public:
 class VoidVisitor : public ASTVisitor<> {
 public:
     // < Constructors >
-    VoidVisitor() : ASTVisitor<>(PostOrder) {}
+    VoidVisitor(Traverse td) : ASTVisitor<>(td) {}
 
     virtual void visit(ASTTerm* term) {}
     virtual void visit(ASTForm* form) {}

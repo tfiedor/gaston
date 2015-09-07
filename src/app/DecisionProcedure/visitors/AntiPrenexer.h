@@ -17,6 +17,9 @@
 #include "../Frontend/ast_visitor.h"
 
 class AntiPrenexer : public ASTTransformer {
+public:
+    AntiPrenexer() : ASTTransformer(Traverse::PreOrder) {}
+
     // Works in preorder
     AST* visit(ASTForm_Ex0* form);
     AST* visit(ASTForm_Ex1* form);

@@ -18,6 +18,9 @@
 #include "../Frontend/ast_visitor.h"
 
 class MacroUnfolder : public ASTTransformer {
+public:
+    MacroUnfolder() : ASTTransformer(Traverse::PreOrder) {}
+
 private:
     // TODO: Switch to shared pointers?
     IdentList* formalParameters;

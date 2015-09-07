@@ -29,6 +29,8 @@
 #include "../Frontend/ast.h"
 
 class BooleanUnfolder : public ASTTransformer {
+public:
+    BooleanUnfolder() : ASTTransformer(Traverse::PostOrder) {}
     AST* visit(ASTForm_And* form);
     AST* visit(ASTForm_Or* form);
     AST* visit(ASTForm_Not* form);

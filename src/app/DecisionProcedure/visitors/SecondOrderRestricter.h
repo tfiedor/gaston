@@ -15,6 +15,9 @@
 #include "../Frontend/ast_visitor.h"
 
 class SecondOrderRestricter : public ASTTransformer {
+public:
+    SecondOrderRestricter() : ASTTransformer(Traverse::PostOrder) {}
+
     AST* visit(ASTForm_Ex1* form);
     AST* visit(ASTForm_All1* form);
     AST* visit(ASTForm_Equal1* form);

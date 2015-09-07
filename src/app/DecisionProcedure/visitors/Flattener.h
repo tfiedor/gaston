@@ -19,6 +19,8 @@
 
 class Flattener : public ASTTransformer {
 public:
+    Flattener() : ASTTransformer(Traverse::PostOrder) {}
+
     static ASTTerm1_Var1* generateFreshFirstOrder();
     static ASTTerm2_Var2* generateFreshSecondOrder();
 
