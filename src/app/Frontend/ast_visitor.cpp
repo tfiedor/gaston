@@ -12,22 +12,22 @@
  * @return:         modified AST
  */
 
-template<class ASTNode>
-AST* traverse_T(ASTNode* node, ASTTransformer &v) {
+template<class RetNode, class Node>
+RetNode traverse_T(Node* node, TransformerVisitor &v) {
     assert(node != nullptr);
     assert(node->T != nullptr);
 
-    ASTNode* temp = nullptr;
+    Node* temp = nullptr;
 
     switch(v.traverseDirection) {
         // Here InOrder and PreOrder are actually the same
-        case ASTTransformer::Traverse::InOrder:
-        case ASTTransformer::Traverse::PreOrder:
+        case TransformerVisitor::Traverse::InOrder:
+        case TransformerVisitor::Traverse::PreOrder:
             // First visit the root then the right child
-            temp = static_cast<ASTNode*>(v.visit(node));
+            temp = static_cast<Node*>(v.visit(node));
             temp->T = static_cast<ASTTerm2*>(temp->T->accept(v));
             return temp;
-        case ASTTransformer::Traverse::PostOrder:
+        case TransformerVisitor::Traverse::PostOrder:
             // First visit the right child, then the root
             node->T = static_cast<ASTTerm2*>(node->T->accept(v));
             return v.visit(node);
@@ -36,22 +36,22 @@ AST* traverse_T(ASTNode* node, ASTTransformer &v) {
     }
 }
 
-template<class ASTNode>
-AST* traverse_t(ASTNode* node, ASTTransformer &v) {
+template<class RetNode, class Node>
+RetNode traverse_t(Node* node, TransformerVisitor &v) {
     assert(node != nullptr);
     assert(node->t != nullptr);
 
-    ASTNode* temp = nullptr;
+    Node* temp = nullptr;
 
     switch(v.traverseDirection) {
         // Here InOrder and PreOrder traversal is the same
-        case ASTTransformer::Traverse::InOrder:
-        case ASTTransformer::Traverse::PreOrder:
+        case TransformerVisitor::Traverse::InOrder:
+        case TransformerVisitor::Traverse::PreOrder:
             // First traverse the root, then the right child
-            temp = static_cast<ASTNode*>(v.visit(node));
+            temp = static_cast<Node*>(v.visit(node));
             temp->t = static_cast<ASTTerm1*>(temp->t->accept(v));
             return temp;
-        case ASTTransformer::Traverse::PostOrder:
+        case TransformerVisitor::Traverse::PostOrder:
             // First traverse the right childe, then the root
             node->t = static_cast<ASTTerm1*>(node->t->accept(v));
             return v.visit(node);
@@ -60,30 +60,30 @@ AST* traverse_t(ASTNode* node, ASTTransformer &v) {
     }
 }
 
-template<class ASTNode>
-AST* traverse_tt(ASTNode* node, ASTTransformer &v) {
+template<class RetNode, class Node>
+RetNode traverse_tt(Node* node, TransformerVisitor &v) {
     assert(node != nullptr);
     assert(node->t1 != nullptr);
     assert(node->t2 != nullptr);
 
-    ASTNode* temp = nullptr;
+    Node* temp = nullptr;
 
     switch(v.traverseDirection) {
-        case ASTTransformer::Traverse::PreOrder:
+        case TransformerVisitor::Traverse::PreOrder:
             // First visit the root, then left and right child
-            temp = static_cast<ASTNode*>(v.visit(node));
+            temp = static_cast<Node*>(v.visit(node));
             temp->t1 = static_cast<ASTTerm1*>(temp->t1->accept(v));
             temp->t2 = static_cast<ASTTerm1*>(temp->t2->accept(v));
             return temp;
-        case ASTTransformer::Traverse::PostOrder:
+        case TransformerVisitor::Traverse::PostOrder:
             // First visit childs, then the root
             node->t1 = static_cast<ASTTerm1*>(node->t1->accept(v));
             node->t2 = static_cast<ASTTerm1*>(node->t2->accept(v));
             return v.visit(node);
-        case ASTTransformer::Traverse::InOrder:
+        case TransformerVisitor::Traverse::InOrder:
             // First visit left child, then root and then right child
             node->t1 = static_cast<ASTTerm1*>(node->t1->accept(v));
-            temp = static_cast<ASTNode*>(v.visit(node));
+            temp = static_cast<Node*>(v.visit(node));
             temp->t2 = static_cast<ASTTerm1*>(temp->t2->accept(v));
             return temp;
         default:
@@ -91,30 +91,30 @@ AST* traverse_tt(ASTNode* node, ASTTransformer &v) {
     }
 }
 
-template<class ASTNode>
-AST* traverse_TT(ASTNode* node, ASTTransformer &v) {
+template<class RetNode, class Node>
+RetNode traverse_TT(Node* node, TransformerVisitor &v) {
     assert(node != nullptr);
     assert(node->T1 != nullptr);
     assert(node->T2 != nullptr);
 
-    ASTNode* temp = nullptr;
+    Node* temp = nullptr;
 
     switch(v.traverseDirection) {
-        case ASTTransformer::Traverse::PreOrder:
+        case TransformerVisitor::Traverse::PreOrder:
             // First visit the root, then childs
-            temp = static_cast<ASTNode*>(v.visit(node));
+            temp = static_cast<Node*>(v.visit(node));
             temp->T1 = static_cast<ASTTerm2*>(temp->T1->accept(v));
             temp->T2 = static_cast<ASTTerm2*>(temp->T2->accept(v));
             return temp;
-        case ASTTransformer::Traverse::PostOrder:
+        case TransformerVisitor::Traverse::PostOrder:
             // First visit childs, then the root
             node->T1 = static_cast<ASTTerm2*>(node->T1->accept(v));
             node->T2 = static_cast<ASTTerm2*>(node->T2->accept(v));
             return v.visit(node);
-        case ASTTransformer::Traverse::InOrder:
+        case TransformerVisitor::Traverse::InOrder:
             // First visit left child, then root and then right child
             node->T1 = static_cast<ASTTerm2*>(node->T1->accept(v));
-            temp = static_cast<ASTNode*>(v.visit(node));
+            temp = static_cast<Node*>(v.visit(node));
             temp->T2 = static_cast<ASTTerm2*>(temp->T2->accept(v));
             return temp;
         default:
@@ -122,30 +122,30 @@ AST* traverse_TT(ASTNode* node, ASTTransformer &v) {
     }
 }
 
-template<class ASTNode>
-AST* traverse_tT(ASTNode* node, ASTTransformer &v) {
+template<class RetNode, class Node>
+RetNode traverse_tT(Node* node, TransformerVisitor &v) {
     assert(node != nullptr);
     assert(node->t1 != nullptr);
     assert(node->T2 != nullptr);
 
-    ASTNode* temp = nullptr;
+    Node* temp = nullptr;
 
     switch(v.traverseDirection) {
-        case ASTTransformer::Traverse::PreOrder:
+        case TransformerVisitor::Traverse::PreOrder:
             // First traverse the root, then childs
-            temp = static_cast<ASTNode*>(v.visit(node));
+            temp = static_cast<Node*>(v.visit(node));
             temp->t1 = static_cast<ASTTerm1*>(temp->t1->accept(v));
             temp->T2 = static_cast<ASTTerm2*>(temp->T2->accept(v));
             return temp;
-        case ASTTransformer::Traverse::PostOrder:
+        case TransformerVisitor::Traverse::PostOrder:
             // First traverse the childs then the root
             node->t1 = static_cast<ASTTerm1*>(node->t1->accept(v));
             node->T2 = static_cast<ASTTerm2*>(node->T2->accept(v));
             return v.visit(node);
-        case ASTTransformer::Traverse::InOrder:
+        case TransformerVisitor::Traverse::InOrder:
             // First traverse the left child, then root, then right child
             node->t1 = static_cast<ASTTerm1*>(node->t1->accept(v));
-            temp = static_cast<ASTNode*>(v.visit(node));
+            temp = static_cast<Node*>(v.visit(node));
             temp->T2 = static_cast<ASTTerm2*>(temp->T2->accept(v));
             return temp;
         default:
@@ -153,22 +153,22 @@ AST* traverse_tT(ASTNode* node, ASTTransformer &v) {
     }
 }
 
-template<class ASTNode>
-AST* traverse_f(ASTNode* node, ASTTransformer &v) {
+template<class RetNode, class Node>
+RetNode traverse_f(Node* node, TransformerVisitor &v) {
     assert(node != nullptr);
     assert(node->f != nullptr);
 
-    ASTNode* temp = nullptr;
+    Node* temp = nullptr;
 
     switch(v.traverseDirection) {
         // InOrder and PreOrder traversal is the same
-        case ASTTransformer::Traverse::InOrder:
-        case ASTTransformer::Traverse::PreOrder:
+        case TransformerVisitor::Traverse::InOrder:
+        case TransformerVisitor::Traverse::PreOrder:
             // First traverse the root, then the child
-            temp = static_cast<ASTNode*>(v.visit(node));
+            temp = static_cast<Node*>(v.visit(node));
             temp->f = static_cast<ASTForm*>(temp->f->accept(v));
             return temp;
-        case ASTTransformer::Traverse::PostOrder:
+        case TransformerVisitor::Traverse::PostOrder:
             // First traverse the child, then the root
             node->f = static_cast<ASTForm*>(node->f->accept(v));
             return v.visit(node);
@@ -177,30 +177,30 @@ AST* traverse_f(ASTNode* node, ASTTransformer &v) {
     }
 }
 
-template<class ASTNode>
-AST* traverse_ff(ASTNode* node, ASTTransformer &v) {
+template<class RetNode, class Node>
+RetNode traverse_ff(Node* node, TransformerVisitor &v) {
     assert(node != nullptr);
     assert(node->f1 != nullptr);
     assert(node->f2 != nullptr);
 
-    ASTNode* temp = nullptr;
+    Node* temp = nullptr;
 
     switch(v.traverseDirection) {
-        case ASTTransformer::Traverse::PreOrder:
+        case TransformerVisitor::Traverse::PreOrder:
             // First traverse the root, then the childs
-            temp = static_cast<ASTNode*>(v.visit(node));
+            temp = static_cast<Node*>(v.visit(node));
             temp->f1 = static_cast<ASTForm*>(temp->f1->accept(v));
             temp->f2 = static_cast<ASTForm*>(temp->f2->accept(v));
             return temp;
-        case ASTTransformer::Traverse::PostOrder:
+        case TransformerVisitor::Traverse::PostOrder:
             // First traverse the childs, then the root
             node->f1 = static_cast<ASTForm*>(node->f1->accept(v));
             node->f2 = static_cast<ASTForm*>(node->f2->accept(v));
             return v.visit(node);
-        case ASTTransformer::Traverse::InOrder:
+        case TransformerVisitor::Traverse::InOrder:
             // First traverse the left child, then the root and then right child
             node->f1 = static_cast<ASTForm*>(node->f1->accept(v));
-            temp = static_cast<ASTNode*>(v.visit(node));
+            temp = static_cast<Node*>(v.visit(node));
             temp->f2 = static_cast<ASTForm*>(temp->f2->accept(v));
             return temp;
         default:
@@ -208,347 +208,347 @@ AST* traverse_ff(ASTNode* node, ASTTransformer &v) {
     }
 }
 
-AST* ASTTerm::accept(ASTTransformer &v) {
+AST* ASTTerm::accept(TransformerVisitor &v) {
     return this;
 }
 
-AST* ASTForm::accept(ASTTransformer &v) {
+AST* ASTForm::accept(TransformerVisitor &v) {
     return this;
 }
 
-AST* ASTUniv::accept(ASTTransformer &v) {
+AST* ASTUniv::accept(TransformerVisitor &v) {
     return this;
 }
 
 // < ASTTerm1 Accepts > //
-AST* ASTTerm1_n::accept(ASTTransformer &v) {
+AST* ASTTerm1_n::accept(TransformerVisitor &v) {
     return v.visit(this);
 }
 
-AST* ASTTerm1_T::accept(ASTTransformer &v) {
-    return traverse_T<ASTTerm1_T>(this, v);
+AST* ASTTerm1_T::accept(TransformerVisitor &v) {
+    return traverse_T<AST*, ASTTerm1_T>(this, v);
 }
 
-AST* ASTTerm1_t::accept(ASTTransformer &v) {
-    return traverse_t<ASTTerm1_t>(this, v);
+AST* ASTTerm1_t::accept(TransformerVisitor &v) {
+    return traverse_t<AST*, ASTTerm1_t>(this, v);
 }
 
-AST* ASTTerm1_tn::accept(ASTTransformer &v) {
-    return traverse_t<ASTTerm1_tn>(this, v);
+AST* ASTTerm1_tn::accept(TransformerVisitor &v) {
+    return traverse_t<AST*, ASTTerm1_tn>(this, v);
 }
 
-AST* ASTTerm1_tnt::accept(ASTTransformer &v) {
-    return traverse_tt<ASTTerm1_tnt>(this, v);
+AST* ASTTerm1_tnt::accept(TransformerVisitor &v) {
+    return traverse_tt<AST*, ASTTerm1_tnt>(this, v);
 }
 
 // < ASTTerm2 Accepts > //
-AST* ASTTerm2_TT::accept(ASTTransformer &v) {
-    return traverse_TT<ASTTerm2_TT>(this, v);
+AST* ASTTerm2_TT::accept(TransformerVisitor &v) {
+    return traverse_TT<AST*, ASTTerm2_TT>(this, v);
 }
 
-AST* ASTTerm2_Tn::accept(ASTTransformer &v) {
-    return traverse_T<ASTTerm2_Tn>(this, v);
+AST* ASTTerm2_Tn::accept(TransformerVisitor &v) {
+    return traverse_T<AST*, ASTTerm2_Tn>(this, v);
 }
 
 // < ASTForm Accepts > //
-AST* ASTForm_tT::accept(ASTTransformer &v) {
-    return traverse_tT<ASTForm_tT>(this, v);
+AST* ASTForm_tT::accept(TransformerVisitor &v) {
+    return traverse_tT<AST*, ASTForm_tT>(this, v);
 }
 
-AST* ASTForm_T::accept(ASTTransformer &v) {
-    return traverse_T<ASTForm_T>(this, v);
+AST* ASTForm_T::accept(TransformerVisitor &v) {
+    return traverse_T<AST*, ASTForm_T>(this, v);
 }
 
-AST* ASTForm_TT::accept(ASTTransformer &v){
-    return traverse_TT<ASTForm_TT>(this, v);
+AST* ASTForm_TT::accept(TransformerVisitor &v){
+    return traverse_TT<AST*, ASTForm_TT>(this, v);
 }
 
-AST* ASTForm_tt::accept(ASTTransformer &v) {
-    return traverse_tt<ASTForm_tt>(this, v);
+AST* ASTForm_tt::accept(TransformerVisitor &v) {
+    return traverse_tt<AST*, ASTForm_tt>(this, v);
 }
 
-AST* ASTForm_nt::accept(ASTTransformer &v) {
-    return traverse_t<ASTForm_nt>(this, v);
+AST* ASTForm_nt::accept(TransformerVisitor &v) {
+    return traverse_t<AST*, ASTForm_nt>(this, v);
 }
 
-AST* ASTForm_nT::accept(ASTTransformer &v) {
-    return traverse_T<ASTForm_nT>(this, v);
+AST* ASTForm_nT::accept(TransformerVisitor &v) {
+    return traverse_T<AST*, ASTForm_nT>(this, v);
 }
 
-AST* ASTForm_f::accept(ASTTransformer &v) {
-    return traverse_f<ASTForm_f>(this, v);
+AST* ASTForm_f::accept(TransformerVisitor &v) {
+    return traverse_f<AST*, ASTForm_f>(this, v);
 }
 
-AST* ASTForm_ff::accept(ASTTransformer &v) {
-    return traverse_ff<ASTForm_ff>(this, v);
+AST* ASTForm_ff::accept(TransformerVisitor &v) {
+    return traverse_ff<AST*, ASTForm_ff>(this, v);
 }
 
-AST* ASTForm_vf::accept(ASTTransformer &v) {
-    return traverse_f<ASTForm_vf>(this, v);
+AST* ASTForm_vf::accept(TransformerVisitor &v) {
+    return traverse_f<AST*, ASTForm_vf>(this, v);
 }
 
-AST* ASTForm_uvf::accept(ASTTransformer &v) {
-    return traverse_f<ASTForm_uvf>(this, v);
+AST* ASTForm_uvf::accept(TransformerVisitor &v) {
+    return traverse_f<AST*, ASTForm_uvf>(this, v);
 }
 
-AST* ASTTerm1_Var1::accept(ASTTransformer &v) {
+AST* ASTTerm1_Var1::accept(TransformerVisitor &v) {
     return v.visit(this);
 }
 
-AST* ASTTerm1_Dot::accept(ASTTransformer &v) {
+AST* ASTTerm1_Dot::accept(TransformerVisitor &v) {
     return v.visit(this);
 }
 
-AST* ASTTerm1_Up::accept(ASTTransformer &v) {
+AST* ASTTerm1_Up::accept(TransformerVisitor &v) {
     return v.visit(this);
 }
 
-AST* ASTTerm1_Root::accept(ASTTransformer &v) {
+AST* ASTTerm1_Root::accept(TransformerVisitor &v) {
     return v.visit(this);
 }
 
-AST* ASTTerm1_Int::accept(ASTTransformer &v) {
+AST* ASTTerm1_Int::accept(TransformerVisitor &v) {
     return v.visit(this);
 }
 
-AST* ASTTerm1_Plus::accept(ASTTransformer &v) {
+AST* ASTTerm1_Plus::accept(TransformerVisitor &v) {
     return v.visit(this);
 }
 
-AST* ASTTerm1_Minus::accept(ASTTransformer &v) {
+AST* ASTTerm1_Minus::accept(TransformerVisitor &v) {
     return v.visit(this);
 }
 
-AST* ASTTerm1_PlusModulo::accept(ASTTransformer &v) {
+AST* ASTTerm1_PlusModulo::accept(TransformerVisitor &v) {
     return v.visit(this);
 }
 
-AST* ASTTerm1_MinusModulo::accept(ASTTransformer &v) {
+AST* ASTTerm1_MinusModulo::accept(TransformerVisitor &v) {
     return v.visit(this);
 }
 
-AST* ASTTerm1_Min::accept(ASTTransformer &v) {
+AST* ASTTerm1_Min::accept(TransformerVisitor &v) {
     return v.visit(this);
 }
 
-AST* ASTTerm1_Max::accept(ASTTransformer &v) {
+AST* ASTTerm1_Max::accept(TransformerVisitor &v) {
     return v.visit(this);
 }
 
-AST* ASTTerm1_TreeRoot::accept(ASTTransformer &v) {
+AST* ASTTerm1_TreeRoot::accept(TransformerVisitor &v) {
     return v.visit(this);
 }
 
-AST* ASTTerm2_Var2::accept(ASTTransformer &v) {
+AST* ASTTerm2_Var2::accept(TransformerVisitor &v) {
     return v.visit(this);
 }
 
-AST* ASTTerm2_VarTree::accept(ASTTransformer &v) {
+AST* ASTTerm2_VarTree::accept(TransformerVisitor &v) {
     return v.visit(this);
 }
 
-AST* ASTTerm2_Dot::accept(ASTTransformer &v) {
+AST* ASTTerm2_Dot::accept(TransformerVisitor &v) {
     return v.visit(this);
 }
 
-AST* ASTTerm2_Up::accept(ASTTransformer &v) {
+AST* ASTTerm2_Up::accept(TransformerVisitor &v) {
     return v.visit(this);
 }
 
-AST* ASTTerm2_Empty::accept(ASTTransformer &v) {
+AST* ASTTerm2_Empty::accept(TransformerVisitor &v) {
     return v.visit(this);
 }
 
-AST* ASTTerm2_Union::accept(ASTTransformer &v) {
+AST* ASTTerm2_Union::accept(TransformerVisitor &v) {
     return v.visit(this);
 }
 
-AST* ASTTerm2_Inter::accept(ASTTransformer &v) {
+AST* ASTTerm2_Inter::accept(TransformerVisitor &v) {
     return v.visit(this);
 }
 
-AST* ASTTerm2_Setminus::accept(ASTTransformer &v) {
+AST* ASTTerm2_Setminus::accept(TransformerVisitor &v) {
     return v.visit(this);
 }
 
-AST* ASTTerm2_Set::accept(ASTTransformer &v) {
+AST* ASTTerm2_Set::accept(TransformerVisitor &v) {
     return v.visit(this);
 }
 
-AST* ASTTerm2_Plus::accept(ASTTransformer &v) {
+AST* ASTTerm2_Plus::accept(TransformerVisitor &v) {
     return v.visit(this);
 }
 
-AST* ASTTerm2_Minus::accept(ASTTransformer &v) {
+AST* ASTTerm2_Minus::accept(TransformerVisitor &v) {
     return v.visit(this);
 }
 
-AST* ASTTerm2_Interval::accept(ASTTransformer &v) {
+AST* ASTTerm2_Interval::accept(TransformerVisitor &v) {
     return v.visit(this);
 }
 
-AST* ASTTerm2_PresbConst::accept(ASTTransformer &v) {
+AST* ASTTerm2_PresbConst::accept(TransformerVisitor &v) {
     return v.visit(this);
 }
 
-AST* ASTTerm2_Formula::accept(ASTTransformer &v) {
+AST* ASTTerm2_Formula::accept(TransformerVisitor &v) {
     return v.visit(this);
 }
 
-AST* ASTForm_Var0::accept(ASTTransformer &v) {
+AST* ASTForm_Var0::accept(TransformerVisitor &v) {
     return v.visit(this);
 }
 
-AST* ASTForm_True::accept(ASTTransformer &v) {
+AST* ASTForm_True::accept(TransformerVisitor &v) {
     return v.visit(this);
 }
 
-AST* ASTForm_False::accept(ASTTransformer &v) {
+AST* ASTForm_False::accept(TransformerVisitor &v) {
     return v.visit(this);
 }
 
-AST* ASTForm_In::accept(ASTTransformer &v) {
-    return traverse_tT<ASTForm_In>(this, v);
+AST* ASTForm_In::accept(TransformerVisitor &v) {
+    return traverse_tT<AST*, ASTForm_In>(this, v);
 }
 
-AST* ASTForm_Notin::accept(ASTTransformer &v) {
-    return traverse_tT<ASTForm_Notin>(this, v);
+AST* ASTForm_Notin::accept(TransformerVisitor &v) {
+    return traverse_tT<AST*, ASTForm_Notin>(this, v);
 }
 
-AST* ASTForm_RootPred::accept(ASTTransformer &v) {
-    return traverse_t<ASTForm_RootPred>(this, v);
+AST* ASTForm_RootPred::accept(TransformerVisitor &v) {
+    return traverse_t<AST*, ASTForm_RootPred>(this, v);
 }
 
-AST* ASTForm_EmptyPred::accept(ASTTransformer &v) {
-    return traverse_T<ASTForm_EmptyPred>(this, v);
+AST* ASTForm_EmptyPred::accept(TransformerVisitor &v) {
+    return traverse_T<AST*, ASTForm_EmptyPred>(this, v);
 }
 
-AST* ASTForm_FirstOrder::accept(ASTTransformer &v) {
-    return traverse_t<ASTForm_FirstOrder>(this, v);
+AST* ASTForm_FirstOrder::accept(TransformerVisitor &v) {
+    return traverse_t<AST*, ASTForm_FirstOrder>(this, v);
 }
 
-AST* ASTForm_Sub::accept(ASTTransformer &v) {
-    return traverse_TT<ASTForm_Sub>(this, v);
+AST* ASTForm_Sub::accept(TransformerVisitor &v) {
+    return traverse_TT<AST*, ASTForm_Sub>(this, v);
 }
 
-AST* ASTForm_Equal1::accept(ASTTransformer &v) {
-    return traverse_tt<ASTForm_Equal1>(this, v);
+AST* ASTForm_Equal1::accept(TransformerVisitor &v) {
+    return traverse_tt<AST*, ASTForm_Equal1>(this, v);
 }
 
-AST* ASTForm_Equal2::accept(ASTTransformer &v) {
-    return traverse_TT<ASTForm_Equal2>(this, v);
+AST* ASTForm_Equal2::accept(TransformerVisitor &v) {
+    return traverse_TT<AST*, ASTForm_Equal2>(this, v);
 }
 
-AST* ASTForm_NotEqual1::accept(ASTTransformer &v) {
-    return traverse_tt<ASTForm_NotEqual1>(this, v);
+AST* ASTForm_NotEqual1::accept(TransformerVisitor &v) {
+    return traverse_tt<AST*, ASTForm_NotEqual1>(this, v);
 }
 
-AST* ASTForm_NotEqual2::accept(ASTTransformer &v) {
-    return traverse_TT<ASTForm_NotEqual2>(this, v);
+AST* ASTForm_NotEqual2::accept(TransformerVisitor &v) {
+    return traverse_TT<AST*, ASTForm_NotEqual2>(this, v);
 }
 
-AST* ASTForm_Less::accept(ASTTransformer &v) {
-    return traverse_tt<ASTForm_Less>(this, v);
+AST* ASTForm_Less::accept(TransformerVisitor &v) {
+    return traverse_tt<AST*, ASTForm_Less>(this, v);
 }
 
-AST* ASTForm_LessEq::accept(ASTTransformer &v) {
-    return traverse_tt<ASTForm_LessEq>(this, v);
+AST* ASTForm_LessEq::accept(TransformerVisitor &v) {
+    return traverse_tt<AST*, ASTForm_LessEq>(this, v);
 }
 
-AST* ASTForm_WellFormedTree::accept(ASTTransformer &v) {
-    return traverse_T<ASTForm_WellFormedTree>(this, v);
+AST* ASTForm_WellFormedTree::accept(TransformerVisitor &v) {
+    return traverse_T<AST*, ASTForm_WellFormedTree>(this, v);
 }
 
-AST* ASTForm_Impl::accept(ASTTransformer &v) {
-    return traverse_ff<ASTForm_Impl>(this, v);
+AST* ASTForm_Impl::accept(TransformerVisitor &v) {
+    return traverse_ff<AST*, ASTForm_Impl>(this, v);
 }
 
-AST* ASTForm_Biimpl::accept(ASTTransformer &v) {
-    return traverse_ff<ASTForm_Biimpl>(this, v);
+AST* ASTForm_Biimpl::accept(TransformerVisitor &v) {
+    return traverse_ff<AST*, ASTForm_Biimpl>(this, v);
 }
 
-AST* ASTForm_And::accept(ASTTransformer &v) {
-    return traverse_ff<ASTForm_And>(this, v);
+AST* ASTForm_And::accept(TransformerVisitor &v) {
+    return traverse_ff<AST*, ASTForm_And>(this, v);
 }
 
-AST* ASTForm_IdLeft::accept(ASTTransformer &v) {
-    return traverse_ff<ASTForm_IdLeft>(this, v);
+AST* ASTForm_IdLeft::accept(TransformerVisitor &v) {
+    return traverse_ff<AST*, ASTForm_IdLeft>(this, v);
 }
 
-AST* ASTForm_Or::accept(ASTTransformer &v) {
-    return traverse_ff<ASTForm_Or>(this, v);
+AST* ASTForm_Or::accept(TransformerVisitor &v) {
+    return traverse_ff<AST*, ASTForm_Or>(this, v);
 }
 
-AST* ASTForm_Not::accept(ASTTransformer &v) {
-    return traverse_f<ASTForm_Not>(this, v);
+AST* ASTForm_Not::accept(TransformerVisitor &v) {
+    return traverse_f<AST*, ASTForm_Not>(this, v);
 }
 
-AST* ASTForm_Ex0::accept(ASTTransformer &v) {
-    return traverse_f<ASTForm_Ex0>(this, v);
+AST* ASTForm_Ex0::accept(TransformerVisitor &v) {
+    return traverse_f<AST*, ASTForm_Ex0>(this, v);
 }
 
-AST* ASTForm_Ex1::accept(ASTTransformer &v) {
-    return traverse_f<ASTForm_Ex1>(this, v);
+AST* ASTForm_Ex1::accept(TransformerVisitor &v) {
+    return traverse_f<AST*, ASTForm_Ex1>(this, v);
 }
 
-AST* ASTForm_Ex2::accept(ASTTransformer &v) {
-    return traverse_f<ASTForm_Ex2>(this, v);
+AST* ASTForm_Ex2::accept(TransformerVisitor &v) {
+    return traverse_f<AST*, ASTForm_Ex2>(this, v);
 }
 
-AST* ASTForm_All0::accept(ASTTransformer &v) {
-    return traverse_f<ASTForm_All0>(this, v);
+AST* ASTForm_All0::accept(TransformerVisitor &v) {
+    return traverse_f<AST*, ASTForm_All0>(this, v);
 }
 
-AST* ASTForm_All1::accept(ASTTransformer &v) {
-    return traverse_f<ASTForm_All1>(this, v);
+AST* ASTForm_All1::accept(TransformerVisitor &v) {
+    return traverse_f<AST*, ASTForm_All1>(this, v);
 }
 
-AST* ASTForm_All2::accept(ASTTransformer &v) {
-    return traverse_f<ASTForm_All2>(this, v);
+AST* ASTForm_All2::accept(TransformerVisitor &v) {
+    return traverse_f<AST*, ASTForm_All2>(this, v);
 }
 
-AST* ASTForm_Let0::accept(ASTTransformer &v) {
-    return traverse_f<ASTForm_Let0>(this, v);
+AST* ASTForm_Let0::accept(TransformerVisitor &v) {
+    return traverse_f<AST*, ASTForm_Let0>(this, v);
 }
 
-AST* ASTForm_Let1::accept(ASTTransformer &v) {
-    return traverse_f<ASTForm_Let1>(this, v);
+AST* ASTForm_Let1::accept(TransformerVisitor &v) {
+    return traverse_f<AST*, ASTForm_Let1>(this, v);
 }
 
-AST* ASTForm_Let2::accept(ASTTransformer &v) {
-    return traverse_f<ASTForm_Let2>(this, v);
+AST* ASTForm_Let2::accept(TransformerVisitor &v) {
+    return traverse_f<AST*, ASTForm_Let2>(this, v);
 }
 
-AST* ASTForm_Call::accept(ASTTransformer &v) {
+AST* ASTForm_Call::accept(TransformerVisitor &v) {
     return v.visit(this);
 }
 
-AST* ASTForm_Import::accept(ASTTransformer &v) {
+AST* ASTForm_Import::accept(TransformerVisitor &v) {
     return v.visit(this);
 }
 
-AST* ASTForm_Export::accept(ASTTransformer &v) {
-    return traverse_f<ASTForm_Export>(this, v);
+AST* ASTForm_Export::accept(TransformerVisitor &v) {
+    return traverse_f<AST*, ASTForm_Export>(this, v);
 }
 
-AST* ASTForm_Prefix::accept(ASTTransformer &v) {
-    return traverse_f<ASTForm_Prefix>(this, v);
+AST* ASTForm_Prefix::accept(TransformerVisitor &v) {
+    return traverse_f<AST*, ASTForm_Prefix>(this, v);
 }
 
-AST* ASTForm_Restrict::accept(ASTTransformer &v) {
-    return traverse_f<ASTForm_Restrict>(this, v);
+AST* ASTForm_Restrict::accept(TransformerVisitor &v) {
+    return traverse_f<AST*, ASTForm_Restrict>(this, v);
 }
 
-AST* ASTForm_InStateSpace1::accept(ASTTransformer &v) {
-    return traverse_t<ASTForm_InStateSpace1>(this, v);
+AST* ASTForm_InStateSpace1::accept(TransformerVisitor &v) {
+    return traverse_t<AST*, ASTForm_InStateSpace1>(this, v);
 }
 
-AST* ASTForm_InStateSpace2::accept(ASTTransformer &v) {
-    return traverse_T<ASTForm_InStateSpace2>(this, v);
+AST* ASTForm_InStateSpace2::accept(TransformerVisitor &v) {
+    return traverse_T<AST*, ASTForm_InStateSpace2>(this, v);
 }
 
-AST* ASTForm_SomeType::accept(ASTTransformer &v) {
-    return traverse_t<ASTForm_SomeType>(this, v);
+AST* ASTForm_SomeType::accept(TransformerVisitor &v) {
+    return traverse_t<AST*, ASTForm_SomeType>(this, v);
 }
 
 /**
@@ -557,19 +557,19 @@ AST* ASTForm_SomeType::accept(ASTTransformer &v) {
  * @param[in] v:    visitor without parameters returning void
  */
 
-template<class ASTNode>
-void void_traverse_T(ASTNode* node, VoidVisitor &v) {
+template<class Node>
+void void_traverse_T(Node* node, VoidVisitor &v) {
     assert(node != nullptr);
     assert(node->T != nullptr);
 
     switch(v.traverseDirection) {
-        case ASTTransformer::Traverse::InOrder:
-        case ASTTransformer::Traverse::PreOrder:
+        case TransformerVisitor::Traverse::InOrder:
+        case TransformerVisitor::Traverse::PreOrder:
             // First traverse the root then the child
             v.visit(node);
             node->T->accept(v);
             break;
-        case ASTTransformer::Traverse::PostOrder:
+        case TransformerVisitor::Traverse::PostOrder:
             // First traverse the child then the root
             node->T->accept(v);
             v.visit(node);
@@ -579,19 +579,19 @@ void void_traverse_T(ASTNode* node, VoidVisitor &v) {
     }
 }
 
-template<class ASTNode>
-void void_traverse_t(ASTNode* node, VoidVisitor &v) {
+template<class Node>
+void void_traverse_t(Node* node, VoidVisitor &v) {
     assert(node != nullptr);
     assert(node->t != nullptr);
 
     switch(v.traverseDirection) {
-        case ASTTransformer::Traverse::InOrder:
-        case ASTTransformer::Traverse::PreOrder:
+        case TransformerVisitor::Traverse::InOrder:
+        case TransformerVisitor::Traverse::PreOrder:
             // First traverse the root, then the child
             v.visit(node);
             node->t->accept(v);
             break;
-        case ASTTransformer::Traverse::PostOrder:
+        case TransformerVisitor::Traverse::PostOrder:
             // First traverse the child then the root
             node->t->accept(v);
             v.visit(node);
@@ -601,26 +601,26 @@ void void_traverse_t(ASTNode* node, VoidVisitor &v) {
     }
 }
 
-template<class ASTNode>
-void void_traverse_tt(ASTNode* node, VoidVisitor &v) {
+template<class Node>
+void void_traverse_tt(Node* node, VoidVisitor &v) {
     assert(node != nullptr);
     assert(node->t1 != nullptr);
     assert(node->t2 != nullptr);
 
     switch(v.traverseDirection) {
-        case ASTTransformer::Traverse::PreOrder:
+        case TransformerVisitor::Traverse::PreOrder:
             // First traverse the root, then childs
             v.visit(node);
             node->t1->accept(v);
             node->t2->accept(v);
             break;
-        case ASTTransformer::Traverse::PostOrder:
+        case TransformerVisitor::Traverse::PostOrder:
             // First traverse childs, then the root
             node->t1->accept(v);
             node->t2->accept(v);
             v.visit(node);
             break;
-        case ASTTransformer::Traverse::InOrder:
+        case TransformerVisitor::Traverse::InOrder:
             // First traverse left child, then root and last right child
             node->t1->accept(v);
             v.visit(node);
@@ -631,26 +631,26 @@ void void_traverse_tt(ASTNode* node, VoidVisitor &v) {
     }
 }
 
-template<class ASTNode>
-void void_traverse_TT(ASTNode* node, VoidVisitor &v) {
+template<class Node>
+void void_traverse_TT(Node* node, VoidVisitor &v) {
     assert(node != nullptr);
     assert(node->T1 != nullptr);
     assert(node->T2 != nullptr);
 
     switch(v.traverseDirection) {
-        case ASTTransformer::Traverse::PreOrder:
+        case TransformerVisitor::Traverse::PreOrder:
             // First visit the root then childs
             v.visit(node);
             node->T1->accept(v);
             node->T2->accept(v);
             break;
-        case ASTTransformer::Traverse::PostOrder:
+        case TransformerVisitor::Traverse::PostOrder:
             // First visit childs, then the root
             node->T1->accept(v);
             node->T2->accept(v);
             v.visit(node);
             break;
-        case ASTTransformer::Traverse::InOrder:
+        case TransformerVisitor::Traverse::InOrder:
             // First left child, then root, then right child
             node->T1->accept(v);
             v.visit(node);
@@ -661,26 +661,26 @@ void void_traverse_TT(ASTNode* node, VoidVisitor &v) {
     }
 }
 
-template<class ASTNode>
-void void_traverse_tT(ASTNode* node, VoidVisitor &v) {
+template<class Node>
+void void_traverse_tT(Node* node, VoidVisitor &v) {
     assert(node != nullptr);
     assert(node->t1 != nullptr);
     assert(node->T2 != nullptr);
 
     switch(v.traverseDirection) {
-        case ASTTransformer::Traverse::PreOrder:
+        case TransformerVisitor::Traverse::PreOrder:
             // First traverse the root, then childs
             v.visit(node);
             node->t1->accept(v);
             node->T2->accept(v);
             break;
-        case ASTTransformer::Traverse::PostOrder:
+        case TransformerVisitor::Traverse::PostOrder:
             // First traverse childs, then the root
             node->t1->accept(v);
             node->T2->accept(v);
             v.visit(node);
             break;
-        case ASTTransformer::Traverse::InOrder:
+        case TransformerVisitor::Traverse::InOrder:
             // First traverse left child, then root, then right child
             node->t1->accept(v);
             v.visit(node);
@@ -691,19 +691,19 @@ void void_traverse_tT(ASTNode* node, VoidVisitor &v) {
     }
 }
 
-template<class ASTNode>
-void void_traverse_f(ASTNode* node, VoidVisitor &v) {
+template<class Node>
+void void_traverse_f(Node* node, VoidVisitor &v) {
     assert(node != nullptr);
     assert(node->f != nullptr);
 
     switch(v.traverseDirection) {
-        case ASTTransformer::Traverse::InOrder:
-        case ASTTransformer::Traverse::PreOrder:
+        case TransformerVisitor::Traverse::InOrder:
+        case TransformerVisitor::Traverse::PreOrder:
             // First traverse the root, then childs
             v.visit(node);
             node->f->accept(v);
             break;
-        case ASTTransformer::Traverse::PostOrder:
+        case TransformerVisitor::Traverse::PostOrder:
             // First traverse childs, then the root
             node->f->accept(v);
             v.visit(node);
@@ -713,26 +713,26 @@ void void_traverse_f(ASTNode* node, VoidVisitor &v) {
     }
 }
 
-template<class ASTNode>
-void void_traverse_ff(ASTNode* node, VoidVisitor &v) {
+template<class Node>
+void void_traverse_ff(Node* node, VoidVisitor &v) {
     assert(node != nullptr);
     assert(node->f1 != nullptr);
     assert(node->f2 != nullptr);
 
     switch(v.traverseDirection) {
-        case ASTTransformer::Traverse::PreOrder:
+        case TransformerVisitor::Traverse::PreOrder:
             // First traverse the root, then childs
             v.visit(node);
             node->f1->accept(v);
             node->f2->accept(v);
             break;
-        case ASTTransformer::Traverse::PostOrder:
+        case TransformerVisitor::Traverse::PostOrder:
             // First traverse childs, then the root
             node->f1->accept(v);
             node->f2->accept(v);
             v.visit(node);
             break;
-        case ASTTransformer::Traverse::InOrder:
+        case TransformerVisitor::Traverse::InOrder:
             // First traverse left childs, then root, then right child
             node->f1->accept(v);
             v.visit(node);

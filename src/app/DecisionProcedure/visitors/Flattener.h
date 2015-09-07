@@ -17,9 +17,9 @@
 #include "../Frontend/symboltable.h"
 #include "../environment.hh"
 
-class Flattener : public ASTTransformer {
+class Flattener : public TransformerVisitor {
 public:
-    Flattener() : ASTTransformer(Traverse::PostOrder) {}
+    Flattener() : TransformerVisitor(Traverse::PostOrder) {}
 
     static ASTTerm1_Var1* generateFreshFirstOrder();
     static ASTTerm2_Var2* generateFreshSecondOrder();

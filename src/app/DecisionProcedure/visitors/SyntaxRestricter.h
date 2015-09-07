@@ -15,9 +15,9 @@
 #include "../Frontend/ast.h"
 #include "../Frontend/ast_visitor.h"
 
-class SyntaxRestricter : public ASTTransformer {
+class SyntaxRestricter : public TransformerVisitor {
 public:
-    SyntaxRestricter() : ASTTransformer(Traverse::PostOrder) {}
+    SyntaxRestricter() : TransformerVisitor(Traverse::PostOrder) {}
     AST* visit(ASTForm_Impl* form);
     AST* visit(ASTForm_Biimpl* form);
 };

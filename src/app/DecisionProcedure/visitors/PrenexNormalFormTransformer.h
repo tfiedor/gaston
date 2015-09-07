@@ -16,9 +16,9 @@
 #include "../Frontend/ast.h"
 #include "../Frontend/ast_visitor.h"
 
-class PrenexNormalFormTransformer : public ASTTransformer {
+class PrenexNormalFormTransformer : public TransformerVisitor {
 public:
-    PrenexNormalFormTransformer() : ASTTransformer(Traverse::PostOrder) {}
+    PrenexNormalFormTransformer() : TransformerVisitor(Traverse::PostOrder) {}
 
     AST* visit(ASTForm_ff* form);
     AST* visit(ASTForm_And* form) { return this->visit(static_cast<ASTForm_ff*>(form));}

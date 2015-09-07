@@ -16,9 +16,9 @@
 #include "../Frontend/ast.h"
 #include "../Frontend/ast_visitor.h"
 
-class Reorderer : public ASTTransformer {
+class Reorderer : public TransformerVisitor {
 public:
-    Reorderer() : ASTTransformer(Traverse::PostOrder) {}
+    Reorderer() : TransformerVisitor(Traverse::PostOrder) {}
     // Postorder traversal
     // Assumption: are not Impl and Biimpls
     AST* visit(ASTForm_ff* form);

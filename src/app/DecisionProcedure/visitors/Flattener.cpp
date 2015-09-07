@@ -263,7 +263,7 @@ AST* Flattener::visit(ASTForm_NotEqual2* form) {
  * @return flattened and freshened formula
  */
 
-ASTForm* substituteFreshLess(ASTTerm1* leftTerm, ASTTerm1* rightTerm, bool substituteLeft, ASTTransformer& visitor) {
+ASTForm* substituteFreshLess(ASTTerm1* leftTerm, ASTTerm1* rightTerm, bool substituteLeft, TransformerVisitor& visitor) {
     ASTTerm1_Var1* z;
     ASTForm_Ex1* exists;
     ASTForm_And* conjuction;
@@ -320,7 +320,7 @@ AST* Flattener::visit(ASTForm_Less* form) {
  * @return flattened and freshened formula
  */
 
-ASTForm* substituteFreshLessEq(ASTTerm1* leftTerm, ASTTerm1* rightTerm, bool substituteLeft, ASTTransformer &visitor) {
+ASTForm* substituteFreshLessEq(ASTTerm1* leftTerm, ASTTerm1* rightTerm, bool substituteLeft, TransformerVisitor &visitor) {
     ASTTerm1_Var1* z;
     ASTForm_Ex1* exists;
     ASTForm_And* conjuction;
@@ -404,7 +404,7 @@ AST* Flattener::visit(ASTForm_LessEq* form) {
  * @return flattened and freshened formula
  */
 
-ASTForm* substituteFreshIn(ASTTerm1* leftTerm, ASTTerm2* rightTerm, ASTTransformer &visitor) {
+ASTForm* substituteFreshIn(ASTTerm1* leftTerm, ASTTerm2* rightTerm, TransformerVisitor &visitor) {
     ASTTerm1_Var1* z;
     ASTForm_Ex1* exists;
     ASTForm_And* conjuction;

@@ -17,9 +17,9 @@
 #include "../Frontend/ast.h"
 #include "../Frontend/ast_visitor.h"
 
-class MacroUnfolder : public ASTTransformer {
+class MacroUnfolder : public TransformerVisitor {
 public:
-    MacroUnfolder() : ASTTransformer(Traverse::PreOrder) {}
+    MacroUnfolder() : TransformerVisitor(Traverse::PreOrder) {}
 
 private:
     // TODO: Switch to shared pointers?

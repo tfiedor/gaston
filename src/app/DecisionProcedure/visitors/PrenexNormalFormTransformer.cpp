@@ -89,7 +89,7 @@ AST* PrenexNormalFormTransformer::visit(ASTForm_ff* form) {
  * @param[in] visitor   visitor for further transformation
  */
 template <class FromQuantifier, class ToQuantifier>
-ToQuantifier* createNegatedQuantifier(ASTForm* from, ASTTransformer &visitor) {
+ToQuantifier* createNegatedQuantifier(ASTForm* from, TransformerVisitor &visitor) {
     static_assert(std::is_base_of<ASTForm_q, FromQuantifier>::value, "FromQuantifier is not derived from ASTForm_q");
     static_assert(std::is_base_of<ASTForm_q, ToQuantifier>::value, "ToQuantifier is not derived from ASTForm_q");
 
@@ -111,7 +111,7 @@ ToQuantifier* createNegatedQuantifier(ASTForm* from, ASTTransformer &visitor) {
  * @param[in] visitor   visitor for further transformation
  */
 template <class FromQuantifier, class ToQuantifier>
-ToQuantifier* createZeroOrderNegatedQuantifier(ASTForm* from, ASTTransformer &visitor) {
+ToQuantifier* createZeroOrderNegatedQuantifier(ASTForm* from, TransformerVisitor &visitor) {
     static_assert(std::is_base_of<ASTForm_vf, FromQuantifier>::value, "FromQuantifier is not derived from ASTForm_q");
     static_assert(std::is_base_of<ASTForm_vf, ToQuantifier>::value, "ToQuantifier is not derived from ASTForm_q");
     assert(from != nullptr);
@@ -130,7 +130,7 @@ ToQuantifier* createZeroOrderNegatedQuantifier(ASTForm* from, ASTTransformer &vi
  * @param node: input AST node representing negation formula
  * @return: formula with negated quantifier
  */
-ASTForm* negateQuantifier(ASTForm_Not* node, ASTTransformer &visitor) {
+ASTForm* negateQuantifier(ASTForm_Not* node, TransformerVisitor &visitor) {
     assert(node != nullptr);
     assert(node->f != nullptr);
 

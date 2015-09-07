@@ -30,7 +30,7 @@
 using Automaton = VATA::BDDBottomUpTreeAut;
 
 #define VISITABLE() virtual void accept(VoidVisitor& v); \
-  virtual AST* accept(ASTTransformer &v)
+  virtual AST* accept(TransformerVisitor &v)
 
 ////////// Bit list ///////////////////////////////////////////////////////////
 
@@ -93,7 +93,7 @@ enum ASTOrder {oTerm1, oTerm2, oForm, oUniv};
 
 class ASTList;
 class VoidVisitor;
-class ASTTransformer;
+class TransformerVisitor;
 
 class AST {
 public:
@@ -185,8 +185,7 @@ public:
   ASTUniv(Ident univ, Pos p) :
 		  AST(oUniv, aUniv, p), u(univ) {}
 
-  virtual void accept(VoidVisitor &v);
-  virtual AST* accept(ASTTransformer &v);
+  VISITABLE();
 
   void dump();
 
@@ -249,8 +248,7 @@ public:
 		  ASTTerm1(kind, p), T(TT) {}
   ~ASTTerm1_T() {delete T;}
 
-  virtual void accept(VoidVisitor &v);
-  virtual AST* accept(ASTTransformer &v);
+  VISITABLE();
 
   void freeVars(IdentList*, IdentList*);
 
@@ -365,8 +363,7 @@ public:
 		  ASTForm(kind, p), T1(TT1), T2(TT2) {}
   ~ASTForm_TT() {delete T1; delete T2;}
 
-  virtual void accept(VoidVisitor &v);
-  virtual AST* accept(ASTTransformer &v);
+  VISITABLE();
 
   void freeVars(IdentList*, IdentList*);
   ASTForm* unfoldMacro(IdentList*, ASTList*);

@@ -14,19 +14,19 @@ public:
 
     typedef R ReturnType;
 
-    virtual ReturnType visit(ASTForm *e) { std::cout << "Default visit(ASTForm)\n"; };
-    virtual ReturnType visit(ASTTerm *e) { std::cout << "Default visit(ASTTerm)\n"; };
-    virtual ReturnType visit(ASTUniv *e) { std::cout << "Default visit(ASTUniv)\n"; };
+    virtual ReturnType visit(ASTForm *e) { };
+    virtual ReturnType visit(ASTTerm *e) { };
+    virtual ReturnType visit(ASTUniv *e) { };
 };
 
 /**
  * An implementation of visitor pattern for traversing and modifing
  * of the structure of AST. Implements traversals for basic node
  */
-class ASTTransformer : public ASTVisitor<AST*> {
+class TransformerVisitor : public ASTVisitor<AST*> {
 public:
     // < Constructors >
-    ASTTransformer(Traverse tD) : ASTVisitor<AST*>(tD) {}
+    TransformerVisitor(Traverse tD) : ASTVisitor<AST*>(tD) {}
 
     // < ASTTerm1 Derives > //
     virtual AST* visit(ASTTerm1_n* term) { return term; }

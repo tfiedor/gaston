@@ -16,9 +16,9 @@
 #include "../Frontend/ast.h"
 #include "../Frontend/ast_visitor.h"
 
-class NegationUnfolder : public ASTTransformer {
+class NegationUnfolder : public TransformerVisitor {
 public:
-    NegationUnfolder() : ASTTransformer(Traverse::PostOrder) {}
+    NegationUnfolder() : TransformerVisitor(Traverse::PostOrder) {}
     AST* visit(ASTForm_Not* form);
 };
 
