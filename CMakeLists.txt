@@ -18,6 +18,7 @@ add_executable(dWiNA
 	src/app/Frontend/ast_visitor.cpp
 	src/app/Frontend/astdump.cpp
 	src/app/Frontend/code.cpp
+	src/app/Frontend/code_visitor.cpp
 	src/app/Frontend/codedump.cpp
 	src/app/Frontend/codesubst.cpp
 	src/app/Frontend/codetable.cpp

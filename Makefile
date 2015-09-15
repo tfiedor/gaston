@@ -642,6 +642,30 @@ src/app/Frontend/code.cpp.s:
 	$(MAKE) -f CMakeFiles/dWiNA.dir/build.make CMakeFiles/dWiNA.dir/src/app/Frontend/code.cpp.s
 .PHONY : src/app/Frontend/code.cpp.s
 
+src/app/Frontend/code_visitor.o: src/app/Frontend/code_visitor.cpp.o
+.PHONY : src/app/Frontend/code_visitor.o
+
+# target to build an object file
+src/app/Frontend/code_visitor.cpp.o:
+	$(MAKE) -f CMakeFiles/dWiNA.dir/build.make CMakeFiles/dWiNA.dir/src/app/Frontend/code_visitor.cpp.o
+.PHONY : src/app/Frontend/code_visitor.cpp.o
+
+src/app/Frontend/code_visitor.i: src/app/Frontend/code_visitor.cpp.i
+.PHONY : src/app/Frontend/code_visitor.i
+
+# target to preprocess a source file
+src/app/Frontend/code_visitor.cpp.i:
+	$(MAKE) -f CMakeFiles/dWiNA.dir/build.make CMakeFiles/dWiNA.dir/src/app/Frontend/code_visitor.cpp.i
+.PHONY : src/app/Frontend/code_visitor.cpp.i
+
+src/app/Frontend/code_visitor.s: src/app/Frontend/code_visitor.cpp.s
+.PHONY : src/app/Frontend/code_visitor.s
+
+# target to generate assembly for a file
+src/app/Frontend/code_visitor.cpp.s:
+	$(MAKE) -f CMakeFiles/dWiNA.dir/build.make CMakeFiles/dWiNA.dir/src/app/Frontend/code_visitor.cpp.s
+.PHONY : src/app/Frontend/code_visitor.cpp.s
+
 src/app/Frontend/codedump.o: src/app/Frontend/codedump.cpp.o
 .PHONY : src/app/Frontend/codedump.o
 
@@ -1197,6 +1221,9 @@ help:
 	@echo "... src/app/Frontend/code.o"
 	@echo "... src/app/Frontend/code.i"
 	@echo "... src/app/Frontend/code.s"
+	@echo "... src/app/Frontend/code_visitor.o"
+	@echo "... src/app/Frontend/code_visitor.i"
+	@echo "... src/app/Frontend/code_visitor.s"
 	@echo "... src/app/Frontend/codedump.o"
 	@echo "... src/app/Frontend/codedump.i"
 	@echo "... src/app/Frontend/codedump.s"

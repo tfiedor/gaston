@@ -29,6 +29,13 @@
 #include "ident.h"
 #include "str.h"
 
+#define DAG_VISITABLE() virtual void accept(VoidCodeVisitor &v); \
+  virtual Code* accept(TransformerCodeVisitor &v)
+
+// Forward definition for visitors
+class VoidCodeVisitor;
+class TransformerCodeVisitor;
+
 ////////// StateSpaces ////////////////////////////////////////////////////////
 
 SSSet stateSpaces(IdentList *univs); // find state spaces for univs
@@ -55,7 +62,7 @@ public:
     vars(v), code(c) {}
   VarCode() : 
     vars(NULL), code(NULL) {}
-  
+
   bool operator==(const VarCode &vc) {return vc.vars==vars && vc.code==code;}
 
   // generate DFA/GTA
@@ -115,6 +122,8 @@ public:
     kind(knd), refs(1), pos(p), mark(0), eqlist(NULL), dfa(NULL), gta(NULL),
     conj(NULL), restrconj(NULL), depth(0)/**, conjhash(0)**/ {}
   virtual ~Code() {}
+
+  DAG_VISITABLE();
 
   // determine syntax/signature equivalence
   virtual bool equiv(Code &c); 
@@ -176,6 +185,8 @@ class Code_n: public Code {
 public:
   Code_n(CodeKind knd, Ident i, Pos p);
 
+  DAG_VISITABLE();
+
   bool equiv(Code&);
   unsigned hash();
 
@@ -186,6 +197,8 @@ class Code_ni: public Code_n {
 public:
   Code_ni(CodeKind knd, Ident i, int n, Pos p);
 
+  DAG_VISITABLE();
+
   bool equiv(Code&);
   unsigned hash();
 
@@ -195,6 +208,8 @@ public:
 class Code_nn: public Code {
 public:
   Code_nn(CodeKind knd, Ident i, Ident j, Pos p);
+
+  DAG_VISITABLE();
 
   bool equiv(Code&);
   unsigned hash();
@@ -207,6 +222,8 @@ class Code_nni: public Code_nn {
 public:
   Code_nni(CodeKind knd, Ident i, Ident j, int n, Pos p);
 
+  DAG_VISITABLE();
+
   bool equiv(Code&);
   unsigned hash();
 
@@ -216,6 +233,8 @@ public:
 class Code_nnn: public Code {
 public:
   Code_nnn(CodeKind knd, Ident i, Ident j, Ident k, Pos p);
+
+  DAG_VISITABLE();
 
   bool equiv(Code&);
   unsigned hash();
@@ -229,6 +248,8 @@ class Code_c: public Code {
 public:
   Code_c(CodeKind knd, VarCode c, Pos p, bool skipinit=false);
   ~Code_c() {vc.remove();}
+
+  DAG_VISITABLE();
 
   bool equiv(Code&);
   unsigned hash();
@@ -247,6 +268,8 @@ class Code_cc: public Code {
 public:
   Code_cc(CodeKind knd, VarCode c1, VarCode c2, Pos p);
   ~Code_cc() {vc1.remove(); vc2.remove();}
+
+  DAG_VISITABLE();
 
   bool equiv(Code&);
   unsigned hash();
@@ -297,6 +320,8 @@ public:
   Code_True(Pos p) :
     Code(cTrue, p) {}
 
+  DAG_VISITABLE();
+
   void makeDFA();
   void makeGTA();
   void dump(bool rec);
@@ -307,6 +332,8 @@ class Code_False: public Code {
 public:
   Code_False(Pos p) :
     Code(cFalse, p) {}
+
+  DAG_VISITABLE();
 
   void makeDFA();
   void makeGTA();
@@ -319,6 +346,8 @@ public:
   Code_EqEmpty(Ident i, Pos p) :
     Code_n(cEqEmpty, i, p) {}
 
+  DAG_VISITABLE();
+
   void makeDFA();
   void makeGTA();
   void dump(bool rec);
@@ -330,6 +359,8 @@ public:
   Code_EqRoot(Ident i, IdentList *univs, Pos p) :
     Code_n(cEqRoot, i, p), universes(univs) {}
   ~Code_EqRoot() {delete universes;}
+
+  DAG_VISITABLE();
 
   bool equiv(Code&);
   void makeGTA();
@@ -344,6 +375,8 @@ public:
   Code_FirstOrder(Ident i, Pos p) :
     Code_n(cFirstOrder, i, p) {}
 
+  DAG_VISITABLE();
+
   void makeDFA();
   void makeGTA();
   void dump(bool rec);
@@ -355,6 +388,8 @@ public:
   Code_EqConst(Ident i, int n, Pos p) :
     Code_ni(cEqConst, i, n, p) {}
 
+  DAG_VISITABLE();
+
   void makeDFA();
   void dump(bool rec);
   VarCode substCopy(IdentList *actuals);
@@ -364,6 +399,8 @@ class Code_Singleton: public Code_n {
 public:
   Code_Singleton(Ident i, Pos p) :
     Code_n(cSingleton, i, p) {}
+
+  DAG_VISITABLE();
 
   void makeDFA();
   void makeGTA();
@@ -376,6 +413,8 @@ public:
   Code_BoolVar(Ident i, Pos p) :
     Code_n(cBoolVar, i, p) {}
 
+  DAG_VISITABLE();
+
   void makeDFA();
   void makeGTA();
   void dump(bool rec);
@@ -387,6 +426,8 @@ public:
   Code_InStateSpace(Ident i, IdentList *s, Pos p) :
     Code_n(cInStateSpace, i, p), ss(s) {}
   ~Code_InStateSpace() {delete ss;}
+
+  DAG_VISITABLE();
 
   bool equiv(Code&);
   unsigned hash();
@@ -402,6 +443,8 @@ public:
   Code_SomeType(Ident i, Pos p) :
     Code_n(cSomeType, i, p) {}
 
+  DAG_VISITABLE();
+
   void makeGTA();
   void dump(bool rec);
   VarCode substCopy(IdentList *actuals);
@@ -411,6 +454,8 @@ class Code_In: public Code_nn {
 public:
   Code_In(Ident i, Ident j, Pos p) :
     Code_nn(cIn, i, j, p) {}
+
+  DAG_VISITABLE();
 
   void makeDFA();
   void makeGTA();
@@ -424,6 +469,8 @@ public:
   Code_Eq1(Ident i, Ident j, Pos p) :
     Code_nn(cEq1, i, j, p) {}
 
+  DAG_VISITABLE();
+
   void makeDFA();
   void makeGTA();
   void dump(bool rec);
@@ -435,6 +482,8 @@ class Code_Eq2: public Code_nn {
 public:
   Code_Eq2(Ident i, Ident j, Pos p) :
     Code_nn(cEq2, i, j, p) {}
+
+  DAG_VISITABLE();
 
   void makeDFA();
   void makeGTA();
@@ -448,6 +497,8 @@ public:
   Code_Sub2(Ident i, Ident j, Pos p) :
     Code_nn(cSub2, i, j, p) {}
 
+  DAG_VISITABLE();
+
   void makeDFA();
   void makeGTA();
   void dump(bool rec);
@@ -458,6 +509,8 @@ class Code_Less1: public Code_nn {
 public:
   Code_Less1(Ident i, Ident j, Pos p) :
     Code_nn(cLess1, i, j, p) {}
+
+  DAG_VISITABLE();
 
   void makeDFA();
   void makeGTA();
@@ -470,6 +523,8 @@ public:
   Code_LessEq1(Ident i, Ident j, Pos p) :
     Code_nn(cLessEq1, i, j, p) {}
 
+  DAG_VISITABLE();
+
   void makeDFA();
   void makeGTA();
   void dump(bool rec);
@@ -481,6 +536,8 @@ public:
   Code_EqDot0(Ident i, Ident j, Pos p) :
     Code_nn(cEqDot0, i, j, p) {}
 
+  DAG_VISITABLE();
+
   void makeGTA();
   void dump(bool rec);
   VarCode substCopy(IdentList *actuals);
@@ -490,6 +547,8 @@ class Code_EqDot1: public Code_nn {
 public:
   Code_EqDot1(Ident i, Ident j, Pos p) :
     Code_nn(cEqDot1, i, j, p) {}
+
+  DAG_VISITABLE();
 
   void makeGTA();
   void dump(bool rec);
@@ -501,6 +560,8 @@ public:
   Code_EqUp(Ident i, Ident j, Pos p) :
     Code_nn(cEqUp, i, j, p) {}
 
+  DAG_VISITABLE();
+
   void makeGTA();
   void dump(bool rec);
   VarCode substCopy(IdentList *actuals);
@@ -510,6 +571,8 @@ class Code_EqPlus2: public Code_nn {
 public:
   Code_EqPlus2(Ident i, Ident j, Pos p) :
     Code_nn(cEqPlus2, i, j, p) {}
+
+  DAG_VISITABLE();
 
   void makeDFA();
   void dump(bool rec);
@@ -521,6 +584,8 @@ public:
   Code_EqMinus2(Ident i, Ident j, Pos p) :
     Code_nn(cEqMinus2, i, j, p) {}
 
+  DAG_VISITABLE();
+
   void makeDFA();
   void dump(bool rec);
   VarCode substCopy(IdentList *actuals);
@@ -530,6 +595,8 @@ class Code_EqMin: public Code_nn {
 public:
   Code_EqMin(Ident i, Ident j, Pos p) :
     Code_nn(cEqMin, i, j, p) {}
+
+  DAG_VISITABLE();
 
   void makeDFA();
   void dump(bool rec);
@@ -541,6 +608,8 @@ public:
   Code_EqMax(Ident i, Ident j, Pos p) :
     Code_nn(cEqMax, i, j, p) {}
 
+  DAG_VISITABLE();
+
   void makeDFA();
   void dump(bool rec);
   VarCode substCopy(IdentList *actuals);
@@ -550,6 +619,8 @@ class Code_EqPlus1: public Code_nni {
 public:
   Code_EqPlus1(Ident i, Ident j, int n, Pos p) :
     Code_nni(cEqPlus1, i, j, n, p) {}
+
+  DAG_VISITABLE();
 
   void makeDFA();
   void dump(bool rec);
@@ -561,6 +632,8 @@ public:
   Code_EqMinus1(Ident i, Ident j, Pos p) :
     Code_nn(cEqMinus1, i, j, p) {}
 
+  DAG_VISITABLE();
+
   void makeDFA();
   void dump(bool rec);
   VarCode substCopy(IdentList *actuals);
@@ -570,6 +643,8 @@ class Code_EqUnion: public Code_nnn {
 public:
   Code_EqUnion(Ident i, Ident j, Ident k, Pos p) :
     Code_nnn(cEqUnion, i, j, k, p) {}
+
+  DAG_VISITABLE();
 
   void makeDFA();
   void makeGTA();
@@ -582,6 +657,8 @@ public:
   Code_EqInter(Ident i, Ident j, Ident k, Pos p) :
     Code_nnn(cEqInter, i, j, k, p) {}
 
+  DAG_VISITABLE();
+
   void makeDFA();
   void makeGTA();
   void dump(bool rec);
@@ -592,6 +669,8 @@ class Code_EqSetMinus: public Code_nnn {
 public:
   Code_EqSetMinus(Ident i, Ident j, Ident k, Pos p) :
     Code_nnn(cEqSetMinus, i, j, k, p) {}
+
+  DAG_VISITABLE();
 
   void makeDFA();
   void makeGTA();
@@ -604,6 +683,8 @@ public:
   Code_EqPlusModulo(Ident i, Ident j, Ident k, Pos p) :
     Code_nnn(cEqPlusModulo, i, j, k, p) {}
 
+  DAG_VISITABLE();
+
   void makeDFA();
   void dump(bool rec);
   VarCode substCopy(IdentList *actuals);
@@ -613,6 +694,8 @@ class Code_EqMinusModulo: public Code_nnn {
 public:
   Code_EqMinusModulo(Ident i, Ident j, Ident k, Pos p) :
     Code_nnn(cEqMinusModulo, i, j, k, p) {}
+
+  DAG_VISITABLE();
 
   void makeDFA();
   void dump(bool rec);
@@ -624,6 +707,8 @@ public:
   Code_EqPresbConst(Ident i, int v, Pos p) :
     Code_ni(cEqPresbConst, i, v, p) {}
 
+  DAG_VISITABLE();
+
   void makeDFA();
   void dump(bool rec);
   VarCode substCopy(IdentList *actuals);
@@ -633,6 +718,8 @@ class Code_WellFormedTree: public Code_n {
 public:
   Code_WellFormedTree(Ident i, Pos p) :
     Code_n(cWellFormedTree, i, p) {}
+
+  DAG_VISITABLE();
 
   void makeGTA();
   void dump(bool rec);
@@ -646,6 +733,8 @@ public:
   Code_Restrict(VarCode vc, Pos p) :
     Code_c(cRestrict, vc, p) {}
 
+  DAG_VISITABLE();
+
   void makeDFA();
   void makeGTA();
   void dump(bool rec);
@@ -656,6 +745,8 @@ public:
 class Code_Project: public Code_c {
 public:
   Code_Project(Ident n, VarCode c, Pos p);
+
+  DAG_VISITABLE();
 
   bool equiv(Code&);
 
@@ -676,6 +767,8 @@ public:
   Code_Negate(VarCode c, Pos p) :
     Code_c(cNegate, c, p) {}
 
+  DAG_VISITABLE();
+
   void makeDFA();
   void makeGTA();
   void dump(bool rec);
@@ -689,6 +782,8 @@ public:
   Code_Prefix(VarCode c, Pos p) :
     Code_c(cPrefix, c, p) {}
 
+  DAG_VISITABLE();
+
   void makeDFA();
   void dump(bool rec);
   VarCode substCopy(IdentList *actuals);
@@ -698,6 +793,8 @@ class Code_And: public Code_cc {
 public:
   Code_And(VarCode vc1, VarCode vc2, Pos p) :
     Code_cc(cAnd, vc1, vc2, p) {}
+
+  DAG_VISITABLE();
 
   void makeDFA();
   void makeGTA();
@@ -727,6 +824,8 @@ public:
   Code_IdLeft(VarCode vc1, VarCode vc2, Pos p) :
     Code_cc(cIdLeft, vc1, vc2, p) {}
 
+  DAG_VISITABLE();
+
   void makeDFA();
   void makeGTA();
   void dump(bool rec);
@@ -737,6 +836,8 @@ class Code_Or: public Code_cc {
 public:
   Code_Or(VarCode vc1, VarCode vc2, Pos p) :
     Code_cc(cOr, vc1, vc2, p) {}
+
+  DAG_VISITABLE();
 
   void makeDFA();
   void makeGTA();
@@ -750,6 +851,8 @@ public:
   Code_Impl(VarCode vc1, VarCode vc2, Pos p) :
     Code_cc(cImpl, vc1, vc2, p) {}
 
+  DAG_VISITABLE();
+
   void makeDFA();
   void makeGTA();
   void dump(bool rec);
@@ -761,6 +864,8 @@ class Code_Biimpl: public Code_cc {
 public:
   Code_Biimpl(VarCode vc1, VarCode vc2, Pos p) :
     Code_cc(cBiimpl, vc1, vc2, p) {}
+
+  DAG_VISITABLE();
 
   void makeDFA();
   void makeGTA();
@@ -777,6 +882,8 @@ public:
 		char *source, Pos p);
   ~Code_PredCall() 
   {vc.remove(); delete[] names; delete[] orders; delete[] filename;}
+
+  DAG_VISITABLE();
 
   bool equiv(Code&);
   unsigned hash();
@@ -799,6 +906,8 @@ class Code_Import: public Code {
 public:
   Code_Import(char *filename, Deque<char*> *forms, IdentList *acts, Pos p);
   ~Code_Import() {delete formals; delete actuals;}
+
+  DAG_VISITABLE();
   
   bool equiv(Code&);
   unsigned hash();
@@ -818,6 +927,8 @@ public:
   Code_Export(VarCode c, char* filename, IdentList *fv, Pos p);
   ~Code_Export() 
   {vc.remove(); delete[] names; delete[] orders;}
+
+  DAG_VISITABLE();
   
   bool equiv(Code&);
   unsigned hash();
