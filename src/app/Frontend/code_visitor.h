@@ -7,20 +7,21 @@ template<typename R = void>
 class CodeVisitor {
 public:
     // TODO: Consider moving this away and merging with ASTVisitor::Traversal
-    enum Traversal {PreOrder, InOrder, PostOrder};
-    const Traversal traverseDirection;
+    enum Traverse {PreOrder, InOrder, PostOrder};
+    const Traverse traverseDirection;
 
     typedef R ReturnType;
 
     // < Constructors >
-    CodeVisitor(CodeVisitor::Traversal td) : traverseDirection(td) {}
+    CodeVisitor(CodeVisitor::Traverse td) : traverseDirection(td) {}
 
     virtual ReturnType visit(Code* c) { };
 };
 
 // < Void Visitor >
 class VoidCodeVisitor : public CodeVisitor<> {
-    VoidCodeVisitor(CodeVisitor::Traversal td) : CodeVisitor<>(td) {}
+public:
+    VoidCodeVisitor(CodeVisitor::Traverse td) : CodeVisitor<>(td) {}
     virtual void visit(Code* c) { }
 
     // < Code Derives >
@@ -91,7 +92,8 @@ class VoidCodeVisitor : public CodeVisitor<> {
 };
 
 class TransformerCodeVisitor : public CodeVisitor<Code*> {
-    TransformerCodeVisitor(CodeVisitor::Traversal td) : CodeVisitor<Code*>(td) {}
+public:
+    TransformerCodeVisitor(CodeVisitor::Traverse td) : CodeVisitor<Code*>(td) {}
 
     virtual Code* visit(Code* c) { return c; }
 
