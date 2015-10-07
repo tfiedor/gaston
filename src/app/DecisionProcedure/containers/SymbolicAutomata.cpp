@@ -78,6 +78,7 @@ void IntersectionAutomaton::dump() {
 }
 
 // <<< BASE AUTOMATA >>>
+
 SymbolicAutomaton::ISect_Type BaseAutomaton::IntersectNonEmpty(::BaseAutomaton::Symbol &symbol, ::BaseAutomaton::StateSet &final) {
     // initState = STSet init
 
@@ -93,6 +94,11 @@ SymbolicAutomaton::ISect_Type BaseAutomaton::IntersectNonEmpty(::BaseAutomaton::
     return false;
 }
 
+SymbolicAutomaton::StateSet BaseAutomaton::Pre(SymbolicAutomaton::Symbol &symbol, SymbolicAutomaton::StateSet &states) {
+    // TODO: not implemented
+    return nullptr;
+}
+
 // << SubAutomaton >>
 
 void SubAutomaton::_InitializeInitialStates() {
@@ -100,10 +106,6 @@ void SubAutomaton::_InitializeInitialStates() {
 }
 
 void SubAutomaton::_InitializeFinalStates() {
-    ;
-}
-
-SymbolicAutomaton::StateSet SubAutomaton::Pre(SymbolicAutomaton::Symbol& symb, SymbolicAutomaton::StateSet& states) {
     ;
 }
 
@@ -121,3 +123,83 @@ void SubAutomaton::dump() {
     std::cout << "Sub";
 }
 
+// <<<<< True Automaton >>>>>
+
+void TrueAutomaton::_InitializeInitialStates() {
+    ;
+}
+
+
+void TrueAutomaton::_InitializeFinalStates() {
+    ;
+}
+
+// <<<<< False Automaton >>>>>
+
+void FalseAutomaton::_InitializeInitialStates() {
+    ;
+}
+
+void FalseAutomaton::_InitializeFinalStates() {
+    ;
+}
+
+// <<<<< In Automaton >>>>>
+
+void InAutomaton::_InitializeInitialStates() {
+    ;
+}
+
+void InAutomaton::_InitializeFinalStates() {
+    ;
+}
+
+// <<<<< First Order Automaton >>>>>
+
+void FirstOrderAutomaton::_InitializeInitialStates() {
+    ;
+}
+
+void FirstOrderAutomaton::_InitializeFinalStates() {
+    ;
+}
+
+// <<<<< Equal First Order Automaton >>>>>
+
+void EqualFirstAutomaton::_InitializeInitialStates() {
+    ;
+}
+
+void EqualFirstAutomaton::_InitializeFinalStates() {
+    ;
+}
+
+// <<<<< Equal Second Order Automaton >>>>>
+
+void EqualSecondAutomaton::_InitializeInitialStates() {
+    ;
+}
+
+void EqualSecondAutomaton::_InitializeFinalStates() {
+    ;
+}
+
+// <<<<< Less Automaton Automaton >>>>>
+
+void LessAutomaton::_InitializeInitialStates() {
+    ;
+}
+
+void LessAutomaton::_InitializeFinalStates() {
+    ;
+}
+
+// <<<<<Less Eq Automaton Automaton >>>>>
+
+void LessEqAutomaton::_InitializeInitialStates() {
+    ;
+}
+
+void LessEqAutomaton::_InitializeFinalStates() {
+    ;
+}

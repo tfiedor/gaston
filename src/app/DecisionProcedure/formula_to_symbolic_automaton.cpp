@@ -6,6 +6,8 @@
 #include "../DecisionProcedure/containers/SymbolicAutomata.h"
 #include <memory>
 
+// TODO: FUCKING PLUS IS MISSING!!!!
+
 template<class TemplatedAutomaton>
 std::shared_ptr<SymbolicAutomaton> baseToSymbolicAutomaton(ASTForm* form, bool doComplement) {
     Automaton aut;
@@ -14,35 +16,35 @@ std::shared_ptr<SymbolicAutomaton> baseToSymbolicAutomaton(ASTForm* form, bool d
 }
 
 std::shared_ptr<SymbolicAutomaton> ASTForm_True::toSymbolicAutomaton(bool doComplement) {
-    return nullptr;
+    return baseToSymbolicAutomaton<TrueAutomaton>(this, doComplement);
 }
 
 std::shared_ptr<SymbolicAutomaton> ASTForm_False::toSymbolicAutomaton(bool doComplement) {
-    return nullptr;
+    return baseToSymbolicAutomaton<FalseAutomaton>(this, doComplement);
 }
 
 std::shared_ptr<SymbolicAutomaton> ASTForm_In::toSymbolicAutomaton(bool doComplement) {
-    return nullptr;
+    return baseToSymbolicAutomaton<InAutomaton>(this, doComplement);
 }
 
 std::shared_ptr<SymbolicAutomaton> ASTForm_FirstOrder::toSymbolicAutomaton(bool doComplement) {
-    return nullptr;
+    return baseToSymbolicAutomaton<FirstOrderAutomaton>(this, doComplement);
 }
 
 std::shared_ptr<SymbolicAutomaton> ASTForm_Equal1::toSymbolicAutomaton(bool doComplement) {
-    return nullptr;
+    return baseToSymbolicAutomaton<EqualFirstAutomaton>(this, doComplement);
 }
 
 std::shared_ptr<SymbolicAutomaton> ASTForm_Equal2::toSymbolicAutomaton(bool doComplement) {
-    return nullptr;
+    return baseToSymbolicAutomaton<EqualSecondAutomaton>(this, doComplement);
 }
 
 std::shared_ptr<SymbolicAutomaton> ASTForm_Less::toSymbolicAutomaton(bool doComplement) {
-    return nullptr;
+    return baseToSymbolicAutomaton<LessAutomaton>(this, doComplement);
 }
 
 std::shared_ptr<SymbolicAutomaton> ASTForm_LessEq::toSymbolicAutomaton(bool doComplement) {
-    return nullptr;
+    return baseToSymbolicAutomaton<LessEqAutomaton>(this, doComplement);
 }
 
 std::shared_ptr<SymbolicAutomaton> ASTForm_Sub::toSymbolicAutomaton(bool doComplement) {

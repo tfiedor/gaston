@@ -80,6 +80,7 @@ protected:
 public:
     BaseAutomaton(LeafAutomaton_Type* aut) : _base_automaton(aut) {}
     virtual ISect_Type IntersectNonEmpty(Symbol&, StateSet&);
+    virtual StateSet Pre(Symbol&, StateSet&);
 };
 
 class SubAutomaton : public BaseAutomaton {
@@ -89,8 +90,88 @@ protected:
 
 public:
     SubAutomaton(LeafAutomaton_Type* aut) : BaseAutomaton(aut) {}
-    virtual StateSet Pre(Symbol&, StateSet&);
     virtual void dump();
+};
+
+class TrueAutomaton : public BaseAutomaton {
+protected:
+    virtual void _InitializeInitialStates();
+    virtual void _InitializeFinalStates();
+
+public:
+    TrueAutomaton(LeafAutomaton_Type* aut) : BaseAutomaton(aut) {}
+    virtual void dump() { std::cout << "True"; }
+};
+
+class FalseAutomaton : public BaseAutomaton {
+protected:
+    virtual void _InitializeInitialStates();
+    virtual void _InitializeFinalStates();
+
+public:
+    FalseAutomaton(LeafAutomaton_Type* aut) : BaseAutomaton(aut) {}
+    virtual void dump() { std::cout << "False"; }
+};
+
+
+class InAutomaton : public BaseAutomaton {
+protected:
+    virtual void _InitializeInitialStates();
+    virtual void _InitializeFinalStates();
+
+public:
+    InAutomaton(LeafAutomaton_Type* aut) : BaseAutomaton(aut) {}
+    virtual void dump() { std::cout << "True"; }
+};
+
+class FirstOrderAutomaton : public BaseAutomaton {
+protected:
+    virtual void _InitializeInitialStates();
+    virtual void _InitializeFinalStates();
+
+public:
+    FirstOrderAutomaton(LeafAutomaton_Type* aut) : BaseAutomaton(aut) {}
+    virtual void dump() { std::cout << "FirstOrder"; }
+};
+
+class EqualFirstAutomaton : public BaseAutomaton {
+protected:
+    virtual void _InitializeInitialStates();
+    virtual void _InitializeFinalStates();
+
+public:
+    EqualFirstAutomaton(LeafAutomaton_Type* aut) : BaseAutomaton(aut) {}
+    virtual void dump() { std::cout << "Equal1"; }
+};
+
+class EqualSecondAutomaton : public BaseAutomaton {
+protected:
+    virtual void _InitializeInitialStates();
+    virtual void _InitializeFinalStates();
+
+public:
+    EqualSecondAutomaton(LeafAutomaton_Type* aut) : BaseAutomaton(aut) {}
+    virtual void dump() { std::cout << "Equal2"; }
+};
+
+class LessAutomaton : public BaseAutomaton {
+protected:
+    virtual void _InitializeInitialStates();
+    virtual void _InitializeFinalStates();
+
+public:
+    LessAutomaton(LeafAutomaton_Type* aut) : BaseAutomaton(aut) {}
+    virtual void dump() { std::cout << "Less"; }
+};
+
+class LessEqAutomaton : public BaseAutomaton {
+protected:
+    virtual void _InitializeInitialStates();
+    virtual void _InitializeFinalStates();
+
+public:
+    LessEqAutomaton(LeafAutomaton_Type* aut) : BaseAutomaton(aut) {}
+    virtual void dump() { std::cout << "LessEq"; }
 };
 
 #endif //WSKS_SYMBOLICAUTOMATA_H
