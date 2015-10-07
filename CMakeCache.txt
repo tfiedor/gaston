@@ -116,7 +116,7 @@ CMAKE_OBJCOPY:FILEPATH=/usr/bin/objcopy
 CMAKE_OBJDUMP:FILEPATH=/usr/bin/objdump
 
 //Value Computed by CMake
-CMAKE_PROJECT_NAME:STATIC=dWiNA2014
+CMAKE_PROJECT_NAME:STATIC=gaston2015
 
 //Path to a program.
 CMAKE_RANLIB:FILEPATH=/usr/bin/ranlib
@@ -175,6 +175,12 @@ dWiNA2014_BINARY_DIR:STATIC=/home/raph/wsks/git
 
 //Value Computed by CMake
 dWiNA2014_SOURCE_DIR:STATIC=/home/raph/wsks/git
+
+//Value Computed by CMake
+gaston2015_BINARY_DIR:STATIC=/home/raph/wsks/git
+
+//Value Computed by CMake
+gaston2015_SOURCE_DIR:STATIC=/home/raph/wsks/git
 
 
 ########################

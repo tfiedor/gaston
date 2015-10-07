@@ -1,7 +1,9 @@
 /*****************************************************************************
- *  dWiNA - Deciding WSkS using non-deterministic automata
+ *  gaston - no real logic behind the name, we simply liked the poor seal gaston. R.I.P. brave soldier.
  *
- *  Copyright (c) 2014  Tomas Fiedor <xfiedo01@stud.fit.vutbr.cz>
+ *  Copyright (c) 2015  Tomas Fiedor <ifiedortom@fit.vutbr.cz>
+ *      Notable mentions: Ondrej Lengal <ondra.lengal@gmail.com>
+ *          			  Overeating Panda <if-his-simulation-reduction-works>
  *
  *****************************************************************************/
 
@@ -88,7 +90,7 @@ extern Ident lastPosVar, allPosVar;
  */
 void PrintUsage()
 {
-	cout << "Usage: dWiNA [options] <filename>\n\n"
+	cout << "Usage: gaston [options] <filename>\n\n"
 		<< "Options:\n"
 		<< " -t, --time 		 Print elapsed time\n"
 		<< " -d, --dump-all		 Dump AST, symboltable, and code DAG\n"
@@ -99,7 +101,7 @@ void PrintUsage()
 		<< " -oX                 	 Optimization level [1 = safe optimizations [default], 2 = heuristic]\n"
 		<< " --method            	 Use either symbolic (novel), forward (EEICT'14) or backward method (TACAS'15) for deciding WSkS [symbolic, backward, forward]\n"
 		//<< " --reorder-bdd		 Disable BDD index reordering [no, random, heuristic]\n\n"
-		<< "Example: ./dWiNA -t -d --reorder-bdd=random foo.mona\n\n";
+		<< "Example: ./gaston -t -d --reorder-bdd=random foo.mona\n\n";
 }
 
 /**

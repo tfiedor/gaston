@@ -102,24 +102,24 @@ depend:
 .PHONY : depend
 
 #=============================================================================
-# Target rules for targets named dWiNA
+# Target rules for targets named gaston
 
 # Build rule for target.
-dWiNA: cmake_check_build_system
-	$(MAKE) -f CMakeFiles/Makefile2 dWiNA
-.PHONY : dWiNA
+gaston: cmake_check_build_system
+	$(MAKE) -f CMakeFiles/Makefile2 gaston
+.PHONY : gaston
 
 # fast build rule for target.
-dWiNA/fast:
-	$(MAKE) -f CMakeFiles/dWiNA.dir/build.make CMakeFiles/dWiNA.dir/build
-.PHONY : dWiNA/fast
+gaston/fast:
+	$(MAKE) -f CMakeFiles/gaston.dir/build.make CMakeFiles/gaston.dir/build
+.PHONY : gaston/fast
 
 src/app/DecisionProcedure/automata.o: src/app/DecisionProcedure/automata.cpp.o
 .PHONY : src/app/DecisionProcedure/automata.o
 
 # target to build an object file
 src/app/DecisionProcedure/automata.cpp.o:
-	$(MAKE) -f CMakeFiles/dWiNA.dir/build.make CMakeFiles/dWiNA.dir/src/app/DecisionProcedure/automata.cpp.o
+	$(MAKE) -f CMakeFiles/gaston.dir/build.make CMakeFiles/gaston.dir/src/app/DecisionProcedure/automata.cpp.o
 .PHONY : src/app/DecisionProcedure/automata.cpp.o
 
 src/app/DecisionProcedure/automata.i: src/app/DecisionProcedure/automata.cpp.i
@@ -127,7 +127,7 @@ src/app/DecisionProcedure/automata.i: src/app/DecisionProcedure/automata.cpp.i
 
 # target to preprocess a source file
 src/app/DecisionProcedure/automata.cpp.i:
-	$(MAKE) -f CMakeFiles/dWiNA.dir/build.make CMakeFiles/dWiNA.dir/src/app/DecisionProcedure/automata.cpp.i
+	$(MAKE) -f CMakeFiles/gaston.dir/build.make CMakeFiles/gaston.dir/src/app/DecisionProcedure/automata.cpp.i
 .PHONY : src/app/DecisionProcedure/automata.cpp.i
 
 src/app/DecisionProcedure/automata.s: src/app/DecisionProcedure/automata.cpp.s
@@ -135,7 +135,7 @@ src/app/DecisionProcedure/automata.s: src/app/DecisionProcedure/automata.cpp.s
 
 # target to generate assembly for a file
 src/app/DecisionProcedure/automata.cpp.s:
-	$(MAKE) -f CMakeFiles/dWiNA.dir/build.make CMakeFiles/dWiNA.dir/src/app/DecisionProcedure/automata.cpp.s
+	$(MAKE) -f CMakeFiles/gaston.dir/build.make CMakeFiles/gaston.dir/src/app/DecisionProcedure/automata.cpp.s
 .PHONY : src/app/DecisionProcedure/automata.cpp.s
 
 src/app/DecisionProcedure/backward_decision_procedure.o: src/app/DecisionProcedure/backward_decision_procedure.cpp.o
@@ -143,7 +143,7 @@ src/app/DecisionProcedure/backward_decision_procedure.o: src/app/DecisionProcedu
 
 # target to build an object file
 src/app/DecisionProcedure/backward_decision_procedure.cpp.o:
-	$(MAKE) -f CMakeFiles/dWiNA.dir/build.make CMakeFiles/dWiNA.dir/src/app/DecisionProcedure/backward_decision_procedure.cpp.o
+	$(MAKE) -f CMakeFiles/gaston.dir/build.make CMakeFiles/gaston.dir/src/app/DecisionProcedure/backward_decision_procedure.cpp.o
 .PHONY : src/app/DecisionProcedure/backward_decision_procedure.cpp.o
 
 src/app/DecisionProcedure/backward_decision_procedure.i: src/app/DecisionProcedure/backward_decision_procedure.cpp.i
@@ -151,7 +151,7 @@ src/app/DecisionProcedure/backward_decision_procedure.i: src/app/DecisionProcedu
 
 # target to preprocess a source file
 src/app/DecisionProcedure/backward_decision_procedure.cpp.i:
-	$(MAKE) -f CMakeFiles/dWiNA.dir/build.make CMakeFiles/dWiNA.dir/src/app/DecisionProcedure/backward_decision_procedure.cpp.i
+	$(MAKE) -f CMakeFiles/gaston.dir/build.make CMakeFiles/gaston.dir/src/app/DecisionProcedure/backward_decision_procedure.cpp.i
 .PHONY : src/app/DecisionProcedure/backward_decision_procedure.cpp.i
 
 src/app/DecisionProcedure/backward_decision_procedure.s: src/app/DecisionProcedure/backward_decision_procedure.cpp.s
@@ -159,7 +159,7 @@ src/app/DecisionProcedure/backward_decision_procedure.s: src/app/DecisionProcedu
 
 # target to generate assembly for a file
 src/app/DecisionProcedure/backward_decision_procedure.cpp.s:
-	$(MAKE) -f CMakeFiles/dWiNA.dir/build.make CMakeFiles/dWiNA.dir/src/app/DecisionProcedure/backward_decision_procedure.cpp.s
+	$(MAKE) -f CMakeFiles/gaston.dir/build.make CMakeFiles/gaston.dir/src/app/DecisionProcedure/backward_decision_procedure.cpp.s
 .PHONY : src/app/DecisionProcedure/backward_decision_procedure.cpp.s
 
 src/app/DecisionProcedure/containers/StateSet.o: src/app/DecisionProcedure/containers/StateSet.cpp.o
@@ -167,7 +167,7 @@ src/app/DecisionProcedure/containers/StateSet.o: src/app/DecisionProcedure/conta
 
 # target to build an object file
 src/app/DecisionProcedure/containers/StateSet.cpp.o:
-	$(MAKE) -f CMakeFiles/dWiNA.dir/build.make CMakeFiles/dWiNA.dir/src/app/DecisionProcedure/containers/StateSet.cpp.o
+	$(MAKE) -f CMakeFiles/gaston.dir/build.make CMakeFiles/gaston.dir/src/app/DecisionProcedure/containers/StateSet.cpp.o
 .PHONY : src/app/DecisionProcedure/containers/StateSet.cpp.o
 
 src/app/DecisionProcedure/containers/StateSet.i: src/app/DecisionProcedure/containers/StateSet.cpp.i
@@ -175,7 +175,7 @@ src/app/DecisionProcedure/containers/StateSet.i: src/app/DecisionProcedure/conta
 
 # target to preprocess a source file
 src/app/DecisionProcedure/containers/StateSet.cpp.i:
-	$(MAKE) -f CMakeFiles/dWiNA.dir/build.make CMakeFiles/dWiNA.dir/src/app/DecisionProcedure/containers/StateSet.cpp.i
+	$(MAKE) -f CMakeFiles/gaston.dir/build.make CMakeFiles/gaston.dir/src/app/DecisionProcedure/containers/StateSet.cpp.i
 .PHONY : src/app/DecisionProcedure/containers/StateSet.cpp.i
 
 src/app/DecisionProcedure/containers/StateSet.s: src/app/DecisionProcedure/containers/StateSet.cpp.s
@@ -183,7 +183,7 @@ src/app/DecisionProcedure/containers/StateSet.s: src/app/DecisionProcedure/conta
 
 # target to generate assembly for a file
 src/app/DecisionProcedure/containers/StateSet.cpp.s:
-	$(MAKE) -f CMakeFiles/dWiNA.dir/build.make CMakeFiles/dWiNA.dir/src/app/DecisionProcedure/containers/StateSet.cpp.s
+	$(MAKE) -f CMakeFiles/gaston.dir/build.make CMakeFiles/gaston.dir/src/app/DecisionProcedure/containers/StateSet.cpp.s
 .PHONY : src/app/DecisionProcedure/containers/StateSet.cpp.s
 
 src/app/DecisionProcedure/containers/VarToTrackMap.o: src/app/DecisionProcedure/containers/VarToTrackMap.cpp.o
@@ -191,7 +191,7 @@ src/app/DecisionProcedure/containers/VarToTrackMap.o: src/app/DecisionProcedure/
 
 # target to build an object file
 src/app/DecisionProcedure/containers/VarToTrackMap.cpp.o:
-	$(MAKE) -f CMakeFiles/dWiNA.dir/build.make CMakeFiles/dWiNA.dir/src/app/DecisionProcedure/containers/VarToTrackMap.cpp.o
+	$(MAKE) -f CMakeFiles/gaston.dir/build.make CMakeFiles/gaston.dir/src/app/DecisionProcedure/containers/VarToTrackMap.cpp.o
 .PHONY : src/app/DecisionProcedure/containers/VarToTrackMap.cpp.o
 
 src/app/DecisionProcedure/containers/VarToTrackMap.i: src/app/DecisionProcedure/containers/VarToTrackMap.cpp.i
@@ -199,7 +199,7 @@ src/app/DecisionProcedure/containers/VarToTrackMap.i: src/app/DecisionProcedure/
 
 # target to preprocess a source file
 src/app/DecisionProcedure/containers/VarToTrackMap.cpp.i:
-	$(MAKE) -f CMakeFiles/dWiNA.dir/build.make CMakeFiles/dWiNA.dir/src/app/DecisionProcedure/containers/VarToTrackMap.cpp.i
+	$(MAKE) -f CMakeFiles/gaston.dir/build.make CMakeFiles/gaston.dir/src/app/DecisionProcedure/containers/VarToTrackMap.cpp.i
 .PHONY : src/app/DecisionProcedure/containers/VarToTrackMap.cpp.i
 
 src/app/DecisionProcedure/containers/VarToTrackMap.s: src/app/DecisionProcedure/containers/VarToTrackMap.cpp.s
@@ -207,7 +207,7 @@ src/app/DecisionProcedure/containers/VarToTrackMap.s: src/app/DecisionProcedure/
 
 # target to generate assembly for a file
 src/app/DecisionProcedure/containers/VarToTrackMap.cpp.s:
-	$(MAKE) -f CMakeFiles/dWiNA.dir/build.make CMakeFiles/dWiNA.dir/src/app/DecisionProcedure/containers/VarToTrackMap.cpp.s
+	$(MAKE) -f CMakeFiles/gaston.dir/build.make CMakeFiles/gaston.dir/src/app/DecisionProcedure/containers/VarToTrackMap.cpp.s
 .PHONY : src/app/DecisionProcedure/containers/VarToTrackMap.cpp.s
 
 src/app/DecisionProcedure/decision_procedures.o: src/app/DecisionProcedure/decision_procedures.cpp.o
@@ -215,7 +215,7 @@ src/app/DecisionProcedure/decision_procedures.o: src/app/DecisionProcedure/decis
 
 # target to build an object file
 src/app/DecisionProcedure/decision_procedures.cpp.o:
-	$(MAKE) -f CMakeFiles/dWiNA.dir/build.make CMakeFiles/dWiNA.dir/src/app/DecisionProcedure/decision_procedures.cpp.o
+	$(MAKE) -f CMakeFiles/gaston.dir/build.make CMakeFiles/gaston.dir/src/app/DecisionProcedure/decision_procedures.cpp.o
 .PHONY : src/app/DecisionProcedure/decision_procedures.cpp.o
 
 src/app/DecisionProcedure/decision_procedures.i: src/app/DecisionProcedure/decision_procedures.cpp.i
@@ -223,7 +223,7 @@ src/app/DecisionProcedure/decision_procedures.i: src/app/DecisionProcedure/decis
 
 # target to preprocess a source file
 src/app/DecisionProcedure/decision_procedures.cpp.i:
-	$(MAKE) -f CMakeFiles/dWiNA.dir/build.make CMakeFiles/dWiNA.dir/src/app/DecisionProcedure/decision_procedures.cpp.i
+	$(MAKE) -f CMakeFiles/gaston.dir/build.make CMakeFiles/gaston.dir/src/app/DecisionProcedure/decision_procedures.cpp.i
 .PHONY : src/app/DecisionProcedure/decision_procedures.cpp.i
 
 src/app/DecisionProcedure/decision_procedures.s: src/app/DecisionProcedure/decision_procedures.cpp.s
@@ -231,7 +231,7 @@ src/app/DecisionProcedure/decision_procedures.s: src/app/DecisionProcedure/decis
 
 # target to generate assembly for a file
 src/app/DecisionProcedure/decision_procedures.cpp.s:
-	$(MAKE) -f CMakeFiles/dWiNA.dir/build.make CMakeFiles/dWiNA.dir/src/app/DecisionProcedure/decision_procedures.cpp.s
+	$(MAKE) -f CMakeFiles/gaston.dir/build.make CMakeFiles/gaston.dir/src/app/DecisionProcedure/decision_procedures.cpp.s
 .PHONY : src/app/DecisionProcedure/decision_procedures.cpp.s
 
 src/app/DecisionProcedure/formula_existential_form_conversion.o: src/app/DecisionProcedure/formula_existential_form_conversion.cpp.o
@@ -239,7 +239,7 @@ src/app/DecisionProcedure/formula_existential_form_conversion.o: src/app/Decisio
 
 # target to build an object file
 src/app/DecisionProcedure/formula_existential_form_conversion.cpp.o:
-	$(MAKE) -f CMakeFiles/dWiNA.dir/build.make CMakeFiles/dWiNA.dir/src/app/DecisionProcedure/formula_existential_form_conversion.cpp.o
+	$(MAKE) -f CMakeFiles/gaston.dir/build.make CMakeFiles/gaston.dir/src/app/DecisionProcedure/formula_existential_form_conversion.cpp.o
 .PHONY : src/app/DecisionProcedure/formula_existential_form_conversion.cpp.o
 
 src/app/DecisionProcedure/formula_existential_form_conversion.i: src/app/DecisionProcedure/formula_existential_form_conversion.cpp.i
@@ -247,7 +247,7 @@ src/app/DecisionProcedure/formula_existential_form_conversion.i: src/app/Decisio
 
 # target to preprocess a source file
 src/app/DecisionProcedure/formula_existential_form_conversion.cpp.i:
-	$(MAKE) -f CMakeFiles/dWiNA.dir/build.make CMakeFiles/dWiNA.dir/src/app/DecisionProcedure/formula_existential_form_conversion.cpp.i
+	$(MAKE) -f CMakeFiles/gaston.dir/build.make CMakeFiles/gaston.dir/src/app/DecisionProcedure/formula_existential_form_conversion.cpp.i
 .PHONY : src/app/DecisionProcedure/formula_existential_form_conversion.cpp.i
 
 src/app/DecisionProcedure/formula_existential_form_conversion.s: src/app/DecisionProcedure/formula_existential_form_conversion.cpp.s
@@ -255,7 +255,7 @@ src/app/DecisionProcedure/formula_existential_form_conversion.s: src/app/Decisio
 
 # target to generate assembly for a file
 src/app/DecisionProcedure/formula_existential_form_conversion.cpp.s:
-	$(MAKE) -f CMakeFiles/dWiNA.dir/build.make CMakeFiles/dWiNA.dir/src/app/DecisionProcedure/formula_existential_form_conversion.cpp.s
+	$(MAKE) -f CMakeFiles/gaston.dir/build.make CMakeFiles/gaston.dir/src/app/DecisionProcedure/formula_existential_form_conversion.cpp.s
 .PHONY : src/app/DecisionProcedure/formula_existential_form_conversion.cpp.s
 
 src/app/DecisionProcedure/formula_flattening.o: src/app/DecisionProcedure/formula_flattening.cpp.o
@@ -263,7 +263,7 @@ src/app/DecisionProcedure/formula_flattening.o: src/app/DecisionProcedure/formul
 
 # target to build an object file
 src/app/DecisionProcedure/formula_flattening.cpp.o:
-	$(MAKE) -f CMakeFiles/dWiNA.dir/build.make CMakeFiles/dWiNA.dir/src/app/DecisionProcedure/formula_flattening.cpp.o
+	$(MAKE) -f CMakeFiles/gaston.dir/build.make CMakeFiles/gaston.dir/src/app/DecisionProcedure/formula_flattening.cpp.o
 .PHONY : src/app/DecisionProcedure/formula_flattening.cpp.o
 
 src/app/DecisionProcedure/formula_flattening.i: src/app/DecisionProcedure/formula_flattening.cpp.i
@@ -271,7 +271,7 @@ src/app/DecisionProcedure/formula_flattening.i: src/app/DecisionProcedure/formul
 
 # target to preprocess a source file
 src/app/DecisionProcedure/formula_flattening.cpp.i:
-	$(MAKE) -f CMakeFiles/dWiNA.dir/build.make CMakeFiles/dWiNA.dir/src/app/DecisionProcedure/formula_flattening.cpp.i
+	$(MAKE) -f CMakeFiles/gaston.dir/build.make CMakeFiles/gaston.dir/src/app/DecisionProcedure/formula_flattening.cpp.i
 .PHONY : src/app/DecisionProcedure/formula_flattening.cpp.i
 
 src/app/DecisionProcedure/formula_flattening.s: src/app/DecisionProcedure/formula_flattening.cpp.s
@@ -279,7 +279,7 @@ src/app/DecisionProcedure/formula_flattening.s: src/app/DecisionProcedure/formul
 
 # target to generate assembly for a file
 src/app/DecisionProcedure/formula_flattening.cpp.s:
-	$(MAKE) -f CMakeFiles/dWiNA.dir/build.make CMakeFiles/dWiNA.dir/src/app/DecisionProcedure/formula_flattening.cpp.s
+	$(MAKE) -f CMakeFiles/gaston.dir/build.make CMakeFiles/gaston.dir/src/app/DecisionProcedure/formula_flattening.cpp.s
 .PHONY : src/app/DecisionProcedure/formula_flattening.cpp.s
 
 src/app/DecisionProcedure/formula_to_automaton_ws1s.o: src/app/DecisionProcedure/formula_to_automaton_ws1s.cpp.o
@@ -287,7 +287,7 @@ src/app/DecisionProcedure/formula_to_automaton_ws1s.o: src/app/DecisionProcedure
 
 # target to build an object file
 src/app/DecisionProcedure/formula_to_automaton_ws1s.cpp.o:
-	$(MAKE) -f CMakeFiles/dWiNA.dir/build.make CMakeFiles/dWiNA.dir/src/app/DecisionProcedure/formula_to_automaton_ws1s.cpp.o
+	$(MAKE) -f CMakeFiles/gaston.dir/build.make CMakeFiles/gaston.dir/src/app/DecisionProcedure/formula_to_automaton_ws1s.cpp.o
 .PHONY : src/app/DecisionProcedure/formula_to_automaton_ws1s.cpp.o
 
 src/app/DecisionProcedure/formula_to_automaton_ws1s.i: src/app/DecisionProcedure/formula_to_automaton_ws1s.cpp.i
@@ -295,7 +295,7 @@ src/app/DecisionProcedure/formula_to_automaton_ws1s.i: src/app/DecisionProcedure
 
 # target to preprocess a source file
 src/app/DecisionProcedure/formula_to_automaton_ws1s.cpp.i:
-	$(MAKE) -f CMakeFiles/dWiNA.dir/build.make CMakeFiles/dWiNA.dir/src/app/DecisionProcedure/formula_to_automaton_ws1s.cpp.i
+	$(MAKE) -f CMakeFiles/gaston.dir/build.make CMakeFiles/gaston.dir/src/app/DecisionProcedure/formula_to_automaton_ws1s.cpp.i
 .PHONY : src/app/DecisionProcedure/formula_to_automaton_ws1s.cpp.i
 
 src/app/DecisionProcedure/formula_to_automaton_ws1s.s: src/app/DecisionProcedure/formula_to_automaton_ws1s.cpp.s
@@ -303,7 +303,7 @@ src/app/DecisionProcedure/formula_to_automaton_ws1s.s: src/app/DecisionProcedure
 
 # target to generate assembly for a file
 src/app/DecisionProcedure/formula_to_automaton_ws1s.cpp.s:
-	$(MAKE) -f CMakeFiles/dWiNA.dir/build.make CMakeFiles/dWiNA.dir/src/app/DecisionProcedure/formula_to_automaton_ws1s.cpp.s
+	$(MAKE) -f CMakeFiles/gaston.dir/build.make CMakeFiles/gaston.dir/src/app/DecisionProcedure/formula_to_automaton_ws1s.cpp.s
 .PHONY : src/app/DecisionProcedure/formula_to_automaton_ws1s.cpp.s
 
 src/app/DecisionProcedure/formula_to_automaton_ws2s.o: src/app/DecisionProcedure/formula_to_automaton_ws2s.cpp.o
@@ -311,7 +311,7 @@ src/app/DecisionProcedure/formula_to_automaton_ws2s.o: src/app/DecisionProcedure
 
 # target to build an object file
 src/app/DecisionProcedure/formula_to_automaton_ws2s.cpp.o:
-	$(MAKE) -f CMakeFiles/dWiNA.dir/build.make CMakeFiles/dWiNA.dir/src/app/DecisionProcedure/formula_to_automaton_ws2s.cpp.o
+	$(MAKE) -f CMakeFiles/gaston.dir/build.make CMakeFiles/gaston.dir/src/app/DecisionProcedure/formula_to_automaton_ws2s.cpp.o
 .PHONY : src/app/DecisionProcedure/formula_to_automaton_ws2s.cpp.o
 
 src/app/DecisionProcedure/formula_to_automaton_ws2s.i: src/app/DecisionProcedure/formula_to_automaton_ws2s.cpp.i
@@ -319,7 +319,7 @@ src/app/DecisionProcedure/formula_to_automaton_ws2s.i: src/app/DecisionProcedure
 
 # target to preprocess a source file
 src/app/DecisionProcedure/formula_to_automaton_ws2s.cpp.i:
-	$(MAKE) -f CMakeFiles/dWiNA.dir/build.make CMakeFiles/dWiNA.dir/src/app/DecisionProcedure/formula_to_automaton_ws2s.cpp.i
+	$(MAKE) -f CMakeFiles/gaston.dir/build.make CMakeFiles/gaston.dir/src/app/DecisionProcedure/formula_to_automaton_ws2s.cpp.i
 .PHONY : src/app/DecisionProcedure/formula_to_automaton_ws2s.cpp.i
 
 src/app/DecisionProcedure/formula_to_automaton_ws2s.s: src/app/DecisionProcedure/formula_to_automaton_ws2s.cpp.s
@@ -327,7 +327,7 @@ src/app/DecisionProcedure/formula_to_automaton_ws2s.s: src/app/DecisionProcedure
 
 # target to generate assembly for a file
 src/app/DecisionProcedure/formula_to_automaton_ws2s.cpp.s:
-	$(MAKE) -f CMakeFiles/dWiNA.dir/build.make CMakeFiles/dWiNA.dir/src/app/DecisionProcedure/formula_to_automaton_ws2s.cpp.s
+	$(MAKE) -f CMakeFiles/gaston.dir/build.make CMakeFiles/gaston.dir/src/app/DecisionProcedure/formula_to_automaton_ws2s.cpp.s
 .PHONY : src/app/DecisionProcedure/formula_to_automaton_ws2s.cpp.s
 
 src/app/DecisionProcedure/visitors/AntiPrenexer.o: src/app/DecisionProcedure/visitors/AntiPrenexer.cpp.o
@@ -335,7 +335,7 @@ src/app/DecisionProcedure/visitors/AntiPrenexer.o: src/app/DecisionProcedure/vis
 
 # target to build an object file
 src/app/DecisionProcedure/visitors/AntiPrenexer.cpp.o:
-	$(MAKE) -f CMakeFiles/dWiNA.dir/build.make CMakeFiles/dWiNA.dir/src/app/DecisionProcedure/visitors/AntiPrenexer.cpp.o
+	$(MAKE) -f CMakeFiles/gaston.dir/build.make CMakeFiles/gaston.dir/src/app/DecisionProcedure/visitors/AntiPrenexer.cpp.o
 .PHONY : src/app/DecisionProcedure/visitors/AntiPrenexer.cpp.o
 
 src/app/DecisionProcedure/visitors/AntiPrenexer.i: src/app/DecisionProcedure/visitors/AntiPrenexer.cpp.i
@@ -343,7 +343,7 @@ src/app/DecisionProcedure/visitors/AntiPrenexer.i: src/app/DecisionProcedure/vis
 
 # target to preprocess a source file
 src/app/DecisionProcedure/visitors/AntiPrenexer.cpp.i:
-	$(MAKE) -f CMakeFiles/dWiNA.dir/build.make CMakeFiles/dWiNA.dir/src/app/DecisionProcedure/visitors/AntiPrenexer.cpp.i
+	$(MAKE) -f CMakeFiles/gaston.dir/build.make CMakeFiles/gaston.dir/src/app/DecisionProcedure/visitors/AntiPrenexer.cpp.i
 .PHONY : src/app/DecisionProcedure/visitors/AntiPrenexer.cpp.i
 
 src/app/DecisionProcedure/visitors/AntiPrenexer.s: src/app/DecisionProcedure/visitors/AntiPrenexer.cpp.s
@@ -351,7 +351,7 @@ src/app/DecisionProcedure/visitors/AntiPrenexer.s: src/app/DecisionProcedure/vis
 
 # target to generate assembly for a file
 src/app/DecisionProcedure/visitors/AntiPrenexer.cpp.s:
-	$(MAKE) -f CMakeFiles/dWiNA.dir/build.make CMakeFiles/dWiNA.dir/src/app/DecisionProcedure/visitors/AntiPrenexer.cpp.s
+	$(MAKE) -f CMakeFiles/gaston.dir/build.make CMakeFiles/gaston.dir/src/app/DecisionProcedure/visitors/AntiPrenexer.cpp.s
 .PHONY : src/app/DecisionProcedure/visitors/AntiPrenexer.cpp.s
 
 src/app/DecisionProcedure/visitors/BooleanUnfolder.o: src/app/DecisionProcedure/visitors/BooleanUnfolder.cpp.o
@@ -359,7 +359,7 @@ src/app/DecisionProcedure/visitors/BooleanUnfolder.o: src/app/DecisionProcedure/
 
 # target to build an object file
 src/app/DecisionProcedure/visitors/BooleanUnfolder.cpp.o:
-	$(MAKE) -f CMakeFiles/dWiNA.dir/build.make CMakeFiles/dWiNA.dir/src/app/DecisionProcedure/visitors/BooleanUnfolder.cpp.o
+	$(MAKE) -f CMakeFiles/gaston.dir/build.make CMakeFiles/gaston.dir/src/app/DecisionProcedure/visitors/BooleanUnfolder.cpp.o
 .PHONY : src/app/DecisionProcedure/visitors/BooleanUnfolder.cpp.o
 
 src/app/DecisionProcedure/visitors/BooleanUnfolder.i: src/app/DecisionProcedure/visitors/BooleanUnfolder.cpp.i
@@ -367,7 +367,7 @@ src/app/DecisionProcedure/visitors/BooleanUnfolder.i: src/app/DecisionProcedure/
 
 # target to preprocess a source file
 src/app/DecisionProcedure/visitors/BooleanUnfolder.cpp.i:
-	$(MAKE) -f CMakeFiles/dWiNA.dir/build.make CMakeFiles/dWiNA.dir/src/app/DecisionProcedure/visitors/BooleanUnfolder.cpp.i
+	$(MAKE) -f CMakeFiles/gaston.dir/build.make CMakeFiles/gaston.dir/src/app/DecisionProcedure/visitors/BooleanUnfolder.cpp.i
 .PHONY : src/app/DecisionProcedure/visitors/BooleanUnfolder.cpp.i
 
 src/app/DecisionProcedure/visitors/BooleanUnfolder.s: src/app/DecisionProcedure/visitors/BooleanUnfolder.cpp.s
@@ -375,7 +375,7 @@ src/app/DecisionProcedure/visitors/BooleanUnfolder.s: src/app/DecisionProcedure/
 
 # target to generate assembly for a file
 src/app/DecisionProcedure/visitors/BooleanUnfolder.cpp.s:
-	$(MAKE) -f CMakeFiles/dWiNA.dir/build.make CMakeFiles/dWiNA.dir/src/app/DecisionProcedure/visitors/BooleanUnfolder.cpp.s
+	$(MAKE) -f CMakeFiles/gaston.dir/build.make CMakeFiles/gaston.dir/src/app/DecisionProcedure/visitors/BooleanUnfolder.cpp.s
 .PHONY : src/app/DecisionProcedure/visitors/BooleanUnfolder.cpp.s
 
 src/app/DecisionProcedure/visitors/Flattener.o: src/app/DecisionProcedure/visitors/Flattener.cpp.o
@@ -383,7 +383,7 @@ src/app/DecisionProcedure/visitors/Flattener.o: src/app/DecisionProcedure/visito
 
 # target to build an object file
 src/app/DecisionProcedure/visitors/Flattener.cpp.o:
-	$(MAKE) -f CMakeFiles/dWiNA.dir/build.make CMakeFiles/dWiNA.dir/src/app/DecisionProcedure/visitors/Flattener.cpp.o
+	$(MAKE) -f CMakeFiles/gaston.dir/build.make CMakeFiles/gaston.dir/src/app/DecisionProcedure/visitors/Flattener.cpp.o
 .PHONY : src/app/DecisionProcedure/visitors/Flattener.cpp.o
 
 src/app/DecisionProcedure/visitors/Flattener.i: src/app/DecisionProcedure/visitors/Flattener.cpp.i
@@ -391,7 +391,7 @@ src/app/DecisionProcedure/visitors/Flattener.i: src/app/DecisionProcedure/visito
 
 # target to preprocess a source file
 src/app/DecisionProcedure/visitors/Flattener.cpp.i:
-	$(MAKE) -f CMakeFiles/dWiNA.dir/build.make CMakeFiles/dWiNA.dir/src/app/DecisionProcedure/visitors/Flattener.cpp.i
+	$(MAKE) -f CMakeFiles/gaston.dir/build.make CMakeFiles/gaston.dir/src/app/DecisionProcedure/visitors/Flattener.cpp.i
 .PHONY : src/app/DecisionProcedure/visitors/Flattener.cpp.i
 
 src/app/DecisionProcedure/visitors/Flattener.s: src/app/DecisionProcedure/visitors/Flattener.cpp.s
@@ -399,7 +399,7 @@ src/app/DecisionProcedure/visitors/Flattener.s: src/app/DecisionProcedure/visito
 
 # target to generate assembly for a file
 src/app/DecisionProcedure/visitors/Flattener.cpp.s:
-	$(MAKE) -f CMakeFiles/dWiNA.dir/build.make CMakeFiles/dWiNA.dir/src/app/DecisionProcedure/visitors/Flattener.cpp.s
+	$(MAKE) -f CMakeFiles/gaston.dir/build.make CMakeFiles/gaston.dir/src/app/DecisionProcedure/visitors/Flattener.cpp.s
 .PHONY : src/app/DecisionProcedure/visitors/Flattener.cpp.s
 
 src/app/DecisionProcedure/visitors/NegationUnfolder.o: src/app/DecisionProcedure/visitors/NegationUnfolder.cpp.o
@@ -407,7 +407,7 @@ src/app/DecisionProcedure/visitors/NegationUnfolder.o: src/app/DecisionProcedure
 
 # target to build an object file
 src/app/DecisionProcedure/visitors/NegationUnfolder.cpp.o:
-	$(MAKE) -f CMakeFiles/dWiNA.dir/build.make CMakeFiles/dWiNA.dir/src/app/DecisionProcedure/visitors/NegationUnfolder.cpp.o
+	$(MAKE) -f CMakeFiles/gaston.dir/build.make CMakeFiles/gaston.dir/src/app/DecisionProcedure/visitors/NegationUnfolder.cpp.o
 .PHONY : src/app/DecisionProcedure/visitors/NegationUnfolder.cpp.o
 
 src/app/DecisionProcedure/visitors/NegationUnfolder.i: src/app/DecisionProcedure/visitors/NegationUnfolder.cpp.i
@@ -415,7 +415,7 @@ src/app/DecisionProcedure/visitors/NegationUnfolder.i: src/app/DecisionProcedure
 
 # target to preprocess a source file
 src/app/DecisionProcedure/visitors/NegationUnfolder.cpp.i:
-	$(MAKE) -f CMakeFiles/dWiNA.dir/build.make CMakeFiles/dWiNA.dir/src/app/DecisionProcedure/visitors/NegationUnfolder.cpp.i
+	$(MAKE) -f CMakeFiles/gaston.dir/build.make CMakeFiles/gaston.dir/src/app/DecisionProcedure/visitors/NegationUnfolder.cpp.i
 .PHONY : src/app/DecisionProcedure/visitors/NegationUnfolder.cpp.i
 
 src/app/DecisionProcedure/visitors/NegationUnfolder.s: src/app/DecisionProcedure/visitors/NegationUnfolder.cpp.s
@@ -423,7 +423,7 @@ src/app/DecisionProcedure/visitors/NegationUnfolder.s: src/app/DecisionProcedure
 
 # target to generate assembly for a file
 src/app/DecisionProcedure/visitors/NegationUnfolder.cpp.s:
-	$(MAKE) -f CMakeFiles/dWiNA.dir/build.make CMakeFiles/dWiNA.dir/src/app/DecisionProcedure/visitors/NegationUnfolder.cpp.s
+	$(MAKE) -f CMakeFiles/gaston.dir/build.make CMakeFiles/gaston.dir/src/app/DecisionProcedure/visitors/NegationUnfolder.cpp.s
 .PHONY : src/app/DecisionProcedure/visitors/NegationUnfolder.cpp.s
 
 src/app/DecisionProcedure/visitors/PrenexNormalFormTransformer.o: src/app/DecisionProcedure/visitors/PrenexNormalFormTransformer.cpp.o
@@ -431,7 +431,7 @@ src/app/DecisionProcedure/visitors/PrenexNormalFormTransformer.o: src/app/Decisi
 
 # target to build an object file
 src/app/DecisionProcedure/visitors/PrenexNormalFormTransformer.cpp.o:
-	$(MAKE) -f CMakeFiles/dWiNA.dir/build.make CMakeFiles/dWiNA.dir/src/app/DecisionProcedure/visitors/PrenexNormalFormTransformer.cpp.o
+	$(MAKE) -f CMakeFiles/gaston.dir/build.make CMakeFiles/gaston.dir/src/app/DecisionProcedure/visitors/PrenexNormalFormTransformer.cpp.o
 .PHONY : src/app/DecisionProcedure/visitors/PrenexNormalFormTransformer.cpp.o
 
 src/app/DecisionProcedure/visitors/PrenexNormalFormTransformer.i: src/app/DecisionProcedure/visitors/PrenexNormalFormTransformer.cpp.i
@@ -439,7 +439,7 @@ src/app/DecisionProcedure/visitors/PrenexNormalFormTransformer.i: src/app/Decisi
 
 # target to preprocess a source file
 src/app/DecisionProcedure/visitors/PrenexNormalFormTransformer.cpp.i:
-	$(MAKE) -f CMakeFiles/dWiNA.dir/build.make CMakeFiles/dWiNA.dir/src/app/DecisionProcedure/visitors/PrenexNormalFormTransformer.cpp.i
+	$(MAKE) -f CMakeFiles/gaston.dir/build.make CMakeFiles/gaston.dir/src/app/DecisionProcedure/visitors/PrenexNormalFormTransformer.cpp.i
 .PHONY : src/app/DecisionProcedure/visitors/PrenexNormalFormTransformer.cpp.i
 
 src/app/DecisionProcedure/visitors/PrenexNormalFormTransformer.s: src/app/DecisionProcedure/visitors/PrenexNormalFormTransformer.cpp.s
@@ -447,7 +447,7 @@ src/app/DecisionProcedure/visitors/PrenexNormalFormTransformer.s: src/app/Decisi
 
 # target to generate assembly for a file
 src/app/DecisionProcedure/visitors/PrenexNormalFormTransformer.cpp.s:
-	$(MAKE) -f CMakeFiles/dWiNA.dir/build.make CMakeFiles/dWiNA.dir/src/app/DecisionProcedure/visitors/PrenexNormalFormTransformer.cpp.s
+	$(MAKE) -f CMakeFiles/gaston.dir/build.make CMakeFiles/gaston.dir/src/app/DecisionProcedure/visitors/PrenexNormalFormTransformer.cpp.s
 .PHONY : src/app/DecisionProcedure/visitors/PrenexNormalFormTransformer.cpp.s
 
 src/app/DecisionProcedure/visitors/Reorderer.o: src/app/DecisionProcedure/visitors/Reorderer.cpp.o
@@ -455,7 +455,7 @@ src/app/DecisionProcedure/visitors/Reorderer.o: src/app/DecisionProcedure/visito
 
 # target to build an object file
 src/app/DecisionProcedure/visitors/Reorderer.cpp.o:
-	$(MAKE) -f CMakeFiles/dWiNA.dir/build.make CMakeFiles/dWiNA.dir/src/app/DecisionProcedure/visitors/Reorderer.cpp.o
+	$(MAKE) -f CMakeFiles/gaston.dir/build.make CMakeFiles/gaston.dir/src/app/DecisionProcedure/visitors/Reorderer.cpp.o
 .PHONY : src/app/DecisionProcedure/visitors/Reorderer.cpp.o
 
 src/app/DecisionProcedure/visitors/Reorderer.i: src/app/DecisionProcedure/visitors/Reorderer.cpp.i
@@ -463,7 +463,7 @@ src/app/DecisionProcedure/visitors/Reorderer.i: src/app/DecisionProcedure/visito
 
 # target to preprocess a source file
 src/app/DecisionProcedure/visitors/Reorderer.cpp.i:
-	$(MAKE) -f CMakeFiles/dWiNA.dir/build.make CMakeFiles/dWiNA.dir/src/app/DecisionProcedure/visitors/Reorderer.cpp.i
+	$(MAKE) -f CMakeFiles/gaston.dir/build.make CMakeFiles/gaston.dir/src/app/DecisionProcedure/visitors/Reorderer.cpp.i
 .PHONY : src/app/DecisionProcedure/visitors/Reorderer.cpp.i
 
 src/app/DecisionProcedure/visitors/Reorderer.s: src/app/DecisionProcedure/visitors/Reorderer.cpp.s
@@ -471,7 +471,7 @@ src/app/DecisionProcedure/visitors/Reorderer.s: src/app/DecisionProcedure/visito
 
 # target to generate assembly for a file
 src/app/DecisionProcedure/visitors/Reorderer.cpp.s:
-	$(MAKE) -f CMakeFiles/dWiNA.dir/build.make CMakeFiles/dWiNA.dir/src/app/DecisionProcedure/visitors/Reorderer.cpp.s
+	$(MAKE) -f CMakeFiles/gaston.dir/build.make CMakeFiles/gaston.dir/src/app/DecisionProcedure/visitors/Reorderer.cpp.s
 .PHONY : src/app/DecisionProcedure/visitors/Reorderer.cpp.s
 
 src/app/DecisionProcedure/visitors/SecondOrderRestricter.o: src/app/DecisionProcedure/visitors/SecondOrderRestricter.cpp.o
@@ -479,7 +479,7 @@ src/app/DecisionProcedure/visitors/SecondOrderRestricter.o: src/app/DecisionProc
 
 # target to build an object file
 src/app/DecisionProcedure/visitors/SecondOrderRestricter.cpp.o:
-	$(MAKE) -f CMakeFiles/dWiNA.dir/build.make CMakeFiles/dWiNA.dir/src/app/DecisionProcedure/visitors/SecondOrderRestricter.cpp.o
+	$(MAKE) -f CMakeFiles/gaston.dir/build.make CMakeFiles/gaston.dir/src/app/DecisionProcedure/visitors/SecondOrderRestricter.cpp.o
 .PHONY : src/app/DecisionProcedure/visitors/SecondOrderRestricter.cpp.o
 
 src/app/DecisionProcedure/visitors/SecondOrderRestricter.i: src/app/DecisionProcedure/visitors/SecondOrderRestricter.cpp.i
@@ -487,7 +487,7 @@ src/app/DecisionProcedure/visitors/SecondOrderRestricter.i: src/app/DecisionProc
 
 # target to preprocess a source file
 src/app/DecisionProcedure/visitors/SecondOrderRestricter.cpp.i:
-	$(MAKE) -f CMakeFiles/dWiNA.dir/build.make CMakeFiles/dWiNA.dir/src/app/DecisionProcedure/visitors/SecondOrderRestricter.cpp.i
+	$(MAKE) -f CMakeFiles/gaston.dir/build.make CMakeFiles/gaston.dir/src/app/DecisionProcedure/visitors/SecondOrderRestricter.cpp.i
 .PHONY : src/app/DecisionProcedure/visitors/SecondOrderRestricter.cpp.i
 
 src/app/DecisionProcedure/visitors/SecondOrderRestricter.s: src/app/DecisionProcedure/visitors/SecondOrderRestricter.cpp.s
@@ -495,7 +495,7 @@ src/app/DecisionProcedure/visitors/SecondOrderRestricter.s: src/app/DecisionProc
 
 # target to generate assembly for a file
 src/app/DecisionProcedure/visitors/SecondOrderRestricter.cpp.s:
-	$(MAKE) -f CMakeFiles/dWiNA.dir/build.make CMakeFiles/dWiNA.dir/src/app/DecisionProcedure/visitors/SecondOrderRestricter.cpp.s
+	$(MAKE) -f CMakeFiles/gaston.dir/build.make CMakeFiles/gaston.dir/src/app/DecisionProcedure/visitors/SecondOrderRestricter.cpp.s
 .PHONY : src/app/DecisionProcedure/visitors/SecondOrderRestricter.cpp.s
 
 src/app/DecisionProcedure/visitors/SyntaxRestricter.o: src/app/DecisionProcedure/visitors/SyntaxRestricter.cpp.o
@@ -503,7 +503,7 @@ src/app/DecisionProcedure/visitors/SyntaxRestricter.o: src/app/DecisionProcedure
 
 # target to build an object file
 src/app/DecisionProcedure/visitors/SyntaxRestricter.cpp.o:
-	$(MAKE) -f CMakeFiles/dWiNA.dir/build.make CMakeFiles/dWiNA.dir/src/app/DecisionProcedure/visitors/SyntaxRestricter.cpp.o
+	$(MAKE) -f CMakeFiles/gaston.dir/build.make CMakeFiles/gaston.dir/src/app/DecisionProcedure/visitors/SyntaxRestricter.cpp.o
 .PHONY : src/app/DecisionProcedure/visitors/SyntaxRestricter.cpp.o
 
 src/app/DecisionProcedure/visitors/SyntaxRestricter.i: src/app/DecisionProcedure/visitors/SyntaxRestricter.cpp.i
@@ -511,7 +511,7 @@ src/app/DecisionProcedure/visitors/SyntaxRestricter.i: src/app/DecisionProcedure
 
 # target to preprocess a source file
 src/app/DecisionProcedure/visitors/SyntaxRestricter.cpp.i:
-	$(MAKE) -f CMakeFiles/dWiNA.dir/build.make CMakeFiles/dWiNA.dir/src/app/DecisionProcedure/visitors/SyntaxRestricter.cpp.i
+	$(MAKE) -f CMakeFiles/gaston.dir/build.make CMakeFiles/gaston.dir/src/app/DecisionProcedure/visitors/SyntaxRestricter.cpp.i
 .PHONY : src/app/DecisionProcedure/visitors/SyntaxRestricter.cpp.i
 
 src/app/DecisionProcedure/visitors/SyntaxRestricter.s: src/app/DecisionProcedure/visitors/SyntaxRestricter.cpp.s
@@ -519,7 +519,7 @@ src/app/DecisionProcedure/visitors/SyntaxRestricter.s: src/app/DecisionProcedure
 
 # target to generate assembly for a file
 src/app/DecisionProcedure/visitors/SyntaxRestricter.cpp.s:
-	$(MAKE) -f CMakeFiles/dWiNA.dir/build.make CMakeFiles/dWiNA.dir/src/app/DecisionProcedure/visitors/SyntaxRestricter.cpp.s
+	$(MAKE) -f CMakeFiles/gaston.dir/build.make CMakeFiles/gaston.dir/src/app/DecisionProcedure/visitors/SyntaxRestricter.cpp.s
 .PHONY : src/app/DecisionProcedure/visitors/SyntaxRestricter.cpp.s
 
 src/app/DecisionProcedure/visitors/UniversalQuantifierRemover.o: src/app/DecisionProcedure/visitors/UniversalQuantifierRemover.cpp.o
@@ -527,7 +527,7 @@ src/app/DecisionProcedure/visitors/UniversalQuantifierRemover.o: src/app/Decisio
 
 # target to build an object file
 src/app/DecisionProcedure/visitors/UniversalQuantifierRemover.cpp.o:
-	$(MAKE) -f CMakeFiles/dWiNA.dir/build.make CMakeFiles/dWiNA.dir/src/app/DecisionProcedure/visitors/UniversalQuantifierRemover.cpp.o
+	$(MAKE) -f CMakeFiles/gaston.dir/build.make CMakeFiles/gaston.dir/src/app/DecisionProcedure/visitors/UniversalQuantifierRemover.cpp.o
 .PHONY : src/app/DecisionProcedure/visitors/UniversalQuantifierRemover.cpp.o
 
 src/app/DecisionProcedure/visitors/UniversalQuantifierRemover.i: src/app/DecisionProcedure/visitors/UniversalQuantifierRemover.cpp.i
@@ -535,7 +535,7 @@ src/app/DecisionProcedure/visitors/UniversalQuantifierRemover.i: src/app/Decisio
 
 # target to preprocess a source file
 src/app/DecisionProcedure/visitors/UniversalQuantifierRemover.cpp.i:
-	$(MAKE) -f CMakeFiles/dWiNA.dir/build.make CMakeFiles/dWiNA.dir/src/app/DecisionProcedure/visitors/UniversalQuantifierRemover.cpp.i
+	$(MAKE) -f CMakeFiles/gaston.dir/build.make CMakeFiles/gaston.dir/src/app/DecisionProcedure/visitors/UniversalQuantifierRemover.cpp.i
 .PHONY : src/app/DecisionProcedure/visitors/UniversalQuantifierRemover.cpp.i
 
 src/app/DecisionProcedure/visitors/UniversalQuantifierRemover.s: src/app/DecisionProcedure/visitors/UniversalQuantifierRemover.cpp.s
@@ -543,7 +543,7 @@ src/app/DecisionProcedure/visitors/UniversalQuantifierRemover.s: src/app/Decisio
 
 # target to generate assembly for a file
 src/app/DecisionProcedure/visitors/UniversalQuantifierRemover.cpp.s:
-	$(MAKE) -f CMakeFiles/dWiNA.dir/build.make CMakeFiles/dWiNA.dir/src/app/DecisionProcedure/visitors/UniversalQuantifierRemover.cpp.s
+	$(MAKE) -f CMakeFiles/gaston.dir/build.make CMakeFiles/gaston.dir/src/app/DecisionProcedure/visitors/UniversalQuantifierRemover.cpp.s
 .PHONY : src/app/DecisionProcedure/visitors/UniversalQuantifierRemover.cpp.s
 
 src/app/Frontend/ast.o: src/app/Frontend/ast.cpp.o
@@ -551,7 +551,7 @@ src/app/Frontend/ast.o: src/app/Frontend/ast.cpp.o
 
 # target to build an object file
 src/app/Frontend/ast.cpp.o:
-	$(MAKE) -f CMakeFiles/dWiNA.dir/build.make CMakeFiles/dWiNA.dir/src/app/Frontend/ast.cpp.o
+	$(MAKE) -f CMakeFiles/gaston.dir/build.make CMakeFiles/gaston.dir/src/app/Frontend/ast.cpp.o
 .PHONY : src/app/Frontend/ast.cpp.o
 
 src/app/Frontend/ast.i: src/app/Frontend/ast.cpp.i
@@ -559,7 +559,7 @@ src/app/Frontend/ast.i: src/app/Frontend/ast.cpp.i
 
 # target to preprocess a source file
 src/app/Frontend/ast.cpp.i:
-	$(MAKE) -f CMakeFiles/dWiNA.dir/build.make CMakeFiles/dWiNA.dir/src/app/Frontend/ast.cpp.i
+	$(MAKE) -f CMakeFiles/gaston.dir/build.make CMakeFiles/gaston.dir/src/app/Frontend/ast.cpp.i
 .PHONY : src/app/Frontend/ast.cpp.i
 
 src/app/Frontend/ast.s: src/app/Frontend/ast.cpp.s
@@ -567,7 +567,7 @@ src/app/Frontend/ast.s: src/app/Frontend/ast.cpp.s
 
 # target to generate assembly for a file
 src/app/Frontend/ast.cpp.s:
-	$(MAKE) -f CMakeFiles/dWiNA.dir/build.make CMakeFiles/dWiNA.dir/src/app/Frontend/ast.cpp.s
+	$(MAKE) -f CMakeFiles/gaston.dir/build.make CMakeFiles/gaston.dir/src/app/Frontend/ast.cpp.s
 .PHONY : src/app/Frontend/ast.cpp.s
 
 src/app/Frontend/ast_visitor.o: src/app/Frontend/ast_visitor.cpp.o
@@ -575,7 +575,7 @@ src/app/Frontend/ast_visitor.o: src/app/Frontend/ast_visitor.cpp.o
 
 # target to build an object file
 src/app/Frontend/ast_visitor.cpp.o:
-	$(MAKE) -f CMakeFiles/dWiNA.dir/build.make CMakeFiles/dWiNA.dir/src/app/Frontend/ast_visitor.cpp.o
+	$(MAKE) -f CMakeFiles/gaston.dir/build.make CMakeFiles/gaston.dir/src/app/Frontend/ast_visitor.cpp.o
 .PHONY : src/app/Frontend/ast_visitor.cpp.o
 
 src/app/Frontend/ast_visitor.i: src/app/Frontend/ast_visitor.cpp.i
@@ -583,7 +583,7 @@ src/app/Frontend/ast_visitor.i: src/app/Frontend/ast_visitor.cpp.i
 
 # target to preprocess a source file
 src/app/Frontend/ast_visitor.cpp.i:
-	$(MAKE) -f CMakeFiles/dWiNA.dir/build.make CMakeFiles/dWiNA.dir/src/app/Frontend/ast_visitor.cpp.i
+	$(MAKE) -f CMakeFiles/gaston.dir/build.make CMakeFiles/gaston.dir/src/app/Frontend/ast_visitor.cpp.i
 .PHONY : src/app/Frontend/ast_visitor.cpp.i
 
 src/app/Frontend/ast_visitor.s: src/app/Frontend/ast_visitor.cpp.s
@@ -591,7 +591,7 @@ src/app/Frontend/ast_visitor.s: src/app/Frontend/ast_visitor.cpp.s
 
 # target to generate assembly for a file
 src/app/Frontend/ast_visitor.cpp.s:
-	$(MAKE) -f CMakeFiles/dWiNA.dir/build.make CMakeFiles/dWiNA.dir/src/app/Frontend/ast_visitor.cpp.s
+	$(MAKE) -f CMakeFiles/gaston.dir/build.make CMakeFiles/gaston.dir/src/app/Frontend/ast_visitor.cpp.s
 .PHONY : src/app/Frontend/ast_visitor.cpp.s
 
 src/app/Frontend/astdump.o: src/app/Frontend/astdump.cpp.o
@@ -599,7 +599,7 @@ src/app/Frontend/astdump.o: src/app/Frontend/astdump.cpp.o
 
 # target to build an object file
 src/app/Frontend/astdump.cpp.o:
-	$(MAKE) -f CMakeFiles/dWiNA.dir/build.make CMakeFiles/dWiNA.dir/src/app/Frontend/astdump.cpp.o
+	$(MAKE) -f CMakeFiles/gaston.dir/build.make CMakeFiles/gaston.dir/src/app/Frontend/astdump.cpp.o
 .PHONY : src/app/Frontend/astdump.cpp.o
 
 src/app/Frontend/astdump.i: src/app/Frontend/astdump.cpp.i
@@ -607,7 +607,7 @@ src/app/Frontend/astdump.i: src/app/Frontend/astdump.cpp.i
 
 # target to preprocess a source file
 src/app/Frontend/astdump.cpp.i:
-	$(MAKE) -f CMakeFiles/dWiNA.dir/build.make CMakeFiles/dWiNA.dir/src/app/Frontend/astdump.cpp.i
+	$(MAKE) -f CMakeFiles/gaston.dir/build.make CMakeFiles/gaston.dir/src/app/Frontend/astdump.cpp.i
 .PHONY : src/app/Frontend/astdump.cpp.i
 
 src/app/Frontend/astdump.s: src/app/Frontend/astdump.cpp.s
@@ -615,7 +615,7 @@ src/app/Frontend/astdump.s: src/app/Frontend/astdump.cpp.s
 
 # target to generate assembly for a file
 src/app/Frontend/astdump.cpp.s:
-	$(MAKE) -f CMakeFiles/dWiNA.dir/build.make CMakeFiles/dWiNA.dir/src/app/Frontend/astdump.cpp.s
+	$(MAKE) -f CMakeFiles/gaston.dir/build.make CMakeFiles/gaston.dir/src/app/Frontend/astdump.cpp.s
 .PHONY : src/app/Frontend/astdump.cpp.s
 
 src/app/Frontend/code.o: src/app/Frontend/code.cpp.o
@@ -623,7 +623,7 @@ src/app/Frontend/code.o: src/app/Frontend/code.cpp.o
 
 # target to build an object file
 src/app/Frontend/code.cpp.o:
-	$(MAKE) -f CMakeFiles/dWiNA.dir/build.make CMakeFiles/dWiNA.dir/src/app/Frontend/code.cpp.o
+	$(MAKE) -f CMakeFiles/gaston.dir/build.make CMakeFiles/gaston.dir/src/app/Frontend/code.cpp.o
 .PHONY : src/app/Frontend/code.cpp.o
 
 src/app/Frontend/code.i: src/app/Frontend/code.cpp.i
@@ -631,7 +631,7 @@ src/app/Frontend/code.i: src/app/Frontend/code.cpp.i
 
 # target to preprocess a source file
 src/app/Frontend/code.cpp.i:
-	$(MAKE) -f CMakeFiles/dWiNA.dir/build.make CMakeFiles/dWiNA.dir/src/app/Frontend/code.cpp.i
+	$(MAKE) -f CMakeFiles/gaston.dir/build.make CMakeFiles/gaston.dir/src/app/Frontend/code.cpp.i
 .PHONY : src/app/Frontend/code.cpp.i
 
 src/app/Frontend/code.s: src/app/Frontend/code.cpp.s
@@ -639,7 +639,7 @@ src/app/Frontend/code.s: src/app/Frontend/code.cpp.s
 
 # target to generate assembly for a file
 src/app/Frontend/code.cpp.s:
-	$(MAKE) -f CMakeFiles/dWiNA.dir/build.make CMakeFiles/dWiNA.dir/src/app/Frontend/code.cpp.s
+	$(MAKE) -f CMakeFiles/gaston.dir/build.make CMakeFiles/gaston.dir/src/app/Frontend/code.cpp.s
 .PHONY : src/app/Frontend/code.cpp.s
 
 src/app/Frontend/code_visitor.o: src/app/Frontend/code_visitor.cpp.o
@@ -647,7 +647,7 @@ src/app/Frontend/code_visitor.o: src/app/Frontend/code_visitor.cpp.o
 
 # target to build an object file
 src/app/Frontend/code_visitor.cpp.o:
-	$(MAKE) -f CMakeFiles/dWiNA.dir/build.make CMakeFiles/dWiNA.dir/src/app/Frontend/code_visitor.cpp.o
+	$(MAKE) -f CMakeFiles/gaston.dir/build.make CMakeFiles/gaston.dir/src/app/Frontend/code_visitor.cpp.o
 .PHONY : src/app/Frontend/code_visitor.cpp.o
 
 src/app/Frontend/code_visitor.i: src/app/Frontend/code_visitor.cpp.i
@@ -655,7 +655,7 @@ src/app/Frontend/code_visitor.i: src/app/Frontend/code_visitor.cpp.i
 
 # target to preprocess a source file
 src/app/Frontend/code_visitor.cpp.i:
-	$(MAKE) -f CMakeFiles/dWiNA.dir/build.make CMakeFiles/dWiNA.dir/src/app/Frontend/code_visitor.cpp.i
+	$(MAKE) -f CMakeFiles/gaston.dir/build.make CMakeFiles/gaston.dir/src/app/Frontend/code_visitor.cpp.i
 .PHONY : src/app/Frontend/code_visitor.cpp.i
 
 src/app/Frontend/code_visitor.s: src/app/Frontend/code_visitor.cpp.s
@@ -663,7 +663,7 @@ src/app/Frontend/code_visitor.s: src/app/Frontend/code_visitor.cpp.s
 
 # target to generate assembly for a file
 src/app/Frontend/code_visitor.cpp.s:
-	$(MAKE) -f CMakeFiles/dWiNA.dir/build.make CMakeFiles/dWiNA.dir/src/app/Frontend/code_visitor.cpp.s
+	$(MAKE) -f CMakeFiles/gaston.dir/build.make CMakeFiles/gaston.dir/src/app/Frontend/code_visitor.cpp.s
 .PHONY : src/app/Frontend/code_visitor.cpp.s
 
 src/app/Frontend/codedump.o: src/app/Frontend/codedump.cpp.o
@@ -671,7 +671,7 @@ src/app/Frontend/codedump.o: src/app/Frontend/codedump.cpp.o
 
 # target to build an object file
 src/app/Frontend/codedump.cpp.o:
-	$(MAKE) -f CMakeFiles/dWiNA.dir/build.make CMakeFiles/dWiNA.dir/src/app/Frontend/codedump.cpp.o
+	$(MAKE) -f CMakeFiles/gaston.dir/build.make CMakeFiles/gaston.dir/src/app/Frontend/codedump.cpp.o
 .PHONY : src/app/Frontend/codedump.cpp.o
 
 src/app/Frontend/codedump.i: src/app/Frontend/codedump.cpp.i
@@ -679,7 +679,7 @@ src/app/Frontend/codedump.i: src/app/Frontend/codedump.cpp.i
 
 # target to preprocess a source file
 src/app/Frontend/codedump.cpp.i:
-	$(MAKE) -f CMakeFiles/dWiNA.dir/build.make CMakeFiles/dWiNA.dir/src/app/Frontend/codedump.cpp.i
+	$(MAKE) -f CMakeFiles/gaston.dir/build.make CMakeFiles/gaston.dir/src/app/Frontend/codedump.cpp.i
 .PHONY : src/app/Frontend/codedump.cpp.i
 
 src/app/Frontend/codedump.s: src/app/Frontend/codedump.cpp.s
@@ -687,7 +687,7 @@ src/app/Frontend/codedump.s: src/app/Frontend/codedump.cpp.s
 
 # target to generate assembly for a file
 src/app/Frontend/codedump.cpp.s:
-	$(MAKE) -f CMakeFiles/dWiNA.dir/build.make CMakeFiles/dWiNA.dir/src/app/Frontend/codedump.cpp.s
+	$(MAKE) -f CMakeFiles/gaston.dir/build.make CMakeFiles/gaston.dir/src/app/Frontend/codedump.cpp.s
 .PHONY : src/app/Frontend/codedump.cpp.s
 
 src/app/Frontend/codesubst.o: src/app/Frontend/codesubst.cpp.o
@@ -695,7 +695,7 @@ src/app/Frontend/codesubst.o: src/app/Frontend/codesubst.cpp.o
 
 # target to build an object file
 src/app/Frontend/codesubst.cpp.o:
-	$(MAKE) -f CMakeFiles/dWiNA.dir/build.make CMakeFiles/dWiNA.dir/src/app/Frontend/codesubst.cpp.o
+	$(MAKE) -f CMakeFiles/gaston.dir/build.make CMakeFiles/gaston.dir/src/app/Frontend/codesubst.cpp.o
 .PHONY : src/app/Frontend/codesubst.cpp.o
 
 src/app/Frontend/codesubst.i: src/app/Frontend/codesubst.cpp.i
@@ -703,7 +703,7 @@ src/app/Frontend/codesubst.i: src/app/Frontend/codesubst.cpp.i
 
 # target to preprocess a source file
 src/app/Frontend/codesubst.cpp.i:
-	$(MAKE) -f CMakeFiles/dWiNA.dir/build.make CMakeFiles/dWiNA.dir/src/app/Frontend/codesubst.cpp.i
+	$(MAKE) -f CMakeFiles/gaston.dir/build.make CMakeFiles/gaston.dir/src/app/Frontend/codesubst.cpp.i
 .PHONY : src/app/Frontend/codesubst.cpp.i
 
 src/app/Frontend/codesubst.s: src/app/Frontend/codesubst.cpp.s
@@ -711,7 +711,7 @@ src/app/Frontend/codesubst.s: src/app/Frontend/codesubst.cpp.s
 
 # target to generate assembly for a file
 src/app/Frontend/codesubst.cpp.s:
-	$(MAKE) -f CMakeFiles/dWiNA.dir/build.make CMakeFiles/dWiNA.dir/src/app/Frontend/codesubst.cpp.s
+	$(MAKE) -f CMakeFiles/gaston.dir/build.make CMakeFiles/gaston.dir/src/app/Frontend/codesubst.cpp.s
 .PHONY : src/app/Frontend/codesubst.cpp.s
 
 src/app/Frontend/codetable.o: src/app/Frontend/codetable.cpp.o
@@ -719,7 +719,7 @@ src/app/Frontend/codetable.o: src/app/Frontend/codetable.cpp.o
 
 # target to build an object file
 src/app/Frontend/codetable.cpp.o:
-	$(MAKE) -f CMakeFiles/dWiNA.dir/build.make CMakeFiles/dWiNA.dir/src/app/Frontend/codetable.cpp.o
+	$(MAKE) -f CMakeFiles/gaston.dir/build.make CMakeFiles/gaston.dir/src/app/Frontend/codetable.cpp.o
 .PHONY : src/app/Frontend/codetable.cpp.o
 
 src/app/Frontend/codetable.i: src/app/Frontend/codetable.cpp.i
@@ -727,7 +727,7 @@ src/app/Frontend/codetable.i: src/app/Frontend/codetable.cpp.i
 
 # target to preprocess a source file
 src/app/Frontend/codetable.cpp.i:
-	$(MAKE) -f CMakeFiles/dWiNA.dir/build.make CMakeFiles/dWiNA.dir/src/app/Frontend/codetable.cpp.i
+	$(MAKE) -f CMakeFiles/gaston.dir/build.make CMakeFiles/gaston.dir/src/app/Frontend/codetable.cpp.i
 .PHONY : src/app/Frontend/codetable.cpp.i
 
 src/app/Frontend/codetable.s: src/app/Frontend/codetable.cpp.s
@@ -735,7 +735,7 @@ src/app/Frontend/codetable.s: src/app/Frontend/codetable.cpp.s
 
 # target to generate assembly for a file
 src/app/Frontend/codetable.cpp.s:
-	$(MAKE) -f CMakeFiles/dWiNA.dir/build.make CMakeFiles/dWiNA.dir/src/app/Frontend/codetable.cpp.s
+	$(MAKE) -f CMakeFiles/gaston.dir/build.make CMakeFiles/gaston.dir/src/app/Frontend/codetable.cpp.s
 .PHONY : src/app/Frontend/codetable.cpp.s
 
 src/app/Frontend/freevars.o: src/app/Frontend/freevars.cpp.o
@@ -743,7 +743,7 @@ src/app/Frontend/freevars.o: src/app/Frontend/freevars.cpp.o
 
 # target to build an object file
 src/app/Frontend/freevars.cpp.o:
-	$(MAKE) -f CMakeFiles/dWiNA.dir/build.make CMakeFiles/dWiNA.dir/src/app/Frontend/freevars.cpp.o
+	$(MAKE) -f CMakeFiles/gaston.dir/build.make CMakeFiles/gaston.dir/src/app/Frontend/freevars.cpp.o
 .PHONY : src/app/Frontend/freevars.cpp.o
 
 src/app/Frontend/freevars.i: src/app/Frontend/freevars.cpp.i
@@ -751,7 +751,7 @@ src/app/Frontend/freevars.i: src/app/Frontend/freevars.cpp.i
 
 # target to preprocess a source file
 src/app/Frontend/freevars.cpp.i:
-	$(MAKE) -f CMakeFiles/dWiNA.dir/build.make CMakeFiles/dWiNA.dir/src/app/Frontend/freevars.cpp.i
+	$(MAKE) -f CMakeFiles/gaston.dir/build.make CMakeFiles/gaston.dir/src/app/Frontend/freevars.cpp.i
 .PHONY : src/app/Frontend/freevars.cpp.i
 
 src/app/Frontend/freevars.s: src/app/Frontend/freevars.cpp.s
@@ -759,7 +759,7 @@ src/app/Frontend/freevars.s: src/app/Frontend/freevars.cpp.s
 
 # target to generate assembly for a file
 src/app/Frontend/freevars.cpp.s:
-	$(MAKE) -f CMakeFiles/dWiNA.dir/build.make CMakeFiles/dWiNA.dir/src/app/Frontend/freevars.cpp.s
+	$(MAKE) -f CMakeFiles/gaston.dir/build.make CMakeFiles/gaston.dir/src/app/Frontend/freevars.cpp.s
 .PHONY : src/app/Frontend/freevars.cpp.s
 
 src/app/Frontend/ident.o: src/app/Frontend/ident.cpp.o
@@ -767,7 +767,7 @@ src/app/Frontend/ident.o: src/app/Frontend/ident.cpp.o
 
 # target to build an object file
 src/app/Frontend/ident.cpp.o:
-	$(MAKE) -f CMakeFiles/dWiNA.dir/build.make CMakeFiles/dWiNA.dir/src/app/Frontend/ident.cpp.o
+	$(MAKE) -f CMakeFiles/gaston.dir/build.make CMakeFiles/gaston.dir/src/app/Frontend/ident.cpp.o
 .PHONY : src/app/Frontend/ident.cpp.o
 
 src/app/Frontend/ident.i: src/app/Frontend/ident.cpp.i
@@ -775,7 +775,7 @@ src/app/Frontend/ident.i: src/app/Frontend/ident.cpp.i
 
 # target to preprocess a source file
 src/app/Frontend/ident.cpp.i:
-	$(MAKE) -f CMakeFiles/dWiNA.dir/build.make CMakeFiles/dWiNA.dir/src/app/Frontend/ident.cpp.i
+	$(MAKE) -f CMakeFiles/gaston.dir/build.make CMakeFiles/gaston.dir/src/app/Frontend/ident.cpp.i
 .PHONY : src/app/Frontend/ident.cpp.i
 
 src/app/Frontend/ident.s: src/app/Frontend/ident.cpp.s
@@ -783,7 +783,7 @@ src/app/Frontend/ident.s: src/app/Frontend/ident.cpp.s
 
 # target to generate assembly for a file
 src/app/Frontend/ident.cpp.s:
-	$(MAKE) -f CMakeFiles/dWiNA.dir/build.make CMakeFiles/dWiNA.dir/src/app/Frontend/ident.cpp.s
+	$(MAKE) -f CMakeFiles/gaston.dir/build.make CMakeFiles/gaston.dir/src/app/Frontend/ident.cpp.s
 .PHONY : src/app/Frontend/ident.cpp.s
 
 src/app/Frontend/lib.o: src/app/Frontend/lib.cpp.o
@@ -791,7 +791,7 @@ src/app/Frontend/lib.o: src/app/Frontend/lib.cpp.o
 
 # target to build an object file
 src/app/Frontend/lib.cpp.o:
-	$(MAKE) -f CMakeFiles/dWiNA.dir/build.make CMakeFiles/dWiNA.dir/src/app/Frontend/lib.cpp.o
+	$(MAKE) -f CMakeFiles/gaston.dir/build.make CMakeFiles/gaston.dir/src/app/Frontend/lib.cpp.o
 .PHONY : src/app/Frontend/lib.cpp.o
 
 src/app/Frontend/lib.i: src/app/Frontend/lib.cpp.i
@@ -799,7 +799,7 @@ src/app/Frontend/lib.i: src/app/Frontend/lib.cpp.i
 
 # target to preprocess a source file
 src/app/Frontend/lib.cpp.i:
-	$(MAKE) -f CMakeFiles/dWiNA.dir/build.make CMakeFiles/dWiNA.dir/src/app/Frontend/lib.cpp.i
+	$(MAKE) -f CMakeFiles/gaston.dir/build.make CMakeFiles/gaston.dir/src/app/Frontend/lib.cpp.i
 .PHONY : src/app/Frontend/lib.cpp.i
 
 src/app/Frontend/lib.s: src/app/Frontend/lib.cpp.s
@@ -807,7 +807,7 @@ src/app/Frontend/lib.s: src/app/Frontend/lib.cpp.s
 
 # target to generate assembly for a file
 src/app/Frontend/lib.cpp.s:
-	$(MAKE) -f CMakeFiles/dWiNA.dir/build.make CMakeFiles/dWiNA.dir/src/app/Frontend/lib.cpp.s
+	$(MAKE) -f CMakeFiles/gaston.dir/build.make CMakeFiles/gaston.dir/src/app/Frontend/lib.cpp.s
 .PHONY : src/app/Frontend/lib.cpp.s
 
 src/app/Frontend/makeguide.o: src/app/Frontend/makeguide.cpp.o
@@ -815,7 +815,7 @@ src/app/Frontend/makeguide.o: src/app/Frontend/makeguide.cpp.o
 
 # target to build an object file
 src/app/Frontend/makeguide.cpp.o:
-	$(MAKE) -f CMakeFiles/dWiNA.dir/build.make CMakeFiles/dWiNA.dir/src/app/Frontend/makeguide.cpp.o
+	$(MAKE) -f CMakeFiles/gaston.dir/build.make CMakeFiles/gaston.dir/src/app/Frontend/makeguide.cpp.o
 .PHONY : src/app/Frontend/makeguide.cpp.o
 
 src/app/Frontend/makeguide.i: src/app/Frontend/makeguide.cpp.i
@@ -823,7 +823,7 @@ src/app/Frontend/makeguide.i: src/app/Frontend/makeguide.cpp.i
 
 # target to preprocess a source file
 src/app/Frontend/makeguide.cpp.i:
-	$(MAKE) -f CMakeFiles/dWiNA.dir/build.make CMakeFiles/dWiNA.dir/src/app/Frontend/makeguide.cpp.i
+	$(MAKE) -f CMakeFiles/gaston.dir/build.make CMakeFiles/gaston.dir/src/app/Frontend/makeguide.cpp.i
 .PHONY : src/app/Frontend/makeguide.cpp.i
 
 src/app/Frontend/makeguide.s: src/app/Frontend/makeguide.cpp.s
@@ -831,7 +831,7 @@ src/app/Frontend/makeguide.s: src/app/Frontend/makeguide.cpp.s
 
 # target to generate assembly for a file
 src/app/Frontend/makeguide.cpp.s:
-	$(MAKE) -f CMakeFiles/dWiNA.dir/build.make CMakeFiles/dWiNA.dir/src/app/Frontend/makeguide.cpp.s
+	$(MAKE) -f CMakeFiles/gaston.dir/build.make CMakeFiles/gaston.dir/src/app/Frontend/makeguide.cpp.s
 .PHONY : src/app/Frontend/makeguide.cpp.s
 
 src/app/Frontend/offsets.o: src/app/Frontend/offsets.cpp.o
@@ -839,7 +839,7 @@ src/app/Frontend/offsets.o: src/app/Frontend/offsets.cpp.o
 
 # target to build an object file
 src/app/Frontend/offsets.cpp.o:
-	$(MAKE) -f CMakeFiles/dWiNA.dir/build.make CMakeFiles/dWiNA.dir/src/app/Frontend/offsets.cpp.o
+	$(MAKE) -f CMakeFiles/gaston.dir/build.make CMakeFiles/gaston.dir/src/app/Frontend/offsets.cpp.o
 .PHONY : src/app/Frontend/offsets.cpp.o
 
 src/app/Frontend/offsets.i: src/app/Frontend/offsets.cpp.i
@@ -847,7 +847,7 @@ src/app/Frontend/offsets.i: src/app/Frontend/offsets.cpp.i
 
 # target to preprocess a source file
 src/app/Frontend/offsets.cpp.i:
-	$(MAKE) -f CMakeFiles/dWiNA.dir/build.make CMakeFiles/dWiNA.dir/src/app/Frontend/offsets.cpp.i
+	$(MAKE) -f CMakeFiles/gaston.dir/build.make CMakeFiles/gaston.dir/src/app/Frontend/offsets.cpp.i
 .PHONY : src/app/Frontend/offsets.cpp.i
 
 src/app/Frontend/offsets.s: src/app/Frontend/offsets.cpp.s
@@ -855,7 +855,7 @@ src/app/Frontend/offsets.s: src/app/Frontend/offsets.cpp.s
 
 # target to generate assembly for a file
 src/app/Frontend/offsets.cpp.s:
-	$(MAKE) -f CMakeFiles/dWiNA.dir/build.make CMakeFiles/dWiNA.dir/src/app/Frontend/offsets.cpp.s
+	$(MAKE) -f CMakeFiles/gaston.dir/build.make CMakeFiles/gaston.dir/src/app/Frontend/offsets.cpp.s
 .PHONY : src/app/Frontend/offsets.cpp.s
 
 src/app/Frontend/parser.o: src/app/Frontend/parser.cpp.o
@@ -863,7 +863,7 @@ src/app/Frontend/parser.o: src/app/Frontend/parser.cpp.o
 
 # target to build an object file
 src/app/Frontend/parser.cpp.o:
-	$(MAKE) -f CMakeFiles/dWiNA.dir/build.make CMakeFiles/dWiNA.dir/src/app/Frontend/parser.cpp.o
+	$(MAKE) -f CMakeFiles/gaston.dir/build.make CMakeFiles/gaston.dir/src/app/Frontend/parser.cpp.o
 .PHONY : src/app/Frontend/parser.cpp.o
 
 src/app/Frontend/parser.i: src/app/Frontend/parser.cpp.i
@@ -871,7 +871,7 @@ src/app/Frontend/parser.i: src/app/Frontend/parser.cpp.i
 
 # target to preprocess a source file
 src/app/Frontend/parser.cpp.i:
-	$(MAKE) -f CMakeFiles/dWiNA.dir/build.make CMakeFiles/dWiNA.dir/src/app/Frontend/parser.cpp.i
+	$(MAKE) -f CMakeFiles/gaston.dir/build.make CMakeFiles/gaston.dir/src/app/Frontend/parser.cpp.i
 .PHONY : src/app/Frontend/parser.cpp.i
 
 src/app/Frontend/parser.s: src/app/Frontend/parser.cpp.s
@@ -879,7 +879,7 @@ src/app/Frontend/parser.s: src/app/Frontend/parser.cpp.s
 
 # target to generate assembly for a file
 src/app/Frontend/parser.cpp.s:
-	$(MAKE) -f CMakeFiles/dWiNA.dir/build.make CMakeFiles/dWiNA.dir/src/app/Frontend/parser.cpp.s
+	$(MAKE) -f CMakeFiles/gaston.dir/build.make CMakeFiles/gaston.dir/src/app/Frontend/parser.cpp.s
 .PHONY : src/app/Frontend/parser.cpp.s
 
 src/app/Frontend/predlib.o: src/app/Frontend/predlib.cpp.o
@@ -887,7 +887,7 @@ src/app/Frontend/predlib.o: src/app/Frontend/predlib.cpp.o
 
 # target to build an object file
 src/app/Frontend/predlib.cpp.o:
-	$(MAKE) -f CMakeFiles/dWiNA.dir/build.make CMakeFiles/dWiNA.dir/src/app/Frontend/predlib.cpp.o
+	$(MAKE) -f CMakeFiles/gaston.dir/build.make CMakeFiles/gaston.dir/src/app/Frontend/predlib.cpp.o
 .PHONY : src/app/Frontend/predlib.cpp.o
 
 src/app/Frontend/predlib.i: src/app/Frontend/predlib.cpp.i
@@ -895,7 +895,7 @@ src/app/Frontend/predlib.i: src/app/Frontend/predlib.cpp.i
 
 # target to preprocess a source file
 src/app/Frontend/predlib.cpp.i:
-	$(MAKE) -f CMakeFiles/dWiNA.dir/build.make CMakeFiles/dWiNA.dir/src/app/Frontend/predlib.cpp.i
+	$(MAKE) -f CMakeFiles/gaston.dir/build.make CMakeFiles/gaston.dir/src/app/Frontend/predlib.cpp.i
 .PHONY : src/app/Frontend/predlib.cpp.i
 
 src/app/Frontend/predlib.s: src/app/Frontend/predlib.cpp.s
@@ -903,7 +903,7 @@ src/app/Frontend/predlib.s: src/app/Frontend/predlib.cpp.s
 
 # target to generate assembly for a file
 src/app/Frontend/predlib.cpp.s:
-	$(MAKE) -f CMakeFiles/dWiNA.dir/build.make CMakeFiles/dWiNA.dir/src/app/Frontend/predlib.cpp.s
+	$(MAKE) -f CMakeFiles/gaston.dir/build.make CMakeFiles/gaston.dir/src/app/Frontend/predlib.cpp.s
 .PHONY : src/app/Frontend/predlib.cpp.s
 
 src/app/Frontend/printline.o: src/app/Frontend/printline.cpp.o
@@ -911,7 +911,7 @@ src/app/Frontend/printline.o: src/app/Frontend/printline.cpp.o
 
 # target to build an object file
 src/app/Frontend/printline.cpp.o:
-	$(MAKE) -f CMakeFiles/dWiNA.dir/build.make CMakeFiles/dWiNA.dir/src/app/Frontend/printline.cpp.o
+	$(MAKE) -f CMakeFiles/gaston.dir/build.make CMakeFiles/gaston.dir/src/app/Frontend/printline.cpp.o
 .PHONY : src/app/Frontend/printline.cpp.o
 
 src/app/Frontend/printline.i: src/app/Frontend/printline.cpp.i
@@ -919,7 +919,7 @@ src/app/Frontend/printline.i: src/app/Frontend/printline.cpp.i
 
 # target to preprocess a source file
 src/app/Frontend/printline.cpp.i:
-	$(MAKE) -f CMakeFiles/dWiNA.dir/build.make CMakeFiles/dWiNA.dir/src/app/Frontend/printline.cpp.i
+	$(MAKE) -f CMakeFiles/gaston.dir/build.make CMakeFiles/gaston.dir/src/app/Frontend/printline.cpp.i
 .PHONY : src/app/Frontend/printline.cpp.i
 
 src/app/Frontend/printline.s: src/app/Frontend/printline.cpp.s
@@ -927,7 +927,7 @@ src/app/Frontend/printline.s: src/app/Frontend/printline.cpp.s
 
 # target to generate assembly for a file
 src/app/Frontend/printline.cpp.s:
-	$(MAKE) -f CMakeFiles/dWiNA.dir/build.make CMakeFiles/dWiNA.dir/src/app/Frontend/printline.cpp.s
+	$(MAKE) -f CMakeFiles/gaston.dir/build.make CMakeFiles/gaston.dir/src/app/Frontend/printline.cpp.s
 .PHONY : src/app/Frontend/printline.cpp.s
 
 src/app/Frontend/reduce.o: src/app/Frontend/reduce.cpp.o
@@ -935,7 +935,7 @@ src/app/Frontend/reduce.o: src/app/Frontend/reduce.cpp.o
 
 # target to build an object file
 src/app/Frontend/reduce.cpp.o:
-	$(MAKE) -f CMakeFiles/dWiNA.dir/build.make CMakeFiles/dWiNA.dir/src/app/Frontend/reduce.cpp.o
+	$(MAKE) -f CMakeFiles/gaston.dir/build.make CMakeFiles/gaston.dir/src/app/Frontend/reduce.cpp.o
 .PHONY : src/app/Frontend/reduce.cpp.o
 
 src/app/Frontend/reduce.i: src/app/Frontend/reduce.cpp.i
@@ -943,7 +943,7 @@ src/app/Frontend/reduce.i: src/app/Frontend/reduce.cpp.i
 
 # target to preprocess a source file
 src/app/Frontend/reduce.cpp.i:
-	$(MAKE) -f CMakeFiles/dWiNA.dir/build.make CMakeFiles/dWiNA.dir/src/app/Frontend/reduce.cpp.i
+	$(MAKE) -f CMakeFiles/gaston.dir/build.make CMakeFiles/gaston.dir/src/app/Frontend/reduce.cpp.i
 .PHONY : src/app/Frontend/reduce.cpp.i
 
 src/app/Frontend/reduce.s: src/app/Frontend/reduce.cpp.s
@@ -951,7 +951,7 @@ src/app/Frontend/reduce.s: src/app/Frontend/reduce.cpp.s
 
 # target to generate assembly for a file
 src/app/Frontend/reduce.cpp.s:
-	$(MAKE) -f CMakeFiles/dWiNA.dir/build.make CMakeFiles/dWiNA.dir/src/app/Frontend/reduce.cpp.s
+	$(MAKE) -f CMakeFiles/gaston.dir/build.make CMakeFiles/gaston.dir/src/app/Frontend/reduce.cpp.s
 .PHONY : src/app/Frontend/reduce.cpp.s
 
 src/app/Frontend/scanner.o: src/app/Frontend/scanner.cpp.o
@@ -959,7 +959,7 @@ src/app/Frontend/scanner.o: src/app/Frontend/scanner.cpp.o
 
 # target to build an object file
 src/app/Frontend/scanner.cpp.o:
-	$(MAKE) -f CMakeFiles/dWiNA.dir/build.make CMakeFiles/dWiNA.dir/src/app/Frontend/scanner.cpp.o
+	$(MAKE) -f CMakeFiles/gaston.dir/build.make CMakeFiles/gaston.dir/src/app/Frontend/scanner.cpp.o
 .PHONY : src/app/Frontend/scanner.cpp.o
 
 src/app/Frontend/scanner.i: src/app/Frontend/scanner.cpp.i
@@ -967,7 +967,7 @@ src/app/Frontend/scanner.i: src/app/Frontend/scanner.cpp.i
 
 # target to preprocess a source file
 src/app/Frontend/scanner.cpp.i:
-	$(MAKE) -f CMakeFiles/dWiNA.dir/build.make CMakeFiles/dWiNA.dir/src/app/Frontend/scanner.cpp.i
+	$(MAKE) -f CMakeFiles/gaston.dir/build.make CMakeFiles/gaston.dir/src/app/Frontend/scanner.cpp.i
 .PHONY : src/app/Frontend/scanner.cpp.i
 
 src/app/Frontend/scanner.s: src/app/Frontend/scanner.cpp.s
@@ -975,7 +975,7 @@ src/app/Frontend/scanner.s: src/app/Frontend/scanner.cpp.s
 
 # target to generate assembly for a file
 src/app/Frontend/scanner.cpp.s:
-	$(MAKE) -f CMakeFiles/dWiNA.dir/build.make CMakeFiles/dWiNA.dir/src/app/Frontend/scanner.cpp.s
+	$(MAKE) -f CMakeFiles/gaston.dir/build.make CMakeFiles/gaston.dir/src/app/Frontend/scanner.cpp.s
 .PHONY : src/app/Frontend/scanner.cpp.s
 
 src/app/Frontend/signature.o: src/app/Frontend/signature.cpp.o
@@ -983,7 +983,7 @@ src/app/Frontend/signature.o: src/app/Frontend/signature.cpp.o
 
 # target to build an object file
 src/app/Frontend/signature.cpp.o:
-	$(MAKE) -f CMakeFiles/dWiNA.dir/build.make CMakeFiles/dWiNA.dir/src/app/Frontend/signature.cpp.o
+	$(MAKE) -f CMakeFiles/gaston.dir/build.make CMakeFiles/gaston.dir/src/app/Frontend/signature.cpp.o
 .PHONY : src/app/Frontend/signature.cpp.o
 
 src/app/Frontend/signature.i: src/app/Frontend/signature.cpp.i
@@ -991,7 +991,7 @@ src/app/Frontend/signature.i: src/app/Frontend/signature.cpp.i
 
 # target to preprocess a source file
 src/app/Frontend/signature.cpp.i:
-	$(MAKE) -f CMakeFiles/dWiNA.dir/build.make CMakeFiles/dWiNA.dir/src/app/Frontend/signature.cpp.i
+	$(MAKE) -f CMakeFiles/gaston.dir/build.make CMakeFiles/gaston.dir/src/app/Frontend/signature.cpp.i
 .PHONY : src/app/Frontend/signature.cpp.i
 
 src/app/Frontend/signature.s: src/app/Frontend/signature.cpp.s
@@ -999,7 +999,7 @@ src/app/Frontend/signature.s: src/app/Frontend/signature.cpp.s
 
 # target to generate assembly for a file
 src/app/Frontend/signature.cpp.s:
-	$(MAKE) -f CMakeFiles/dWiNA.dir/build.make CMakeFiles/dWiNA.dir/src/app/Frontend/signature.cpp.s
+	$(MAKE) -f CMakeFiles/gaston.dir/build.make CMakeFiles/gaston.dir/src/app/Frontend/signature.cpp.s
 .PHONY : src/app/Frontend/signature.cpp.s
 
 src/app/Frontend/st_dfa.o: src/app/Frontend/st_dfa.cpp.o
@@ -1007,7 +1007,7 @@ src/app/Frontend/st_dfa.o: src/app/Frontend/st_dfa.cpp.o
 
 # target to build an object file
 src/app/Frontend/st_dfa.cpp.o:
-	$(MAKE) -f CMakeFiles/dWiNA.dir/build.make CMakeFiles/dWiNA.dir/src/app/Frontend/st_dfa.cpp.o
+	$(MAKE) -f CMakeFiles/gaston.dir/build.make CMakeFiles/gaston.dir/src/app/Frontend/st_dfa.cpp.o
 .PHONY : src/app/Frontend/st_dfa.cpp.o
 
 src/app/Frontend/st_dfa.i: src/app/Frontend/st_dfa.cpp.i
@@ -1015,7 +1015,7 @@ src/app/Frontend/st_dfa.i: src/app/Frontend/st_dfa.cpp.i
 
 # target to preprocess a source file
 src/app/Frontend/st_dfa.cpp.i:
-	$(MAKE) -f CMakeFiles/dWiNA.dir/build.make CMakeFiles/dWiNA.dir/src/app/Frontend/st_dfa.cpp.i
+	$(MAKE) -f CMakeFiles/gaston.dir/build.make CMakeFiles/gaston.dir/src/app/Frontend/st_dfa.cpp.i
 .PHONY : src/app/Frontend/st_dfa.cpp.i
 
 src/app/Frontend/st_dfa.s: src/app/Frontend/st_dfa.cpp.s
@@ -1023,7 +1023,7 @@ src/app/Frontend/st_dfa.s: src/app/Frontend/st_dfa.cpp.s
 
 # target to generate assembly for a file
 src/app/Frontend/st_dfa.cpp.s:
-	$(MAKE) -f CMakeFiles/dWiNA.dir/build.make CMakeFiles/dWiNA.dir/src/app/Frontend/st_dfa.cpp.s
+	$(MAKE) -f CMakeFiles/gaston.dir/build.make CMakeFiles/gaston.dir/src/app/Frontend/st_dfa.cpp.s
 .PHONY : src/app/Frontend/st_dfa.cpp.s
 
 src/app/Frontend/st_gta.o: src/app/Frontend/st_gta.cpp.o
@@ -1031,7 +1031,7 @@ src/app/Frontend/st_gta.o: src/app/Frontend/st_gta.cpp.o
 
 # target to build an object file
 src/app/Frontend/st_gta.cpp.o:
-	$(MAKE) -f CMakeFiles/dWiNA.dir/build.make CMakeFiles/dWiNA.dir/src/app/Frontend/st_gta.cpp.o
+	$(MAKE) -f CMakeFiles/gaston.dir/build.make CMakeFiles/gaston.dir/src/app/Frontend/st_gta.cpp.o
 .PHONY : src/app/Frontend/st_gta.cpp.o
 
 src/app/Frontend/st_gta.i: src/app/Frontend/st_gta.cpp.i
@@ -1039,7 +1039,7 @@ src/app/Frontend/st_gta.i: src/app/Frontend/st_gta.cpp.i
 
 # target to preprocess a source file
 src/app/Frontend/st_gta.cpp.i:
-	$(MAKE) -f CMakeFiles/dWiNA.dir/build.make CMakeFiles/dWiNA.dir/src/app/Frontend/st_gta.cpp.i
+	$(MAKE) -f CMakeFiles/gaston.dir/build.make CMakeFiles/gaston.dir/src/app/Frontend/st_gta.cpp.i
 .PHONY : src/app/Frontend/st_gta.cpp.i
 
 src/app/Frontend/st_gta.s: src/app/Frontend/st_gta.cpp.s
@@ -1047,7 +1047,7 @@ src/app/Frontend/st_gta.s: src/app/Frontend/st_gta.cpp.s
 
 # target to generate assembly for a file
 src/app/Frontend/st_gta.cpp.s:
-	$(MAKE) -f CMakeFiles/dWiNA.dir/build.make CMakeFiles/dWiNA.dir/src/app/Frontend/st_gta.cpp.s
+	$(MAKE) -f CMakeFiles/gaston.dir/build.make CMakeFiles/gaston.dir/src/app/Frontend/st_gta.cpp.s
 .PHONY : src/app/Frontend/st_gta.cpp.s
 
 src/app/Frontend/symboltable.o: src/app/Frontend/symboltable.cpp.o
@@ -1055,7 +1055,7 @@ src/app/Frontend/symboltable.o: src/app/Frontend/symboltable.cpp.o
 
 # target to build an object file
 src/app/Frontend/symboltable.cpp.o:
-	$(MAKE) -f CMakeFiles/dWiNA.dir/build.make CMakeFiles/dWiNA.dir/src/app/Frontend/symboltable.cpp.o
+	$(MAKE) -f CMakeFiles/gaston.dir/build.make CMakeFiles/gaston.dir/src/app/Frontend/symboltable.cpp.o
 .PHONY : src/app/Frontend/symboltable.cpp.o
 
 src/app/Frontend/symboltable.i: src/app/Frontend/symboltable.cpp.i
@@ -1063,7 +1063,7 @@ src/app/Frontend/symboltable.i: src/app/Frontend/symboltable.cpp.i
 
 # target to preprocess a source file
 src/app/Frontend/symboltable.cpp.i:
-	$(MAKE) -f CMakeFiles/dWiNA.dir/build.make CMakeFiles/dWiNA.dir/src/app/Frontend/symboltable.cpp.i
+	$(MAKE) -f CMakeFiles/gaston.dir/build.make CMakeFiles/gaston.dir/src/app/Frontend/symboltable.cpp.i
 .PHONY : src/app/Frontend/symboltable.cpp.i
 
 src/app/Frontend/symboltable.s: src/app/Frontend/symboltable.cpp.s
@@ -1071,7 +1071,7 @@ src/app/Frontend/symboltable.s: src/app/Frontend/symboltable.cpp.s
 
 # target to generate assembly for a file
 src/app/Frontend/symboltable.cpp.s:
-	$(MAKE) -f CMakeFiles/dWiNA.dir/build.make CMakeFiles/dWiNA.dir/src/app/Frontend/symboltable.cpp.s
+	$(MAKE) -f CMakeFiles/gaston.dir/build.make CMakeFiles/gaston.dir/src/app/Frontend/symboltable.cpp.s
 .PHONY : src/app/Frontend/symboltable.cpp.s
 
 src/app/Frontend/timer.o: src/app/Frontend/timer.cpp.o
@@ -1079,7 +1079,7 @@ src/app/Frontend/timer.o: src/app/Frontend/timer.cpp.o
 
 # target to build an object file
 src/app/Frontend/timer.cpp.o:
-	$(MAKE) -f CMakeFiles/dWiNA.dir/build.make CMakeFiles/dWiNA.dir/src/app/Frontend/timer.cpp.o
+	$(MAKE) -f CMakeFiles/gaston.dir/build.make CMakeFiles/gaston.dir/src/app/Frontend/timer.cpp.o
 .PHONY : src/app/Frontend/timer.cpp.o
 
 src/app/Frontend/timer.i: src/app/Frontend/timer.cpp.i
@@ -1087,7 +1087,7 @@ src/app/Frontend/timer.i: src/app/Frontend/timer.cpp.i
 
 # target to preprocess a source file
 src/app/Frontend/timer.cpp.i:
-	$(MAKE) -f CMakeFiles/dWiNA.dir/build.make CMakeFiles/dWiNA.dir/src/app/Frontend/timer.cpp.i
+	$(MAKE) -f CMakeFiles/gaston.dir/build.make CMakeFiles/gaston.dir/src/app/Frontend/timer.cpp.i
 .PHONY : src/app/Frontend/timer.cpp.i
 
 src/app/Frontend/timer.s: src/app/Frontend/timer.cpp.s
@@ -1095,7 +1095,7 @@ src/app/Frontend/timer.s: src/app/Frontend/timer.cpp.s
 
 # target to generate assembly for a file
 src/app/Frontend/timer.cpp.s:
-	$(MAKE) -f CMakeFiles/dWiNA.dir/build.make CMakeFiles/dWiNA.dir/src/app/Frontend/timer.cpp.s
+	$(MAKE) -f CMakeFiles/gaston.dir/build.make CMakeFiles/gaston.dir/src/app/Frontend/timer.cpp.s
 .PHONY : src/app/Frontend/timer.cpp.s
 
 src/app/Frontend/untyped.o: src/app/Frontend/untyped.cpp.o
@@ -1103,7 +1103,7 @@ src/app/Frontend/untyped.o: src/app/Frontend/untyped.cpp.o
 
 # target to build an object file
 src/app/Frontend/untyped.cpp.o:
-	$(MAKE) -f CMakeFiles/dWiNA.dir/build.make CMakeFiles/dWiNA.dir/src/app/Frontend/untyped.cpp.o
+	$(MAKE) -f CMakeFiles/gaston.dir/build.make CMakeFiles/gaston.dir/src/app/Frontend/untyped.cpp.o
 .PHONY : src/app/Frontend/untyped.cpp.o
 
 src/app/Frontend/untyped.i: src/app/Frontend/untyped.cpp.i
@@ -1111,7 +1111,7 @@ src/app/Frontend/untyped.i: src/app/Frontend/untyped.cpp.i
 
 # target to preprocess a source file
 src/app/Frontend/untyped.cpp.i:
-	$(MAKE) -f CMakeFiles/dWiNA.dir/build.make CMakeFiles/dWiNA.dir/src/app/Frontend/untyped.cpp.i
+	$(MAKE) -f CMakeFiles/gaston.dir/build.make CMakeFiles/gaston.dir/src/app/Frontend/untyped.cpp.i
 .PHONY : src/app/Frontend/untyped.cpp.i
 
 src/app/Frontend/untyped.s: src/app/Frontend/untyped.cpp.s
@@ -1119,7 +1119,7 @@ src/app/Frontend/untyped.s: src/app/Frontend/untyped.cpp.s
 
 # target to generate assembly for a file
 src/app/Frontend/untyped.cpp.s:
-	$(MAKE) -f CMakeFiles/dWiNA.dir/build.make CMakeFiles/dWiNA.dir/src/app/Frontend/untyped.cpp.s
+	$(MAKE) -f CMakeFiles/gaston.dir/build.make CMakeFiles/gaston.dir/src/app/Frontend/untyped.cpp.s
 .PHONY : src/app/Frontend/untyped.cpp.s
 
 src/app/main.o: src/app/main.cpp.o
@@ -1127,7 +1127,7 @@ src/app/main.o: src/app/main.cpp.o
 
 # target to build an object file
 src/app/main.cpp.o:
-	$(MAKE) -f CMakeFiles/dWiNA.dir/build.make CMakeFiles/dWiNA.dir/src/app/main.cpp.o
+	$(MAKE) -f CMakeFiles/gaston.dir/build.make CMakeFiles/gaston.dir/src/app/main.cpp.o
 .PHONY : src/app/main.cpp.o
 
 src/app/main.i: src/app/main.cpp.i
@@ -1135,7 +1135,7 @@ src/app/main.i: src/app/main.cpp.i
 
 # target to preprocess a source file
 src/app/main.cpp.i:
-	$(MAKE) -f CMakeFiles/dWiNA.dir/build.make CMakeFiles/dWiNA.dir/src/app/main.cpp.i
+	$(MAKE) -f CMakeFiles/gaston.dir/build.make CMakeFiles/gaston.dir/src/app/main.cpp.i
 .PHONY : src/app/main.cpp.i
 
 src/app/main.s: src/app/main.cpp.s
@@ -1143,7 +1143,7 @@ src/app/main.s: src/app/main.cpp.s
 
 # target to generate assembly for a file
 src/app/main.cpp.s:
-	$(MAKE) -f CMakeFiles/dWiNA.dir/build.make CMakeFiles/dWiNA.dir/src/app/main.cpp.s
+	$(MAKE) -f CMakeFiles/gaston.dir/build.make CMakeFiles/gaston.dir/src/app/main.cpp.s
 .PHONY : src/app/main.cpp.s
 
 # Help Target
@@ -1152,8 +1152,8 @@ help:
 	@echo "... all (the default if no target is provided)"
 	@echo "... clean"
 	@echo "... depend"
-	@echo "... dWiNA"
 	@echo "... edit_cache"
+	@echo "... gaston"
 	@echo "... rebuild_cache"
 	@echo "... src/app/DecisionProcedure/automata.o"
 	@echo "... src/app/DecisionProcedure/automata.i"
