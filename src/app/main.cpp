@@ -44,6 +44,7 @@
 #include <DecisionProcedure/decision_procedures.hh>
 #include <DecisionProcedure/containers/VarToTrackMap.hh>
 #include "DecisionProcedure/containers/Cache.hh"
+#include "DecisionProcedure/containers/SymbolicAutomata.h"
 #include "DecisionProcedure/visitors/BooleanUnfolder.h"
 #include "DecisionProcedure/visitors/UniversalQuantifierRemover.h"
 #include "DecisionProcedure/visitors/SecondOrderRestricter.h"
@@ -525,6 +526,7 @@ int main(int argc, char *argv[]) {
 	}
 
 	Automaton vataAutomaton;
+	std::shared_ptr<SymbolicAutomaton> symAutomaton;
 	timer_automaton.start();
 	if(options.construction != AutomataConstruction::SYMBOLIC_AUT) {
 		// Use mona for building automaton instead of VATA
@@ -584,6 +586,8 @@ int main(int argc, char *argv[]) {
 		}
 	} else {
 		std::cout << "[*] Constructing 'Symbolic' Automaton using gaston\n";
+		symAutomaton = (ast->formula)->toSymbolicAutomaton(false);
+		symAutomaton->dump();
 	}
 
 	timer_automaton.stop();

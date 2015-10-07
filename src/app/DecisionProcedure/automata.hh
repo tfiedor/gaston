@@ -55,10 +55,11 @@ inline void setFinalState(Automaton &automaton, bool complement, unsigned int st
 				automaton.SetStateFinal(state);
 				break;
 			case BACKWARD:
+			case SYMBOLIC:
 				automaton.AddTransition(Automaton::StateTuple({}), constructUniversalTrack(), state);
 				break;
 			default:
-				std::cerr << "Method not implemented yet!";
+				std::cerr << "setFinalState: Method not implemented yet!";
 				throw NotImplementedException();
 		}
 	}
@@ -79,10 +80,11 @@ inline void setNonFinalState(Automaton &automaton, bool complement, unsigned int
 				automaton.SetStateFinal(state);
 				break;
 			case BACKWARD:
+			case SYMBOLIC:
 				automaton.AddTransition(Automaton::StateTuple({}), constructUniversalTrack(), state);
 				break;
 			default:
-				std::cerr << "Method not implemented yet!";
+				std::cerr << "setNonFinalState: Method not implemented yet!";
 				throw NotImplementedException();
 		}
 	}
@@ -103,12 +105,13 @@ inline void setInitialState(Automaton &automaton, unsigned int state) {
 			automaton.AddTransition(Automaton::StateTuple({}), constructUniversalTrack(), state);
 			break;
 		case BACKWARD:
+		case SYMBOLIC:
 			// In backward construction, we want to work with pres, so every initial
 			// state is a final one here
 			automaton.SetStateFinal(state);
 			break;
 		default:
-			std::cerr << "Method not implemented yet!";
+			std::cerr << "setInitialState: Method not implemented yet!";
 			throw NotImplementedException();
 	}
 }

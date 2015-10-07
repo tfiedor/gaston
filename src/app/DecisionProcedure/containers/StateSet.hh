@@ -26,7 +26,7 @@ class LeafStateSet;
 //#define USE_DYNAMIC_BITSETS
 
 // < Typedefs >
-typedef size_t StateType;
+using StateType = size_t;
 typedef std::vector<TStateSet*> StateSetList;
 typedef std::vector<TStateSet*>::iterator StateSetIterator;
 using TLeafMask = boost::dynamic_bitset<>;

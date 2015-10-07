@@ -354,6 +354,30 @@ src/app/DecisionProcedure/formula_to_automaton_ws2s.cpp.s:
 	$(MAKE) -f CMakeFiles/gaston.dir/build.make CMakeFiles/gaston.dir/src/app/DecisionProcedure/formula_to_automaton_ws2s.cpp.s
 .PHONY : src/app/DecisionProcedure/formula_to_automaton_ws2s.cpp.s
 
+src/app/DecisionProcedure/formula_to_symbolic_automaton.o: src/app/DecisionProcedure/formula_to_symbolic_automaton.cpp.o
+.PHONY : src/app/DecisionProcedure/formula_to_symbolic_automaton.o
+
+# target to build an object file
+src/app/DecisionProcedure/formula_to_symbolic_automaton.cpp.o:
+	$(MAKE) -f CMakeFiles/gaston.dir/build.make CMakeFiles/gaston.dir/src/app/DecisionProcedure/formula_to_symbolic_automaton.cpp.o
+.PHONY : src/app/DecisionProcedure/formula_to_symbolic_automaton.cpp.o
+
+src/app/DecisionProcedure/formula_to_symbolic_automaton.i: src/app/DecisionProcedure/formula_to_symbolic_automaton.cpp.i
+.PHONY : src/app/DecisionProcedure/formula_to_symbolic_automaton.i
+
+# target to preprocess a source file
+src/app/DecisionProcedure/formula_to_symbolic_automaton.cpp.i:
+	$(MAKE) -f CMakeFiles/gaston.dir/build.make CMakeFiles/gaston.dir/src/app/DecisionProcedure/formula_to_symbolic_automaton.cpp.i
+.PHONY : src/app/DecisionProcedure/formula_to_symbolic_automaton.cpp.i
+
+src/app/DecisionProcedure/formula_to_symbolic_automaton.s: src/app/DecisionProcedure/formula_to_symbolic_automaton.cpp.s
+.PHONY : src/app/DecisionProcedure/formula_to_symbolic_automaton.s
+
+# target to generate assembly for a file
+src/app/DecisionProcedure/formula_to_symbolic_automaton.cpp.s:
+	$(MAKE) -f CMakeFiles/gaston.dir/build.make CMakeFiles/gaston.dir/src/app/DecisionProcedure/formula_to_symbolic_automaton.cpp.s
+.PHONY : src/app/DecisionProcedure/formula_to_symbolic_automaton.cpp.s
+
 src/app/DecisionProcedure/symbolic_decision_procedure.o: src/app/DecisionProcedure/symbolic_decision_procedure.cpp.o
 .PHONY : src/app/DecisionProcedure/symbolic_decision_procedure.o
 
@@ -1233,6 +1257,9 @@ help:
 	@echo "... src/app/DecisionProcedure/formula_to_automaton_ws2s.o"
 	@echo "... src/app/DecisionProcedure/formula_to_automaton_ws2s.i"
 	@echo "... src/app/DecisionProcedure/formula_to_automaton_ws2s.s"
+	@echo "... src/app/DecisionProcedure/formula_to_symbolic_automaton.o"
+	@echo "... src/app/DecisionProcedure/formula_to_symbolic_automaton.i"
+	@echo "... src/app/DecisionProcedure/formula_to_symbolic_automaton.s"
 	@echo "... src/app/DecisionProcedure/symbolic_decision_procedure.o"
 	@echo "... src/app/DecisionProcedure/symbolic_decision_procedure.i"
 	@echo "... src/app/DecisionProcedure/symbolic_decision_procedure.s"

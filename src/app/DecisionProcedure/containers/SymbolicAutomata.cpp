@@ -9,6 +9,8 @@
 
 #include "SymbolicAutomata.h"
 
+StateType SymbolicAutomaton::stateCnt = 0;
+
 /**
  * Returns final states with lazy construction
  *
@@ -91,19 +93,31 @@ SymbolicAutomaton::ISect_Type BaseAutomaton::IntersectNonEmpty(::BaseAutomaton::
     return false;
 }
 
+// << SubAutomaton >>
+
 void SubAutomaton::_InitializeInitialStates() {
-    this->_initialStates->
+    ;
 }
 
 void SubAutomaton::_InitializeFinalStates() {
-
+    ;
 }
 
 SymbolicAutomaton::StateSet SubAutomaton::Pre(SymbolicAutomaton::Symbol& symb, SymbolicAutomaton::StateSet& states) {
-
+    ;
 }
 
 void SubAutomaton::dump() {
-    std::cout << "Sub" << std::endl;
+    StateToStateMap translMap;
+    StateToStateTranslator stateTransl(translMap,
+                                       [](const StateType &) { return SymbolicAutomaton::stateCnt++; });
+
+    // TODO: Maybe there is something better
+    this->_base_automaton.reset(new LeafAutomaton_Type(this->_base_automaton->ReindexStates(stateTransl)));
+
+    VATA::Serialization::AbstrSerializer *serializer = new VATA::Serialization::TimbukSerializer();
+    std::cerr << this->_base_automaton->DumpToString(*serializer, "symbolic") << "\n";
+    delete serializer;
+    std::cout << "Sub";
 }
 

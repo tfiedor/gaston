@@ -48,10 +48,10 @@ char charToAsgn(char c) {
 void addTransition(Automaton& aut, unsigned int q, Automaton::SymbolType transition, unsigned int qf) {
 	if(options.method == FORWARD) {
 		aut.AddTransition(Automaton::StateTuple({q}), transition, qf);
-	} else if (options.method == BACKWARD) {
+	} else if (options.method == BACKWARD || options.method == SYMBOLIC) {
 		aut.AddTransition(Automaton::StateTuple({qf}), transition, q);
 	} else {
-		std::cerr << "Method not implemented\n";
+		std::cerr << "addTransition: Method not implemented\n";
 		throw NotImplementedException();
 	}
 }

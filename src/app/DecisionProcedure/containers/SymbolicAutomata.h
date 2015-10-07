@@ -13,8 +13,12 @@
 #include <vector>
 
 #include "StateSet.hh"
+#include <vata/bdd_bu_tree_aut.hh>
+#include <vata/parsing/timbuk_parser.hh>
+#include <vata/serialization/timbuk_serializer.hh>
+#include <vata/util/binary_relation.hh>
 
-enum AutType {INTERSECTION, UNION, PROJECT, BASE, COMPLEMENT};
+enum AutType {INTERSECTION, UNION, PROJECTION, BASE, COMPLEMENT};
 enum AutSubType {FINAL, NONFINAL};
 
 /**
@@ -27,6 +31,11 @@ public:
     using StateSet = std::shared_ptr<TStateSet>;
     using Symbol = char;
     using ISect_Type = bool;
+    using LeafAutomaton_Type = VATA::BDDBottomUpTreeAut;
+    using StateToStateTranslator = VATA::AutBase::StateToStateTranslWeak;
+    using StateToStateMap        = std::unordered_map<StateType, StateType>;
+
+    static StateType stateCnt;
 protected:
     // < Private Members >
     StateSet _initialStates;
@@ -59,12 +68,17 @@ protected:
 public:
     virtual StateSet Pre(Symbol&, StateSet&);
     virtual ISect_Type IntersectNonEmpty(Symbol&, StateSet&);
-    //IntersectionAutomaton(SymbolicAutomaton& lhs, SymbolicAutomaton& rhs) : lhs_aut(lhs), rhs_aut(rhs) {}
+    IntersectionAutomaton(SymbolicAutomaton* lhs, SymbolicAutomaton* rhs) : lhs_aut(lhs), rhs_aut(rhs) {}
+    IntersectionAutomaton(std::shared_ptr<SymbolicAutomaton> lhs, std::shared_ptr<SymbolicAutomaton> rhs) : lhs_aut(lhs), rhs_aut(rhs) {}
     virtual void dump();
 };
 
 class BaseAutomaton : public SymbolicAutomaton {
+protected:
+    std::shared_ptr<LeafAutomaton_Type> _base_automaton;
+
 public:
+    BaseAutomaton(LeafAutomaton_Type* aut) : _base_automaton(aut) {}
     virtual ISect_Type IntersectNonEmpty(Symbol&, StateSet&);
 };
 
@@ -74,6 +88,7 @@ protected:
     virtual void _InitializeFinalStates();
 
 public:
+    SubAutomaton(LeafAutomaton_Type* aut) : BaseAutomaton(aut) {}
     virtual StateSet Pre(Symbol&, StateSet&);
     virtual void dump();
 };
