@@ -97,8 +97,8 @@ void PrintUsage()
 		<< "     --no-expnf      	 Implies --use-mona-dfa, does not convert formula to exPNF\n"
 		<< " -q, --quiet		 Quiet, don't print progress\n"
 		<< " -oX                 	 Optimization level [1 = safe optimizations [default], 2 = heuristic]\n"
-		<< " --method            	 Use either forward or backward method [backward [default], forward]\n"
-		<< " --reorder-bdd		 Disable BDD index reordering [no, random, heuristic]\n\n"
+		<< " --method            	 Use either symbolic (novel), forward (EEICT'14) or backward method (TACAS'15) for deciding WSkS [symbolic, backward, forward]\n"
+		//<< " --reorder-bdd		 Disable BDD index reordering [no, random, heuristic]\n\n"
 		<< "Example: ./dWiNA -t -d --reorder-bdd=random foo.mona\n\n";
 }
 
@@ -148,9 +148,11 @@ bool ParseArguments(int argc, char *argv[])
 			else if(strcmp(argv[i], "--use-mona-dfa") == 0)
 				options.useMonaDFA = true;
 			else if(strcmp(argv[i], "--method=forward") == 0)
-				options.method = FORWARD;
+				options.method = Method::FORWARD;
 			else if(strcmp(argv[i], "--method=backward") == 0)
-				options.method = BACKWARD;
+				options.method = Method::BACKWARD;
+			else if(strcmp(argv[i], "--method=symbolic") == 0)
+				options.method = Method::SYMBOLIC;
 			else if(strcmp(argv[i], "--no-expnf") == 0) {
 				options.noExpnf = true;
 				options.useMonaDFA = true;
@@ -588,7 +590,8 @@ int main(int argc, char *argv[])
 	// Dump automaton
 	if(options.dump && !options.dontDumpAutomaton) {
 		VATA::Serialization::AbstrSerializer* serializer = new VATA::Serialization::TimbukSerializer();
-		std::cout << formulaAutomaton.DumpToString(*serializer) << "\n";
+		std::cerr << formulaAutomaton.DumpToString(*serializer, "symbolic") << "\n";
+		//std::cout << formulaAutomaton.DumpToDot() << "\n";
 		delete serializer;
 	}
 
@@ -613,6 +616,7 @@ int main(int argc, char *argv[])
 		timer_deciding.start();
 		try {
 			if(options.mode != TREE) {
+				// TODO: This should be encapsulated in some Checker Class, no time now though
 				if(options.method == FORWARD) {
 					decided = decideWS1S(formulaAutomaton, plist, nplist);
 				} else {

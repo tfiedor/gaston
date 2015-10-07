@@ -23,7 +23,7 @@
 
 enum Mode {LINEAR, TREE};
 enum ReorderMode {NO, RANDOM, HEURISTIC};
-enum Method {FORWARD, BACKWARD};
+enum Method {FORWARD, BACKWARD, SYMBOLIC};
 
 class Options {
 public:
