@@ -78,4 +78,7 @@ bool testValidity(Automaton &aut, PrefixListType prefix, bool topmostIsNegation)
 MacroStateSet* computeFinalStates(Automaton &aut, PrefixListType prefix, unsigned int detNo);
 bool initialStateIsInFinalStates(MacroStateSet *initial, MacroStateSet *finalStates, unsigned int level);
 
+// < Symbolic decision procedure functions >
+int decideWS1S_symbolically();
+
 #endif

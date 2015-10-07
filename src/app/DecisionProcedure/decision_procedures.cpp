@@ -155,7 +155,7 @@ int decideWS1S(Automaton & aut, PrefixListType formulaPrefixSet, PrefixListType 
 #endif
 
 	if(options.dump) {
-		std::cout << "[*] Commencing decision procedure for WS1S\n";
+		std::cout << "[*] Commencing forward decision procedure for WS1S\n";
 	}
 
 	// Construct initial state of final automaton
@@ -203,7 +203,7 @@ int decideWS1S(Automaton & aut, PrefixListType formulaPrefixSet, PrefixListType 
 		answer = SATISFIABLE;
 	// THIS SHOULD NOT HAPPEN
 	} else {
-		answer = -1;
+		assert(false && "Some mysterious answer has emerged!");
 	}
 
 	delete initialState;

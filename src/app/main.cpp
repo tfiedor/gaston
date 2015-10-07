@@ -47,6 +47,9 @@
 #include "DecisionProcedure/visitors/BooleanUnfolder.h"
 #include "DecisionProcedure/visitors/UniversalQuantifierRemover.h"
 #include "DecisionProcedure/visitors/SecondOrderRestricter.h"
+#include "DecisionProcedure/visitors/PrenexNormalFormTransformer.h"
+#include "DecisionProcedure/visitors/Flattener.h"
+#include "DecisionProcedure/visitors/NegationUnfolder.h"
 
 // < Typedefs and usings >
 using std::cout;
@@ -69,6 +72,8 @@ VarToTrackMap varMap;
 IdentList inFirstOrder;
 int numTypes = 0;
 bool regenerate = false;
+
+#define G_DEBUG_FORMULA_AFTER_PHASE(str) cout << "\n\n[*] Formula after '" << str << "' phase:\n"
 
 #if (USE_STATECACHE == true)
 MultiLevelMCache<bool> StateCache;
@@ -94,12 +99,12 @@ void PrintUsage()
 		<< "Options:\n"
 		<< " -t, --time 		 Print elapsed time\n"
 		<< " -d, --dump-all		 Dump AST, symboltable, and code DAG\n"
-		<< "     --no-automaton  	 Don't dump Automaton\n"
-		<< "     --use-mona-dfa  	 Uses MONA for building base automaton\n"
-		<< "     --no-expnf      	 Implies --use-mona-dfa, does not convert formula to exPNF\n"
+		<< "     --no-automaton  Don't dump Automaton\n"
+		<< "     --use-mona-dfa  Uses MONA for building base automaton\n"
+		<< "     --no-expnf      Implies --use-mona-dfa, does not convert formula to exPNF\n"
 		<< " -q, --quiet		 Quiet, don't print progress\n"
-		<< " -oX                 	 Optimization level [1 = safe optimizations [default], 2 = heuristic]\n"
-		<< " --method            	 Use either symbolic (novel), forward (EEICT'14) or backward method (TACAS'15) for deciding WSkS [symbolic, backward, forward]\n"
+		<< " -oX                 Optimization level [1 = safe optimizations [default], 2 = heuristic]\n"
+		<< " --method            Use either symbolic (novel), forward (EEICT'14) or backward method (TACAS'15) for deciding WSkS [symbolic, backward, forward]\n"
 		//<< " --reorder-bdd		 Disable BDD index reordering [no, random, heuristic]\n\n"
 		<< "Example: ./gaston -t -d --reorder-bdd=random foo.mona\n\n";
 }
@@ -147,15 +152,20 @@ bool ParseArguments(int argc, char *argv[])
 				options.reorder = HEURISTIC;
 			else if(strcmp(argv[i], "--no-automaton") == 0)
 				options.dontDumpAutomaton = true;
-			else if(strcmp(argv[i], "--use-mona-dfa") == 0)
+			else if(strcmp(argv[i], "--use-mona-dfa") == 0) {
 				options.useMonaDFA = true;
-			else if(strcmp(argv[i], "--method=forward") == 0)
+				options.construction = AutomataConstruction::DETERMINISTIC_AUT;
+			} else if(strcmp(argv[i], "--method=forward") == 0) {
 				options.method = Method::FORWARD;
-			else if(strcmp(argv[i], "--method=backward") == 0)
+			} else if(strcmp(argv[i], "--method=backward") == 0) {
 				options.method = Method::BACKWARD;
-			else if(strcmp(argv[i], "--method=symbolic") == 0)
+			} else if(strcmp(argv[i], "--method=symbolic") == 0) {
 				options.method = Method::SYMBOLIC;
-			else if(strcmp(argv[i], "--no-expnf") == 0) {
+				options.construction = AutomataConstruction::SYMBOLIC_AUT;
+				options.noExpnf = true;
+			} else if(strcmp(argv[i], "--to-expnf") == 0) {
+				options.noExpnf = false;
+			} else if(strcmp(argv[i], "--no-expnf") == 0) {
 				options.noExpnf = true;
 				options.useMonaDFA = true;
 			} else {
@@ -312,8 +322,7 @@ void reorder(ReorderMode mode, ASTForm* formula) {
 	}
 }
 
-int main(int argc, char *argv[])
-{
+int main(int argc, char *argv[]) {
 	/* Parse initial arguments */
 	if (!ParseArguments(argc, argv)) {
 		PrintUsage();
@@ -339,63 +348,60 @@ int main(int argc, char *argv[])
 
 	// Prints progress if dumping is set
 	if (options.printProgress) {
-		cout << "[*] Parsing input formula " << inputFileName << "\n";
+		G_DEBUG_FORMULA_AFTER_PHASE("loading");
 		cout << "[*] Elapsed time: ";
 		timer_parsing.print();
 	}
 
+	// Clean up untypedAST
 	delete untypedAST;
 
+	// Remove Trues and Falses from the formulae
+	BooleanUnfolder bu_visitor;
+	ast->formula = static_cast<ASTForm *>((ast->formula)->accept(bu_visitor));
+
 	if (options.dump) {
-	// Dump AST for main formula, verify formulas, and assertion
-		cout << "[*] Main formula:\n";
+		// Dump AST for main formula, verify formulas, and assertion
+		G_DEBUG_FORMULA_AFTER_PHASE("boolean unfolding");
 		(ast->formula)->dump();
 	}
 
-	// INSERT FUN HERE
-	cout << "\n[*] Main formula:\n";
-	(ast->formula)->dump();
-	BooleanUnfolder bu_visitor;
-	ast->formula = static_cast<ASTForm*>((ast->formula)->accept(bu_visitor));
-	cout << "\n[*] Main formula after Boolean unfolding:\n";
-	(ast->formula)->dump();
-	cout << "\n";
-
 	timer_formula.start();
-	if(options.noExpnf == false) {
+
+
 	// Flattening of the formula
 	try {
-		ast->formula = (ASTForm*) (ast->formula)->toSecondOrder();
+		Flattener f_visitor;
+		ast->formula = static_cast<ASTForm *>((ast->formula)->accept(f_visitor));
 	} catch (NotImplementedException e) {
 		cout << "[!] Formula is 'UNSUPPORTED'\n";
 		return 0;
 	}
-		if(options.dump) {
-			cout << "\n\n[*] Flattened formula:\n";
-			(ast->formula)->dump();
-		}
+	if (options.dump) {
+		G_DEBUG_FORMULA_AFTER_PHASE("flattening");
+		(ast->formula)->dump();
+	}
 
+	if (options.noExpnf == false) {
 		// Transform AST to existentional Prenex Normal Form
-		ast->formula = (ASTForm*) (ast->formula)->toExistentionalPNF();
-	} else {
-		if(ast->formula->kind == aAnd) {
-			ASTForm_And* andFormula = (ASTForm_And*) ast->formula;
-			if(andFormula->f1->kind == aTrue) {
-				ast->formula = static_cast<ASTForm*>(andFormula->f2);
-			} else if(andFormula->f2->kind == aTrue) {
-			  ast->formula = static_cast<ASTForm*>(andFormula->f1);
-			}
-		}
 
-		UniversalQuantifierRemover uqr_visitor;
+		ast->formula = (ASTForm *) (ast->formula)->toExistentionalPNF();
+	} else {
+		// Restrict to second order
 		SecondOrderRestricter sor_visitor;
-		ast->formula = static_cast<ASTForm*>(ast->formula->accept(uqr_visitor));
-		ast->formula = static_cast<ASTForm*>(ast->formula->accept(sor_visitor));
+		ast->formula = static_cast<ASTForm *>(ast->formula->accept(sor_visitor));
+		// Push the negation towards the leaves
+		// TODO: Ex2 and All2 may be unsupported
+		NegationUnfolder nu_visitor;
+		ast->formula = static_cast<ASTForm *>(ast->formula->accept(nu_visitor));
+		// Remove universal quantification
+		UniversalQuantifierRemover uqr_visitor;
+		ast->formula = static_cast<ASTForm *>(ast->formula->accept(uqr_visitor));
 	}
 	timer_formula.stop();
 
-	if(options.dump) {
-		cout << "\n\n[*] Formula in exPNF:\n";
+	if (options.dump) {
+		G_DEBUG_FORMULA_AFTER_PHASE("ex-PNF conversion");
 		(ast->formula)->dump();
 
 		// dumping symbol table
@@ -445,23 +451,30 @@ int main(int argc, char *argv[])
 	std::cout << "\n";
 #endif
 
-	// First formula in AST representation is split into matrix and prefix part.
-	ASTForm *matrix, *prefix;
-	splitMatrixAndPrefix(ast, matrix, prefix);
-	bool topmostIsNegation = (prefix->kind == aNot);
-	if(options.noExpnf == false) {
-		matrix = matrix->restrictFormula();
-	}
+	// Definitions for compatibility between the methods
+	PrefixListType plist;
+	PrefixListType nplist;
+	ASTForm *matrix = nullptr, *prefix = nullptr;
+	bool topmostIsNegation;
+	if (options.method == Method::FORWARD || options.method == Method::BACKWARD) {
+		// First formula in AST representation is split into matrix and prefix part.
+		// Only for FORWARD and BACKWARD method
+		splitMatrixAndPrefix(ast, matrix, prefix);
+		topmostIsNegation = (prefix->kind == aNot);
+		if (options.noExpnf == false) {
+			matrix = matrix->restrictFormula();
+		}
 
-	if(options.dump) {
-		std::cout << "[*] Dumping restricted matrix\n";
-		matrix->dump();
-		std::cout << "\n";
-	}
+		if (options.dump) {
+			std::cout << "[*] Dumping restricted matrix\n";
+			matrix->dump();
+			std::cout << "\n";
+		}
 
-	// Transform prefix to set of sets of second-order variables
-	PrefixListType plist = convertPrefixFormulaToList(prefix);
-	PrefixListType nplist(plist);
+		// Transform prefix to set of sets of second-order variables
+		// TODO: This might be wrong
+		plist = convertPrefixFormulaToList(prefix);
+		nplist = plist;
 
 #if (DEBUG_FORMULA_PREFIX == true)
 	std::cout << "[?] Prefixes before closing\n";
@@ -483,12 +496,12 @@ int main(int argc, char *argv[])
 	std::cout << "\n";
 #endif
 
-	// If formula is not ground, we close it
-	if(freeVars.size() != 0) {
-		closePrefix(plist, &freeVars, topmostIsNegation);
-		closePrefix(nplist, &freeVars, (prefix->kind != aNot));
-		topmostIsNegation = false;
-	}
+		// If formula is not ground, we close it
+		if (freeVars.size() != 0) {
+			closePrefix(plist, &freeVars, topmostIsNegation);
+			closePrefix(nplist, &freeVars, (prefix->kind != aNot));
+			topmostIsNegation = false;
+		}
 
 #if (DEBUG_FORMULA_PREFIX == true)
 	std::cout << "[?] Prefixes after closing\n";
@@ -509,107 +522,118 @@ int main(int argc, char *argv[])
 	}
 	std::cout << "\n";
 #endif
-
-	Automaton formulaAutomaton;
-	timer_automaton.start();
-	// Use mona for building automaton instead of VATA
-	// -> this may fail on insufficient memory
-	if(options.useMonaDFA) {
-		std::cout << "[*] Using MONA DFA (with minimizations) to build base automaton\n";
-
-		// First code is generated, should be in DAG
-		codeTable = new CodeTable;
-		VarCode formulaCode = matrix->makeCode();
-
-		DFA *dfa = 0;
-
-		// Initialization
-		bdd_init();
-		codeTable->init_print_progress();
-
-		dfa = formulaCode.DFATranslate();
-		formulaCode.remove();
-
-		// unrestrict automata
-		DFA *temp = dfaCopy(dfa);
-		dfaUnrestrict(temp);
-		dfa = dfaMinimize(temp);
-		dfaFree(temp);
-
-		// some freaking crappy initializations
-		IdentList::iterator id;
-		int ix = 0;
-		int numVars = varMap.TrackLength();
-		char **vnames = new char*[numVars];
-		unsigned *offs = new unsigned[numVars];
-
-		IdentList free, bounded;
-		matrix->freeVars(&free, &bounded);
-		IdentList* vars = ident_union(&free, &bounded);
-
-		// iterate through all variables
-		for (id = vars->begin();id != vars->end(); id++, ix++) {
-			vnames[ix] = symbolTable.lookupSymbol(*id);
-			offs[ix] = offsets.off(*id);
-		}
-
-		convertMonaToVataAutomaton(formulaAutomaton, dfa, vars, numVars, offs);
-		// Build automaton by ourselves, may build huge automata
-	} else {
-		// WS1S formula is transformed to unary NTA
-		if(options.mode != TREE) {
-			matrix->toUnaryAutomaton(formulaAutomaton, false);
-		// WS2S formula is transformed to binary NTA
-		} else {
-			matrix->toBinaryAutomaton(formulaAutomaton, false);
-		}
 	}
-	timer_automaton.stop();
 
-	if(options.dump) {
-		std::cout << "[*] Formula transformed into non-deterministic tree automaton\n";
+	Automaton vataAutomaton;
+	timer_automaton.start();
+	if(options.construction != AutomataConstruction::SYMBOLIC_AUT) {
+		// Use mona for building automaton instead of VATA
+		// -> this may fail on insufficient memory
+		if (options.construction == AutomataConstruction::DETERMINISTIC_AUT) {
+			std::cout << "[*] Constructing 'Deterministic' Automaton using MONA\n";
+
+			// First code is generated, should be in DAG
+			codeTable = new CodeTable;
+			VarCode formulaCode = matrix->makeCode();
+
+			DFA *dfa = nullptr;
+
+			// Initialization
+			bdd_init();
+			codeTable->init_print_progress();
+
+			dfa = formulaCode.DFATranslate();
+			formulaCode.remove();
+
+			// unrestrict automata
+			DFA *temp = dfaCopy(dfa);
+			dfaUnrestrict(temp);
+			dfa = dfaMinimize(temp);
+			dfaFree(temp);
+
+			// some freaking crappy initializations
+			IdentList::iterator id;
+			int ix = 0;
+			int numVars = varMap.TrackLength();
+			char **vnames = new char *[numVars];
+			unsigned *offs = new unsigned[numVars];
+
+			IdentList free, bounded;
+			matrix->freeVars(&free, &bounded);
+			IdentList *vars = ident_union(&free, &bounded);
+
+			// iterate through all variables
+			for (id = vars->begin(); id != vars->end(); id++, ix++) {
+				vnames[ix] = symbolTable.lookupSymbol(*id);
+				offs[ix] = offsets.off(*id);
+			}
+
+			convertMonaToVataAutomaton(vataAutomaton, dfa, vars, numVars, offs);
+			std::cout << "[*] Converting 'Deterministic' Automaton to 'NonDeterministic' Automaton\n";
+			// Build automaton by ourselves, may build huge automata
+		} else {
+			// WS1S formula is transformed to unary NTA
+			if (options.mode != TREE) {
+				std::cout << "[*] Constructing 'NonDeterministic' Unary Automaton using VATA\n";
+				matrix->toUnaryAutomaton(vataAutomaton, false);
+				// WS2S formula is transformed to binary NTA
+			} else {
+				std::cout << "[*] Constructing 'NonDeterministic' Binary Automaton using VATA\n";
+				matrix->toBinaryAutomaton(vataAutomaton, false);
+			}
+		}
+	} else {
+		std::cout << "[*] Constructing 'Symbolic' Automaton using gaston\n";
+	}
+
+	timer_automaton.stop();
+	if (options.dump) {
+		std::cout << "[*] Formula translation to Automaton [DONE]\n";
 		cout << "[*] Elapsed time: ";
 		timer_automaton.print();
 		cout << "\n";
 	}
 
-	// reindex the states, for space optimizations for bitsets
-	StateHT reachable;
-	formulaAutomaton = formulaAutomaton.RemoveUnreachableStates(&reachable);
+	if(options.construction != SYMBOLIC_AUT) {
+		std::cout << "[*] Reindexing states in VATA Automaton\n";
+		// reindex the states, for space optimizations for bitsets
+		StateHT reachable;
+		vataAutomaton = vataAutomaton.RemoveUnreachableStates(&reachable);
 
-	StateType stateCnt = 0;
-	StateToStateMap translMap;
-	StateToStateTranslator stateTransl(translMap,
-									   [&stateCnt](const StateType&){return stateCnt++;});
+		StateType stateCnt = 0;
+		StateToStateMap translMap;
+		StateToStateTranslator stateTransl(translMap,
+										   [&stateCnt](const StateType &) { return stateCnt++; });
 
-	formulaAutomaton = formulaAutomaton.ReindexStates(stateTransl);
-	TStateSet::stateNo = reachable.size();
+		vataAutomaton = vataAutomaton.ReindexStates(stateTransl);
+		TStateSet::stateNo = reachable.size();
 
-	if(options.dump) {
-		std::cout<< "[*] Number of states in resulting automaton: " << TStateSet::stateNo << "\n";
-	}
+		if (options.dump) {
+			std::cout << "[*] Number of states in resulting automaton: " << TStateSet::stateNo << "\n";
+		}
 
-	// Dump automaton
-	if(options.dump && !options.dontDumpAutomaton) {
-		VATA::Serialization::AbstrSerializer* serializer = new VATA::Serialization::TimbukSerializer();
-		std::cerr << formulaAutomaton.DumpToString(*serializer, "symbolic") << "\n";
-		//std::cout << formulaAutomaton.DumpToDot() << "\n";
-		delete serializer;
-	}
+		// Dump automaton
+		if (options.dump && !options.dontDumpAutomaton) {
+			VATA::Serialization::AbstrSerializer *serializer = new VATA::Serialization::TimbukSerializer();
+			std::cerr << vataAutomaton.DumpToString(*serializer, "symbolic") << "\n";
+			//std::cout << formulaAutomaton.DumpToDot() << "\n";
+			delete serializer;
+		}
 
 #if (DEBUG_BDDS == true)
 	StateHT allStates;
-	formulaAutomaton.RemoveUnreachableStates(&allStates);
-	TransMTBDD * tbdd = getMTBDDForStateTuple(formulaAutomaton, Automaton::StateTuple({}));
+	vataAutomaton.RemoveUnreachableStates(&allStates);
+	TransMTBDD * tbdd = getMTBDDForStateTuple(vataAutomaton, Automaton::StateTuple({}));
 	std::cout << "Leaf : bdd\n";
 	std::cout << TransMTBDD::DumpToDot({tbdd}) << "\n\n";
 	// Dump bdds
 	for (auto state : allStates) {
-		TransMTBDD* bdd = getMTBDDForStateTuple(formulaAutomaton, Automaton::StateTuple({state}));
+		TransMTBDD* bdd = getMTBDDForStateTuple(vataAutomaton, Automaton::StateTuple({state}));
 		std::cout << state << " : bdd\n";
 		std::cout << TransMTBDD::DumpToDot({bdd}) << "\n\n";
 	}
 #endif
+	}
 
 	///////// DECISION PROCEDURE /////////////////////////////////////////////
 	int decided;
@@ -617,16 +641,27 @@ int main(int argc, char *argv[])
 	// Deciding WS1S formula
 		timer_deciding.start();
 		try {
-			if(options.mode != TREE) {
-				// TODO: This should be encapsulated in some Checker Class, no time now though
-				if(options.method == FORWARD) {
-					decided = decideWS1S(formulaAutomaton, plist, nplist);
+			if(options.method == Method::FORWARD) {
+				if(options.mode != TREE) {
+					decided = decideWS1S(vataAutomaton, plist, nplist);
 				} else {
-					decided = decideWS1S_backwards(formulaAutomaton, plist, nplist, formulaIsGround, topmostIsNegation);
+					throw NotImplementedException();
+				}
+			} else if(options.method == Method::BACKWARD) {
+				if(options.mode != TREE) {
+					decided = decideWS1S_backwards(vataAutomaton, plist, nplist, formulaIsGround, topmostIsNegation);
+				} else {
+					throw NotImplementedException();
 				}
 			// Deciding WS2S formula
+			} else if(options.method == Method::SYMBOLIC) {
+				if (options.mode != TREE) {
+					decided = decideWS1S_symbolically();
+				} else {
+					throw NotImplementedException();
+				}
 			} else {
-				decided = decideWS2S(formulaAutomaton);
+				std::cout << "[!] Unsupported mode for deciding\n";
 			}
 		} catch (std::bad_alloc) {
 			std::cout << "[!] Insufficient memory for deciding\n";
@@ -657,7 +692,6 @@ int main(int argc, char *argv[])
 	} catch (NotImplementedException& e) {
 		std::cerr << e.what() << std::endl;
 	}
-
 	if(options.dump) {
 		std::cout << "[*] State cache statistics:\n";
 		StateCache.dumpStats();

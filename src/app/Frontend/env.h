@@ -24,11 +24,12 @@
 enum Mode {LINEAR, TREE};
 enum ReorderMode {NO, RANDOM, HEURISTIC};
 enum Method {FORWARD, BACKWARD, SYMBOLIC};
+enum AutomataConstruction {DETERMINISTIC_AUT, NONDETERMINISTIC_AUT, SYMBOLIC_AUT};
 
 class Options {
 public:
   Options() :
-    time(false), whole(false), mode(LINEAR),
+    noExpnf(true), method(SYMBOLIC), construction(AutomataConstruction::SYMBOLIC_AUT), time(false), whole(false), mode(LINEAR),
     statistics(false), printProgress(false),
     analysis(false), separateCompilation(false),
     dump(false), intermediate(false),
@@ -38,11 +39,12 @@ public:
     externalWhole(false), demo(false), 
     inheritedAcceptance(false), unrestrict(false), 
     alternativeM2LStr(false), reorder(HEURISTIC), optimize(0),
-    useMonaDFA(false), noExpnf(false) {}
+    useMonaDFA(false) {}
 
   bool useMonaDFA;
   bool noExpnf;
   Method method;
+  AutomataConstruction construction;
 
   bool time;
   bool whole;

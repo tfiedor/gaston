@@ -330,6 +330,30 @@ src/app/DecisionProcedure/formula_to_automaton_ws2s.cpp.s:
 	$(MAKE) -f CMakeFiles/gaston.dir/build.make CMakeFiles/gaston.dir/src/app/DecisionProcedure/formula_to_automaton_ws2s.cpp.s
 .PHONY : src/app/DecisionProcedure/formula_to_automaton_ws2s.cpp.s
 
+src/app/DecisionProcedure/symbolic_decision_procedure.o: src/app/DecisionProcedure/symbolic_decision_procedure.cpp.o
+.PHONY : src/app/DecisionProcedure/symbolic_decision_procedure.o
+
+# target to build an object file
+src/app/DecisionProcedure/symbolic_decision_procedure.cpp.o:
+	$(MAKE) -f CMakeFiles/gaston.dir/build.make CMakeFiles/gaston.dir/src/app/DecisionProcedure/symbolic_decision_procedure.cpp.o
+.PHONY : src/app/DecisionProcedure/symbolic_decision_procedure.cpp.o
+
+src/app/DecisionProcedure/symbolic_decision_procedure.i: src/app/DecisionProcedure/symbolic_decision_procedure.cpp.i
+.PHONY : src/app/DecisionProcedure/symbolic_decision_procedure.i
+
+# target to preprocess a source file
+src/app/DecisionProcedure/symbolic_decision_procedure.cpp.i:
+	$(MAKE) -f CMakeFiles/gaston.dir/build.make CMakeFiles/gaston.dir/src/app/DecisionProcedure/symbolic_decision_procedure.cpp.i
+.PHONY : src/app/DecisionProcedure/symbolic_decision_procedure.cpp.i
+
+src/app/DecisionProcedure/symbolic_decision_procedure.s: src/app/DecisionProcedure/symbolic_decision_procedure.cpp.s
+.PHONY : src/app/DecisionProcedure/symbolic_decision_procedure.s
+
+# target to generate assembly for a file
+src/app/DecisionProcedure/symbolic_decision_procedure.cpp.s:
+	$(MAKE) -f CMakeFiles/gaston.dir/build.make CMakeFiles/gaston.dir/src/app/DecisionProcedure/symbolic_decision_procedure.cpp.s
+.PHONY : src/app/DecisionProcedure/symbolic_decision_procedure.cpp.s
+
 src/app/DecisionProcedure/visitors/AntiPrenexer.o: src/app/DecisionProcedure/visitors/AntiPrenexer.cpp.o
 .PHONY : src/app/DecisionProcedure/visitors/AntiPrenexer.o
 
@@ -1182,6 +1206,9 @@ help:
 	@echo "... src/app/DecisionProcedure/formula_to_automaton_ws2s.o"
 	@echo "... src/app/DecisionProcedure/formula_to_automaton_ws2s.i"
 	@echo "... src/app/DecisionProcedure/formula_to_automaton_ws2s.s"
+	@echo "... src/app/DecisionProcedure/symbolic_decision_procedure.o"
+	@echo "... src/app/DecisionProcedure/symbolic_decision_procedure.i"
+	@echo "... src/app/DecisionProcedure/symbolic_decision_procedure.s"
 	@echo "... src/app/DecisionProcedure/visitors/AntiPrenexer.o"
 	@echo "... src/app/DecisionProcedure/visitors/AntiPrenexer.i"
 	@echo "... src/app/DecisionProcedure/visitors/AntiPrenexer.s"
