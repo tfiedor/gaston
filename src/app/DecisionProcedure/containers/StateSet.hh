@@ -23,7 +23,7 @@ class TStateSet;
 class MacroStateSet;
 class LeafStateSet;
 
-#define USE_DYNAMIC_BITSETS
+//#define USE_DYNAMIC_BITSETS
 
 // < Typedefs >
 typedef size_t StateType;

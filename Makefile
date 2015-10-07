@@ -186,6 +186,30 @@ src/app/DecisionProcedure/containers/StateSet.cpp.s:
 	$(MAKE) -f CMakeFiles/gaston.dir/build.make CMakeFiles/gaston.dir/src/app/DecisionProcedure/containers/StateSet.cpp.s
 .PHONY : src/app/DecisionProcedure/containers/StateSet.cpp.s
 
+src/app/DecisionProcedure/containers/SymbolicAutomata.o: src/app/DecisionProcedure/containers/SymbolicAutomata.cpp.o
+.PHONY : src/app/DecisionProcedure/containers/SymbolicAutomata.o
+
+# target to build an object file
+src/app/DecisionProcedure/containers/SymbolicAutomata.cpp.o:
+	$(MAKE) -f CMakeFiles/gaston.dir/build.make CMakeFiles/gaston.dir/src/app/DecisionProcedure/containers/SymbolicAutomata.cpp.o
+.PHONY : src/app/DecisionProcedure/containers/SymbolicAutomata.cpp.o
+
+src/app/DecisionProcedure/containers/SymbolicAutomata.i: src/app/DecisionProcedure/containers/SymbolicAutomata.cpp.i
+.PHONY : src/app/DecisionProcedure/containers/SymbolicAutomata.i
+
+# target to preprocess a source file
+src/app/DecisionProcedure/containers/SymbolicAutomata.cpp.i:
+	$(MAKE) -f CMakeFiles/gaston.dir/build.make CMakeFiles/gaston.dir/src/app/DecisionProcedure/containers/SymbolicAutomata.cpp.i
+.PHONY : src/app/DecisionProcedure/containers/SymbolicAutomata.cpp.i
+
+src/app/DecisionProcedure/containers/SymbolicAutomata.s: src/app/DecisionProcedure/containers/SymbolicAutomata.cpp.s
+.PHONY : src/app/DecisionProcedure/containers/SymbolicAutomata.s
+
+# target to generate assembly for a file
+src/app/DecisionProcedure/containers/SymbolicAutomata.cpp.s:
+	$(MAKE) -f CMakeFiles/gaston.dir/build.make CMakeFiles/gaston.dir/src/app/DecisionProcedure/containers/SymbolicAutomata.cpp.s
+.PHONY : src/app/DecisionProcedure/containers/SymbolicAutomata.cpp.s
+
 src/app/DecisionProcedure/containers/VarToTrackMap.o: src/app/DecisionProcedure/containers/VarToTrackMap.cpp.o
 .PHONY : src/app/DecisionProcedure/containers/VarToTrackMap.o
 
@@ -1188,6 +1212,9 @@ help:
 	@echo "... src/app/DecisionProcedure/containers/StateSet.o"
 	@echo "... src/app/DecisionProcedure/containers/StateSet.i"
 	@echo "... src/app/DecisionProcedure/containers/StateSet.s"
+	@echo "... src/app/DecisionProcedure/containers/SymbolicAutomata.o"
+	@echo "... src/app/DecisionProcedure/containers/SymbolicAutomata.i"
+	@echo "... src/app/DecisionProcedure/containers/SymbolicAutomata.s"
 	@echo "... src/app/DecisionProcedure/containers/VarToTrackMap.o"
 	@echo "... src/app/DecisionProcedure/containers/VarToTrackMap.i"
 	@echo "... src/app/DecisionProcedure/containers/VarToTrackMap.s"
