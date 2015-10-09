@@ -19,6 +19,7 @@
 #include <boost/range/join.hpp>
 
 using MTBDDLeafStateSet = VATA::Util::OrdVector<StateType>;
+using BaseAut_States = VATA::Util::OrdVector<StateType>;
 
 /**
  * Family of MTBDD manipulation functors
@@ -257,20 +258,20 @@ public:
  * StateCollectorFunctor takes a MTBDD and collects all states in leaves
  */
 GCC_DIAG_OFF(effc++)
-class StateCollectorFunctor : public VATA::MTBDDPkg::VoidApply1Functor<StateCollectorFunctor, MTBDDLeafStateSet> {
+class StateCollectorFunctor : public VATA::MTBDDPkg::VoidApply1Functor<StateCollectorFunctor, BaseAut_States> {
 GCC_DIAG_ON(effc++)
 private:
-	MTBDDLeafStateSet & collected;
+	BaseAut_States & collected;
 
 public:
 	// < Public Constructors >
-	StateCollectorFunctor(MTBDDLeafStateSet & l) : collected(l) {}
+	StateCollectorFunctor(BaseAut_States & l) : collected(l) {}
 
 	// <Public Methods >
 	/**
 	 * @param lhs: operand of apply
 	 */
-	inline void ApplyOperation(MTBDDLeafStateSet lhs) {
+	inline void ApplyOperation(BaseAut_States lhs) {
 		collected = collected.Union(lhs);
 	}
 };

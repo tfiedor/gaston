@@ -586,7 +586,7 @@ int main(int argc, char *argv[]) {
 		}
 	} else {
 		std::cout << "[*] Constructing 'Symbolic' Automaton using gaston\n";
-		symAutomaton = (ast->formula)->toSymbolicAutomaton(false);
+		symAutomaton = std::shared_ptr<SymbolicAutomaton>((ast->formula)->toSymbolicAutomaton(false));
 		symAutomaton->dump();
 	}
 

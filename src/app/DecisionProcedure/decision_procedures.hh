@@ -27,6 +27,7 @@
 #include <deque>
 #include <memory>
 #include <unordered_map>
+#include <utility>
 
 #include "mtbdd/ondriks_mtbdd.hh"
 #include "containers/VarToTrackMap.hh"
@@ -43,12 +44,21 @@ extern Options options;
 typedef std::vector<unsigned int> VariableSet;
 typedef std::deque<VariableSet> PrefixListType;
 
-using Automaton = VATA::BDDBottomUpTreeAut;
+// < FOR SYMBOLIC METHOD >
+// TODO: Little redoing things:
 using StateType = size_t;
-using StateHT = std::unordered_set<StateType>;
 using StateTuple = std::vector<StateType>;
+using BaseAut_States = VATA::Util::OrdVector<StateType>;
+using BaseAut_MTBDD = VATA::MTBDDPkg::OndriksMTBDD<BaseAut_States>;
+// Compiler complaining fucker
+using FixPoint_MTBDD = VATA::MTBDDPkg::OndriksMTBDD<std::pair<std::shared_ptr<MacroStateSet>, bool> >;
+using FixPoint_MTBDD_T = VATA::MTBDDPkg::OndriksMTBDD<std::shared_ptr<MacroStateSet> >;
+using FixPoint_MTBDD_B = VATA::MTBDDPkg::OndriksMTBDD<bool>;
+
+using Automaton = VATA::BDDBottomUpTreeAut;
+using StateHT = std::unordered_set<StateType>;
 using MTBDDLeafStateSet = VATA::Util::OrdVector<StateType>;
-using TransMTBDD = VATA::MTBDDPkg::OndriksMTBDD<MTBDDLeafStateSet>;
+using      TransMTBDD = VATA::MTBDDPkg::OndriksMTBDD<MTBDDLeafStateSet>;
 using MacroTransMTBDD = VATA::MTBDDPkg::OndriksMTBDD<MacroStateSet*>;
 typedef StateHT BaseFinalStatesType;
 typedef MacroStateSet* FinalStateType;
