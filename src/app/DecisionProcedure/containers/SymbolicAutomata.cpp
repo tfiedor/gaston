@@ -12,11 +12,6 @@
 
 StateType SymbolicAutomaton::stateCnt = 0;
 
-void SymbolicAutomaton::_InitializeAutomaton() {
-    this->_InitializeInitialStates();
-    this->_InitializeFinalStates();
-}
-
 /**
  * Returns final states with lazy construction
  *
@@ -43,7 +38,7 @@ SymbolicAutomaton::StateSet SymbolicAutomaton::GetInitialStates() {
     return this->_initialStates;
 }
 
-// <<< INTERSECTION AUTOMATON >>>
+// <<<<<<<<<<<<<<<<<<<<<< BINARY AUTOMATA >>>>>>>>>>>>>>>>>>>>>>>>>>
 
 void BinaryOpAutomaton::_InitializeFinalStates() {
     // TODO: not implemented
@@ -83,7 +78,33 @@ void BinaryOpAutomaton::dump() {
     rhs_aut->dump();
 }
 
-// <<< BASE AUTOMATA >>>
+// <<<<<<<<<<<<<<<<<<<<<< COMPLEMENT AUTOMATON >>>>>>>>>>>>>>>>>>>>>>>>>>
+
+void ComplementAutomaton::_InitializeFinalStates() {
+    // TODO:
+}
+
+void ComplementAutomaton::_InitializeInitialStates() {
+    // TODO:
+}
+
+SymbolicAutomaton::StateSet ComplementAutomaton::Pre(SymbolicAutomaton::Symbol* symbol, SymbolicAutomaton::StateSet &states) {
+    // TODO:
+}
+
+SymbolicAutomaton::ISect_Type ComplementAutomaton::IntersectNonEmpty(ComplementAutomaton::Symbol *symbol,ComplementAutomaton::StateSet &final) {
+    // TODO: Implement details
+    // mtbdd = evalSubset(this->_aut, nonfinNested, symbol)
+    // return unaryApply(mtbdd, \(fix, bool) -> (STDownClosed fix, bool) );
+}
+
+void ComplementAutomaton::dump() {
+    std::cout << "compl(";
+    this->_aut->dump();
+    std::cout << ")";
+}
+
+// <<<<<<<<<<<<<<<<<<<<<< BASE AUTOMATON >>>>>>>>>>>>>>>>>>>>>>>>>>
 
 void BaseAutomaton::_InitializeAutomaton() {
     this->_RenameStates();

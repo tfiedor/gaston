@@ -40,15 +40,15 @@ public:
     static StateType stateCnt;
 
     // < Public Constructors >
-    SymbolicAutomaton() { this->_InitializeAutomaton(); }
+    SymbolicAutomaton() {}
 protected:
     // < Private Members >
     StateSet _initialStates;
     StateSet _finalStates;
 
-    virtual void _InitializeAutomaton();
-    virtual void _InitializeInitialStates() {}
-    virtual void _InitializeFinalStates() {}
+    virtual void _InitializeAutomaton() = 0;
+    virtual void _InitializeInitialStates() = 0;
+    virtual void _InitializeFinalStates() = 0;
 
 // < Public API >
 public:
@@ -60,53 +60,83 @@ public:
     virtual void dump() = 0;
 };
 
-// TODO: There should be difference between Final and Nonfinal automaton, according to the structure and things
+/**
+ *
+ */
 class BinaryOpAutomaton : public SymbolicAutomaton {
 protected:
     std::shared_ptr<SymbolicAutomaton> lhs_aut;
     std::shared_ptr<SymbolicAutomaton> rhs_aut;
+    virtual void _InitializeAutomaton() { this->_InitializeInitialStates(); this->_InitializeFinalStates(); }
     virtual void _InitializeInitialStates();
     virtual void _InitializeFinalStates();
 
 public:
     virtual StateSet Pre(Symbol*, StateSet&);
     virtual ISect_Type IntersectNonEmpty(Symbol*, StateSet&);
-    BinaryOpAutomaton(SymbolicAutomaton* lhs, SymbolicAutomaton* rhs) : lhs_aut(lhs), rhs_aut(rhs) {}
+    BinaryOpAutomaton(SymbolicAutomaton* lhs, SymbolicAutomaton* rhs) : lhs_aut(lhs), rhs_aut(rhs) { this->_InitializeAutomaton(); }
     BinaryOpAutomaton() {}
     virtual void dump();
 };
 
+/**
+ *
+ */
 class IntersectionAutomaton : public BinaryOpAutomaton {
 public:
     IntersectionAutomaton() {}
-    IntersectionAutomaton(SymbolicAutomaton* lhs, SymbolicAutomaton* rhs) : BinaryOpAutomaton(lhs, rhs) {}
+    IntersectionAutomaton(SymbolicAutomaton* lhs, SymbolicAutomaton* rhs) : BinaryOpAutomaton(lhs, rhs) { this->_InitializeAutomaton(); }
 };
 
+/**
+ *
+ */
 class UnionAutomaton : public BinaryOpAutomaton {
 public:
     UnionAutomaton() {}
-    UnionAutomaton(SymbolicAutomaton* lhs, SymbolicAutomaton* rhs) : BinaryOpAutomaton(lhs, rhs) {}
+    UnionAutomaton(SymbolicAutomaton* lhs, SymbolicAutomaton* rhs) : BinaryOpAutomaton(lhs, rhs) { this->_InitializeAutomaton(); }
 };
 
+/**
+ *
+ */
 class ComplementAutomaton : public SymbolicAutomaton {
 protected:
     std::shared_ptr<SymbolicAutomaton> _aut;
+    virtual void _InitializeAutomaton() { this->_InitializeInitialStates(); this->_InitializeFinalStates(); }
     virtual void _InitializeInitialStates();
     virtual void _InitializeFinalStates();
 
 public:
     ComplementAutomaton() {}
-    ComplementAutomaton(SymbolicAutomaton *aut) : _aut(aut) {}
+    ComplementAutomaton(SymbolicAutomaton *aut) : _aut(aut) { this->_InitializeAutomaton(); }
 
     virtual StateSet Pre(Symbol*, StateSet&);
     virtual ISect_Type IntersectNonEmpty(Symbol*, StateSet&);
     virtual void dump();
 };
 
+/**
+ *
+ */
 class ProjectionAutomaton : public SymbolicAutomaton {
+protected:
+    std::shared_ptr<SymbolicAutomaton> _aut;
+    virtual void _InitializeAutomaton() { this->_InitializeInitialStates(); this->_InitializeFinalStates(); }
+    virtual void _InitializeInitialStates();
+    virtual void _InitializeFinalStates();
 
+public:
+    ProjectionAutomaton(SymbolicAutomaton* aut) : _aut(aut) { this->_InitializeAutomaton(); }
+
+    virtual StateSet Pre(Symbol*, StateSet&);
+    virtual ISect_Type IntersectNonEmpty(Symbol*, StateSet&);
+    virtual void dump();
 };
 
+/**
+ *
+ */
 class BaseAutomaton : public SymbolicAutomaton {
 protected:
     virtual void _InitializeAutomaton();
