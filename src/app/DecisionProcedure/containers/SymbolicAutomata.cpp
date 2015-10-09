@@ -119,7 +119,40 @@ SymbolicAutomaton::StateSet ProjectionAutomaton::Pre(ProjectionAutomaton::Symbol
 }
 
 SymbolicAutomaton::ISect_Type ProjectionAutomaton::IntersectNonEmpty(ProjectionAutomaton::Symbol* symbol, ProjectionAutomaton::StateSet &final) {
+    // First iteration of fixpoint
+    if(symbol == nullptr) {
+        // MTBDD nested Mtbdd = this->
+        //bool res = this->_aut->IntersectNonEmpty(symbol, final); // final states should be unnested
 
+        // symbol = new BDD(0000000, true);
+
+        // worklist nestedMtbdd.collectSinks();
+    // Next iteration
+    } else {
+        // worklist = listOfStates (from final)
+    }
+
+    // symbol.set(freeVars, X);
+    // MTBDD fixpoint = new MTBDD(freeVars, listOfStates);
+
+    // while(!worklist.empty()) {
+    //      term = worklist.get_and_destroy();
+
+    //      MTBDD nestedMtbdd = this->_aut->IntersectNonEmpty(symbol, final);
+    //      MTBDD projMtbdd = nestedMtbdd.project(vars, (remove_subsumed(\lhs rhs -> {lhs, rhs}, lhs OR rhs)))
+
+    //      fixpoint = apply(fixpoint, projMtbdd, \(oldFix, oldBool) (newFix, newBool) ->
+    //          -> {
+    //              if(old.contains(term)) {
+    //                  trulyNew = new.removeSubsumedBy(old);
+    //                  worklist.insertAll(trulyNew);
+    //                  return (remove_subsumed(old ++ trulyNew), oldBool OR newBool)
+    //              } else {
+    //                  return (old);
+    //              }
+    //             });
+    //  }
+    //  return fixpoint;
 }
 
 void ProjectionAutomaton::dump() {
@@ -169,18 +202,17 @@ SymbolicAutomaton::StateSet BaseAutomaton::Pre(SymbolicAutomaton::Symbol* symbol
 }
 
 void BaseAutomaton::_InitializeInitialStates() {
-    std::cout << "BaseAutomaton::_InitializeInitialStates()\n";
     // NOTE: The automaton is constructed backwards, so final states are initial
     assert(this->_initialStates == nullptr);
     this->_initialStates = std::make_shared<MacroStateSet>();
     for(auto state : this->_base_automaton->GetFinalStates()) {
+        std::cout << "Adding initial state: " << state << "\n";
         this->_initialStates->addState(new LeafStateSet(state));
     }
 
 }
 
 void BaseAutomaton::_InitializeFinalStates() {
-    std::cout << "BaseAutomaton::_InitializeFinalStates()\n";
     // NOTE: The automaton is constructed backwards, so initial states are finals
     assert(this->_finalStates == nullptr);
     BaseAut_States finalStates;
@@ -193,8 +225,18 @@ void BaseAutomaton::_InitializeFinalStates() {
 
     // push states to macrostate
     this->_finalStates = std::make_shared<MacroStateSet>();
+    std::cout << "Dumping collected states:\n";
+    std::cout << finalStates << "\n";
     for(auto state : finalStates) {
+        std::cout << "Adding final state: " << state << "\n";
         this->_finalStates->addState(new LeafStateSet(state));
+        for(auto s : this->_finalStates->getMacroStates()) {
+            std::cout << "Ministate: " << s << "\n";
+        }
+    }
+
+    for(auto s : this->_finalStates->getMacroStates()) {
+        std::cout << "Ministate: " << s << "\n";
     }
 }
 

@@ -149,6 +149,8 @@ void MacroStateSet::addState(TStateSet* state) {
 				return s->DoCompare(state);
 			});
 		this->macroStates.push_back(state);
+	} else {
+		std::cerr << "Warning: Trying to add sink state to MacroState\n";
 	}
 }
 
