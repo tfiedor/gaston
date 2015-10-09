@@ -163,6 +163,19 @@ void MacroStateSet::unionMacroSets(MacroStateSet* state) {
 
 }
 
+bool MacroStateSet::Intersects(MacroStateSet *states) {
+	for(auto state : states->getMacroStates()) {
+		auto matching_iter = std::find_if(this->macroStates.begin(), this->macroStates.end(),
+			[state](TStateSet* s) {
+				return s->DoCompare(state);
+			});
+		if(matching_iter != this->macroStates.end()) {
+			return true;
+		}
+	}
+	return false;
+}
+
 /**
  * Counts number of states in state space
  */

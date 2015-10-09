@@ -179,6 +179,7 @@ public:
 	StateSetList getMacroStates() const;
 	void addState(TStateSet* state);
 	void unionMacroSets(MacroStateSet* state);
+	bool Intersects(MacroStateSet* state);
 	bool isEmpty() { return this->macroStates.size() == 0; }
 	unsigned int measureStateSpace();
 

@@ -8,6 +8,7 @@
  *****************************************************************************/
 
 #include "SymbolicAutomata.h"
+#include "../environment.hh"
 #include "../decision_procedures.hh"
 
 StateType SymbolicAutomaton::stateCnt = 0;
@@ -171,12 +172,17 @@ void BaseAutomaton::_InitializeAutomaton() {
 
 SymbolicAutomaton::ISect_Type BaseAutomaton::IntersectNonEmpty(BaseAutomaton::Symbol* symbol, BaseAutomaton::StateSet final) {
     // initState = STSet init
-    FixPoint_MTBDD_T* tmp;
+    FixPoint_MTBDD* tmp;
 
     if(symbol == nullptr) {
         // computing epsilon
-        tmp = new FixPoint_MTBDD_T(this->_finalStates.get());
-        std::cout << FixPoint_MTBDD_T::DumpToDot({tmp}) << "\n";
+        tmp = new FixPoint_MTBDD(std::make_pair(this->_finalStates.get(), this->_finalStates->Intersects(this->_initialStates.get())));
+        #if (DEBUG_BDDS == true)
+        std::cout << FixPoint_MTBDD::DumpToDot({tmp}) << "\n";
+        #endif
+    // Doing Pre
+    } else {
+
     }
 
     // MTBDD tmp
@@ -188,7 +194,7 @@ SymbolicAutomaton::ISect_Type BaseAutomaton::IntersectNonEmpty(BaseAutomaton::Sy
 
     // tmp = unaryApply(tmp, \set -> (set, is_isect(init, fix)) );
     // return tmp;
-    return false;
+    return tmp;
 }
 
 SymbolicAutomaton::StateSet BaseAutomaton::Pre(SymbolicAutomaton::Symbol* symbol, SymbolicAutomaton::StateSet states) {
@@ -209,7 +215,6 @@ void BaseAutomaton::_InitializeInitialStates() {
     for(auto state : this->_base_automaton->GetFinalStates()) {
         this->_initialStates->addState(new LeafStateSet(state));
     }
-
 }
 
 void BaseAutomaton::_InitializeFinalStates() {

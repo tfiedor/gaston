@@ -13,6 +13,7 @@
 #include <vector>
 
 #include "StateSet.hh"
+#include "../mtbdd/ondriks_mtbdd.hh"
 #include <vata/bdd_bu_tree_aut.hh>
 #include <vata/parsing/timbuk_parser.hh>
 #include <vata/serialization/timbuk_serializer.hh>
@@ -33,7 +34,8 @@ public:
     using StateSet_ptr           = std::shared_ptr<MacroStateSet>;
     using StateSet               = MacroStateSet*;
     using Symbol                 = char;
-    using ISect_Type             = bool;
+    using FixPoint_MTBDD         = VATA::MTBDDPkg::OndriksMTBDD<std::pair<MacroStateSet*, bool> >;
+    using ISect_Type             = FixPoint_MTBDD*;
     using LeafAutomaton_Type     = VATA::BDDBottomUpTreeAut;
     using StateToStateTranslator = VATA::AutBase::StateToStateTranslWeak;
     using StateToStateMap        = std::unordered_map<StateType, StateType>;
@@ -158,56 +160,56 @@ public:
 class SubAutomaton : public BaseAutomaton {
 public:
     SubAutomaton(LeafAutomaton_Type* aut) : BaseAutomaton(aut) {}
-    virtual void dump() { std::cout << "Sub"; this->baseAutDump(); }
+    virtual void dump() { std::cout << "Sub\n"; this->baseAutDump(); }
 };
 
 class TrueAutomaton : public BaseAutomaton {
 public:
     TrueAutomaton(LeafAutomaton_Type* aut) : BaseAutomaton(aut) {}
-    virtual void dump() { std::cout << "True"; }
+    virtual void dump() { std::cout << "True\n"; this->baseAutDump(); }
 };
 
 class FalseAutomaton : public BaseAutomaton {
 public:
     FalseAutomaton(LeafAutomaton_Type* aut) : BaseAutomaton(aut) {}
-    virtual void dump() { std::cout << "False"; }
+    virtual void dump() { std::cout << "False\n"; this->baseAutDump(); }
 };
 
 
 class InAutomaton : public BaseAutomaton {
 public:
     InAutomaton(LeafAutomaton_Type* aut) : BaseAutomaton(aut) {}
-    virtual void dump() { std::cout << "True"; }
+    virtual void dump() { std::cout << "True\n"; this->baseAutDump(); }
 };
 
 class FirstOrderAutomaton : public BaseAutomaton {
 public:
     FirstOrderAutomaton(LeafAutomaton_Type* aut) : BaseAutomaton(aut) {}
-    virtual void dump() { std::cout << "FirstOrder"; }
+    virtual void dump() { std::cout << "FirstOrder\n"; this->baseAutDump(); }
 };
 
 class EqualFirstAutomaton : public BaseAutomaton {
 public:
     EqualFirstAutomaton(LeafAutomaton_Type* aut) : BaseAutomaton(aut) {}
-    virtual void dump() { std::cout << "Equal1"; }
+    virtual void dump() { std::cout << "Equal1\n"; this->baseAutDump(); }
 };
 
 class EqualSecondAutomaton : public BaseAutomaton {
 public:
     EqualSecondAutomaton(LeafAutomaton_Type* aut) : BaseAutomaton(aut) {}
-    virtual void dump() { std::cout << "Equal2"; }
+    virtual void dump() { std::cout << "Equal2\n"; this->baseAutDump(); }
 };
 
 class LessAutomaton : public BaseAutomaton {
 public:
     LessAutomaton(LeafAutomaton_Type* aut) : BaseAutomaton(aut) {}
-    virtual void dump() { std::cout << "Less"; }
+    virtual void dump() { std::cout << "Less\n"; this->baseAutDump(); }
 };
 
 class LessEqAutomaton : public BaseAutomaton {
 public:
     LessEqAutomaton(LeafAutomaton_Type* aut) : BaseAutomaton(aut) {}
-    virtual void dump() { std::cout << "LessEq"; }
+    virtual void dump() { std::cout << "LessEq\n"; this->baseAutDump(); }
 };
 
 #endif //WSKS_SYMBOLICAUTOMATA_H

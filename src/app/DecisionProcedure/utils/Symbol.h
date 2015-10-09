@@ -7,8 +7,15 @@
 
 
 class Symbol {
+public:
+using Vars = std::vector<size_t>;
 
+private:
+    std::string _track;
+
+public:
+    void ProjectVars(Vars freeVars);
+    bool IsEmpty();
 };
-
 
 #endif //WSKS_SYMBOL_H

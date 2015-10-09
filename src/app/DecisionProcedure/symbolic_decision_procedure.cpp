@@ -14,14 +14,23 @@
  *
  */
 int decideWS1S_symbolically(SymbolicAutomaton& aut) {
-    std::cout << "[*] Deciding WS1S Symbolically\n";
-    // Input: Symbolic automaton
+    // TODO: We assume we have ground formulae
+    std::cout << "\n[*] Deciding WS1S Symbolically\n";
 
     // finalStateApproximation = autPhi.GetFirstFinStateApprox();
-
+    // TODO: Do the approximation somehow
 
     // aut.IntersectInitialNonEmpty(finalStateApproximation, EmptySymbol)
-    bool res = aut.IntersectNonEmpty(nullptr, nullptr);
-
-    return 0;
+    FixPoint_MTBDD* res = aut.IntersectNonEmpty(nullptr, nullptr);
+    std::pair<MacroStateSet*, bool> resValue = res->GetValue(constructUniversalTrack());
+    #if (DEBUG_FIXPOINT == true)
+    std::cout << "[!] Finished deciding WS1S formula with following fixpoint:\n";
+    resValue.first->dump();
+    std::cout << "\n";
+    #endif
+    if(resValue.second == true) {
+        return VALID;
+    } else {
+        return UNSATISFIABLE;
+    }
 };
