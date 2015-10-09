@@ -22,7 +22,7 @@ SymbolicAutomaton::StateSet SymbolicAutomaton::GetFinalStates() {
         this->_InitializeFinalStates();
     }
 
-    return this->_finalStates;
+    return this->_finalStates.get();
 }
 
 /**
@@ -35,7 +35,7 @@ SymbolicAutomaton::StateSet SymbolicAutomaton::GetInitialStates() {
         this->_InitializeInitialStates();
     }
 
-    return this->_initialStates;
+    return this->_initialStates.get();
 }
 
 // <<<<<<<<<<<<<<<<<<<<<< BINARY AUTOMATA >>>>>>>>>>>>>>>>>>>>>>>>>>
@@ -51,7 +51,7 @@ void BinaryOpAutomaton::_InitializeInitialStates() {
 /**
  * Does the pre on the symbolic automaton through the @p symbol from @p states
  */
-SymbolicAutomaton::StateSet BinaryOpAutomaton::Pre(SymbolicAutomaton::Symbol* symbol, SymbolicAutomaton::StateSet &states) {
+SymbolicAutomaton::StateSet BinaryOpAutomaton::Pre(SymbolicAutomaton::Symbol* symbol, SymbolicAutomaton::StateSet states) {
     // TODO: not implemented, do we need this?
     // Pre left?
     // Pre right?
@@ -60,7 +60,7 @@ SymbolicAutomaton::StateSet BinaryOpAutomaton::Pre(SymbolicAutomaton::Symbol* sy
     return nullptr;
 }
 
-SymbolicAutomaton::ISect_Type BinaryOpAutomaton::IntersectNonEmpty(SymbolicAutomaton::Symbol* symbol, SymbolicAutomaton::StateSet &final) {
+SymbolicAutomaton::ISect_Type BinaryOpAutomaton::IntersectNonEmpty(SymbolicAutomaton::Symbol* symbol, SymbolicAutomaton::StateSet final) {
     // Explore the left automaton
     this->lhs_aut->IntersectNonEmpty(symbol, final);
     // Explore the right automaton
@@ -88,11 +88,11 @@ void ComplementAutomaton::_InitializeInitialStates() {
     // TODO:
 }
 
-SymbolicAutomaton::StateSet ComplementAutomaton::Pre(SymbolicAutomaton::Symbol* symbol, SymbolicAutomaton::StateSet &states) {
+SymbolicAutomaton::StateSet ComplementAutomaton::Pre(SymbolicAutomaton::Symbol* symbol, SymbolicAutomaton::StateSet states) {
     // TODO:
 }
 
-SymbolicAutomaton::ISect_Type ComplementAutomaton::IntersectNonEmpty(ComplementAutomaton::Symbol* symbol,ComplementAutomaton::StateSet &final) {
+SymbolicAutomaton::ISect_Type ComplementAutomaton::IntersectNonEmpty(ComplementAutomaton::Symbol* symbol,ComplementAutomaton::StateSet final) {
     // TODO: Implement details
     // mtbdd = evalSubset(this->_aut, nonfinNested, symbol)
     // return unaryApply(mtbdd, \(fix, bool) -> (STDownClosed fix, bool) );
@@ -114,11 +114,11 @@ void ProjectionAutomaton::_InitializeFinalStates() {
 
 }
 
-SymbolicAutomaton::StateSet ProjectionAutomaton::Pre(ProjectionAutomaton::Symbol* symbol, ProjectionAutomaton::StateSet &final) {
+SymbolicAutomaton::StateSet ProjectionAutomaton::Pre(ProjectionAutomaton::Symbol* symbol, ProjectionAutomaton::StateSet final) {
 
 }
 
-SymbolicAutomaton::ISect_Type ProjectionAutomaton::IntersectNonEmpty(ProjectionAutomaton::Symbol* symbol, ProjectionAutomaton::StateSet &final) {
+SymbolicAutomaton::ISect_Type ProjectionAutomaton::IntersectNonEmpty(ProjectionAutomaton::Symbol* symbol, ProjectionAutomaton::StateSet final) {
     // First iteration of fixpoint
     if(symbol == nullptr) {
         // MTBDD nested Mtbdd = this->
@@ -169,13 +169,14 @@ void BaseAutomaton::_InitializeAutomaton() {
     this->_InitializeFinalStates();
 }
 
-SymbolicAutomaton::ISect_Type BaseAutomaton::IntersectNonEmpty(BaseAutomaton::Symbol* symbol, BaseAutomaton::StateSet &final) {
+SymbolicAutomaton::ISect_Type BaseAutomaton::IntersectNonEmpty(BaseAutomaton::Symbol* symbol, BaseAutomaton::StateSet final) {
     // initState = STSet init
-    FixPoint_MTBDD_B* tmp;
+    FixPoint_MTBDD_T* tmp;
 
     if(symbol == nullptr) {
         // computing epsilon
-        tmp = new FixPoint_MTBDD_B(true);
+        tmp = new FixPoint_MTBDD_T(this->_finalStates.get());
+        std::cout << FixPoint_MTBDD_T::DumpToDot({tmp}) << "\n";
     }
 
     // MTBDD tmp
@@ -190,7 +191,7 @@ SymbolicAutomaton::ISect_Type BaseAutomaton::IntersectNonEmpty(BaseAutomaton::Sy
     return false;
 }
 
-SymbolicAutomaton::StateSet BaseAutomaton::Pre(SymbolicAutomaton::Symbol* symbol, SymbolicAutomaton::StateSet &states) {
+SymbolicAutomaton::StateSet BaseAutomaton::Pre(SymbolicAutomaton::Symbol* symbol, SymbolicAutomaton::StateSet states) {
     // Clean MTBDD
     //FixPoint_MTBDD nullary = new FixPoint_MTBDD(new MacroStateSet());
     for(auto state : states->getMacroStates()) {
@@ -206,7 +207,6 @@ void BaseAutomaton::_InitializeInitialStates() {
     assert(this->_initialStates == nullptr);
     this->_initialStates = std::make_shared<MacroStateSet>();
     for(auto state : this->_base_automaton->GetFinalStates()) {
-        std::cout << "Adding initial state: " << state << "\n";
         this->_initialStates->addState(new LeafStateSet(state));
     }
 
@@ -225,18 +225,8 @@ void BaseAutomaton::_InitializeFinalStates() {
 
     // push states to macrostate
     this->_finalStates = std::make_shared<MacroStateSet>();
-    std::cout << "Dumping collected states:\n";
-    std::cout << finalStates << "\n";
     for(auto state : finalStates) {
-        std::cout << "Adding final state: " << state << "\n";
         this->_finalStates->addState(new LeafStateSet(state));
-        for(auto s : this->_finalStates->getMacroStates()) {
-            std::cout << "Ministate: " << s << "\n";
-        }
-    }
-
-    for(auto s : this->_finalStates->getMacroStates()) {
-        std::cout << "Ministate: " << s << "\n";
     }
 }
 

@@ -47,7 +47,7 @@ public:
 	StateType state;
 	unsigned int type;
 	TLeafMask leaves;
-	bool stateIsSink;
+	bool stateIsSink = false;
 
 	unsigned int id;
 
@@ -78,8 +78,8 @@ private:
 
 public:
 	// < Public Methods >
-	LeafStateSet (StateType q) : stateIsSink(false) { std::cout << "LSS(q)\n"; type = STATE; id = 0; state = q;}
-	LeafStateSet () : stateIsSink(true) { std::cout << "LSS()\n"; type = STATE; id = 0; state = -1;}
+	LeafStateSet (StateType q) : stateIsSink(false) { type = STATE; id = 0; state = q;}
+	LeafStateSet () : stateIsSink(true) { type = STATE; id = 0; state = -1;}
 
 	void dump();
 	void closed_dump(unsigned int level);

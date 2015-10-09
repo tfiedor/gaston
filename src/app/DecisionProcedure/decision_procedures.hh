@@ -51,9 +51,10 @@ using StateTuple = std::vector<StateType>;
 using BaseAut_States = VATA::Util::OrdVector<StateType>;
 using BaseAut_MTBDD = VATA::MTBDDPkg::OndriksMTBDD<BaseAut_States>;
 // Compiler complaining fucker
-using FixPoint_MTBDD = VATA::MTBDDPkg::OndriksMTBDD<std::pair<std::shared_ptr<MacroStateSet>, bool> >;
-using FixPoint_MTBDD_T = VATA::MTBDDPkg::OndriksMTBDD<std::shared_ptr<MacroStateSet> >;
+using FixPoint_MTBDD = VATA::MTBDDPkg::OndriksMTBDD<std::pair<MacroStateSet*, bool> >;
+using FixPoint_MTBDD_T = VATA::MTBDDPkg::OndriksMTBDD<MacroStateSet*>;
 using FixPoint_MTBDD_B = VATA::MTBDDPkg::OndriksMTBDD<bool>;
+using StateSet = MacroStateSet*;
 
 using Automaton = VATA::BDDBottomUpTreeAut;
 using StateHT = std::unordered_set<StateType>;
@@ -89,6 +90,6 @@ MacroStateSet* computeFinalStates(Automaton &aut, PrefixListType prefix, unsigne
 bool initialStateIsInFinalStates(MacroStateSet *initial, MacroStateSet *finalStates, unsigned int level);
 
 // < Symbolic decision procedure functions >
-int decideWS1S_symbolically();
+int decideWS1S_symbolically(SymbolicAutomaton& aut);
 
 #endif

@@ -619,8 +619,7 @@ int main(int argc, char *argv[]) {
 		// Dump automaton
 		if (options.dump && !options.dontDumpAutomaton) {
 			VATA::Serialization::AbstrSerializer *serializer = new VATA::Serialization::TimbukSerializer();
-			std::cerr << vataAutomaton.DumpToString(*serializer, "symbolic") << "\n";
-			//std::cout << formulaAutomaton.DumpToDot() << "\n";
+			std::cout << vataAutomaton.DumpToString(*serializer, "symbolic") << "\n";
 			delete serializer;
 		}
 
@@ -660,7 +659,7 @@ int main(int argc, char *argv[]) {
 			// Deciding WS2S formula
 			} else if(options.method == Method::SYMBOLIC) {
 				if (options.mode != TREE) {
-					decided = decideWS1S_symbolically();
+					decided = decideWS1S_symbolically(*symAutomaton);
 				} else {
 					throw NotImplementedException();
 				}

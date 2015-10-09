@@ -13,10 +13,15 @@
 /**
  *
  */
-int decideWS1S_symbolically() {
+int decideWS1S_symbolically(SymbolicAutomaton& aut) {
     std::cout << "[*] Deciding WS1S Symbolically\n";
     // Input: Symbolic automaton
+
     // finalStateApproximation = autPhi.GetFirstFinStateApprox();
+
+
     // aut.IntersectInitialNonEmpty(finalStateApproximation, EmptySymbol)
+    bool res = aut.IntersectNonEmpty(nullptr, nullptr);
+
     return 0;
 };

@@ -30,7 +30,8 @@ class SymbolicAutomaton {
 public:
     // < Used Typedefs >
     // TODO: Change to something more efficient
-    using StateSet               = std::shared_ptr<MacroStateSet>;
+    using StateSet_ptr           = std::shared_ptr<MacroStateSet>;
+    using StateSet               = MacroStateSet*;
     using Symbol                 = char;
     using ISect_Type             = bool;
     using LeafAutomaton_Type     = VATA::BDDBottomUpTreeAut;
@@ -43,8 +44,8 @@ public:
     SymbolicAutomaton() {}
 protected:
     // < Private Members >
-    StateSet _initialStates;
-    StateSet _finalStates;
+    StateSet_ptr _initialStates;
+    StateSet_ptr _finalStates;
 
     virtual void _InitializeAutomaton() = 0;
     virtual void _InitializeInitialStates() = 0;
@@ -54,8 +55,8 @@ protected:
 public:
     virtual StateSet GetInitialStates();
     virtual StateSet GetFinalStates();
-    virtual StateSet Pre(Symbol*, StateSet&) = 0;
-    virtual ISect_Type IntersectNonEmpty(Symbol*, StateSet&) = 0;
+    virtual StateSet Pre(Symbol*, StateSet) = 0;
+    virtual ISect_Type IntersectNonEmpty(Symbol*, StateSet) = 0;
 
     virtual void dump() = 0;
 };
@@ -72,8 +73,8 @@ protected:
     virtual void _InitializeFinalStates();
 
 public:
-    virtual StateSet Pre(Symbol*, StateSet&);
-    virtual ISect_Type IntersectNonEmpty(Symbol*, StateSet&);
+    virtual StateSet Pre(Symbol*, StateSet);
+    virtual ISect_Type IntersectNonEmpty(Symbol*, StateSet);
     BinaryOpAutomaton(SymbolicAutomaton* lhs, SymbolicAutomaton* rhs) : lhs_aut(lhs), rhs_aut(rhs) { this->_InitializeAutomaton(); }
     BinaryOpAutomaton() {}
     virtual void dump();
@@ -111,8 +112,8 @@ public:
     ComplementAutomaton() {}
     ComplementAutomaton(SymbolicAutomaton *aut) : _aut(aut) { this->_InitializeAutomaton(); }
 
-    virtual StateSet Pre(Symbol*, StateSet&);
-    virtual ISect_Type IntersectNonEmpty(Symbol*, StateSet&);
+    virtual StateSet Pre(Symbol*, StateSet);
+    virtual ISect_Type IntersectNonEmpty(Symbol*, StateSet);
     virtual void dump();
 };
 
@@ -130,8 +131,8 @@ protected:
 public:
     ProjectionAutomaton(SymbolicAutomaton* aut) : _aut(aut) { this->_InitializeAutomaton(); }
 
-    virtual StateSet Pre(Symbol*, StateSet&);
-    virtual ISect_Type IntersectNonEmpty(Symbol*, StateSet&);
+    virtual StateSet Pre(Symbol*, StateSet);
+    virtual ISect_Type IntersectNonEmpty(Symbol*, StateSet);
     virtual void dump();
 };
 
@@ -149,8 +150,8 @@ protected:
 
 public:
     BaseAutomaton(LeafAutomaton_Type* aut) : _base_automaton(aut) { this->_InitializeAutomaton(); }
-    virtual ISect_Type IntersectNonEmpty(Symbol*, StateSet&);
-    virtual StateSet Pre(Symbol*, StateSet&);
+    virtual ISect_Type IntersectNonEmpty(Symbol*, StateSet);
+    virtual StateSet Pre(Symbol*, StateSet);
     virtual void baseAutDump();
 };
 
