@@ -122,6 +122,7 @@ public:
 class ProjectionAutomaton : public SymbolicAutomaton {
 protected:
     std::shared_ptr<SymbolicAutomaton> _aut;
+
     virtual void _InitializeAutomaton() { this->_InitializeInitialStates(); this->_InitializeFinalStates(); }
     virtual void _InitializeInitialStates();
     virtual void _InitializeFinalStates();
@@ -147,7 +148,7 @@ protected:
     void _RenameStates();
 
 public:
-    BaseAutomaton(LeafAutomaton_Type* aut) : _base_automaton(aut) {}
+    BaseAutomaton(LeafAutomaton_Type* aut) : _base_automaton(aut) { this->_InitializeAutomaton(); }
     virtual ISect_Type IntersectNonEmpty(Symbol*, StateSet&);
     virtual StateSet Pre(Symbol*, StateSet&);
     virtual void baseAutDump();

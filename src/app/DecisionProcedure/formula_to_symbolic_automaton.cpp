@@ -79,3 +79,9 @@ SymbolicAutomaton* ASTForm_Not::toSymbolicAutomaton(bool doComplement) {
     aut = this->f->toSymbolicAutomaton(!doComplement);
     return new ComplementAutomaton(aut);
 }
+
+SymbolicAutomaton* ASTForm_Ex2::toSymbolicAutomaton(bool doComplement) {
+    SymbolicAutomaton* aut;
+    aut = this->f->toSymbolicAutomaton(doComplement);
+    return new ProjectionAutomaton(aut);
+}

@@ -1206,6 +1206,7 @@ public:
   VarCode makeCode(SubstCode *subst = NULL);
   void dump();
   ASTForm* clone() { return new ASTForm_Ex2(this->ul, this->vl->copy(), this->f->clone(), this->pos); }
+  SymbolicAutomaton* toSymbolicAutomaton(bool doComplement);
 };
 
 class ASTForm_All0: public ASTForm_vf {

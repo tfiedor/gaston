@@ -92,7 +92,7 @@ SymbolicAutomaton::StateSet ComplementAutomaton::Pre(SymbolicAutomaton::Symbol* 
     // TODO:
 }
 
-SymbolicAutomaton::ISect_Type ComplementAutomaton::IntersectNonEmpty(ComplementAutomaton::Symbol *symbol,ComplementAutomaton::StateSet &final) {
+SymbolicAutomaton::ISect_Type ComplementAutomaton::IntersectNonEmpty(ComplementAutomaton::Symbol* symbol,ComplementAutomaton::StateSet &final) {
     // TODO: Implement details
     // mtbdd = evalSubset(this->_aut, nonfinNested, symbol)
     // return unaryApply(mtbdd, \(fix, bool) -> (STDownClosed fix, bool) );
@@ -100,6 +100,30 @@ SymbolicAutomaton::ISect_Type ComplementAutomaton::IntersectNonEmpty(ComplementA
 
 void ComplementAutomaton::dump() {
     std::cout << "compl(";
+    this->_aut->dump();
+    std::cout << ")";
+}
+
+// <<<<<<<<<<<<<<<<<<<<<< PROJECTION AUTOMATON >>>>>>>>>>>>>>>>>>>>>>>>>>
+
+void ProjectionAutomaton::_InitializeInitialStates() {
+
+}
+
+void ProjectionAutomaton::_InitializeFinalStates() {
+
+}
+
+SymbolicAutomaton::StateSet ProjectionAutomaton::Pre(ProjectionAutomaton::Symbol* symbol, ProjectionAutomaton::StateSet &final) {
+
+}
+
+SymbolicAutomaton::ISect_Type ProjectionAutomaton::IntersectNonEmpty(ProjectionAutomaton::Symbol* symbol, ProjectionAutomaton::StateSet &final) {
+
+}
+
+void ProjectionAutomaton::dump() {
+    std::cout << "ex2(";
     this->_aut->dump();
     std::cout << ")";
 }
@@ -165,6 +189,8 @@ void BaseAutomaton::_InitializeFinalStates() {
     StateCollectorFunctor sc_functor(finalStates);
     sc_functor(*initBDD);
 
+    std::cout << BaseAut_MTBDD::DumpToDot({initBDD}) << "\n";
+
     // push states to macrostate
     this->_finalStates = std::make_shared<MacroStateSet>();
     for(auto state : finalStates) {
@@ -189,6 +215,7 @@ void BaseAutomaton::baseAutDump() {
     std::cout << "[!] Initial states:\n";
     if(this->_initialStates) {
         this->_initialStates->dump();
+        std::cout << "\n";
     } else {
         std::cout << "-> not initialized\n";
     }
@@ -196,6 +223,7 @@ void BaseAutomaton::baseAutDump() {
     std::cout << "[!] Final states:\n";
     if(this->_finalStates) {
         this->_finalStates->dump();
+        std::cout << "\n";
     } else {
         std::cout << "-> not initialized\n";
     }
