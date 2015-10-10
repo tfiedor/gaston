@@ -8,15 +8,75 @@
 #include <vector>
 #include "../utils/Symbol.h"
 
-struct Term;
+class Term {
+public:
+    virtual void dump() = 0;
+};
+// Wow such clean!
 
 // < Usings >
 using Term_ptr          = std::shared_ptr<Term>;
 using TermProductStates = std::pair<Term_ptr, Term_ptr>;
+using TermListStates    = std::vector<Term_ptr>;
+using BaseState         = size_t;
+using TermBaseSetStates = std::vector<BaseState>;
 using ResultType        = std::pair<Term_ptr, bool>;
 using SymbolType        = ZeroSymbol;
 
-struct TermFixpointStates {
+enum TermType {TERM_FIXPOINT, TERM_PRODUCT, TERM_BASE, TERM_LIST};
+
+class TermProduct : public Term {
+public:
+    Term_ptr left;
+    Term_ptr right;
+    void dump() {
+        std::cout << "{";
+        left->dump();
+        std::cout << ", ";
+        right->dump();
+        std::cout << "}";
+    }
+};
+
+class TermBaseSet : public Term {
+public:
+    TermBaseSetStates states;
+
+    void dump() {
+        std::cout << "{";
+        for(auto state : this->states) {
+            std::cout << (state) << ",";
+        }
+        std::cout << "}";
+    }
+
+    bool Intersects(TermBaseSet* rhs) {
+        for (auto lhs_state : this->states) {
+            for(auto rhs_state : rhs->states) {
+                if(lhs_state == rhs_state) {
+                    return true;
+                }
+            }
+        }
+        return false;
+    }
+};
+
+class TermList : public Term {
+public:
+    TermListStates list;
+    void dump() {
+        std::cout << "{";
+        for(auto state : this->list) {
+            state->dump();
+            std::cout  << ",";
+        }
+        std::cout << "}";
+    }
+};
+
+class TermFixpointStates : public Term {
+public:
     using FixpointType = std::vector<Term_ptr>;
 
     using WorklistItemType = std::pair<Term_ptr, SymbolType>;
@@ -84,6 +144,7 @@ private:
     }
 
 public:
+    void dump() {}
     TermFixpointStates(Term_ptr approx, Symbols symbols) {
         // ????
     }
@@ -91,16 +152,5 @@ public:
     bool empty() {
         return this->_worklist.empty();
     }
-};
-
-struct Term {
-    enum TermType {TERM_FIXPOINT, TERM_UNION};
-
-    union {
-        TermFixpointStates fixpoint;
-        TermProductStates product;
-        // TERM BASE -> LIST
-        // TERM COMPL
-    };
 };
 #endif //WSKS_TERM_H

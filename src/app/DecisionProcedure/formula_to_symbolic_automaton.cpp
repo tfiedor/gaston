@@ -12,7 +12,8 @@ template<class TemplatedAutomaton>
 SymbolicAutomaton* baseToSymbolicAutomaton(ASTForm* form, bool doComplement) {
     Automaton aut;
     form->toUnaryAutomaton(aut, doComplement);
-    return new TemplatedAutomaton(new Automaton(aut), form);
+    TemplatedAutomaton* tmp = new TemplatedAutomaton(new Automaton(aut), form);
+    return tmp;
 }
 
 SymbolicAutomaton* ASTForm_True::toSymbolicAutomaton(bool doComplement) {

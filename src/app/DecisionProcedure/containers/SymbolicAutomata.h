@@ -42,10 +42,10 @@ public:
     // TODO: Change to something more efficient
     using Formula_ptr            = ASTForm*;
     using StateSet_ptr           = std::shared_ptr<MacroStateSet>;
-    using StateSet               = MacroStateSet*;
+    using StateSet               = Term*;
     using Symbol                 = ZeroSymbol;
     //using FixPoint_MTBDD         = VATA::MTBDDPkg::OndriksMTBDD<std::pair<MacroStateSet*, bool> >;
-    using ISect_Type             = std::pair<StateSet_ptr, bool>;
+    using ISect_Type             = std::pair<Term_ptr, bool>;
     using LeafAutomaton_Type     = VATA::BDDBottomUpTreeAut;
     using StateToStateTranslator = VATA::AutBase::StateToStateTranslWeak;
     using StateToStateMap        = std::unordered_map<StateType, StateType>;
@@ -56,9 +56,9 @@ public:
 
 protected:
     // < Private Members >
-    StateSet_ptr _initialStates;
-    StateSet_ptr _finalStates;
     Formula_ptr _form;
+    Term_ptr _initialStates;
+    Term_ptr _finalStates;
 
     virtual void _InitializeAutomaton() = 0;
     virtual void _InitializeInitialStates() = 0;
@@ -85,6 +85,7 @@ class BinaryOpAutomaton : public SymbolicAutomaton {
 protected:
     std::shared_ptr<SymbolicAutomaton> lhs_aut;
     std::shared_ptr<SymbolicAutomaton> rhs_aut;
+    bool (*_eval_result)(bool, bool);
     virtual void _InitializeAutomaton() { this->_InitializeInitialStates(); this->_InitializeFinalStates(); }
     virtual void _InitializeInitialStates();
     virtual void _InitializeFinalStates();
@@ -92,7 +93,10 @@ protected:
 
 public:
     virtual StateSet Pre(Symbol*, StateSet);
-    BinaryOpAutomaton(SymbolicAutomaton* lhs, SymbolicAutomaton* rhs, Formula_ptr form) : SymbolicAutomaton(form), lhs_aut(lhs), rhs_aut(rhs) { this->_InitializeAutomaton(); }
+    BinaryOpAutomaton(SymbolicAutomaton* lhs,
+                      SymbolicAutomaton* rhs,
+                      Formula_ptr form)
+            : SymbolicAutomaton(form), lhs_aut(lhs), rhs_aut(rhs) { this->_InitializeAutomaton(); }
     virtual void dump();
 };
 
@@ -101,7 +105,13 @@ public:
  */
 class IntersectionAutomaton : public BinaryOpAutomaton {
 public:
-    IntersectionAutomaton(SymbolicAutomaton* lhs, SymbolicAutomaton* rhs, Formula_ptr form) : BinaryOpAutomaton(lhs, rhs, form) { this->_InitializeAutomaton(); }
+    IntersectionAutomaton(SymbolicAutomaton* lhs,
+                          SymbolicAutomaton* rhs,
+                          Formula_ptr form)
+            : BinaryOpAutomaton(lhs, rhs, form) {
+        this->_InitializeAutomaton();
+        this->_eval_result = [](bool a, bool b) {return a && b; };
+    }
 };
 
 /**
@@ -109,7 +119,13 @@ public:
  */
 class UnionAutomaton : public BinaryOpAutomaton {
 public:
-    UnionAutomaton(SymbolicAutomaton* lhs, SymbolicAutomaton* rhs, Formula_ptr form) : BinaryOpAutomaton(lhs, rhs, form) { this->_InitializeAutomaton(); }
+    UnionAutomaton(SymbolicAutomaton* lhs,
+                   SymbolicAutomaton* rhs,
+                   Formula_ptr form)
+            : BinaryOpAutomaton(lhs, rhs, form) {
+        this->_InitializeAutomaton();
+        this->_eval_result = [](bool a, bool b) {return a || b; };
+    }
 };
 
 /**
@@ -176,8 +192,8 @@ public:
 
 class SubAutomaton : public BaseAutomaton {
 public:
-    SubAutomaton(LeafAutomaton_Type* aut, Formula_ptr form) : BaseAutomaton(aut, form) {}
-    virtual void dump() { std::cout << "Sub\n"; this->baseAutDump(); }
+    SubAutomaton(LeafAutomaton_Type* aut, Formula_ptr form) : BaseAutomaton(aut, form) { }
+    virtual void dump() { std::cout << "Sub\n"; this->baseAutDump();}
 };
 
 class TrueAutomaton : public BaseAutomaton {

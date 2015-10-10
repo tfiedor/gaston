@@ -71,11 +71,10 @@ SymbolicAutomaton::StateSet BinaryOpAutomaton::Pre(SymbolicAutomaton::Symbol* sy
 
 SymbolicAutomaton::ISect_Type BinaryOpAutomaton::_IntersectNonEmptyCore(SymbolicAutomaton::Symbol* symbol, SymbolicAutomaton::StateSet final) {
     // Explore the left automaton
-    this->lhs_aut->IntersectNonEmpty(symbol, final);
+    ISect_Type lhsResult = this->lhs_aut->IntersectNonEmpty(symbol, final);
     // Explore the right automaton
-    this->rhs_aut->IntersectNonEmpty(symbol, final);
-    // combined = apply(lhsmtbdd, rhsmtbdd, \(lfix, \lBool) (rfix, rBool) -> (u lFix rFix, lBool || rBool))
-    // return combined
+    ISect_Type rhsResult = this->rhs_aut->IntersectNonEmpty(symbol, final);
+    //ISect_Type combined = (lhsResult rhsResult, this->_eval_result(lhsBool, rhsBool));
 }
 
 /**
@@ -137,7 +136,7 @@ SymbolicAutomaton::ISect_Type ProjectionAutomaton::_IntersectNonEmptyCore(Projec
         symbol = new ZeroSymbol();
     // Next iteration
     } else {
-        projectionFixPoint = std::make_pair(std::shared_ptr<MacroStateSet>(final), false);
+        //TODO:projectionFixPoint = std::make_pair(std::shared_ptr<Term>(final), false);
     }
 
     // push projetionFixPoint to worklist?
@@ -157,8 +156,8 @@ SymbolicAutomaton::ISect_Type ProjectionAutomaton::_IntersectNonEmptyCore(Projec
         WorkListTerm* term = worklist.back().get();
         worklist.pop_back();
 
-        ISect_Type resultZero = this->_aut->IntersectNonEmpty(symbolZero, term);
-        ISect_Type resultOne = this->_aut->IntersectNonEmpty(symbolOne, term);
+        //ISect_Type resultZero = this->_aut->IntersectNonEmpty(symbolZero, term);
+        //ISect_Type resultOne = this->_aut->IntersectNonEmpty(symbolOne, term);
         // combine (new, newbool) = (STListFin [resultZero, resultOne], boolZero || boolOne)
 
         // trulyNew = new.removeSubsumedBy(projectionFixpoint);
@@ -186,17 +185,20 @@ void BaseAutomaton::_InitializeAutomaton() {
     this->_InitializeFinalStates();
 }
 
-SymbolicAutomaton::ISect_Type BaseAutomaton::_IntersectNonEmptyCore(BaseAutomaton::Symbol* symbol, BaseAutomaton::StateSet final) {
+SymbolicAutomaton::ISect_Type BaseAutomaton::_IntersectNonEmptyCore(BaseAutomaton::Symbol* symbol, BaseAutomaton::StateSet approx) {
     // initState = {init}
     ISect_Type tmp;
+    TermBaseSet* initial = reinterpret_cast<TermBaseSet*>(this->_initialStates.get());
+    TermBaseSet* final = reinterpret_cast<TermBaseSet*>(this->_finalStates.get());
 
     // Computing Intersection for epsilon symbol, i.e. only whether it intersects the initial states
     if(symbol == nullptr) {
-        tmp = std::make_pair(this->_finalStates, this->_finalStates->Intersects(this->_initialStates.get()));
+        assert(initial->states.size() == 1 && "There should be only one initial state");
+        tmp = std::make_pair(this->_finalStates, initial->Intersects(final));
     // Doing Pre(final), i.e. one step back from final states
     } else {
-        MacroStateSet* preFinal = this->Pre(symbol, final);
-        tmp = std::make_pair(std::shared_ptr<MacroStateSet>(preFinal), preFinal->Intersects(this->_initialStates.get()));
+        //TODO: MacroStateSet* preFinal = this->Pre(symbol, final);
+        //tmp = std::make_pair(std::shared_ptr<MacroStateSet>(preFinal), preFinal->Intersects(this->_initialStates.get()));
     }
 
     return tmp;
@@ -206,12 +208,12 @@ SymbolicAutomaton::StateSet BaseAutomaton::Pre(SymbolicAutomaton::Symbol* symbol
     // Clean MTBDD
     std::cout << "[*] Computing Pre(" << (*symbol) << ")\n";
     std::cout << "For: ";
-    states->dump();
+    //TODO:states->dump();
     std::cout << "\n";
 
-    SymbolicAutomaton::StateSet preStates = new MacroStateSet();
+    //TODO:SymbolicAutomaton::StateSet preStates = new MacroStateSet();
 
-    for(auto state : states->getMacroStates()) {
+    /*TODO:for(auto state : states->getMacroStates()) {
         assert(state->type == STATE);
 
         BaseAut_MTBDD* preState = getMTBDDForStateTuple(*this->_base_automaton, StateTuple({state->state}));
@@ -222,18 +224,20 @@ SymbolicAutomaton::StateSet BaseAutomaton::Pre(SymbolicAutomaton::Symbol* symbol
         const BaseAut_MTBDD &temp = masker(*preState, *symbol->GetMTBDD());
 
         // Collect
-    }
+    }*/
 
-    return preStates;
+    //TODO:return preStates;
 }
 
 void BaseAutomaton::_InitializeInitialStates() {
     // NOTE: The automaton is constructed backwards, so final states are initial
     assert(this->_initialStates == nullptr);
-    this->_initialStates = std::make_shared<MacroStateSet>();
+    TermBaseSet* temp = new TermBaseSet();
     for(auto state : this->_base_automaton->GetFinalStates()) {
-        this->_initialStates->addState(new LeafStateSet(state));
+       temp->states.push_back(state);
     }
+
+    this->_initialStates = std::shared_ptr<Term>(temp);
 }
 
 void BaseAutomaton::_InitializeFinalStates() {
@@ -246,10 +250,12 @@ void BaseAutomaton::_InitializeFinalStates() {
     sc_functor(*initBDD);
 
     // push states to macrostate
-    this->_finalStates = std::make_shared<MacroStateSet>();
+    TermBaseSet* temp = new TermBaseSet();
     for(auto state : finalStates) {
-        this->_finalStates->addState(new LeafStateSet(state));
+        temp->states.push_back(state);
     }
+
+    this->_finalStates = std::shared_ptr<Term>(temp);
 }
 
 void BaseAutomaton::_RenameStates() {
@@ -267,16 +273,16 @@ void BaseAutomaton::baseAutDump() {
     delete serializer;
 
     std::cout << "[!] Initial states:\n";
-    if(this->_initialStates) {
-        this->_initialStates->dump();
+    if(this->_initialStates != nullptr) {
+        this->_finalStates->dump();
         std::cout << "\n";
     } else {
         std::cout << "-> not initialized\n";
     }
 
     std::cout << "[!] Final states:\n";
-    if(this->_finalStates) {
-        this->_finalStates->dump();
+    if(this->_finalStates != nullptr) {
+        this->_initialStates->dump();
         std::cout << "\n";
     } else {
         std::cout << "-> not initialized\n";

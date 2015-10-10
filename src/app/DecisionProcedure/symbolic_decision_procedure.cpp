@@ -10,6 +10,7 @@
 #include "environment.hh"
 #include "decision_procedures.hh"
 #include "containers/SymbolicAutomata.h"
+#include "containers/Term.h"
 
 /**
  *
@@ -22,10 +23,10 @@ int decideWS1S_symbolically(SymbolicAutomaton& aut) {
     // TODO: Do the approximation somehow
 
     // aut.IntersectInitialNonEmpty(finalStateApproximation, EmptySymbol)
-    std::pair<std::shared_ptr<MacroStateSet>, bool> res = aut.IntersectNonEmpty(nullptr, nullptr);
+    std::pair<std::shared_ptr<Term>, bool> res = aut.IntersectNonEmpty(nullptr, nullptr);
     #if (DEBUG_FIXPOINT == true)
     std::cout << "[!] Finished deciding WS1S formula with following fixpoint:\n";
-    res.first->dump();
+    //res.first->dump();
     std::cout << "\n";
     #endif
     if(res.second == true) {
