@@ -10,8 +10,6 @@
 #ifndef WSKS_SYMBOLICAUTOMATA_H
 #define WSKS_SYMBOLICAUTOMATA_H
 
-#include <vector>
-
 #include "../mtbdd/apply1func.hh"
 #include "../mtbdd/apply2func.hh"
 #include "../mtbdd/void_apply1func.hh"
@@ -20,6 +18,8 @@
 #include "../../Frontend/ident.h"
 #include "../../Frontend/ast.h"
 #include "StateSet.hh"
+#include "Term.h"
+#include <vector>
 #include <vata/bdd_bu_tree_aut.hh>
 #include <vata/parsing/timbuk_parser.hh>
 #include <vata/serialization/timbuk_serializer.hh>
