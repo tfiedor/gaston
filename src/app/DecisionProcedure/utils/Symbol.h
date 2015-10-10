@@ -12,6 +12,7 @@
 using Automaton = VATA::BDDBottomUpTreeAut;
 using StateType = size_t;
 using StateTuple = std::vector<StateType>;
+using Value = char;
 using Var = size_t;
 using Vars = std::vector<Var>;
 using BaseAut_States = VATA::Util::OrdVector<StateType>;
@@ -26,6 +27,8 @@ private:
 
 public:
     ZeroSymbol();
+    ZeroSymbol(Automaton::SymbolType);
+    ZeroSymbol(Automaton::SymbolType, Var, Value);
 
     void ProjectVars(Vars freeVars);
     void ProjectVar(Var var);

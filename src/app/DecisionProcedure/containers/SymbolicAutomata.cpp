@@ -125,15 +125,13 @@ SymbolicAutomaton::ISect_Type ProjectionAutomaton::IntersectNonEmpty(ProjectionA
 
     // First iteration of fixpoint
     if(symbol == nullptr) {
+        std::cout << "projectionFixPoint from nested\n";
         projectionFixPoint = this->_aut->IntersectNonEmpty(symbol, final);
-        // MTBDD nested Mtbdd = this->
-        //FixPoint_MTBDD* nestedMtbdd = this->_aut->IntersectNonEmpty(symbol, final);
-
-        //projectionFixPoint = nestedMtbdd;
-        //FixPointCollectorFunctor fp_collector(worklist);
-        //fp_collector(*nestedMtbdd);
-
-        //symbol = new ZeroSymbol();
+        std::cout << "ZeroSymbol constructing\n";
+        symbol = new ZeroSymbol();
+        std::cout << "Received: \n";
+        projectionFixPoint.first->dump();
+        std::cout << "\n";
     // Next iteration
     } else {
         // worklist = listOfStates (from final)
@@ -196,6 +194,8 @@ SymbolicAutomaton::ISect_Type BaseAutomaton::IntersectNonEmpty(BaseAutomaton::Sy
     }
 
     std::cout << "Returning: \n";
+    tmp.first->dump();
+    std::cout << " and " << tmp.second << "\n";
 
     return tmp;
 }
@@ -220,6 +220,7 @@ SymbolicAutomaton::StateSet BaseAutomaton::Pre(SymbolicAutomaton::Symbol* symbol
         MaskerFunctor masker;
         const BaseAut_MTBDD &temp = masker(*preState, *symbol->GetMTBDD());
 
+        // Collect
     }
 
     return preStates;

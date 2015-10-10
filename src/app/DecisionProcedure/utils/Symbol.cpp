@@ -32,6 +32,7 @@ Automaton::SymbolType ZeroSymbol::constructUniversalTrack() {
 Automaton::SymbolType ZeroSymbol::constructZeroTrack() {
     unsigned int trackLen = varMap.TrackLength();
     std::string track(trackLen, '0');
+    return Automaton::SymbolType(track.c_str());
 }
 
 void ZeroSymbol::ProjectVar(Var var) {
@@ -48,6 +49,17 @@ void ZeroSymbol::ProjectVars(Vars freeVars) {
 
 ZeroSymbol::ZeroSymbol() {
     this->_track = ZeroSymbol::constructZeroTrack();
+    this->_bdd = new BaseAut_MTBDD(this->_track, BaseAut_States(StateTuple({0})), BaseAut_States(StateTuple({})));
+}
+
+ZeroSymbol::ZeroSymbol(Automaton::SymbolType track) {
+    this->_track = track;
+    this->_bdd = new BaseAut_MTBDD(track, BaseAut_States(StateTuple({0})), BaseAut_States(StateTuple({})));
+}
+
+ZeroSymbol::ZeroSymbol(Automaton::SymbolType track, Var var, Value val) {
+    this->_track = track;
+    this->_track.SetIthVariableValue(var, charToAsgn(val));
     this->_bdd = new BaseAut_MTBDD(this->_track, BaseAut_States(StateTuple({0})), BaseAut_States(StateTuple({})));
 }
 
