@@ -120,40 +120,52 @@ SymbolicAutomaton::StateSet ProjectionAutomaton::Pre(ProjectionAutomaton::Symbol
 }
 
 SymbolicAutomaton::ISect_Type ProjectionAutomaton::IntersectNonEmpty(ProjectionAutomaton::Symbol* symbol, ProjectionAutomaton::StateSet final) {
+    ISect_Type projectionFixPoint;
+    WorkListSet worklist;
+
     // First iteration of fixpoint
     if(symbol == nullptr) {
+        projectionFixPoint = this->_aut->IntersectNonEmpty(symbol, final);
         // MTBDD nested Mtbdd = this->
-        //bool res = this->_aut->IntersectNonEmpty(symbol, final); // final states should be unnested
+        //FixPoint_MTBDD* nestedMtbdd = this->_aut->IntersectNonEmpty(symbol, final);
 
-        // symbol = new BDD(0000000, true);
+        //projectionFixPoint = nestedMtbdd;
+        //FixPointCollectorFunctor fp_collector(worklist);
+        //fp_collector(*nestedMtbdd);
 
-        // worklist nestedMtbdd.collectSinks();
+        //symbol = new ZeroSymbol();
     // Next iteration
     } else {
         // worklist = listOfStates (from final)
+
+        // MTBDD fixpoint = new MTBDD(symbol, listOfStates);
     }
 
     // symbol.set(freeVars, X);
-    // MTBDD fixpoint = new MTBDD(freeVars, listOfStates);
 
-    // while(!worklist.empty()) {
-    //      term = worklist.get_and_destroy();
+    while(!worklist.empty()) {
+        std::cout << "[*] Popping some term from worklist\n";
+        std::shared_ptr<WorkListTerm> term = worklist.back();
+        worklist.pop_back();
+        term->dump();
 
-    //      MTBDD nestedMtbdd = this->_aut->IntersectNonEmpty(symbol, final);
-    //      MTBDD projMtbdd = nestedMtbdd.project(vars, (remove_subsumed(\lhs rhs -> {lhs, rhs}, lhs OR rhs)))
+        std::cout << "Symbol: " << (*symbol) << "\n";
+        ISect_Type nestedMtbdd = this->_aut->IntersectNonEmpty(symbol, term.get());
+        //      MTBDD projMtbdd = nestedMtbdd.project(vars, (remove_subsumed(\lhs rhs -> {lhs, rhs}, lhs OR rhs)))
 
-    //      fixpoint = apply(fixpoint, projMtbdd, \(oldFix, oldBool) (newFix, newBool) ->
-    //          -> {
-    //              if(old.contains(term)) {
-    //                  trulyNew = new.removeSubsumedBy(old);
-    //                  worklist.insertAll(trulyNew);
-    //                  return (remove_subsumed(old ++ trulyNew), oldBool OR newBool)
-    //              } else {
-    //                  return (old);
-    //              }
-    //             });
-    //  }
-    //  return fixpoint;
+        //      fixpoint = apply(fixpoint, projMtbdd, \(oldFix, oldBool) (newFix, newBool) ->
+        //          -> {
+        //              if(old.contains(term)) {
+        //                  trulyNew = new.removeSubsumedBy(old);
+        //                  worklist.insertAll(trulyNew);
+        //                  return (remove_subsumed(old ++ trulyNew), oldBool OR newBool)
+        //              } else {
+        //                  return (old);
+        //              }
+        //             });
+    }
+
+    return projectionFixPoint;
 }
 
 void ProjectionAutomaton::dump() {
@@ -171,41 +183,46 @@ void BaseAutomaton::_InitializeAutomaton() {
 }
 
 SymbolicAutomaton::ISect_Type BaseAutomaton::IntersectNonEmpty(BaseAutomaton::Symbol* symbol, BaseAutomaton::StateSet final) {
-    // initState = STSet init
-    FixPoint_MTBDD* tmp;
+    // initState = {init}
+    ISect_Type tmp;
 
+    // Computing Intersection for epsilon symbol, i.e. only whether it intersects the initial states
     if(symbol == nullptr) {
-        // computing epsilon
-        tmp = new FixPoint_MTBDD(std::make_pair(this->_finalStates.get(), this->_finalStates->Intersects(this->_initialStates.get())));
-        #if (DEBUG_BDDS == true)
-        std::cout << FixPoint_MTBDD::DumpToDot({tmp}) << "\n";
-        #endif
-    // Doing Pre
+        tmp = std::make_pair(this->_finalStates, this->_finalStates->Intersects(this->_initialStates.get()));
+    // Doing Pre(final), i.e. one step back from final states
     } else {
-
+        MacroStateSet* preFinal = this->Pre(symbol, final);
+        tmp = std::make_pair(std::shared_ptr<MacroStateSet>(preFinal), preFinal->Intersects(this->_initialStates.get()));
     }
 
-    // MTBDD tmp
-    // if (symbol == _|_) {
-    //    tmp = new MTBDD(X...X, aut.finalStates)
-    // } else {
-    //    tmp = new MTBDD(pre(symb, fix))
-    // }
+    std::cout << "Returning: \n";
 
-    // tmp = unaryApply(tmp, \set -> (set, is_isect(init, fix)) );
-    // return tmp;
     return tmp;
 }
 
 SymbolicAutomaton::StateSet BaseAutomaton::Pre(SymbolicAutomaton::Symbol* symbol, SymbolicAutomaton::StateSet states) {
     // Clean MTBDD
     //FixPoint_MTBDD nullary = new FixPoint_MTBDD(new MacroStateSet());
+    std::cout << "[*] Computing Pre(" << (*symbol) << ")\n";
+    std::cout << "For: ";
+    states->dump();
+    std::cout << "\n";
+
+    SymbolicAutomaton::StateSet preStates = new MacroStateSet();
+
     for(auto state : states->getMacroStates()) {
-        // Pre(state, symbol)
-        // union to nullary
+        assert(state->type == STATE);
+
+        BaseAut_MTBDD* preState = getMTBDDForStateTuple(*this->_base_automaton, StateTuple({state->state}));
+        //                                                     Are you fucking kidding me -.- ---^
+
+        // There is leak maybe, fuck it though
+        MaskerFunctor masker;
+        const BaseAut_MTBDD &temp = masker(*preState, *symbol->GetMTBDD());
+
     }
 
-    return nullptr;
+    return preStates;
 }
 
 void BaseAutomaton::_InitializeInitialStates() {
@@ -225,8 +242,6 @@ void BaseAutomaton::_InitializeFinalStates() {
 
     StateCollectorFunctor sc_functor(finalStates);
     sc_functor(*initBDD);
-
-    std::cout << BaseAut_MTBDD::DumpToDot({initBDD}) << "\n";
 
     // push states to macrostate
     this->_finalStates = std::make_shared<MacroStateSet>();

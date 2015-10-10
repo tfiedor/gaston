@@ -12,8 +12,12 @@
 
 #include <vector>
 
-#include "StateSet.hh"
+#include "../mtbdd/apply1func.hh"
+#include "../mtbdd/apply2func.hh"
+#include "../mtbdd/void_apply1func.hh"
 #include "../mtbdd/ondriks_mtbdd.hh"
+#include "../utils/Symbol.h"
+#include "StateSet.hh"
 #include <vata/bdd_bu_tree_aut.hh>
 #include <vata/parsing/timbuk_parser.hh>
 #include <vata/serialization/timbuk_serializer.hh>
@@ -22,6 +26,8 @@
 enum AutType {INTERSECTION, UNION, PROJECTION, BASE, COMPLEMENT};
 enum AutSubType {FINAL, NONFINAL};
 enum AutBaseType {BT_SUB, BT_IN, BT_EQF, BT_EQS, BT_LSS, BT_LEQ, BT_FO, BT_T, BT_F};
+
+using BaseAut_States = VATA::Util::OrdVector<StateType>;
 
 /**
  * Base class for symbolic automata
@@ -33,12 +39,14 @@ public:
     // TODO: Change to something more efficient
     using StateSet_ptr           = std::shared_ptr<MacroStateSet>;
     using StateSet               = MacroStateSet*;
-    using Symbol                 = char;
-    using FixPoint_MTBDD         = VATA::MTBDDPkg::OndriksMTBDD<std::pair<MacroStateSet*, bool> >;
-    using ISect_Type             = FixPoint_MTBDD*;
+    using Symbol                 = ZeroSymbol;
+    //using FixPoint_MTBDD         = VATA::MTBDDPkg::OndriksMTBDD<std::pair<MacroStateSet*, bool> >;
+    using ISect_Type             = std::pair<StateSet_ptr, bool>;
     using LeafAutomaton_Type     = VATA::BDDBottomUpTreeAut;
     using StateToStateTranslator = VATA::AutBase::StateToStateTranslWeak;
     using StateToStateMap        = std::unordered_map<StateType, StateType>;
+    using WorkListTerm           = MacroStateSet;
+    using WorkListSet            = std::vector<std::shared_ptr<WorkListTerm>>;
 
     static StateType stateCnt;
 
@@ -211,5 +219,49 @@ public:
     LessEqAutomaton(LeafAutomaton_Type* aut) : BaseAutomaton(aut) {}
     virtual void dump() { std::cout << "LessEq\n"; this->baseAutDump(); }
 };
+
+// <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<< FUNCTORS >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+
+GCC_DIAG_OFF(effc++)
+class FixPointCollectorFunctor : public VATA::MTBDDPkg::VoidApply1Functor<FixPointCollectorFunctor, std::pair<MacroStateSet*, bool>> {
+    GCC_DIAG_ON(effc++)
+public:
+    using WorkListTerm           = MacroStateSet;
+    using WorkListSet            = std::vector<std::shared_ptr<WorkListTerm>>;
+private:
+    WorkListSet& collected;
+
+public:
+    // < Public Constructors >
+    FixPointCollectorFunctor(std::vector<std::shared_ptr<WorkListTerm>> & l) : collected(l) {}
+
+    // < Public Methods >
+    /**
+     * @param lhs: operand of apply
+     */
+    inline void ApplyOperation(std::pair<MacroStateSet*, bool> lhs) {
+        collected.push_back(std::shared_ptr<WorkListTerm>(lhs.first));
+    }
+};
+
+GCC_DIAG_OFF(effc++)
+class MaskerFunctor : public VATA::MTBDDPkg::Apply2Functor<MaskerFunctor, BaseAut_States, BaseAut_States, BaseAut_States> {
+    GCC_DIAG_ON(effc++)
+public:
+    // < Public Methods >
+    /**
+     * @param lhs: left operand
+     * @param rhs: right operand
+     * @return union of leaf operands
+     */
+    inline BaseAut_States ApplyOperation(BaseAut_States lhs, BaseAut_States rhs) {
+        if(rhs.size() == 0) {
+            return rhs;
+        } else {
+            return lhs;
+        }
+    }
+};
+
 
 #endif //WSKS_SYMBOLICAUTOMATA_H

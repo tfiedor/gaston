@@ -402,6 +402,30 @@ src/app/DecisionProcedure/symbolic_decision_procedure.cpp.s:
 	$(MAKE) -f CMakeFiles/gaston.dir/build.make CMakeFiles/gaston.dir/src/app/DecisionProcedure/symbolic_decision_procedure.cpp.s
 .PHONY : src/app/DecisionProcedure/symbolic_decision_procedure.cpp.s
 
+src/app/DecisionProcedure/utils/Symbol.o: src/app/DecisionProcedure/utils/Symbol.cpp.o
+.PHONY : src/app/DecisionProcedure/utils/Symbol.o
+
+# target to build an object file
+src/app/DecisionProcedure/utils/Symbol.cpp.o:
+	$(MAKE) -f CMakeFiles/gaston.dir/build.make CMakeFiles/gaston.dir/src/app/DecisionProcedure/utils/Symbol.cpp.o
+.PHONY : src/app/DecisionProcedure/utils/Symbol.cpp.o
+
+src/app/DecisionProcedure/utils/Symbol.i: src/app/DecisionProcedure/utils/Symbol.cpp.i
+.PHONY : src/app/DecisionProcedure/utils/Symbol.i
+
+# target to preprocess a source file
+src/app/DecisionProcedure/utils/Symbol.cpp.i:
+	$(MAKE) -f CMakeFiles/gaston.dir/build.make CMakeFiles/gaston.dir/src/app/DecisionProcedure/utils/Symbol.cpp.i
+.PHONY : src/app/DecisionProcedure/utils/Symbol.cpp.i
+
+src/app/DecisionProcedure/utils/Symbol.s: src/app/DecisionProcedure/utils/Symbol.cpp.s
+.PHONY : src/app/DecisionProcedure/utils/Symbol.s
+
+# target to generate assembly for a file
+src/app/DecisionProcedure/utils/Symbol.cpp.s:
+	$(MAKE) -f CMakeFiles/gaston.dir/build.make CMakeFiles/gaston.dir/src/app/DecisionProcedure/utils/Symbol.cpp.s
+.PHONY : src/app/DecisionProcedure/utils/Symbol.cpp.s
+
 src/app/DecisionProcedure/visitors/AntiPrenexer.o: src/app/DecisionProcedure/visitors/AntiPrenexer.cpp.o
 .PHONY : src/app/DecisionProcedure/visitors/AntiPrenexer.o
 
@@ -1263,6 +1287,9 @@ help:
 	@echo "... src/app/DecisionProcedure/symbolic_decision_procedure.o"
 	@echo "... src/app/DecisionProcedure/symbolic_decision_procedure.i"
 	@echo "... src/app/DecisionProcedure/symbolic_decision_procedure.s"
+	@echo "... src/app/DecisionProcedure/utils/Symbol.o"
+	@echo "... src/app/DecisionProcedure/utils/Symbol.i"
+	@echo "... src/app/DecisionProcedure/utils/Symbol.s"
 	@echo "... src/app/DecisionProcedure/visitors/AntiPrenexer.o"
 	@echo "... src/app/DecisionProcedure/visitors/AntiPrenexer.i"
 	@echo "... src/app/DecisionProcedure/visitors/AntiPrenexer.s"
