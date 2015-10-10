@@ -125,43 +125,37 @@ SymbolicAutomaton::ISect_Type ProjectionAutomaton::IntersectNonEmpty(ProjectionA
 
     // First iteration of fixpoint
     if(symbol == nullptr) {
-        std::cout << "projectionFixPoint from nested\n";
         projectionFixPoint = this->_aut->IntersectNonEmpty(symbol, final);
-        std::cout << "ZeroSymbol constructing\n";
         symbol = new ZeroSymbol();
-        std::cout << "Received: \n";
-        projectionFixPoint.first->dump();
-        std::cout << "\n";
     // Next iteration
     } else {
-        // worklist = listOfStates (from final)
-
-        // MTBDD fixpoint = new MTBDD(symbol, listOfStates);
+        projectionFixPoint = std::make_pair(std::shared_ptr<MacroStateSet>(final), false);
     }
 
-    // symbol.set(freeVars, X);
+    // push projetionFixPoint to worklist?
+    // TODO: VAR FOR PROJECTION YOU NOOB
+    ProjectionAutomaton::Symbol* symbolZero = new ZeroSymbol(symbol->GetTrack(), 0, '0');
+    ProjectionAutomaton::Symbol* symbolOne = new ZeroSymbol(symbol->GetTrack(), 0, '1');
+
+    #if optimisation
+       // in some cases, we can go down with symbol and split later
+    #endif
 
     while(!worklist.empty()) {
-        std::cout << "[*] Popping some term from worklist\n";
-        std::shared_ptr<WorkListTerm> term = worklist.back();
+        WorkListTerm* term = worklist.back().get();
         worklist.pop_back();
-        term->dump();
 
-        std::cout << "Symbol: " << (*symbol) << "\n";
-        ISect_Type nestedMtbdd = this->_aut->IntersectNonEmpty(symbol, term.get());
-        //      MTBDD projMtbdd = nestedMtbdd.project(vars, (remove_subsumed(\lhs rhs -> {lhs, rhs}, lhs OR rhs)))
+        ISect_Type resultZero = this->_aut->IntersectNonEmpty(symbolZero, term);
+        ISect_Type resultOne = this->_aut->IntersectNonEmpty(symbolOne, term);
+        // combine (new, newbool) = (STListFin [resultZero, resultOne], boolZero || boolOne)
 
-        //      fixpoint = apply(fixpoint, projMtbdd, \(oldFix, oldBool) (newFix, newBool) ->
-        //          -> {
-        //              if(old.contains(term)) {
-        //                  trulyNew = new.removeSubsumedBy(old);
-        //                  worklist.insertAll(trulyNew);
-        //                  return (remove_subsumed(old ++ trulyNew), oldBool OR newBool)
-        //              } else {
-        //                  return (old);
-        //              }
-        //             });
+        // trulyNew = new.removeSubsumedBy(projectionFixpoint);
+        // worklist.insertAll(trulyNew);
+        // projectionFixPoint = (STListFin removeSubsumed((fst fixpoint) ++ trulyNew), (scd fixpoint) || newBool)
     }
+
+    delete symbolZero;
+    delete symbolOne;
 
     return projectionFixPoint;
 }
