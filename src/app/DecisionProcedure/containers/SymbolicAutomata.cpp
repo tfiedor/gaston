@@ -13,6 +13,14 @@
 
 StateType SymbolicAutomaton::stateCnt = 0;
 
+SymbolicAutomaton::ISect_Type SymbolicAutomaton::IntersectNonEmpty(::SymbolicAutomaton::Symbol* symbol, StateSet approx) {
+    // TODO: trimmedSymbol = symbol.keepOnly(aut.freeVars);
+    // TODO: Cache: if((cRse = aut.cache_find(finalStateApprox, trimmedSymbol)) != _) { return cRes; }
+
+    ISect_Type result = this->_IntersectNonEmptyCore(symbol, approx);
+    return result;
+}
+
 /**
  * Returns final states with lazy construction
  *
@@ -61,7 +69,7 @@ SymbolicAutomaton::StateSet BinaryOpAutomaton::Pre(SymbolicAutomaton::Symbol* sy
     return nullptr;
 }
 
-SymbolicAutomaton::ISect_Type BinaryOpAutomaton::IntersectNonEmpty(SymbolicAutomaton::Symbol* symbol, SymbolicAutomaton::StateSet final) {
+SymbolicAutomaton::ISect_Type BinaryOpAutomaton::_IntersectNonEmptyCore(SymbolicAutomaton::Symbol* symbol, SymbolicAutomaton::StateSet final) {
     // Explore the left automaton
     this->lhs_aut->IntersectNonEmpty(symbol, final);
     // Explore the right automaton
@@ -93,7 +101,7 @@ SymbolicAutomaton::StateSet ComplementAutomaton::Pre(SymbolicAutomaton::Symbol* 
     // TODO:
 }
 
-SymbolicAutomaton::ISect_Type ComplementAutomaton::IntersectNonEmpty(ComplementAutomaton::Symbol* symbol,ComplementAutomaton::StateSet final) {
+SymbolicAutomaton::ISect_Type ComplementAutomaton::_IntersectNonEmptyCore(ComplementAutomaton::Symbol* symbol,ComplementAutomaton::StateSet final) {
     // TODO: Implement details
     // mtbdd = evalSubset(this->_aut, nonfinNested, symbol)
     // return unaryApply(mtbdd, \(fix, bool) -> (STDownClosed fix, bool) );
@@ -119,7 +127,7 @@ SymbolicAutomaton::StateSet ProjectionAutomaton::Pre(ProjectionAutomaton::Symbol
 
 }
 
-SymbolicAutomaton::ISect_Type ProjectionAutomaton::IntersectNonEmpty(ProjectionAutomaton::Symbol* symbol, ProjectionAutomaton::StateSet final) {
+SymbolicAutomaton::ISect_Type ProjectionAutomaton::_IntersectNonEmptyCore(ProjectionAutomaton::Symbol* symbol, ProjectionAutomaton::StateSet final) {
     ISect_Type projectionFixPoint;
     WorkListSet worklist;
 
@@ -178,7 +186,7 @@ void BaseAutomaton::_InitializeAutomaton() {
     this->_InitializeFinalStates();
 }
 
-SymbolicAutomaton::ISect_Type BaseAutomaton::IntersectNonEmpty(BaseAutomaton::Symbol* symbol, BaseAutomaton::StateSet final) {
+SymbolicAutomaton::ISect_Type BaseAutomaton::_IntersectNonEmptyCore(BaseAutomaton::Symbol* symbol, BaseAutomaton::StateSet final) {
     // initState = {init}
     ISect_Type tmp;
 

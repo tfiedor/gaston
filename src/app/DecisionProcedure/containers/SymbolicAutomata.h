@@ -63,6 +63,7 @@ protected:
     virtual void _InitializeAutomaton() = 0;
     virtual void _InitializeInitialStates() = 0;
     virtual void _InitializeFinalStates() = 0;
+    virtual ISect_Type _IntersectNonEmptyCore(Symbol*, StateSet) = 0;
 
 // < Public API >
 public:
@@ -72,7 +73,7 @@ public:
     virtual StateSet GetInitialStates();
     virtual StateSet GetFinalStates();
     virtual StateSet Pre(Symbol*, StateSet) = 0;
-    virtual ISect_Type IntersectNonEmpty(Symbol*, StateSet) = 0;
+    ISect_Type IntersectNonEmpty(Symbol*, StateSet);
 
     virtual void dump() = 0;
 };
@@ -87,10 +88,10 @@ protected:
     virtual void _InitializeAutomaton() { this->_InitializeInitialStates(); this->_InitializeFinalStates(); }
     virtual void _InitializeInitialStates();
     virtual void _InitializeFinalStates();
+    virtual ISect_Type _IntersectNonEmptyCore(Symbol*, StateSet);
 
 public:
     virtual StateSet Pre(Symbol*, StateSet);
-    virtual ISect_Type IntersectNonEmpty(Symbol*, StateSet);
     BinaryOpAutomaton(SymbolicAutomaton* lhs, SymbolicAutomaton* rhs, Formula_ptr form) : SymbolicAutomaton(form), lhs_aut(lhs), rhs_aut(rhs) { this->_InitializeAutomaton(); }
     virtual void dump();
 };
@@ -120,12 +121,12 @@ protected:
     virtual void _InitializeAutomaton() { this->_InitializeInitialStates(); this->_InitializeFinalStates(); }
     virtual void _InitializeInitialStates();
     virtual void _InitializeFinalStates();
+    virtual ISect_Type _IntersectNonEmptyCore(Symbol*, StateSet);
 
 public:
     ComplementAutomaton(SymbolicAutomaton *aut, Formula_ptr form) : SymbolicAutomaton(form), _aut(aut) { this->_InitializeAutomaton(); }
 
     virtual StateSet Pre(Symbol*, StateSet);
-    virtual ISect_Type IntersectNonEmpty(Symbol*, StateSet);
     virtual void dump();
 };
 
@@ -145,12 +146,12 @@ protected:
     }
     virtual void _InitializeInitialStates();
     virtual void _InitializeFinalStates();
+    virtual ISect_Type _IntersectNonEmptyCore(Symbol*, StateSet);
 
 public:
     ProjectionAutomaton(SymbolicAutomaton* aut, Formula_ptr form) : SymbolicAutomaton(form), _aut(aut) { this->_InitializeAutomaton(); }
 
     virtual StateSet Pre(Symbol*, StateSet);
-    virtual ISect_Type IntersectNonEmpty(Symbol*, StateSet);
     virtual void dump();
 };
 
@@ -162,13 +163,13 @@ protected:
     virtual void _InitializeAutomaton();
     virtual void _InitializeInitialStates();
     virtual void _InitializeFinalStates();
+    virtual ISect_Type _IntersectNonEmptyCore(Symbol*, StateSet);
 
     std::shared_ptr<LeafAutomaton_Type> _base_automaton;
     void _RenameStates();
 
 public:
     BaseAutomaton(LeafAutomaton_Type* aut, Formula_ptr form) : SymbolicAutomaton(form), _base_automaton(aut) { this->_InitializeAutomaton(); }
-    virtual ISect_Type IntersectNonEmpty(Symbol*, StateSet);
     virtual StateSet Pre(Symbol*, StateSet);
     virtual void baseAutDump();
 };
