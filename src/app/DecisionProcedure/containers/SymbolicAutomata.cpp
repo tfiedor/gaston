@@ -133,10 +133,14 @@ SymbolicAutomaton::ISect_Type ProjectionAutomaton::IntersectNonEmpty(ProjectionA
     }
 
     // push projetionFixPoint to worklist?
-    // TODO: VAR FOR PROJECTION YOU NOOB
-    ProjectionAutomaton::Symbol* symbolZero = new ZeroSymbol(symbol->GetTrack(), 0, '0');
-    ProjectionAutomaton::Symbol* symbolOne = new ZeroSymbol(symbol->GetTrack(), 0, '1');
+    // Do projection for more variables, not just one...
+    assert(this->_projected_vars->size() == 1);
+    auto var = this->_projected_vars->begin();
+    ProjectionAutomaton::Symbol *symbolZero = new ZeroSymbol(symbol->GetTrack(), (*var), '0');
+    ProjectionAutomaton::Symbol *symbolOne = new ZeroSymbol(symbol->GetTrack(), (*var), '1');
 
+    std::cout << (*symbolZero) << "\n";
+    std::cout << (*symbolOne) << "\n";
     #if optimisation
        // in some cases, we can go down with symbol and split later
     #endif
@@ -187,16 +191,11 @@ SymbolicAutomaton::ISect_Type BaseAutomaton::IntersectNonEmpty(BaseAutomaton::Sy
         tmp = std::make_pair(std::shared_ptr<MacroStateSet>(preFinal), preFinal->Intersects(this->_initialStates.get()));
     }
 
-    std::cout << "Returning: \n";
-    tmp.first->dump();
-    std::cout << " and " << tmp.second << "\n";
-
     return tmp;
 }
 
 SymbolicAutomaton::StateSet BaseAutomaton::Pre(SymbolicAutomaton::Symbol* symbol, SymbolicAutomaton::StateSet states) {
     // Clean MTBDD
-    //FixPoint_MTBDD nullary = new FixPoint_MTBDD(new MacroStateSet());
     std::cout << "[*] Computing Pre(" << (*symbol) << ")\n";
     std::cout << "For: ";
     states->dump();

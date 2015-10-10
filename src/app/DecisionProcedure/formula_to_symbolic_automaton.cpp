@@ -12,7 +12,7 @@ template<class TemplatedAutomaton>
 SymbolicAutomaton* baseToSymbolicAutomaton(ASTForm* form, bool doComplement) {
     Automaton aut;
     form->toUnaryAutomaton(aut, doComplement);
-    return new TemplatedAutomaton(new Automaton(aut));
+    return new TemplatedAutomaton(new Automaton(aut), form);
 }
 
 SymbolicAutomaton* ASTForm_True::toSymbolicAutomaton(bool doComplement) {
@@ -62,7 +62,7 @@ SymbolicAutomaton* ASTForm_And::toSymbolicAutomaton(bool doComplement) {
     lhs_aut = this->f1->toSymbolicAutomaton(doComplement);
     SymbolicAutomaton* rhs_aut;
     rhs_aut = this->f2->toSymbolicAutomaton(doComplement);
-    return new IntersectionAutomaton(lhs_aut, rhs_aut);
+    return new IntersectionAutomaton(lhs_aut, rhs_aut, this);
 }
 
 SymbolicAutomaton* ASTForm_Or::toSymbolicAutomaton(bool doComplement) {
@@ -71,17 +71,17 @@ SymbolicAutomaton* ASTForm_Or::toSymbolicAutomaton(bool doComplement) {
     lhs_aut = this->f1->toSymbolicAutomaton(doComplement);
     SymbolicAutomaton* rhs_aut;
     rhs_aut = this->f2->toSymbolicAutomaton(doComplement);
-    return new UnionAutomaton(lhs_aut, rhs_aut);
+    return new UnionAutomaton(lhs_aut, rhs_aut, this);
 }
 
 SymbolicAutomaton* ASTForm_Not::toSymbolicAutomaton(bool doComplement) {
     SymbolicAutomaton* aut;
     aut = this->f->toSymbolicAutomaton(!doComplement);
-    return new ComplementAutomaton(aut);
+    return new ComplementAutomaton(aut, this);
 }
 
 SymbolicAutomaton* ASTForm_Ex2::toSymbolicAutomaton(bool doComplement) {
     SymbolicAutomaton* aut;
     aut = this->f->toSymbolicAutomaton(doComplement);
-    return new ProjectionAutomaton(aut);
+    return new ProjectionAutomaton(aut, this);
 }

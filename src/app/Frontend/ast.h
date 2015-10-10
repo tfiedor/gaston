@@ -25,10 +25,11 @@
 #include "codetable.h"
 #include "printline.h"
 #include <vata/bdd_bu_tree_aut.hh>
-#include "../DecisionProcedure/containers/SymbolicAutomata.h"
 #include <cstring>
 
 using Automaton = VATA::BDDBottomUpTreeAut;
+
+class SymbolicAutomaton;
 
 #define VISITABLE() virtual void accept(VoidVisitor& v); \
   virtual AST* accept(TransformerVisitor &v)

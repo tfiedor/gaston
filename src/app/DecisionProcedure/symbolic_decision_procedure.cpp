@@ -9,6 +9,7 @@
 
 #include "environment.hh"
 #include "decision_procedures.hh"
+#include "containers/SymbolicAutomata.h"
 
 /**
  *
