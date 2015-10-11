@@ -18,12 +18,13 @@
 #include "../../Frontend/ident.h"
 #include "../../Frontend/ast.h"
 #include "StateSet.hh"
-#include "Term.h"
 #include <vector>
 #include <vata/bdd_bu_tree_aut.hh>
 #include <vata/parsing/timbuk_parser.hh>
 #include <vata/serialization/timbuk_serializer.hh>
 #include <vata/util/binary_relation.hh>
+
+class Term;
 
 enum AutType {INTERSECTION, UNION, PROJECTION, BASE, COMPLEMENT};
 enum AutSubType {FINAL, NONFINAL};
@@ -36,10 +37,10 @@ using BaseAut_States = VATA::Util::OrdVector<StateType>;
  * Base class for symbolic automata
  */
 class SymbolicAutomaton {
-// TODO: ADD POINTER TO FORMULA
 public:
     // < Used Typedefs >
     // TODO: Change to something more efficient
+    using Term_ptr               = std::shared_ptr<Term>;
     using Formula_ptr            = ASTForm*;
     using StateSet_ptr           = std::shared_ptr<MacroStateSet>;
     using StateSet               = Term*;

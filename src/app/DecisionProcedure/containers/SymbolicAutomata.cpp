@@ -10,6 +10,7 @@
 #include "SymbolicAutomata.h"
 #include "../environment.hh"
 #include "../decision_procedures.hh"
+#include "Term.h"
 
 StateType SymbolicAutomaton::stateCnt = 0;
 
@@ -50,11 +51,11 @@ SymbolicAutomaton::StateSet SymbolicAutomaton::GetInitialStates() {
 // <<<<<<<<<<<<<<<<<<<<<< BINARY AUTOMATA >>>>>>>>>>>>>>>>>>>>>>>>>>
 
 void BinaryOpAutomaton::_InitializeFinalStates() {
-    this->_finalStates = std::shared_ptr<Term>(new TermProduct(this->lhs_aut->GetFinalStates(), this->rhs_aut->GetFinalStates()));
+    //this->_finalStates = std::shared_ptr<Term>(new TermProduct(this->lhs_aut->GetFinalStates(), this->rhs_aut->GetFinalStates()));
 }
 
 void BinaryOpAutomaton::_InitializeInitialStates() {
-    this->_initialStates = std::shared_ptr<Term>(new TermProduct(this->lhs_aut->GetInitialStates(), this->rhs_aut->GetFinalStates()));
+    //this->_initialStates = std::shared_ptr<Term>(new TermProduct(this->lhs_aut->GetInitialStates(), this->rhs_aut->GetFinalStates()));
 }
 
 /**
@@ -72,16 +73,8 @@ SymbolicAutomaton::StateSet BinaryOpAutomaton::Pre(SymbolicAutomaton::Symbol* sy
 SymbolicAutomaton::ISect_Type BinaryOpAutomaton::_IntersectNonEmptyCore(SymbolicAutomaton::Symbol* symbol, SymbolicAutomaton::StateSet final) {
     assert(final != nullptr);
     assert(final->type == TERM_PRODUCT || final->type == TERM_UNION);
-    TermProduct* productFin = reinterpret_cast<TermProduct*>(final);
 
-    // Explore the left automaton
-    ISect_Type lhsResult = this->lhs_aut->IntersectNonEmpty(symbol, productFin->left.get());
-    // Explore the right automaton
-    ISect_Type rhsResult = this->rhs_aut->IntersectNonEmpty(symbol, productFin->right.get());
 
-    // Combine and return
-    ISect_Type combined = std::make_pair(std::shared_ptr<Term>(new TermProduct(lhsResult.first.get(), rhsResult.first.get())), this->_eval_result(lhsResult.second, rhsResult.second));
-    return combined;
 }
 
 /**
@@ -134,82 +127,10 @@ SymbolicAutomaton::StateSet ProjectionAutomaton::Pre(ProjectionAutomaton::Symbol
 }
 
 SymbolicAutomaton::ISect_Type ProjectionAutomaton::_IntersectNonEmptyCore(ProjectionAutomaton::Symbol* symbol, ProjectionAutomaton::StateSet final) {
-    ISect_Type resultZero;
-    ISect_Type projectionFixPoint;
-    ISect_Type resultOne;
-    WorkListSet worklist;
+    // TermSet passedApprox
 
-    // assert(final != nullptr);
-    // assert(final->type == TYPE_LIST)
-
-    // First iteration of fixpoint
     if(symbol == nullptr) {
-        ISect_Type nested = this->_aut->IntersectNonEmpty(symbol, final);
-        symbol = new ZeroSymbol();
-        projectionFixPoint = std::make_pair(std::shared_ptr<Term>(new TermList(nested.first)), nested.second);
 
-        worklist.push_back(nested.first);
-
-        // push projetionFixPoint to worklist?
-        // TODO: Do projection for more variables, not just one...
-        assert(this->_projected_vars->size() == 1);
-        auto var = this->_projected_vars->begin();
-        ProjectionAutomaton::Symbol *symbolZero = new ZeroSymbol(symbol->GetTrack(), (*var), '0');
-        ProjectionAutomaton::Symbol *symbolOne = new ZeroSymbol(symbol->GetTrack(), (*var), '1');
-
-        std::shared_ptr<TermList> newTerm;
-        while (!worklist.empty()) {
-
-            WorkListTerm_ptr term = worklist.back();
-            worklist.pop_back();
-            term->dump();
-            std::cout << "\n";
-
-            // TODO: Push more symbols;
-            resultOne = this->_aut->IntersectNonEmpty(symbolOne, term.get());
-            resultZero = this->_aut->IntersectNonEmpty(symbolZero, term.get());
-            bool newBool = resultOne.second || resultZero.second;
-            newTerm = std::make_shared<TermList>(resultZero.first, resultOne.first);
-
-            // Nothing to remove, nothing to compute
-            if(newTerm->IsEmpty()) {
-                continue;
-            }
-
-            TermList* fp_term = reinterpret_cast<TermList*>(projectionFixPoint.first.get());
-            newTerm->RemoveSubsumed(fp_term);
-            fp_term->Add(newTerm.get());
-
-            for(auto toEnqueue : newTerm->list) {
-                worklist.push_back(toEnqueue);
-            }
-
-            //projectionFixPoint = std::make_pair(std::shared_ptr<Term>(projectionFixPoint.first.get()), projectionFixPoint.second || newBool);
-            projectionFixPoint.second = projectionFixPoint.second || newBool;
-
-        }
-
-        // TODO: With continuation we may kill ourselves here somehow
-        delete symbolZero;
-        delete symbolOne;
-
-        return projectionFixPoint;
-    } else {
-        // TermSet fixpoint = (STListFin [], bool);
-        assert(this->_projected_vars->size() == 1);
-        auto var = this->_projected_vars->begin();
-        ProjectionAutomaton::Symbol *symbolZero = new ZeroSymbol(symbol->GetTrack(), (*var), '0');
-        ProjectionAutomaton::Symbol *symbolOne = new ZeroSymbol(symbol->GetTrack(), (*var), '1');
-
-        // for (term in approx) {
-        //      (resultZero, boolZero) = aut->IntersectNonEmpty(symbolZero, term);
-        //      (resultOne, boolOne    = aut->IntersectNonEmpty(symbolOne, term);
-        //      (new, newBool) = (STList [resultZero, resultOne], boolZero || boolOne)
-
-        //      trulyNew =  new.removeSubsumedBy(fixpoint);
-        //      projectionFixPoint = (STListFin remove_subsumed((fixpoint.first) ++ trulyNew, fixpoint.second || newBool
-
-        return projectionFixPoint;
     }
 }
 
@@ -236,14 +157,12 @@ SymbolicAutomaton::ISect_Type BaseAutomaton::_IntersectNonEmptyCore(BaseAutomato
     // Computing Intersection for epsilon symbol, i.e. only whether it intersects the initial states
     if(symbol == nullptr) {
         assert(initial->states.size() == 1 && "There should be only one initial state");
-        tmp = std::make_pair(this->_finalStates, initial->Intersects(final));
+        return std::make_pair(this->_finalStates, initial->Intersects(final));
     // Doing Pre(final), i.e. one step back from final states
     } else {
         TermBaseSet* preFinal = reinterpret_cast<TermBaseSet*>(this->Pre(symbol, approx));
-        tmp = std::make_pair(std::shared_ptr<Term>(preFinal), initial->Intersects(preFinal));
+        return std::make_pair(std::shared_ptr<Term>(preFinal), initial->Intersects(preFinal));
     }
-
-    return tmp;
 }
 
 SymbolicAutomaton::StateSet BaseAutomaton::Pre(SymbolicAutomaton::Symbol* symbol, SymbolicAutomaton::StateSet approx) {

@@ -6,11 +6,15 @@
 #define WSKS_TERM_H
 
 #include <vector>
+#include <list>
 #include <algorithm>
 #include "../utils/Symbol.h"
 #include "../mtbdd/ondriks_mtbdd.hh"
+#include "../containers/SymbolicAutomata.h"
 
 enum TermType {TERM_FIXPOINT, TERM_PRODUCT, TERM_UNION, TERM_BASE, TERM_LIST};
+
+class SymbolicAutomaton;
 
 class Term {
 public:
@@ -50,8 +54,8 @@ public:
 
     bool IsEmpty() { return false; };
 
-    TermProduct(Term* lhs, Term* rhs) : left(lhs), right(rhs) { type = TERM_PRODUCT; }
-    TermProduct(Term* lhs, Term* rhs, TermType t) : left(lhs), right(rhs) { type = t; }
+    TermProduct(Term_ptr lhs, Term_ptr rhs) : left(lhs), right(rhs) { type = TERM_PRODUCT; }
+    TermProduct(Term_ptr lhs, Term_ptr rhs, TermType t) : left(lhs), right(rhs) { type = t; }
 };
 
 class TermBaseSet : public Term {
@@ -136,27 +140,9 @@ public:
         this->list.push_back(first);
     }
 
-    TermList(Term* first) {
-        this->list.clear();
-        if(!first->IsEmpty()) {
-            this->list.push_back(std::shared_ptr<Term>(first));
-        }
-    }
-
     TermList(Term_ptr f, Term_ptr s) {
         this->list.push_back(f);
         this->list.push_back(s);
-    }
-
-    TermList(Term* first, Term* second) {
-        std::cout << first->type << " and " << second->type << "\n";
-        this->list.clear();
-        if(!first->IsEmpty()) {
-            this->list.push_back(std::shared_ptr<Term>(first));
-        }
-        if(!second->IsEmpty()) {
-            this->list.push_back(std::shared_ptr<Term>(second));
-        }
     }
 
     bool IsSubsumed(Term* t) {
@@ -204,83 +190,172 @@ public:
     }
 };
 
+class TermContProduct : public Term {
+    std::shared_ptr<SymbolicAutomaton> aut;
+    Term_ptr term;
+    SymbolType symbol;
+};
+
+class TermContSubset : public Term {
+    std::shared_ptr<SymbolicAutomaton> aut;
+    Term_ptr term;
+    SymbolType symbol;
+};
+
 class TermFixpointStates : public Term {
 public:
-    using FixpointType = std::vector<Term_ptr>;
+    using FixpointType = std::list<Term_ptr>;
+    using Aut_ptr = std::shared_ptr<SymbolicAutomaton>;
 
     using WorklistItemType = std::pair<Term_ptr, SymbolType>;
-    using WorklistType = std::vector<WorklistItemType>;
+    using WorklistType = std::list<WorklistItemType>;
+    using Symbols = std::list<SymbolType>;
 
-    using Symbols = std::vector<SymbolType>;
-
-    Term_ptr _approx;
-    FixpointType _fixpoint;
-    WorklistType _worklist;
-    bool _result;
-    Symbols _symbols;
+    enum FixpointTermSem {E_FIXTERM_FIXPOINT, E_FIXTERM_PRE};
 
     struct iterator {
     private:
-        TermFixpointStates& _termFixpoint;
+        TermFixpointStates &_termFixpoint;
         FixpointType::const_iterator _it;
 
     public:
-        Term_ptr getNext() {
-            if(_termFixpoint._fixpoint.cend() != _it) {
-                return *(_it++);
+        Term_ptr GetNext() {
+            assert(!_termFixpoint._fixpoint.empty());
+            assert(_termFixpoint._fixpoint.cend() != _it);
+
+            FixpointType::const_iterator succIt = _it;
+            ++succIt;
+
+            if (_termFixpoint._fixpoint.cend() != succIt) {
+                // if we can traverse
+                assert(nullptr != *_it);
+                return *(++_it);
             } else {
-                // We need to unfold the fixpoint
-                if (_termFixpoint.IsEmpty()) {
-                    // we get the fixpoint
-                    return nullptr;
+                // we need to refine the fixpoint
+                if (E_FIXTERM_FIXPOINT == _termFixpoint.GetSemantics()) {
+                    // we need to unfold the fixpoint
+                    if (_termFixpoint._worklist.empty()) {
+                        ++_it;
+
+                        return nullptr;
+                    } else {
+                        _termFixpoint.ComputeNextFixpoint();
+                        return this->GetNext();
+                    }
                 } else {
-                    _termFixpoint.computeNext();
-                    return this->getNext();
+                    // we need to compute pre of another guy
+                    assert(E_FIXTERM_PRE == _termFixpoint.GetSemantics());
+
+                    if (_termFixpoint._worklist.empty()) {
+                        Term_ptr term = nullptr;
+                        if ((term = _termFixpoint._sourceIt->GetNext()) != nullptr) {
+                            // if more are to be processed
+                            for (auto symbol : _termFixpoint._symList) {
+                                _termFixpoint._worklist.insert(_termFixpoint._worklist.cbegin(), std::make_pair(term, symbol));
+                            }
+
+                            _termFixpoint.ComputeNextPre();
+                            return this->GetNext();
+                        } else {
+                            // we are complete;
+                            ++_it;
+
+                            // TODO: kill soumething and make it behave like a fixpoint semantics
+
+                            return nullptr;
+                        }
+                    }
                 }
             }
         }
 
-        iterator(TermFixpointStates& termFixpoint) : _termFixpoint(termFixpoint), _it(_termFixpoint._fixpoint.begin()) {
+        iterator(TermFixpointStates &termFixpoint) : _termFixpoint(termFixpoint), _it(_termFixpoint._fixpoint.begin()) {
             assert(nullptr != &termFixpoint);
-            assert(!termFixpoint._fixpoint.empty());
-        }
-
-        iterator getIterator() {
-            return iterator(*this);
+            assert(!_termFixpoint._fixpoint.empty());
         }
     };
 
+    // Only for the pre-semantics to link into the source of the pre
+    Term_ptr _sourceTerm;
+    std::auto_ptr<iterator> _sourceIt;
+
+    Aut_ptr _aut;
+    FixpointType _fixpoint;
+    Term_ptr _fixpointGuard;
+    WorklistType _worklist;
+    Symbols _symList;
+    bool _bValue;
+
+    iterator GetIterator() {
+        return iterator(*this);
+    }
+
 private:
-    void computeNext() {
+    void ComputeNextFixpoint() {
         assert(!_worklist.empty());
 
-        // TODO: somewhere we should call getNext() on _approx and it might be interesting to try various strategies DFS/BFS
+        WorklistItemType item = _worklist.front();
+        _worklist.pop_front();
 
-        WorklistItemType item = _worklist.back();
-        _worklist.pop_back();
+        // TODO: CHANGE TO SHARED_PTR
+        ResultType result = _aut->IntersectNonEmpty(&item.second, item.first.get());
 
-        ResultType result; // ...compute the pre of term item.first over symbol item.second
-
-        /*if(result.is_subsumed_by(_fixpoint)) {
-            return;
-        }*/
+        // if(result.is_subsumed_by(fixpoint)) return;
 
         _fixpoint.push_back(result.first);
-        _result = _result || result.second;
-        for(auto symbol : _symbols) {
-            _worklist.push_back(std::make_pair(result.first, symbol));
+        _bValue = _bValue || result.second;
+        for(auto symbol : _symList) {
+            _worklist.insert(_worklist.cbegin(), std::make_pair(result.first, symbol));
         }
     }
 
+    void ComputeNextPre() {
+        assert(!_worklist.empty());
+
+        WorklistItemType item = _worklist.front();
+        _worklist.pop_front();
+
+        // TODO: CHANGE TO SHARED_PTR
+        ResultType result = _aut->IntersectNonEmpty(&item.second, item.first.get());
+
+        // if(result.is_subsumed_by(fixpoint) return;
+
+        _fixpoint.push_back(result.first);
+        _bValue = _bValue || result.second;
+    }
 public:
-    void dump() {}
-    TermFixpointStates(Term_ptr approx, Symbols symbols) {
-        type = TERM_FIXPOINT;
+    TermFixpointStates(
+            Term_ptr startingTerm,
+            SymbolType symbol,
+            bool initbValue) : // also differentiates between two constructors
+        _sourceTerm(nullptr),
+        _sourceIt(nullptr),
+        //_fixpoint({nullptr, startingTerm}),
+        //_worklist({startingTerm}),
+        _bValue(initbValue) {
+        this->_symList.push_back(symbol);
+        this->_fixpoint.push_front(startingTerm);
+        this->_fixpoint.push_front(nullptr);
+        for(auto symbol : this->_symList) {
+            this->_worklist.insert(this->_worklist.cbegin(), std::make_pair(startingTerm, symbol));
+        }
     }
 
-    TermFixpointStates() {
-        type = TERM_FIXPOINT;
+    TermFixpointStates(
+            Term_ptr sourceTerm,
+            SymbolType symbol) :
+            _sourceTerm(sourceTerm),
+            _fixpoint({nullptr}),
+            _worklist(),
+            _bValue(false) {
+        this->_symList.push_back(symbol);
     }
+
+    FixpointTermSem GetSemantics() const {
+        return (nullptr == _sourceTerm) ? E_FIXTERM_FIXPOINT : E_FIXTERM_PRE;
+    }
+
+    void dump() {}
 
     bool IsEmpty() {
         return this->_worklist.empty();
