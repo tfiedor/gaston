@@ -9,8 +9,11 @@
 #include "../utils/Symbol.h"
 #include "../mtbdd/ondriks_mtbdd.hh"
 
+enum TermType {TERM_FIXPOINT, TERM_PRODUCT, TERM_UNION, TERM_BASE, TERM_LIST};
+
 class Term {
 public:
+    TermType type;
     virtual void dump() = 0;
 };
 // Wow such clean!
@@ -24,7 +27,6 @@ using TermBaseSetStates = std::vector<BaseState>;
 using ResultType        = std::pair<Term_ptr, bool>;
 using SymbolType        = ZeroSymbol;
 
-enum TermType {TERM_FIXPOINT, TERM_PRODUCT, TERM_BASE, TERM_LIST};
 
 class TermProduct : public Term {
 public:
@@ -37,6 +39,9 @@ public:
         right->dump();
         std::cout << "}";
     }
+
+    TermProduct(Term* lhs, Term* rhs) : left(lhs), right(rhs) { type = TERM_PRODUCT; }
+    TermProduct(Term* lhs, Term* rhs, TermType t) : left(lhs), right(rhs) { type = t; }
 };
 
 class TermBaseSet : public Term {
@@ -62,14 +67,16 @@ public:
         return false;
     }
 
-    TermBaseSet() {}
+    TermBaseSet() { type = TERM_BASE; }
     TermBaseSet(TermBaseSetStates& states) {
+        type = TERM_BASE;
         for(auto state : states) {
             this->states.push_back(state);
         }
     }
 
     TermBaseSet(VATA::Util::OrdVector<unsigned int>& states) {
+        type = TERM_BASE;
         for(auto state : states) {
             this->states.push_back(state);
         }
@@ -87,6 +94,8 @@ public:
         }
         std::cout << "}";
     }
+
+    TermList() {type = TERM_LIST;}
 };
 
 class TermFixpointStates : public Term {
@@ -160,7 +169,11 @@ private:
 public:
     void dump() {}
     TermFixpointStates(Term_ptr approx, Symbols symbols) {
-        // ????
+        type = TERM_FIXPOINT;
+    }
+
+    TermFixpointStates() {
+        type = TERM_FIXPOINT;
     }
 
     bool empty() {
