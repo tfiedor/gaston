@@ -50,11 +50,11 @@ SymbolicAutomaton::StateSet SymbolicAutomaton::GetInitialStates() {
 // <<<<<<<<<<<<<<<<<<<<<< BINARY AUTOMATA >>>>>>>>>>>>>>>>>>>>>>>>>>
 
 void BinaryOpAutomaton::_InitializeFinalStates() {
-    // TODO: not implemented
+    this->_finalStates = std::shared_ptr<Term>(new TermProduct(this->lhs_aut->GetFinalStates(), this->rhs_aut->GetFinalStates()));
 }
 
 void BinaryOpAutomaton::_InitializeInitialStates() {
-    // TODO: not implemented
+    this->_initialStates = std::shared_ptr<Term>(new TermProduct(this->lhs_aut->GetInitialStates(), this->rhs_aut->GetFinalStates()));
 }
 
 /**
@@ -70,12 +70,18 @@ SymbolicAutomaton::StateSet BinaryOpAutomaton::Pre(SymbolicAutomaton::Symbol* sy
 }
 
 SymbolicAutomaton::ISect_Type BinaryOpAutomaton::_IntersectNonEmptyCore(SymbolicAutomaton::Symbol* symbol, SymbolicAutomaton::StateSet final) {
+    assert(final != nullptr);
+    assert(final->type == TERM_PRODUCT || final->type == TERM_UNION);
+    TermProduct* productFin = reinterpret_cast<TermProduct*>(final);
 
     // Explore the left automaton
-    ISect_Type lhsResult = this->lhs_aut->IntersectNonEmpty(symbol, final);
+    ISect_Type lhsResult = this->lhs_aut->IntersectNonEmpty(symbol, productFin->left.get());
     // Explore the right automaton
-    ISect_Type rhsResult = this->rhs_aut->IntersectNonEmpty(symbol, final);
-    //ISect_Type combined = (lhsResult rhsResult, this->_eval_result(lhsBool, rhsBool));
+    ISect_Type rhsResult = this->rhs_aut->IntersectNonEmpty(symbol, productFin->right.get());
+
+    // Combine and return
+    ISect_Type combined = std::make_pair(std::shared_ptr<Term>(new TermProduct(lhsResult.first.get(), rhsResult.first.get())), this->_eval_result(lhsResult.second, rhsResult.second));
+    return combined;
 }
 
 /**
