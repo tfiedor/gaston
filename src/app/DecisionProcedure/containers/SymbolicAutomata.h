@@ -43,9 +43,8 @@ public:
     using Term_ptr               = std::shared_ptr<Term>;
     using Formula_ptr            = ASTForm*;
     using StateSet_ptr           = std::shared_ptr<MacroStateSet>;
-    using StateSet               = Term*;
-    using Symbol                 = ZeroSymbol;
-    //using FixPoint_MTBDD         = VATA::MTBDDPkg::OndriksMTBDD<std::pair<MacroStateSet*, bool> >;
+    using StateSet               = Term_ptr;
+    using Symbol                 = ZeroSymbol;;
     using ISect_Type             = std::pair<Term_ptr, bool>;
     using LeafAutomaton_Type     = VATA::BDDBottomUpTreeAut;
     using StateToStateTranslator = VATA::AutBase::StateToStateTranslWeak;

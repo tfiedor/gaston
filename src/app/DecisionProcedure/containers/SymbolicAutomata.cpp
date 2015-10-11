@@ -32,7 +32,7 @@ SymbolicAutomaton::StateSet SymbolicAutomaton::GetFinalStates() {
         this->_InitializeFinalStates();
     }
 
-    return this->_finalStates.get();
+    return this->_finalStates;
 }
 
 /**
@@ -45,7 +45,7 @@ SymbolicAutomaton::StateSet SymbolicAutomaton::GetInitialStates() {
         this->_InitializeInitialStates();
     }
 
-    return this->_initialStates.get();
+    return this->_initialStates;
 }
 
 // <<<<<<<<<<<<<<<<<<<<<< BINARY AUTOMATA >>>>>>>>>>>>>>>>>>>>>>>>>>
@@ -130,7 +130,7 @@ SymbolicAutomaton::ISect_Type ProjectionAutomaton::_IntersectNonEmptyCore(Projec
     // TermSet passedApprox
 
     if(symbol == nullptr) {
-
+        return this->_aut->IntersectNonEmpty(symbol, final);
     }
 }
 
@@ -160,14 +160,15 @@ SymbolicAutomaton::ISect_Type BaseAutomaton::_IntersectNonEmptyCore(BaseAutomato
         return std::make_pair(this->_finalStates, initial->Intersects(final));
     // Doing Pre(final), i.e. one step back from final states
     } else {
-        TermBaseSet* preFinal = reinterpret_cast<TermBaseSet*>(this->Pre(symbol, approx));
-        return std::make_pair(std::shared_ptr<Term>(preFinal), initial->Intersects(preFinal));
+        StateSet preSet = this->Pre(symbol, approx);
+        TermBaseSet* preFinal = reinterpret_cast<TermBaseSet*>(preSet.get());
+        return std::make_pair(preSet, initial->Intersects(preFinal));
     }
 }
 
 SymbolicAutomaton::StateSet BaseAutomaton::Pre(SymbolicAutomaton::Symbol* symbol, SymbolicAutomaton::StateSet approx) {
     // We know...
-    TermBaseSet* base = reinterpret_cast<TermBaseSet*>(approx);
+    TermBaseSet* base = reinterpret_cast<TermBaseSet*>(approx.get());
     BaseAut_States states;
 
     for(auto state : base->states) {
@@ -180,7 +181,7 @@ SymbolicAutomaton::StateSet BaseAutomaton::Pre(SymbolicAutomaton::Symbol* symbol
         collector(temp);
     }
 
-    return new TermBaseSet(states);
+    return std::shared_ptr<Term>(new TermBaseSet(states));
 }
 
 void BaseAutomaton::_InitializeInitialStates() {

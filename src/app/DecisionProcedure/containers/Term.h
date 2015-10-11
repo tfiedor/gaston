@@ -298,7 +298,7 @@ private:
         _worklist.pop_front();
 
         // TODO: CHANGE TO SHARED_PTR
-        ResultType result = _aut->IntersectNonEmpty(&item.second, item.first.get());
+        ResultType result = _aut->IntersectNonEmpty(&item.second, item.first);
 
         // if(result.is_subsumed_by(fixpoint)) return;
 
@@ -316,7 +316,7 @@ private:
         _worklist.pop_front();
 
         // TODO: CHANGE TO SHARED_PTR
-        ResultType result = _aut->IntersectNonEmpty(&item.second, item.first.get());
+        ResultType result = _aut->IntersectNonEmpty(&item.second, item.first);
 
         // if(result.is_subsumed_by(fixpoint) return;
 
