@@ -134,15 +134,21 @@ SymbolicAutomaton::StateSet ProjectionAutomaton::Pre(ProjectionAutomaton::Symbol
 }
 
 SymbolicAutomaton::ISect_Type ProjectionAutomaton::_IntersectNonEmptyCore(ProjectionAutomaton::Symbol* symbol, ProjectionAutomaton::StateSet final) {
+    ISect_Type resultZero;
     ISect_Type projectionFixPoint;
+    ISect_Type resultOne;
     WorkListSet worklist;
+
+    // assert(final != nullptr);
+    // assert(final->type == TYPE_LIST)
 
     // First iteration of fixpoint
     if(symbol == nullptr) {
-        projectionFixPoint = this->_aut->IntersectNonEmpty(symbol, final);
+        ISect_Type nested = this->_aut->IntersectNonEmpty(symbol, final);
         symbol = new ZeroSymbol();
+        projectionFixPoint = std::make_pair(std::shared_ptr<Term>(new TermList(nested.first)), nested.second);
 
-        worklist.push_back(projectionFixPoint.first);
+        worklist.push_back(nested.first);
 
         // push projetionFixPoint to worklist?
         // TODO: Do projection for more variables, not just one...
@@ -151,21 +157,36 @@ SymbolicAutomaton::ISect_Type ProjectionAutomaton::_IntersectNonEmptyCore(Projec
         ProjectionAutomaton::Symbol *symbolZero = new ZeroSymbol(symbol->GetTrack(), (*var), '0');
         ProjectionAutomaton::Symbol *symbolOne = new ZeroSymbol(symbol->GetTrack(), (*var), '1');
 
+        std::shared_ptr<TermList> newTerm;
         while (!worklist.empty()) {
+
             WorkListTerm_ptr term = worklist.back();
             worklist.pop_back();
+            term->dump();
+            std::cout << "\n";
 
             // TODO: Push more symbols;
-            ISect_Type resultZero = this->_aut->IntersectNonEmpty(symbolZero, term.get());
-            ISect_Type resultOne = this->_aut->IntersectNonEmpty(symbolOne, term.get());
+            resultOne = this->_aut->IntersectNonEmpty(symbolOne, term.get());
+            resultZero = this->_aut->IntersectNonEmpty(symbolZero, term.get());
+            bool newBool = resultOne.second || resultZero.second;
+            newTerm = std::make_shared<TermList>(resultZero.first, resultOne.first);
 
-            bool result = resultOne.second || resultZero.second;
-            //combine (new, newbool) = (STListFin [resultZero, resultOne], boolZero || boolOne)
-            std::cout << "combined:\n";
+            // Nothing to remove, nothing to compute
+            if(newTerm->IsEmpty()) {
+                continue;
+            }
 
-            // trulyNew = new.removeSubsumedBy(projectionFixpoint);
-            // worklist.insertAll(trulyNew);
-            // projectionFixPoint = (STListFin removeSubsumed((fst fixpoint) ++ trulyNew), (scd fixpoint) || newBool)
+            TermList* fp_term = reinterpret_cast<TermList*>(projectionFixPoint.first.get());
+            newTerm->RemoveSubsumed(fp_term);
+            fp_term->Add(newTerm.get());
+
+            for(auto toEnqueue : newTerm->list) {
+                worklist.push_back(toEnqueue);
+            }
+
+            //projectionFixPoint = std::make_pair(std::shared_ptr<Term>(projectionFixPoint.first.get()), projectionFixPoint.second || newBool);
+            projectionFixPoint.second = projectionFixPoint.second || newBool;
+
         }
 
         // TODO: With continuation we may kill ourselves here somehow
@@ -175,7 +196,6 @@ SymbolicAutomaton::ISect_Type ProjectionAutomaton::_IntersectNonEmptyCore(Projec
         return projectionFixPoint;
     } else {
         // TermSet fixpoint = (STListFin [], bool);
-
         assert(this->_projected_vars->size() == 1);
         auto var = this->_projected_vars->begin();
         ProjectionAutomaton::Symbol *symbolZero = new ZeroSymbol(symbol->GetTrack(), (*var), '0');
@@ -230,12 +250,12 @@ SymbolicAutomaton::StateSet BaseAutomaton::Pre(SymbolicAutomaton::Symbol* symbol
     // We know...
     TermBaseSet* base = reinterpret_cast<TermBaseSet*>(approx);
     BaseAut_States states;
+
     for(auto state : base->states) {
         BaseAut_MTBDD* preState = getMTBDDForStateTuple(*this->_base_automaton, StateTuple({state}));
 
         MaskerFunctor masker;
         const BaseAut_MTBDD &temp = masker(*preState, *(symbol->GetMTBDD()));
-        std::cout << BaseAut_MTBDD::DumpToDot({&temp}) << "\n";
 
         BaseCollectorFunctor collector(states);
         collector(temp);

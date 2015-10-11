@@ -6,6 +6,7 @@
 #define WSKS_TERM_H
 
 #include <vector>
+#include <algorithm>
 #include "../utils/Symbol.h"
 #include "../mtbdd/ondriks_mtbdd.hh"
 
@@ -15,6 +16,8 @@ class Term {
 public:
     TermType type;
     virtual void dump() = 0;
+    virtual bool IsSubsumed(Term* t) = 0;
+    virtual bool IsEmpty() = 0;
 };
 // Wow such clean!
 
@@ -40,6 +43,13 @@ public:
         std::cout << "}";
     }
 
+    bool IsSubsumed(Term* t) {
+        // TODO:
+        return false;
+    }
+
+    bool IsEmpty() { return false; };
+
     TermProduct(Term* lhs, Term* rhs) : left(lhs), right(rhs) { type = TERM_PRODUCT; }
     TermProduct(Term* lhs, Term* rhs, TermType t) : left(lhs), right(rhs) { type = t; }
 };
@@ -49,11 +59,16 @@ public:
     TermBaseSetStates states;
 
     void dump() {
+        std::cout << this->type;
         std::cout << "{";
         for(auto state : this->states) {
             std::cout << (state) << ",";
         }
         std::cout << "}";
+    }
+
+    bool IsEmpty() {
+        return this->states.size() == 0;
     }
 
     bool Intersects(TermBaseSet* rhs) {
@@ -67,17 +82,37 @@ public:
         return false;
     }
 
-    TermBaseSet() { type = TERM_BASE; }
-    TermBaseSet(TermBaseSetStates& states) {
+    bool IsSubsumed(Term* term) {
+        if(term->type != TERM_BASE) {
+            return false;
+        } else {
+            TermBaseSet *t = reinterpret_cast<TermBaseSet*>(term);
+            if(t->states.size() < this->states.size()) {
+                return false;
+            } else {
+                for(auto state : this->states) {
+                    auto isIn = std::find(t->states.begin(), t->states.end(), state);
+                    if(isIn == t->states.end()) {
+                        // Not in, false
+                        return false;
+                    }
+                }
+                return true;
+            }
+        }
+    }
+
+    TermBaseSet() : states() { type = TERM_BASE; }
+    TermBaseSet(TermBaseSetStates& s) : states()  {
         type = TERM_BASE;
-        for(auto state : states) {
+        for(auto state : s) {
             this->states.push_back(state);
         }
     }
 
-    TermBaseSet(VATA::Util::OrdVector<unsigned int>& states) {
+    TermBaseSet(VATA::Util::OrdVector<unsigned int>& s) : states()  {
         type = TERM_BASE;
-        for(auto state : states) {
+        for(auto state : s) {
             this->states.push_back(state);
         }
     }
@@ -96,6 +131,77 @@ public:
     }
 
     TermList() {type = TERM_LIST;}
+
+    TermList(Term_ptr first) {
+        this->list.push_back(first);
+    }
+
+    TermList(Term* first) {
+        this->list.clear();
+        if(!first->IsEmpty()) {
+            this->list.push_back(std::shared_ptr<Term>(first));
+        }
+    }
+
+    TermList(Term_ptr f, Term_ptr s) {
+        this->list.push_back(f);
+        this->list.push_back(s);
+    }
+
+    TermList(Term* first, Term* second) {
+        std::cout << first->type << " and " << second->type << "\n";
+        this->list.clear();
+        if(!first->IsEmpty()) {
+            this->list.push_back(std::shared_ptr<Term>(first));
+        }
+        if(!second->IsEmpty()) {
+            this->list.push_back(std::shared_ptr<Term>(second));
+        }
+    }
+
+    bool IsSubsumed(Term* t) {
+        // TODO:
+        return false;
+    }
+
+    bool IsEmpty() {
+        return false;
+        std::cout << "this->list.size() = " << this->list.size() << "\n";
+        return this->list.size() == 0 ||
+               this->list.size() == 1 && this->list[0]->IsEmpty();
+    }
+
+    void RemoveSubsumed(TermList* fixpoint) {
+        if(this->IsEmpty()) {
+            std::cout << "Returning as empty";
+            return;
+        }
+        TermListStates temp;
+        temp.clear();
+        for(auto state : this->list) {
+            bool isSub = false;
+            for(auto tstate : fixpoint->list) {
+                if(isSub = state->IsSubsumed(tstate.get())) {
+                    break;
+                }
+            }
+            if(!isSub) {
+                temp.push_back(state);
+            }
+        }
+        // TODO: Very inefficient
+        //this->list = temp;
+        this->list.clear();
+        for(auto item : temp) {
+            this->list.push_back(item);
+        }
+    }
+
+    void Add(TermList* term) {
+        for(auto t: term->list) {
+            this->list.push_back(t);
+        }
+    }
 };
 
 class TermFixpointStates : public Term {
@@ -124,7 +230,7 @@ public:
                 return *(_it++);
             } else {
                 // We need to unfold the fixpoint
-                if (_termFixpoint.empty()) {
+                if (_termFixpoint.IsEmpty()) {
                     // we get the fixpoint
                     return nullptr;
                 } else {
@@ -176,8 +282,13 @@ public:
         type = TERM_FIXPOINT;
     }
 
-    bool empty() {
+    bool IsEmpty() {
         return this->_worklist.empty();
+    }
+
+    bool IsSubsumed(Term* t) {
+        // TODO:
+        return false;
     }
 };
 #endif //WSKS_TERM_H
