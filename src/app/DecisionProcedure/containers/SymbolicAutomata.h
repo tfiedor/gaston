@@ -49,7 +49,9 @@ public:
     using LeafAutomaton_Type     = VATA::BDDBottomUpTreeAut;
     using StateToStateTranslator = VATA::AutBase::StateToStateTranslWeak;
     using StateToStateMap        = std::unordered_map<StateType, StateType>;
-    using WorkListTerm           = MacroStateSet;
+    using WorkListTerm           = Term;
+    using WorkListTerm_raw       = Term*;
+    using WorkListTerm_ptr       = Term_ptr;
     using WorkListSet            = std::vector<std::shared_ptr<WorkListTerm>>;
 
     static StateType stateCnt;
@@ -247,24 +249,21 @@ public:
 // <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<< FUNCTORS >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
 
 GCC_DIAG_OFF(effc++)
-class FixPointCollectorFunctor : public VATA::MTBDDPkg::VoidApply1Functor<FixPointCollectorFunctor, std::pair<MacroStateSet*, bool>> {
+class BaseCollectorFunctor : public VATA::MTBDDPkg::VoidApply1Functor<BaseCollectorFunctor, BaseAut_States> {
     GCC_DIAG_ON(effc++)
-public:
-    using WorkListTerm           = MacroStateSet;
-    using WorkListSet            = std::vector<std::shared_ptr<WorkListTerm>>;
 private:
-    WorkListSet& collected;
+    BaseAut_States& collected;
 
 public:
     // < Public Constructors >
-    FixPointCollectorFunctor(std::vector<std::shared_ptr<WorkListTerm>> & l) : collected(l) {}
+    BaseCollectorFunctor(BaseAut_States& l) : collected(l) {}
 
     // < Public Methods >
     /**
      * @param lhs: operand of apply
      */
-    inline void ApplyOperation(std::pair<MacroStateSet*, bool> lhs) {
-        collected.push_back(std::shared_ptr<WorkListTerm>(lhs.first));
+    inline void ApplyOperation(BaseAut_States lhs) {
+        collected.insert(lhs);
     }
 };
 

@@ -7,6 +7,7 @@
 
 #include <vector>
 #include "../utils/Symbol.h"
+#include "../mtbdd/ondriks_mtbdd.hh"
 
 class Term {
 public:
@@ -59,6 +60,19 @@ public:
             }
         }
         return false;
+    }
+
+    TermBaseSet() {}
+    TermBaseSet(TermBaseSetStates& states) {
+        for(auto state : states) {
+            this->states.push_back(state);
+        }
+    }
+
+    TermBaseSet(VATA::Util::OrdVector<unsigned int>& states) {
+        for(auto state : states) {
+            this->states.push_back(state);
+        }
     }
 };
 

@@ -70,6 +70,7 @@ SymbolicAutomaton::StateSet BinaryOpAutomaton::Pre(SymbolicAutomaton::Symbol* sy
 }
 
 SymbolicAutomaton::ISect_Type BinaryOpAutomaton::_IntersectNonEmptyCore(SymbolicAutomaton::Symbol* symbol, SymbolicAutomaton::StateSet final) {
+
     // Explore the left automaton
     ISect_Type lhsResult = this->lhs_aut->IntersectNonEmpty(symbol, final);
     // Explore the right automaton
@@ -115,15 +116,15 @@ void ComplementAutomaton::dump() {
 // <<<<<<<<<<<<<<<<<<<<<< PROJECTION AUTOMATON >>>>>>>>>>>>>>>>>>>>>>>>>>
 
 void ProjectionAutomaton::_InitializeInitialStates() {
-
+    // TODO: Maybe not needed?
 }
 
 void ProjectionAutomaton::_InitializeFinalStates() {
-
+    // TODO: Maybe not needed?
 }
 
 SymbolicAutomaton::StateSet ProjectionAutomaton::Pre(ProjectionAutomaton::Symbol* symbol, ProjectionAutomaton::StateSet final) {
-
+    // Todo may be optimization
 }
 
 SymbolicAutomaton::ISect_Type ProjectionAutomaton::_IntersectNonEmptyCore(ProjectionAutomaton::Symbol* symbol, ProjectionAutomaton::StateSet final) {
@@ -134,41 +135,56 @@ SymbolicAutomaton::ISect_Type ProjectionAutomaton::_IntersectNonEmptyCore(Projec
     if(symbol == nullptr) {
         projectionFixPoint = this->_aut->IntersectNonEmpty(symbol, final);
         symbol = new ZeroSymbol();
-    // Next iteration
+
+        worklist.push_back(projectionFixPoint.first);
+
+        // push projetionFixPoint to worklist?
+        // TODO: Do projection for more variables, not just one...
+        assert(this->_projected_vars->size() == 1);
+        auto var = this->_projected_vars->begin();
+        ProjectionAutomaton::Symbol *symbolZero = new ZeroSymbol(symbol->GetTrack(), (*var), '0');
+        ProjectionAutomaton::Symbol *symbolOne = new ZeroSymbol(symbol->GetTrack(), (*var), '1');
+
+        while (!worklist.empty()) {
+            WorkListTerm_ptr term = worklist.back();
+            worklist.pop_back();
+
+            // TODO: Push more symbols;
+            ISect_Type resultZero = this->_aut->IntersectNonEmpty(symbolZero, term.get());
+            ISect_Type resultOne = this->_aut->IntersectNonEmpty(symbolOne, term.get());
+
+            bool result = resultOne.second || resultZero.second;
+            //combine (new, newbool) = (STListFin [resultZero, resultOne], boolZero || boolOne)
+            std::cout << "combined:\n";
+
+            // trulyNew = new.removeSubsumedBy(projectionFixpoint);
+            // worklist.insertAll(trulyNew);
+            // projectionFixPoint = (STListFin removeSubsumed((fst fixpoint) ++ trulyNew), (scd fixpoint) || newBool)
+        }
+
+        // TODO: With continuation we may kill ourselves here somehow
+        delete symbolZero;
+        delete symbolOne;
+
+        return projectionFixPoint;
     } else {
-        //TODO:projectionFixPoint = std::make_pair(std::shared_ptr<Term>(final), false);
+        // TermSet fixpoint = (STListFin [], bool);
+
+        assert(this->_projected_vars->size() == 1);
+        auto var = this->_projected_vars->begin();
+        ProjectionAutomaton::Symbol *symbolZero = new ZeroSymbol(symbol->GetTrack(), (*var), '0');
+        ProjectionAutomaton::Symbol *symbolOne = new ZeroSymbol(symbol->GetTrack(), (*var), '1');
+
+        // for (term in approx) {
+        //      (resultZero, boolZero) = aut->IntersectNonEmpty(symbolZero, term);
+        //      (resultOne, boolOne    = aut->IntersectNonEmpty(symbolOne, term);
+        //      (new, newBool) = (STList [resultZero, resultOne], boolZero || boolOne)
+
+        //      trulyNew =  new.removeSubsumedBy(fixpoint);
+        //      projectionFixPoint = (STListFin remove_subsumed((fixpoint.first) ++ trulyNew, fixpoint.second || newBool
+
+        return projectionFixPoint;
     }
-
-    // push projetionFixPoint to worklist?
-    // Do projection for more variables, not just one...
-    assert(this->_projected_vars->size() == 1);
-    auto var = this->_projected_vars->begin();
-    ProjectionAutomaton::Symbol *symbolZero = new ZeroSymbol(symbol->GetTrack(), (*var), '0');
-    ProjectionAutomaton::Symbol *symbolOne = new ZeroSymbol(symbol->GetTrack(), (*var), '1');
-
-    std::cout << (*symbolZero) << "\n";
-    std::cout << (*symbolOne) << "\n";
-    #if optimisation
-       // in some cases, we can go down with symbol and split later
-    #endif
-
-    while(!worklist.empty()) {
-        WorkListTerm* term = worklist.back().get();
-        worklist.pop_back();
-
-        //ISect_Type resultZero = this->_aut->IntersectNonEmpty(symbolZero, term);
-        //ISect_Type resultOne = this->_aut->IntersectNonEmpty(symbolOne, term);
-        // combine (new, newbool) = (STListFin [resultZero, resultOne], boolZero || boolOne)
-
-        // trulyNew = new.removeSubsumedBy(projectionFixpoint);
-        // worklist.insertAll(trulyNew);
-        // projectionFixPoint = (STListFin removeSubsumed((fst fixpoint) ++ trulyNew), (scd fixpoint) || newBool)
-    }
-
-    delete symbolZero;
-    delete symbolOne;
-
-    return projectionFixPoint;
 }
 
 void ProjectionAutomaton::dump() {
@@ -197,36 +213,29 @@ SymbolicAutomaton::ISect_Type BaseAutomaton::_IntersectNonEmptyCore(BaseAutomato
         tmp = std::make_pair(this->_finalStates, initial->Intersects(final));
     // Doing Pre(final), i.e. one step back from final states
     } else {
-        //TODO: MacroStateSet* preFinal = this->Pre(symbol, final);
-        //tmp = std::make_pair(std::shared_ptr<MacroStateSet>(preFinal), preFinal->Intersects(this->_initialStates.get()));
+        TermBaseSet* preFinal = reinterpret_cast<TermBaseSet*>(this->Pre(symbol, approx));
+        tmp = std::make_pair(std::shared_ptr<Term>(preFinal), initial->Intersects(preFinal));
     }
 
     return tmp;
 }
 
-SymbolicAutomaton::StateSet BaseAutomaton::Pre(SymbolicAutomaton::Symbol* symbol, SymbolicAutomaton::StateSet states) {
-    // Clean MTBDD
-    std::cout << "[*] Computing Pre(" << (*symbol) << ")\n";
-    std::cout << "For: ";
-    //TODO:states->dump();
-    std::cout << "\n";
+SymbolicAutomaton::StateSet BaseAutomaton::Pre(SymbolicAutomaton::Symbol* symbol, SymbolicAutomaton::StateSet approx) {
+    // We know...
+    TermBaseSet* base = reinterpret_cast<TermBaseSet*>(approx);
+    BaseAut_States states;
+    for(auto state : base->states) {
+        BaseAut_MTBDD* preState = getMTBDDForStateTuple(*this->_base_automaton, StateTuple({state}));
 
-    //TODO:SymbolicAutomaton::StateSet preStates = new MacroStateSet();
-
-    /*TODO:for(auto state : states->getMacroStates()) {
-        assert(state->type == STATE);
-
-        BaseAut_MTBDD* preState = getMTBDDForStateTuple(*this->_base_automaton, StateTuple({state->state}));
-        //                                                     Are you fucking kidding me -.- ---^
-
-        // There is leak maybe, fuck it though
         MaskerFunctor masker;
-        const BaseAut_MTBDD &temp = masker(*preState, *symbol->GetMTBDD());
+        const BaseAut_MTBDD &temp = masker(*preState, *(symbol->GetMTBDD()));
+        std::cout << BaseAut_MTBDD::DumpToDot({&temp}) << "\n";
 
-        // Collect
-    }*/
+        BaseCollectorFunctor collector(states);
+        collector(temp);
+    }
 
-    //TODO:return preStates;
+    return new TermBaseSet(states);
 }
 
 void BaseAutomaton::_InitializeInitialStates() {
