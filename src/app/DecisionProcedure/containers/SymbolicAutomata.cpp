@@ -18,30 +18,18 @@ StateType SymbolicAutomaton::stateCnt = 0;
 SymbolicAutomaton::ISect_Type SymbolicAutomaton::IntersectNonEmpty(::SymbolicAutomaton::Symbol* symbol, StateSet approx) {
     // TODO: trimmedSymbol = symbol.keepOnly(aut.freeVars)
     // TODO: if((cRes = aut.cache_find(finalStateApprox, trimmedSymbol)) != _|_) { return res;}
-    std::cout << "Called IntersectNonEmpty()\n";
 
     if(approx != nullptr && approx->type == TERM_CONT_ISECT) {
         TermContProduct* cont = reinterpret_cast<TermContProduct*>(approx.get());
         approx = (cont->aut->IntersectNonEmpty(&cont->symbol, cont->term)).first;
     }
-    std::cout << "Checked if TERM_CONT_ISECT\n";
 
     if(approx != nullptr && approx->type == TERM_CONT_SUBSET) {
         TermContSubset* contS = reinterpret_cast<TermContSubset*>(approx.get());
         approx = (contS->aut->IntersectNonEmpty(&contS->symbol, contS->term)).first;
     }
-    std::cout << "Checked if TERM_CONT_SUBSET\n";
-    if(symbol != nullptr) {
-        std::cout << (*symbol) << " for automaton ";
-        approx->dump();
-        std::cout << "\n";
-    }
 
     ISect_Type result = this->_IntersectNonEmptyCore(symbol, approx);
-    std::cout << "IntersectNonEmpty():";
-    std::cout << "(" << result.second << ") with fixpoint '";
-    result.first->dump();
-    std::cout << "'\n";
     // aut.cache_insert(approx, symbol, result);
     return result;
 }
@@ -121,7 +109,7 @@ void ComplementAutomaton::_InitializeFinalStates() {
 }
 
 void ComplementAutomaton::_InitializeInitialStates() {
-    this->_initialStates = std::shared_ptr<Term>(new TermList(this->_aut->GetFinalStates()));
+    this->_finalStates = std::shared_ptr<Term>(new TermList(this->_aut->GetFinalStates()));
 }
 
 SymbolicAutomaton::StateSet ComplementAutomaton::Pre(SymbolicAutomaton::Symbol* symbol, SymbolicAutomaton::StateSet states) {
@@ -147,7 +135,7 @@ void ProjectionAutomaton::_InitializeInitialStates() {
 }
 
 void ProjectionAutomaton::_InitializeFinalStates() {
-    this->_initialStates = std::shared_ptr<Term>(new TermList(this->_aut->GetFinalStates()));
+    this->_finalStates = std::shared_ptr<Term>(new TermList(this->_aut->GetFinalStates()));
 }
 
 SymbolicAutomaton::StateSet ProjectionAutomaton::Pre(ProjectionAutomaton::Symbol* symbol, ProjectionAutomaton::StateSet final) {
@@ -156,7 +144,6 @@ SymbolicAutomaton::StateSet ProjectionAutomaton::Pre(ProjectionAutomaton::Symbol
 
 SymbolicAutomaton::ISect_Type ProjectionAutomaton::_IntersectNonEmptyCore(ProjectionAutomaton::Symbol* symbol, ProjectionAutomaton::StateSet final) {
     // TODO: final should have some structure
-    std::cout << "Commencing ProjectionAutomaton::_IntersectNonEmptyCore()\n";
 
     if(symbol == nullptr) {
         // Evaluate the zero unfoldings
@@ -182,19 +169,14 @@ SymbolicAutomaton::ISect_Type ProjectionAutomaton::_IntersectNonEmptyCore(Projec
             symNum <<= 1;// times 2
         }
 
-        // TODO: pass _aut
         TermFixpointStates* fixpoint = new TermFixpointStates(this->_aut.get(), result.first, symbols, result.second);
         TermFixpointStates::iterator it = fixpoint->GetIterator();
         Term_ptr term;
 
+        // TODO: There is some issue here
         while( ((term = it.GetNext()) != nullptr)) { }
         //while( ((term = it.GetNext()) != nullptr) && (!fixpoint->GetResult())) {}
         //                                            ^--- is this right?
-
-        std::cout << "ProjectionAutomaton::_IntersectNonEmptyCore():";
-        std::cout << "(" << fixpoint->GetResult() << ") with fixpoint '";
-        fixpoint->dump();
-        std::cout << "'\n";
 
         return std::make_pair(std::shared_ptr<Term>(fixpoint), fixpoint->GetResult());
     } else {
@@ -243,7 +225,6 @@ void BaseAutomaton::_InitializeAutomaton() {
 
 SymbolicAutomaton::ISect_Type BaseAutomaton::_IntersectNonEmptyCore(BaseAutomaton::Symbol* symbol, BaseAutomaton::StateSet approx) {
     // initState = {init}
-    std::cout << "Commencing BaseAutomaton::_IntersectNonEmptyCore()\n";
     ISect_Type tmp;
     TermBaseSet* initial = reinterpret_cast<TermBaseSet*>(this->_initialStates.get());
     TermBaseSet* final = reinterpret_cast<TermBaseSet*>(this->_finalStates.get());
@@ -262,7 +243,6 @@ SymbolicAutomaton::ISect_Type BaseAutomaton::_IntersectNonEmptyCore(BaseAutomato
 
 SymbolicAutomaton::StateSet BaseAutomaton::Pre(SymbolicAutomaton::Symbol* symbol, SymbolicAutomaton::StateSet approx) {
     // We know...
-    std::cout << "Commencing BaseAutomaton::Pre()\n";
     TermBaseSet* base = reinterpret_cast<TermBaseSet*>(approx.get());
     BaseAut_States states;
 

@@ -28,14 +28,16 @@ int decideWS1S_symbolically(SymbolicAutomaton& aut) {
     std::cout << "\n[*] Deciding WS1S Symbolically\n";
 
     Term_ptr finalApprox = aut.GetFinalStates();
+    #if (DEBUG_INITIAL_APPROX == true)
     finalApprox->dump();
-
+    std::cout << "\n";
+    #endif
 
     // TODO: Extracttype
     std::pair<std::shared_ptr<Term>, bool> res = aut.IntersectNonEmpty(nullptr, nullptr);
     #if (DEBUG_FIXPOINT == true)
     std::cout << "[!] Finished deciding WS1S formula with following fixpoint:\n";
-    //res.first->dump();
+    res.first->dump();
     std::cout << "\n";
     #endif
     if(res.second == true) {

@@ -16,6 +16,8 @@ enum TermType {TERM_FIXPOINT, TERM_PRODUCT, TERM_UNION, TERM_BASE, TERM_LIST, TE
 
 class SymbolicAutomaton;
 
+// TODO: Subsumption: We can maybe exploit something about the leafstates
+
 // < Usings >
 using Term_ptr          = std::shared_ptr<Term>;
 using TermProductStates = std::pair<Term_ptr, Term_ptr>;
@@ -83,7 +85,7 @@ public:
     void dump() {
         std::cout << "{";
         left->dump();
-        std::cout << ", ";
+        std::cout << " x ";
         right->dump();
         std::cout << "}";
     }
@@ -108,7 +110,6 @@ public:
     TermBaseSetStates states;
 
     void dump() {
-        std::cout << this->type;
         std::cout << "{";
         for(auto state : this->states) {
             std::cout << (state) << ",";
@@ -117,32 +118,16 @@ public:
     }
 
     bool IsSubsumedBy(std::list<Term_ptr>& fixpoint) {
-        std::cout << "IsSubsumedBy()? "; this->dump(); std::cout << "->" << this->states.size() << "\n";
-
-        std::cout << "{";
-        for(auto item : fixpoint) {
-            if(item == nullptr) continue;
-            item->dump();
-            std::cout << ",";
-        }
-        std::cout << "}\n";
-
         if(this->states.size() == 0) {
-            std::cout << "Yes it is subsumed\n";
             return true;
         }
 
-        std::cout << "Starting checking\n";
         for(auto item : fixpoint) {
             if(item == nullptr) continue;
-            std::cout << " -> "; item->dump();
             if(this->IsSubsumed(item.get())) {
-                std::cout << "true\n";
                 return true;
             }
-            std::cout << "\n";
         }
-
 
         return false;
     }
@@ -261,7 +246,6 @@ public:
                 //assert(nullptr != *_it);
                 return *(++_it);
             } else {
-                std::cout << "--";
                 // we need to refine the fixpoint
                 if (E_FIXTERM_FIXPOINT == _termFixpoint.GetSemantics()) {
                     // we need to unfold the fixpoint
@@ -324,33 +308,18 @@ private:
         assert(!_worklist.empty());
 
         WorklistItemType item = _worklist.front();
-        std::cout << "ComputeNextFixpoint->pop_front(): ";
-        std::cout << (item.second) << " -> ";
-        item.first->dump();
-        std::cout << "\n";
         _worklist.pop_front();
 
-        std::cout << "_aut->IntersectNonEmpty()\n";
         ResultType result = _aut->IntersectNonEmpty(&item.second, item.first);
-        std::cout << "Returned from nestedAut\n";
-        result.first->dump();
-        std::cout << " (" << result.second << ")\n";
+
 
         if(result.first->IsSubsumedBy(_fixpoint)) {
-            std::cout << "Is Subsumed\n";
             return;
         }
-
-        std::cout << "DO PICE UZ:";
-        result.first->dump();
-        std::cout <<"\n";
 
         _fixpoint.push_back(result.first);
         _bValue = _bValue || result.second;
         for(auto symbol : _symList) {
-            std::cout << "ComputeNextFixpoint()->insert(";
-            result.first->dump();
-            std::cout << ", " << (symbol) << ")\n";
             _worklist.insert(_worklist.cbegin(), std::make_pair(result.first, symbol));
         }
     }
