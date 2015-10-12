@@ -57,10 +57,12 @@ public:
     TermList() {type = TERM_LIST;}
 
     TermList(Term_ptr first) {
+        this->type = TERM_LIST;
         this->list.push_back(first);
     }
 
     TermList(Term_ptr f, Term_ptr s) {
+        this->type = TERM_LIST;
         this->list.push_back(f);
         this->list.push_back(s);
     }
@@ -101,8 +103,10 @@ public:
 
     bool IsEmpty() { return false; };
 
-    TermProduct(Term_ptr lhs, Term_ptr rhs) : left(lhs), right(rhs) { type = TERM_PRODUCT; }
-    TermProduct(Term_ptr lhs, Term_ptr rhs, TermType t) : left(lhs), right(rhs) { type = t; }
+    TermProduct(Term_ptr lhs, Term_ptr rhs) : left(lhs), right(rhs) {
+        type = TERM_PRODUCT; }
+    TermProduct(Term_ptr lhs, Term_ptr rhs, TermType t) : left(lhs), right(rhs) {
+        type = t; }
 };
 
 class TermBaseSet : public Term {

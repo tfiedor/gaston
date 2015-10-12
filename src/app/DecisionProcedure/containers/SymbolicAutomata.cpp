@@ -142,8 +142,27 @@ SymbolicAutomaton::StateSet ProjectionAutomaton::Pre(ProjectionAutomaton::Symbol
     assert(false && "Doing Pre on Projection Automaton!");
 }
 
+void initialize_symbols(std::list<ProjectionAutomaton::Symbol> &symbols, IdentList* vars) {
+    // Transform the symbols
+    unsigned int symNum = 1;
+    for(auto var = vars->begin(); var != vars->end(); ++var) {
+        // Pop symbol;
+        for(auto i = symNum; i != 0; --i) {
+            ProjectionAutomaton::Symbol symF = symbols.front();
+            symbols.pop_front();
+            ProjectionAutomaton::Symbol zero(symF.GetTrack(), (*var), '0');
+            ProjectionAutomaton::Symbol one(symF.GetTrack(), (*var), '1');
+            symbols.push_back(zero);
+            symbols.push_back(one);
+        }
+        symNum <<= 1;// times 2
+    }
+}
+
 SymbolicAutomaton::ISect_Type ProjectionAutomaton::_IntersectNonEmptyCore(ProjectionAutomaton::Symbol* symbol, ProjectionAutomaton::StateSet final) {
-    // TODO: final should have some structure
+    assert(final != nullptr);
+    assert(final->type == TERM_LIST);
+
 
     if(symbol == nullptr) {
         // Evaluate the zero unfoldings
@@ -155,19 +174,7 @@ SymbolicAutomaton::ISect_Type ProjectionAutomaton::_IntersectNonEmptyCore(Projec
         symbols.push_back(*symbol);
         // Transform the symbols
         ASTForm_uvf* form = reinterpret_cast<ASTForm_uvf*>(this->_form);
-        unsigned int symNum = 1;
-        for(auto var = form->vl->begin(); var != form->vl->end(); ++var) {
-            // Pop symbol;
-            for(auto i = symNum; i != 0; --i) {
-                Symbol symF = symbols.front();
-                symbols.pop_front();
-                Symbol zero(symF.GetTrack(), (*var), '0');
-                Symbol one(symF.GetTrack(), (*var), '1');
-                symbols.push_back(zero);
-                symbols.push_back(one);
-            }
-            symNum <<= 1;// times 2
-        }
+        initialize_symbols(symbols, form->vl);
 
         TermFixpointStates* fixpoint = new TermFixpointStates(this->_aut.get(), result.first, symbols, result.second);
         TermFixpointStates::iterator it = fixpoint->GetIterator();
@@ -185,19 +192,7 @@ SymbolicAutomaton::ISect_Type ProjectionAutomaton::_IntersectNonEmptyCore(Projec
         symbols.push_back(*symbol);
         // Transform the symbols
         ASTForm_uvf* form = reinterpret_cast<ASTForm_uvf*>(this->_form);
-        unsigned int symNum = 1;
-        for(auto var = form->vl->begin(); var != form->vl->end(); ++var) {
-            // Pop symbol;
-            for(auto i = symNum; i != 0; --i) {
-                Symbol symF = symbols.front();
-                symbols.pop_front();
-                Symbol zero(symF.GetTrack(), (*var), '0');
-                Symbol one(symF.GetTrack(), (*var), '1');
-                symbols.push_back(zero);
-                symbols.push_back(one);
-            }
-            symNum <<= 1;// times 2
-        }
+        initialize_symbols(symbols, form->vl);
 
         TermFixpointStates* fixpoint = new TermFixpointStates(this->_aut.get(), final, symbols);
         TermFixpointStates::iterator it = fixpoint->GetIterator();
