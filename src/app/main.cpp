@@ -625,7 +625,8 @@ int main(int argc, char *argv[]) {
 
 #if (DEBUG_BDDS == true)
 	StateHT allStates;
-	vataAutomaton.RemoveUnreachableStates(&allStates);
+	auto vataAut = vataAutomaton.RemoveUnreachableStates(&allStates);
+	vataAutomaton = vataAut.RemoveUselessStates();
 	TransMTBDD * tbdd = getMTBDDForStateTuple(vataAutomaton, Automaton::StateTuple({}));
 	std::cout << "Leaf : bdd\n";
 	std::cout << TransMTBDD::DumpToDot({tbdd}) << "\n\n";

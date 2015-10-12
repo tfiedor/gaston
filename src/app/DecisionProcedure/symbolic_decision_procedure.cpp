@@ -17,6 +17,7 @@
 // TODO: OPT: Subformulae to Automaton
 // TODO: OPT: Anti-prenexing
 // TODO: OPT: Pandareduction
+// TODO: OPT: Caching
 // TODO: (Counter)Example printing
 
 /**
@@ -26,15 +27,15 @@ int decideWS1S_symbolically(SymbolicAutomaton& aut) {
     // TODO: We assume we have ground formulae
     std::cout << "\n[*] Deciding WS1S Symbolically\n";
 
-    // finalStateApproximation = autPhi.GetFirstFinStateApprox();
-    // TODO: Do the approximation somehow
-    // TODO: Is it even needed?
+    Term_ptr finalApprox = aut.GetFinalStates();
+    finalApprox->dump();
+
 
     // TODO: Extracttype
     std::pair<std::shared_ptr<Term>, bool> res = aut.IntersectNonEmpty(nullptr, nullptr);
     #if (DEBUG_FIXPOINT == true)
     std::cout << "[!] Finished deciding WS1S formula with following fixpoint:\n";
-    res.first->dump();
+    //res.first->dump();
     std::cout << "\n";
     #endif
     if(res.second == true) {

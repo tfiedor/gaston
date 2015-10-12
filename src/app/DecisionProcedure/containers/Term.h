@@ -16,15 +16,6 @@ enum TermType {TERM_FIXPOINT, TERM_PRODUCT, TERM_UNION, TERM_BASE, TERM_LIST, TE
 
 class SymbolicAutomaton;
 
-class Term {
-public:
-    TermType type;
-    virtual void dump() = 0;
-    virtual bool IsSubsumed(Term* t) = 0;
-    virtual bool IsEmpty() = 0;
-};
-// Wow such clean!
-
 // < Usings >
 using Term_ptr          = std::shared_ptr<Term>;
 using TermProductStates = std::pair<Term_ptr, Term_ptr>;
@@ -34,6 +25,56 @@ using TermBaseSetStates = std::vector<BaseState>;
 using ResultType        = std::pair<Term_ptr, bool>;
 using SymbolType        = ZeroSymbol;
 
+class Term {
+public:
+    TermType type;
+    virtual void dump() = 0;
+    virtual bool IsSubsumed(Term* t) = 0;
+    virtual bool IsSubsumedBy(std::list<Term_ptr>& fixpoint) = 0;
+    virtual bool IsEmpty() = 0;
+};
+// Wow such clean!
+
+class TermList : public Term {
+public:
+    TermListStates list;
+
+    bool IsSubsumedBy(std::list<Term_ptr>& fixpoint) {
+        assert(false && "TermList.IsSubsumedBy() is not implemented yet~!");
+    }
+
+    void dump() {
+        std::cout << "{";
+        for(auto state : this->list) {
+            state->dump();
+            std::cout  << ",";
+        }
+        std::cout << "}";
+    }
+
+    TermList() {type = TERM_LIST;}
+
+    TermList(Term_ptr first) {
+        this->list.push_back(first);
+    }
+
+    TermList(Term_ptr f, Term_ptr s) {
+        this->list.push_back(f);
+        this->list.push_back(s);
+    }
+
+    bool IsSubsumed(Term* t) {
+        // TODO:
+        return false;
+    }
+
+    bool IsEmpty() {
+        return false;
+        std::cout << "this->list.size() = " << this->list.size() << "\n";
+        return this->list.size() == 0 ||
+               this->list.size() == 1 && this->list[0]->IsEmpty();
+    }
+};
 
 class TermProduct : public Term {
 public:
@@ -50,6 +91,10 @@ public:
     bool IsSubsumed(Term* t) {
         // TODO:
         return false;
+    }
+
+    bool IsSubsumedBy(std::list<Term_ptr>& fixpoint) {
+        assert(false && "TermProduct.IsSubsumedBy() is not implemented yet~!");
     }
 
     bool IsEmpty() { return false; };
@@ -69,6 +114,37 @@ public:
             std::cout << (state) << ",";
         }
         std::cout << "}";
+    }
+
+    bool IsSubsumedBy(std::list<Term_ptr>& fixpoint) {
+        std::cout << "IsSubsumedBy()? "; this->dump(); std::cout << "->" << this->states.size() << "\n";
+
+        std::cout << "{";
+        for(auto item : fixpoint) {
+            if(item == nullptr) continue;
+            item->dump();
+            std::cout << ",";
+        }
+        std::cout << "}\n";
+
+        if(this->states.size() == 0) {
+            std::cout << "Yes it is subsumed\n";
+            return true;
+        }
+
+        std::cout << "Starting checking\n";
+        for(auto item : fixpoint) {
+            if(item == nullptr) continue;
+            std::cout << " -> "; item->dump();
+            if(this->IsSubsumed(item.get())) {
+                std::cout << "true\n";
+                return true;
+            }
+            std::cout << "\n";
+        }
+
+
+        return false;
     }
 
     bool IsEmpty() {
@@ -122,79 +198,15 @@ public:
     }
 };
 
-class TermList : public Term {
-public:
-    TermListStates list;
-    void dump() {
-        std::cout << "{";
-        for(auto state : this->list) {
-            state->dump();
-            std::cout  << ",";
-        }
-        std::cout << "}";
-    }
-
-    TermList() {type = TERM_LIST;}
-
-    TermList(Term_ptr first) {
-        this->list.push_back(first);
-    }
-
-    TermList(Term_ptr f, Term_ptr s) {
-        this->list.push_back(f);
-        this->list.push_back(s);
-    }
-
-    bool IsSubsumed(Term* t) {
-        // TODO:
-        return false;
-    }
-
-    bool IsEmpty() {
-        return false;
-        std::cout << "this->list.size() = " << this->list.size() << "\n";
-        return this->list.size() == 0 ||
-               this->list.size() == 1 && this->list[0]->IsEmpty();
-    }
-
-    void RemoveSubsumed(TermList* fixpoint) {
-        if(this->IsEmpty()) {
-            std::cout << "Returning as empty";
-            return;
-        }
-        TermListStates temp;
-        temp.clear();
-        for(auto state : this->list) {
-            bool isSub = false;
-            for(auto tstate : fixpoint->list) {
-                if(isSub = state->IsSubsumed(tstate.get())) {
-                    break;
-                }
-            }
-            if(!isSub) {
-                temp.push_back(state);
-            }
-        }
-        // TODO: Very inefficient
-        //this->list = temp;
-        this->list.clear();
-        for(auto item : temp) {
-            this->list.push_back(item);
-        }
-    }
-
-    void Add(TermList* term) {
-        for(auto t: term->list) {
-            this->list.push_back(t);
-        }
-    }
-};
-
 class TermContProduct : public Term {
 public:
     std::shared_ptr<SymbolicAutomaton> aut;
     Term_ptr term;
     SymbolType symbol;
+
+    bool IsSubsumedBy(std::list<Term_ptr>& fixpoint) {
+        assert(false && "TermContProduct.IsSubsumedBy() is not implemented yet~!");
+    }
 
     TermContProduct(SymbolicAutomaton* a, Term_ptr t, SymbolType s) : aut(a), term(t), symbol(s) {
         this->type = TERM_CONT_ISECT;
@@ -206,6 +218,10 @@ public:
     std::shared_ptr<SymbolicAutomaton> aut;
     Term_ptr term;
     SymbolType symbol;
+
+    bool IsSubsumedBy(std::list<Term_ptr>& fixpoint) {
+        assert(false && "TermContSubset.IsSubsumedBy() is not implemented yet~!");
+    }
 
     TermContSubset(SymbolicAutomaton* a, Term_ptr t, SymbolType s) : aut(a), term(t), symbol(s) {
         this->type = TERM_CONT_SUBSET;
@@ -223,6 +239,10 @@ public:
 
     enum FixpointTermSem {E_FIXTERM_FIXPOINT, E_FIXTERM_PRE};
 
+    bool IsSubsumedBy(std::list<Term_ptr>& fixpoint) {
+        assert(false && "TermFixpointStates.IsSubsumedBy() is not implemented yet~!");
+    }
+
     struct iterator {
     private:
         TermFixpointStates &_termFixpoint;
@@ -238,9 +258,10 @@ public:
 
             if (_termFixpoint._fixpoint.cend() != succIt) {
                 // if we can traverse
-                assert(nullptr != *_it);
+                //assert(nullptr != *_it);
                 return *(++_it);
             } else {
+                std::cout << "--";
                 // we need to refine the fixpoint
                 if (E_FIXTERM_FIXPOINT == _termFixpoint.GetSemantics()) {
                     // we need to unfold the fixpoint
@@ -263,14 +284,13 @@ public:
                             for (auto symbol : _termFixpoint._symList) {
                                 _termFixpoint._worklist.insert(_termFixpoint._worklist.cbegin(), std::make_pair(term, symbol));
                             }
-
                             _termFixpoint.ComputeNextPre();
                             return this->GetNext();
                         } else {
                             // we are complete;
                             ++_it;
 
-                            // TODO: kill soumething and make it behave like a fixpoint semantics
+                            // TODO: kill something and make it behave like a fixpoint semantics
 
                             return nullptr;
                         }
@@ -291,7 +311,6 @@ public:
 
     Aut_ptr _aut;
     FixpointType _fixpoint;
-    Term_ptr _fixpointGuard;
     WorklistType _worklist;
     Symbols _symList;
     bool _bValue;
@@ -305,16 +324,33 @@ private:
         assert(!_worklist.empty());
 
         WorklistItemType item = _worklist.front();
+        std::cout << "ComputeNextFixpoint->pop_front(): ";
+        std::cout << (item.second) << " -> ";
+        item.first->dump();
+        std::cout << "\n";
         _worklist.pop_front();
 
+        std::cout << "_aut->IntersectNonEmpty()\n";
         ResultType result = _aut->IntersectNonEmpty(&item.second, item.first);
+        std::cout << "Returned from nestedAut\n";
+        result.first->dump();
+        std::cout << " (" << result.second << ")\n";
 
-        // TODO: THIS IS IMPORTANT
-        // if(result.is_subsumed_by(fixpoint)) return;
+        if(result.first->IsSubsumedBy(_fixpoint)) {
+            std::cout << "Is Subsumed\n";
+            return;
+        }
+
+        std::cout << "DO PICE UZ:";
+        result.first->dump();
+        std::cout <<"\n";
 
         _fixpoint.push_back(result.first);
         _bValue = _bValue || result.second;
         for(auto symbol : _symList) {
+            std::cout << "ComputeNextFixpoint()->insert(";
+            result.first->dump();
+            std::cout << ", " << (symbol) << ")\n";
             _worklist.insert(_worklist.cbegin(), std::make_pair(result.first, symbol));
         }
     }
@@ -327,45 +363,62 @@ private:
 
         ResultType result = _aut->IntersectNonEmpty(&item.second, item.first);
 
-        // TODO: THIS IS IMPORTANT
-        // if(result.is_subsumed_by(fixpoint) return;
+        if(result.first->IsSubsumedBy(_fixpoint)) {
+            return;
+        }
 
         _fixpoint.push_back(result.first);
         _bValue = _bValue || result.second;
     }
 public:
     TermFixpointStates(
+            SymbolicAutomaton* aut,
             Term_ptr startingTerm,
-            SymbolType symbol,
+            Symbols symList,
             bool initbValue) : // also differentiates between two constructors
         _sourceTerm(nullptr),
         _sourceIt(nullptr),
+        _aut(aut),
         //_fixpoint({nullptr, startingTerm}),
         //_worklist({startingTerm}),
         _bValue(initbValue) {
-        this->_symList.push_back(symbol);
         this->_fixpoint.push_front(startingTerm);
         this->_fixpoint.push_front(nullptr);
-        for(auto symbol : this->_symList) {
+        for(auto symbol : symList) {
+            this->_symList.push_back(symbol);
             this->_worklist.insert(this->_worklist.cbegin(), std::make_pair(startingTerm, symbol));
         }
     }
 
     TermFixpointStates(
+            SymbolicAutomaton* aut,
             Term_ptr sourceTerm,
-            SymbolType symbol) :
+            Symbols symList) :
             _sourceTerm(sourceTerm),
             _fixpoint({nullptr}),
+            _aut(aut),
             _worklist(),
             _bValue(false) {
-        this->_symList.push_back(symbol);
+        for(auto symbol : symList) {
+            this->_symList.push_back(symbol);
+        }
     }
 
     FixpointTermSem GetSemantics() const {
         return (nullptr == _sourceTerm) ? E_FIXTERM_FIXPOINT : E_FIXTERM_PRE;
     }
 
-    void dump() {}
+    void dump() {
+        std::cout << "{";
+        for(auto item : this->_fixpoint) {
+            if(item == nullptr) {
+                continue;
+            }
+            item->dump();
+            std::cout << ",";
+        }
+        std::cout << "}";
+    }
 
     bool IsEmpty() {
         return this->_worklist.empty();
