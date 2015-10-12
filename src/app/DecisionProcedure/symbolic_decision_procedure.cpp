@@ -12,6 +12,13 @@
 #include "containers/SymbolicAutomata.h"
 #include "containers/Term.h"
 
+// TODO: OPT: Pushing symbols down the formulae
+// TODO: OPT: Early Projection
+// TODO: OPT: Subformulae to Automaton
+// TODO: OPT: Anti-prenexing
+// TODO: OPT: Pandareduction
+// TODO: (Counter)Example printing
+
 /**
  *
  */
@@ -23,6 +30,7 @@ int decideWS1S_symbolically(SymbolicAutomaton& aut) {
     // TODO: Do the approximation somehow
     // TODO: Is it even needed?
 
+    // TODO: Extracttype
     std::pair<std::shared_ptr<Term>, bool> res = aut.IntersectNonEmpty(nullptr, nullptr);
     #if (DEBUG_FIXPOINT == true)
     std::cout << "[!] Finished deciding WS1S formula with following fixpoint:\n";
