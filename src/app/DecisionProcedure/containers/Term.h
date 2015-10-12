@@ -12,7 +12,7 @@
 #include "../mtbdd/ondriks_mtbdd.hh"
 #include "../containers/SymbolicAutomata.h"
 
-enum TermType {TERM_FIXPOINT, TERM_PRODUCT, TERM_UNION, TERM_BASE, TERM_LIST};
+enum TermType {TERM_FIXPOINT, TERM_PRODUCT, TERM_UNION, TERM_BASE, TERM_LIST, TERM_CONT_ISECT, TERM_CONT_SUBSET};
 
 class SymbolicAutomaton;
 
@@ -191,15 +191,25 @@ public:
 };
 
 class TermContProduct : public Term {
+public:
     std::shared_ptr<SymbolicAutomaton> aut;
     Term_ptr term;
     SymbolType symbol;
+
+    TermContProduct(SymbolicAutomaton* a, Term_ptr t, SymbolType s) : aut(a), term(t), symbol(s) {
+        this->type = TERM_CONT_ISECT;
+    }
 };
 
 class TermContSubset : public Term {
+public:
     std::shared_ptr<SymbolicAutomaton> aut;
     Term_ptr term;
     SymbolType symbol;
+
+    TermContSubset(SymbolicAutomaton* a, Term_ptr t, SymbolType s) : aut(a), term(t), symbol(s) {
+        this->type = TERM_CONT_SUBSET;
+    }
 };
 
 class TermFixpointStates : public Term {
@@ -297,9 +307,9 @@ private:
         WorklistItemType item = _worklist.front();
         _worklist.pop_front();
 
-        // TODO: CHANGE TO SHARED_PTR
         ResultType result = _aut->IntersectNonEmpty(&item.second, item.first);
 
+        // TODO: THIS IS IMPORTANT
         // if(result.is_subsumed_by(fixpoint)) return;
 
         _fixpoint.push_back(result.first);
@@ -315,9 +325,9 @@ private:
         WorklistItemType item = _worklist.front();
         _worklist.pop_front();
 
-        // TODO: CHANGE TO SHARED_PTR
         ResultType result = _aut->IntersectNonEmpty(&item.second, item.first);
 
+        // TODO: THIS IS IMPORTANT
         // if(result.is_subsumed_by(fixpoint) return;
 
         _fixpoint.push_back(result.first);
@@ -364,6 +374,10 @@ public:
     bool IsSubsumed(Term* t) {
         // TODO:
         return false;
+    }
+
+    bool GetResult() {
+        return this->_bValue;
     }
 };
 #endif //WSKS_TERM_H

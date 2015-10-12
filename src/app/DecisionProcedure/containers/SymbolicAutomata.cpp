@@ -7,18 +7,30 @@
  *
  *****************************************************************************/
 
+#include <list>
 #include "SymbolicAutomata.h"
+#include "Term.h"
 #include "../environment.hh"
 #include "../decision_procedures.hh"
-#include "Term.h"
 
 StateType SymbolicAutomaton::stateCnt = 0;
 
 SymbolicAutomaton::ISect_Type SymbolicAutomaton::IntersectNonEmpty(::SymbolicAutomaton::Symbol* symbol, StateSet approx) {
-    // TODO: trimmedSymbol = symbol.keepOnly(aut.freeVars);
-    // TODO: Cache: if((cRse = aut.cache_find(finalStateApprox, trimmedSymbol)) != _) { return cRes; }
+    // TODO: trimmedSymbol = symbol.keepOnly(aut.freeVars)
+    // TODO: if((cRes = aut.cache_find(finalStateApprox, trimmedSymbol)) != _|_) { return res;}
+
+    if(approx != nullptr && approx->type == TERM_CONT_ISECT) {
+        TermContProduct* cont = reinterpret_cast<TermContProduct*>(approx.get());
+        approx = (cont->aut->IntersectNonEmpty(&cont->symbol, cont->term)).first;
+    }
+
+    if(approx != nullptr && approx->type == TERM_CONT_SUBSET) {
+        TermContSubset* contS = reinterpret_cast<TermContSubset*>(approx.get());
+        approx = (contS->aut->IntersectNonEmpty(&contS->symbol, contS->term)).first;
+    }
 
     ISect_Type result = this->_IntersectNonEmptyCore(symbol, approx);
+    // aut.cache_insert(approx, symbol, result);
     return result;
 }
 
@@ -55,19 +67,14 @@ void BinaryOpAutomaton::_InitializeFinalStates() {
 }
 
 void BinaryOpAutomaton::_InitializeInitialStates() {
-    this->_initialStates = std::shared_ptr<Term>(new TermProduct(this->lhs_aut->GetInitialStates(), this->rhs_aut->GetFinalStates()));
+    this->_initialStates = std::shared_ptr<Term>(new TermProduct(this->lhs_aut->GetInitialStates(), this->rhs_aut->GetInitialStates()));
 }
 
 /**
  * Does the pre on the symbolic automaton through the @p symbol from @p states
  */
 SymbolicAutomaton::StateSet BinaryOpAutomaton::Pre(SymbolicAutomaton::Symbol* symbol, SymbolicAutomaton::StateSet states) {
-    // TODO: not implemented, do we need this?
-    // Pre left?
-    // Pre right?
-    // Combine???
-    // Profit!!!
-    return nullptr;
+    assert(false && "Doing Pre on BinaryOp Automaton!");
 }
 
 SymbolicAutomaton::ISect_Type BinaryOpAutomaton::_IntersectNonEmptyCore(SymbolicAutomaton::Symbol* symbol, SymbolicAutomaton::StateSet final) {
@@ -98,15 +105,15 @@ void BinaryOpAutomaton::dump() {
 // <<<<<<<<<<<<<<<<<<<<<< COMPLEMENT AUTOMATON >>>>>>>>>>>>>>>>>>>>>>>>>>
 
 void ComplementAutomaton::_InitializeFinalStates() {
-    // TODO:
+    this->_initialStates = std::shared_ptr<Term>(new TermList(this->_aut->GetInitialStates()));
 }
 
 void ComplementAutomaton::_InitializeInitialStates() {
-    // TODO:
+    this->_initialStates = std::shared_ptr<Term>(new TermList(this->_aut->GetFinalStates()));
 }
 
 SymbolicAutomaton::StateSet ComplementAutomaton::Pre(SymbolicAutomaton::Symbol* symbol, SymbolicAutomaton::StateSet states) {
-    // TODO:
+    assert(false && "Doing Pre on Complement Automaton!");
 }
 
 SymbolicAutomaton::ISect_Type ComplementAutomaton::_IntersectNonEmptyCore(ComplementAutomaton::Symbol* symbol,ComplementAutomaton::StateSet final) {
@@ -124,22 +131,45 @@ void ComplementAutomaton::dump() {
 // <<<<<<<<<<<<<<<<<<<<<< PROJECTION AUTOMATON >>>>>>>>>>>>>>>>>>>>>>>>>>
 
 void ProjectionAutomaton::_InitializeInitialStates() {
-    // TODO: Maybe not needed?
+    this->_initialStates = std::shared_ptr<Term>(new TermList(this->_aut->GetInitialStates()));
 }
 
 void ProjectionAutomaton::_InitializeFinalStates() {
-    // TODO: Maybe not needed?
+    this->_initialStates = std::shared_ptr<Term>(new TermList(this->_aut->GetFinalStates()));
 }
 
 SymbolicAutomaton::StateSet ProjectionAutomaton::Pre(ProjectionAutomaton::Symbol* symbol, ProjectionAutomaton::StateSet final) {
-    // Todo may be optimization
+    assert(false && "Doing Pre on Projection Automaton!");
 }
 
 SymbolicAutomaton::ISect_Type ProjectionAutomaton::_IntersectNonEmptyCore(ProjectionAutomaton::Symbol* symbol, ProjectionAutomaton::StateSet final) {
-    // TermSet passedApprox
+    // TODO: final should have some structure
 
     if(symbol == nullptr) {
-        return this->_aut->IntersectNonEmpty(symbol, final);
+        // Evaluate the zero unfoldings
+        ISect_Type result = this->_aut->IntersectNonEmpty(symbol, nullptr);
+
+        // TODO: More symbols should be pushed in
+        std::list<Symbol> symbols;
+        symbol = new ZeroSymbol();
+        symbols.insert(symbols.cbegin(), *symbol);
+
+        // TODO: pass _aut
+        TermFixpointStates fixpoint(result.first, *symbol, result.second);
+        TermFixpointStates::iterator it = fixpoint.GetIterator();
+        Term_ptr term;
+        // TODO: Some issue here
+        while( ((term = it.GetNext()) != nullptr) /*&& (!term.second)*/) {}
+
+        return std::make_pair(std::shared_ptr<Term>(&fixpoint), fixpoint.GetResult());
+    } else {
+        // TODO: More symbols should be pushed in
+        TermFixpointStates fixpoint(final, *symbol);
+        TermFixpointStates::iterator it = fixpoint.GetIterator();
+        Term_ptr term;
+        while (((term = it.GetNext()) != nullptr) /*&& (!term.second)*/) {}
+
+        return std::make_pair(std::shared_ptr<Term>(&fixpoint), fixpoint.GetResult());
     }
 }
 
