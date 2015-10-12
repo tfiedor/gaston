@@ -88,6 +88,7 @@ protected:
     std::shared_ptr<SymbolicAutomaton> lhs_aut;
     std::shared_ptr<SymbolicAutomaton> rhs_aut;
     bool (*_eval_result)(bool, bool);
+    bool (*_eval_early)(bool);
     virtual void _InitializeAutomaton() { this->_InitializeInitialStates(); this->_InitializeFinalStates(); }
     virtual void _InitializeInitialStates();
     virtual void _InitializeFinalStates();
@@ -113,6 +114,7 @@ public:
             : BinaryOpAutomaton(lhs, rhs, form) {
         this->_InitializeAutomaton();
         this->_eval_result = [](bool a, bool b) {return a && b; };
+        this->_eval_early = [](bool a) {return !a;};
     }
 };
 
@@ -127,6 +129,7 @@ public:
             : BinaryOpAutomaton(lhs, rhs, form) {
         this->_InitializeAutomaton();
         this->_eval_result = [](bool a, bool b) {return a || b; };
+        this->_eval_early = [](bool a) { return a;};
     }
 };
 
