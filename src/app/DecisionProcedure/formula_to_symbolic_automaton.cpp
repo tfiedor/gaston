@@ -4,6 +4,7 @@
 
 #include "../Frontend/ast.h"
 #include "../DecisionProcedure/containers/SymbolicAutomata.h"
+#include "../DecisionProcedure/environment.hh"
 #include <memory>
 
 // TODO: FUCKING PLUS IS MISSING!!!!
@@ -58,7 +59,7 @@ SymbolicAutomaton* ASTForm_Sub::toSymbolicAutomaton(bool doComplement) {
  * @param doComplement: true if we are making complementon
  */
 SymbolicAutomaton* ASTForm_And::toSymbolicAutomaton(bool doComplement) {
-    // TODO: doComplement should be better handled
+    // TODO: Add optimization of creating part of the base automata
     SymbolicAutomaton* lhs_aut;
     lhs_aut = this->f1->toSymbolicAutomaton(doComplement);
     SymbolicAutomaton* rhs_aut;
@@ -67,7 +68,7 @@ SymbolicAutomaton* ASTForm_And::toSymbolicAutomaton(bool doComplement) {
 }
 
 SymbolicAutomaton* ASTForm_Or::toSymbolicAutomaton(bool doComplement) {
-    // TODO: doComplement should be better handled
+    // TODO: Add optimization of creating part of the base automata
     SymbolicAutomaton* lhs_aut;
     lhs_aut = this->f1->toSymbolicAutomaton(doComplement);
     SymbolicAutomaton* rhs_aut;
@@ -75,13 +76,44 @@ SymbolicAutomaton* ASTForm_Or::toSymbolicAutomaton(bool doComplement) {
     return new UnionAutomaton(lhs_aut, rhs_aut, this);
 }
 
+bool is_base_automaton(ASTForm* f) {
+    return f->kind != aOr &&
+           f->kind != aAnd &&
+           f->kind != aEx2;
+}
+
 SymbolicAutomaton* ASTForm_Not::toSymbolicAutomaton(bool doComplement) {
+    #if (OPT_CREATE_QF_AUTOMATON == true)
+        // TODO: WE ARE MISSING COMPLEMENTATION
+        IdentList free, bound;
+        this->f->freeVars(&free, &bound);
+        if(bound.empty()) {
+            SymbolicAutomaton* baseAut = baseToSymbolicAutomaton<GenericBaseAutomaton>(this->f, false);
+            return new ComplementAutomaton(baseAut, this);
+        }
+    #endif
+
+    #if (OPT_DRAW_NEGATION_IN_BASE == true)
+    if(is_base_automaton(this->f)) {
+        return baseToSymbolicAutomaton<GenericBaseAutomaton>(this, !doComplement);
+    }
+    #endif
     SymbolicAutomaton* aut;
     aut = this->f->toSymbolicAutomaton(!doComplement);
     return new ComplementAutomaton(aut, this);
 }
 
 SymbolicAutomaton* ASTForm_Ex2::toSymbolicAutomaton(bool doComplement) {
+    #if (OPT_CREATE_QF_AUTOMATON == true)
+        // TODO: WE ARE MISSING COMPLEMENTATION
+        IdentList free, bound;
+        this->f->freeVars(&free, &bound);
+        if(bound.empty()) {
+            SymbolicAutomaton* baseAut = baseToSymbolicAutomaton<GenericBaseAutomaton>(this->f, false);
+            return new ComplementAutomaton(baseAut, this);
+        }
+    #endif
+
     SymbolicAutomaton* aut;
     aut = this->f->toSymbolicAutomaton(doComplement);
     return new ProjectionAutomaton(aut, this);

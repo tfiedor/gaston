@@ -29,6 +29,7 @@ AST* NegationUnfolder::visit(ASTForm_Not* form) {
             return new ASTForm_And(static_cast<ASTForm*>(lhs->accept(*this)), static_cast<ASTForm*>(rhs->accept(*this)), form->pos);
         // kind == aAnd
         } else {
+            assert(form->f->kind == aAnd);
             return new ASTForm_Or(static_cast<ASTForm*>(lhs->accept(*this)), static_cast<ASTForm*>(rhs->accept(*this)), form->pos);
         }
     } else {

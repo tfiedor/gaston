@@ -34,6 +34,11 @@ extern VarToTrackMap varMap;
 
 using Automaton = VATA::BDDBottomUpTreeAut;
 
+void reduce(Automaton &aut) {
+	auto aut1 = aut.RemoveUnreachableStates();
+	aut = aut1.RemoveUselessStates();
+}
+
 /**
  * Constructs automaton for unary automaton True
  *
@@ -79,6 +84,7 @@ void ASTForm_False::toUnaryAutomaton(Automaton &falseAutomaton, bool doComplemen
  * @param doComplement: whether automaton should be complemented
  */
 void ASTForm_Not::toUnaryAutomaton(Automaton &notAutomaton, bool doComplement) {
+	assert(this->f->kind != aOr && this->f->kind != aAnd && this->f->kind != aEx2 && "Negation should be only on leaves!");
 	// Inner formula is first conversed to unary automaton
 	this->f->toUnaryAutomaton(notAutomaton, true);
 }
@@ -98,6 +104,11 @@ void ASTForm_And::toUnaryAutomaton(Automaton &andAutomaton, bool doComplement) {
 	this->f1->toUnaryAutomaton(left, doComplement);
 	this->f2->toUnaryAutomaton(right, doComplement);
 
+	#if (OPT_REDUCE_AUTOMATA == true)
+	reduce(left);
+	reduce(right);
+	#endif
+
 	// TODO: Dangerous, not sure if this is valid!!!
 	// if CheckInclusion(left, right) returns 1, that means that left is
 	// smaller so for intersection of automata this means we only have to
@@ -115,6 +126,10 @@ void ASTForm_And::toUnaryAutomaton(Automaton &andAutomaton, bool doComplement) {
 	} else {
 		andAutomaton = Automaton::Intersection(left, right);
 	}
+
+	#if (OPT_REDUCE_AUTOMATA == true)
+	reduce(andAutomaton);
+	#endif
 
 	/*StateHT reachable;
 	andAutomaton.RemoveUnreachableStates(&reachable);*/
@@ -135,6 +150,11 @@ void ASTForm_Or::toUnaryAutomaton(Automaton &orAutomaton, bool doComplement) {
 	this->f1->toUnaryAutomaton(left, doComplement);
 	this->f2->toUnaryAutomaton(right, doComplement);
 
+	#if (OPT_REDUCE_AUTOMATA == true)
+	reduce(left);
+	reduce(right);
+	#endif
+
 	// TODO: This may be dangerous as well
 	// if CheckInclusion(left,right) returns 1, that means that right
 	// is bigger and so for union of automata we only have to use the
@@ -150,6 +170,10 @@ void ASTForm_Or::toUnaryAutomaton(Automaton &orAutomaton, bool doComplement) {
 	} else {
 		orAutomaton = Automaton::Union(left, right);
 	}
+
+	#if (OPT_REDUCE_AUTOMATA == true)
+	reduce(orAutomaton);
+	#endif
 
 	/*StateHT reachable;
 	orAutomaton.RemoveUnreachableStates(&reachable);*/

@@ -32,6 +32,7 @@ enum AutBaseType {BT_SUB, BT_IN, BT_EQF, BT_EQS, BT_LSS, BT_LEQ, BT_FO, BT_T, BT
 
 using BaseAut_States = VATA::Util::OrdVector<StateType>;
 
+#define DEBUG_BASE_AUTOMATA false
 
 /**
  * Base class for symbolic automata
@@ -65,7 +66,7 @@ protected:
     virtual void _InitializeAutomaton() = 0;
     virtual void _InitializeInitialStates() = 0;
     virtual void _InitializeFinalStates() = 0;
-    virtual ISect_Type _IntersectNonEmptyCore(Symbol*, StateSet) = 0;
+    virtual ISect_Type _IntersectNonEmptyCore(Symbol*, StateSet, bool) = 0;
 
 // < Public API >
 public:
@@ -75,7 +76,7 @@ public:
     virtual StateSet GetInitialStates();
     virtual StateSet GetFinalStates();
     virtual StateSet Pre(Symbol*, StateSet) = 0;
-    ISect_Type IntersectNonEmpty(Symbol*, StateSet);
+    ISect_Type IntersectNonEmpty(Symbol*, StateSet, bool);
 
     virtual void dump() = 0;
 };
@@ -92,7 +93,7 @@ protected:
     virtual void _InitializeAutomaton() { this->_InitializeInitialStates(); this->_InitializeFinalStates(); }
     virtual void _InitializeInitialStates();
     virtual void _InitializeFinalStates();
-    virtual ISect_Type _IntersectNonEmptyCore(Symbol*, StateSet);
+    virtual ISect_Type _IntersectNonEmptyCore(Symbol*, StateSet, bool);
 
 public:
     virtual StateSet Pre(Symbol*, StateSet);
@@ -142,7 +143,7 @@ protected:
     virtual void _InitializeAutomaton() { this->_InitializeInitialStates(); this->_InitializeFinalStates(); }
     virtual void _InitializeInitialStates();
     virtual void _InitializeFinalStates();
-    virtual ISect_Type _IntersectNonEmptyCore(Symbol*, StateSet);
+    virtual ISect_Type _IntersectNonEmptyCore(Symbol*, StateSet, bool);
 
 public:
     ComplementAutomaton(SymbolicAutomaton *aut, Formula_ptr form) : SymbolicAutomaton(form), _aut(aut) { this->_InitializeAutomaton(); }
@@ -167,7 +168,7 @@ protected:
     }
     virtual void _InitializeInitialStates();
     virtual void _InitializeFinalStates();
-    virtual ISect_Type _IntersectNonEmptyCore(Symbol*, StateSet);
+    virtual ISect_Type _IntersectNonEmptyCore(Symbol*, StateSet, bool);
 
 public:
     ProjectionAutomaton(SymbolicAutomaton* aut, Formula_ptr form) : SymbolicAutomaton(form), _aut(aut) { this->_InitializeAutomaton(); }
@@ -184,7 +185,7 @@ protected:
     virtual void _InitializeAutomaton();
     virtual void _InitializeInitialStates();
     virtual void _InitializeFinalStates();
-    virtual ISect_Type _IntersectNonEmptyCore(Symbol*, StateSet);
+    virtual ISect_Type _IntersectNonEmptyCore(Symbol*, StateSet, bool);
 
     std::shared_ptr<LeafAutomaton_Type> _base_automaton;
     void _RenameStates();
@@ -195,58 +196,104 @@ public:
     virtual void baseAutDump();
 };
 
+class GenericBaseAutomaton : public BaseAutomaton {
+public:
+    GenericBaseAutomaton(LeafAutomaton_Type* aut, Formula_ptr form) : BaseAutomaton(aut, form) { }
+    virtual void dump() { std::cout << "<Aut>";
+#if (DEBUG_BASE_AUTOMATA == true)
+        this->baseAutDump();
+        #endif
+    }
+};
+
 class SubAutomaton : public BaseAutomaton {
 public:
     SubAutomaton(LeafAutomaton_Type* aut, Formula_ptr form) : BaseAutomaton(aut, form) { }
-    virtual void dump() { std::cout << "Sub\n"; this->baseAutDump();}
+    virtual void dump() { std::cout << "Sub";
+        #if (DEBUG_BASE_AUTOMATA == true)
+        this->baseAutDump();
+        #endif
+    }
 };
 
 class TrueAutomaton : public BaseAutomaton {
 public:
     TrueAutomaton(LeafAutomaton_Type* aut, Formula_ptr form) : BaseAutomaton(aut, form) {}
-    virtual void dump() { std::cout << "True\n"; this->baseAutDump(); }
+    virtual void dump() { std::cout << "True";
+        #if (DEBUG_BASE_AUTOMATA == true)
+        this->baseAutDump();
+        #endif
+    }
 };
 
 class FalseAutomaton : public BaseAutomaton {
 public:
     FalseAutomaton(LeafAutomaton_Type* aut, Formula_ptr form) : BaseAutomaton(aut, form) {}
-    virtual void dump() { std::cout << "False\n"; this->baseAutDump(); }
+    virtual void dump() { std::cout << "False";
+        #if (DEBUG_BASE_AUTOMATA == true)
+        this->baseAutDump();
+        #endif
+    }
 };
 
 class InAutomaton : public BaseAutomaton {
 public:
     InAutomaton(LeafAutomaton_Type* aut, Formula_ptr form) : BaseAutomaton(aut, form) {}
-    virtual void dump() { std::cout << "True\n"; this->baseAutDump(); }
+    virtual void dump() { std::cout << "In";
+        #if (DEBUG_BASE_AUTOMATA == true)
+        this->baseAutDump();
+        #endif
+    }
 };
 
 class FirstOrderAutomaton : public BaseAutomaton {
 public:
     FirstOrderAutomaton(LeafAutomaton_Type* aut, Formula_ptr form) : BaseAutomaton(aut, form) {}
-    virtual void dump() { std::cout << "FirstOrder\n"; this->baseAutDump(); }
+    virtual void dump() { std::cout << "FirstOrder";
+        #if (DEBUG_BASE_AUTOMATA == true)
+        this->baseAutDump();
+        #endif
+    }
 };
 
 class EqualFirstAutomaton : public BaseAutomaton {
 public:
     EqualFirstAutomaton(LeafAutomaton_Type* aut, Formula_ptr form) : BaseAutomaton(aut, form) {}
-    virtual void dump() { std::cout << "Equal1\n"; this->baseAutDump(); }
+    virtual void dump() { std::cout << "Equal1";
+        #if (DEBUG_BASE_AUTOMATA == true)
+        this->baseAutDump();
+        #endif
+    }
 };
 
 class EqualSecondAutomaton : public BaseAutomaton {
 public:
     EqualSecondAutomaton(LeafAutomaton_Type* aut, Formula_ptr form) : BaseAutomaton(aut, form) {}
-    virtual void dump() { std::cout << "Equal2\n"; this->baseAutDump(); }
+    virtual void dump() { std::cout << "Equal2";
+        #if (DEBUG_BASE_AUTOMATA == true)
+        this->baseAutDump();
+        #endif
+    }
 };
 
 class LessAutomaton : public BaseAutomaton {
 public:
     LessAutomaton(LeafAutomaton_Type* aut, Formula_ptr form) : BaseAutomaton(aut, form) {}
-    virtual void dump() { std::cout << "Less\n"; this->baseAutDump(); }
+    virtual void dump() { std::cout << "Less";
+        #if (DEBUG_BASE_AUTOMATA == true)
+        this->baseAutDump();
+        #endif
+    }
 };
 
 class LessEqAutomaton : public BaseAutomaton {
 public:
     LessEqAutomaton(LeafAutomaton_Type* aut, Formula_ptr form) : BaseAutomaton(aut, form) {}
-    virtual void dump() { std::cout << "LessEq\n"; this->baseAutDump(); }
+    virtual void dump() { std::cout << "LessEq";
+        #if (DEBUG_BASE_AUTOMATA == true)
+        this->baseAutDump();
+        #endif
+    }
 };
 
 // <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<< FUNCTORS >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>

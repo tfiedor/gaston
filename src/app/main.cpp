@@ -47,6 +47,7 @@
 #include "DecisionProcedure/containers/SymbolicAutomata.h"
 #include "DecisionProcedure/visitors/BooleanUnfolder.h"
 #include "DecisionProcedure/visitors/UniversalQuantifierRemover.h"
+#include "DecisionProcedure/visitors/SyntaxRestricter.h"
 #include "DecisionProcedure/visitors/SecondOrderRestricter.h"
 #include "DecisionProcedure/visitors/PrenexNormalFormTransformer.h"
 #include "DecisionProcedure/visitors/Flattener.h"
@@ -388,6 +389,9 @@ int main(int argc, char *argv[]) {
 
 		ast->formula = (ASTForm *) (ast->formula)->toExistentionalPNF();
 	} else {
+		// Remove implication and stuff
+		SyntaxRestricter sr_visitor;
+		ast->formula = static_cast<ASTForm *>(ast->formula->accept(sr_visitor));
 		// Restrict to second order
 		SecondOrderRestricter sor_visitor;
 		ast->formula = static_cast<ASTForm *>(ast->formula->accept(sor_visitor));
@@ -587,7 +591,7 @@ int main(int argc, char *argv[]) {
 	} else {
 		std::cout << "[*] Constructing 'Symbolic' Automaton using gaston\n";
 		symAutomaton = std::shared_ptr<SymbolicAutomaton>((ast->formula)->toSymbolicAutomaton(false));
-		//symAutomaton->dump();
+		symAutomaton->dump();
 	}
 
 	timer_automaton.stop();

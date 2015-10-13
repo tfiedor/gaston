@@ -34,7 +34,7 @@ int decideWS1S_symbolically(SymbolicAutomaton& aut) {
     #endif
 
     // TODO: Extracttype
-    std::pair<std::shared_ptr<Term>, bool> res = aut.IntersectNonEmpty(nullptr, finalApprox);
+    std::pair<std::shared_ptr<Term>, bool> res = aut.IntersectNonEmpty(nullptr, finalApprox, false);
     #if (DEBUG_FIXPOINT == true)
     std::cout << "[!] Finished deciding WS1S formula with following fixpoint:\n";
     res.first->dump();

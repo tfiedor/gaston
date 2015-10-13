@@ -41,6 +41,7 @@ enum Decision {SATISFIABLE, UNSATISFIABLE, VALID, INVALID};
 #define DEBUG_VARIABLE_SETS false
 #define DEBUG_BDDS true
 #define DEBUG_FIXPOINT true
+#define DEBUG_INITIAL_APPROX true
 
 /**
  * Enabling the optimizations
@@ -52,4 +53,11 @@ enum Decision {SATISFIABLE, UNSATISFIABLE, VALID, INVALID};
 #define USE_BDDCACHE false 			// BDD Cache is temporary disable due to the memory leaks
 #define SMART_BINARY true
 
+/*********************************************
+ * NOVEL OPTIMIZATIONS IN SYMBOLIC COMPUTING *
+ *********************************************/
+
+#define OPT_DRAW_NEGATION_IN_BASE true
+#define OPT_CREATE_QF_AUTOMATON false
+#define OPT_REDUCE_AUTOMATA true
 #endif

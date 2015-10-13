@@ -31,18 +31,47 @@ class Term {
 public:
     TermType type;
     virtual void dump() = 0;
-    virtual bool IsSubsumed(Term* t) = 0;
     virtual bool IsSubsumedBy(std::list<Term_ptr>& fixpoint) = 0;
+    virtual bool IsSubsumed(Term* t) = 0;
     virtual bool IsEmpty() = 0;
 };
 // Wow such clean!
 
+#define DEBUG_TERM_SUBSUMPTION true
+
 class TermList : public Term {
 public:
     TermListStates list;
+    bool isComplement;
 
     bool IsSubsumedBy(std::list<Term_ptr>& fixpoint) {
-        assert(false && "TermList.IsSubsumedBy() is not implemented yet~!");
+        #if (DEBUG_TERM_SUBSUMPTION == true)
+        this->dump();
+        std::cout << " <?= ";
+        std::cout << "{";
+        for(auto item : fixpoint) {
+            if(item == nullptr) continue;
+            item->dump();
+            std::cout << ",";
+        }
+        std::cout << "}";
+        std::cout << "\n";
+        #endif
+
+        for(auto item : fixpoint) {
+            if(item == nullptr) continue;
+            if(this->isComplement) {
+                if (item->IsSubsumed(this)) {
+                    return true;
+                }
+            } else {
+                if (this->IsSubsumed(item.get())) {
+                    return true;
+                }
+            }
+        }
+
+        return false;
     }
 
     void dump() {
@@ -56,20 +85,38 @@ public:
 
     TermList() {type = TERM_LIST;}
 
-    TermList(Term_ptr first) {
+    TermList(Term_ptr first, bool isCompl) : isComplement(isCompl) {
         this->type = TERM_LIST;
         this->list.push_back(first);
     }
 
-    TermList(Term_ptr f, Term_ptr s) {
+    TermList(Term_ptr f, Term_ptr s, bool isCompl) : isComplement(isCompl) {
         this->type = TERM_LIST;
         this->list.push_back(f);
         this->list.push_back(s);
     }
 
     bool IsSubsumed(Term* t) {
-        // TODO:
-        return false;
+        if(t->type != TERM_LIST) {
+            std::cerr << "Warning: Testing subsumption of incompatible terms: '";
+            this->dump();
+            std::cerr << "' <?= '";
+            t->dump();
+            std::cerr << "'\n";
+        }
+        TermList* tt = reinterpret_cast<TermList*>(t);
+        for(auto item : this->list) {
+            bool subsumes = false;
+            for(auto tt_item : tt->list) {
+                if(item->IsSubsumed(tt_item.get())) {
+                    subsumes = true;
+                    break;
+                }
+            }
+            if(!subsumes) return false;
+        }
+
+        return true;
     }
 
     bool IsEmpty() {
@@ -216,7 +263,7 @@ public:
     }
 
     void dump() {
-        assert(false && "To do");
+        std::cout << "?!?";
     }
 
     bool IsSubsumed(Term *t) {
@@ -241,7 +288,7 @@ public:
     }
 
     void dump() {
-        assert(false && "To do");
+        std::cout << "???";
     }
 
     bool IsSubsumed(Term *t) {
@@ -336,6 +383,7 @@ public:
     WorklistType _worklist;
     Symbols _symList;
     bool _bValue;
+    bool _inComplement;
 
     iterator GetIterator() {
         return iterator(*this);
@@ -348,7 +396,7 @@ private:
         WorklistItemType item = _worklist.front();
         _worklist.pop_front();
 
-        ResultType result = _aut->IntersectNonEmpty(&item.second, item.first);
+        ResultType result = _aut->IntersectNonEmpty(&item.second, item.first, this->_inComplement);
 
 
         if(result.first->IsSubsumedBy(_fixpoint)) {
@@ -368,7 +416,7 @@ private:
         WorklistItemType item = _worklist.front();
         _worklist.pop_front();
 
-        ResultType result = _aut->IntersectNonEmpty(&item.second, item.first);
+        ResultType result = _aut->IntersectNonEmpty(&item.second, item.first, this->_inComplement);
 
         if(result.first->IsSubsumedBy(_fixpoint)) {
             return;
@@ -382,13 +430,15 @@ public:
             SymbolicAutomaton* aut,
             Term_ptr startingTerm,
             Symbols symList,
+            bool inComplement,
             bool initbValue) : // also differentiates between two constructors
         _sourceTerm(nullptr),
         _sourceIt(nullptr),
         _aut(aut),
         //_fixpoint({nullptr, startingTerm}),
         //_worklist({startingTerm}),
-        _bValue(initbValue) {
+        _bValue(initbValue),
+        _inComplement(inComplement) {
         this->_fixpoint.push_front(startingTerm);
         this->_fixpoint.push_front(nullptr);
         for(auto symbol : symList) {
@@ -400,12 +450,14 @@ public:
     TermFixpointStates(
             SymbolicAutomaton* aut,
             Term_ptr sourceTerm,
-            Symbols symList) :
+            Symbols symList,
+            bool inComplement) :
             _sourceTerm(sourceTerm),
             _fixpoint({nullptr}),
             _aut(aut),
             _worklist(),
-            _bValue(false) {
+            _bValue(false),
+            _inComplement(inComplement) {
         for(auto symbol : symList) {
             this->_symList.push_back(symbol);
         }
