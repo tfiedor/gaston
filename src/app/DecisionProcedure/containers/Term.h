@@ -73,10 +73,8 @@ public:
     }
 
     bool IsEmpty() {
-        return false;
-        std::cout << "this->list.size() = " << this->list.size() << "\n";
         return this->list.size() == 0 ||
-               this->list.size() == 1 && this->list[0]->IsEmpty();
+                (this->list.size() == 1 && this->list[0]->IsEmpty());
     }
 };
 
@@ -93,15 +91,31 @@ public:
     }
 
     bool IsSubsumed(Term* t) {
-        // TODO:
-        return false;
+        if(t->type != TERM_PRODUCT) {
+            // TODO: Maybe assert?
+            return false;
+        } else {
+            TermProduct *rhs = reinterpret_cast<TermProduct*>(t);
+            return (this->left->IsSubsumed(rhs->left.get())) && (this->right->IsSubsumed(rhs->right.get()));
+        }
     }
 
     bool IsSubsumedBy(std::list<Term_ptr>& fixpoint) {
-        assert(false && "TermProduct.IsSubsumedBy() is not implemented yet~!");
+        if(this->left->IsEmpty() && this->right->IsEmpty()) {
+            return true;
+        }
+
+        for(auto item : fixpoint) {
+            if(item == nullptr) continue;
+            if(this->IsSubsumed(item.get())) {
+                return true;
+            }
+        }
+
+        return false;
     }
 
-    bool IsEmpty() { return false; };
+    bool IsEmpty() { return this->left->IsEmpty() && this->right->IsEmpty(); };
 
     TermProduct(Term_ptr lhs, Term_ptr rhs) : left(lhs), right(rhs) {
         type = TERM_PRODUCT; }
@@ -200,6 +214,16 @@ public:
     TermContProduct(SymbolicAutomaton* a, Term_ptr t, SymbolType s) : aut(a), term(t), symbol(s) {
         this->type = TERM_CONT_ISECT;
     }
+
+    void dump() {
+        assert(false && "To do");
+    }
+
+    bool IsSubsumed(Term *t) {
+        assert(false && "To do");
+    }
+
+    bool IsEmpty() {return false;}
 };
 
 class TermContSubset : public Term {
@@ -215,6 +239,16 @@ public:
     TermContSubset(SymbolicAutomaton* a, Term_ptr t, SymbolType s) : aut(a), term(t), symbol(s) {
         this->type = TERM_CONT_SUBSET;
     }
+
+    void dump() {
+        assert(false && "To do");
+    }
+
+    bool IsSubsumed(Term *t) {
+        assert(false && "To do");
+    }
+
+    bool IsEmpty() {return false;}
 };
 
 class TermFixpointStates : public Term {

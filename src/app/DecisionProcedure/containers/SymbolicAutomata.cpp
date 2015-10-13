@@ -12,6 +12,9 @@
 #include "Term.h"
 #include "../environment.hh"
 #include "../decision_procedures.hh"
+#include "../containers/VarToTrackMap.hh"
+
+extern VarToTrackMap varMap;
 
 StateType SymbolicAutomaton::stateCnt = 0;
 
@@ -30,7 +33,7 @@ SymbolicAutomaton::ISect_Type SymbolicAutomaton::IntersectNonEmpty(::SymbolicAut
     }
 
     ISect_Type result = this->_IntersectNonEmptyCore(symbol, approx);
-    // aut.cache_insert(approx, symbol, result);
+    // TODO: aut.cache_insert(approx, symbol, result);
     return result;
 }
 
@@ -80,15 +83,16 @@ SymbolicAutomaton::StateSet BinaryOpAutomaton::Pre(SymbolicAutomaton::Symbol* sy
 SymbolicAutomaton::ISect_Type BinaryOpAutomaton::_IntersectNonEmptyCore(SymbolicAutomaton::Symbol* symbol, SymbolicAutomaton::StateSet final) {
     assert(final != nullptr);
     assert(final->type == TERM_PRODUCT || final->type == TERM_UNION);
-    // TODO: final to (STISectFin finalLhs finalRhs)
+    TermProduct* finalApprox = reinterpret_cast<TermProduct*>(final.get());
 
-    ISect_Type lhs_result = this->lhs_aut->IntersectNonEmpty(symbol, final);
+    ISect_Type lhs_result = this->lhs_aut->IntersectNonEmpty(symbol, finalApprox->left);
     if(this->_eval_early(lhs_result.second)) {
-        // return std::pair
-        // return (STISect lhsResult (TermContIsect lhs_aut finalRhs, symbol);
+        /*TermContProduct *rhsCont = new TermContProduct(this->rhs_aut.get(), finalApprox->right, *symbol);
+        Term_ptr leftCombined = std::shared_ptr<Term>(new TermProduct(lhs_result.first, std::shared_ptr<Term>(rhsCont)));
+        return std::make_pair(leftCombined, this->_eval_early(lhs_result.second));*/
     }
 
-    ISect_Type rhs_result = this->rhs_aut->IntersectNonEmpty(symbol, final);
+    ISect_Type rhs_result = this->rhs_aut->IntersectNonEmpty(symbol, finalApprox->right);
     Term_ptr combined = std::shared_ptr<Term>(new TermProduct(lhs_result.first, rhs_result.first));
     return std::make_pair(combined, this->_eval_result(lhs_result.second, rhs_result.second));
 }
@@ -150,8 +154,8 @@ void initialize_symbols(std::list<ProjectionAutomaton::Symbol> &symbols, IdentLi
         for(auto i = symNum; i != 0; --i) {
             ProjectionAutomaton::Symbol symF = symbols.front();
             symbols.pop_front();
-            ProjectionAutomaton::Symbol zero(symF.GetTrack(), (*var), '0');
-            ProjectionAutomaton::Symbol one(symF.GetTrack(), (*var), '1');
+            ProjectionAutomaton::Symbol zero(symF.GetTrack(), varMap[(*var)], '0');
+            ProjectionAutomaton::Symbol one(symF.GetTrack(), varMap[(*var)], '1');
             symbols.push_back(zero);
             symbols.push_back(one);
         }
@@ -162,13 +166,13 @@ void initialize_symbols(std::list<ProjectionAutomaton::Symbol> &symbols, IdentLi
 SymbolicAutomaton::ISect_Type ProjectionAutomaton::_IntersectNonEmptyCore(ProjectionAutomaton::Symbol* symbol, ProjectionAutomaton::StateSet final) {
     assert(final != nullptr);
     assert(final->type == TERM_LIST);
-
+    TermList* finalApprox = reinterpret_cast<TermList*>(final.get());
+    assert(finalApprox->list.size() == 1);
 
     if(symbol == nullptr) {
         // Evaluate the zero unfoldings
-        ISect_Type result = this->_aut->IntersectNonEmpty(symbol, nullptr);
+        ISect_Type result = this->_aut->IntersectNonEmpty(symbol, finalApprox->list[0]);
 
-        // TODO: REFACTOR -> This is not nice at all
         std::list<Symbol> symbols;
         symbol = new ZeroSymbol();
         symbols.push_back(*symbol);
@@ -238,6 +242,7 @@ SymbolicAutomaton::ISect_Type BaseAutomaton::_IntersectNonEmptyCore(BaseAutomato
 
 SymbolicAutomaton::StateSet BaseAutomaton::Pre(SymbolicAutomaton::Symbol* symbol, SymbolicAutomaton::StateSet approx) {
     // We know...
+    // TODO: Cache pre?
     TermBaseSet* base = reinterpret_cast<TermBaseSet*>(approx.get());
     BaseAut_States states;
 
