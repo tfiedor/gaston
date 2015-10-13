@@ -15,6 +15,7 @@
 #include "../mtbdd/void_apply1func.hh"
 #include "../mtbdd/ondriks_mtbdd.hh"
 #include "../utils/Symbol.h"
+#include "../environment.hh"
 #include "../../Frontend/ident.h"
 #include "../../Frontend/ast.h"
 #include "StateSet.hh"
@@ -31,8 +32,6 @@ enum AutSubType {FINAL, NONFINAL};
 enum AutBaseType {BT_SUB, BT_IN, BT_EQF, BT_EQS, BT_LSS, BT_LEQ, BT_FO, BT_T, BT_F};
 
 using BaseAut_States = VATA::Util::OrdVector<StateType>;
-
-#define DEBUG_BASE_AUTOMATA false
 
 /**
  * Base class for symbolic automata
@@ -75,7 +74,7 @@ public:
 
     virtual StateSet GetInitialStates();
     virtual StateSet GetFinalStates();
-    virtual StateSet Pre(Symbol*, StateSet) = 0;
+    virtual StateSet Pre(Symbol*, StateSet, bool) = 0;
     ISect_Type IntersectNonEmpty(Symbol*, StateSet, bool);
 
     virtual void dump() = 0;
@@ -96,7 +95,7 @@ protected:
     virtual ISect_Type _IntersectNonEmptyCore(Symbol*, StateSet, bool);
 
 public:
-    virtual StateSet Pre(Symbol*, StateSet);
+    virtual StateSet Pre(Symbol*, StateSet, bool);
     BinaryOpAutomaton(SymbolicAutomaton* lhs,
                       SymbolicAutomaton* rhs,
                       Formula_ptr form)
@@ -148,7 +147,7 @@ protected:
 public:
     ComplementAutomaton(SymbolicAutomaton *aut, Formula_ptr form) : SymbolicAutomaton(form), _aut(aut) { this->_InitializeAutomaton(); }
 
-    virtual StateSet Pre(Symbol*, StateSet);
+    virtual StateSet Pre(Symbol*, StateSet, bool);
     virtual void dump();
 };
 
@@ -173,7 +172,7 @@ protected:
 public:
     ProjectionAutomaton(SymbolicAutomaton* aut, Formula_ptr form) : SymbolicAutomaton(form), _aut(aut) { this->_InitializeAutomaton(); }
 
-    virtual StateSet Pre(Symbol*, StateSet);
+    virtual StateSet Pre(Symbol*, StateSet, bool);
     virtual void dump();
 };
 
@@ -192,7 +191,7 @@ protected:
 
 public:
     BaseAutomaton(LeafAutomaton_Type* aut, Formula_ptr form) : SymbolicAutomaton(form), _base_automaton(aut) { this->_InitializeAutomaton(); }
-    virtual StateSet Pre(Symbol*, StateSet);
+    virtual StateSet Pre(Symbol*, StateSet, bool);
     virtual void baseAutDump();
 };
 
@@ -303,17 +302,51 @@ class BaseCollectorFunctor : public VATA::MTBDDPkg::VoidApply1Functor<BaseCollec
     GCC_DIAG_ON(effc++)
 private:
     BaseAut_States& collected;
+    bool _minusInteresect;
 
 public:
+    bool _isFirst;
     // < Public Constructors >
-    BaseCollectorFunctor(BaseAut_States& l) : collected(l) {}
+    BaseCollectorFunctor(BaseAut_States& l, bool minusIntersect) : collected(l), _minusInteresect(minusIntersect), _isFirst(true) {}
 
     // < Public Methods >
     /**
      * @param lhs: operand of apply
      */
-    inline void ApplyOperation(BaseAut_States lhs) {
-        collected.insert(lhs);
+    inline void ApplyOperation(BaseAut_States rhs) {
+        if(_minusInteresect) {
+            if(_isFirst) {
+                collected.insert(rhs);
+                return;
+            }
+            auto itLhs = collected.begin();
+            auto itRhs = rhs.begin();
+            BaseAut_States intersection;
+
+            while ((itLhs != collected.end()) || (itRhs != rhs.end()))
+            {	// until we drop out of the array (or find a common element)
+                if (*itLhs == *itRhs)
+                {	// in case there exists a common element
+                    intersection.insert(*itLhs);
+                    ++itLhs;
+                    ++itRhs;
+                }
+                else if (*itLhs < *itRhs)
+                {	// in case the element in lhs is smaller
+                    ++itLhs;
+                }
+                else
+                {	// in case the element in rhs is smaller
+                    assert(*itLhs > *itRhs);
+                    ++itRhs;
+                }
+            }
+
+            collected.clear();
+            collected.insert(intersection);
+        } else {
+            collected.insert(rhs);
+        }
     }
 };
 

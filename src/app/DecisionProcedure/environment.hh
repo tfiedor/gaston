@@ -40,8 +40,11 @@ enum Decision {SATISFIABLE, UNSATISFIABLE, VALID, INVALID};
 #define DEBUG_PRUNING_OF_FINAL_STATES false
 #define DEBUG_VARIABLE_SETS false
 #define DEBUG_BDDS true
+
+#define DEBUG_BASE_AUTOMATA false
 #define DEBUG_FIXPOINT true
 #define DEBUG_INITIAL_APPROX true
+#define DEBUG_INTERSECT_NON_EMPTY false
 
 /**
  * Enabling the optimizations

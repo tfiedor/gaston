@@ -99,7 +99,7 @@ SymbolicAutomaton* ASTForm_Not::toSymbolicAutomaton(bool doComplement) {
     }
     #endif
     SymbolicAutomaton* aut;
-    aut = this->f->toSymbolicAutomaton(!doComplement);
+    aut = this->f->toSymbolicAutomaton(doComplement);
     return new ComplementAutomaton(aut, this);
 }
 

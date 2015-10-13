@@ -16,9 +16,6 @@
 
 extern VarToTrackMap varMap;
 
-// TODO: MOVE TO ENVIRONMENT?
-#define DEBUG_INTERSECT_NON_EMPTY false
-
 StateType SymbolicAutomaton::stateCnt = 0;
 
 SymbolicAutomaton::ISect_Type SymbolicAutomaton::IntersectNonEmpty(::SymbolicAutomaton::Symbol* symbol, StateSet approx, bool underComplement) {
@@ -35,6 +32,7 @@ SymbolicAutomaton::ISect_Type SymbolicAutomaton::IntersectNonEmpty(::SymbolicAut
     } else {
         approx->dump();
     }
+    std::cout << ", " << (underComplement ? "True" : "False");
     std::cout << ")\n";
     #endif
     // TODO: trimmedSymbol = symbol.keepOnly(aut.freeVars)
@@ -52,6 +50,21 @@ SymbolicAutomaton::ISect_Type SymbolicAutomaton::IntersectNonEmpty(::SymbolicAut
 
     ISect_Type result = this->_IntersectNonEmptyCore(symbol, approx, underComplement);
     // TODO: aut.cache_insert(approx, symbol, result);
+#if (DEBUG_INTERSECT_NON_EMPTY == true)
+    std::cout << "\nIntersectNonEmpty(";
+    if(symbol != nullptr) {
+        std::cout << (*symbol);
+    } else {
+        std::cout << "''";
+    }
+    std::cout << ",";
+    if(approx == nullptr) {
+        std::cout << "nullptr";
+    } else {
+        approx->dump();
+    }
+    std::cout << ") = " << (result.second ? "True" : "False") << "\n";
+    #endif
     return result;
 }
 
@@ -94,7 +107,7 @@ void BinaryOpAutomaton::_InitializeInitialStates() {
 /**
  * Does the pre on the symbolic automaton through the @p symbol from @p states
  */
-SymbolicAutomaton::StateSet BinaryOpAutomaton::Pre(SymbolicAutomaton::Symbol* symbol, SymbolicAutomaton::StateSet states) {
+SymbolicAutomaton::StateSet BinaryOpAutomaton::Pre(SymbolicAutomaton::Symbol* symbol, SymbolicAutomaton::StateSet states, bool underComplement) {
     assert(false && "Doing Pre on BinaryOp Automaton!");
 }
 
@@ -129,16 +142,14 @@ void BinaryOpAutomaton::dump() {
 // <<<<<<<<<<<<<<<<<<<<<< COMPLEMENT AUTOMATON >>>>>>>>>>>>>>>>>>>>>>>>>>
 
 void ComplementAutomaton::_InitializeFinalStates() {
-    // TODO: We need some information, that this is negation
     this->_initialStates = std::shared_ptr<Term>(new TermList(this->_aut->GetInitialStates(), true));
 }
 
 void ComplementAutomaton::_InitializeInitialStates() {
-    // TODO: We need some information, that this is negation
     this->_finalStates = std::shared_ptr<Term>(new TermList(this->_aut->GetFinalStates(), true));
 }
 
-SymbolicAutomaton::StateSet ComplementAutomaton::Pre(SymbolicAutomaton::Symbol* symbol, SymbolicAutomaton::StateSet states) {
+SymbolicAutomaton::StateSet ComplementAutomaton::Pre(SymbolicAutomaton::Symbol* symbol, SymbolicAutomaton::StateSet states, bool underComplement) {
     assert(false && "Doing Pre on Complement Automaton!");
 }
 
@@ -148,7 +159,7 @@ SymbolicAutomaton::ISect_Type ComplementAutomaton::_IntersectNonEmptyCore(Comple
 
     TermList* approx = reinterpret_cast<TermList*>(final.get());
     assert(approx->list.size() == 1);
-    // TODO: Switch to other implementation
+
     ISect_Type result = this->_aut->IntersectNonEmpty(symbol, approx->list[0], !underComplement);
     // TODO: We need some information, that this is negation. Is this ok?
     TermList* newResult = new TermList(result.first, true);
@@ -171,7 +182,7 @@ void ProjectionAutomaton::_InitializeFinalStates() {
     this->_finalStates = std::shared_ptr<Term>(new TermList(this->_aut->GetFinalStates(), false));
 }
 
-SymbolicAutomaton::StateSet ProjectionAutomaton::Pre(ProjectionAutomaton::Symbol* symbol, ProjectionAutomaton::StateSet final) {
+SymbolicAutomaton::StateSet ProjectionAutomaton::Pre(ProjectionAutomaton::Symbol* symbol, ProjectionAutomaton::StateSet final, bool underComplement) {
     assert(false && "Doing Pre on Projection Automaton!");
 }
 
@@ -194,7 +205,6 @@ void initialize_symbols(std::list<ProjectionAutomaton::Symbol> &symbols, IdentLi
 
 SymbolicAutomaton::ISect_Type ProjectionAutomaton::_IntersectNonEmptyCore(ProjectionAutomaton::Symbol* symbol, ProjectionAutomaton::StateSet final, bool underComplement) {
     assert(final != nullptr);
-    final->dump();
     // TODO: Can there be Continuation?
     assert(final->type == TERM_LIST || final->type == TERM_FIXPOINT);
 
@@ -218,10 +228,11 @@ SymbolicAutomaton::ISect_Type ProjectionAutomaton::_IntersectNonEmptyCore(Projec
 
         // TODO: underComplement
         if(result.second == !underComplement) {
-            return std::make_pair(std::shared_ptr<Term>(fixpoint), true);
+            return std::make_pair(std::shared_ptr<Term>(fixpoint), result.second);
         }
 
         // TODO: underComplement
+        //while( ((term = it.GetNext()) != nullptr) && (!fixpoint->GetResult())) {}
         while( ((term = it.GetNext()) != nullptr) && (underComplement == fixpoint->GetResult())) {}
         //                                            ^--- is this right?
 
@@ -237,6 +248,7 @@ SymbolicAutomaton::ISect_Type ProjectionAutomaton::_IntersectNonEmptyCore(Projec
         TermFixpointStates* fixpoint = new TermFixpointStates(this->_aut.get(), final, symbols, underComplement);
         TermFixpointStates::iterator it = fixpoint->GetIterator();
         Term_ptr term;
+        //while( ((term = it.GetNext()) != nullptr) && (!fixpoint->GetResult())) {}
         while( ((term = it.GetNext()) != nullptr) && (underComplement == fixpoint->GetResult())) {}
         //                                            ^--- is this right?
 
@@ -267,19 +279,20 @@ SymbolicAutomaton::ISect_Type BaseAutomaton::_IntersectNonEmptyCore(BaseAutomato
     // Computing Intersection for epsilon symbol, i.e. only whether it intersects the initial states
     if(symbol == nullptr) {
         assert(initial->states.size() == 1 && "There should be only one initial state");
-        return std::make_pair(this->_finalStates, initial->Intersects(final));
+        std::cout << "initial->Intersects(final) = " << (initial->Intersects(final)) << "\n";
+        return std::make_pair(this->_finalStates, initial->Intersects(final) != underComplement);
     // Doing Pre(final), i.e. one step back from final states
     } else {
-        StateSet preSet = this->Pre(symbol, approx);
+        StateSet preSet = this->Pre(symbol, approx, underComplement);
         TermBaseSet* preFinal = reinterpret_cast<TermBaseSet*>(preSet.get());
-        return std::make_pair(preSet, initial->Intersects(preFinal));
+        return std::make_pair(preSet, initial->Intersects(preFinal) != underComplement);
     }
 }
 
-SymbolicAutomaton::StateSet BaseAutomaton::Pre(SymbolicAutomaton::Symbol* symbol, SymbolicAutomaton::StateSet approx) {
+SymbolicAutomaton::StateSet BaseAutomaton::Pre(SymbolicAutomaton::Symbol* symbol, SymbolicAutomaton::StateSet approx, bool underComplement) {
     // We know...
     // TODO: Cache pre?
-    // TODO: pre cpre
+    // TODO: is the cepre/intersect minus correct?
     TermBaseSet* base = reinterpret_cast<TermBaseSet*>(approx.get());
     BaseAut_States states;
 
@@ -289,8 +302,9 @@ SymbolicAutomaton::StateSet BaseAutomaton::Pre(SymbolicAutomaton::Symbol* symbol
         MaskerFunctor masker;
         const BaseAut_MTBDD &temp = masker(*preState, *(symbol->GetMTBDD()));
 
-        BaseCollectorFunctor collector(states);
+        BaseCollectorFunctor collector(states, underComplement);
         collector(temp);
+        collector._isFirst = false;
     }
 
     return std::shared_ptr<Term>(new TermBaseSet(states));

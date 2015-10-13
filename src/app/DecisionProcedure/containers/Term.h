@@ -12,7 +12,7 @@
 #include "../mtbdd/ondriks_mtbdd.hh"
 #include "../containers/SymbolicAutomata.h"
 
-enum TermType {TERM_FIXPOINT, TERM_PRODUCT, TERM_UNION, TERM_BASE, TERM_LIST, TERM_CONT_ISECT, TERM_CONT_SUBSET};
+enum TermType {TERM, TERM_FIXPOINT, TERM_PRODUCT, TERM_UNION, TERM_BASE, TERM_LIST, TERM_CONT_ISECT, TERM_CONT_SUBSET};
 
 class SymbolicAutomaton;
 
@@ -348,6 +348,7 @@ public:
 
                     if (_termFixpoint._worklist.empty()) {
                         Term_ptr term = nullptr;
+                        assert(_termFixpoint._sourceIt.get() != nullptr);
                         if ((term = _termFixpoint._sourceIt->GetNext()) != nullptr) {
                             // if more are to be processed
                             for (auto symbol : _termFixpoint._symList) {
@@ -398,7 +399,6 @@ private:
 
         ResultType result = _aut->IntersectNonEmpty(&item.second, item.first, this->_inComplement);
 
-
         if(result.first->IsSubsumedBy(_fixpoint)) {
             return;
         }
@@ -439,6 +439,7 @@ public:
         //_worklist({startingTerm}),
         _bValue(initbValue),
         _inComplement(inComplement) {
+        this->type = TERM_FIXPOINT;
         this->_fixpoint.push_front(startingTerm);
         this->_fixpoint.push_front(nullptr);
         for(auto symbol : symList) {
@@ -453,11 +454,12 @@ public:
             Symbols symList,
             bool inComplement) :
             _sourceTerm(sourceTerm),
-            _fixpoint({nullptr}),
             _aut(aut),
             _worklist(),
             _bValue(false),
             _inComplement(inComplement) {
+        this->type = TERM_FIXPOINT;
+        this->_fixpoint.push_front(nullptr);
         for(auto symbol : symList) {
             this->_symList.push_back(symbol);
         }
