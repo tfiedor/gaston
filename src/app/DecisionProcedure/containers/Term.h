@@ -11,6 +11,7 @@
 #include "../utils/Symbol.h"
 #include "../mtbdd/ondriks_mtbdd.hh"
 #include "../containers/SymbolicAutomata.h"
+#include "../environment.hh"
 
 enum TermType {TERM, TERM_FIXPOINT, TERM_PRODUCT, TERM_UNION, TERM_BASE, TERM_LIST, TERM_CONT_ISECT, TERM_CONT_SUBSET};
 
@@ -36,8 +37,6 @@ public:
     virtual bool IsEmpty() = 0;
 };
 // Wow such clean!
-
-#define DEBUG_TERM_SUBSUMPTION true
 
 class TermList : public Term {
 public:
@@ -138,6 +137,12 @@ public:
     }
 
     bool IsSubsumed(Term* t) {
+        #if (DEBUG_TERM_SUBSUMPTION == true)
+        this->dump();
+        std::cout << " <?= ";
+        t->dump();
+        std::cout << "\n";
+        #endif
         if(t->type != TERM_PRODUCT) {
             // TODO: Maybe assert?
             return false;
@@ -213,6 +218,12 @@ public:
     }
 
     bool IsSubsumed(Term* term) {
+        #if (DEBUG_TERM_SUBSUMPTION == true)
+        this->dump();
+        std::cout << " <?= ";
+        term->dump();
+        std::cout;
+        #endif
         if(term->type != TERM_BASE) {
             return false;
         } else {
@@ -227,6 +238,7 @@ public:
                         return false;
                     }
                 }
+                std::cout << " -> true\n";
                 return true;
             }
         }
@@ -309,10 +321,6 @@ public:
 
     enum FixpointTermSem {E_FIXTERM_FIXPOINT, E_FIXTERM_PRE};
 
-    bool IsSubsumedBy(std::list<Term_ptr>& fixpoint) {
-        assert(false && "TermFixpointStates.IsSubsumedBy() is not implemented yet~!");
-    }
-
     struct iterator {
     private:
         TermFixpointStates &_termFixpoint;
@@ -377,7 +385,7 @@ public:
 
     // Only for the pre-semantics to link into the source of the pre
     Term_ptr _sourceTerm;
-    std::auto_ptr<iterator> _sourceIt;
+    std::shared_ptr<iterator> _sourceIt;
 
     Aut_ptr _aut;
     FixpointType _fixpoint;
@@ -388,6 +396,10 @@ public:
 
     iterator GetIterator() {
         return iterator(*this);
+    }
+
+    iterator* GetIteratorDynamic() {
+        return new iterator(*this);
     }
 
 private:
@@ -454,11 +466,15 @@ public:
             Symbols symList,
             bool inComplement) :
             _sourceTerm(sourceTerm),
+            _sourceIt(reinterpret_cast<TermFixpointStates*>(sourceTerm.get())->GetIteratorDynamic()),
             _aut(aut),
             _worklist(),
             _bValue(false),
             _inComplement(inComplement) {
+        // TODO: is it ok?
+        assert(sourceTerm->type == TERM_FIXPOINT);
         this->type = TERM_FIXPOINT;
+
         this->_fixpoint.push_front(nullptr);
         for(auto symbol : symList) {
             this->_symList.push_back(symbol);
@@ -485,9 +501,53 @@ public:
         return this->_worklist.empty();
     }
 
-    bool IsSubsumed(Term* t) {
-        // TODO:
+    bool IsSubsumedBy(std::list<Term_ptr>& fixpoint) {
+        // TODO: There should be unfolding of fixpoint probably
+#if (DEBUG_TERM_SUBSUMPTION == true)
+        this->dump();
+        std::cout << " <?= ";
+        std::cout << "{";
+        for(auto item : fixpoint) {
+            if(item == nullptr) continue;
+            item->dump();
+            std::cout << ",";
+        }
+        std::cout << "}";
+        std::cout << "\n";
+#endif
+
+        for(auto item : fixpoint) {
+            if(item == nullptr) continue;
+            if (this->IsSubsumed(item.get())) {
+                return true;
+            }
+        }
         return false;
+    }
+
+    bool IsSubsumed(Term* t) {
+        if(t->type != TERM_FIXPOINT) {
+            std::cerr << "Warning: Testing subsumption of incompatible terms: '";
+            this->dump();
+            std::cerr << "' <?= '";
+            t->dump();
+            std::cerr << "'\n";
+        }
+        TermFixpointStates* tt = reinterpret_cast<TermFixpointStates*>(t);
+        for(auto item : this->_fixpoint) {
+            if(item == nullptr) continue;
+            bool subsumes = false;
+            for(auto tt_item : tt->_fixpoint) {
+                if(tt_item == nullptr) continue;
+                if(item->IsSubsumed(tt_item.get())) {
+                    subsumes = true;
+                    break;
+                }
+            }
+            if(!subsumes) return false;
+        }
+
+        return true;
     }
 
     bool GetResult() {

@@ -279,7 +279,6 @@ SymbolicAutomaton::ISect_Type BaseAutomaton::_IntersectNonEmptyCore(BaseAutomato
     // Computing Intersection for epsilon symbol, i.e. only whether it intersects the initial states
     if(symbol == nullptr) {
         assert(initial->states.size() == 1 && "There should be only one initial state");
-        std::cout << "initial->Intersects(final) = " << (initial->Intersects(final)) << "\n";
         return std::make_pair(this->_finalStates, initial->Intersects(final) != underComplement);
     // Doing Pre(final), i.e. one step back from final states
     } else {

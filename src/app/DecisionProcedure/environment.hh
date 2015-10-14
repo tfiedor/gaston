@@ -43,8 +43,9 @@ enum Decision {SATISFIABLE, UNSATISFIABLE, VALID, INVALID};
 
 #define DEBUG_BASE_AUTOMATA false
 #define DEBUG_FIXPOINT true
-#define DEBUG_INITIAL_APPROX true
-#define DEBUG_INTERSECT_NON_EMPTY false
+#define DEBUG_INITIAL_APPROX false
+#define DEBUG_INTERSECT_NON_EMPTY true
+#define DEBUG_TERM_SUBSUMPTION false
 
 /**
  * Enabling the optimizations

@@ -159,7 +159,6 @@ protected:
     std::shared_ptr<SymbolicAutomaton> _aut;
     IdentList* _projected_vars;
 
-
     virtual void _InitializeAutomaton() {
         this->_InitializeInitialStates();
         this->_InitializeFinalStates();
