@@ -664,7 +664,7 @@ int main(int argc, char *argv[]) {
 			// Deciding WS2S formula
 			} else if(options.method == Method::SYMBOLIC) {
 				if (options.mode != TREE) {
-					decided = decideWS1S_symbolically(*symAutomaton);
+					decided = decideWS1S_symbolically(symAutomaton);
 				} else {
 					throw NotImplementedException();
 				}

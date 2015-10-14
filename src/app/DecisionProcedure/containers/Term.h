@@ -238,7 +238,6 @@ public:
                         return false;
                     }
                 }
-                std::cout << " -> true\n";
                 return true;
             }
         }
@@ -270,7 +269,7 @@ public:
         assert(false && "TermContProduct.IsSubsumedBy() is not implemented yet~!");
     }
 
-    TermContProduct(SymbolicAutomaton* a, Term_ptr t, SymbolType s) : aut(a), term(t), symbol(s) {
+    TermContProduct(std::shared_ptr<SymbolicAutomaton> a, Term_ptr t, SymbolType s) : aut(a), term(t), symbol(s.GetTrack()) {
         this->type = TERM_CONT_ISECT;
     }
 
@@ -295,7 +294,7 @@ public:
         assert(false && "TermContSubset.IsSubsumedBy() is not implemented yet~!");
     }
 
-    TermContSubset(SymbolicAutomaton* a, Term_ptr t, SymbolType s) : aut(a), term(t), symbol(s) {
+    TermContSubset(std::shared_ptr<SymbolicAutomaton> a, Term_ptr t, SymbolType s) : aut(a), term(t), symbol(s.GetTrack()) {
         this->type = TERM_CONT_SUBSET;
     }
 
@@ -329,6 +328,10 @@ public:
     public:
         Term_ptr GetNext() {
             assert(!_termFixpoint._fixpoint.empty());
+            // TODO: Not sure if this is valid
+            if(_termFixpoint._fixpoint.cend() == _it) {
+                return nullptr;
+            }
             assert(_termFixpoint._fixpoint.cend() != _it);
 
             FixpointType::const_iterator succIt = _it;
@@ -367,11 +370,13 @@ public:
                         } else {
                             // we are complete;
                             ++_it;
-
                             // TODO: kill something and make it behave like a fixpoint semantics
 
                             return nullptr;
                         }
+                    } else {
+                        _termFixpoint.ComputeNextPre();
+                        return this->GetNext();
                     }
                 }
             }
@@ -439,7 +444,8 @@ private:
     }
 public:
     TermFixpointStates(
-            SymbolicAutomaton* aut,
+            //SymbolicAutomaton* aut,
+            std::shared_ptr<SymbolicAutomaton> aut,
             Term_ptr startingTerm,
             Symbols symList,
             bool inComplement,
@@ -461,7 +467,8 @@ public:
     }
 
     TermFixpointStates(
-            SymbolicAutomaton* aut,
+            //SymbolicAutomaton* aut,
+            std::shared_ptr<SymbolicAutomaton> aut,
             Term_ptr sourceTerm,
             Symbols symList,
             bool inComplement) :

@@ -23,18 +23,18 @@
 /**
  *
  */
-int decideWS1S_symbolically(SymbolicAutomaton& aut) {
+int decideWS1S_symbolically(std::shared_ptr<SymbolicAutomaton> aut) {
     // TODO: We assume we have ground formulae
     std::cout << "\n[*] Deciding WS1S Symbolically\n";
 
-    Term_ptr finalApprox = aut.GetFinalStates();
+    Term_ptr finalApprox = aut->GetFinalStates();
     #if (DEBUG_INITIAL_APPROX == true)
     finalApprox->dump();
     std::cout << "\n";
     #endif
 
     // TODO: Extracttype
-    std::pair<std::shared_ptr<Term>, bool> res = aut.IntersectNonEmpty(nullptr, finalApprox, false);
+    std::pair<std::shared_ptr<Term>, bool> res = aut->IntersectNonEmpty(nullptr, finalApprox, false);
     #if (DEBUG_FIXPOINT == true)
     std::cout << "[!] Finished deciding WS1S formula with following fixpoint:\n";
     res.first->dump();

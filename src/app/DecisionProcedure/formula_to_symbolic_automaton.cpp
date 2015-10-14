@@ -7,8 +7,6 @@
 #include "../DecisionProcedure/environment.hh"
 #include <memory>
 
-// TODO: FUCKING PLUS IS MISSING!!!!
-
 template<class TemplatedAutomaton>
 SymbolicAutomaton* baseToSymbolicAutomaton(ASTForm* form, bool doComplement) {
     Automaton aut;

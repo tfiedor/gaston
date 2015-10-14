@@ -19,6 +19,8 @@ extern VarToTrackMap varMap;
 StateType SymbolicAutomaton::stateCnt = 0;
 
 SymbolicAutomaton::ISect_Type SymbolicAutomaton::IntersectNonEmpty(::SymbolicAutomaton::Symbol* symbol, StateSet approx, bool underComplement) {
+    assert(this->type != AutType::SYMBOLIC_BASE);
+
     #if (DEBUG_INTERSECT_NON_EMPTY == true)
     std::cout << "\nIntersectNonEmpty(";
     if(symbol != nullptr) {
@@ -38,6 +40,7 @@ SymbolicAutomaton::ISect_Type SymbolicAutomaton::IntersectNonEmpty(::SymbolicAut
     // TODO: trimmedSymbol = symbol.keepOnly(aut.freeVars)
     // TODO: if((cRes = aut.cache_find(finalStateApprox, trimmedSymbol)) != _|_) { return res;}
 
+    // TODO: UNCOMMENT
     if(approx != nullptr && approx->type == TERM_CONT_ISECT) {
         TermContProduct* cont = reinterpret_cast<TermContProduct*>(approx.get());
         approx = (cont->aut->IntersectNonEmpty(&cont->symbol, cont->term, false)).first;
@@ -117,13 +120,21 @@ SymbolicAutomaton::ISect_Type BinaryOpAutomaton::_IntersectNonEmptyCore(Symbolic
     TermProduct* finalApprox = reinterpret_cast<TermProduct*>(final.get());
 
     ISect_Type lhs_result = this->lhs_aut->IntersectNonEmpty(symbol, finalApprox->left, underComplement);
-    if(this->_eval_early(lhs_result.second)) {
-        // TODO: UNCOMMENT
-        // TODO: undercomplement
-        /*TermContProduct *rhsCont = new TermContProduct(this->rhs_aut.get(), finalApprox->right, *symbol);
-        Term_ptr leftCombined = std::shared_ptr<Term>(new TermProduct(lhs_result.first, std::shared_ptr<Term>(rhsCont)));
-        return std::make_pair(leftCombined, this->_eval_early(lhs_result.second));*/
+    #if (OPT_EARLY_EVALUATION == true)
+    if(this->_eval_early(lhs_result.second, underComplement)) {
+        if(!underComplement) {
+            TermContProduct *rhsCont = new TermContProduct(this->rhs_aut, finalApprox->right, *symbol);
+            Term_ptr leftCombined = std::shared_ptr<Term>(
+                    new TermProduct(lhs_result.first, std::shared_ptr<Term>(rhsCont)));
+            return std::make_pair(leftCombined, this->_early_val(underComplement));
+        } else {
+            TermContSubset *rhsContSub = new TermContSubset(this->rhs_aut, finalApprox->right, *symbol);
+            Term_ptr leftCombinedSub = std::shared_ptr<Term>(
+                    new TermProduct(lhs_result.first, std::shared_ptr<Term>(rhsContSub)));
+            return std::make_pair(leftCombinedSub, this->_early_val(underComplement));
+        }
     }
+    #endif
 
     ISect_Type rhs_result = this->rhs_aut->IntersectNonEmpty(symbol, finalApprox->right, underComplement);
     Term_ptr combined = std::shared_ptr<Term>(new TermProduct(lhs_result.first, rhs_result.first));
@@ -222,7 +233,7 @@ SymbolicAutomaton::ISect_Type ProjectionAutomaton::_IntersectNonEmptyCore(Projec
         ASTForm_uvf* form = reinterpret_cast<ASTForm_uvf*>(this->_form);
         initialize_symbols(symbols, form->vl);
 
-        TermFixpointStates* fixpoint = new TermFixpointStates(this->_aut.get(), result.first, symbols, underComplement, result.second);
+        TermFixpointStates* fixpoint = new TermFixpointStates(this->_aut, result.first, symbols, underComplement, result.second);
         TermFixpointStates::iterator it = fixpoint->GetIterator();
         Term_ptr term;
 
@@ -245,7 +256,7 @@ SymbolicAutomaton::ISect_Type ProjectionAutomaton::_IntersectNonEmptyCore(Projec
         ASTForm_uvf* form = reinterpret_cast<ASTForm_uvf*>(this->_form);
         initialize_symbols(symbols, form->vl);
 
-        TermFixpointStates* fixpoint = new TermFixpointStates(this->_aut.get(), final, symbols, underComplement);
+        TermFixpointStates* fixpoint = new TermFixpointStates(this->_aut, final, symbols, underComplement);
         TermFixpointStates::iterator it = fixpoint->GetIterator();
         Term_ptr term;
         //while( ((term = it.GetNext()) != nullptr) && (!fixpoint->GetResult())) {}

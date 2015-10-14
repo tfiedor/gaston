@@ -27,7 +27,7 @@
 
 class Term;
 
-enum AutType {INTERSECTION, UNION, PROJECTION, BASE, COMPLEMENT};
+enum AutType {SYMBOLIC_BASE /*0*/, BINARY /*1*/, INTERSECTION /*2*/, UNION /*3*/, PROJECTION /*4*/, BASE /*5*/, COMPLEMENT /*6*/};
 enum AutSubType {FINAL, NONFINAL};
 enum AutBaseType {BT_SUB, BT_IN, BT_EQF, BT_EQS, BT_LSS, BT_LEQ, BT_FO, BT_T, BT_F};
 
@@ -55,6 +55,7 @@ public:
     using WorkListSet            = std::vector<std::shared_ptr<WorkListTerm>>;
 
     static StateType stateCnt;
+    AutType type;
 
 protected:
     // < Private Members >
@@ -70,7 +71,7 @@ protected:
 // < Public API >
 public:
     // < Public Constructors >
-    SymbolicAutomaton(Formula_ptr form) : _form(form) {}
+    SymbolicAutomaton(Formula_ptr form) : _form(form) {type = AutType::SYMBOLIC_BASE;}
 
     virtual StateSet GetInitialStates();
     virtual StateSet GetFinalStates();
@@ -88,7 +89,8 @@ protected:
     std::shared_ptr<SymbolicAutomaton> lhs_aut;
     std::shared_ptr<SymbolicAutomaton> rhs_aut;
     bool (*_eval_result)(bool, bool);
-    bool (*_eval_early)(bool);
+    bool (*_eval_early)(bool, bool);
+    bool (*_early_val)(bool);
     virtual void _InitializeAutomaton() { this->_InitializeInitialStates(); this->_InitializeFinalStates(); }
     virtual void _InitializeInitialStates();
     virtual void _InitializeFinalStates();
@@ -99,7 +101,7 @@ public:
     BinaryOpAutomaton(SymbolicAutomaton* lhs,
                       SymbolicAutomaton* rhs,
                       Formula_ptr form)
-            : SymbolicAutomaton(form), lhs_aut(lhs), rhs_aut(rhs) { this->_InitializeAutomaton(); }
+            : SymbolicAutomaton(form), lhs_aut(lhs), rhs_aut(rhs) { this->_InitializeAutomaton(); type = AutType::BINARY;}
     virtual void dump();
 };
 
@@ -113,8 +115,10 @@ public:
                           Formula_ptr form)
             : BinaryOpAutomaton(lhs, rhs, form) {
         this->_InitializeAutomaton();
+        this->type = AutType::INTERSECTION;
         this->_eval_result = [](bool a, bool b) {return a && b; };
-        this->_eval_early = [](bool a) {return !a;};
+        this->_eval_early = [](bool a, bool underC) {return (a == underC);};
+        this->_early_val = [](bool underC) { return underC;};
     }
 };
 
@@ -128,8 +132,10 @@ public:
                    Formula_ptr form)
             : BinaryOpAutomaton(lhs, rhs, form) {
         this->_InitializeAutomaton();
+        this->type = AutType::UNION;
         this->_eval_result = [](bool a, bool b) {return a || b; };
-        this->_eval_early = [](bool a) { return a;};
+        this->_eval_early = [](bool a, bool underC) { return (a != underC);};
+        this->_early_val = [](bool underC) { return !underC;};
     }
 };
 
@@ -145,7 +151,7 @@ protected:
     virtual ISect_Type _IntersectNonEmptyCore(Symbol*, StateSet, bool);
 
 public:
-    ComplementAutomaton(SymbolicAutomaton *aut, Formula_ptr form) : SymbolicAutomaton(form), _aut(aut) { this->_InitializeAutomaton(); }
+    ComplementAutomaton(SymbolicAutomaton *aut, Formula_ptr form) : SymbolicAutomaton(form), _aut(aut) { this->_InitializeAutomaton(); type = AutType::COMPLEMENT;}
 
     virtual StateSet Pre(Symbol*, StateSet, bool);
     virtual void dump();
@@ -169,7 +175,7 @@ protected:
     virtual ISect_Type _IntersectNonEmptyCore(Symbol*, StateSet, bool);
 
 public:
-    ProjectionAutomaton(SymbolicAutomaton* aut, Formula_ptr form) : SymbolicAutomaton(form), _aut(aut) { this->_InitializeAutomaton(); }
+    ProjectionAutomaton(SymbolicAutomaton* aut, Formula_ptr form) : SymbolicAutomaton(form), _aut(aut) { this->_InitializeAutomaton(); type = AutType::PROJECTION;}
 
     virtual StateSet Pre(Symbol*, StateSet, bool);
     virtual void dump();
@@ -189,7 +195,7 @@ protected:
     void _RenameStates();
 
 public:
-    BaseAutomaton(LeafAutomaton_Type* aut, Formula_ptr form) : SymbolicAutomaton(form), _base_automaton(aut) { this->_InitializeAutomaton(); }
+    BaseAutomaton(LeafAutomaton_Type* aut, Formula_ptr form) : SymbolicAutomaton(form), _base_automaton(aut){ this->_InitializeAutomaton();type = AutType::BASE; }
     virtual StateSet Pre(Symbol*, StateSet, bool);
     virtual void baseAutDump();
 };

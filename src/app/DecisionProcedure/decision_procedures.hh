@@ -90,6 +90,6 @@ MacroStateSet* computeFinalStates(Automaton &aut, PrefixListType prefix, unsigne
 bool initialStateIsInFinalStates(MacroStateSet *initial, MacroStateSet *finalStates, unsigned int level);
 
 // < Symbolic decision procedure functions >
-int decideWS1S_symbolically(SymbolicAutomaton& aut);
+int decideWS1S_symbolically(std::shared_ptr<SymbolicAutomaton> aut);
 
 #endif
