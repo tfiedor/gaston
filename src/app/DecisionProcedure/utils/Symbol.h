@@ -34,7 +34,7 @@ public:
     void ProjectVar(Var var);
     bool IsEmpty();
     Automaton::SymbolType GetTrack() { return this->_track; }
-    BaseAut_MTBDD* GetMTBDD() { return this->_bdd; }
+    BaseAut_MTBDD* GetMTBDD();
 
     static Automaton::SymbolType constructUniversalTrack();
     static Automaton::SymbolType constructZeroTrack();

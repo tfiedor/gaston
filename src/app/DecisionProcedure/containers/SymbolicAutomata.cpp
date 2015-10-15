@@ -18,6 +18,8 @@ extern VarToTrackMap varMap;
 
 StateType SymbolicAutomaton::stateCnt = 0;
 
+
+
 SymbolicAutomaton::ISect_Type SymbolicAutomaton::IntersectNonEmpty(::SymbolicAutomaton::Symbol* symbol, StateSet approx, bool underComplement) {
     assert(this->type != AutType::SYMBOLIC_BASE);
 
@@ -43,12 +45,14 @@ SymbolicAutomaton::ISect_Type SymbolicAutomaton::IntersectNonEmpty(::SymbolicAut
     // TODO: UNCOMMENT
     if(approx != nullptr && approx->type == TERM_CONT_ISECT) {
         TermContProduct* cont = reinterpret_cast<TermContProduct*>(approx.get());
-        approx = (cont->aut->IntersectNonEmpty(&cont->symbol, cont->term, false)).first;
+        approx = (cont->aut->IntersectNonEmpty((cont->symbol == nullptr ? nullptr : cont->symbol.get()), cont->term, false)).first;
+        //                                                                                                           ^--- is this ok?
     }
 
     if(approx != nullptr && approx->type == TERM_CONT_SUBSET) {
         TermContSubset* contS = reinterpret_cast<TermContSubset*>(approx.get());
-        approx = (contS->aut->IntersectNonEmpty(&contS->symbol, contS->term, true)).first;
+        approx = (contS->aut->IntersectNonEmpty((contS->symbol == nullptr ? nullptr : contS->symbol.get()), contS->term, true)).first;
+        //                                                                                                               ^--- is this ok?
     }
 
     ISect_Type result = this->_IntersectNonEmptyCore(symbol, approx, underComplement);
@@ -122,13 +126,14 @@ SymbolicAutomaton::ISect_Type BinaryOpAutomaton::_IntersectNonEmptyCore(Symbolic
     ISect_Type lhs_result = this->lhs_aut->IntersectNonEmpty(symbol, finalApprox->left, underComplement);
     #if (OPT_EARLY_EVALUATION == true)
     if(this->_eval_early(lhs_result.second, underComplement)) {
+        std::shared_ptr<Symbol> contSymbol = (symbol == nullptr) ? nullptr : std::shared_ptr<Symbol>(new ZeroSymbol(symbol->GetTrack()));
         if(!underComplement) {
-            TermContProduct *rhsCont = new TermContProduct(this->rhs_aut, finalApprox->right, *symbol);
+            TermContProduct *rhsCont = new TermContProduct(this->rhs_aut, finalApprox->right, contSymbol);
             Term_ptr leftCombined = std::shared_ptr<Term>(
                     new TermProduct(lhs_result.first, std::shared_ptr<Term>(rhsCont)));
             return std::make_pair(leftCombined, this->_early_val(underComplement));
         } else {
-            TermContSubset *rhsContSub = new TermContSubset(this->rhs_aut, finalApprox->right, *symbol);
+            TermContSubset *rhsContSub = new TermContSubset(this->rhs_aut, finalApprox->right, contSymbol);
             Term_ptr leftCombinedSub = std::shared_ptr<Term>(
                     new TermProduct(lhs_result.first, std::shared_ptr<Term>(rhsContSub)));
             return std::make_pair(leftCombinedSub, this->_early_val(underComplement));
@@ -199,6 +204,7 @@ SymbolicAutomaton::StateSet ProjectionAutomaton::Pre(ProjectionAutomaton::Symbol
 
 void initialize_symbols(std::list<ProjectionAutomaton::Symbol> &symbols, IdentList* vars) {
     // Transform the symbols
+    // TODO: Optimize, this sucks
     unsigned int symNum = 1;
     for(auto var = vars->begin(); var != vars->end(); ++var) {
         // Pop symbol;
@@ -242,8 +248,6 @@ SymbolicAutomaton::ISect_Type ProjectionAutomaton::_IntersectNonEmptyCore(Projec
             return std::make_pair(std::shared_ptr<Term>(fixpoint), result.second);
         }
 
-        // TODO: underComplement
-        //while( ((term = it.GetNext()) != nullptr) && (!fixpoint->GetResult())) {}
         while( ((term = it.GetNext()) != nullptr) && (underComplement == fixpoint->GetResult())) {}
         //                                            ^--- is this right?
 
@@ -259,9 +263,7 @@ SymbolicAutomaton::ISect_Type ProjectionAutomaton::_IntersectNonEmptyCore(Projec
         TermFixpointStates* fixpoint = new TermFixpointStates(this->_aut, final, symbols, underComplement);
         TermFixpointStates::iterator it = fixpoint->GetIterator();
         Term_ptr term;
-        //while( ((term = it.GetNext()) != nullptr) && (!fixpoint->GetResult())) {}
         while( ((term = it.GetNext()) != nullptr) && (underComplement == fixpoint->GetResult())) {}
-        //                                            ^--- is this right?
 
         return std::make_pair(std::shared_ptr<Term>(fixpoint), fixpoint->GetResult());
     }
@@ -289,7 +291,7 @@ SymbolicAutomaton::ISect_Type BaseAutomaton::_IntersectNonEmptyCore(BaseAutomato
 
     // Computing Intersection for epsilon symbol, i.e. only whether it intersects the initial states
     if(symbol == nullptr) {
-        assert(initial->states.size() == 1 && "There should be only one initial state");
+        //assert(initial->states.size() == 1 && "There should be only one initial state"); // TODO: FUCK, there can be more
         return std::make_pair(this->_finalStates, initial->Intersects(final) != underComplement);
     // Doing Pre(final), i.e. one step back from final states
     } else {
@@ -300,6 +302,7 @@ SymbolicAutomaton::ISect_Type BaseAutomaton::_IntersectNonEmptyCore(BaseAutomato
 }
 
 SymbolicAutomaton::StateSet BaseAutomaton::Pre(SymbolicAutomaton::Symbol* symbol, SymbolicAutomaton::StateSet approx, bool underComplement) {
+    assert(symbol != nullptr);
     // We know...
     // TODO: Cache pre?
     // TODO: is the cepre/intersect minus correct?

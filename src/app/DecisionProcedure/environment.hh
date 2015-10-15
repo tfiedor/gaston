@@ -42,10 +42,11 @@ enum Decision {SATISFIABLE, UNSATISFIABLE, VALID, INVALID};
 #define DEBUG_BDDS true
 
 #define DEBUG_BASE_AUTOMATA false
-#define DEBUG_FIXPOINT true
+#define DEBUG_FIXPOINT false
 #define DEBUG_INITIAL_APPROX false
 #define DEBUG_INTERSECT_NON_EMPTY false
 #define DEBUG_TERM_SUBSUMPTION false
+#define DEBUG_CONTINUATIONS false
 
 /**
  * Enabling the optimizations
@@ -61,8 +62,8 @@ enum Decision {SATISFIABLE, UNSATISFIABLE, VALID, INVALID};
  * NOVEL OPTIMIZATIONS IN SYMBOLIC COMPUTING *
  *********************************************/
 
-#define OPT_DRAW_NEGATION_IN_BASE true
-#define OPT_CREATE_QF_AUTOMATON true
-#define OPT_REDUCE_AUTOMATA true
+#define OPT_DRAW_NEGATION_IN_BASE false
+#define OPT_CREATE_QF_AUTOMATON false
+#define OPT_REDUCE_AUTOMATA false
 #define OPT_EARLY_EVALUATION false
 #endif

@@ -231,6 +231,7 @@ public:
             if(t->states.size() < this->states.size()) {
                 return false;
             } else {
+                // TODO: Maybe we could exploit that we have ordered vectors
                 for(auto state : this->states) {
                     auto isIn = std::find(t->states.begin(), t->states.end(), state);
                     if(isIn == t->states.end()) {
@@ -263,22 +264,48 @@ class TermContProduct : public Term {
 public:
     std::shared_ptr<SymbolicAutomaton> aut;
     Term_ptr term;
-    SymbolType symbol;
+    std::shared_ptr<SymbolType> symbol;
 
     bool IsSubsumedBy(std::list<Term_ptr>& fixpoint) {
-        assert(false && "TermContProduct.IsSubsumedBy() is not implemented yet~!");
+        assert(false && "TermContProduct.IsSubsumedBy() is impossible to happen~!");
     }
 
-    TermContProduct(std::shared_ptr<SymbolicAutomaton> a, Term_ptr t, SymbolType s) : aut(a), term(t), symbol(s.GetTrack()) {
+    TermContProduct(std::shared_ptr<SymbolicAutomaton> a, Term_ptr t, std::shared_ptr<SymbolType> s) : aut(a), term(t), symbol(s) {
         this->type = TERM_CONT_ISECT;
+        #if (DEBUG_CONTINUATIONS == true)
+        std::cout << "Postponing computation as [";
+        t->dump();
+        std::cout << "]\n";
+        #endif
     }
 
     void dump() {
-        std::cout << "?!?";
+        std::cout << "?";
+        term->dump();
+        std::cout << "!";
+        std::cout << "'";
+        if(symbol != nullptr) {
+            std::cout << (*symbol);
+        }
+        std::cout << "'";
+        std::cout << "?";
+        //std::cout << "?!?";
     }
 
+    // TODO: How to do this smartly?
+    // TODO: Maybe if we have {} we can answer sooner, without unpacking
     bool IsSubsumed(Term *t) {
-        assert(false && "To do");
+        assert(this->type != TERM_CONT_SUBSET && t->type != TERM_CONT_SUBSET);
+
+        // We unpack this term
+        auto thisFix = (this->aut->IntersectNonEmpty(this->symbol.get(), this->term, false)).first;
+        if(t->type == TERM_CONT_ISECT) {
+            TermContProduct* tCont = reinterpret_cast<TermContProduct*>(t);
+            auto tFix = (tCont->aut->IntersectNonEmpty(tCont->symbol.get(), tCont->term, false)).first;
+            return thisFix->IsSubsumed(tFix.get());
+        } else {
+            return thisFix->IsSubsumed(t);
+        }
     }
 
     bool IsEmpty() {return false;}
@@ -288,13 +315,13 @@ class TermContSubset : public Term {
 public:
     std::shared_ptr<SymbolicAutomaton> aut;
     Term_ptr term;
-    SymbolType symbol;
+    std::shared_ptr<SymbolType> symbol;
 
     bool IsSubsumedBy(std::list<Term_ptr>& fixpoint) {
-        assert(false && "TermContSubset.IsSubsumedBy() is not implemented yet~!");
+        assert(false && "TermContSubset.IsSubsumedBy() is impossible to happen~!");
     }
 
-    TermContSubset(std::shared_ptr<SymbolicAutomaton> a, Term_ptr t, SymbolType s) : aut(a), term(t), symbol(s.GetTrack()) {
+    TermContSubset(std::shared_ptr<SymbolicAutomaton> a, Term_ptr t, std::shared_ptr<SymbolType> s) : aut(a), term(t), symbol(s) {
         this->type = TERM_CONT_SUBSET;
     }
 
@@ -303,7 +330,17 @@ public:
     }
 
     bool IsSubsumed(Term *t) {
-        assert(false && "To do");
+        assert(this->type != TERM_CONT_ISECT && t->type != TERM_CONT_ISECT);
+
+        // We unpack this term
+        auto thisFix = (this->aut->IntersectNonEmpty(this->symbol.get(), this->term, true)).first;
+        if(t->type == TERM_CONT_SUBSET) {
+            TermContSubset* tCont = reinterpret_cast<TermContSubset*>(t);
+            auto tFix = (tCont->aut->IntersectNonEmpty(tCont->symbol.get(), tCont->term, true)).first;
+            return thisFix->IsSubsumed(tFix.get());
+        } else {
+            return thisFix->IsSubsumed(t);
+        }
     }
 
     bool IsEmpty() {return false;}
