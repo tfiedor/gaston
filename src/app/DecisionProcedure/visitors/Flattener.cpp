@@ -12,6 +12,7 @@
 extern SymbolTable symbolTable;
 extern PredicateLib predicateLib;
 extern IdentList inFirstOrder;
+extern Options options;
 
 /**
  * Generates fresh first-order variable that can be used for quantification
@@ -74,7 +75,16 @@ AST* Flattener::visit(ASTForm_Equal1* form) {
 
     // No need to flatten
     if(form->t1->kind == aVar1 && form->t2->kind == aVar1) {
-        return form;
+        ASTTerm1_Var1* yf = static_cast<ASTTerm1_Var1*>(form->t2);
+        ASTTerm1_Var1* xf = static_cast<ASTTerm1_Var1*>(form->t1);
+        // FO(X)
+        ASTForm_FirstOrder* xInFO = new ASTForm_FirstOrder(xf, form->pos);
+        // FO(Y)
+        ASTForm_FirstOrder* yInFO = new ASTForm_FirstOrder(yf, form->pos);
+        // FO(X) & FO(Y)
+        ASTForm_And* inFirstOrder = new ASTForm_And(xInFO, yInFO, form->pos);
+        // return x = y & FO(X) & FO(Y)
+        return new ASTForm_And(form, inFirstOrder, form->pos);
     // switch formula to format x = ...
     } else if(form->t2->kind == aVar1) {
         ASTTerm1* temp;
@@ -96,10 +106,22 @@ AST* Flattener::visit(ASTForm_Equal1* form) {
         // y = xi -> Xy = Xx i
         assert(temp->n == 1 && "Expected Plus(Var, 1)"); // ASSERTION = {y = x + 1}
         if (temp->t->kind == aVar1) {
-            y = new ASTTerm2_Var2(static_cast<ASTTerm1_Var1*>(form->t1)->getVar(), form->pos);
-            x = new ASTTerm2_Var2(static_cast<ASTTerm1_Var1*>(temp->t)->getVar(), form->pos);
+            ASTTerm1_Var1* yf = static_cast<ASTTerm1_Var1*>(form->t1);
+            y = new ASTTerm2_Var2(yf->getVar(), form->pos);
+            ASTTerm1_Var1* xf = static_cast<ASTTerm1_Var1*>(temp->t);
+            x = new ASTTerm2_Var2(xf->getVar(), form->pos);
+            // X + 1
             ASTTerm2_Plus* plus = new ASTTerm2_Plus(x, temp->n, form->pos);
-            return new ASTForm_Equal2(y, plus, form->pos);
+            // Y = X + 1
+            ASTForm_Equal2* eq2 = new ASTForm_Equal2(y, plus, form->pos);
+            // FO(X)
+            ASTForm_FirstOrder* xInFO = new ASTForm_FirstOrder(xf, form->pos);
+            // FO(Y)
+            ASTForm_FirstOrder* yInFO = new ASTForm_FirstOrder(yf, form->pos);
+            // FO(X) & FO(Y)
+            ASTForm_And* inFirstOrder = new ASTForm_And(xInFO, yInFO, form->pos);
+            // return Y = X + 1 & FO(X) & FO(Y)
+            return new ASTForm_And(eq2, inFirstOrder, form->pos);
             // y = ti -> ex z: z = t & y = zi
         } else {
             unsigned int z = symbolTable.insertFresh(Varname1);
@@ -135,7 +157,8 @@ AST* Flattener::visit(ASTForm_Equal1* form) {
             ASTTerm1_Var1* z = Flattener::generateFreshFirstOrder();
             ASTForm_Equal1* zLess = new ASTForm_Equal1(z, new ASTTerm1_Int(val-1, form->pos), form->pos);
             ASTForm_Equal1* plus = new ASTForm_Equal1(form->t1, new ASTTerm1_Plus(z, 1, form->pos), form->pos);
-            ASTForm_And* conjuction = new ASTForm_And(zLess->accept(*this), plus->accept(*this), form->pos);
+            ASTForm_And* conjuction = new ASTForm_And(reinterpret_cast<ASTForm*>(zLess->accept(*this)),
+                                                      reinterpret_cast<ASTForm*>(plus->accept(*this)), form->pos);
             return new ASTForm_Ex2(0, new IdentList(z->getVar()), conjuction, form->pos);
         }
 #endif
@@ -388,7 +411,7 @@ AST* Flattener::visit(ASTForm_LessEq* form) {
 		ASTForm_In* xInX = new ASTForm_In(form->t1, X, form->pos);
 		outerImplication = new ASTForm_Impl(innerConjuction, xInX, form->pos);
 
-		ASTForm_All2* newFormula = new ASTForm_All2(0, new IdentList(X->getVar()), outerImplication->accept(*this) , form->pos);
+		ASTForm_All2* newFormula = new ASTForm_All2(0, new IdentList(X->getVar()), reinterpret_cast<ASTForm*>(outerImplication->accept(*this)), form->pos);
 		return newFormula->accept(*this);
 #endif
     }

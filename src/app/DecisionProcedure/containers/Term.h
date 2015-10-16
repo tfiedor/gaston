@@ -435,6 +435,7 @@ public:
     Symbols _symList;
     bool _bValue;
     bool _inComplement;
+    bool (*_aggregate_result)(bool, bool);
 
     iterator GetIterator() {
         return iterator(*this);
@@ -458,7 +459,7 @@ private:
         }
 
         _fixpoint.push_back(result.first);
-        _bValue = _bValue || result.second;
+        _bValue = this->_aggregate_result(_bValue,result.second);
         for(auto symbol : _symList) {
             _worklist.insert(_worklist.cbegin(), std::make_pair(result.first, symbol));
         }
@@ -477,7 +478,16 @@ private:
         }
 
         _fixpoint.push_back(result.first);
-        _bValue = _bValue || result.second;
+        _bValue = this->_aggregate_result(_bValue,result.second);
+    }
+
+    void _InitializeAggregateFunction(bool inComplement) {
+        // TODO: Not sure atm. if this is valid
+        if(!inComplement) {
+            this->_aggregate_result = [](bool a, bool b) {return a || b;};
+        } else {
+            this->_aggregate_result = [](bool a, bool b) {return a && b;};
+        }
     }
 public:
     TermFixpointStates(
@@ -494,6 +504,7 @@ public:
         //_worklist({startingTerm}),
         _bValue(initbValue),
         _inComplement(inComplement) {
+        this->_InitializeAggregateFunction(inComplement);
         this->type = TERM_FIXPOINT;
         this->_fixpoint.push_front(startingTerm);
         this->_fixpoint.push_front(nullptr);
@@ -516,6 +527,7 @@ public:
             _bValue(false),
             _inComplement(inComplement) {
         // TODO: is it ok?
+        this->_InitializeAggregateFunction(inComplement);
         assert(sourceTerm->type == TERM_FIXPOINT);
         this->type = TERM_FIXPOINT;
 

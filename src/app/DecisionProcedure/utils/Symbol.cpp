@@ -23,11 +23,13 @@ char ZeroSymbol::charToAsgn(char c) {
 }
 
 BaseAut_MTBDD* ZeroSymbol::GetMTBDD() {
-    if(this->_bdd == nullptr) {
+    // TODO: OPTIMIZE
+    /*if(this->_bdd == nullptr) {
         this->_bdd = new BaseAut_MTBDD(this->_track, BaseAut_States(StateTuple({0})), BaseAut_States(StateTuple({})));
     }
     assert(this->_bdd != nullptr);
-    return this->_bdd;
+    return this->_bdd;*/
+    return new BaseAut_MTBDD(this->_track, BaseAut_States(StateTuple({0})), BaseAut_States(StateTuple({})));
 }
 
 Automaton::SymbolType ZeroSymbol::constructUniversalTrack() {

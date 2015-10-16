@@ -395,13 +395,13 @@ int main(int argc, char *argv[]) {
 		// Restrict to second order
 		SecondOrderRestricter sor_visitor;
 		ast->formula = static_cast<ASTForm *>(ast->formula->accept(sor_visitor));
+		// Remove universal quantification
+		UniversalQuantifierRemover uqr_visitor;
+		ast->formula = static_cast<ASTForm *>(ast->formula->accept(uqr_visitor));
 		// Push the negation towards the leaves
 		// TODO: Ex2 and All2 may be unsupported
 		NegationUnfolder nu_visitor;
 		ast->formula = static_cast<ASTForm *>(ast->formula->accept(nu_visitor));
-		// Remove universal quantification
-		UniversalQuantifierRemover uqr_visitor;
-		ast->formula = static_cast<ASTForm *>(ast->formula->accept(uqr_visitor));
 	}
 	timer_formula.stop();
 

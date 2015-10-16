@@ -40,6 +40,17 @@ public:
     static Automaton::SymbolType constructZeroTrack();
     static char charToAsgn(char c);
     friend std::ostream& operator <<(std::ostream& osObject, const ZeroSymbol& z);
+    friend bool operator==(const std::shared_ptr<ZeroSymbol>& lhs, const std::shared_ptr<ZeroSymbol>& rhs);
 };
+
+inline bool operator==(const std::shared_ptr<ZeroSymbol>& lhs, const std::shared_ptr<ZeroSymbol>& rhs) {
+    if(lhs == nullptr || rhs == nullptr) {
+        return lhs == nullptr && rhs == nullptr;
+    } else if(lhs.get() == rhs.get()) {
+        return true;
+    } else {
+        return lhs->_track.ToString() == rhs->_track.ToString();
+    }
+}
 
 #endif //WSKS_SYMBOL_H

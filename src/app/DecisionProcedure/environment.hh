@@ -26,7 +26,7 @@ enum Decision {SATISFIABLE, UNSATISFIABLE, VALID, INVALID};
 /**
  * Configuration macros
  */
-#define CONSTRUCT_ALWAYS_DTA false
+#define CONSTRUCT_ALWAYS_DTA true
 
 /**
  * Enabling debugging
@@ -41,29 +41,32 @@ enum Decision {SATISFIABLE, UNSATISFIABLE, VALID, INVALID};
 #define DEBUG_VARIABLE_SETS false
 #define DEBUG_BDDS true
 
+/**
+ * Enabling the optimizations
+ */
+#define PRUNE_BY_RELATION false		// [TODO] What's the difference with BY_SUBSUMPTION?
+#define PRUNE_BY_SUBSUMPTION false
+#define USE_STATECACHE true
+#define USE_BDDCACHE false 			// BDD Cache is temporary disable due to the memory leaks
+#define SMART_BINARY true
+
+#define SMART_FLATTEN true
+
+/*********************************************
+ * NOVEL OPTIMIZATIONS IN SYMBOLIC COMPUTING *
+ *********************************************/
+
 #define DEBUG_BASE_AUTOMATA false
 #define DEBUG_FIXPOINT false
 #define DEBUG_INITIAL_APPROX false
 #define DEBUG_INTERSECT_NON_EMPTY false
 #define DEBUG_TERM_SUBSUMPTION false
 #define DEBUG_CONTINUATIONS false
+#define DEBUG_COMPUTE_FULL_FIXPOINT false
 
-/**
- * Enabling the optimizations
- */
-#define PRUNE_BY_RELATION false		// [TODO] What's the difference with BY_SUBSUMPTION?
-#define PRUNE_BY_SUBSUMPTION false
-#define SMART_FLATTEN true
-#define USE_STATECACHE true
-#define USE_BDDCACHE false 			// BDD Cache is temporary disable due to the memory leaks
-#define SMART_BINARY true
-
-/*********************************************
- * NOVEL OPTIMIZATIONS IN SYMBOLIC COMPUTING *
- *********************************************/
-
-#define OPT_DRAW_NEGATION_IN_BASE false
+#define OPT_DRAW_NEGATION_IN_BASE true
 #define OPT_CREATE_QF_AUTOMATON false
 #define OPT_REDUCE_AUTOMATA false
 #define OPT_EARLY_EVALUATION false
+#define OPT_CACHE_RESULTS true
 #endif

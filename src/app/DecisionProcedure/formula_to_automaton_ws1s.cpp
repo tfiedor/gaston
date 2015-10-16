@@ -447,6 +447,7 @@ void ASTForm_FirstOrder::toUnaryAutomaton(Automaton &aut, bool doComplement) {
  * @return Automaton corresponding to the formula x <= y
  */
 void ASTForm_LessEq::toUnaryAutomaton(Automaton &aut, bool doComplement) {
+	// TODO: I think this is fucking wrong o.O
 	ASTTerm1_Var1 *xVar = (ASTTerm1_Var1*) this->t1;
 	unsigned int x = (unsigned int) xVar->n;
 	ASTTerm1_Var1 *yVar = (ASTTerm1_Var1*) this->t2;
@@ -468,7 +469,7 @@ void ASTForm_LessEq::toUnaryAutomaton(Automaton &aut, bool doComplement) {
 	addTransition(aut, 0, x, y, (char *) "10", 2);
 
 	// q0 -(x11x)-> q1
-	addTransition(aut, 0, x, y, (char *) "11", 1);
+	//addTransition(aut, 0, x, y, (char *) "11", 1);
 
 	// q2 -(x01x)-> q1
 	addTransition(aut, 2, x, y, (char *) "01", 1);

@@ -22,6 +22,7 @@ StateType SymbolicAutomaton::stateCnt = 0;
 
 SymbolicAutomaton::ISect_Type SymbolicAutomaton::IntersectNonEmpty(::SymbolicAutomaton::Symbol* symbol, StateSet approx, bool underComplement) {
     assert(this->type != AutType::SYMBOLIC_BASE);
+    ISect_Type result;
 
     #if (DEBUG_INTERSECT_NON_EMPTY == true)
     std::cout << "\nIntersectNonEmpty(";
@@ -39,8 +40,29 @@ SymbolicAutomaton::ISect_Type SymbolicAutomaton::IntersectNonEmpty(::SymbolicAut
     std::cout << ", " << (underComplement ? "True" : "False");
     std::cout << ")\n";
     #endif
-    // TODO: trimmedSymbol = symbol.keepOnly(aut.freeVars)
-    // TODO: if((cRes = aut.cache_find(finalStateApprox, trimmedSymbol)) != _|_) { return res;}
+    if(symbol != nullptr) {
+        auto it = this->_freeVars.begin();
+        auto end = this->_freeVars.end();
+        for(size_t var = 0; var < varMap.TrackLength(); ++var) {
+            if (it != end && var == *it) {
+                ++it;
+            } else {
+                symbol->ProjectVar(var);
+            }
+
+        }
+    }
+
+    #if (OPT_CACHE_RESULTS == true)
+    std::shared_ptr<Symbol> symbolKey = nullptr;
+    if(symbol != nullptr) {
+        symbolKey = std::shared_ptr<Symbol>(new Symbol(symbol->GetTrack()));
+    }
+    auto key = std::make_pair(approx, symbolKey);
+    if(this->_resCache.retrieveFromCache(key, result)) {
+        return result;
+    }
+    #endif
 
     // TODO: UNCOMMENT
     if(approx != nullptr && approx->type == TERM_CONT_ISECT) {
@@ -55,9 +77,15 @@ SymbolicAutomaton::ISect_Type SymbolicAutomaton::IntersectNonEmpty(::SymbolicAut
         //                                                                                                               ^--- is this ok?
     }
 
-    ISect_Type result = this->_IntersectNonEmptyCore(symbol, approx, underComplement);
-    // TODO: aut.cache_insert(approx, symbol, result);
-#if (DEBUG_INTERSECT_NON_EMPTY == true)
+    result = this->_IntersectNonEmptyCore(symbol, approx, underComplement);
+
+    #if (OPT_CACHE_RESULTS == true)
+    if(!this->_resCache.inCache(key)) {
+        this->_resCache.StoreIn(key, result);
+    }
+    #endif
+
+    #if (DEBUG_INTERSECT_NON_EMPTY == true)
     std::cout << "\nIntersectNonEmpty(";
     if(symbol != nullptr) {
         std::cout << (*symbol);
@@ -243,13 +271,16 @@ SymbolicAutomaton::ISect_Type ProjectionAutomaton::_IntersectNonEmptyCore(Projec
         TermFixpointStates::iterator it = fixpoint->GetIterator();
         Term_ptr term;
 
-        // TODO: underComplement
+        #if (DEBUG_COMPUTE_FULL_FIXPOINT == true)
+        while((term = it.GetNext()) != nullptr) {}
+        #else
         if(result.second == !underComplement) {
             return std::make_pair(std::shared_ptr<Term>(fixpoint), result.second);
         }
 
         while( ((term = it.GetNext()) != nullptr) && (underComplement == fixpoint->GetResult())) {}
         //                                            ^--- is this right?
+        #endif
 
         return std::make_pair(std::shared_ptr<Term>(fixpoint), fixpoint->GetResult());
     } else {

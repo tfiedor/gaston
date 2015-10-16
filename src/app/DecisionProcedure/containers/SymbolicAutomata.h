@@ -15,9 +15,11 @@
 #include "../mtbdd/void_apply1func.hh"
 #include "../mtbdd/ondriks_mtbdd.hh"
 #include "../utils/Symbol.h"
+#include "../utils/cached_binary_op.hh"
 #include "../environment.hh"
 #include "../../Frontend/ident.h"
 #include "../../Frontend/ast.h"
+#include "../containers/SymbolicCache.hh"
 #include "StateSet.hh"
 #include <vector>
 #include <vata/bdd_bu_tree_aut.hh>
@@ -33,6 +35,17 @@ enum AutBaseType {BT_SUB, BT_IN, BT_EQF, BT_EQS, BT_LSS, BT_LEQ, BT_FO, BT_T, BT
 
 using BaseAut_States = VATA::Util::OrdVector<StateType>;
 
+struct Pair_Hash {
+    /**
+     * @param set: set we are computing hash of
+     * @return hash of @p set
+     */
+    int operator()(std::pair<std::shared_ptr<Term>, std::shared_ptr<ZeroSymbol>> set) const {
+        // TODO: MOTHER FUCKING SHIT
+        return 1;
+    }
+};
+
 /**
  * Base class for symbolic automata
  */
@@ -44,7 +57,9 @@ public:
     using Formula_ptr            = ASTForm*;
     using StateSet_ptr           = std::shared_ptr<MacroStateSet>;
     using StateSet               = Term_ptr;
-    using Symbol                 = ZeroSymbol;;
+    using Symbol                 = ZeroSymbol;
+    using Symbol_ptr             = std::shared_ptr<Symbol>;
+
     using ISect_Type             = std::pair<Term_ptr, bool>;
     using LeafAutomaton_Type     = VATA::BDDBottomUpTreeAut;
     using StateToStateTranslator = VATA::AutBase::StateToStateTranslWeak;
@@ -53,6 +68,9 @@ public:
     using WorkListTerm_raw       = Term*;
     using WorkListTerm_ptr       = Term_ptr;
     using WorkListSet            = std::vector<std::shared_ptr<WorkListTerm>>;
+    using ResultCache            = BinaryCache<Term_ptr, Symbol_ptr, ISect_Type, Pair_Hash>;
+    using SubsumptionCache       = VATA::Util::CachedBinaryOp<Term_ptr, Term_ptr, bool>;
+    using VarList                = VATA::Util::OrdVector<StateType>;
 
     static StateType stateCnt;
     AutType type;
@@ -62,6 +80,9 @@ protected:
     Formula_ptr _form;
     Term_ptr _initialStates;
     Term_ptr _finalStates;
+    ResultCache _resCache;
+    SubsumptionCache _subCache;
+    VarList _freeVars;
 
     virtual void _InitializeAutomaton() = 0;
     virtual void _InitializeInitialStates() = 0;
@@ -71,7 +92,15 @@ protected:
 // < Public API >
 public:
     // < Public Constructors >
-    SymbolicAutomaton(Formula_ptr form) : _form(form) {type = AutType::SYMBOLIC_BASE;}
+    SymbolicAutomaton(Formula_ptr form) : _form(form) {
+        type = AutType::SYMBOLIC_BASE;
+
+        IdentList free, bound;
+        this->_form->freeVars(&free, &bound);
+        for(auto it = free.begin(); it != free.end(); ++it) {
+            _freeVars.insert(*it);
+        }
+    }
 
     virtual StateSet GetInitialStates();
     virtual StateSet GetFinalStates();
