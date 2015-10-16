@@ -582,12 +582,18 @@ public:
     }
 
     bool IsSubsumed(Term* t) {
+        if(t->type == TERM_CONT_ISECT) {
+            TermContProduct* cont = reinterpret_cast<TermContProduct*>(t);
+            t = (cont->aut->IntersectNonEmpty((cont->symbol == nullptr ? nullptr : cont->symbol.get()), cont->term, false)).first.get();
+        }
+
+        if(t->type == TERM_CONT_SUBSET) {
+            TermContSubset* contS = reinterpret_cast<TermContSubset*>(t);
+            t = (contS->aut->IntersectNonEmpty((contS->symbol == nullptr ? nullptr : contS->symbol.get()), contS->term, true)).first.get();
+        }
+
         if(t->type != TERM_FIXPOINT) {
-            std::cerr << "Warning: Testing subsumption of incompatible terms: '";
-            this->dump();
-            std::cerr << "' <?= '";
-            t->dump();
-            std::cerr << "'\n";
+            assert(false && "Testing subsumption of incompatible terms\n");
         }
         TermFixpointStates* tt = reinterpret_cast<TermFixpointStates*>(t);
         for(auto item : this->_fixpoint) {
