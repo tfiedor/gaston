@@ -38,92 +38,6 @@ public:
 };
 // Wow such clean!
 
-class TermList : public Term {
-public:
-    TermListStates list;
-    bool isComplement;
-
-    bool IsSubsumedBy(std::list<Term_ptr>& fixpoint) {
-        #if (DEBUG_TERM_SUBSUMPTION == true)
-        this->dump();
-        std::cout << " <?= ";
-        std::cout << "{";
-        for(auto item : fixpoint) {
-            if(item == nullptr) continue;
-            item->dump();
-            std::cout << ",";
-        }
-        std::cout << "}";
-        std::cout << "\n";
-        #endif
-
-        for(auto item : fixpoint) {
-            if(item == nullptr) continue;
-            if(this->isComplement) {
-                if (item->IsSubsumed(this)) {
-                    return true;
-                }
-            } else {
-                if (this->IsSubsumed(item.get())) {
-                    return true;
-                }
-            }
-        }
-
-        return false;
-    }
-
-    void dump() {
-        std::cout << "{";
-        for(auto state : this->list) {
-            state->dump();
-            std::cout  << ",";
-        }
-        std::cout << "}";
-    }
-
-    TermList() {type = TERM_LIST;}
-
-    TermList(Term_ptr first, bool isCompl) : isComplement(isCompl) {
-        this->type = TERM_LIST;
-        this->list.push_back(first);
-    }
-
-    TermList(Term_ptr f, Term_ptr s, bool isCompl) : isComplement(isCompl) {
-        this->type = TERM_LIST;
-        this->list.push_back(f);
-        this->list.push_back(s);
-    }
-
-    bool IsSubsumed(Term* t) {
-        if(t->type != TERM_LIST) {
-            std::cerr << "Warning: Testing subsumption of incompatible terms: '";
-            this->dump();
-            std::cerr << "' <?= '";
-            t->dump();
-            std::cerr << "'\n";
-        }
-        TermList* tt = reinterpret_cast<TermList*>(t);
-        for(auto item : this->list) {
-            bool subsumes = false;
-            for(auto tt_item : tt->list) {
-                if(item->IsSubsumed(tt_item.get())) {
-                    subsumes = true;
-                    break;
-                }
-            }
-            if(!subsumes) return false;
-        }
-
-        return true;
-    }
-
-    bool IsEmpty() {
-        return this->list.size() == 0 ||
-                (this->list.size() == 1 && this->list[0]->IsEmpty());
-    }
-};
-
 class TermProduct : public Term {
 public:
     Term_ptr left;
@@ -344,6 +258,96 @@ public:
     }
 
     bool IsEmpty() {return false;}
+};
+
+
+class TermList : public Term {
+public:
+    TermListStates list;
+    bool isComplement;
+
+    bool IsSubsumedBy(std::list<Term_ptr>& fixpoint) {
+#if (DEBUG_TERM_SUBSUMPTION == true)
+        this->dump();
+        std::cout << " <?= ";
+        std::cout << "{";
+        for(auto item : fixpoint) {
+            if(item == nullptr) continue;
+            item->dump();
+            std::cout << ",";
+        }
+        std::cout << "}";
+        std::cout << "\n";
+        #endif
+
+        for(auto item : fixpoint) {
+            if(item == nullptr) continue;
+            if(this->isComplement) {
+                if (item->IsSubsumed(this)) {
+                    return true;
+                }
+            } else {
+                if (this->IsSubsumed(item.get())) {
+                    return true;
+                }
+            }
+        }
+
+        return false;
+    }
+
+    void dump() {
+        std::cout << "{";
+        for(auto state : this->list) {
+            state->dump();
+            std::cout  << ",";
+        }
+        std::cout << "}";
+    }
+
+    TermList() {type = TERM_LIST;}
+
+    TermList(Term_ptr first, bool isCompl) : isComplement(isCompl) {
+        this->type = TERM_LIST;
+        this->list.push_back(first);
+    }
+
+    TermList(Term_ptr f, Term_ptr s, bool isCompl) : isComplement(isCompl) {
+        this->type = TERM_LIST;
+        this->list.push_back(f);
+        this->list.push_back(s);
+    }
+
+    bool IsSubsumed(Term* t) {
+        if(t->type == TERM_CONT_ISECT) {
+            TermContProduct* cont = reinterpret_cast<TermContProduct*>(t);
+            t = (cont->aut->IntersectNonEmpty((cont->symbol == nullptr ? nullptr : cont->symbol.get()), cont->term, false)).first.get();
+        }
+
+        if(t->type == TERM_CONT_SUBSET) {
+            TermContSubset* contS = reinterpret_cast<TermContSubset*>(t);
+            t = (contS->aut->IntersectNonEmpty((contS->symbol == nullptr ? nullptr : contS->symbol.get()), contS->term, true)).first.get();
+        }
+
+        TermList* tt = reinterpret_cast<TermList*>(t);
+        for(auto item : this->list) {
+            bool subsumes = false;
+            for(auto tt_item : tt->list) {
+                if(item->IsSubsumed(tt_item.get())) {
+                    subsumes = true;
+                    break;
+                }
+            }
+            if(!subsumes) return false;
+        }
+
+        return true;
+    }
+
+    bool IsEmpty() {
+        return this->list.size() == 0 ||
+               (this->list.size() == 1 && this->list[0]->IsEmpty());
+    }
 };
 
 class TermFixpointStates : public Term {
