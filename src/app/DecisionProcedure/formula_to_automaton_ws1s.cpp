@@ -469,7 +469,7 @@ void ASTForm_LessEq::toUnaryAutomaton(Automaton &aut, bool doComplement) {
 	addTransition(aut, 0, x, y, (char *) "10", 2);
 
 	// q0 -(x11x)-> q1
-	//addTransition(aut, 0, x, y, (char *) "11", 1);
+	addTransition(aut, 0, x, y, (char *) "11", 1);
 
 	// q2 -(x01x)-> q1
 	addTransition(aut, 2, x, y, (char *) "01", 1);
@@ -522,33 +522,43 @@ void ASTForm_Less::toUnaryAutomaton(Automaton &aut, bool doComplement) {
 	// -(xxx)-> q0
 	setInitialState(aut, 0);
 
-	// q0 -(x00x)-> q0
+	// q0 -(00)-> q0
 	addTransition(aut, 0, x, y, (char *) "00", 0);
 
-	// q1 -(x00x)-> q1
+	// q0 -(10)-> q1
+	addTransition(aut, 0, x, y, (char *) "10", 1);
+
+	// q0 -(11)-> _
+	addTransition(aut, 0, x, y, (char *) "11", 3);
+
+	// q0 -(01)-> _
+	addTransition(aut, 0, x, y, (char *) "01", 3);
+
+	// q1 -(00)-> q1
 	addTransition(aut, 1, x, y, (char *) "00", 1);
 
-	// q2 -(x00x)-> q2
+	// q1 -(01)-> q2
+	addTransition(aut, 1, x, y, (char *) "01", 2);
+
+	// q1 -(1X)-> _
+	addTransition(aut, 1, x, y, (char *) "1X", 3);
+
+	// q2 -(00)-> q2
 	addTransition(aut, 2, x, y, (char *) "00", 2);
 
-	if(doComplement) {
-		// q0 -(x11x)-> q1
-		addTransition(aut, 0, x, y, (char *) "11", 1);
+	// q2 -(01)-> _
+	addTransition(aut, 2, x, y, (char *) "01", 3);
 
-		// q0 -(x01x)-> q2
-		addTransition(aut, 0, x, y, (char *) "01", 2);
+	// q2 -(1X)-> _
+	addTransition(aut, 2, x, y, (char *) "1X", 3);
 
-		// q2 -(x10x)-> q1
-		addTransition(aut, 2, x, y, (char *) "10", 1);
-	} else {
-		// q0 -(x10x)-> q2
-		addTransition(aut, 0, x, y, (char *) "10", 2);
+	// _  -(XX)-> _
+	addUniversalTransition(aut, 3, 3);
 
-		// q2 -(x01x)-> q1
-		addTransition(aut, 2, x, y, (char *) "01", 1);
-	}
-
-	setFinalState(aut, doComplement, 1);
+	setNonFinalState(aut, doComplement, 0);
+	setNonFinalState(aut, doComplement, 1);
+	setFinalState(aut, doComplement, 2);
+	setNonFinalState(aut, doComplement, 3);
 }
 
 /**

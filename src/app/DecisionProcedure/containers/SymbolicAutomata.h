@@ -20,6 +20,7 @@
 #include "../../Frontend/ident.h"
 #include "../../Frontend/ast.h"
 #include "../containers/SymbolicCache.hh"
+#include "../containers/VarToTrackMap.hh"
 #include "StateSet.hh"
 #include <vector>
 #include <vata/bdd_bu_tree_aut.hh>
@@ -34,6 +35,8 @@ enum AutSubType {FINAL, NONFINAL};
 enum AutBaseType {BT_SUB, BT_IN, BT_EQF, BT_EQS, BT_LSS, BT_LEQ, BT_FO, BT_T, BT_F};
 
 using BaseAut_States = VATA::Util::OrdVector<StateType>;
+
+extern VarToTrackMap varMap;
 
 struct Pair_Hash {
     /**
@@ -98,7 +101,7 @@ public:
         IdentList free, bound;
         this->_form->freeVars(&free, &bound);
         for(auto it = free.begin(); it != free.end(); ++it) {
-            _freeVars.insert(*it);
+            _freeVars.insert(varMap[(*it)]);
         }
     }
 
@@ -117,7 +120,7 @@ class BinaryOpAutomaton : public SymbolicAutomaton {
 protected:
     std::shared_ptr<SymbolicAutomaton> lhs_aut;
     std::shared_ptr<SymbolicAutomaton> rhs_aut;
-    bool (*_eval_result)(bool, bool);
+    bool (*_eval_result)(bool, bool, bool);
     bool (*_eval_early)(bool, bool);
     bool (*_early_val)(bool);
     virtual void _InitializeAutomaton() { this->_InitializeInitialStates(); this->_InitializeFinalStates(); }
@@ -145,7 +148,7 @@ public:
             : BinaryOpAutomaton(lhs, rhs, form) {
         this->_InitializeAutomaton();
         this->type = AutType::INTERSECTION;
-        this->_eval_result = [](bool a, bool b) {return a && b; };
+        this->_eval_result = [](bool a, bool b, bool underC) { if(!underC) {return a && b;} else {return a || b;} };
         this->_eval_early = [](bool a, bool underC) {return (a == underC);};
         this->_early_val = [](bool underC) { return underC;};
     }
@@ -162,7 +165,7 @@ public:
             : BinaryOpAutomaton(lhs, rhs, form) {
         this->_InitializeAutomaton();
         this->type = AutType::UNION;
-        this->_eval_result = [](bool a, bool b) {return a || b; };
+        this->_eval_result = [](bool a, bool b, bool underC) {if(!underC) {return a || b;} else { return a && b;} };
         this->_eval_early = [](bool a, bool underC) { return (a != underC);};
         this->_early_val = [](bool underC) { return !underC;};
     }

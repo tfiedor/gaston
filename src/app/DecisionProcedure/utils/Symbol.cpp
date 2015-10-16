@@ -69,7 +69,9 @@ ZeroSymbol::ZeroSymbol(Automaton::SymbolType track) {
 
 ZeroSymbol::ZeroSymbol(Automaton::SymbolType track, Var var, Value val) {
     this->_track = track;
-    this->_track.SetIthVariableValue(var, charToAsgn(val));
+    if(this->_track.GetIthVariableValue(var) != charToAsgn('X')) {
+        this->_track.SetIthVariableValue(var, charToAsgn(val));
+    }
     this->_bdd = nullptr;
 }
 

@@ -26,7 +26,6 @@ enum Decision {SATISFIABLE, UNSATISFIABLE, VALID, INVALID};
 /**
  * Configuration macros
  */
-#define CONSTRUCT_ALWAYS_DTA true
 
 /**
  * Enabling debugging
@@ -51,6 +50,7 @@ enum Decision {SATISFIABLE, UNSATISFIABLE, VALID, INVALID};
 #define SMART_BINARY true
 
 #define SMART_FLATTEN true
+#define CONSTRUCT_ALWAYS_DTA true
 
 /*********************************************
  * NOVEL OPTIMIZATIONS IN SYMBOLIC COMPUTING *
@@ -65,8 +65,8 @@ enum Decision {SATISFIABLE, UNSATISFIABLE, VALID, INVALID};
 #define DEBUG_COMPUTE_FULL_FIXPOINT false
 
 #define OPT_DRAW_NEGATION_IN_BASE true
-#define OPT_CREATE_QF_AUTOMATON false
-#define OPT_REDUCE_AUTOMATA false
-#define OPT_EARLY_EVALUATION false
+#define OPT_CREATE_QF_AUTOMATON true
+#define OPT_REDUCE_AUTOMATA true
+#define OPT_EARLY_EVALUATION true
 #define OPT_CACHE_RESULTS true
 #endif

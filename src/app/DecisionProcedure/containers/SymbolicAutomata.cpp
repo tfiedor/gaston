@@ -40,7 +40,10 @@ SymbolicAutomaton::ISect_Type SymbolicAutomaton::IntersectNonEmpty(::SymbolicAut
     std::cout << ", " << (underComplement ? "True" : "False");
     std::cout << ")\n";
     #endif
+
     if(symbol != nullptr) {
+        symbol = new Symbol(symbol->GetTrack());
+
         auto it = this->_freeVars.begin();
         auto end = this->_freeVars.end();
         for(size_t var = 0; var < varMap.TrackLength(); ++var) {
@@ -49,7 +52,6 @@ SymbolicAutomaton::ISect_Type SymbolicAutomaton::IntersectNonEmpty(::SymbolicAut
             } else {
                 symbol->ProjectVar(var);
             }
-
         }
     }
 
@@ -171,16 +173,18 @@ SymbolicAutomaton::ISect_Type BinaryOpAutomaton::_IntersectNonEmptyCore(Symbolic
 
     ISect_Type rhs_result = this->rhs_aut->IntersectNonEmpty(symbol, finalApprox->right, underComplement);
     Term_ptr combined = std::shared_ptr<Term>(new TermProduct(lhs_result.first, rhs_result.first));
-    return std::make_pair(combined, this->_eval_result(lhs_result.second, rhs_result.second));
+    return std::make_pair(combined, this->_eval_result(lhs_result.second, rhs_result.second, underComplement));
 }
 
 /**
  * Dumps the intersection automaton to std::cout
  */
 void BinaryOpAutomaton::dump() {
+    std::cout << "(";
     lhs_aut->dump();
     std::cout << " x ";
     rhs_aut->dump();
+    std::cout << ")";
 }
 
 // <<<<<<<<<<<<<<<<<<<<<< COMPLEMENT AUTOMATON >>>>>>>>>>>>>>>>>>>>>>>>>>
