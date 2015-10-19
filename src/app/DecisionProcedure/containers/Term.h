@@ -35,11 +35,15 @@ public:
     virtual bool IsSubsumedBy(std::list<Term_ptr>& fixpoint) = 0;
     virtual bool IsSubsumed(Term* t) = 0;
     virtual bool IsEmpty() = 0;
+    virtual unsigned int MeasureStateSpace() = 0;
 };
 // Wow such clean!
 
 class TermProduct : public Term {
 public:
+    #if (MEASURE_STATE_SPACE == true)
+    static int instances;
+    #endif
     Term_ptr left;
     Term_ptr right;
     void dump() {
@@ -84,13 +88,26 @@ public:
     bool IsEmpty() { return this->left->IsEmpty() && this->right->IsEmpty(); };
 
     TermProduct(Term_ptr lhs, Term_ptr rhs) : left(lhs), right(rhs) {
+        #if (MEASURE_STATE_SPACE == true)
+        ++TermProduct::instances;
+        #endif
         type = TERM_PRODUCT; }
     TermProduct(Term_ptr lhs, Term_ptr rhs, TermType t) : left(lhs), right(rhs) {
+        #if (MEASURE_STATE_SPACE == true)
+        ++TermProduct::instances;
+        #endif
         type = t; }
+
+    unsigned int MeasureStateSpace() {
+        return this->left->MeasureStateSpace() + this->right->MeasureStateSpace() + 1;
+    }
 };
 
 class TermBaseSet : public Term {
 public:
+    #if (MEASURE_STATE_SPACE == true)
+    static int instances;
+    #endif
     TermBaseSetStates states;
 
     void dump() {
@@ -158,8 +175,16 @@ public:
         }
     }
 
-    TermBaseSet() : states() { type = TERM_BASE; }
+    TermBaseSet() : states() {
+        #if (MEASURE_STATE_SPACE == true)
+        ++TermBaseSet::instances;
+        #endif
+        type = TERM_BASE;
+    }
     TermBaseSet(TermBaseSetStates& s) : states()  {
+        #if (MEASURE_STATE_SPACE == true)
+        ++TermBaseSet::instances;
+        #endif
         type = TERM_BASE;
         for(auto state : s) {
             this->states.push_back(state);
@@ -167,15 +192,26 @@ public:
     }
 
     TermBaseSet(VATA::Util::OrdVector<unsigned int>& s) : states()  {
+        #if (MEASURE_STATE_SPACE == true)
+        ++TermBaseSet::instances;
+        #endif
         type = TERM_BASE;
         for(auto state : s) {
             this->states.push_back(state);
         }
     }
+
+    unsigned int MeasureStateSpace() {
+        return this->states.size();
+    }
 };
 
 class TermContProduct : public Term {
 public:
+    #if (MEASURE_STATE_SPACE == true)
+    static int instances;
+    #endif
+
     std::shared_ptr<SymbolicAutomaton> aut;
     Term_ptr term;
     std::shared_ptr<SymbolType> symbol;
@@ -185,11 +221,14 @@ public:
     }
 
     TermContProduct(std::shared_ptr<SymbolicAutomaton> a, Term_ptr t, std::shared_ptr<SymbolType> s) : aut(a), term(t), symbol(s) {
+        #if (MEASURE_STATE_SPACE == true)
+            ++TermContProduct::instances;
+        #endif
         this->type = TERM_CONT_ISECT;
         #if (DEBUG_CONTINUATIONS == true)
-        std::cout << "Postponing computation as [";
-        t->dump();
-        std::cout << "]\n";
+            std::cout << "Postponing computation as [";
+            t->dump();
+            std::cout << "]\n";
         #endif
     }
 
@@ -223,10 +262,18 @@ public:
     }
 
     bool IsEmpty() {return false;}
+
+    unsigned int MeasureStateSpace() {
+        return 1;
+    }
 };
 
 class TermContSubset : public Term {
 public:
+    #if (MEASURE_STATE_SPACE == true)
+    static int instances;
+    #endif
+
     std::shared_ptr<SymbolicAutomaton> aut;
     Term_ptr term;
     std::shared_ptr<SymbolType> symbol;
@@ -236,6 +283,9 @@ public:
     }
 
     TermContSubset(std::shared_ptr<SymbolicAutomaton> a, Term_ptr t, std::shared_ptr<SymbolType> s) : aut(a), term(t), symbol(s) {
+        #if (MEASURE_STATE_SPACE == true)
+            ++TermContSubset::instances;
+        #endif
         this->type = TERM_CONT_SUBSET;
     }
 
@@ -258,11 +308,19 @@ public:
     }
 
     bool IsEmpty() {return false;}
+
+    unsigned int MeasureStateSpace() {
+        return 1;
+    }
 };
 
 
 class TermList : public Term {
 public:
+    #if (MEASURE_STATE_SPACE == true)
+    static int instances;
+    #endif
+
     TermListStates list;
     bool isComplement;
 
@@ -305,14 +363,25 @@ public:
         std::cout << "}";
     }
 
-    TermList() {type = TERM_LIST;}
+    TermList() {
+        #if (MEASURE_STATE_SPACE == true)
+            ++TermList::instances;
+        #endif
+        type = TERM_LIST;
+    }
 
     TermList(Term_ptr first, bool isCompl) : isComplement(isCompl) {
+        #if (MEASURE_STATE_SPACE == true)
+            ++TermList::instances;
+        #endif
         this->type = TERM_LIST;
         this->list.push_back(first);
     }
 
     TermList(Term_ptr f, Term_ptr s, bool isCompl) : isComplement(isCompl) {
+        #if (MEASURE_STATE_SPACE == true)
+            ++TermList::instances;
+        #endif
         this->type = TERM_LIST;
         this->list.push_back(f);
         this->list.push_back(s);
@@ -348,10 +417,23 @@ public:
         return this->list.size() == 0 ||
                (this->list.size() == 1 && this->list[0]->IsEmpty());
     }
+
+    unsigned int MeasureStateSpace() {
+        unsigned int count = 0;
+        for(auto item : this->list) {
+            count += item->MeasureStateSpace();
+        }
+
+        return count;
+    }
 };
 
 class TermFixpointStates : public Term {
 public:
+    #if (MEASURE_STATE_SPACE == true)
+    static int instances;
+    #endif
+
     using FixpointType = std::list<Term_ptr>;
     using Aut_ptr = std::shared_ptr<SymbolicAutomaton>;
 
@@ -508,6 +590,10 @@ public:
         //_worklist({startingTerm}),
         _bValue(initbValue),
         _inComplement(inComplement) {
+        #if (MEASURE_STATE_SPACE == true)
+            ++TermFixpointStates::instances;
+        #endif
+
         this->_InitializeAggregateFunction(inComplement);
         this->type = TERM_FIXPOINT;
         this->_fixpoint.push_front(startingTerm);
@@ -530,6 +616,9 @@ public:
             _worklist(),
             _bValue(false),
             _inComplement(inComplement) {
+        #if (MEASURE_STATE_SPACE == true)
+            ++TermFixpointStates::instances;
+        #endif
         // TODO: is it ok?
         this->_InitializeAggregateFunction(inComplement);
         assert(sourceTerm->type == TERM_FIXPOINT);
@@ -618,6 +707,19 @@ public:
 
     bool GetResult() {
         return this->_bValue;
+    }
+
+    unsigned int MeasureStateSpace() {
+        unsigned count = 1;
+        for(auto item : this->_fixpoint) {
+            if(item == nullptr) {
+                continue;
+            }
+            assert(item != nullptr);
+            count += item->MeasureStateSpace();
+        }
+
+        return count;
     }
 };
 #endif //WSKS_TERM_H

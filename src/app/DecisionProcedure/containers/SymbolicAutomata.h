@@ -44,7 +44,6 @@ struct Pair_Hash {
      * @return hash of @p set
      */
     int operator()(std::pair<std::shared_ptr<Term>, std::shared_ptr<ZeroSymbol>> set) const {
-        // TODO: MOTHER FUCKING SHIT
         return 1;
     }
 };
@@ -111,6 +110,7 @@ public:
     ISect_Type IntersectNonEmpty(Symbol*, StateSet, bool);
 
     virtual void dump() = 0;
+    virtual void DumpCacheStats() = 0;
 };
 
 /**
@@ -135,6 +135,11 @@ public:
                       Formula_ptr form)
             : SymbolicAutomaton(form), lhs_aut(lhs), rhs_aut(rhs) { this->_InitializeAutomaton(); type = AutType::BINARY;}
     virtual void dump();
+    virtual void DumpCacheStats() {
+        this->_form->dump();
+        this->_resCache.dumpStats();
+        this->lhs_aut->DumpCacheStats();
+        this->rhs_aut->DumpCacheStats();}
 };
 
 /**
@@ -187,6 +192,11 @@ public:
 
     virtual StateSet Pre(Symbol*, StateSet, bool);
     virtual void dump();
+    virtual void DumpCacheStats() {
+        this->_form->dump();
+        this->_resCache.dumpStats();
+        this->_aut->DumpCacheStats();
+    }
 };
 
 /**
@@ -211,6 +221,11 @@ public:
 
     virtual StateSet Pre(Symbol*, StateSet, bool);
     virtual void dump();
+    virtual void DumpCacheStats() {
+        this->_form->dump();
+        this->_resCache.dumpStats();
+        this->_aut->DumpCacheStats();
+    }
 };
 
 /**
@@ -230,6 +245,10 @@ public:
     BaseAutomaton(LeafAutomaton_Type* aut, Formula_ptr form) : SymbolicAutomaton(form), _base_automaton(aut){ this->_InitializeAutomaton();type = AutType::BASE; }
     virtual StateSet Pre(Symbol*, StateSet, bool);
     virtual void baseAutDump();
+    virtual void DumpCacheStats() {
+        this->_form->dump();
+        this->_resCache.dumpStats();
+    }
 };
 
 class GenericBaseAutomaton : public BaseAutomaton {

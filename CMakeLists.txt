@@ -51,6 +51,7 @@ add_executable(gaston
 	src/app/DecisionProcedure/containers/VarToTrackMap.cpp
 	src/app/DecisionProcedure/containers/StateSet.cpp
 	src/app/DecisionProcedure/containers/SymbolicAutomata.cpp
+	src/app/DecisionProcedure/containers/Term.cpp
 	src/app/DecisionProcedure/utils/Symbol.cpp
 	src/app/DecisionProcedure/visitors/BooleanUnfolder.cpp
 	src/app/DecisionProcedure/visitors/Flattener.cpp
@@ -72,7 +73,7 @@ target_link_libraries(gaston ${CMAKE_SOURCE_DIR}/src/libs/libvata.a)
 
 if (UNIX)
 	message(STATUS "Setting G++ flags")
-	set(CMAKE_CXX_FLAGS "${CMAKE_C++_FLAGS} -m32 -std=c++0x -DHAVE_CONFIG_H -I. -I.. -I../include -O2 -g -O3")
+	set(CMAKE_CXX_FLAGS "${CMAKE_C++_FLAGS} -m32 -std=c++0x -DHAVE_CONFIG_H -I. -I.. -I../include -pg -O2 -g -O3")
 else()
 	message(fatal_error "Not supported yet")
 endif()

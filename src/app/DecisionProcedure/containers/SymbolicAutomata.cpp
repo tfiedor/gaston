@@ -3,7 +3,6 @@
  *
  *  Copyright (c) 2015  Tomas Fiedor <ifiedortom@fit.vutbr.cz>
  *      Notable mentions: Ondrej Lengal <ondra.lengal@gmail.com>
- *          			  Overeating Panda <if-his-simulation-reduction-works>
  *
  *****************************************************************************/
 
@@ -17,8 +16,6 @@
 extern VarToTrackMap varMap;
 
 StateType SymbolicAutomaton::stateCnt = 0;
-
-
 
 SymbolicAutomaton::ISect_Type SymbolicAutomaton::IntersectNonEmpty(::SymbolicAutomaton::Symbol* symbol, StateSet approx, bool underComplement) {
     assert(this->type != AutType::SYMBOLIC_BASE);
@@ -66,7 +63,6 @@ SymbolicAutomaton::ISect_Type SymbolicAutomaton::IntersectNonEmpty(::SymbolicAut
     }
     #endif
 
-    // TODO: UNCOMMENT
     if(approx != nullptr && approx->type == TERM_CONT_ISECT) {
         TermContProduct* cont = reinterpret_cast<TermContProduct*>(approx.get());
         approx = (cont->aut->IntersectNonEmpty((cont->symbol == nullptr ? nullptr : cont->symbol.get()), cont->term, false)).first;

@@ -210,6 +210,30 @@ src/app/DecisionProcedure/containers/SymbolicAutomata.cpp.s:
 	$(MAKE) -f CMakeFiles/gaston.dir/build.make CMakeFiles/gaston.dir/src/app/DecisionProcedure/containers/SymbolicAutomata.cpp.s
 .PHONY : src/app/DecisionProcedure/containers/SymbolicAutomata.cpp.s
 
+src/app/DecisionProcedure/containers/Term.o: src/app/DecisionProcedure/containers/Term.cpp.o
+.PHONY : src/app/DecisionProcedure/containers/Term.o
+
+# target to build an object file
+src/app/DecisionProcedure/containers/Term.cpp.o:
+	$(MAKE) -f CMakeFiles/gaston.dir/build.make CMakeFiles/gaston.dir/src/app/DecisionProcedure/containers/Term.cpp.o
+.PHONY : src/app/DecisionProcedure/containers/Term.cpp.o
+
+src/app/DecisionProcedure/containers/Term.i: src/app/DecisionProcedure/containers/Term.cpp.i
+.PHONY : src/app/DecisionProcedure/containers/Term.i
+
+# target to preprocess a source file
+src/app/DecisionProcedure/containers/Term.cpp.i:
+	$(MAKE) -f CMakeFiles/gaston.dir/build.make CMakeFiles/gaston.dir/src/app/DecisionProcedure/containers/Term.cpp.i
+.PHONY : src/app/DecisionProcedure/containers/Term.cpp.i
+
+src/app/DecisionProcedure/containers/Term.s: src/app/DecisionProcedure/containers/Term.cpp.s
+.PHONY : src/app/DecisionProcedure/containers/Term.s
+
+# target to generate assembly for a file
+src/app/DecisionProcedure/containers/Term.cpp.s:
+	$(MAKE) -f CMakeFiles/gaston.dir/build.make CMakeFiles/gaston.dir/src/app/DecisionProcedure/containers/Term.cpp.s
+.PHONY : src/app/DecisionProcedure/containers/Term.cpp.s
+
 src/app/DecisionProcedure/containers/VarToTrackMap.o: src/app/DecisionProcedure/containers/VarToTrackMap.cpp.o
 .PHONY : src/app/DecisionProcedure/containers/VarToTrackMap.o
 
@@ -1263,6 +1287,9 @@ help:
 	@echo "... src/app/DecisionProcedure/containers/SymbolicAutomata.o"
 	@echo "... src/app/DecisionProcedure/containers/SymbolicAutomata.i"
 	@echo "... src/app/DecisionProcedure/containers/SymbolicAutomata.s"
+	@echo "... src/app/DecisionProcedure/containers/Term.o"
+	@echo "... src/app/DecisionProcedure/containers/Term.i"
+	@echo "... src/app/DecisionProcedure/containers/Term.s"
 	@echo "... src/app/DecisionProcedure/containers/VarToTrackMap.o"
 	@echo "... src/app/DecisionProcedure/containers/VarToTrackMap.i"
 	@echo "... src/app/DecisionProcedure/containers/VarToTrackMap.s"

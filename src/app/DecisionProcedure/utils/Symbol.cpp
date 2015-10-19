@@ -23,13 +23,13 @@ char ZeroSymbol::charToAsgn(char c) {
 }
 
 BaseAut_MTBDD* ZeroSymbol::GetMTBDD() {
-    // TODO: OPTIMIZE
-    /*if(this->_bdd == nullptr) {
+    if(this->_bdd == nullptr) {
         this->_bdd = new BaseAut_MTBDD(this->_track, BaseAut_States(StateTuple({0})), BaseAut_States(StateTuple({})));
     }
-    assert(this->_bdd != nullptr);
-    return this->_bdd;*/
-    return new BaseAut_MTBDD(this->_track, BaseAut_States(StateTuple({0})), BaseAut_States(StateTuple({})));
+
+    // Initialization was successful
+    assert(this->_bdd != nullptr && "MTBDD was not initialized\n");
+    return this->_bdd;
 }
 
 Automaton::SymbolType ZeroSymbol::constructUniversalTrack() {
@@ -47,11 +47,13 @@ Automaton::SymbolType ZeroSymbol::constructZeroTrack() {
 
 void ZeroSymbol::ProjectVar(Var var) {
     assert(this->_bdd == nullptr);
+
     this->_track.SetIthVariableValue(var, charToAsgn('X'));
 }
 
 void ZeroSymbol::ProjectVars(Vars freeVars) {
     assert(this->_bdd == nullptr);
+
     for(auto var : freeVars) {
         this->_track.SetIthVariableValue(var, charToAsgn('X'));
     }

@@ -133,9 +133,9 @@ public:
 	 * @param level: level of cache
 	 * @return number of dumped keys
 	 */
-	unsigned int dumpStats(unsigned int level) {
+	unsigned int dumpStats() {
 		unsigned int size = this->_cache.size();
-		std::cout << "Level " << level << " cache: " << size;
+		std::cout << "Cache size: " << size;
 		if(this->cacheHits+this->cacheMisses != 0)
 			std::cout << "(" << this->cacheHits << ":" << this->cacheMisses << ") -> "<< (this->cacheHits/(double)(this->cacheHits+this->cacheMisses)) <<"\n";
 		else
