@@ -45,7 +45,6 @@ typedef std::vector<unsigned int> VariableSet;
 typedef std::deque<VariableSet> PrefixListType;
 
 // < FOR SYMBOLIC METHOD >
-// TODO: Little redoing things:
 using StateType = size_t;
 using StateTuple = std::vector<StateType>;
 using BaseAut_States = VATA::Util::OrdVector<StateType>;
@@ -90,6 +89,6 @@ MacroStateSet* computeFinalStates(Automaton &aut, PrefixListType prefix, unsigne
 bool initialStateIsInFinalStates(MacroStateSet *initial, MacroStateSet *finalStates, unsigned int level);
 
 // < Symbolic decision procedure functions >
-int decideWS1S_symbolically(std::shared_ptr<SymbolicAutomaton> aut);
+int decideWS1S_symbolically(Gaston::SymbolicAutomaton_ptr aut);
 
 #endif

@@ -19,6 +19,7 @@
 
 #include <exception>
 #include <iostream>
+#include <memory>
 
 class NotImplementedException : public std::exception {
 	public:
@@ -27,11 +28,17 @@ class NotImplementedException : public std::exception {
 		}
 };
 
+/*****************************
+ * FORWARD CLASS DECLARATION *
+ *****************************/
+class SymbolicAutomaton;
+
 /***************************
  * GLOBAL USING DIRECTIVES *
  ***************************/
 namespace Gaston {
-	using SymbolicAut_ptr		= std::shared_ptr<SymbolicAutomaton>;
+	using SymbolicAutomaton_ptr		= std::shared_ptr<SymbolicAutomaton>;
+	using SymbolicAutomaton_raw		= SymbolicAutomaton*;
 }
 
 /***********************
@@ -58,13 +65,13 @@ enum Decision {SATISFIABLE, UNSATISFIABLE, VALID, INVALID};
  * >>> Optimizations <<< *
  *************************/
 #define USE_PRUNED_UNION_FUNCTOR 		false
-#define PRUNE_BY_RELATION 		false		// [TODO] What's the difference with BY_SUBSUMPTION?
-#define PRUNE_BY_SUBSUMPTION 	false
-#define USE_STATECACHE 			true
-#define USE_BDDCACHE 			false 		// BDD Cache is temporary disable due to the memory leaks
-#define SMART_BINARY 			true
-#define SMART_FLATTEN 			true
-#define CONSTRUCT_ALWAYS_DTA 	true
+#define PRUNE_BY_RELATION 				false		// [TODO] What's the difference with BY_SUBSUMPTION?
+#define PRUNE_BY_SUBSUMPTION 			false
+#define USE_STATECACHE 					true
+#define USE_BDDCACHE 					false 		// BDD Cache is temporary disable due to the memory leaks
+#define SMART_BINARY 					true
+#define SMART_FLATTEN 					true
+#define CONSTRUCT_ALWAYS_DTA 			true
 
 /***********************************
  * SYMBOLIC METHOD RELATED DEFINES *
@@ -84,15 +91,15 @@ enum Decision {SATISFIABLE, UNSATISFIABLE, VALID, INVALID};
 /*****************************
  * >>> Measuring Options <<< *
  *****************************/
-#define MEASURE_STATE_SPACE 		true
-#define MEASURE_CACHE_HITS 			true
+#define MEASURE_STATE_SPACE 			true
+#define MEASURE_CACHE_HITS 				true
 
 /*************************
  * >>> Optimizations <<< *
  *************************/
-#define OPT_DRAW_NEGATION_IN_BASE 	false
-#define OPT_CREATE_QF_AUTOMATON 	false
-#define OPT_REDUCE_AUTOMATA 		false
-#define OPT_EARLY_EVALUATION 		false
-#define OPT_CACHE_RESULTS 			true
+#define OPT_DRAW_NEGATION_IN_BASE 		false
+#define OPT_CREATE_QF_AUTOMATON 		false
+#define OPT_REDUCE_AUTOMATA 			false
+#define OPT_EARLY_EVALUATION 			false
+#define OPT_CACHE_RESULTS 				true
 #endif

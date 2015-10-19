@@ -135,7 +135,7 @@ public:
 	 */
 	unsigned int dumpStats() {
 		unsigned int size = this->_cache.size();
-		std::cout << "Cache size: " << size;
+		std::cout << ".Cache size: " << size;
 		if(this->cacheHits+this->cacheMisses != 0)
 			std::cout << "(" << this->cacheHits << ":" << this->cacheMisses << ") -> "<< (this->cacheHits/(double)(this->cacheHits+this->cacheMisses)) <<"\n";
 		else

@@ -694,16 +694,6 @@ int main(int argc, char *argv[]) {
 				cout << "undecided due to an error.\n";
 				break;
 		}
-		#if (MEASURE_STATE_SPACE == true)
-		cout << "[*] Measured State Space: \n";
-		cout << "	~ Term Products: " << TermProduct::instances << "\n";
-		cout << "	~ Term Bases: " << TermBaseSet::instances << "\n";
-		cout << "	~ Term Fixpoints: " << TermFixpointStates::instances << "\n";
-		cout << "	~ Term Lists: " << TermList::instances << "\n";
-		cout << "	~ Term Continuations: " << (TermContProduct::instances + TermContSubset::instances) << "\n";
-		cout << "[*] Overall State Space: " << (TermProduct::instances + TermBaseSet::instances + TermFixpointStates::instances
-											   + TermList::instances + TermContProduct::instances + TermContSubset::instances) << "\n";
-		#endif
 
 		cout << "[*] Decision procedure elapsed time: ";
 		timer_deciding.print();

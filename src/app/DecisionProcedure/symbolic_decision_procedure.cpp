@@ -1,46 +1,79 @@
 /*****************************************************************************
- *  gaston - no real logic behind the name, we simply liked the poor seal gaston. R.I.P. brave soldier.
+ *  gaston - We pay homage to Gaston, an Africa-born brown fur seal who
+ *    escaped the Prague Zoo during the floods in 2002 and made a heroic
+ *    journey for freedom of over 300km all the way to Dresden. There he
+ *    was caught and subsequently died due to exhaustion and infection.
+ *    Rest In Piece, brave soldier.
  *
  *  Copyright (c) 2015  Tomas Fiedor <ifiedortom@fit.vutbr.cz>
  *      Notable mentions: Ondrej Lengal <ondra.lengal@gmail.com>
- *          			  Overeating Panda <if-his-simulation-reduction-works>
  *
+ *  Description:
+ *      Symbolic Method of deciding the WS1S formulae. The method traverses
+ *      the formulae symbolically and tests if initial states of automaton
+ *      corresponding to the formulae and final states intersection is
+ *      nonempty.
  *****************************************************************************/
 
-#include "environment.hh"
-#include "decision_procedures.hh"
 #include "containers/SymbolicAutomata.h"
 #include "containers/Term.h"
+#include "decision_procedures.hh"
+#include "environment.hh"
 
-// TODO: OPT: Pushing symbols down the formulae
-// TODO: OPT: Early Projection
-// TODO: OPT: Subformulae to Automaton
-// TODO: OPT: Anti-prenexing
-// TODO: OPT: Pandareduction
-// TODO: OPT: Caching
-// TODO: (Counter)Example printing
+using namespace Gaston;
 
 /**
- *
+ * @param[in] symbolicAutomaton: input formula in symbolic automaton representation
+ * @return: VALID/UNSATISFIABLE/SATISFIABLE
  */
-int decideWS1S_symbolically(std::shared_ptr<SymbolicAutomaton> aut) {
-    // TODO: We assume we have ground formulae
+int decideWS1S_symbolically(SymbolicAutomaton_ptr symbolicAutomaton) {
+    // TODO: Extend the notion to ground formulae
     std::cout << "\n[*] Deciding WS1S Symbolically\n";
 
-    Term_ptr finalApprox = aut->GetFinalStates();
+    // Construct the initial approximation for final states
+    // Note: This only copies the structure of fixpoint term with final
+    //      states of base automata on leaves
+    Term_ptr finalStatesApproximation = symbolicAutomaton->GetFinalStates();
     #if (DEBUG_INITIAL_APPROX == true)
-    finalApprox->dump();
+    finalStatesApproximation->dump();
     std::cout << "\n";
     #endif
 
-    // TODO: Extracttype
-    std::pair<std::shared_ptr<Term>, bool> res = aut->IntersectNonEmpty(nullptr, finalApprox, false);
+    // Checks if Initial States intersect Final states
+    std::pair<Term_ptr, bool> result = symbolicAutomaton->IntersectNonEmpty(nullptr, finalStatesApproximation, false);
+    Term_ptr fixpoint = result.first;
+    bool isValid = result.second;
+
     #if (DEBUG_FIXPOINT == true)
     std::cout << "[!] Finished deciding WS1S formula with following fixpoint:\n";
-    res.first->dump();
+    fixpoint->dump();
     std::cout << "\n";
     #endif
-    if(res.second == true) {
+
+    #if (MEASURE_STATE_SPACE == true)
+    std::cout << "[*] Explored Fixpoint Space: " << fixpoint->MeasureStateSpace() << "\n";
+    #endif
+
+
+    #if (MEASURE_STATE_SPACE == true)
+    std::cout << "[*] Measured State Space: \n";
+    std::cout << "	~ Term Products: " << TermProduct::instances << "\n";
+    std::cout << "	~ Term Bases: " << TermBaseSet::instances << "\n";
+    std::cout << "	~ Term Fixpoints: " << TermFixpointStates::instances << "\n";
+    std::cout << "	~ Term Lists: " << TermList::instances << "\n";
+    std::cout << "	~ Term Continuations: " << (TermContProduct::instances + TermContSubset::instances) << "\n";
+    std::cout << "[*] Overall State Space: " << (TermProduct::instances + TermBaseSet::instances + TermFixpointStates::instances
+                                            + TermList::instances + TermContProduct::instances + TermContSubset::instances) << "\n";
+    #endif
+
+    #if (MEASURE_CACHE_HITS == true)
+    std::cout << "[*] Printing Result Cache statistics\n";
+    symbolicAutomaton->DumpCacheStats();
+    std::cout << "\n";
+    #endif
+
+    // If Initial States does intersect final ones, the formula is valid, else it is unsatisfiable
+    if(isValid) {
         return VALID;
     } else {
         return UNSATISFIABLE;
