@@ -1,13 +1,17 @@
 /*****************************************************************************
- *  dWiNA - Deciding WSkS using non-deterministic automata
+ *  gaston - We pay homage to Gaston, an Africa-born brown fur seal who
+ *    escaped the Prague Zoo during the floods in 2002 and made a heroic
+ *    journey for freedom of over 300km all the way to Dresden. There he
+ *    was caught and subsequently died due to exhaustion and infection.
+ *    Rest In Piece, brave soldier.
  *
- *  Copyright (c) 2014  Tomas Fiedor <xfiedo01@stud.fit.vutbr.cz>
+ *  Copyright (c) 2015  Tomas Fiedor <ifiedortom@fit.vutbr.cz>
+ *      Notable mentions: Ondrej Lengal <ondra.lengal@gmail.com>
  *
  *  Description:
- *    WSkS Decision Procedure
- *
+ *      Header file for all decision procedure methods. Globally used headers,
+ *      function defines, etc.
  *****************************************************************************/
-
 #ifndef __DEC_PROC__H__
 #define __DEC_PROC__H__
 
@@ -41,10 +45,11 @@ extern VarToTrackMap varMap;
 extern Options options;
 
 // < Module Typedefs >
-typedef std::vector<unsigned int> VariableSet;
-typedef std::deque<VariableSet> PrefixListType;
+using VariableSet = std::vector<unsigned int>;
+using PrefixListType = std::deque<VariableSet>;
 
 // < FOR SYMBOLIC METHOD >
+// TODO: Move to environment.h?
 using StateType = size_t;
 using StateTuple = std::vector<StateType>;
 using BaseAut_States = VATA::Util::OrdVector<StateType>;
@@ -54,15 +59,14 @@ using FixPoint_MTBDD = VATA::MTBDDPkg::OndriksMTBDD<std::pair<MacroStateSet*, bo
 using FixPoint_MTBDD_T = VATA::MTBDDPkg::OndriksMTBDD<MacroStateSet*>;
 using FixPoint_MTBDD_B = VATA::MTBDDPkg::OndriksMTBDD<bool>;
 using StateSet = MacroStateSet*;
-
 using Automaton = VATA::BDDBottomUpTreeAut;
 using StateHT = std::unordered_set<StateType>;
 using MTBDDLeafStateSet = VATA::Util::OrdVector<StateType>;
 using      TransMTBDD = VATA::MTBDDPkg::OndriksMTBDD<MTBDDLeafStateSet>;
 using MacroTransMTBDD = VATA::MTBDDPkg::OndriksMTBDD<MacroStateSet*>;
-typedef StateHT BaseFinalStatesType;
-typedef MacroStateSet* FinalStateType;
-typedef StateHT StateSetType;
+using BaseFinalStatesType = StateHT;
+using FinalStateType = MacroStateSet*;
+using StateSetType = StateHT;
 
 // < Module Functions >
 int decideWS1S(Automaton & aut, PrefixListType formulaPrefixSet, PrefixListType negFormulaPrefixSet);
@@ -89,6 +93,6 @@ MacroStateSet* computeFinalStates(Automaton &aut, PrefixListType prefix, unsigne
 bool initialStateIsInFinalStates(MacroStateSet *initial, MacroStateSet *finalStates, unsigned int level);
 
 // < Symbolic decision procedure functions >
-int decideWS1S_symbolically(Gaston::SymbolicAutomaton_ptr aut);
+int ws1s_symbolic_decision_procedure(Gaston::SymbolicAutomaton_ptr aut);
 
 #endif

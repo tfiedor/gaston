@@ -26,7 +26,7 @@ using namespace Gaston;
  * @param[in] symbolicAutomaton: input formula in symbolic automaton representation
  * @return: VALID/UNSATISFIABLE/SATISFIABLE
  */
-int decideWS1S_symbolically(SymbolicAutomaton_ptr symbolicAutomaton) {
+int ws1s_symbolic_decision_procedure(SymbolicAutomaton_ptr symbolicAutomaton) {
     // TODO: Extend the notion to ground formulae
     std::cout << "\n[*] Deciding WS1S Symbolically\n";
 
@@ -51,11 +51,6 @@ int decideWS1S_symbolically(SymbolicAutomaton_ptr symbolicAutomaton) {
     #endif
 
     #if (MEASURE_STATE_SPACE == true)
-    std::cout << "[*] Explored Fixpoint Space: " << fixpoint->MeasureStateSpace() << "\n";
-    #endif
-
-
-    #if (MEASURE_STATE_SPACE == true)
     std::cout << "[*] Measured State Space: \n";
     std::cout << "	~ Term Products: " << TermProduct::instances << "\n";
     std::cout << "	~ Term Bases: " << TermBaseSet::instances << "\n";
@@ -64,6 +59,7 @@ int decideWS1S_symbolically(SymbolicAutomaton_ptr symbolicAutomaton) {
     std::cout << "	~ Term Continuations: " << (TermContProduct::instances + TermContSubset::instances) << "\n";
     std::cout << "[*] Overall State Space: " << (TermProduct::instances + TermBaseSet::instances + TermFixpointStates::instances
                                             + TermList::instances + TermContProduct::instances + TermContSubset::instances) << "\n";
+    std::cout << "[*] Explored Fixpoint Space: " << fixpoint->MeasureStateSpace() << "\n";
     #endif
 
     #if (MEASURE_CACHE_HITS == true)

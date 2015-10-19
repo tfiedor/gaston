@@ -20,6 +20,12 @@
 #include <exception>
 #include <iostream>
 #include <memory>
+#include <list>
+#include <vata/bdd_bu_tree_aut.hh>
+#include <vata/parsing/timbuk_parser.hh>
+#include <vata/serialization/timbuk_serializer.hh>
+#include "utils/cached_binary_op.hh"
+#include "containers/SymbolicCache.hh"
 
 class NotImplementedException : public std::exception {
 	public:
@@ -32,14 +38,59 @@ class NotImplementedException : public std::exception {
  * FORWARD CLASS DECLARATION *
  *****************************/
 class SymbolicAutomaton;
+class ZeroSymbol;
+class Term;
+class ASTForm;
+
+struct ResultHashType {
+	/**
+      * @param set: set we are computing hash of
+      * @return hash of @p set
+      */
+	int operator()(std::pair<std::shared_ptr<Term>, std::shared_ptr<ZeroSymbol>> set) const {
+		// TODO: OPTIMIZE THIS
+		return 1;
+	}
+};
 
 /***************************
  * GLOBAL USING DIRECTIVES *
  ***************************/
 namespace Gaston {
-	using SymbolicAutomaton_ptr		= std::shared_ptr<SymbolicAutomaton>;
-	using SymbolicAutomaton_raw		= SymbolicAutomaton*;
+	using Formula_ptr            = ASTForm*;
+	using Term_ptr				 = std::shared_ptr<Term>;
+	using ResultType			 = std::pair<Term_ptr, bool>;
+
+	using StateType				 = size_t;
+	using StateToStateTranslator = VATA::AutBase::StateToStateTranslWeak;
+	using StateToStateMap        = std::unordered_map<StateType, StateType>;
+
+	using SymbolicAutomaton_ptr	 = std::shared_ptr<SymbolicAutomaton>;
+	using SymbolicAutomaton_raw	 = SymbolicAutomaton*;
+
+	using Symbol				 = ZeroSymbol;
+	using Symbol_ptr			 = Symbol*;
+	using Symbol_shared			 = std::shared_ptr<Symbol>;
+	using SymbolList			 = std::list<Symbol>;
+
+	using ResultCache            = BinaryCache<Term_ptr, Symbol_shared, ResultType, ResultHashType>;
+	using SubsumptionCache       = VATA::Util::CachedBinaryOp<Term_ptr, Term_ptr, bool>;
+
+	using WorkListTerm           = Term;
+	using WorkListTerm_raw       = Term*;
+	using WorkListTerm_ptr       = Term_ptr;
+	using WorkListSet            = std::vector<std::shared_ptr<WorkListTerm>>;
+
+	using BaseAutomatonType      = VATA::BDDBottomUpTreeAut;
+	using BaseAutomatonStates 	 = VATA::Util::OrdVector<StateType>;
+
+	using VarType				 = size_t;
+	using VarList                = VATA::Util::OrdVector<StateType>;
 }
+
+/*************************
+ * ADDITIONAL STRUCTURES *
+ *************************/
 
 /***********************
  * GLOBAL ENUMERATIONS *
@@ -100,6 +151,6 @@ enum Decision {SATISFIABLE, UNSATISFIABLE, VALID, INVALID};
 #define OPT_DRAW_NEGATION_IN_BASE 		false
 #define OPT_CREATE_QF_AUTOMATON 		false
 #define OPT_REDUCE_AUTOMATA 			false
-#define OPT_EARLY_EVALUATION 			false
+#define OPT_EARLY_EVALUATION 			true
 #define OPT_CACHE_RESULTS 				true
 #endif

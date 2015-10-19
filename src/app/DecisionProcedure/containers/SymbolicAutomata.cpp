@@ -17,9 +17,42 @@ extern VarToTrackMap varMap;
 
 StateType SymbolicAutomaton::stateCnt = 0;
 
-SymbolicAutomaton::ISect_Type SymbolicAutomaton::IntersectNonEmpty(::SymbolicAutomaton::Symbol* symbol, StateSet approx, bool underComplement) {
+using namespace Gaston;
+
+/**
+ * Transforms @p symbols according to the bound variable in @p vars, by pumping
+ *  0 and 1 on the tracks
+ *
+ * @param[in,out] symbols:  list of symbols, that will be transformed
+ * @param[in] vars:         list of used vars, that are projected
+ */
+void initialize_symbols(SymbolList &symbols, IdentList* vars) {
+    // TODO: Optimize, this sucks
+    unsigned int symNum = 1;
+    for(auto var = vars->begin(); var != vars->end(); ++var) {
+        // Pop symbol;
+        for(auto i = symNum; i != 0; --i) {
+            Symbol symF = symbols.front();
+            symbols.pop_front();
+            Symbol zero(symF.GetTrack(), varMap[(*var)], '0');
+            Symbol one(symF.GetTrack(), varMap[(*var)], '1');
+            symbols.push_back(zero);
+            symbols.push_back(one);
+        }
+
+        symNum <<= 1;// times 2
+    }
+}
+
+/**
+ * @param[in] symbol:               symbol we are minusing away
+ * @param[in] stateApproximation:   approximation of final states
+ * @param[in] underComplement:      true, if we are under the complement
+ * @return:                         (fixpoint, true if nonemptyintersect)
+ */
+ResultType SymbolicAutomaton::IntersectNonEmpty(Symbol_ptr symbol, Term_ptr stateApproximation, bool underComplement) {
     assert(this->type != AutType::SYMBOLIC_BASE);
-    ISect_Type result;
+    ResultType result;
 
     #if (DEBUG_INTERSECT_NON_EMPTY == true)
     std::cout << "\nIntersectNonEmpty(";
@@ -29,10 +62,10 @@ SymbolicAutomaton::ISect_Type SymbolicAutomaton::IntersectNonEmpty(::SymbolicAut
         std::cout << "''";
     }
     std::cout << ",";
-    if(approx == nullptr) {
+    if(stateApproximation == nullptr) {
         std::cout << "nullptr";
     } else {
-        approx->dump();
+        stateApproximation->dump();
     }
     std::cout << ", " << (underComplement ? "True" : "False");
     std::cout << ")\n";
@@ -57,25 +90,25 @@ SymbolicAutomaton::ISect_Type SymbolicAutomaton::IntersectNonEmpty(::SymbolicAut
     if(symbol != nullptr) {
         symbolKey = std::shared_ptr<Symbol>(new Symbol(symbol->GetTrack()));
     }
-    auto key = std::make_pair(approx, symbolKey);
+    auto key = std::make_pair(stateApproximation, symbolKey);
     if(this->_resCache.retrieveFromCache(key, result)) {
         return result;
     }
     #endif
 
-    if(approx != nullptr && approx->type == TERM_CONT_ISECT) {
-        TermContProduct* cont = reinterpret_cast<TermContProduct*>(approx.get());
-        approx = (cont->aut->IntersectNonEmpty((cont->symbol == nullptr ? nullptr : cont->symbol.get()), cont->term, false)).first;
+    if(stateApproximation != nullptr && stateApproximation->type == TERM_CONT_ISECT) {
+        TermContProduct* cont = reinterpret_cast<TermContProduct*>(stateApproximation.get());
+        stateApproximation = (cont->aut->IntersectNonEmpty((cont->symbol == nullptr ? nullptr : cont->symbol.get()), cont->term, false)).first;
         //                                                                                                           ^--- is this ok?
     }
 
-    if(approx != nullptr && approx->type == TERM_CONT_SUBSET) {
-        TermContSubset* contS = reinterpret_cast<TermContSubset*>(approx.get());
-        approx = (contS->aut->IntersectNonEmpty((contS->symbol == nullptr ? nullptr : contS->symbol.get()), contS->term, true)).first;
+    if(stateApproximation != nullptr && stateApproximation->type == TERM_CONT_SUBSET) {
+        TermContSubset* contS = reinterpret_cast<TermContSubset*>(stateApproximation.get());
+        stateApproximation = (contS->aut->IntersectNonEmpty((contS->symbol == nullptr ? nullptr : contS->symbol.get()), contS->term, true)).first;
         //                                                                                                               ^--- is this ok?
     }
 
-    result = this->_IntersectNonEmptyCore(symbol, approx, underComplement);
+    result = this->_IntersectNonEmptyCore(symbol, stateApproximation, underComplement);
 
     #if (OPT_CACHE_RESULTS == true)
     if(!this->_resCache.inCache(key)) {
@@ -91,10 +124,10 @@ SymbolicAutomaton::ISect_Type SymbolicAutomaton::IntersectNonEmpty(::SymbolicAut
         std::cout << "''";
     }
     std::cout << ",";
-    if(approx == nullptr) {
+    if(stateApproximation == nullptr) {
         std::cout << "nullptr";
     } else {
-        approx->dump();
+        stateApproximation->dump();
     }
     std::cout << ") = " << (result.second ? "True" : "False") << "\n";
     #endif
@@ -102,11 +135,11 @@ SymbolicAutomaton::ISect_Type SymbolicAutomaton::IntersectNonEmpty(::SymbolicAut
 }
 
 /**
- * Returns final states with lazy construction
+ * Lazy evaluation of final states. If states are not initialized, they are recreated and returned
  *
- * @return final states as macrostate
+ * @return: Final states of automaton as Term
  */
-SymbolicAutomaton::StateSet SymbolicAutomaton::GetFinalStates() {
+Term_ptr SymbolicAutomaton::GetFinalStates() {
     if(this->_finalStates == nullptr) {
         this->_InitializeFinalStates();
     }
@@ -115,11 +148,11 @@ SymbolicAutomaton::StateSet SymbolicAutomaton::GetFinalStates() {
 }
 
 /**
- * Return initial states with lazy construction
+ * Lazy evaluation of initial states. If state are not initialized, they are recreated and returned
  *
- * @return initial states as macrostate
+ * @return: Initial states of automaton as Term
  */
-SymbolicAutomaton::StateSet SymbolicAutomaton::GetInitialStates() {
+Term_ptr SymbolicAutomaton::GetInitialStates() {
     if(this->_initialStates == nullptr) {
         this->_InitializeInitialStates();
     }
@@ -127,39 +160,135 @@ SymbolicAutomaton::StateSet SymbolicAutomaton::GetInitialStates() {
     return this->_initialStates;
 }
 
-// <<<<<<<<<<<<<<<<<<<<<< BINARY AUTOMATA >>>>>>>>>>>>>>>>>>>>>>>>>>
-
-void BinaryOpAutomaton::_InitializeFinalStates() {
-    this->_finalStates = std::shared_ptr<Term>(new TermProduct(this->lhs_aut->GetFinalStates(), this->rhs_aut->GetFinalStates()));
-}
-
-void BinaryOpAutomaton::_InitializeInitialStates() {
-    this->_initialStates = std::shared_ptr<Term>(new TermProduct(this->lhs_aut->GetInitialStates(), this->rhs_aut->GetInitialStates()));
+/**
+ * Initialization of Base Automaton. First we rename the states according
+ * to the shared class counter, so every base automaton is disjunctive.
+ *
+ * Then we initialize Initial and Base states.
+ */
+void BaseAutomaton::_InitializeAutomaton() {
+    // TODO: Maybe this could be done only, if we are dumping the automaton?
+    this->_RenameStates();
+    this->_InitializeInitialStates();
+    this->_InitializeFinalStates();
 }
 
 /**
- * Does the pre on the symbolic automaton through the @p symbol from @p states
+ * Initialization of initial states for automata wrt. the structure of the symbolic automaton
  */
-SymbolicAutomaton::StateSet BinaryOpAutomaton::Pre(SymbolicAutomaton::Symbol* symbol, SymbolicAutomaton::StateSet states, bool underComplement) {
+void BinaryOpAutomaton::_InitializeInitialStates() {
+    this->_initialStates = std::shared_ptr<Term>(new TermProduct(this->_lhs_aut->GetInitialStates(), this->_rhs_aut->GetInitialStates()));
+}
+
+void ComplementAutomaton::_InitializeInitialStates() {
+    this->_finalStates = std::shared_ptr<Term>(new TermList(this->_aut->GetFinalStates(), true));
+}
+
+void ProjectionAutomaton::_InitializeInitialStates() {
+    this->_initialStates = std::shared_ptr<Term>(new TermList(this->_aut->GetInitialStates(), false));
+}
+
+// TODO: Optimize so this uses boost::dynamic_bitset instead
+void BaseAutomaton::_InitializeInitialStates() {
+    // NOTE: The automaton is constructed backwards, so final states are initial
+    assert(this->_initialStates == nullptr);
+
+    TermBaseSet* temp = new TermBaseSet();
+    for(auto state : this->_base_automaton->GetFinalStates()) {
+        temp->states.push_back(state);
+    }
+
+    this->_initialStates = std::shared_ptr<Term>(temp);
+}
+
+/**
+ * Initialization of final states for automata wrt. the structure of the symbolic automaton
+ */
+void BinaryOpAutomaton::_InitializeFinalStates() {
+    this->_finalStates = std::shared_ptr<Term>(new TermProduct(this->_lhs_aut->GetFinalStates(), this->_rhs_aut->GetFinalStates()));
+}
+
+void ComplementAutomaton::_InitializeFinalStates() {
+    this->_initialStates = std::shared_ptr<Term>(new TermList(this->_aut->GetInitialStates(), true));
+}
+
+void ProjectionAutomaton::_InitializeFinalStates() {
+    this->_finalStates = std::shared_ptr<Term>(new TermList(this->_aut->GetFinalStates(), false));
+}
+
+// TODO: Refactor a little
+void BaseAutomaton::_InitializeFinalStates() {
+    // NOTE: The automaton is constructed backwards, so initial states are finals
+    assert(this->_finalStates == nullptr);
+
+    BaseAutomatonStates finalStates;
+    BaseAut_MTBDD* initBDD = getMTBDDForStateTuple(*this->_base_automaton, Automaton::StateTuple());
+
+    StateCollectorFunctor sc_functor(finalStates);
+    sc_functor(*initBDD);
+
+    // push states to macrostate
+    TermBaseSet* temp = new TermBaseSet();
+    for(auto state : finalStates) {
+        temp->states.push_back(state);
+    }
+
+    this->_finalStates = std::shared_ptr<Term>(temp);
+}
+
+Term_ptr BinaryOpAutomaton::Pre(Symbol_ptr symbol, Term_ptr finalApproximation, bool underComplement) {
     assert(false && "Doing Pre on BinaryOp Automaton!");
 }
 
-SymbolicAutomaton::ISect_Type BinaryOpAutomaton::_IntersectNonEmptyCore(SymbolicAutomaton::Symbol* symbol, SymbolicAutomaton::StateSet final, bool underComplement) {
+Term_ptr ComplementAutomaton::Pre(Symbol_ptr symbol, Term_ptr finalApproximation, bool underComplement) {
+    assert(false && "Doing Pre on Complement Automaton!");
+}
+
+Term_ptr ProjectionAutomaton::Pre(Symbol_ptr symbol, Term_ptr finalApproximation, bool underComplement) {
+    assert(false && "Doing Pre on Projection Automaton!");
+}
+
+Term_ptr BaseAutomaton::Pre(Symbol_ptr symbol, Term_ptr finalApproximation, bool underComplement) {
+    assert(symbol != nullptr);
+    // TODO: Cache MTBDD for pre?
+    // TODO: Consult the correctness of cpre/pre computation
+
+    TermBaseSet* base = reinterpret_cast<TermBaseSet*>(finalApproximation.get());
+    BaseAutomatonStates states;
+
+    for(auto state : base->states) {
+        // Get MTBDD for Pre of states @p state
+        BaseAut_MTBDD* preState = getMTBDDForStateTuple(*this->_base_automaton, StateTuple({state}));
+
+        // Create the masker functor, that will mask the states away
+        MaskerFunctor masker;
+        const BaseAut_MTBDD &temp = masker(*preState, *(symbol->GetMTBDD()));
+
+        // Collect the states and set the flag that we already got some states
+        BaseCollectorFunctor collector(states, underComplement);
+        collector(temp);
+        collector._isFirst = false;
+    }
+
+    return std::shared_ptr<Term>(new TermBaseSet(states));
+}
+
+ResultType BinaryOpAutomaton::_IntersectNonEmptyCore(Symbol_ptr symbol, Term_ptr final, bool underComplement) {
     assert(final != nullptr);
     assert(final->type == TERM_PRODUCT || final->type == TERM_UNION);
     TermProduct* finalApprox = reinterpret_cast<TermProduct*>(final.get());
 
-    ISect_Type lhs_result = this->lhs_aut->IntersectNonEmpty(symbol, finalApprox->left, underComplement);
+    ResultType lhs_result = this->_lhs_aut->IntersectNonEmpty(symbol, finalApprox->left, underComplement);
     #if (OPT_EARLY_EVALUATION == true)
     if(this->_eval_early(lhs_result.second, underComplement)) {
         std::shared_ptr<Symbol> contSymbol = (symbol == nullptr) ? nullptr : std::shared_ptr<Symbol>(new ZeroSymbol(symbol->GetTrack()));
         if(!underComplement) {
-            TermContProduct *rhsCont = new TermContProduct(this->rhs_aut, finalApprox->right, contSymbol);
+            TermContProduct *rhsCont = new TermContProduct(this->_rhs_aut, finalApprox->right, contSymbol);
             Term_ptr leftCombined = std::shared_ptr<Term>(
                     new TermProduct(lhs_result.first, std::shared_ptr<Term>(rhsCont)));
             return std::make_pair(leftCombined, this->_early_val(underComplement));
         } else {
-            TermContSubset *rhsContSub = new TermContSubset(this->rhs_aut, finalApprox->right, contSymbol);
+            TermContSubset *rhsContSub = new TermContSubset(this->_rhs_aut, finalApprox->right, contSymbol);
             Term_ptr leftCombinedSub = std::shared_ptr<Term>(
                     new TermProduct(lhs_result.first, std::shared_ptr<Term>(rhsContSub)));
             return std::make_pair(leftCombinedSub, this->_early_val(underComplement));
@@ -167,88 +296,25 @@ SymbolicAutomaton::ISect_Type BinaryOpAutomaton::_IntersectNonEmptyCore(Symbolic
     }
     #endif
 
-    ISect_Type rhs_result = this->rhs_aut->IntersectNonEmpty(symbol, finalApprox->right, underComplement);
+    ResultType rhs_result = this->_rhs_aut->IntersectNonEmpty(symbol, finalApprox->right, underComplement);
     Term_ptr combined = std::shared_ptr<Term>(new TermProduct(lhs_result.first, rhs_result.first));
     return std::make_pair(combined, this->_eval_result(lhs_result.second, rhs_result.second, underComplement));
 }
 
-/**
- * Dumps the intersection automaton to std::cout
- */
-void BinaryOpAutomaton::dump() {
-    std::cout << "(";
-    lhs_aut->dump();
-    std::cout << " x ";
-    rhs_aut->dump();
-    std::cout << ")";
-}
-
-// <<<<<<<<<<<<<<<<<<<<<< COMPLEMENT AUTOMATON >>>>>>>>>>>>>>>>>>>>>>>>>>
-
-void ComplementAutomaton::_InitializeFinalStates() {
-    this->_initialStates = std::shared_ptr<Term>(new TermList(this->_aut->GetInitialStates(), true));
-}
-
-void ComplementAutomaton::_InitializeInitialStates() {
-    this->_finalStates = std::shared_ptr<Term>(new TermList(this->_aut->GetFinalStates(), true));
-}
-
-SymbolicAutomaton::StateSet ComplementAutomaton::Pre(SymbolicAutomaton::Symbol* symbol, SymbolicAutomaton::StateSet states, bool underComplement) {
-    assert(false && "Doing Pre on Complement Automaton!");
-}
-
-SymbolicAutomaton::ISect_Type ComplementAutomaton::_IntersectNonEmptyCore(ComplementAutomaton::Symbol* symbol,ComplementAutomaton::StateSet final, bool underComplement) {
+ResultType ComplementAutomaton::_IntersectNonEmptyCore(Symbol_ptr symbol, Term_ptr final, bool underComplement) {
     // TODO: Is this ok? Can there be something more
     assert(final->type == TERM_LIST);
 
     TermList* approx = reinterpret_cast<TermList*>(final.get());
     assert(approx->list.size() == 1);
 
-    ISect_Type result = this->_aut->IntersectNonEmpty(symbol, approx->list[0], !underComplement);
+    ResultType result = this->_aut->IntersectNonEmpty(symbol, approx->list[0], !underComplement);
     // TODO: We need some information, that this is negation. Is this ok?
     TermList* newResult = new TermList(result.first, true);
     return std::make_pair(std::shared_ptr<Term>(newResult), result.second);
 }
 
-void ComplementAutomaton::dump() {
-    std::cout << "compl(";
-    this->_aut->dump();
-    std::cout << ")";
-}
-
-// <<<<<<<<<<<<<<<<<<<<<< PROJECTION AUTOMATON >>>>>>>>>>>>>>>>>>>>>>>>>>
-
-void ProjectionAutomaton::_InitializeInitialStates() {
-    this->_initialStates = std::shared_ptr<Term>(new TermList(this->_aut->GetInitialStates(), false));
-}
-
-void ProjectionAutomaton::_InitializeFinalStates() {
-    this->_finalStates = std::shared_ptr<Term>(new TermList(this->_aut->GetFinalStates(), false));
-}
-
-SymbolicAutomaton::StateSet ProjectionAutomaton::Pre(ProjectionAutomaton::Symbol* symbol, ProjectionAutomaton::StateSet final, bool underComplement) {
-    assert(false && "Doing Pre on Projection Automaton!");
-}
-
-void initialize_symbols(std::list<ProjectionAutomaton::Symbol> &symbols, IdentList* vars) {
-    // Transform the symbols
-    // TODO: Optimize, this sucks
-    unsigned int symNum = 1;
-    for(auto var = vars->begin(); var != vars->end(); ++var) {
-        // Pop symbol;
-        for(auto i = symNum; i != 0; --i) {
-            ProjectionAutomaton::Symbol symF = symbols.front();
-            symbols.pop_front();
-            ProjectionAutomaton::Symbol zero(symF.GetTrack(), varMap[(*var)], '0');
-            ProjectionAutomaton::Symbol one(symF.GetTrack(), varMap[(*var)], '1');
-            symbols.push_back(zero);
-            symbols.push_back(one);
-        }
-        symNum <<= 1;// times 2
-    }
-}
-
-SymbolicAutomaton::ISect_Type ProjectionAutomaton::_IntersectNonEmptyCore(ProjectionAutomaton::Symbol* symbol, ProjectionAutomaton::StateSet final, bool underComplement) {
+ResultType ProjectionAutomaton::_IntersectNonEmptyCore(Symbol_ptr symbol, Term_ptr final, bool underComplement) {
     assert(final != nullptr);
     // TODO: Can there be Continuation?
     assert(final->type == TERM_LIST || final->type == TERM_FIXPOINT);
@@ -258,7 +324,7 @@ SymbolicAutomaton::ISect_Type ProjectionAutomaton::_IntersectNonEmptyCore(Projec
         assert(finalApprox->list.size() == 1);
 
         // Evaluate the zero unfoldings
-        ISect_Type result = this->_aut->IntersectNonEmpty(symbol, finalApprox->list[0], underComplement);
+        ResultType result = this->_aut->IntersectNonEmpty(symbol, finalApprox->list[0], underComplement);
 
         std::list<Symbol> symbols;
         symbol = new ZeroSymbol();
@@ -271,7 +337,7 @@ SymbolicAutomaton::ISect_Type ProjectionAutomaton::_IntersectNonEmptyCore(Projec
         TermFixpointStates::iterator it = fixpoint->GetIterator();
         Term_ptr term;
 
-        #if (DEBUG_COMPUTE_FULL_FIXPOINT == true)
+#if (DEBUG_COMPUTE_FULL_FIXPOINT == true)
         while((term = it.GetNext()) != nullptr) {}
         #else
         if(result.second == !underComplement) {
@@ -280,7 +346,7 @@ SymbolicAutomaton::ISect_Type ProjectionAutomaton::_IntersectNonEmptyCore(Projec
 
         while( ((term = it.GetNext()) != nullptr) && (underComplement == fixpoint->GetResult())) {}
         //                                            ^--- is this right?
-        #endif
+#endif
 
         return std::make_pair(std::shared_ptr<Term>(fixpoint), fixpoint->GetResult());
     } else {
@@ -300,23 +366,9 @@ SymbolicAutomaton::ISect_Type ProjectionAutomaton::_IntersectNonEmptyCore(Projec
     }
 }
 
-void ProjectionAutomaton::dump() {
-    std::cout << "ex2(";
-    this->_aut->dump();
-    std::cout << ")";
-}
-
-// <<<<<<<<<<<<<<<<<<<<<< BASE AUTOMATON >>>>>>>>>>>>>>>>>>>>>>>>>>
-
-void BaseAutomaton::_InitializeAutomaton() {
-    this->_RenameStates();
-    this->_InitializeInitialStates();
-    this->_InitializeFinalStates();
-}
-
-SymbolicAutomaton::ISect_Type BaseAutomaton::_IntersectNonEmptyCore(BaseAutomaton::Symbol* symbol, BaseAutomaton::StateSet approx, bool underComplement) {
+ResultType BaseAutomaton::_IntersectNonEmptyCore(Symbol_ptr symbol, Term_ptr approx, bool underComplement) {
     // initState = {init}
-    ISect_Type tmp;
+    ResultType tmp;
     TermBaseSet* initial = reinterpret_cast<TermBaseSet*>(this->_initialStates.get());
     TermBaseSet* final = reinterpret_cast<TermBaseSet*>(this->_finalStates.get());
 
@@ -324,93 +376,62 @@ SymbolicAutomaton::ISect_Type BaseAutomaton::_IntersectNonEmptyCore(BaseAutomato
     if(symbol == nullptr) {
         //assert(initial->states.size() == 1 && "There should be only one initial state"); // TODO: FUCK, there can be more
         return std::make_pair(this->_finalStates, initial->Intersects(final) != underComplement);
-    // Doing Pre(final), i.e. one step back from final states
+        // Doing Pre(final), i.e. one step back from final states
     } else {
-        StateSet preSet = this->Pre(symbol, approx, underComplement);
+        Term_ptr preSet = this->Pre(symbol, approx, underComplement);
         TermBaseSet* preFinal = reinterpret_cast<TermBaseSet*>(preSet.get());
         return std::make_pair(preSet, initial->Intersects(preFinal) != underComplement);
     }
 }
 
-SymbolicAutomaton::StateSet BaseAutomaton::Pre(SymbolicAutomaton::Symbol* symbol, SymbolicAutomaton::StateSet approx, bool underComplement) {
-    assert(symbol != nullptr);
-    // We know...
-    // TODO: Cache pre?
-    // TODO: is the cepre/intersect minus correct?
-    TermBaseSet* base = reinterpret_cast<TermBaseSet*>(approx.get());
-    BaseAut_States states;
-
-    for(auto state : base->states) {
-        BaseAut_MTBDD* preState = getMTBDDForStateTuple(*this->_base_automaton, StateTuple({state}));
-
-        MaskerFunctor masker;
-        const BaseAut_MTBDD &temp = masker(*preState, *(symbol->GetMTBDD()));
-
-        BaseCollectorFunctor collector(states, underComplement);
-        collector(temp);
-        collector._isFirst = false;
-    }
-
-    return std::shared_ptr<Term>(new TermBaseSet(states));
+void BinaryOpAutomaton::dump() {
+    std::cout << "(";
+    _lhs_aut->dump();
+    std::cout << " x ";
+    _rhs_aut->dump();
+    std::cout << ")";
 }
 
-void BaseAutomaton::_InitializeInitialStates() {
-    // NOTE: The automaton is constructed backwards, so final states are initial
-    assert(this->_initialStates == nullptr);
-    TermBaseSet* temp = new TermBaseSet();
-    for(auto state : this->_base_automaton->GetFinalStates()) {
-       temp->states.push_back(state);
-    }
-
-    this->_initialStates = std::shared_ptr<Term>(temp);
+void ComplementAutomaton::dump() {
+    std::cout << "compl(";
+    this->_aut->dump();
+    std::cout << ")";
 }
 
-void BaseAutomaton::_InitializeFinalStates() {
-    // NOTE: The automaton is constructed backwards, so initial states are finals
-    assert(this->_finalStates == nullptr);
-    BaseAut_States finalStates;
-    BaseAut_MTBDD* initBDD = getMTBDDForStateTuple(*this->_base_automaton, Automaton::StateTuple());
-
-    StateCollectorFunctor sc_functor(finalStates);
-    sc_functor(*initBDD);
-
-    // push states to macrostate
-    TermBaseSet* temp = new TermBaseSet();
-    for(auto state : finalStates) {
-        temp->states.push_back(state);
-    }
-
-    this->_finalStates = std::shared_ptr<Term>(temp);
+void ProjectionAutomaton::dump() {
+    std::cout << "ex2(";
+    this->_aut->dump();
+    std::cout << ")";
 }
 
 void BaseAutomaton::_RenameStates() {
     StateToStateMap translMap;
     StateToStateTranslator stateTransl(translMap,
                                        [](const StateType &) { return SymbolicAutomaton::stateCnt++; });
-    this->_base_automaton.reset(new LeafAutomaton_Type(this->_base_automaton->ReindexStates(stateTransl)));
+    this->_base_automaton.reset(new BaseAutomatonType(this->_base_automaton->ReindexStates(stateTransl)));
 }
 
 void BaseAutomaton::baseAutDump() {
-    std::cerr << "\n[----------------------->]\n";
-    std::cerr << "[!] Base VATA Automaton\n";
+    std::cout << "\n[----------------------->]\n";
+    std::cout << "[!] Base VATA Automaton\n";
     VATA::Serialization::AbstrSerializer *serializer = new VATA::Serialization::TimbukSerializer();
-    std::cerr << this->_base_automaton->DumpToString(*serializer, "symbolic") << "\n";
+    std::cout << this->_base_automaton->DumpToString(*serializer, "symbolic") << "\n";
     delete serializer;
 
-    std::cerr << "[!] Initial states:\n";
+    std::cout << "[!] Initial states:\n";
     if(this->_initialStates != nullptr) {
         this->_finalStates->dump();
-        std::cerr << "\n";
+        std::cout << "\n";
     } else {
-        std::cerr << "-> not initialized\n";
+        std::cout << "-> not initialized\n";
     }
 
-    std::cerr << "[!] Final states:\n";
+    std::cout << "[!] Final states:\n";
     if(this->_finalStates != nullptr) {
         this->_initialStates->dump();
-        std::cerr << "\n";
+        std::cout << "\n";
     } else {
-        std::cerr << "-> not initialized\n";
+        std::cout << "-> not initialized\n";
     }
-    std::cerr << "[----------------------->]\n";
+    std::cout << "[----------------------->]\n";
 }

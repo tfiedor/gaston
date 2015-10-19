@@ -15,65 +15,29 @@
 #include "../mtbdd/void_apply1func.hh"
 #include "../mtbdd/ondriks_mtbdd.hh"
 #include "../utils/Symbol.h"
-#include "../utils/cached_binary_op.hh"
 #include "../environment.hh"
 #include "../../Frontend/ident.h"
 #include "../../Frontend/ast.h"
-#include "../containers/SymbolicCache.hh"
 #include "../containers/VarToTrackMap.hh"
 #include "StateSet.hh"
 #include <vector>
-#include <vata/bdd_bu_tree_aut.hh>
-#include <vata/parsing/timbuk_parser.hh>
-#include <vata/serialization/timbuk_serializer.hh>
 #include <vata/util/binary_relation.hh>
 
 class Term;
+
+using namespace Gaston;
 
 enum AutType {SYMBOLIC_BASE /*0*/, BINARY /*1*/, INTERSECTION /*2*/, UNION /*3*/, PROJECTION /*4*/, BASE /*5*/, COMPLEMENT /*6*/};
 enum AutSubType {FINAL, NONFINAL};
 enum AutBaseType {BT_SUB, BT_IN, BT_EQF, BT_EQS, BT_LSS, BT_LEQ, BT_FO, BT_T, BT_F};
 
-using BaseAut_States = VATA::Util::OrdVector<StateType>;
-
 extern VarToTrackMap varMap;
-
-struct Pair_Hash {
-    /**
-     * @param set: set we are computing hash of
-     * @return hash of @p set
-     */
-    int operator()(std::pair<std::shared_ptr<Term>, std::shared_ptr<ZeroSymbol>> set) const {
-        return 1;
-    }
-};
 
 /**
  * Base class for symbolic automata
  */
 class SymbolicAutomaton {
 public:
-    // < Used Typedefs >
-    // TODO: Change to something more efficient
-    using Term_ptr               = std::shared_ptr<Term>;
-    using Formula_ptr            = ASTForm*;
-    using StateSet_ptr           = std::shared_ptr<MacroStateSet>;
-    using StateSet               = Term_ptr;
-    using Symbol                 = ZeroSymbol;
-    using Symbol_ptr             = std::shared_ptr<Symbol>;
-
-    using ISect_Type             = std::pair<Term_ptr, bool>;
-    using LeafAutomaton_Type     = VATA::BDDBottomUpTreeAut;
-    using StateToStateTranslator = VATA::AutBase::StateToStateTranslWeak;
-    using StateToStateMap        = std::unordered_map<StateType, StateType>;
-    using WorkListTerm           = Term;
-    using WorkListTerm_raw       = Term*;
-    using WorkListTerm_ptr       = Term_ptr;
-    using WorkListSet            = std::vector<std::shared_ptr<WorkListTerm>>;
-    using ResultCache            = BinaryCache<Term_ptr, Symbol_ptr, ISect_Type, Pair_Hash>;
-    using SubsumptionCache       = VATA::Util::CachedBinaryOp<Term_ptr, Term_ptr, bool>;
-    using VarList                = VATA::Util::OrdVector<StateType>;
-
     static StateType stateCnt;
     AutType type;
 
@@ -89,7 +53,7 @@ protected:
     virtual void _InitializeAutomaton() = 0;
     virtual void _InitializeInitialStates() = 0;
     virtual void _InitializeFinalStates() = 0;
-    virtual ISect_Type _IntersectNonEmptyCore(Symbol*, StateSet, bool) = 0;
+    virtual ResultType _IntersectNonEmptyCore(Symbol*, Term_ptr, bool) = 0;
 
 // < Public API >
 public:
@@ -104,10 +68,10 @@ public:
         }
     }
 
-    virtual StateSet GetInitialStates();
-    virtual StateSet GetFinalStates();
-    virtual StateSet Pre(Symbol*, StateSet, bool) = 0;
-    ISect_Type IntersectNonEmpty(Symbol*, StateSet, bool);
+    virtual Term_ptr GetInitialStates();
+    virtual Term_ptr GetFinalStates();
+    virtual Term_ptr Pre(Symbol*, Term_ptr, bool) = 0;
+    ResultType IntersectNonEmpty(Symbol*, Term_ptr, bool);
 
     virtual void dump() = 0;
     virtual void DumpCacheStats() = 0;
@@ -118,28 +82,29 @@ public:
  */
 class BinaryOpAutomaton : public SymbolicAutomaton {
 protected:
-    std::shared_ptr<SymbolicAutomaton> lhs_aut;
-    std::shared_ptr<SymbolicAutomaton> rhs_aut;
+    std::shared_ptr<SymbolicAutomaton> _lhs_aut;
+    std::shared_ptr<SymbolicAutomaton> _rhs_aut;
     bool (*_eval_result)(bool, bool, bool);
     bool (*_eval_early)(bool, bool);
     bool (*_early_val)(bool);
     virtual void _InitializeAutomaton() { this->_InitializeInitialStates(); this->_InitializeFinalStates(); }
     virtual void _InitializeInitialStates();
     virtual void _InitializeFinalStates();
-    virtual ISect_Type _IntersectNonEmptyCore(Symbol*, StateSet, bool);
+    virtual ResultType _IntersectNonEmptyCore(Symbol*, Term_ptr, bool);
 
 public:
-    virtual StateSet Pre(Symbol*, StateSet, bool);
+    virtual Term_ptr Pre(Symbol*, Term_ptr, bool);
     BinaryOpAutomaton(SymbolicAutomaton* lhs,
                       SymbolicAutomaton* rhs,
                       Formula_ptr form)
-            : SymbolicAutomaton(form), lhs_aut(lhs), rhs_aut(rhs) { this->_InitializeAutomaton(); type = AutType::BINARY;}
+            : SymbolicAutomaton(form), _lhs_aut(lhs), _rhs_aut(rhs) { this->_InitializeAutomaton(); type = AutType::BINARY;}
     virtual void dump();
     virtual void DumpCacheStats() {
         this->_form->dump();
         this->_resCache.dumpStats();
-        this->lhs_aut->DumpCacheStats();
-        this->rhs_aut->DumpCacheStats();}
+        this->_lhs_aut->DumpCacheStats();
+        this->_rhs_aut->DumpCacheStats();
+    }
 };
 
 /**
@@ -185,12 +150,12 @@ protected:
     virtual void _InitializeAutomaton() { this->_InitializeInitialStates(); this->_InitializeFinalStates(); }
     virtual void _InitializeInitialStates();
     virtual void _InitializeFinalStates();
-    virtual ISect_Type _IntersectNonEmptyCore(Symbol*, StateSet, bool);
+    virtual ResultType _IntersectNonEmptyCore(Symbol*, Term_ptr, bool);
 
 public:
     ComplementAutomaton(SymbolicAutomaton *aut, Formula_ptr form) : SymbolicAutomaton(form), _aut(aut) { this->_InitializeAutomaton(); type = AutType::COMPLEMENT;}
 
-    virtual StateSet Pre(Symbol*, StateSet, bool);
+    virtual Term_ptr Pre(Symbol*, Term_ptr, bool);
     virtual void dump();
     virtual void DumpCacheStats() {
         this->_form->dump();
@@ -214,12 +179,12 @@ protected:
     }
     virtual void _InitializeInitialStates();
     virtual void _InitializeFinalStates();
-    virtual ISect_Type _IntersectNonEmptyCore(Symbol*, StateSet, bool);
+    virtual ResultType _IntersectNonEmptyCore(Symbol*, Term_ptr, bool);
 
 public:
     ProjectionAutomaton(SymbolicAutomaton* aut, Formula_ptr form) : SymbolicAutomaton(form), _aut(aut) { this->_InitializeAutomaton(); type = AutType::PROJECTION;}
 
-    virtual StateSet Pre(Symbol*, StateSet, bool);
+    virtual Term_ptr Pre(Symbol*, Term_ptr, bool);
     virtual void dump();
     virtual void DumpCacheStats() {
         this->_form->dump();
@@ -236,14 +201,14 @@ protected:
     virtual void _InitializeAutomaton();
     virtual void _InitializeInitialStates();
     virtual void _InitializeFinalStates();
-    virtual ISect_Type _IntersectNonEmptyCore(Symbol*, StateSet, bool);
+    virtual ResultType _IntersectNonEmptyCore(Symbol*, Term_ptr, bool);
 
-    std::shared_ptr<LeafAutomaton_Type> _base_automaton;
+    std::shared_ptr<BaseAutomatonType> _base_automaton;
     void _RenameStates();
 
 public:
-    BaseAutomaton(LeafAutomaton_Type* aut, Formula_ptr form) : SymbolicAutomaton(form), _base_automaton(aut){ this->_InitializeAutomaton();type = AutType::BASE; }
-    virtual StateSet Pre(Symbol*, StateSet, bool);
+    BaseAutomaton(BaseAutomatonType* aut, Formula_ptr form) : SymbolicAutomaton(form), _base_automaton(aut){ this->_InitializeAutomaton();type = AutType::BASE; }
+    virtual Term_ptr Pre(Symbol*, Term_ptr, bool);
     virtual void baseAutDump();
     virtual void DumpCacheStats() {
         this->_form->dump();
@@ -253,7 +218,7 @@ public:
 
 class GenericBaseAutomaton : public BaseAutomaton {
 public:
-    GenericBaseAutomaton(LeafAutomaton_Type* aut, Formula_ptr form) : BaseAutomaton(aut, form) { }
+    GenericBaseAutomaton(BaseAutomatonType* aut, Formula_ptr form) : BaseAutomaton(aut, form) { }
     virtual void dump() { std::cout << "<Aut>";
 #if (DEBUG_BASE_AUTOMATA == true)
         this->baseAutDump();
@@ -263,7 +228,7 @@ public:
 
 class SubAutomaton : public BaseAutomaton {
 public:
-    SubAutomaton(LeafAutomaton_Type* aut, Formula_ptr form) : BaseAutomaton(aut, form) { }
+    SubAutomaton(BaseAutomatonType* aut, Formula_ptr form) : BaseAutomaton(aut, form) { }
     virtual void dump() { std::cout << "Sub";
         #if (DEBUG_BASE_AUTOMATA == true)
         this->baseAutDump();
@@ -273,7 +238,7 @@ public:
 
 class TrueAutomaton : public BaseAutomaton {
 public:
-    TrueAutomaton(LeafAutomaton_Type* aut, Formula_ptr form) : BaseAutomaton(aut, form) {}
+    TrueAutomaton(BaseAutomatonType* aut, Formula_ptr form) : BaseAutomaton(aut, form) {}
     virtual void dump() { std::cout << "True";
         #if (DEBUG_BASE_AUTOMATA == true)
         this->baseAutDump();
@@ -283,7 +248,7 @@ public:
 
 class FalseAutomaton : public BaseAutomaton {
 public:
-    FalseAutomaton(LeafAutomaton_Type* aut, Formula_ptr form) : BaseAutomaton(aut, form) {}
+    FalseAutomaton(BaseAutomatonType* aut, Formula_ptr form) : BaseAutomaton(aut, form) {}
     virtual void dump() { std::cout << "False";
         #if (DEBUG_BASE_AUTOMATA == true)
         this->baseAutDump();
@@ -293,7 +258,7 @@ public:
 
 class InAutomaton : public BaseAutomaton {
 public:
-    InAutomaton(LeafAutomaton_Type* aut, Formula_ptr form) : BaseAutomaton(aut, form) {}
+    InAutomaton(BaseAutomatonType* aut, Formula_ptr form) : BaseAutomaton(aut, form) {}
     virtual void dump() { std::cout << "In";
         #if (DEBUG_BASE_AUTOMATA == true)
         this->baseAutDump();
@@ -303,7 +268,7 @@ public:
 
 class FirstOrderAutomaton : public BaseAutomaton {
 public:
-    FirstOrderAutomaton(LeafAutomaton_Type* aut, Formula_ptr form) : BaseAutomaton(aut, form) {}
+    FirstOrderAutomaton(BaseAutomatonType* aut, Formula_ptr form) : BaseAutomaton(aut, form) {}
     virtual void dump() { std::cout << "FirstOrder";
         #if (DEBUG_BASE_AUTOMATA == true)
         this->baseAutDump();
@@ -313,7 +278,7 @@ public:
 
 class EqualFirstAutomaton : public BaseAutomaton {
 public:
-    EqualFirstAutomaton(LeafAutomaton_Type* aut, Formula_ptr form) : BaseAutomaton(aut, form) {}
+    EqualFirstAutomaton(BaseAutomatonType* aut, Formula_ptr form) : BaseAutomaton(aut, form) {}
     virtual void dump() { std::cout << "Equal1";
         #if (DEBUG_BASE_AUTOMATA == true)
         this->baseAutDump();
@@ -323,7 +288,7 @@ public:
 
 class EqualSecondAutomaton : public BaseAutomaton {
 public:
-    EqualSecondAutomaton(LeafAutomaton_Type* aut, Formula_ptr form) : BaseAutomaton(aut, form) {}
+    EqualSecondAutomaton(BaseAutomatonType* aut, Formula_ptr form) : BaseAutomaton(aut, form) {}
     virtual void dump() { std::cout << "Equal2";
         #if (DEBUG_BASE_AUTOMATA == true)
         this->baseAutDump();
@@ -333,7 +298,7 @@ public:
 
 class LessAutomaton : public BaseAutomaton {
 public:
-    LessAutomaton(LeafAutomaton_Type* aut, Formula_ptr form) : BaseAutomaton(aut, form) {}
+    LessAutomaton(BaseAutomatonType* aut, Formula_ptr form) : BaseAutomaton(aut, form) {}
     virtual void dump() { std::cout << "Less";
         #if (DEBUG_BASE_AUTOMATA == true)
         this->baseAutDump();
@@ -343,7 +308,7 @@ public:
 
 class LessEqAutomaton : public BaseAutomaton {
 public:
-    LessEqAutomaton(LeafAutomaton_Type* aut, Formula_ptr form) : BaseAutomaton(aut, form) {}
+    LessEqAutomaton(BaseAutomatonType* aut, Formula_ptr form) : BaseAutomaton(aut, form) {}
     virtual void dump() { std::cout << "LessEq";
         #if (DEBUG_BASE_AUTOMATA == true)
         this->baseAutDump();
@@ -354,22 +319,22 @@ public:
 // <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<< FUNCTORS >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
 
 GCC_DIAG_OFF(effc++)
-class BaseCollectorFunctor : public VATA::MTBDDPkg::VoidApply1Functor<BaseCollectorFunctor, BaseAut_States> {
+class BaseCollectorFunctor : public VATA::MTBDDPkg::VoidApply1Functor<BaseCollectorFunctor, BaseAutomatonStates> {
     GCC_DIAG_ON(effc++)
 private:
-    BaseAut_States& collected;
+    BaseAutomatonStates& collected;
     bool _minusInteresect;
 
 public:
     bool _isFirst;
     // < Public Constructors >
-    BaseCollectorFunctor(BaseAut_States& l, bool minusIntersect) : collected(l), _minusInteresect(minusIntersect), _isFirst(true) {}
+    BaseCollectorFunctor(BaseAutomatonStates& l, bool minusIntersect) : collected(l), _minusInteresect(minusIntersect), _isFirst(true) {}
 
     // < Public Methods >
     /**
      * @param lhs: operand of apply
      */
-    inline void ApplyOperation(BaseAut_States rhs) {
+    inline void ApplyOperation(BaseAutomatonStates rhs) {
         if(_minusInteresect) {
             if(_isFirst) {
                 collected.insert(rhs);
@@ -377,7 +342,7 @@ public:
             }
             auto itLhs = collected.begin();
             auto itRhs = rhs.begin();
-            BaseAut_States intersection;
+            BaseAutomatonStates intersection;
 
             while ((itLhs != collected.end()) || (itRhs != rhs.end()))
             {	// until we drop out of the array (or find a common element)
@@ -407,7 +372,7 @@ public:
 };
 
 GCC_DIAG_OFF(effc++)
-class MaskerFunctor : public VATA::MTBDDPkg::Apply2Functor<MaskerFunctor, BaseAut_States, BaseAut_States, BaseAut_States> {
+class MaskerFunctor : public VATA::MTBDDPkg::Apply2Functor<MaskerFunctor, BaseAutomatonStates, BaseAutomatonStates, BaseAutomatonStates> {
     GCC_DIAG_ON(effc++)
 public:
     // < Public Methods >
@@ -416,7 +381,7 @@ public:
      * @param rhs: right operand
      * @return union of leaf operands
      */
-    inline BaseAut_States ApplyOperation(BaseAut_States lhs, BaseAut_States rhs) {
+    inline BaseAutomatonStates ApplyOperation(BaseAutomatonStates lhs, BaseAutomatonStates rhs) {
         if(rhs.size() == 0) {
             return rhs;
         } else {
