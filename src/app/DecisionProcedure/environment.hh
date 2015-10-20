@@ -82,7 +82,7 @@ namespace Gaston {
 	using WorkListSet            = std::vector<std::shared_ptr<WorkListTerm>>;
 
 	using BaseAutomatonType      = VATA::BDDBottomUpTreeAut;
-	using BaseAutomatonStates 	 = VATA::Util::OrdVector<StateType>;
+	using BaseAutomatonStateSet     = VATA::Util::OrdVector<StateType>;
 
 	using VarType				 = size_t;
 	using VarList                = VATA::Util::OrdVector<StateType>;

@@ -221,21 +221,33 @@ void BaseAutomaton::_InitializeFinalStates() {
     // NOTE: The automaton is constructed backwards, so initial states are finals
     assert(this->_finalStates == nullptr);
 
-    BaseAutomatonStates finalStates;
+    // Obtain the MTBDD for Initial states
+    BaseAutomatonStateSet finalStates;
     BaseAut_MTBDD* initBDD = getMTBDDForStateTuple(*this->_base_automaton, Automaton::StateTuple());
 
-    StateCollectorFunctor sc_functor(finalStates);
-    sc_functor(*initBDD);
+    // Collect the states on leaves
+    StateCollectorFunctor collector(finalStates);
+    collector(*initBDD);
 
-    // push states to macrostate
-    TermBaseSet* temp = new TermBaseSet();
+    // Push states to new Base Set
+    TermBaseSet* finalStateSet = new TermBaseSet();
     for(auto state : finalStates) {
-        temp->states.push_back(state);
+        finalStateSet->states.push_back(state);
     }
 
-    this->_finalStates = std::shared_ptr<Term>(temp);
+    // Return new state set
+    this->_finalStates = std::shared_ptr<Term>(finalStateSet);
 }
 
+/**
+ * Computes the Predecessors of @p finalApproximation through the @p symbol.
+ * Right now, we only do the Pre on the base automata and leave the higher
+ * levels unkept, and fire assertion error.
+ *
+ * @param[in] symbol:               symbol for which we are doing Pre on @p finalApproximation
+ * @param[in] finalApproximation:   approximation of states that we are computing Pre for
+ * @param[in] underComplement:      true, if we are under complement
+ */
 Term_ptr BinaryOpAutomaton::Pre(Symbol_ptr symbol, Term_ptr finalApproximation, bool underComplement) {
     assert(false && "Doing Pre on BinaryOp Automaton!");
 }
@@ -253,10 +265,11 @@ Term_ptr BaseAutomaton::Pre(Symbol_ptr symbol, Term_ptr finalApproximation, bool
     // TODO: Cache MTBDD for pre?
     // TODO: Consult the correctness of cpre/pre computation
 
-    TermBaseSet* base = reinterpret_cast<TermBaseSet*>(finalApproximation.get());
-    BaseAutomatonStates states;
+    // Reinterpret the approximation as base states
+    TermBaseSet* baseSet = reinterpret_cast<TermBaseSet*>(finalApproximation.get());
+    BaseAutomatonStateSet states;
 
-    for(auto state : base->states) {
+    for(auto state : baseSet->states) {
         // Get MTBDD for Pre of states @p state
         BaseAut_MTBDD* preState = getMTBDDForStateTuple(*this->_base_automaton, StateTuple({state}));
 
@@ -273,113 +286,149 @@ Term_ptr BaseAutomaton::Pre(Symbol_ptr symbol, Term_ptr finalApproximation, bool
     return std::shared_ptr<Term>(new TermBaseSet(states));
 }
 
-ResultType BinaryOpAutomaton::_IntersectNonEmptyCore(Symbol_ptr symbol, Term_ptr final, bool underComplement) {
-    assert(final != nullptr);
-    assert(final->type == TERM_PRODUCT || final->type == TERM_UNION);
-    TermProduct* finalApprox = reinterpret_cast<TermProduct*>(final.get());
+/**
+ * Tests if Initial states intersects the Final states. Returns the pair of
+ * computed fixpoint representation and true/false according to the symbolic
+ * automaton type.
+ *
+ * @param[in] symbol:               symbol we are minusing away
+ * @param[in] finalApproximation:   approximation of states that were computed above
+ * @param[in] underComplement:      true, if we are computing interesction under complement
+ * @return (fixpoint, bool)
+ */
+ResultType BinaryOpAutomaton::_IntersectNonEmptyCore(Symbol_ptr symbol, Term_ptr finalApproximation, bool underComplement) {
+    // TODO: Add counter of continuations per node
+    assert(finalApproximation != nullptr);
+    assert(finalApproximation->type == TERM_PRODUCT || finalApproximation->type == TERM_UNION);
 
-    ResultType lhs_result = this->_lhs_aut->IntersectNonEmpty(symbol, finalApprox->left, underComplement);
+    // Retype the approximation to TermProduct type
+    TermProduct* productStateApproximation = reinterpret_cast<TermProduct*>(finalApproximation.get());
+
+    // Checks if left automaton's initial states intersects the final states
+    ResultType lhs_result = this->_lhs_aut->IntersectNonEmpty(symbol, productStateApproximation->left, underComplement);
+
     #if (OPT_EARLY_EVALUATION == true)
+    // Sometimes we can evaluate the experession early and return the continuation.
+    // For intersection of automata we can return early, if left term was evaluated
+    // as false, whereas for union of automata we can return early if left term
+    // was true.
     if(this->_eval_early(lhs_result.second, underComplement)) {
-        std::shared_ptr<Symbol> contSymbol = (symbol == nullptr) ? nullptr : std::shared_ptr<Symbol>(new ZeroSymbol(symbol->GetTrack()));
+        // Construct the pointer for symbol (either symbol or epsilon---nullptr)
+        std::shared_ptr<Symbol> suspendedSymbol = (symbol == nullptr) ? nullptr : std::shared_ptr<Symbol>(new ZeroSymbol(symbol->GetTrack()));
+
         if(!underComplement) {
-            TermContProduct *rhsCont = new TermContProduct(this->_rhs_aut, finalApprox->right, contSymbol);
-            Term_ptr leftCombined = std::shared_ptr<Term>(
-                    new TermProduct(lhs_result.first, std::shared_ptr<Term>(rhsCont)));
+            // If we are not under complement we construct the TermContProduct continuation
+            TermContProduct *rhsContinuation = new TermContProduct(this->_rhs_aut, productStateApproximation->right, suspendedSymbol);
+            Term_ptr leftCombined = std::shared_ptr<Term>(new TermProduct(lhs_result.first, std::shared_ptr<Term>(rhsContinuation)));
             return std::make_pair(leftCombined, this->_early_val(underComplement));
         } else {
-            TermContSubset *rhsContSub = new TermContSubset(this->_rhs_aut, finalApprox->right, contSymbol);
-            Term_ptr leftCombinedSub = std::shared_ptr<Term>(
-                    new TermProduct(lhs_result.first, std::shared_ptr<Term>(rhsContSub)));
+            // If we are under complement we construct the TermContSubset continuation
+            TermContSubset *rhsContinuationSub = new TermContSubset(this->_rhs_aut, productStateApproximation->right, suspendedSymbol);
+            Term_ptr leftCombinedSub = std::shared_ptr<Term>(new TermProduct(lhs_result.first, std::shared_ptr<Term>(rhsContinuationSub)));
             return std::make_pair(leftCombinedSub, this->_early_val(underComplement));
         }
     }
     #endif
 
-    ResultType rhs_result = this->_rhs_aut->IntersectNonEmpty(symbol, finalApprox->right, underComplement);
+    // Otherwise compute the right side and return full fixpoint
+    ResultType rhs_result = this->_rhs_aut->IntersectNonEmpty(symbol, productStateApproximation->right, underComplement);
     Term_ptr combined = std::shared_ptr<Term>(new TermProduct(lhs_result.first, rhs_result.first));
     return std::make_pair(combined, this->_eval_result(lhs_result.second, rhs_result.second, underComplement));
 }
 
-ResultType ComplementAutomaton::_IntersectNonEmptyCore(Symbol_ptr symbol, Term_ptr final, bool underComplement) {
-    // TODO: Is this ok? Can there be something more
-    assert(final->type == TERM_LIST);
+ResultType ComplementAutomaton::_IntersectNonEmptyCore(Symbol_ptr symbol, Term_ptr finalApproximaton, bool underComplement) {
+    // We assume finalApproximation is in form of {term}, i.e. list containing exactly one term
+    assert(finalApproximaton->type == TERM_LIST);
 
-    TermList* approx = reinterpret_cast<TermList*>(final.get());
-    assert(approx->list.size() == 1);
+    // Reinterpret to TermList
+    TermList*complementStateApproximation = reinterpret_cast<TermList*>(finalApproximaton.get());
+    assert(complementStateApproximation->list.size() == 1);
 
-    ResultType result = this->_aut->IntersectNonEmpty(symbol, approx->list[0], !underComplement);
-    // TODO: We need some information, that this is negation. Is this ok?
+    // Compute the result of nested automaton with switched complement
+    ResultType result = this->_aut->IntersectNonEmpty(symbol, complementStateApproximation->list[0], !underComplement);
+
+    // Create new result and return
     TermList* newResult = new TermList(result.first, true);
     return std::make_pair(std::shared_ptr<Term>(newResult), result.second);
 }
 
-ResultType ProjectionAutomaton::_IntersectNonEmptyCore(Symbol_ptr symbol, Term_ptr final, bool underComplement) {
-    assert(final != nullptr);
-    // TODO: Can there be Continuation?
-    assert(final->type == TERM_LIST || final->type == TERM_FIXPOINT);
+ResultType ProjectionAutomaton::_IntersectNonEmptyCore(Symbol_ptr symbol, Term_ptr finalApproximation, bool underComplement) {
+    // TODO: There can be continutation probably
+    assert(finalApproximation != nullptr);
+    assert(finalApproximation->type == TERM_LIST || finalApproximation->type == TERM_FIXPOINT);
 
     if(symbol == nullptr) {
-        TermList* finalApprox = reinterpret_cast<TermList*>(final.get());
-        assert(finalApprox->list.size() == 1);
+        // We are doing the initial step by evaluating the epsilon
+        TermList*projectionApproximation = reinterpret_cast<TermList*>(finalApproximation.get());
+        assert(projectionApproximation->list.size() == 1);
 
-        // Evaluate the zero unfoldings
-        ResultType result = this->_aut->IntersectNonEmpty(symbol, finalApprox->list[0], underComplement);
+        // Evaluate the initial unfolding of epsilon
+        ResultType result = this->_aut->IntersectNonEmpty(symbol, projectionApproximation->list[0], underComplement);
 
-        std::list<Symbol> symbols;
+        // Create the new Zero symbol and initialize the symbol list with all projections
+        SymbolList symbols;
         symbol = new ZeroSymbol();
         symbols.push_back(*symbol);
         // Transform the symbols
         ASTForm_uvf* form = reinterpret_cast<ASTForm_uvf*>(this->_form);
         initialize_symbols(symbols, form->vl);
 
+        // Create a new fixpoint term and iterator on it
         TermFixpointStates* fixpoint = new TermFixpointStates(this->_aut, result.first, symbols, underComplement, result.second);
         TermFixpointStates::iterator it = fixpoint->GetIterator();
-        Term_ptr term;
+        Term_ptr fixpointTerm;
 
-#if (DEBUG_COMPUTE_FULL_FIXPOINT == true)
-        while((term = it.GetNext()) != nullptr) {}
+        #if (DEBUG_COMPUTE_FULL_FIXPOINT == true)
+        // Computes the whole fixpoint, withouth early evaluation
+        while((fixpointTerm = it.GetNext()) != nullptr) {}
         #else
+        // Early evaluation of fixpoint
         if(result.second == !underComplement) {
             return std::make_pair(std::shared_ptr<Term>(fixpoint), result.second);
         }
 
-        while( ((term = it.GetNext()) != nullptr) && (underComplement == fixpoint->GetResult())) {}
+        // While the fixpoint is not fully unfolded and while we cannot evaluate early
+        while( ((fixpointTerm = it.GetNext()) != nullptr) && (underComplement == fixpoint->GetResult())) {}
         //                                            ^--- is this right?
-#endif
+        #endif
 
+        // Return (fixpoint, bool)
         return std::make_pair(std::shared_ptr<Term>(fixpoint), fixpoint->GetResult());
     } else {
-        // TODO: REFACTOR
-        std::list<Symbol> symbols;
+        // Project the quantified symbols and push them to symbol list
+        SymbolList symbols;
         symbols.push_back(*symbol);
         // Transform the symbols
         ASTForm_uvf* form = reinterpret_cast<ASTForm_uvf*>(this->_form);
         initialize_symbols(symbols, form->vl);
 
-        TermFixpointStates* fixpoint = new TermFixpointStates(this->_aut, final, symbols, underComplement);
+        // Create a new fixpoint term and iterator on it
+        TermFixpointStates* fixpoint = new TermFixpointStates(this->_aut, finalApproximation, symbols, underComplement);
         TermFixpointStates::iterator it = fixpoint->GetIterator();
-        Term_ptr term;
-        while( ((term = it.GetNext()) != nullptr) && (underComplement == fixpoint->GetResult())) {}
+        Term_ptr fixpointTerm;
 
+        // Compute the Pre of the fixpoint
+        while( ((fixpointTerm = it.GetNext()) != nullptr) && (underComplement == fixpoint->GetResult())) {}
+
+        // Return (fixpoint, bool)
         return std::make_pair(std::shared_ptr<Term>(fixpoint), fixpoint->GetResult());
     }
 }
 
-ResultType BaseAutomaton::_IntersectNonEmptyCore(Symbol_ptr symbol, Term_ptr approx, bool underComplement) {
-    // initState = {init}
-    ResultType tmp;
+ResultType BaseAutomaton::_IntersectNonEmptyCore(Symbol_ptr symbol, Term_ptr approximation, bool underComplement) {
+    // Reinterpret the initial and final states
     TermBaseSet* initial = reinterpret_cast<TermBaseSet*>(this->_initialStates.get());
     TermBaseSet* final = reinterpret_cast<TermBaseSet*>(this->_finalStates.get());
 
-    // Computing Intersection for epsilon symbol, i.e. only whether it intersects the initial states
     if(symbol == nullptr) {
-        //assert(initial->states.size() == 1 && "There should be only one initial state"); // TODO: FUCK, there can be more
+        // Testing if epsilon is in language, i.e. testing if final states intersect initial ones
         return std::make_pair(this->_finalStates, initial->Intersects(final) != underComplement);
-        // Doing Pre(final), i.e. one step back from final states
     } else {
-        Term_ptr preSet = this->Pre(symbol, approx, underComplement);
+        // First do the pre of the approximation
+        Term_ptr preSet = this->Pre(symbol, approximation, underComplement);
         TermBaseSet* preFinal = reinterpret_cast<TermBaseSet*>(preSet.get());
+
+        // Return the pre and true if it intersects the initial states
         return std::make_pair(preSet, initial->Intersects(preFinal) != underComplement);
     }
 }
@@ -404,6 +453,9 @@ void ProjectionAutomaton::dump() {
     std::cout << ")";
 }
 
+/**
+ * Renames the states according to the translation function so we get unique states.
+ */
 void BaseAutomaton::_RenameStates() {
     StateToStateMap translMap;
     StateToStateTranslator stateTransl(translMap,

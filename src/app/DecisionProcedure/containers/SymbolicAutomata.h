@@ -319,22 +319,22 @@ public:
 // <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<< FUNCTORS >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
 
 GCC_DIAG_OFF(effc++)
-class BaseCollectorFunctor : public VATA::MTBDDPkg::VoidApply1Functor<BaseCollectorFunctor, BaseAutomatonStates> {
+class BaseCollectorFunctor : public VATA::MTBDDPkg::VoidApply1Functor<BaseCollectorFunctor, BaseAutomatonStateSet> {
     GCC_DIAG_ON(effc++)
 private:
-    BaseAutomatonStates& collected;
+    BaseAutomatonStateSet& collected;
     bool _minusInteresect;
 
 public:
     bool _isFirst;
     // < Public Constructors >
-    BaseCollectorFunctor(BaseAutomatonStates& l, bool minusIntersect) : collected(l), _minusInteresect(minusIntersect), _isFirst(true) {}
+    BaseCollectorFunctor(BaseAutomatonStateSet& l, bool minusIntersect) : collected(l), _minusInteresect(minusIntersect), _isFirst(true) {}
 
     // < Public Methods >
     /**
      * @param lhs: operand of apply
      */
-    inline void ApplyOperation(BaseAutomatonStates rhs) {
+    inline void ApplyOperation(BaseAutomatonStateSet rhs) {
         if(_minusInteresect) {
             if(_isFirst) {
                 collected.insert(rhs);
@@ -342,7 +342,7 @@ public:
             }
             auto itLhs = collected.begin();
             auto itRhs = rhs.begin();
-            BaseAutomatonStates intersection;
+            BaseAutomatonStateSet intersection;
 
             while ((itLhs != collected.end()) || (itRhs != rhs.end()))
             {	// until we drop out of the array (or find a common element)
@@ -372,7 +372,7 @@ public:
 };
 
 GCC_DIAG_OFF(effc++)
-class MaskerFunctor : public VATA::MTBDDPkg::Apply2Functor<MaskerFunctor, BaseAutomatonStates, BaseAutomatonStates, BaseAutomatonStates> {
+class MaskerFunctor : public VATA::MTBDDPkg::Apply2Functor<MaskerFunctor, BaseAutomatonStateSet, BaseAutomatonStateSet, BaseAutomatonStateSet> {
     GCC_DIAG_ON(effc++)
 public:
     // < Public Methods >
@@ -381,7 +381,7 @@ public:
      * @param rhs: right operand
      * @return union of leaf operands
      */
-    inline BaseAutomatonStates ApplyOperation(BaseAutomatonStates lhs, BaseAutomatonStates rhs) {
+    inline BaseAutomatonStateSet ApplyOperation(BaseAutomatonStateSet lhs, BaseAutomatonStateSet rhs) {
         if(rhs.size() == 0) {
             return rhs;
         } else {
