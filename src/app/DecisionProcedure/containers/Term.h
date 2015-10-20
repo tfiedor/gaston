@@ -1,6 +1,17 @@
-//
-// Created by Raph on 10/10/2015.
-//
+/*****************************************************************************
+ *  gaston - We pay homage to Gaston, an Africa-born brown fur seal who
+ *    escaped the Prague Zoo during the floods in 2002 and made a heroic
+ *    journey for freedom of over 300km all the way to Dresden. There he
+ *    was caught and subsequently died due to exhaustion and infection.
+ *    Rest In Piece, brave soldier.
+ *
+ *  Copyright (c) 2015  Tomas Fiedor <ifiedortom@fit.vutbr.cz>
+ *      Notable mentions: Ondrej Lengal <ondra.lengal@gmail.com>
+ *
+ *  Description:
+ *      Representation of Terms that are computed during the decision procedure
+ *****************************************************************************/
+// TODO: Subsumption: We can maybe exploit something about the leafstates
 
 #ifndef WSKS_TERM_H
 #define WSKS_TERM_H
@@ -13,10 +24,10 @@
 #include "../containers/SymbolicAutomata.h"
 #include "../environment.hh"
 
+// <<< FORWARD CLASS DECLARATION >>>
 class SymbolicAutomaton;
 
-// TODO: Subsumption: We can maybe exploit something about the leafstates
-
+// TODO: Move away the usings
 using Term_ptr          = std::shared_ptr<Term>;
 using TermProductStates = std::pair<Term_ptr, Term_ptr>;
 using TermListStates    = std::vector<Term_ptr>;
@@ -29,407 +40,140 @@ class Term {
 public:
     TermType type;
 
-    virtual void dump() = 0;
+    // <<< PUBLIC API >>>
     virtual bool IsSubsumedBy(std::list<Term_ptr>& fixpoint) = 0;
     virtual bool IsSubsumed(Term* t) = 0;
     virtual bool IsEmpty() = 0;
+
+    // <<< MEASURING FUNCTIONS >>>
     virtual unsigned int MeasureStateSpace() = 0;
+
+    // <<< DUMPING FUNCTIONS >>>
+    virtual void dump() = 0;
 };
 
 class TermProduct : public Term {
 public:
-    #if (MEASURE_STATE_SPACE == true)
+    // <<< PUBLIC MEMBERS >>>
     static int instances;
-    #endif
     Term_ptr left;
     Term_ptr right;
-    void dump() {
-        std::cout << "{";
-        left->dump();
-        std::cout << " x ";
-        right->dump();
-        std::cout << "}";
-    }
 
-    bool IsSubsumed(Term* t) {
-        #if (DEBUG_TERM_SUBSUMPTION == true)
-        this->dump();
-        std::cout << " <?= ";
-        t->dump();
-        std::cout << "\n";
-        #endif
-        if(t->type != TERM_PRODUCT) {
-            // TODO: Maybe assert?
-            return false;
-        } else {
-            TermProduct *rhs = reinterpret_cast<TermProduct*>(t);
-            return (this->left->IsSubsumed(rhs->left.get())) && (this->right->IsSubsumed(rhs->right.get()));
-        }
-    }
+    // <<< CONSTRUCTORS >>>
+    TermProduct(Term_ptr lhs, Term_ptr rhs);
+    TermProduct(Term_ptr lhs, Term_ptr rhs, TermType t);
 
-    bool IsSubsumedBy(std::list<Term_ptr>& fixpoint) {
-        if(this->left->IsEmpty() && this->right->IsEmpty()) {
-            return true;
-        }
+    // <<< PUBLIC API >>>
+    bool IsSubsumed(Term* t);
+    bool IsSubsumedBy(std::list<Term_ptr>& fixpoint);
+    bool IsEmpty();
 
-        for(auto item : fixpoint) {
-            if(item == nullptr) continue;
-            if(this->IsSubsumed(item.get())) {
-                return true;
-            }
-        }
+    // <<< MEASURING FUNCTIONS >>>
+    unsigned int MeasureStateSpace();
 
-        return false;
-    }
-
-    bool IsEmpty() { return this->left->IsEmpty() && this->right->IsEmpty(); };
-
-    TermProduct(Term_ptr lhs, Term_ptr rhs) : left(lhs), right(rhs) {
-        #if (MEASURE_STATE_SPACE == true)
-        ++TermProduct::instances;
-        #endif
-        type = TERM_PRODUCT; }
-    TermProduct(Term_ptr lhs, Term_ptr rhs, TermType t) : left(lhs), right(rhs) {
-        #if (MEASURE_STATE_SPACE == true)
-        ++TermProduct::instances;
-        #endif
-        type = t; }
-
-    unsigned int MeasureStateSpace() {
-        return this->left->MeasureStateSpace() + this->right->MeasureStateSpace() + 1;
-    }
+    // <<< DUMPING FUNCTIONS >>>
+    void dump();
 };
 
 class TermBaseSet : public Term {
 public:
-    #if (MEASURE_STATE_SPACE == true)
+    // <<< PUBLIC MEMBERS >>>
     static int instances;
-    #endif
     TermBaseSetStates states;
 
-    void dump() {
-        std::cout << "{";
-        for(auto state : this->states) {
-            std::cout << (state) << ",";
-        }
-        std::cout << "}";
-    }
+    // <<< CONSTRUCTORS >>>
+    TermBaseSet();
+    TermBaseSet(TermBaseSetStates& s);
+    TermBaseSet(VATA::Util::OrdVector<unsigned int>& s);
 
-    bool IsSubsumedBy(std::list<Term_ptr>& fixpoint) {
-        if(this->states.size() == 0) {
-            return true;
-        }
+    // <<< PUBLIC API >>>
+    bool Intersects(TermBaseSet* rhs);
+    bool IsSubsumedBy(std::list<Term_ptr>& fixpoint);
+    bool IsEmpty();
+    bool IsSubsumed(Term* term);
 
-        for(auto item : fixpoint) {
-            if(item == nullptr) continue;
-            if(this->IsSubsumed(item.get())) {
-                return true;
-            }
-        }
+    // <<< MEASURING FUNCTIONS >>>
+    unsigned int MeasureStateSpace();
 
-        return false;
-    }
-
-    bool IsEmpty() {
-        return this->states.size() == 0;
-    }
-
-    bool Intersects(TermBaseSet* rhs) {
-        for (auto lhs_state : this->states) {
-            for(auto rhs_state : rhs->states) {
-                if(lhs_state == rhs_state) {
-                    return true;
-                }
-            }
-        }
-        return false;
-    }
-
-    bool IsSubsumed(Term* term) {
-        #if (DEBUG_TERM_SUBSUMPTION == true)
-        this->dump();
-        std::cout << " <?= ";
-        term->dump();
-        std::cout;
-        #endif
-        if(term->type != TERM_BASE) {
-            return false;
-        } else {
-            TermBaseSet *t = reinterpret_cast<TermBaseSet*>(term);
-            if(t->states.size() < this->states.size()) {
-                return false;
-            } else {
-                // TODO: Maybe we could exploit that we have ordered vectors
-                for(auto state : this->states) {
-                    auto isIn = std::find(t->states.begin(), t->states.end(), state);
-                    if(isIn == t->states.end()) {
-                        // Not in, false
-                        return false;
-                    }
-                }
-                return true;
-            }
-        }
-    }
-
-    TermBaseSet() : states() {
-        #if (MEASURE_STATE_SPACE == true)
-        ++TermBaseSet::instances;
-        #endif
-        type = TERM_BASE;
-    }
-    TermBaseSet(TermBaseSetStates& s) : states()  {
-        #if (MEASURE_STATE_SPACE == true)
-        ++TermBaseSet::instances;
-        #endif
-        type = TERM_BASE;
-        for(auto state : s) {
-            this->states.push_back(state);
-        }
-    }
-
-    TermBaseSet(VATA::Util::OrdVector<unsigned int>& s) : states()  {
-        #if (MEASURE_STATE_SPACE == true)
-        ++TermBaseSet::instances;
-        #endif
-        type = TERM_BASE;
-        for(auto state : s) {
-            this->states.push_back(state);
-        }
-    }
-
-    unsigned int MeasureStateSpace() {
-        return this->states.size();
-    }
+    // <<< DUMPING FUNCTIONS >>>
+    void dump();
 };
 
 class TermContProduct : public Term {
 public:
-    #if (MEASURE_STATE_SPACE == true)
+    // <<< PUBLIC MEMBERS >>>
     static int instances;
-    #endif
 
     std::shared_ptr<SymbolicAutomaton> aut;
     Term_ptr term;
     std::shared_ptr<SymbolType> symbol;
 
-    bool IsSubsumedBy(std::list<Term_ptr>& fixpoint) {
-        assert(false && "TermContProduct.IsSubsumedBy() is impossible to happen~!");
-    }
+    // <<< CONSTRUCTORS >>>
+    TermContProduct(std::shared_ptr<SymbolicAutomaton> a, Term_ptr t, std::shared_ptr<SymbolType> s);
 
-    TermContProduct(std::shared_ptr<SymbolicAutomaton> a, Term_ptr t, std::shared_ptr<SymbolType> s) : aut(a), term(t), symbol(s) {
-        #if (MEASURE_STATE_SPACE == true)
-            ++TermContProduct::instances;
-        #endif
-        this->type = TERM_CONT_ISECT;
-        #if (DEBUG_CONTINUATIONS == true)
-            std::cout << "Postponing computation as [";
-            t->dump();
-            std::cout << "]\n";
-        #endif
-    }
+    // <<< PUBLIC API >>>
+    bool IsSubsumedBy(std::list<Term_ptr>& fixpoint);
+    bool IsSubsumed(Term *t);
+    bool IsEmpty();
 
-    void dump() {
-        std::cout << "?";
-        term->dump();
-        std::cout << "!";
-        std::cout << "'";
-        if(symbol != nullptr) {
-            std::cout << (*symbol);
-        }
-        std::cout << "'";
-        std::cout << "?";
-        //std::cout << "?!?";
-    }
+    // <<< MEASURING FUNCTIONS >>>
+    unsigned int MeasureStateSpace();
 
-    // TODO: How to do this smartly?
-    // TODO: Maybe if we have {} we can answer sooner, without unpacking
-    bool IsSubsumed(Term *t) {
-        assert(this->type != TERM_CONT_SUBSET && t->type != TERM_CONT_SUBSET);
-
-        // We unpack this term
-        auto thisFix = (this->aut->IntersectNonEmpty(this->symbol.get(), this->term, false)).first;
-        if(t->type == TERM_CONT_ISECT) {
-            TermContProduct* tCont = reinterpret_cast<TermContProduct*>(t);
-            auto tFix = (tCont->aut->IntersectNonEmpty(tCont->symbol.get(), tCont->term, false)).first;
-            return thisFix->IsSubsumed(tFix.get());
-        } else {
-            return thisFix->IsSubsumed(t);
-        }
-    }
-
-    bool IsEmpty() {return false;}
-
-    unsigned int MeasureStateSpace() {
-        return 1;
-    }
+    // <<< DUMPING FUNCTIONS >>>
+    void dump();
 };
 
 class TermContSubset : public Term {
 public:
-    #if (MEASURE_STATE_SPACE == true)
+    // <<< PUBLIC MEMBERS >>>
     static int instances;
-    #endif
 
     std::shared_ptr<SymbolicAutomaton> aut;
     Term_ptr term;
     std::shared_ptr<SymbolType> symbol;
 
-    bool IsSubsumedBy(std::list<Term_ptr>& fixpoint) {
-        assert(false && "TermContSubset.IsSubsumedBy() is impossible to happen~!");
-    }
+    // <<< CONSTRUCTORS >>>
+    TermContSubset(std::shared_ptr<SymbolicAutomaton> a, Term_ptr t, std::shared_ptr<SymbolType> s);
 
-    TermContSubset(std::shared_ptr<SymbolicAutomaton> a, Term_ptr t, std::shared_ptr<SymbolType> s) : aut(a), term(t), symbol(s) {
-        #if (MEASURE_STATE_SPACE == true)
-            ++TermContSubset::instances;
-        #endif
-        this->type = TERM_CONT_SUBSET;
-    }
+    // <<< PUBLIC API >>>
+    bool IsSubsumedBy(std::list<Term_ptr>& fixpoint);
+    bool IsSubsumed(Term *t);
+    bool IsEmpty();
 
-    void dump() {
-        std::cout << "???";
-    }
+    // <<< MEASURING FUNCTIONS >>>
+    unsigned int MeasureStateSpace();
 
-    bool IsSubsumed(Term *t) {
-        assert(this->type != TERM_CONT_ISECT && t->type != TERM_CONT_ISECT);
-
-        // We unpack this term
-        auto thisFix = (this->aut->IntersectNonEmpty(this->symbol.get(), this->term, true)).first;
-        if(t->type == TERM_CONT_SUBSET) {
-            TermContSubset* tCont = reinterpret_cast<TermContSubset*>(t);
-            auto tFix = (tCont->aut->IntersectNonEmpty(tCont->symbol.get(), tCont->term, true)).first;
-            return thisFix->IsSubsumed(tFix.get());
-        } else {
-            return thisFix->IsSubsumed(t);
-        }
-    }
-
-    bool IsEmpty() {return false;}
-
-    unsigned int MeasureStateSpace() {
-        return 1;
-    }
+    // <<< DUMPING FUNCTIONS >>>
+    void dump();
 };
 
 class TermList : public Term {
 public:
-    #if (MEASURE_STATE_SPACE == true)
+    // <<< PUBLIC MEMBERS >>>
     static int instances;
-    #endif
 
     TermListStates list;
     bool isComplement;
 
-    bool IsSubsumedBy(std::list<Term_ptr>& fixpoint) {
-#if (DEBUG_TERM_SUBSUMPTION == true)
-        this->dump();
-        std::cout << " <?= ";
-        std::cout << "{";
-        for(auto item : fixpoint) {
-            if(item == nullptr) continue;
-            item->dump();
-            std::cout << ",";
-        }
-        std::cout << "}";
-        std::cout << "\n";
-        #endif
+    // <<< CONSTRUCTORS >>>
+    TermList();
+    TermList(Term_ptr first, bool isCompl);
+    TermList(Term_ptr f, Term_ptr s, bool isCompl);
 
-        for(auto item : fixpoint) {
-            if(item == nullptr) continue;
-            if(this->isComplement) {
-                if (item->IsSubsumed(this)) {
-                    return true;
-                }
-            } else {
-                if (this->IsSubsumed(item.get())) {
-                    return true;
-                }
-            }
-        }
+    // <<< PUBLIC API >>>
+    bool IsSubsumedBy(std::list<Term_ptr>& fixpoint);
+    bool IsSubsumed(Term* t);
+    bool IsEmpty();
 
-        return false;
-    }
+    // <<< MEASURING FUNCTIONS >>>
+    unsigned int MeasureStateSpace();
 
-    void dump() {
-        std::cout << "{";
-        for(auto state : this->list) {
-            state->dump();
-            std::cout  << ",";
-        }
-        std::cout << "}";
-    }
-
-    TermList() {
-        #if (MEASURE_STATE_SPACE == true)
-            ++TermList::instances;
-        #endif
-        type = TERM_LIST;
-    }
-
-    TermList(Term_ptr first, bool isCompl) : isComplement(isCompl) {
-        #if (MEASURE_STATE_SPACE == true)
-            ++TermList::instances;
-        #endif
-        this->type = TERM_LIST;
-        this->list.push_back(first);
-    }
-
-    TermList(Term_ptr f, Term_ptr s, bool isCompl) : isComplement(isCompl) {
-        #if (MEASURE_STATE_SPACE == true)
-            ++TermList::instances;
-        #endif
-        this->type = TERM_LIST;
-        this->list.push_back(f);
-        this->list.push_back(s);
-    }
-
-    bool IsSubsumed(Term* t) {
-        if(t->type == TERM_CONT_ISECT) {
-            TermContProduct* cont = reinterpret_cast<TermContProduct*>(t);
-            t = (cont->aut->IntersectNonEmpty((cont->symbol == nullptr ? nullptr : cont->symbol.get()), cont->term, false)).first.get();
-        }
-
-        if(t->type == TERM_CONT_SUBSET) {
-            TermContSubset* contS = reinterpret_cast<TermContSubset*>(t);
-            t = (contS->aut->IntersectNonEmpty((contS->symbol == nullptr ? nullptr : contS->symbol.get()), contS->term, true)).first.get();
-        }
-
-        TermList* tt = reinterpret_cast<TermList*>(t);
-        for(auto item : this->list) {
-            bool subsumes = false;
-            for(auto tt_item : tt->list) {
-                if(item->IsSubsumed(tt_item.get())) {
-                    subsumes = true;
-                    break;
-                }
-            }
-            if(!subsumes) return false;
-        }
-
-        return true;
-    }
-
-    bool IsEmpty() {
-        return this->list.size() == 0 ||
-               (this->list.size() == 1 && this->list[0]->IsEmpty());
-    }
-
-    unsigned int MeasureStateSpace() {
-        unsigned int count = 0;
-        for(auto item : this->list) {
-            count += item->MeasureStateSpace();
-        }
-
-        return count;
-    }
+    // <<< DUMPING FUNCTIONS >>>
+    void dump();
 };
 
 class TermFixpoint : public Term {
 public:
-    #if (MEASURE_STATE_SPACE == true)
-    static int instances;
-    #endif
-
     using FixpointType = std::list<Term_ptr>;
     using Aut_ptr = std::shared_ptr<SymbolicAutomaton>;
 
@@ -437,8 +181,8 @@ public:
     using WorklistType = std::list<WorklistItemType>;
     using Symbols = std::list<SymbolType>;
 
-    enum FixpointTermSem {E_FIXTERM_FIXPOINT, E_FIXTERM_PRE};
-
+    // <<< PUBLIC MEMBERS >>>
+    static int instances;
     struct iterator {
     private:
         TermFixpoint &_termFixpoint;
@@ -458,7 +202,6 @@ public:
 
             if (_termFixpoint._fixpoint.cend() != succIt) {
                 // if we can traverse
-                //assert(nullptr != *_it);
                 return *(++_it);
             } else {
                 // we need to refine the fixpoint
@@ -519,203 +262,30 @@ public:
     bool _inComplement;
     bool (*_aggregate_result)(bool, bool);
 
-    iterator GetIterator() {
-        return iterator(*this);
-    }
+    // <<< CONSTRUCTORS >>>
+    TermFixpoint(std::shared_ptr<SymbolicAutomaton> aut,Term_ptr startingTerm, Symbols symList, bool inComplement, bool initbValue);
+    TermFixpoint(std::shared_ptr<SymbolicAutomaton> aut, Term_ptr sourceTerm, Symbols symList, bool inComplement);
 
-    iterator* GetIteratorDynamic() {
-        return new iterator(*this);
-    }
+    // <<< PUBLIC API >>>
+    FixpointTermSem GetSemantics() const;
+    bool IsEmpty();
+    bool IsSubsumedBy(std::list<Term_ptr>& fixpoint);
+    bool IsSubsumed(Term* t);
+    bool GetResult();
+
+    iterator GetIterator() { return iterator(*this); }
+    iterator* GetIteratorDynamic() { return new iterator(*this); }
+
+    // <<< MEASURING FUNCTIONS >>>
+    unsigned int MeasureStateSpace();
+
+    // <<< DUMPING FUNCTIONS >>>
+    void dump();
 
 private:
-    void ComputeNextFixpoint() {
-        assert(!_worklist.empty());
-
-        WorklistItemType item = _worklist.front();
-        _worklist.pop_front();
-
-        ResultType result = _aut->IntersectNonEmpty(&item.second, item.first, this->_inComplement);
-
-        if(result.first->IsSubsumedBy(_fixpoint)) {
-            return;
-        }
-
-        _fixpoint.push_back(result.first);
-        _bValue = this->_aggregate_result(_bValue,result.second);
-        for(auto symbol : _symList) {
-            _worklist.insert(_worklist.cbegin(), std::make_pair(result.first, symbol));
-        }
-    }
-
-    void ComputeNextPre() {
-        assert(!_worklist.empty());
-
-        WorklistItemType item = _worklist.front();
-        _worklist.pop_front();
-
-        ResultType result = _aut->IntersectNonEmpty(&item.second, item.first, this->_inComplement);
-
-        if(result.first->IsSubsumedBy(_fixpoint)) {
-            return;
-        }
-
-        _fixpoint.push_back(result.first);
-        _bValue = this->_aggregate_result(_bValue,result.second);
-    }
-
-    void _InitializeAggregateFunction(bool inComplement) {
-        // TODO: Not sure atm. if this is valid
-        if(!inComplement) {
-            this->_aggregate_result = [](bool a, bool b) {return a || b;};
-        } else {
-            this->_aggregate_result = [](bool a, bool b) {return a && b;};
-        }
-    }
-public:
-    TermFixpoint(
-            //SymbolicAutomaton* aut,
-            std::shared_ptr<SymbolicAutomaton> aut,
-            Term_ptr startingTerm,
-            Symbols symList,
-            bool inComplement,
-            bool initbValue) : // also differentiates between two constructors
-        _sourceTerm(nullptr),
-        _sourceIt(nullptr),
-        _aut(aut),
-        //_fixpoint({nullptr, startingTerm}),
-        //_worklist({startingTerm}),
-        _bValue(initbValue),
-        _inComplement(inComplement) {
-        #if (MEASURE_STATE_SPACE == true)
-            ++TermFixpoint::instances;
-        #endif
-
-        this->_InitializeAggregateFunction(inComplement);
-        this->type = TERM_FIXPOINT;
-        this->_fixpoint.push_front(startingTerm);
-        this->_fixpoint.push_front(nullptr);
-        for(auto symbol : symList) {
-            this->_symList.push_back(symbol);
-            this->_worklist.insert(this->_worklist.cbegin(), std::make_pair(startingTerm, symbol));
-        }
-    }
-
-    TermFixpoint(
-            //SymbolicAutomaton* aut,
-            std::shared_ptr<SymbolicAutomaton> aut,
-            Term_ptr sourceTerm,
-            Symbols symList,
-            bool inComplement) :
-            _sourceTerm(sourceTerm),
-            _sourceIt(reinterpret_cast<TermFixpoint*>(sourceTerm.get())->GetIteratorDynamic()),
-            _aut(aut),
-            _worklist(),
-            _bValue(false),
-            _inComplement(inComplement) {
-        #if (MEASURE_STATE_SPACE == true)
-            ++TermFixpoint::instances;
-        #endif
-        // TODO: is it ok?
-        this->_InitializeAggregateFunction(inComplement);
-        assert(sourceTerm->type == TERM_FIXPOINT);
-        this->type = TERM_FIXPOINT;
-
-        this->_fixpoint.push_front(nullptr);
-        for(auto symbol : symList) {
-            this->_symList.push_back(symbol);
-        }
-    }
-
-    FixpointTermSem GetSemantics() const {
-        return (nullptr == _sourceTerm) ? E_FIXTERM_FIXPOINT : E_FIXTERM_PRE;
-    }
-
-    void dump() {
-        std::cout << "{";
-        for(auto item : this->_fixpoint) {
-            if(item == nullptr) {
-                continue;
-            }
-            item->dump();
-            std::cout << ",";
-        }
-        std::cout << "}";
-    }
-
-    bool IsEmpty() {
-        return this->_worklist.empty();
-    }
-
-    bool IsSubsumedBy(std::list<Term_ptr>& fixpoint) {
-        // TODO: There should be unfolding of fixpoint probably
-#if (DEBUG_TERM_SUBSUMPTION == true)
-        this->dump();
-        std::cout << " <?= ";
-        std::cout << "{";
-        for(auto item : fixpoint) {
-            if(item == nullptr) continue;
-            item->dump();
-            std::cout << ",";
-        }
-        std::cout << "}";
-        std::cout << "\n";
-#endif
-
-        for(auto item : fixpoint) {
-            if(item == nullptr) continue;
-            if (this->IsSubsumed(item.get())) {
-                return true;
-            }
-        }
-        return false;
-    }
-
-    bool IsSubsumed(Term* t) {
-        if(t->type == TERM_CONT_ISECT) {
-            TermContProduct* cont = reinterpret_cast<TermContProduct*>(t);
-            t = (cont->aut->IntersectNonEmpty((cont->symbol == nullptr ? nullptr : cont->symbol.get()), cont->term, false)).first.get();
-        }
-
-        if(t->type == TERM_CONT_SUBSET) {
-            TermContSubset* contS = reinterpret_cast<TermContSubset*>(t);
-            t = (contS->aut->IntersectNonEmpty((contS->symbol == nullptr ? nullptr : contS->symbol.get()), contS->term, true)).first.get();
-        }
-
-        if(t->type != TERM_FIXPOINT) {
-            assert(false && "Testing subsumption of incompatible terms\n");
-        }
-        TermFixpoint* tt = reinterpret_cast<TermFixpoint*>(t);
-        for(auto item : this->_fixpoint) {
-            if(item == nullptr) continue;
-            bool subsumes = false;
-            for(auto tt_item : tt->_fixpoint) {
-                if(tt_item == nullptr) continue;
-                if(item->IsSubsumed(tt_item.get())) {
-                    subsumes = true;
-                    break;
-                }
-            }
-            if(!subsumes) return false;
-        }
-
-        return true;
-    }
-
-    bool GetResult() {
-        return this->_bValue;
-    }
-
-    unsigned int MeasureStateSpace() {
-        unsigned count = 1;
-        for(auto item : this->_fixpoint) {
-            if(item == nullptr) {
-                continue;
-            }
-            assert(item != nullptr);
-            count += item->MeasureStateSpace();
-        }
-
-        return count;
-    }
+    // <<< PRIVATE FUNCTIONS >>>
+    void ComputeNextFixpoint();
+    void ComputeNextPre();
+    void _InitializeAggregateFunction(bool inComplement);
 };
 #endif //WSKS_TERM_H
