@@ -17,6 +17,7 @@
 
 #include "../containers/VarToTrackMap.hh"
 #include "../environment.hh"
+#include <boost/dynamic_bitset.hpp>
 
 using namespace Gaston;
 
@@ -28,6 +29,13 @@ private:
     // <<< PRIVATE MEMBERS >>>
     TrackType _track;
     BaseAutomatonMTBDD* _bdd;
+    boost::dynamic_bitset<> _trackMask;
+
+    // <<< PRIVATE METHODS >>>
+    void _InitializeTrackMask();
+    void _SetZeroAt(VarType var);
+    void _SetOneAt(VarType var);
+    void _SetDontCareAt(VarType var);
 
 public:
     // <<< CONSTRUCTORS >>>
@@ -62,7 +70,7 @@ inline bool operator==(const std::shared_ptr<ZeroSymbol>& lhs, const std::shared
     } else if(lhs.get() == rhs.get()) {
         return true;
     } else {
-        return lhs->_track.ToString() == rhs->_track.ToString();
+        return lhs->_trackMask == rhs->_trackMask;
     }
 }
 

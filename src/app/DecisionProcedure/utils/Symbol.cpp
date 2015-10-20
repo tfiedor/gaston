@@ -20,7 +20,7 @@ extern VarToTrackMap varMap;
 /**
  * Constructor that creates a new zero symbol
  */
-ZeroSymbol::ZeroSymbol() {
+ZeroSymbol::ZeroSymbol() : _trackMask(varMap.TrackLength() << 1) {
     this->_track = ZeroSymbol::constructZeroTrack();
     this->_bdd = nullptr;
 }
@@ -30,9 +30,11 @@ ZeroSymbol::ZeroSymbol() {
  *
  * @param[in] track:    track of the constructed symbol
  */
-ZeroSymbol::ZeroSymbol(Automaton::SymbolType track) {
+ZeroSymbol::ZeroSymbol(TrackType track) : _trackMask(varMap.TrackLength() << 1) {
     this->_track = track;
     this->_bdd = nullptr;
+
+    this->_InitializeTrackMask();
 }
 
 /**
@@ -43,12 +45,51 @@ ZeroSymbol::ZeroSymbol(Automaton::SymbolType track) {
  * @param[in] var:      variable that is set to certain value @val
  * @param[in] val:      value of @p var
  */
-ZeroSymbol::ZeroSymbol(Automaton::SymbolType track, VarType var, VarValue val) {
+ZeroSymbol::ZeroSymbol(TrackType track, VarType var, VarValue val) : _trackMask(varMap.TrackLength() << 1) {
     this->_track = track;
     if(this->_track.GetIthVariableValue(var) != charToAsgn('X')) {
         this->_track.SetIthVariableValue(var, charToAsgn(val));
     }
     this->_bdd = nullptr;
+
+    this->_InitializeTrackMask();
+}
+
+// <<< PRIVATE METHODS >>>
+void ZeroSymbol::_SetDontCareAt(VarType var) {
+    this->_trackMask.set(2*var, true);
+    this->_trackMask.set(2*var+1, true);
+}
+
+void ZeroSymbol::_SetZeroAt(VarType var) {
+    this->_trackMask.set(2*var, false);
+    this->_trackMask.set(2*var+1, false);
+}
+
+void ZeroSymbol::_SetOneAt(VarType var) {
+    this->_trackMask.set(2*var, true);
+    this->_trackMask.set(2*var+1, false);
+}
+
+void ZeroSymbol::_InitializeTrackMask() {
+    for (auto i = 0; i < this->_track.length(); ++i)
+    {	// append all variables to the string
+        switch (this->_track.GetIthVariableValue(i))
+        {
+            case 0x01:
+                this->_SetZeroAt(i);
+                break;
+            case 0x02:
+                this->_SetOneAt(i);
+                break;
+            case 0x03:
+                this->_SetDontCareAt(i);
+                break;
+            default:
+                assert(false);
+                break;   // fail gracefully
+        }
+    }
 }
 
 // <<< STATIC FUNCTIONS >>>
@@ -116,6 +157,7 @@ void ZeroSymbol::ProjectVar(VarType var) {
     assert(this->_bdd == nullptr);
 
     this->_track.SetIthVariableValue(var, charToAsgn('X'));
+    this->_SetDontCareAt(var);
 }
 
 // <<< FRIEND FUNCTIONS >>>

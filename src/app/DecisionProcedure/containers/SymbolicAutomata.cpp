@@ -493,8 +493,8 @@ ResultType ProjectionAutomaton::_IntersectNonEmptyCore(Symbol_ptr symbol, Term_p
         initialize_symbols(symbols, form->vl);
 
         // Create a new fixpoint term and iterator on it
-        TermFixpointStates* fixpoint = new TermFixpointStates(this->_aut, result.first, symbols, underComplement, result.second);
-        TermFixpointStates::iterator it = fixpoint->GetIterator();
+        TermFixpoint* fixpoint = new TermFixpoint(this->_aut, result.first, symbols, underComplement, result.second);
+        TermFixpoint::iterator it = fixpoint->GetIterator();
         Term_ptr fixpointTerm;
 
         #if (DEBUG_COMPUTE_FULL_FIXPOINT == true)
@@ -522,8 +522,8 @@ ResultType ProjectionAutomaton::_IntersectNonEmptyCore(Symbol_ptr symbol, Term_p
         initialize_symbols(symbols, form->vl);
 
         // Create a new fixpoint term and iterator on it
-        TermFixpointStates* fixpoint = new TermFixpointStates(this->_aut, finalApproximation, symbols, underComplement);
-        TermFixpointStates::iterator it = fixpoint->GetIterator();
+        TermFixpoint* fixpoint = new TermFixpoint(this->_aut, finalApproximation, symbols, underComplement);
+        TermFixpoint::iterator it = fixpoint->GetIterator();
         Term_ptr fixpointTerm;
 
         // Compute the Pre of the fixpoint

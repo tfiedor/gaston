@@ -13,13 +13,10 @@
 #include "../containers/SymbolicAutomata.h"
 #include "../environment.hh"
 
-enum TermType {TERM, TERM_FIXPOINT, TERM_PRODUCT, TERM_UNION, TERM_BASE, TERM_LIST, TERM_CONT_ISECT, TERM_CONT_SUBSET};
-
 class SymbolicAutomaton;
 
 // TODO: Subsumption: We can maybe exploit something about the leafstates
 
-// < Usings >
 using Term_ptr          = std::shared_ptr<Term>;
 using TermProductStates = std::pair<Term_ptr, Term_ptr>;
 using TermListStates    = std::vector<Term_ptr>;
@@ -31,13 +28,13 @@ using SymbolType        = ZeroSymbol;
 class Term {
 public:
     TermType type;
+
     virtual void dump() = 0;
     virtual bool IsSubsumedBy(std::list<Term_ptr>& fixpoint) = 0;
     virtual bool IsSubsumed(Term* t) = 0;
     virtual bool IsEmpty() = 0;
     virtual unsigned int MeasureStateSpace() = 0;
 };
-// Wow such clean!
 
 class TermProduct : public Term {
 public:
@@ -314,7 +311,6 @@ public:
     }
 };
 
-
 class TermList : public Term {
 public:
     #if (MEASURE_STATE_SPACE == true)
@@ -428,7 +424,7 @@ public:
     }
 };
 
-class TermFixpointStates : public Term {
+class TermFixpoint : public Term {
 public:
     #if (MEASURE_STATE_SPACE == true)
     static int instances;
@@ -445,7 +441,7 @@ public:
 
     struct iterator {
     private:
-        TermFixpointStates &_termFixpoint;
+        TermFixpoint &_termFixpoint;
         FixpointType::const_iterator _it;
 
     public:
@@ -505,7 +501,7 @@ public:
             }
         }
 
-        iterator(TermFixpointStates &termFixpoint) : _termFixpoint(termFixpoint), _it(_termFixpoint._fixpoint.begin()) {
+        iterator(TermFixpoint &termFixpoint) : _termFixpoint(termFixpoint), _it(_termFixpoint._fixpoint.begin()) {
             assert(nullptr != &termFixpoint);
             assert(!_termFixpoint._fixpoint.empty());
         }
@@ -576,7 +572,7 @@ private:
         }
     }
 public:
-    TermFixpointStates(
+    TermFixpoint(
             //SymbolicAutomaton* aut,
             std::shared_ptr<SymbolicAutomaton> aut,
             Term_ptr startingTerm,
@@ -591,7 +587,7 @@ public:
         _bValue(initbValue),
         _inComplement(inComplement) {
         #if (MEASURE_STATE_SPACE == true)
-            ++TermFixpointStates::instances;
+            ++TermFixpoint::instances;
         #endif
 
         this->_InitializeAggregateFunction(inComplement);
@@ -604,20 +600,20 @@ public:
         }
     }
 
-    TermFixpointStates(
+    TermFixpoint(
             //SymbolicAutomaton* aut,
             std::shared_ptr<SymbolicAutomaton> aut,
             Term_ptr sourceTerm,
             Symbols symList,
             bool inComplement) :
             _sourceTerm(sourceTerm),
-            _sourceIt(reinterpret_cast<TermFixpointStates*>(sourceTerm.get())->GetIteratorDynamic()),
+            _sourceIt(reinterpret_cast<TermFixpoint*>(sourceTerm.get())->GetIteratorDynamic()),
             _aut(aut),
             _worklist(),
             _bValue(false),
             _inComplement(inComplement) {
         #if (MEASURE_STATE_SPACE == true)
-            ++TermFixpointStates::instances;
+            ++TermFixpoint::instances;
         #endif
         // TODO: is it ok?
         this->_InitializeAggregateFunction(inComplement);
@@ -688,7 +684,7 @@ public:
         if(t->type != TERM_FIXPOINT) {
             assert(false && "Testing subsumption of incompatible terms\n");
         }
-        TermFixpointStates* tt = reinterpret_cast<TermFixpointStates*>(t);
+        TermFixpoint* tt = reinterpret_cast<TermFixpoint*>(t);
         for(auto item : this->_fixpoint) {
             if(item == nullptr) continue;
             bool subsumes = false;
