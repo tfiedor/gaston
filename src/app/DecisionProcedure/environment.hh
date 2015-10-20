@@ -96,6 +96,7 @@ namespace Gaston {
  * GLOBAL ENUMERATIONS *
  ***********************/
 enum Decision {SATISFIABLE, UNSATISFIABLE, VALID, INVALID};
+enum AutType {SYMBOLIC_BASE, BINARY, INTERSECTION, UNION, PROJECTION, BASE, COMPLEMENT};
 
 /*********************************
  * OTHER METHODS RELATED DEFINES *
@@ -144,6 +145,11 @@ enum Decision {SATISFIABLE, UNSATISFIABLE, VALID, INVALID};
  *****************************/
 #define MEASURE_STATE_SPACE 			true
 #define MEASURE_CACHE_HITS 				true
+#define MEASURE_CONTINUATION_CREATION	true
+#define MEASURE_CONTINUATION_EVALUATION	true
+#define MEASURE_RESULT_HITS				true
+#define MEASURE_PROJECTION				true
+#define MEASURE_ALL						true
 
 /*************************
  * >>> Optimizations <<< *

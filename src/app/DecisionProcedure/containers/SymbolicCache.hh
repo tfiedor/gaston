@@ -11,6 +11,7 @@
 #ifndef __SYM_CACHE__H__
 #define __SYM_CACHE__H__
 
+#include <iomanip>
 #include <map>
 #include <vector>
 #include <unordered_map>
@@ -135,9 +136,9 @@ public:
 	 */
 	unsigned int dumpStats() {
 		unsigned int size = this->_cache.size();
-		std::cout << ".Cache size: " << size;
+		std::cout << "Size: " << size;
 		if(this->cacheHits+this->cacheMisses != 0)
-			std::cout << "(" << this->cacheHits << ":" << this->cacheMisses << ") -> "<< (this->cacheHits/(double)(this->cacheHits+this->cacheMisses)) <<"\n";
+			std::cout << ", Hit:Miss (" << this->cacheHits << ":" << this->cacheMisses << ")	->	"<< std::fixed << std::setprecision(2) << (this->cacheHits/(double)(this->cacheHits+this->cacheMisses)) <<"%\n";
 		else
 			std::cout << "\n";
 		return size;

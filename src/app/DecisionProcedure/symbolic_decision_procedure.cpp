@@ -63,8 +63,8 @@ int ws1s_symbolic_decision_procedure(SymbolicAutomaton_ptr symbolicAutomaton) {
     #endif
 
     #if (MEASURE_CACHE_HITS == true)
-    std::cout << "[*] Printing Result Cache statistics\n";
-    symbolicAutomaton->DumpCacheStats();
+    std::cout << "[*] Printing Statistics\n";
+    symbolicAutomaton->DumpStats();
     std::cout << "\n";
     #endif
 

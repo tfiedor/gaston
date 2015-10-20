@@ -1,9 +1,16 @@
 /*****************************************************************************
- *  gaston - no real logic behind the name, we simply liked the poor seal gaston. R.I.P. brave soldier.
+ *  gaston - We pay homage to Gaston, an Africa-born brown fur seal who
+ *    escaped the Prague Zoo during the floods in 2002 and made a heroic
+ *    journey for freedom of over 300km all the way to Dresden. There he
+ *    was caught and subsequently died due to exhaustion and infection.
+ *    Rest In Piece, brave soldier.
  *
  *  Copyright (c) 2015  Tomas Fiedor <ifiedortom@fit.vutbr.cz>
  *      Notable mentions: Ondrej Lengal <ondra.lengal@gmail.com>
  *
+ *  Description:
+ *      Symbolic Automata representing the formulae. The computation is
+ *      done on this representation according to the latest paper.
  *****************************************************************************/
 
 #include <list>
@@ -18,6 +25,77 @@ extern VarToTrackMap varMap;
 StateType SymbolicAutomaton::stateCnt = 0;
 
 using namespace Gaston;
+
+// <<< CONSTRUCTORS >>>
+SymbolicAutomaton::SymbolicAutomaton(Formula_ptr form) : _form(form) {
+    type = AutType::SYMBOLIC_BASE;
+
+    IdentList free, bound;
+    this->_form->freeVars(&free, &bound);
+    for(auto it = free.begin(); it != free.end(); ++it) {
+        _freeVars.insert(varMap[(*it)]);
+    }
+}
+
+BinaryOpAutomaton::BinaryOpAutomaton(SymbolicAutomaton_raw lhs, SymbolicAutomaton_raw rhs, Formula_ptr form)
+        : SymbolicAutomaton(form), _lhs_aut(lhs), _rhs_aut(rhs) {
+    type = AutType::BINARY;
+    this->_InitializeAutomaton();
+}
+
+ComplementAutomaton::ComplementAutomaton(SymbolicAutomaton *aut, Formula_ptr form)
+        : SymbolicAutomaton(form), _aut(aut) {
+    this->_InitializeAutomaton();
+    type = AutType::COMPLEMENT;
+}
+
+ProjectionAutomaton::ProjectionAutomaton(SymbolicAutomaton_raw aut, Formula_ptr form)
+        : SymbolicAutomaton(form), _aut(aut) {
+    this->_InitializeAutomaton();
+    type = AutType::PROJECTION;
+}
+
+// Derive of BinaryOpAutomaton
+IntersectionAutomaton::IntersectionAutomaton(SymbolicAutomaton_raw lhs, SymbolicAutomaton_raw rhs, Formula_ptr form)
+        : BinaryOpAutomaton(lhs, rhs, form) {
+    this->_InitializeAutomaton();
+    this->type = AutType::INTERSECTION;
+    this->_eval_result = [](bool a, bool b, bool underC) {
+        // e in A cap B == e in A && e in B
+        if(!underC) {return a && b;}
+        // e notin A cap B == e notin A || e notin B
+        else {return a || b;}
+    };
+    this->_eval_early = [](bool a, bool underC) {
+        // e in A && e in B => False
+        // e notin A || e notin B => True
+        return (a == underC);
+    };
+    this->_early_val = [](bool underC) {
+        return underC;
+    };
+}
+
+// Derive of BinaryOpAutomaton
+UnionAutomaton::UnionAutomaton(SymbolicAutomaton_raw lhs, SymbolicAutomaton_raw rhs, Formula_ptr form)
+        : BinaryOpAutomaton(lhs, rhs, form) {
+    this->_InitializeAutomaton();
+    this->type = AutType::UNION;
+    this->_eval_result = [](bool a, bool b, bool underC) {
+        // e in A cup B == e in A || e in B
+        if(!underC) {return a || b;}
+        // e notin A cup B == e notin A && e notin B
+        else { return a && b;}
+    };
+    this->_eval_early = [](bool a, bool underC) {
+        // e in A || e in B => True
+        // e notin A && e notin B => False
+        return (a != underC);
+    };
+    this->_early_val = [](bool underC) {
+        return !underC;
+    };
+}
 
 /**
  * Transforms @p symbols according to the bound variable in @p vars, by pumping
@@ -71,6 +149,7 @@ ResultType SymbolicAutomaton::IntersectNonEmpty(Symbol_ptr symbol, Term_ptr stat
     std::cout << ")\n";
     #endif
 
+    // Trim the variables that are not occuring in the formula away
     if(symbol != nullptr) {
         symbol = new Symbol(symbol->GetTrack());
 
@@ -86,30 +165,49 @@ ResultType SymbolicAutomaton::IntersectNonEmpty(Symbol_ptr symbol, Term_ptr stat
     }
 
     #if (OPT_CACHE_RESULTS == true)
+    // Create a new symbol for cache
     std::shared_ptr<Symbol> symbolKey = nullptr;
     if(symbol != nullptr) {
         symbolKey = std::shared_ptr<Symbol>(new Symbol(symbol->GetTrack()));
     }
+
+    // Look up in cache, if in cache, return the result
     auto key = std::make_pair(stateApproximation, symbolKey);
     if(this->_resCache.retrieveFromCache(key, result)) {
         return result;
     }
     #endif
 
+    // If we have continuation, we have to unwind it
     if(stateApproximation != nullptr && stateApproximation->type == TERM_CONT_ISECT) {
-        TermContProduct* cont = reinterpret_cast<TermContProduct*>(stateApproximation.get());
-        stateApproximation = (cont->aut->IntersectNonEmpty((cont->symbol == nullptr ? nullptr : cont->symbol.get()), cont->term, false)).first;
+        #if (MEASURE_CONTINUATION_EVALUATION == true || MEASURE_ALL == true)
+        ++this->_contUnfoldingCounter;
+        #endif
+        TermContProduct* continuation = reinterpret_cast<TermContProduct*>(stateApproximation.get());
+        stateApproximation = (continuation->aut->IntersectNonEmpty((continuation->symbol == nullptr ? nullptr : continuation->symbol.get()), continuation->term, false)).first;
         //                                                                                                           ^--- is this ok?
     }
 
     if(stateApproximation != nullptr && stateApproximation->type == TERM_CONT_SUBSET) {
-        TermContSubset* contS = reinterpret_cast<TermContSubset*>(stateApproximation.get());
-        stateApproximation = (contS->aut->IntersectNonEmpty((contS->symbol == nullptr ? nullptr : contS->symbol.get()), contS->term, true)).first;
+        #if (MEASURE_CONTINUATION_EVALUATION == true || MEASURE_ALL == true)
+        ++this->_contUnfoldingCounter;
+        #endif
+        TermContSubset* subsetContinuation = reinterpret_cast<TermContSubset*>(stateApproximation.get());
+        stateApproximation = (subsetContinuation->aut->IntersectNonEmpty((subsetContinuation->symbol == nullptr ? nullptr : subsetContinuation->symbol.get()), subsetContinuation->term, true)).first;
         //                                                                                                               ^--- is this ok?
     }
 
+    // Call the core function
     result = this->_IntersectNonEmptyCore(symbol, stateApproximation, underComplement);
+    #if (MEASURE_RESULT_HITS == true || MEASURE_ALL == true)
+    if(result.second) {
+        ++this->_trueCounter;
+    } else {
+        ++this->_falseCounter;
+    }
+    #endif
 
+    // Cache Results
     #if (OPT_CACHE_RESULTS == true)
     if(!this->_resCache.inCache(key)) {
         this->_resCache.StoreIn(key, result);
@@ -131,6 +229,8 @@ ResultType SymbolicAutomaton::IntersectNonEmpty(Symbol_ptr symbol, Term_ptr stat
     }
     std::cout << ") = " << (result.second ? "True" : "False") << "\n";
     #endif
+
+    // Return results
     return result;
 }
 
@@ -171,6 +271,22 @@ void BaseAutomaton::_InitializeAutomaton() {
     this->_RenameStates();
     this->_InitializeInitialStates();
     this->_InitializeFinalStates();
+}
+
+void BinaryOpAutomaton::_InitializeAutomaton() {
+    this->_InitializeInitialStates();
+    this->_InitializeFinalStates();
+}
+
+void ComplementAutomaton::_InitializeAutomaton() {
+    this->_InitializeInitialStates();
+    this->_InitializeFinalStates();
+}
+
+void ProjectionAutomaton::_InitializeAutomaton() {
+    this->_InitializeInitialStates();
+    this->_InitializeFinalStates();
+    this->_projected_vars = static_cast<ASTForm_uvf*>(this->_form)->vl;
 }
 
 /**
@@ -316,6 +432,9 @@ ResultType BinaryOpAutomaton::_IntersectNonEmptyCore(Symbol_ptr symbol, Term_ptr
         // Construct the pointer for symbol (either symbol or epsilon---nullptr)
         std::shared_ptr<Symbol> suspendedSymbol = (symbol == nullptr) ? nullptr : std::shared_ptr<Symbol>(new ZeroSymbol(symbol->GetTrack()));
 
+        #if (MEASURE_CONTINUATION_CREATION == true || MEASURE_ALL == true)
+        ++this->_contCreationCounter;
+        #endif
         if(!underComplement) {
             // If we are not under complement we construct the TermContProduct continuation
             TermContProduct *rhsContinuation = new TermContProduct(this->_rhs_aut, productStateApproximation->right, suspendedSymbol);
@@ -433,24 +552,94 @@ ResultType BaseAutomaton::_IntersectNonEmptyCore(Symbol_ptr symbol, Term_ptr app
     }
 }
 
-void BinaryOpAutomaton::dump() {
+void BinaryOpAutomaton::DumpAutomaton() {
     std::cout << "(";
-    _lhs_aut->dump();
+    _lhs_aut->DumpAutomaton();
     std::cout << " x ";
-    _rhs_aut->dump();
+    _rhs_aut->DumpAutomaton();
     std::cout << ")";
 }
 
-void ComplementAutomaton::dump() {
+void ComplementAutomaton::DumpAutomaton() {
     std::cout << "compl(";
-    this->_aut->dump();
+    this->_aut->DumpAutomaton();
     std::cout << ")";
 }
 
-void ProjectionAutomaton::dump() {
+void ProjectionAutomaton::DumpAutomaton() {
     std::cout << "ex2(";
-    this->_aut->dump();
+    this->_aut->DumpAutomaton();
     std::cout << ")";
+}
+
+void GenericBaseAutomaton::DumpAutomaton() { std::cout << "<Aut>";
+    #if (DEBUG_BASE_AUTOMATA == true)
+    this->BaseAutDump();
+    #endif
+}
+
+void SubAutomaton::DumpAutomaton() {
+    this->_form->dump();
+    #if (DEBUG_BASE_AUTOMATA == true)
+    this->baseAutDump();
+    #endif
+}
+
+void TrueAutomaton::DumpAutomaton() {
+    this->_form->dump();
+    #if (DEBUG_BASE_AUTOMATA == true)
+    this->baseAutDump();
+    #endif
+}
+
+void FalseAutomaton::DumpAutomaton() {
+    this->_form->dump();
+    #if (DEBUG_BASE_AUTOMATA == true)
+    this->baseAutDump();
+    #endif
+}
+
+void InAutomaton::DumpAutomaton() {
+    this->_form->dump();
+    #if (DEBUG_BASE_AUTOMATA == true)
+    this->baseAutDump();
+    #endif
+}
+
+void FirstOrderAutomaton::DumpAutomaton() {
+    this->_form->dump();
+    #if (DEBUG_BASE_AUTOMATA == true)
+    this->baseAutDump();
+    #endif
+}
+
+void EqualFirstAutomaton::DumpAutomaton() {
+    this->_form->dump();
+    #if (DEBUG_BASE_AUTOMATA == true)
+    this->baseAutDump();
+    #endif
+}
+
+
+void EqualSecondAutomaton::DumpAutomaton() {
+    this->_form->dump();
+    #if (DEBUG_BASE_AUTOMATA == true)
+    this->baseAutDump();
+    #endif
+}
+
+void LessAutomaton::DumpAutomaton() {
+    this->_form->dump();
+    #if (DEBUG_BASE_AUTOMATA == true)
+    this->baseAutDump();
+    #endif
+}
+
+void LessEqAutomaton::DumpAutomaton() {
+    this->_form->dump();
+    #if (DEBUG_BASE_AUTOMATA == true)
+    this->baseAutDump();
+    #endif
 }
 
 /**
@@ -463,7 +652,7 @@ void BaseAutomaton::_RenameStates() {
     this->_base_automaton.reset(new BaseAutomatonType(this->_base_automaton->ReindexStates(stateTransl)));
 }
 
-void BaseAutomaton::baseAutDump() {
+void BaseAutomaton::BaseAutDump() {
     std::cout << "\n[----------------------->]\n";
     std::cout << "[!] Base VATA Automaton\n";
     VATA::Serialization::AbstrSerializer *serializer = new VATA::Serialization::TimbukSerializer();
@@ -486,4 +675,95 @@ void BaseAutomaton::baseAutDump() {
         std::cout << "-> not initialized\n";
     }
     std::cout << "[----------------------->]\n";
+}
+
+/**
+ * Dump Cache stats of automaton only
+ */
+void BinaryOpAutomaton::DumpCacheStats() {
+    this->_form->dump();
+    this->_resCache.dumpStats();
+    this->_lhs_aut->DumpCacheStats();
+    this->_rhs_aut->DumpCacheStats();
+}
+
+void ComplementAutomaton::DumpCacheStats() {
+    this->_form->dump();
+    this->_resCache.dumpStats();
+    this->_aut->DumpCacheStats();
+}
+
+void ProjectionAutomaton::DumpCacheStats() {
+    this->_form->dump();
+    this->_resCache.dumpStats();
+    this->_aut->DumpCacheStats();
+}
+
+void BaseAutomaton::DumpCacheStats() {
+    this->_form->dump();
+    this->_resCache.dumpStats();
+}
+
+/**
+ * Dumps stats for automata
+ *
+ * 1) True/False hits
+ * 2) Cache hit/miss
+ * 3) Number of iterations in projection
+ * 4) Number of symbols evaluated in projection
+ * 5) Number of evaluated continuations
+ * 6) Number of created continuation
+ */
+void print_stat(std::string statName, unsigned int stat) {
+    if(stat != 0) {
+        std::cout << "  ~ " << statName << " -> " << stat << "\n";
+    }
+}
+
+void BinaryOpAutomaton::DumpStats() {
+    this->_form->dump();
+    std::cout << "\n";
+    std::cout << "  ~ Cache stats -> ";
+    this->_resCache.dumpStats();
+    print_stat("True Hits", this->_trueCounter);
+    print_stat("False Hits", this->_falseCounter);
+    print_stat("Continuation Generation", this->_contCreationCounter);
+    print_stat("Continuation Evaluation", this->_contUnfoldingCounter);
+
+    this->_lhs_aut->DumpStats();
+    this->_rhs_aut->DumpStats();
+}
+
+void ProjectionAutomaton::DumpStats() {
+    this->_form->dump();
+    std::cout << "\n";
+    std::cout << "  ~ Cache stats -> ";
+    this->_resCache.dumpStats();
+    print_stat("True Hits", this->_trueCounter);
+    print_stat("False Hits", this->_falseCounter);
+    print_stat("Continuation Evaluation", this->_contUnfoldingCounter);
+
+    this->_aut->DumpStats();
+}
+
+void ComplementAutomaton::DumpStats() {
+    this->_form->dump();
+    std::cout << "\n";
+    std::cout << "  ~ Cache stats -> ";
+    this->_resCache.dumpStats();
+    print_stat("True Hits", this->_trueCounter);
+    print_stat("False Hits", this->_falseCounter);
+    print_stat("Continuation Evaluation", this->_contUnfoldingCounter);
+
+    this->_aut->DumpStats();
+}
+
+void BaseAutomaton::DumpStats() {
+    this->_form->dump();
+    std::cout << "\n";
+    std::cout << "  ~ Cache stats -> ";
+    this->_resCache.dumpStats();
+    print_stat("True Hits", this->_trueCounter);
+    print_stat("False Hits", this->_falseCounter);
+    print_stat("Continuation Evaluation", this->_contUnfoldingCounter);
 }

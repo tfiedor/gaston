@@ -17,9 +17,12 @@
 #include "containers/StateSet.hh"
 #include "decision_procedures.hh"
 #include <boost/range/join.hpp>
+#include "environment.hh"
 
 using MTBDDLeafStateSet = VATA::Util::OrdVector<StateType>;
 using BaseAut_States = VATA::Util::OrdVector<StateType>;
+
+using namespace Gaston;
 
 /**
  * Family of MTBDD manipulation functors
@@ -295,5 +298,79 @@ public:
 		return lhs.Union(rhs);
 	}
 };
+
+
+GCC_DIAG_OFF(effc++)
+class BaseCollectorFunctor : public VATA::MTBDDPkg::VoidApply1Functor<BaseCollectorFunctor, BaseAutomatonStateSet> {
+	GCC_DIAG_ON(effc++)
+private:
+	BaseAutomatonStateSet& collected;
+	bool _minusInteresect;
+
+public:
+	bool _isFirst;
+	// < Public Constructors >
+	BaseCollectorFunctor(BaseAutomatonStateSet& l, bool minusIntersect) : collected(l), _minusInteresect(minusIntersect), _isFirst(true) {}
+
+	// < Public Methods >
+	/**
+     * @param lhs: operand of apply
+     */
+	inline void ApplyOperation(BaseAutomatonStateSet rhs) {
+		if(_minusInteresect) {
+			if(_isFirst) {
+				collected.insert(rhs);
+				return;
+			}
+			auto itLhs = collected.begin();
+			auto itRhs = rhs.begin();
+			BaseAutomatonStateSet intersection;
+
+			while ((itLhs != collected.end()) || (itRhs != rhs.end()))
+			{	// until we drop out of the array (or find a common element)
+				if (*itLhs == *itRhs)
+				{	// in case there exists a common element
+					intersection.insert(*itLhs);
+					++itLhs;
+					++itRhs;
+				}
+				else if (*itLhs < *itRhs)
+				{	// in case the element in lhs is smaller
+					++itLhs;
+				}
+				else
+				{	// in case the element in rhs is smaller
+					assert(*itLhs > *itRhs);
+					++itRhs;
+				}
+			}
+
+			collected.clear();
+			collected.insert(intersection);
+		} else {
+			collected.insert(rhs);
+		}
+	}
+};
+
+GCC_DIAG_OFF(effc++)
+class MaskerFunctor : public VATA::MTBDDPkg::Apply2Functor<MaskerFunctor, BaseAutomatonStateSet, BaseAutomatonStateSet, BaseAutomatonStateSet> {
+	GCC_DIAG_ON(effc++)
+public:
+	// < Public Methods >
+	/**
+     * @param lhs: left operand
+     * @param rhs: right operand
+     * @return union of leaf operands
+     */
+	inline BaseAutomatonStateSet ApplyOperation(BaseAutomatonStateSet lhs, BaseAutomatonStateSet rhs) {
+		if(rhs.size() == 0) {
+			return rhs;
+		} else {
+			return lhs;
+		}
+	}
+};
+
 
 #endif
