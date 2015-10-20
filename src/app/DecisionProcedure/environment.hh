@@ -25,6 +25,7 @@
 #include <vata/parsing/timbuk_parser.hh>
 #include <vata/serialization/timbuk_serializer.hh>
 #include "utils/cached_binary_op.hh"
+#include "mtbdd/ondriks_mtbdd.hh"
 #include "containers/SymbolicCache.hh"
 
 class NotImplementedException : public std::exception {
@@ -57,11 +58,13 @@ struct ResultHashType {
  * GLOBAL USING DIRECTIVES *
  ***************************/
 namespace Gaston {
+	using Automaton 			 = VATA::BDDBottomUpTreeAut;
 	using Formula_ptr            = ASTForm*;
 	using Term_ptr				 = std::shared_ptr<Term>;
 	using ResultType			 = std::pair<Term_ptr, bool>;
 
 	using StateType				 = size_t;
+	using StateTuple 			 = std::vector<StateType>;
 	using StateToStateTranslator = VATA::AutBase::StateToStateTranslWeak;
 	using StateToStateMap        = std::unordered_map<StateType, StateType>;
 
@@ -82,10 +85,13 @@ namespace Gaston {
 	using WorkListSet            = std::vector<std::shared_ptr<WorkListTerm>>;
 
 	using BaseAutomatonType      = VATA::BDDBottomUpTreeAut;
-	using BaseAutomatonStateSet     = VATA::Util::OrdVector<StateType>;
+	using BaseAutomatonStateSet  = VATA::Util::OrdVector<StateType>;
+	using BaseAutomatonMTBDD	 = VATA::MTBDDPkg::OndriksMTBDD<BaseAutomatonStateSet>;
 
 	using VarType				 = size_t;
 	using VarList                = VATA::Util::OrdVector<StateType>;
+	using VarValue			     = char;
+	using TrackType				 = Automaton::SymbolType;
 }
 
 /*************************

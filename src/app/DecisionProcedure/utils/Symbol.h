@@ -1,48 +1,61 @@
-//
-// Created by Raph on 09/10/2015.
-//
+/*****************************************************************************
+ *  gaston - We pay homage to Gaston, an Africa-born brown fur seal who
+ *    escaped the Prague Zoo during the floods in 2002 and made a heroic
+ *    journey for freedom of over 300km all the way to Dresden. There he
+ *    was caught and subsequently died due to exhaustion and infection.
+ *    Rest In Piece, brave soldier.
+ *
+ *  Copyright (c) 2015  Tomas Fiedor <ifiedortom@fit.vutbr.cz>
+ *      Notable mentions: Ondrej Lengal <ondra.lengal@gmail.com>
+ *
+ *  Description:
+ *      Representation of Zero Symbol used in decision procedure
+ *****************************************************************************/
 
 #ifndef WSKS_SYMBOL_H
 #define WSKS_SYMBOL_H
 
-#include <vata/bdd_bu_tree_aut.hh>
 #include "../containers/VarToTrackMap.hh"
-#include "../mtbdd/ondriks_mtbdd.hh"
+#include "../environment.hh"
 
-using Automaton = VATA::BDDBottomUpTreeAut;
-using StateType = size_t;
-using StateTuple = std::vector<StateType>;
-using Value = char;
-using Var = size_t;
-using Vars = std::vector<Var>;
-using BaseAut_States = VATA::Util::OrdVector<StateType>;
-using BaseAut_MTBDD = VATA::MTBDDPkg::OndriksMTBDD<BaseAut_States>;
+using namespace Gaston;
 
+/**
+ * Class that represents one symbol on track
+ */
 class ZeroSymbol {
-public:
-
 private:
-    Automaton::SymbolType _track;
-    BaseAut_MTBDD* _bdd;
+    // <<< PRIVATE MEMBERS >>>
+    TrackType _track;
+    BaseAutomatonMTBDD* _bdd;
 
 public:
+    // <<< CONSTRUCTORS >>>
     ZeroSymbol();
-    ZeroSymbol(Automaton::SymbolType);
-    ZeroSymbol(Automaton::SymbolType, Var, Value);
+    ZeroSymbol(TrackType);
+    ZeroSymbol(TrackType, VarType, VarValue);
 
-    void ProjectVars(Vars freeVars);
-    void ProjectVar(Var var);
-    bool IsEmpty();
-    Automaton::SymbolType GetTrack() { return this->_track; }
-    BaseAut_MTBDD* GetMTBDD();
+    // <<< PUBLIC API >>>
+    void ProjectVar(VarType var);
+    TrackType GetTrack() { return this->_track; }
+    BaseAutomatonMTBDD* GetMTBDD();
 
-    static Automaton::SymbolType constructUniversalTrack();
-    static Automaton::SymbolType constructZeroTrack();
+    // <<< STATIC METHODS >>>
+    static TrackType constructUniversalTrack();
+    static TrackType constructZeroTrack();
     static char charToAsgn(char c);
+
+    // <<< FRIENDS >>>
     friend std::ostream& operator <<(std::ostream& osObject, const ZeroSymbol& z);
     friend bool operator==(const std::shared_ptr<ZeroSymbol>& lhs, const std::shared_ptr<ZeroSymbol>& rhs);
 };
 
+/**
+ * Does the comparison of two Zero Symbols
+ *
+ * @param[in] lhs:      left operand
+ * @param[in] rhs:      right operand
+ */
 inline bool operator==(const std::shared_ptr<ZeroSymbol>& lhs, const std::shared_ptr<ZeroSymbol>& rhs) {
     if(lhs == nullptr || rhs == nullptr) {
         return lhs == nullptr && rhs == nullptr;
