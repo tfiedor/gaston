@@ -138,7 +138,7 @@ public:
 		unsigned int size = this->_cache.size();
 		std::cout << "Size: " << size;
 		if(this->cacheHits+this->cacheMisses != 0)
-			std::cout << ", Hit:Miss (" << this->cacheHits << ":" << this->cacheMisses << ")	->	"<< std::fixed << std::setprecision(2) << (this->cacheHits/(double)(this->cacheHits+this->cacheMisses)) <<"%\n";
+			std::cout << ", Hit:Miss (" << this->cacheHits << ":" << this->cacheMisses << ")	->	"<< std::fixed << std::setprecision(2) << (this->cacheHits/(double)(this->cacheHits+this->cacheMisses))*100 <<"%\n";
 		else
 			std::cout << "\n";
 		return size;

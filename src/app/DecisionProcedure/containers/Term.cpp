@@ -16,11 +16,10 @@
 
 // <<< STATIC MEMBER INITIALIZATION >>>
 int TermProduct::instances = 0;
-int TermContProduct::instances = 0;
 int TermBaseSet::instances = 0;
 int TermList::instances = 0;
 int TermFixpoint::instances = 0;
-int TermContSubset::instances = 0;
+int TermContinuation::instances = 0;
 
 // <<< TERM CONSTRUCTORS >>>
 /**
@@ -53,6 +52,7 @@ TermBaseSet::TermBaseSet() : states() {
     #endif
     type = TERM_BASE;
 }
+
 TermBaseSet::TermBaseSet(TermBaseSetStates& s) : states()  {
     #if (MEASURE_STATE_SPACE == true)
     ++TermBaseSet::instances;
@@ -73,23 +73,11 @@ TermBaseSet::TermBaseSet(VATA::Util::OrdVector<unsigned int>& s) : states()  {
     }
 }
 
-TermContProduct::TermContProduct(std::shared_ptr<SymbolicAutomaton> a, Term_ptr t, std::shared_ptr<SymbolType> s) : aut(a), term(t), symbol(s) {
+TermContinuation::TermContinuation(std::shared_ptr<SymbolicAutomaton> a, Term_ptr t, std::shared_ptr<SymbolType> s, bool b) : aut(a), term(t), symbol(s), underComplement(b) {
     #if (MEASURE_STATE_SPACE == true)
-    ++TermContProduct::instances;
+    ++TermContinuation::instances;
     #endif
-    this->type = TERM_CONT_ISECT;
-    #if (DEBUG_CONTINUATIONS == true)
-    std::cout << "Postponing computation as [";
-    t->dump();
-    std::cout << "]\n";
-    #endif
-}
-
-TermContSubset::TermContSubset(std::shared_ptr<SymbolicAutomaton> a, Term_ptr t, std::shared_ptr<SymbolType> s) : aut(a), term(t), symbol(s) {
-    #if (MEASURE_STATE_SPACE == true)
-    ++TermContSubset::instances;
-    #endif
-    this->type = TERM_CONT_SUBSET;
+    this->type = TERM_CONTINUATION;
     #if (DEBUG_CONTINUATIONS == true)
     std::cout << "Postponing computation as [";
     t->dump();
@@ -177,7 +165,6 @@ bool TermProduct::IsSubsumed(Term* t) {
     t->dump();
     std::cout << "\n";
     #endif
-
     assert(t->type == TERM_PRODUCT);
 
     // Retype and test the subsumption component-wise
@@ -213,37 +200,19 @@ bool TermBaseSet::IsSubsumed(Term* term) {
     }
 }
 
-bool TermContProduct::IsSubsumed(Term *t) {
+bool TermContinuation::IsSubsumed(Term *t) {
     // TODO: How to do this smartly?
     // TODO: Maybe if we have {} we can answer sooner, without unpacking
-    assert(t->type != TERM_CONT_SUBSET);
+    //assert(t->type != TERM_CONT_SUBSET);
 
     // We unpack this term
     auto unfoldedTerm = (this->aut->IntersectNonEmpty(this->symbol.get(), this->term, false)).first;
-    if(t->type == TERM_CONT_ISECT) {
+    if(t->type == TERM_CONTINUATION) {
         // @p t is also folded in continuation so we have to unfold it as well
-        TermContProduct* continuationT = reinterpret_cast<TermContProduct*>(t);
+        TermContinuation* continuationT = reinterpret_cast<TermContinuation*>(t);
+        assert(continuationT->underComplement == this->underComplement);
+
         auto unfoldedT = (continuationT->aut->IntersectNonEmpty(continuationT->symbol.get(), continuationT->term, false)).first;
-
-        // Test the subsumption over the unfolded stuff
-        return unfoldedTerm->IsSubsumed(unfoldedT.get());
-    } else {
-        // Test the subsumption over the unfolded stuff
-        return unfoldedTerm->IsSubsumed(t);
-    }
-}
-
-bool TermContSubset::IsSubsumed(Term *t) {
-    // TODO: How to do this smartly?
-    // TODO: Maybe if we have {} we can answer sooner, without unpacking
-    assert(t->type != TERM_CONT_ISECT);
-
-    // We unpack this term
-    auto unfoldedTerm = (this->aut->IntersectNonEmpty(this->symbol.get(), this->term, true)).first;
-    if(t->type == TERM_CONT_SUBSET) {
-        // @p t is also folded in continuation so we have to unfold it as well
-        TermContSubset* continuationT = reinterpret_cast<TermContSubset*>(t);
-        auto unfoldedT = (continuationT->aut->IntersectNonEmpty(continuationT->symbol.get(), continuationT->term, true)).first;
 
         // Test the subsumption over the unfolded stuff
         return unfoldedTerm->IsSubsumed(unfoldedT.get());
@@ -255,14 +224,9 @@ bool TermContSubset::IsSubsumed(Term *t) {
 
 bool TermList::IsSubsumed(Term* t) {
     // Unfold continuation
-    if(t->type == TERM_CONT_ISECT) {
-        TermContProduct* productContinuation = reinterpret_cast<TermContProduct*>(t);
+    if(t->type == TERM_CONTINUATION) {
+        TermContinuation* productContinuation = reinterpret_cast<TermContinuation*>(t);
         t = (productContinuation->aut->IntersectNonEmpty((productContinuation->symbol == nullptr ? nullptr : productContinuation->symbol.get()), productContinuation->term, false)).first.get();
-    }
-
-    if(t->type == TERM_CONT_SUBSET) {
-        TermContSubset* subsetContinuation = reinterpret_cast<TermContSubset*>(t);
-        t = (subsetContinuation->aut->IntersectNonEmpty((subsetContinuation->symbol == nullptr ? nullptr : subsetContinuation->symbol.get()), subsetContinuation->term, true)).first.get();
     }
 
     // Reinterpret
@@ -285,14 +249,9 @@ bool TermList::IsSubsumed(Term* t) {
 
 bool TermFixpoint::IsSubsumed(Term* t) {
     // Unfold continuation
-    if(t->type == TERM_CONT_ISECT) {
-        TermContProduct* productContinuation = reinterpret_cast<TermContProduct*>(t);
-        t = (productContinuation->aut->IntersectNonEmpty((productContinuation->symbol == nullptr ? nullptr : productContinuation->symbol.get()), productContinuation->term, false)).first.get();
-    }
-
-    if(t->type == TERM_CONT_SUBSET) {
-        TermContSubset* subsetContinuation = reinterpret_cast<TermContSubset*>(t);
-        t = (subsetContinuation->aut->IntersectNonEmpty((subsetContinuation->symbol == nullptr ? nullptr : subsetContinuation->symbol.get()), subsetContinuation->term, true)).first.get();
+    if(t->type == TERM_CONTINUATION) {
+        TermContinuation* productContinuation = reinterpret_cast<TermContinuation*>(t);
+        t = (productContinuation->aut->IntersectNonEmpty((productContinuation->symbol == nullptr ? nullptr : productContinuation->symbol.get()), productContinuation->term, productContinuation->underComplement)).first.get();
     }
 
     if(t->type != TERM_FIXPOINT) {
@@ -365,11 +324,7 @@ bool TermBaseSet::IsSubsumedBy(std::list<Term_ptr>& fixpoint) {
     return false;
 }
 
-bool TermContProduct::IsSubsumedBy(std::list<Term_ptr>& fixpoint) {
-    assert(false && "TermContProduct.IsSubsumedBy() is impossible to happen~!");
-}
-
-bool TermContSubset::IsSubsumedBy(std::list<Term_ptr>& fixpoint) {
+bool TermContinuation::IsSubsumedBy(std::list<Term_ptr>& fixpoint) {
     assert(false && "TermContSubset.IsSubsumedBy() is impossible to happen~!");
 }
 
@@ -448,11 +403,7 @@ bool TermBaseSet::IsEmpty() {
     return this->states.size() == 0;
 }
 
-bool TermContProduct::IsEmpty() {
-    return false;
-}
-
-bool TermContSubset::IsEmpty() {
+bool TermContinuation::IsEmpty() {
     return false;
 }
 
@@ -484,11 +435,7 @@ unsigned int TermBaseSet::MeasureStateSpace() {
     return this->states.size();
 }
 
-unsigned int TermContProduct::MeasureStateSpace() {
-    return 1;
-}
-
-unsigned int TermContSubset::MeasureStateSpace() {
+unsigned int TermContinuation::MeasureStateSpace() {
     return 1;
 }
 
@@ -533,22 +480,10 @@ void TermBaseSet::dump() {
     std::cout << "}";
 }
 
-void TermContProduct::dump() {
+void TermContinuation::dump() {
     std::cout << "?";
     term->dump();
     std::cout << "?";
-    std::cout << "'";
-    if(symbol != nullptr) {
-        std::cout << (*symbol);
-    }
-    std::cout << "'";
-    std::cout << "?";
-}
-
-void TermContSubset::dump() {
-    std::cout << "?";
-    term->dump();
-    std::cout << "!";
     std::cout << "'";
     if(symbol != nullptr) {
         std::cout << (*symbol);

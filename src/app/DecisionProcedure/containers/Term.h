@@ -99,7 +99,7 @@ public:
     void dump();
 };
 
-class TermContProduct : public Term {
+class TermContinuation : public Term {
 public:
     // <<< PUBLIC MEMBERS >>>
     static int instances;
@@ -107,33 +107,10 @@ public:
     std::shared_ptr<SymbolicAutomaton> aut;
     Term_ptr term;
     std::shared_ptr<SymbolType> symbol;
+    bool underComplement;
 
     // <<< CONSTRUCTORS >>>
-    TermContProduct(std::shared_ptr<SymbolicAutomaton> a, Term_ptr t, std::shared_ptr<SymbolType> s);
-
-    // <<< PUBLIC API >>>
-    bool IsSubsumedBy(std::list<Term_ptr>& fixpoint);
-    bool IsSubsumed(Term *t);
-    bool IsEmpty();
-
-    // <<< MEASURING FUNCTIONS >>>
-    unsigned int MeasureStateSpace();
-
-    // <<< DUMPING FUNCTIONS >>>
-    void dump();
-};
-
-class TermContSubset : public Term {
-public:
-    // <<< PUBLIC MEMBERS >>>
-    static int instances;
-
-    std::shared_ptr<SymbolicAutomaton> aut;
-    Term_ptr term;
-    std::shared_ptr<SymbolType> symbol;
-
-    // <<< CONSTRUCTORS >>>
-    TermContSubset(std::shared_ptr<SymbolicAutomaton> a, Term_ptr t, std::shared_ptr<SymbolType> s);
+    TermContinuation(std::shared_ptr<SymbolicAutomaton>, Term_ptr, std::shared_ptr<SymbolType>, bool);
 
     // <<< PUBLIC API >>>
     bool IsSubsumedBy(std::list<Term_ptr>& fixpoint);

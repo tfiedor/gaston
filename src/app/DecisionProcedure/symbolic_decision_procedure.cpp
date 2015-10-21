@@ -56,9 +56,9 @@ int ws1s_symbolic_decision_procedure(SymbolicAutomaton_ptr symbolicAutomaton) {
     std::cout << "	~ Term Bases: " << TermBaseSet::instances << "\n";
     std::cout << "	~ Term Fixpoints: " << TermFixpoint::instances << "\n";
     std::cout << "	~ Term Lists: " << TermList::instances << "\n";
-    std::cout << "	~ Term Continuations: " << (TermContProduct::instances + TermContSubset::instances) << "\n";
+    std::cout << "	~ Term Continuations: " << (TermContinuation::instances) << "\n";
     std::cout << "[*] Overall State Space: " << (TermProduct::instances + TermBaseSet::instances + TermFixpoint::instances
-                                            + TermList::instances + TermContProduct::instances + TermContSubset::instances) << "\n";
+                                            + TermList::instances + TermContinuation::instances) << "\n";
     std::cout << "[*] Explored Fixpoint Space: " << fixpoint->MeasureStateSpace() << "\n";
     #endif
 

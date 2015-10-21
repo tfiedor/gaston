@@ -172,30 +172,22 @@ ResultType SymbolicAutomaton::IntersectNonEmpty(Symbol_ptr symbol, Term_ptr stat
     }
 
     // Look up in cache, if in cache, return the result
-    auto key = std::make_pair(stateApproximation, symbolKey);
+    auto key = std::make_pair(stateApproximation.get(), symbolKey);
     if(this->_resCache.retrieveFromCache(key, result)) {
         return result;
     }
     #endif
 
     // If we have continuation, we have to unwind it
-    if(stateApproximation != nullptr && stateApproximation->type == TERM_CONT_ISECT) {
+    if(stateApproximation != nullptr && stateApproximation->type == TERM_CONTINUATION) {
         #if (MEASURE_CONTINUATION_EVALUATION == true || MEASURE_ALL == true)
         ++this->_contUnfoldingCounter;
         #endif
-        TermContProduct* continuation = reinterpret_cast<TermContProduct*>(stateApproximation.get());
-        stateApproximation = (continuation->aut->IntersectNonEmpty((continuation->symbol == nullptr ? nullptr : continuation->symbol.get()), continuation->term, false)).first;
+        TermContinuation* continuation = reinterpret_cast<TermContinuation*>(stateApproximation.get());
+        stateApproximation = (continuation->aut->IntersectNonEmpty((continuation->symbol == nullptr ? nullptr : continuation->symbol.get()), continuation->term, continuation->underComplement)).first;
         //                                                                                                           ^--- is this ok?
     }
-
-    if(stateApproximation != nullptr && stateApproximation->type == TERM_CONT_SUBSET) {
-        #if (MEASURE_CONTINUATION_EVALUATION == true || MEASURE_ALL == true)
-        ++this->_contUnfoldingCounter;
-        #endif
-        TermContSubset* subsetContinuation = reinterpret_cast<TermContSubset*>(stateApproximation.get());
-        stateApproximation = (subsetContinuation->aut->IntersectNonEmpty((subsetContinuation->symbol == nullptr ? nullptr : subsetContinuation->symbol.get()), subsetContinuation->term, true)).first;
-        //                                                                                                               ^--- is this ok?
-    }
+    assert(stateApproximation->type != TERM_CONTINUATION);
 
     // Call the core function
     result = this->_IntersectNonEmptyCore(symbol, stateApproximation, underComplement);
@@ -268,7 +260,7 @@ Term_ptr SymbolicAutomaton::GetInitialStates() {
  */
 void BaseAutomaton::_InitializeAutomaton() {
     // TODO: Maybe this could be done only, if we are dumping the automaton?
-    this->_RenameStates();
+    //this->_RenameStates();
     this->_InitializeInitialStates();
     this->_InitializeFinalStates();
 }
@@ -435,17 +427,9 @@ ResultType BinaryOpAutomaton::_IntersectNonEmptyCore(Symbol_ptr symbol, Term_ptr
         #if (MEASURE_CONTINUATION_CREATION == true || MEASURE_ALL == true)
         ++this->_contCreationCounter;
         #endif
-        if(!underComplement) {
-            // If we are not under complement we construct the TermContProduct continuation
-            TermContProduct *rhsContinuation = new TermContProduct(this->_rhs_aut, productStateApproximation->right, suspendedSymbol);
-            Term_ptr leftCombined = std::shared_ptr<Term>(new TermProduct(lhs_result.first, std::shared_ptr<Term>(rhsContinuation)));
-            return std::make_pair(leftCombined, this->_early_val(underComplement));
-        } else {
-            // If we are under complement we construct the TermContSubset continuation
-            TermContSubset *rhsContinuationSub = new TermContSubset(this->_rhs_aut, productStateApproximation->right, suspendedSymbol);
-            Term_ptr leftCombinedSub = std::shared_ptr<Term>(new TermProduct(lhs_result.first, std::shared_ptr<Term>(rhsContinuationSub)));
-            return std::make_pair(leftCombinedSub, this->_early_val(underComplement));
-        }
+        TermContinuation *continuation = new TermContinuation(this->_rhs_aut, productStateApproximation->right, suspendedSymbol, underComplement);
+        Term_ptr leftCombined = std::shared_ptr<Term>(new TermProduct(lhs_result.first, std::shared_ptr<Term>(continuation)));
+        return std::make_pair(leftCombined, this->_early_val(underComplement));
     }
     #endif
 

@@ -387,7 +387,6 @@ int main(int argc, char *argv[]) {
 
 	if (options.noExpnf == false) {
 		// Transform AST to existentional Prenex Normal Form
-
 		ast->formula = (ASTForm *) (ast->formula)->toExistentionalPNF();
 	} else {
 		// Remove implication and stuff
@@ -628,20 +627,20 @@ int main(int argc, char *argv[]) {
 			delete serializer;
 		}
 
-#if (DEBUG_BDDS == true)
-	StateHT allStates;
-	auto vataAut = vataAutomaton.RemoveUnreachableStates(&allStates);
-	vataAutomaton = vataAut.RemoveUselessStates();
-	TransMTBDD * tbdd = getMTBDDForStateTuple(vataAutomaton, Automaton::StateTuple({}));
-	std::cout << "Leaf : bdd\n";
-	std::cout << TransMTBDD::DumpToDot({tbdd}) << "\n\n";
-	// Dump bdds
-	for (auto state : allStates) {
-		TransMTBDD* bdd = getMTBDDForStateTuple(vataAutomaton, Automaton::StateTuple({state}));
-		std::cout << state << " : bdd\n";
-		std::cout << TransMTBDD::DumpToDot({bdd}) << "\n\n";
-	}
-#endif
+		#if (DEBUG_BDDS == true)
+		StateHT allStates;
+		auto vataAut = vataAutomaton.RemoveUnreachableStates(&allStates);
+		vataAutomaton = vataAut.RemoveUselessStates();
+		TransMTBDD * tbdd = getMTBDDForStateTuple(vataAutomaton, Automaton::StateTuple({}));
+		std::cout << "Leaf : bdd\n";
+		std::cout << TransMTBDD::DumpToDot({tbdd}) << "\n\n";
+		// Dump bdds
+		for (auto state : allStates) {
+			TransMTBDD* bdd = getMTBDDForStateTuple(vataAutomaton, Automaton::StateTuple({state}));
+			std::cout << state << " : bdd\n";
+			std::cout << TransMTBDD::DumpToDot({bdd}) << "\n\n";
+		}
+		#endif
 	}
 
 	///////// DECISION PROCEDURE /////////////////////////////////////////////

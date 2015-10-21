@@ -17,6 +17,7 @@
 #ifndef __DWINA_ENV__H__
 #define __DWINA_ENV__H__
 
+#include <boost/dynamic_bitset.hpp>
 #include <exception>
 #include <iostream>
 #include <memory>
@@ -27,13 +28,6 @@
 #include "utils/cached_binary_op.hh"
 #include "mtbdd/ondriks_mtbdd.hh"
 #include "containers/SymbolicCache.hh"
-
-class NotImplementedException : public std::exception {
-	public:
-		virtual const char* what() const throw () {
-			return "Functionality not implemented yet";
-		}
-};
 
 /*****************************
  * FORWARD CLASS DECLARATION *
@@ -48,7 +42,7 @@ struct ResultHashType {
       * @param set: set we are computing hash of
       * @return hash of @p set
       */
-	int operator()(std::pair<std::shared_ptr<Term>, std::shared_ptr<ZeroSymbol>> set) const {
+	int operator()(std::pair<Term*, std::shared_ptr<ZeroSymbol>> set) const {
 		// TODO: OPTIMIZE THIS
 		return 1;
 	}
@@ -61,6 +55,8 @@ namespace Gaston {
 	using Automaton 			 = VATA::BDDBottomUpTreeAut;
 	using Formula_ptr            = ASTForm*;
 	using Term_ptr				 = std::shared_ptr<Term>;
+	using Term_weak				 = std::weak_ptr<Term>;
+	using Term_raw 				 = Term*;
 	using ResultType			 = std::pair<Term_ptr, bool>;
 
 	using StateType				 = size_t;
@@ -76,7 +72,13 @@ namespace Gaston {
 	using Symbol_shared			 = std::shared_ptr<Symbol>;
 	using SymbolList			 = std::list<Symbol>;
 
-	using ResultCache            = BinaryCache<Term_ptr, Symbol_shared, ResultType, ResultHashType>;
+	using BitMask				 = boost::dynamic_bitset<>;
+	using VarType				 = size_t;
+	using VarList                = VATA::Util::OrdVector<StateType>;
+	using VarValue			     = char;
+	using TrackType				 = Automaton::SymbolType;
+
+	using ResultCache            = BinaryCache<Term_raw, Symbol_shared, ResultType, ResultHashType>;
 	using SubsumptionCache       = VATA::Util::CachedBinaryOp<Term_ptr, Term_ptr, bool>;
 
 	using WorkListTerm           = Term;
@@ -87,31 +89,32 @@ namespace Gaston {
 	using BaseAutomatonType      = VATA::BDDBottomUpTreeAut;
 	using BaseAutomatonStateSet  = VATA::Util::OrdVector<StateType>;
 	using BaseAutomatonMTBDD	 = VATA::MTBDDPkg::OndriksMTBDD<BaseAutomatonStateSet>;
-
-	using VarType				 = size_t;
-	using VarList                = VATA::Util::OrdVector<StateType>;
-	using VarValue			     = char;
-	using TrackType				 = Automaton::SymbolType;
 }
 
 /*************************
  * ADDITIONAL STRUCTURES *
  *************************/
 
+class NotImplementedException : public std::exception {
+public:
+	virtual const char* what() const throw () {
+		return "Functionality not implemented yet";
+	}
+};
+
 /***********************
  * GLOBAL ENUMERATIONS *
  ***********************/
 enum Decision {SATISFIABLE, UNSATISFIABLE, VALID, INVALID};
 enum AutType {SYMBOLIC_BASE, BINARY, INTERSECTION, UNION, PROJECTION, BASE, COMPLEMENT};
-enum TermType {TERM, TERM_FIXPOINT, TERM_PRODUCT, TERM_UNION, TERM_BASE, TERM_LIST, TERM_CONT_ISECT, TERM_CONT_SUBSET};
+enum TermType {TERM, TERM_FIXPOINT, TERM_PRODUCT, TERM_UNION, TERM_BASE, TERM_LIST, TERM_CONTINUATION};
 enum FixpointTermSem {E_FIXTERM_FIXPOINT, E_FIXTERM_PRE};
 
 /*********************************
  * OTHER METHODS RELATED DEFINES *
  *********************************/
 
-/*****************************
- * >>> Debugging Options <<< *
+/* >>> Debugging Options <<< *
  *****************************/
 #define DEBUG_FORMULA_PREFIX 			false
 #define DEBUG_VALIDITY_TEST 			false
@@ -121,8 +124,7 @@ enum FixpointTermSem {E_FIXTERM_FIXPOINT, E_FIXTERM_PRE};
 #define DEBUG_VARIABLE_SETS 			false
 #define DEBUG_BDDS 						true
 
-/*************************
- * >>> Optimizations <<< *
+/* >>> Optimizations <<< *
  *************************/
 #define USE_PRUNED_UNION_FUNCTOR 		false
 #define PRUNE_BY_RELATION 				false		// [TODO] What's the difference with BY_SUBSUMPTION?
@@ -137,8 +139,7 @@ enum FixpointTermSem {E_FIXTERM_FIXPOINT, E_FIXTERM_PRE};
  * SYMBOLIC METHOD RELATED DEFINES *
  ***********************************/
 
-/*****************************
- * >>> Debugging Options <<< *
+/* >>> Debugging Options <<< *
  *****************************/
 #define DEBUG_BASE_AUTOMATA 			false
 #define DEBUG_FIXPOINT 					true
@@ -148,8 +149,7 @@ enum FixpointTermSem {E_FIXTERM_FIXPOINT, E_FIXTERM_PRE};
 #define DEBUG_CONTINUATIONS 			false
 #define DEBUG_COMPUTE_FULL_FIXPOINT 	false
 
-/*****************************
- * >>> Measuring Options <<< *
+/* >>> Measuring Options <<< *
  *****************************/
 #define MEASURE_STATE_SPACE 			true
 #define MEASURE_CACHE_HITS 				true
@@ -159,10 +159,9 @@ enum FixpointTermSem {E_FIXTERM_FIXPOINT, E_FIXTERM_PRE};
 #define MEASURE_PROJECTION				true
 #define MEASURE_ALL						true
 
-/*************************
- * >>> Optimizations <<< *
+/* >>> Optimizations <<< *
  *************************/
-#define OPT_DRAW_NEGATION_IN_BASE 		false
+#define OPT_DRAW_NEGATION_IN_BASE 		true
 #define OPT_CREATE_QF_AUTOMATON 		false
 #define OPT_REDUCE_AUTOMATA 			false
 #define OPT_EARLY_EVALUATION 			true

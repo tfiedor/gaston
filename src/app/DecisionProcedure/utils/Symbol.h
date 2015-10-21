@@ -17,7 +17,6 @@
 
 #include "../containers/VarToTrackMap.hh"
 #include "../environment.hh"
-#include <boost/dynamic_bitset.hpp>
 
 using namespace Gaston;
 
@@ -29,7 +28,7 @@ private:
     // <<< PRIVATE MEMBERS >>>
     TrackType _track;
     BaseAutomatonMTBDD* _bdd;
-    boost::dynamic_bitset<> _trackMask;
+    BitMask _trackMask;
 
     // <<< PRIVATE METHODS >>>
     void _InitializeTrackMask();
@@ -46,6 +45,7 @@ public:
     // <<< PUBLIC API >>>
     void ProjectVar(VarType var);
     TrackType GetTrack() { return this->_track; }
+    BitMask GetTrackMask() { return this->_trackMask; }
     BaseAutomatonMTBDD* GetMTBDD();
 
     // <<< STATIC METHODS >>>
