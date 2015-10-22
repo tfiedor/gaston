@@ -19,8 +19,10 @@
 #include "../environment.hh"
 #include "../decision_procedures.hh"
 #include "../containers/VarToTrackMap.hh"
+#include "../../Frontend/symboltable.h"
 
 extern VarToTrackMap varMap;
+extern SymbolTable symbolTable;
 
 StateType SymbolicAutomaton::stateCnt = 0;
 
@@ -60,6 +62,7 @@ IntersectionAutomaton::IntersectionAutomaton(SymbolicAutomaton_raw lhs, Symbolic
         : BinaryOpAutomaton(lhs, rhs, form) {
     this->_InitializeAutomaton();
     this->type = AutType::INTERSECTION;
+    this->_productType = E_INTERSECTION;
     this->_eval_result = [](bool a, bool b, bool underC) {
         // e in A cap B == e in A && e in B
         if(!underC) {return a && b;}
@@ -81,6 +84,7 @@ UnionAutomaton::UnionAutomaton(SymbolicAutomaton_raw lhs, SymbolicAutomaton_raw 
         : BinaryOpAutomaton(lhs, rhs, form) {
     this->_InitializeAutomaton();
     this->type = AutType::UNION;
+    this->_productType = E_UNION;
     this->_eval_result = [](bool a, bool b, bool underC) {
         // e in A cup B == e in A || e in B
         if(!underC) {return a || b;}
@@ -285,7 +289,7 @@ void ProjectionAutomaton::_InitializeAutomaton() {
  * Initialization of initial states for automata wrt. the structure of the symbolic automaton
  */
 void BinaryOpAutomaton::_InitializeInitialStates() {
-    this->_initialStates = std::shared_ptr<Term>(new TermProduct(this->_lhs_aut->GetInitialStates(), this->_rhs_aut->GetInitialStates()));
+    this->_initialStates = std::shared_ptr<Term>(new TermProduct(this->_lhs_aut->GetInitialStates(), this->_rhs_aut->GetInitialStates(), this->_productType));
 }
 
 void ComplementAutomaton::_InitializeInitialStates() {
@@ -313,7 +317,7 @@ void BaseAutomaton::_InitializeInitialStates() {
  * Initialization of final states for automata wrt. the structure of the symbolic automaton
  */
 void BinaryOpAutomaton::_InitializeFinalStates() {
-    this->_finalStates = std::shared_ptr<Term>(new TermProduct(this->_lhs_aut->GetFinalStates(), this->_rhs_aut->GetFinalStates()));
+    this->_finalStates = std::shared_ptr<Term>(new TermProduct(this->_lhs_aut->GetFinalStates(), this->_rhs_aut->GetFinalStates(), this->_productType));
 }
 
 void ComplementAutomaton::_InitializeFinalStates() {
@@ -407,7 +411,7 @@ Term_ptr BaseAutomaton::Pre(Symbol_ptr symbol, Term_ptr finalApproximation, bool
 ResultType BinaryOpAutomaton::_IntersectNonEmptyCore(Symbol_ptr symbol, Term_ptr finalApproximation, bool underComplement) {
     // TODO: Add counter of continuations per node
     assert(finalApproximation != nullptr);
-    assert(finalApproximation->type == TERM_PRODUCT || finalApproximation->type == TERM_UNION);
+    assert(finalApproximation->type == TERM_PRODUCT);
 
     // Retype the approximation to TermProduct type
     TermProduct* productStateApproximation = reinterpret_cast<TermProduct*>(finalApproximation.get());
@@ -428,14 +432,14 @@ ResultType BinaryOpAutomaton::_IntersectNonEmptyCore(Symbol_ptr symbol, Term_ptr
         ++this->_contCreationCounter;
         #endif
         TermContinuation *continuation = new TermContinuation(this->_rhs_aut, productStateApproximation->right, suspendedSymbol, underComplement);
-        Term_ptr leftCombined = std::shared_ptr<Term>(new TermProduct(lhs_result.first, std::shared_ptr<Term>(continuation)));
+        Term_ptr leftCombined = std::shared_ptr<Term>(new TermProduct(lhs_result.first, std::shared_ptr<Term>(continuation), this->_productType));
         return std::make_pair(leftCombined, this->_early_val(underComplement));
     }
     #endif
 
     // Otherwise compute the right side and return full fixpoint
     ResultType rhs_result = this->_rhs_aut->IntersectNonEmpty(symbol, productStateApproximation->right, underComplement);
-    Term_ptr combined = std::shared_ptr<Term>(new TermProduct(lhs_result.first, rhs_result.first));
+    Term_ptr combined = std::shared_ptr<Term>(new TermProduct(lhs_result.first, rhs_result.first, this->_productType));
     return std::make_pair(combined, this->_eval_result(lhs_result.second, rhs_result.second, underComplement));
 }
 
@@ -539,21 +543,35 @@ ResultType BaseAutomaton::_IntersectNonEmptyCore(Symbol_ptr symbol, Term_ptr app
 void BinaryOpAutomaton::DumpAutomaton() {
     std::cout << "(";
     _lhs_aut->DumpAutomaton();
-    std::cout << " x ";
+    if(this->type == AutType::INTERSECTION) {
+        //std::cout << " \u22C2 ";
+        std::cout << " \u2229 ";
+    } else {
+        //std::cout << " \u22C3 ";
+        std::cout << " \u222A ";
+    };
     _rhs_aut->DumpAutomaton();
     std::cout << ")";
 }
 
 void ComplementAutomaton::DumpAutomaton() {
-    std::cout << "compl(";
+    std::cout << "\033[1;31m\u2201(\033[0m";
     this->_aut->DumpAutomaton();
-    std::cout << ")";
+    std::cout << "\033[1;31m)\033[0m";
 }
 
 void ProjectionAutomaton::DumpAutomaton() {
-    std::cout << "ex2(";
+    std::cout << "\033[1;34m";
+    std::cout << "\u2203";
+    for(auto it = this->_projected_vars->begin(); it != this->_projected_vars->end(); ++it) {
+        std::cout << symbolTable.lookupSymbol(*it);
+        if((it + 1) != this->_projected_vars->end()) {
+            std::cout << ", ";
+        }
+    }
+    std::cout << "(\033[0m";
     this->_aut->DumpAutomaton();
-    std::cout << ")";
+    std::cout << "\033[1;34m)\033[0m";
 }
 
 void GenericBaseAutomaton::DumpAutomaton() { std::cout << "<Aut>";
@@ -603,7 +621,6 @@ void EqualFirstAutomaton::DumpAutomaton() {
     this->baseAutDump();
     #endif
 }
-
 
 void EqualSecondAutomaton::DumpAutomaton() {
     this->_form->dump();
@@ -700,14 +717,14 @@ void BaseAutomaton::DumpCacheStats() {
  */
 void print_stat(std::string statName, unsigned int stat) {
     if(stat != 0) {
-        std::cout << "  ~ " << statName << " -> " << stat << "\n";
+        std::cout << "  \u2218 " << statName << " -> " << stat << "\n";
     }
 }
 
 void BinaryOpAutomaton::DumpStats() {
     this->_form->dump();
     std::cout << "\n";
-    std::cout << "  ~ Cache stats -> ";
+    std::cout << "  \u2218 Cache stats -> ";
     this->_resCache.dumpStats();
     print_stat("True Hits", this->_trueCounter);
     print_stat("False Hits", this->_falseCounter);
@@ -721,7 +738,7 @@ void BinaryOpAutomaton::DumpStats() {
 void ProjectionAutomaton::DumpStats() {
     this->_form->dump();
     std::cout << "\n";
-    std::cout << "  ~ Cache stats -> ";
+    std::cout << "  \u2218 Cache stats -> ";
     this->_resCache.dumpStats();
     print_stat("True Hits", this->_trueCounter);
     print_stat("False Hits", this->_falseCounter);
@@ -733,7 +750,7 @@ void ProjectionAutomaton::DumpStats() {
 void ComplementAutomaton::DumpStats() {
     this->_form->dump();
     std::cout << "\n";
-    std::cout << "  ~ Cache stats -> ";
+    std::cout << "  \u2218 Cache stats -> ";
     this->_resCache.dumpStats();
     print_stat("True Hits", this->_trueCounter);
     print_stat("False Hits", this->_falseCounter);
@@ -745,7 +762,7 @@ void ComplementAutomaton::DumpStats() {
 void BaseAutomaton::DumpStats() {
     this->_form->dump();
     std::cout << "\n";
-    std::cout << "  ~ Cache stats -> ";
+    std::cout << "  \u2218 Cache stats -> ";
     this->_resCache.dumpStats();
     print_stat("True Hits", this->_trueCounter);
     print_stat("False Hits", this->_falseCounter);

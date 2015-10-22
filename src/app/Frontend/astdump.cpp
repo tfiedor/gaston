@@ -392,7 +392,7 @@ ASTForm_Biimpl::dump()
 void 
 ASTForm_And::dump()
 {
-  cout << "("; f1->dump(); cout << " & "; f2->dump(); cout << ")";
+  cout << "("; f1->dump(); cout << " \u2227 "; f2->dump(); cout << ")";
 }
     
 void 
@@ -404,49 +404,49 @@ ASTForm_IdLeft::dump()
 void 
 ASTForm_Or::dump()
 {
-  cout << "("; f1->dump(); cout << " | "; f2->dump(); cout << ")";
+  cout << "("; f1->dump(); cout << " \u2228 "; f2->dump(); cout << ")";
 }
     
 void 
 ASTForm_Not::dump()
 {
-  cout << "~("; f->dump(); cout << ")";
+  cout << "\u00AC("; f->dump(); cout << ")";
 }
     
 void 
 ASTForm_Ex0::dump()
 {
-  cout << "Ex0("; vl->dump(); cout << ","; f->dump(); cout << ")";
+  cout << "\u22030("; vl->dump(); cout << ","; f->dump(); cout << ")";
 }
     
 void 
 ASTForm_Ex1::dump()
 {
-  cout << "Ex1("; vl->dump(); cout << ","; f->dump(); cout << ")";
+  cout << "\u22031("; vl->dump(); cout << ","; f->dump(); cout << ")";
 }
     
 void 
 ASTForm_Ex2::dump()
 {
-  cout << "Ex2("; vl->dump(); cout << ","; f->dump(); cout << ")";
+  cout << "\u22032("; vl->dump(); cout << ","; f->dump(); cout << ")";
 }
     
 void 
 ASTForm_All0::dump()
 {
-  cout << "All0("; vl->dump(); cout << ","; f->dump(); cout << ")";
+  cout << "\u22000("; vl->dump(); cout << ","; f->dump(); cout << ")";
 }
     
 void 
 ASTForm_All1::dump()
 {
-  cout << "All1("; vl->dump(); cout << ","; f->dump(); cout << ")";
+  cout << "\u22001("; vl->dump(); cout << ","; f->dump(); cout << ")";
 }
     
 void 
 ASTForm_All2::dump()
 {
-  cout << "All2("; vl->dump(); cout << ","; f->dump(); cout << ")";
+  cout << "\u22002("; vl->dump(); cout << ","; f->dump(); cout << ")";
 }
     
 void 

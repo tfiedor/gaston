@@ -33,17 +33,19 @@ TermProduct::TermProduct(Term_ptr lhs, Term_ptr rhs) : left(lhs), right(rhs) {
     #if (MEASURE_STATE_SPACE == true)
     ++TermProduct::instances;
     #endif
-    type = TERM_PRODUCT;
+    type = TermType::TERM_PRODUCT;
+    subtype = ProductType::E_INTERSECTION;
 }
 
 /**
  * Constructor of Term Product---other type
  */
-TermProduct::TermProduct(Term_ptr lhs, Term_ptr rhs, TermType t) : left(lhs), right(rhs) {
+TermProduct::TermProduct(Term_ptr lhs, Term_ptr rhs, ProductType pt) : left(lhs), right(rhs) {
     #if (MEASURE_STATE_SPACE == true)
     ++TermProduct::instances;
     #endif
-    type = t;
+    type = TermType::TERM_PRODUCT;
+    subtype = pt;
 }
 
 TermBaseSet::TermBaseSet() : states() {
@@ -156,15 +158,30 @@ TermFixpoint::TermFixpoint(std::shared_ptr<SymbolicAutomaton> aut, Term_ptr sour
  * @param[in] t:    term we are testing subsumption against
  * @return:         true if this is subsumed by @p t
  */
-bool TermProduct::IsSubsumed(Term* t) {
-    // TODO: Add continuations
-    // TODO: Add caching
+bool Term::IsSubsumed(Term *t) {
+    // TODO: Add Caching
     #if (DEBUG_TERM_SUBSUMPTION == true)
     this->dump();
     std::cout << " <?= ";
     t->dump();
     std::cout << "\n";
     #endif
+    // unfold the continuation
+    if(t->type == TERM_CONTINUATION) {
+        // TODO: We should check that maybe we have different continuations
+        TermContinuation* continuation = reinterpret_cast<TermContinuation*>(t);
+        if(this->type == TERM_CONTINUATION) {
+            TermContinuation* thisCont = reinterpret_cast<TermContinuation*>(this);
+            assert(continuation->underComplement == thisCont->underComplement);
+        }
+        auto unfoldedContinuation = (continuation->aut->IntersectNonEmpty(continuation->symbol.get(), continuation->term, continuation->underComplement)).first;
+        return this->_IsSubsumedCore(unfoldedContinuation.get());
+    } else {
+        return this->_IsSubsumedCore(t);
+    }
+}
+
+bool TermProduct::_IsSubsumedCore(Term* t) {
     assert(t->type == TERM_PRODUCT);
 
     // Retype and test the subsumption component-wise
@@ -172,14 +189,7 @@ bool TermProduct::IsSubsumed(Term* t) {
     return (this->left->IsSubsumed(rhs->left.get())) && (this->right->IsSubsumed(rhs->right.get()));
 }
 
-bool TermBaseSet::IsSubsumed(Term* term) {
-    #if (DEBUG_TERM_SUBSUMPTION == true)
-    this->dump();
-    std::cout << " <?= ";
-    term->dump();
-    std::cout;
-    #endif
-
+bool TermBaseSet::_IsSubsumedCore(Term* term) {
     assert(term->type == TERM_BASE);
 
     // Test component-wise, not very efficient though
@@ -200,34 +210,17 @@ bool TermBaseSet::IsSubsumed(Term* term) {
     }
 }
 
-bool TermContinuation::IsSubsumed(Term *t) {
+bool TermContinuation::_IsSubsumedCore(Term *t) {
     // TODO: How to do this smartly?
     // TODO: Maybe if we have {} we can answer sooner, without unpacking
-    //assert(t->type != TERM_CONT_SUBSET);
 
     // We unpack this term
-    auto unfoldedTerm = (this->aut->IntersectNonEmpty(this->symbol.get(), this->term, false)).first;
-    if(t->type == TERM_CONTINUATION) {
-        // @p t is also folded in continuation so we have to unfold it as well
-        TermContinuation* continuationT = reinterpret_cast<TermContinuation*>(t);
-        assert(continuationT->underComplement == this->underComplement);
-
-        auto unfoldedT = (continuationT->aut->IntersectNonEmpty(continuationT->symbol.get(), continuationT->term, false)).first;
-
-        // Test the subsumption over the unfolded stuff
-        return unfoldedTerm->IsSubsumed(unfoldedT.get());
-    } else {
-        // Test the subsumption over the unfolded stuff
-        return unfoldedTerm->IsSubsumed(t);
-    }
+    auto unfoldedTerm = (this->aut->IntersectNonEmpty(this->symbol.get(), this->term, this->underComplement)).first;
+    return unfoldedTerm->IsSubsumed(t);
 }
 
-bool TermList::IsSubsumed(Term* t) {
-    // Unfold continuation
-    if(t->type == TERM_CONTINUATION) {
-        TermContinuation* productContinuation = reinterpret_cast<TermContinuation*>(t);
-        t = (productContinuation->aut->IntersectNonEmpty((productContinuation->symbol == nullptr ? nullptr : productContinuation->symbol.get()), productContinuation->term, false)).first.get();
-    }
+bool TermList::_IsSubsumedCore(Term* t) {
+    assert(t->type == TERM_LIST);
 
     // Reinterpret
     TermList* tt = reinterpret_cast<TermList*>(t);
@@ -246,17 +239,8 @@ bool TermList::IsSubsumed(Term* t) {
     return true;
 }
 
-
-bool TermFixpoint::IsSubsumed(Term* t) {
-    // Unfold continuation
-    if(t->type == TERM_CONTINUATION) {
-        TermContinuation* productContinuation = reinterpret_cast<TermContinuation*>(t);
-        t = (productContinuation->aut->IntersectNonEmpty((productContinuation->symbol == nullptr ? nullptr : productContinuation->symbol.get()), productContinuation->term, productContinuation->underComplement)).first.get();
-    }
-
-    if(t->type != TERM_FIXPOINT) {
-        assert(false && "Testing subsumption of incompatible terms\n");
-    }
+bool TermFixpoint::_IsSubsumedCore(Term* t) {
+    assert(t->type == TERM_FIXPOINT);
 
     // Reinterpret
     TermFixpoint* tt = reinterpret_cast<TermFixpoint*>(t);
@@ -278,6 +262,7 @@ bool TermFixpoint::IsSubsumed(Term* t) {
 
     return true;
 }
+
 /**
  * Tests the subsumption over the list of terms
  *
@@ -465,9 +450,15 @@ unsigned int TermFixpoint::MeasureStateSpace() {
  * Dumping functions
  */
 void TermProduct::dump() {
+    // TODO: distinguish if it is intersecto or unionoproduct
     std::cout << "{";
     left->dump();
-    std::cout << " x ";
+    if(this->subtype == ProductType::E_INTERSECTION) {
+        std::cout << " \u2A2F ";
+    } else {
+        assert(this->subtype == ProductType::E_UNION);
+        std::cout << " \u228E ";
+    }
     right->dump();
     std::cout << "}";
 }
@@ -493,24 +484,32 @@ void TermContinuation::dump() {
 }
 
 void TermList::dump() {
-    std::cout << "{";
+    if(this->isComplement) {
+        std::cout << "\033[1;31m{\033[0m";
+    } else {
+        std::cout << "{";
+    }
     for(auto state : this->list) {
         state->dump();
         std::cout  << ",";
     }
-    std::cout << "}";
+    if(this->isComplement) {
+        std::cout << "\033[1;31m}\033[0m";
+    } else {
+        std::cout << "}";
+    }
 }
 
 void TermFixpoint::dump() {
-    std::cout << "{";
+    std::cout << "\033[1;34m{\033[0m";
     for(auto item : this->_fixpoint) {
         if(item == nullptr) {
             continue;
         }
         item->dump();
-        std::cout << ",";
+        std::cout << "\033[1;34m,\033[0m";
     }
-    std::cout << "}";
+    std::cout << "\033[1;34m}\033[0m";
 }
 // <<< ADDITIONAL TERMBASESET FUNCTIONS >>>
 

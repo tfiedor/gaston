@@ -107,7 +107,8 @@ public:
  ***********************/
 enum Decision {SATISFIABLE, UNSATISFIABLE, VALID, INVALID};
 enum AutType {SYMBOLIC_BASE, BINARY, INTERSECTION, UNION, PROJECTION, BASE, COMPLEMENT};
-enum TermType {TERM, TERM_FIXPOINT, TERM_PRODUCT, TERM_UNION, TERM_BASE, TERM_LIST, TERM_CONTINUATION};
+enum TermType {TERM, TERM_FIXPOINT, TERM_PRODUCT, TERM_BASE, TERM_LIST, TERM_CONTINUATION};
+enum ProductType {E_INTERSECTION, E_UNION};
 enum FixpointTermSem {E_FIXTERM_FIXPOINT, E_FIXTERM_PRE};
 
 /*********************************
@@ -161,7 +162,7 @@ enum FixpointTermSem {E_FIXTERM_FIXPOINT, E_FIXTERM_PRE};
 
 /* >>> Optimizations <<< *
  *************************/
-#define OPT_DRAW_NEGATION_IN_BASE 		true
+#define OPT_DRAW_NEGATION_IN_BASE 		false
 #define OPT_CREATE_QF_AUTOMATON 		false
 #define OPT_REDUCE_AUTOMATA 			false
 #define OPT_EARLY_EVALUATION 			true

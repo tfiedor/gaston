@@ -95,6 +95,7 @@ protected:
     // <<< PRIVATE MEMBERS >>>
     SymbolicAutomaton_ptr _lhs_aut;
     SymbolicAutomaton_ptr _rhs_aut;
+    ProductType _productType;
     bool (*_eval_result)(bool, bool, bool);     // Boolean function for evaluation of left and right results
     bool (*_eval_early)(bool, bool);            // Boolean function for evaluating early evaluation
     bool (*_early_val)(bool);                   // Boolean value of early result

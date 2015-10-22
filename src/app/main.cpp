@@ -681,20 +681,20 @@ int main(int argc, char *argv[]) {
 		cout << "[!] Formula is ";
 		switch(decided) {
 			case SATISFIABLE:
-				cout << "'SATISFIABLE'\n";
+				cout << "\033[1;34m'SATISFIABLE'\033[0m";
 				break;
 			case UNSATISFIABLE:
-				cout << "'UNSATISFIABLE'\n";
+				cout << "\033[1;31m'UNSATISFIABLE'\033[0m";
 				break;
 			case VALID:
-				cout << "'VALID'\n";
+				cout << "\033[1;32m'VALID'\033[0m";
 				break;
 			default:
 				cout << "undecided due to an error.\n";
 				break;
 		}
 
-		cout << "[*] Decision procedure elapsed time: ";
+		cout << "\n[*] Decision procedure elapsed time: ";
 		timer_deciding.print();
 		cout << "\n";
 		// Something that was used is not supported by dWiNA

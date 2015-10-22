@@ -52,11 +52,11 @@ int ws1s_symbolic_decision_procedure(SymbolicAutomaton_ptr symbolicAutomaton) {
 
     #if (MEASURE_STATE_SPACE == true)
     std::cout << "[*] Measured State Space: \n";
-    std::cout << "	~ Term Products: " << TermProduct::instances << "\n";
-    std::cout << "	~ Term Bases: " << TermBaseSet::instances << "\n";
-    std::cout << "	~ Term Fixpoints: " << TermFixpoint::instances << "\n";
-    std::cout << "	~ Term Lists: " << TermList::instances << "\n";
-    std::cout << "	~ Term Continuations: " << (TermContinuation::instances) << "\n";
+    std::cout << "	\u2218 Term Products: " << TermProduct::instances << "\n";
+    std::cout << "	\u2218 Term Bases: " << TermBaseSet::instances << "\n";
+    std::cout << "	\u2218 Term Fixpoints: " << TermFixpoint::instances << "\n";
+    std::cout << "	\u2218 Term Lists: " << TermList::instances << "\n";
+    std::cout << "	\u2218 Term Continuations: " << (TermContinuation::instances) << "\n";
     std::cout << "[*] Overall State Space: " << (TermProduct::instances + TermBaseSet::instances + TermFixpoint::instances
                                             + TermList::instances + TermContinuation::instances) << "\n";
     std::cout << "[*] Explored Fixpoint Space: " << fixpoint->MeasureStateSpace() << "\n";

@@ -42,7 +42,7 @@ public:
 
     // <<< PUBLIC API >>>
     virtual bool IsSubsumedBy(std::list<Term_ptr>& fixpoint) = 0;
-    virtual bool IsSubsumed(Term* t) = 0;
+    virtual bool IsSubsumed(Term* t);
     virtual bool IsEmpty() = 0;
 
     // <<< MEASURING FUNCTIONS >>>
@@ -50,6 +50,9 @@ public:
 
     // <<< DUMPING FUNCTIONS >>>
     virtual void dump() = 0;
+private:
+    // <<< PRIVATE FUNCTIONS >>>
+    virtual bool _IsSubsumedCore(Term* t) = 0;
 };
 
 class TermProduct : public Term {
@@ -58,13 +61,13 @@ public:
     static int instances;
     Term_ptr left;
     Term_ptr right;
+    ProductType subtype;
 
     // <<< CONSTRUCTORS >>>
     TermProduct(Term_ptr lhs, Term_ptr rhs);
-    TermProduct(Term_ptr lhs, Term_ptr rhs, TermType t);
+    TermProduct(Term_ptr lhs, Term_ptr rhs, ProductType subtype);
 
     // <<< PUBLIC API >>>
-    bool IsSubsumed(Term* t);
     bool IsSubsumedBy(std::list<Term_ptr>& fixpoint);
     bool IsEmpty();
 
@@ -73,6 +76,9 @@ public:
 
     // <<< DUMPING FUNCTIONS >>>
     void dump();
+private:
+    // <<< PRIVATE FUNCTIONS >>>
+    virtual bool _IsSubsumedCore(Term* t);
 };
 
 class TermBaseSet : public Term {
@@ -90,13 +96,15 @@ public:
     bool Intersects(TermBaseSet* rhs);
     bool IsSubsumedBy(std::list<Term_ptr>& fixpoint);
     bool IsEmpty();
-    bool IsSubsumed(Term* term);
 
     // <<< MEASURING FUNCTIONS >>>
     unsigned int MeasureStateSpace();
 
     // <<< DUMPING FUNCTIONS >>>
     void dump();
+private:
+    // <<< PRIVATE FUNCTIONS >>>
+    virtual bool _IsSubsumedCore(Term* t);
 };
 
 class TermContinuation : public Term {
@@ -114,7 +122,6 @@ public:
 
     // <<< PUBLIC API >>>
     bool IsSubsumedBy(std::list<Term_ptr>& fixpoint);
-    bool IsSubsumed(Term *t);
     bool IsEmpty();
 
     // <<< MEASURING FUNCTIONS >>>
@@ -122,6 +129,9 @@ public:
 
     // <<< DUMPING FUNCTIONS >>>
     void dump();
+private:
+    // <<< PRIVATE FUNCTIONS >>>
+    virtual bool _IsSubsumedCore(Term* t);
 };
 
 class TermList : public Term {
@@ -139,7 +149,6 @@ public:
 
     // <<< PUBLIC API >>>
     bool IsSubsumedBy(std::list<Term_ptr>& fixpoint);
-    bool IsSubsumed(Term* t);
     bool IsEmpty();
 
     // <<< MEASURING FUNCTIONS >>>
@@ -147,6 +156,9 @@ public:
 
     // <<< DUMPING FUNCTIONS >>>
     void dump();
+private:
+    // <<< PRIVATE FUNCTIONS >>>
+    virtual bool _IsSubsumedCore(Term* t);
 };
 
 class TermFixpoint : public Term {
@@ -247,7 +259,6 @@ public:
     FixpointTermSem GetSemantics() const;
     bool IsEmpty();
     bool IsSubsumedBy(std::list<Term_ptr>& fixpoint);
-    bool IsSubsumed(Term* t);
     bool GetResult();
 
     iterator GetIterator() { return iterator(*this); }
@@ -264,5 +275,6 @@ private:
     void ComputeNextFixpoint();
     void ComputeNextPre();
     void _InitializeAggregateFunction(bool inComplement);
+    virtual bool _IsSubsumedCore(Term* t);
 };
 #endif //WSKS_TERM_H
