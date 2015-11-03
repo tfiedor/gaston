@@ -293,7 +293,8 @@ void BinaryOpAutomaton::_InitializeInitialStates() {
 }
 
 void ComplementAutomaton::_InitializeInitialStates() {
-    this->_finalStates = std::shared_ptr<Term>(new TermList(this->_aut->GetFinalStates(), true));
+    this->_initialStates = this->_aut->GetInitialStates();
+    this->_initialStates->Complement();
 }
 
 void ProjectionAutomaton::_InitializeInitialStates() {
@@ -322,7 +323,8 @@ void BinaryOpAutomaton::_InitializeFinalStates() {
 }
 
 void ComplementAutomaton::_InitializeFinalStates() {
-    this->_initialStates = std::shared_ptr<Term>(new TermList(this->_aut->GetInitialStates(), true));
+    this->_finalStates = this->_aut->GetFinalStates();
+    this->_finalStates->Complement();
 }
 
 void ProjectionAutomaton::_InitializeFinalStates() {
@@ -446,19 +448,12 @@ ResultType BinaryOpAutomaton::_IntersectNonEmptyCore(Symbol_ptr symbol, Term_ptr
 }
 
 ResultType ComplementAutomaton::_IntersectNonEmptyCore(Symbol_ptr symbol, Term_ptr finalApproximaton, bool underComplement) {
-    // We assume finalApproximation is in form of {term}, i.e. list containing exactly one term
-    assert(finalApproximaton->type == TERM_LIST);
-
-    // Reinterpret to TermList
-    TermList*complementStateApproximation = reinterpret_cast<TermList*>(finalApproximaton.get());
-    assert(complementStateApproximation->list.size() == 1);
-
     // Compute the result of nested automaton with switched complement
-    ResultType result = this->_aut->IntersectNonEmpty(symbol, complementStateApproximation->list[0], !underComplement);
+    finalApproximaton->Complement();
+    ResultType result = this->_aut->IntersectNonEmpty(symbol, finalApproximaton, !underComplement);
+    result.first->Complement();
 
-    // Create new result and return
-    TermList* newResult = new TermList(result.first, true);
-    return std::make_pair(std::shared_ptr<Term>(newResult), result.second);
+    return result;
 }
 
 ResultType ProjectionAutomaton::_IntersectNonEmptyCore(Symbol_ptr symbol, Term_ptr finalApproximation, bool underComplement) {

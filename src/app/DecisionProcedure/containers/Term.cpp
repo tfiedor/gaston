@@ -22,6 +22,11 @@ int TermFixpoint::instances = 0;
 int TermContinuation::instances = 0;
 
 // <<< TERM CONSTRUCTORS >>>
+TermEmpty::TermEmpty() {
+    this->_inComplement = false;
+    this->type = TERM_EMPTY;
+}
+
 /**
  * Constructor of Term Product---construct intersecting product of
  * @p lhs and @p rhs
@@ -35,6 +40,7 @@ TermProduct::TermProduct(Term_ptr lhs, Term_ptr rhs) : left(lhs), right(rhs) {
     #endif
     type = TermType::TERM_PRODUCT;
     subtype = ProductType::E_INTERSECTION;
+    this->_inComplement = false;
 }
 
 /**
@@ -46,6 +52,7 @@ TermProduct::TermProduct(Term_ptr lhs, Term_ptr rhs, ProductType pt) : left(lhs)
     #endif
     type = TermType::TERM_PRODUCT;
     subtype = pt;
+    this->_inComplement = false;
 }
 
 TermBaseSet::TermBaseSet() : states(), stateMask(0) {
@@ -53,6 +60,7 @@ TermBaseSet::TermBaseSet() : states(), stateMask(0) {
     ++TermBaseSet::instances;
     #endif
     type = TERM_BASE;
+    this->_inComplement = false;
 }
 
 TermBaseSet::TermBaseSet(VATA::Util::OrdVector<unsigned int>& s, unsigned int offset, unsigned int stateNo) : states(), stateMask(stateNo)  {
@@ -64,6 +72,7 @@ TermBaseSet::TermBaseSet(VATA::Util::OrdVector<unsigned int>& s, unsigned int of
         this->states.push_back(state);
         this->stateMask.set(state-offset, true);
     }
+    this->_inComplement = false;
 }
 
 TermContinuation::TermContinuation(std::shared_ptr<SymbolicAutomaton> a, Term_ptr t, std::shared_ptr<SymbolType> s, bool b) : aut(a), term(t), symbol(s), underComplement(b) {
@@ -76,6 +85,7 @@ TermContinuation::TermContinuation(std::shared_ptr<SymbolicAutomaton> a, Term_pt
     t->dump();
     std::cout << "]\n";
     #endif
+    this->_inComplement = b;
 }
 
 TermList::TermList() {
@@ -83,33 +93,37 @@ TermList::TermList() {
     ++TermList::instances;
     #endif
     type = TERM_LIST;
+    this->_inComplement = false;
 }
 
-TermList::TermList(Term_ptr first, bool isCompl) : isComplement(isCompl) {
+TermList::TermList(Term_ptr first, bool isCompl) {
     #if (MEASURE_STATE_SPACE == true)
     ++TermList::instances;
     #endif
     this->type = TERM_LIST;
     this->list.push_back(first);
+    this->_inComplement = isCompl;
 }
 
-TermList::TermList(Term_ptr f, Term_ptr s, bool isCompl) : isComplement(isCompl) {
+TermList::TermList(Term_ptr f, Term_ptr s, bool isCompl) {
     #if (MEASURE_STATE_SPACE == true)
     ++TermList::instances;
     #endif
     this->type = TERM_LIST;
     this->list.push_back(f);
     this->list.push_back(s);
+    this->_inComplement = isCompl;
 }
 
 TermFixpoint::TermFixpoint(std::shared_ptr<SymbolicAutomaton> aut, Term_ptr startingTerm, Symbols symList, bool inComplement, bool initbValue)
-        : _sourceTerm(nullptr), _sourceIt(nullptr), _aut(aut), _bValue(initbValue), _inComplement(inComplement) {
+        : _sourceTerm(nullptr), _sourceIt(nullptr), _aut(aut), _bValue(initbValue) {
     #if (MEASURE_STATE_SPACE == true)
     ++TermFixpoint::instances;
     #endif
 
     // Initialize the aggregate function
     this->_InitializeAggregateFunction(inComplement);
+    this->_inComplement = inComplement;
     this->type = TERM_FIXPOINT;
 
     // Initialize the fixpoint as [nullptr, startingTerm]
@@ -123,9 +137,9 @@ TermFixpoint::TermFixpoint(std::shared_ptr<SymbolicAutomaton> aut, Term_ptr star
     }
 }
 
-TermFixpoint::TermFixpoint(std::shared_ptr<SymbolicAutomaton> aut, Term_ptr sourceTerm, Symbols symList,bool inComplement)
+TermFixpoint::TermFixpoint(std::shared_ptr<SymbolicAutomaton> aut, Term_ptr sourceTerm, Symbols symList, bool inComplement)
         : _sourceTerm(sourceTerm), _sourceIt(reinterpret_cast<TermFixpoint*>(sourceTerm.get())->GetIteratorDynamic()),
-        _aut(aut), _worklist(), _bValue(false), _inComplement(inComplement) {
+        _aut(aut), _worklist(), _bValue(false) {
     #if (MEASURE_STATE_SPACE == true)
     ++TermFixpoint::instances;
     #endif
@@ -134,6 +148,7 @@ TermFixpoint::TermFixpoint(std::shared_ptr<SymbolicAutomaton> aut, Term_ptr sour
     // Initialize the aggregate function
     this->_InitializeAggregateFunction(inComplement);
     this->type = TERM_FIXPOINT;
+    this->_inComplement = inComplement;
 
     // Initialize the fixpoint
     this->_fixpoint.push_front(nullptr);
@@ -166,10 +181,19 @@ bool Term::IsSubsumed(Term *t) {
             assert(continuation->underComplement == thisCont->underComplement);
         }
         auto unfoldedContinuation = (continuation->aut->IntersectNonEmpty(continuation->symbol.get(), continuation->term, continuation->underComplement)).first;
-        return this->_IsSubsumedCore(unfoldedContinuation.get());
+        return this->IsSubsumed(unfoldedContinuation.get());
     } else {
-        return this->_IsSubsumedCore(t);
+        if(this->_inComplement) {
+            return t->_IsSubsumedCore(this);
+        } else {
+            return this->_IsSubsumedCore(t);
+        }
     }
+}
+
+bool TermEmpty::_IsSubsumedCore(Term *t) {
+    // Empty term is subsumed by everything (probably)
+    return true;
 }
 
 bool TermProduct::_IsSubsumedCore(Term* t) {
@@ -259,6 +283,11 @@ bool TermFixpoint::_IsSubsumedCore(Term* t) {
  *
  * @param[in] fixpoint:     list of terms contained as fixpoint
  */
+bool TermEmpty::IsSubsumedBy(std::list < Term_ptr > &fixpoint) {
+    // Empty term is subsumed by everything
+    return true;
+}
+
 bool TermProduct::IsSubsumedBy(std::list<Term_ptr>& fixpoint) {
     // TODO: Add caching
     // Empty things is always subsumed
@@ -329,7 +358,7 @@ bool TermList::IsSubsumedBy(std::list<Term_ptr>& fixpoint) {
 
         // Test the subsumption of terms, if we are under complement
         //   we switch the subsumption relation
-        if(this->isComplement) {
+        if(this->_inComplement) {
             if (item->IsSubsumed(this)) {
                 return true;
             }
@@ -371,6 +400,10 @@ bool TermFixpoint::IsSubsumedBy(std::list<Term_ptr>& fixpoint) {
 /**
  * Tests the emptiness of Term
  */
+bool TermEmpty::IsEmpty() {
+    return true;
+}
+
 bool TermProduct::IsEmpty() {
     return this->left->IsEmpty() && this->right->IsEmpty();
 }
@@ -403,6 +436,10 @@ bool TermFixpoint::IsEmpty() {
 /**
  * Measures the state space as number of states
  */
+unsigned int TermEmpty::MeasureStateSpace() {
+    return 0;
+}
+
 unsigned int TermProduct::MeasureStateSpace() {
     return this->left->MeasureStateSpace() + this->right->MeasureStateSpace() + 1;
 }
@@ -440,7 +477,21 @@ unsigned int TermFixpoint::MeasureStateSpace() {
 /**
  * Dumping functions
  */
-void TermProduct::dump() {
+void Term::dump() {
+    if(this->_inComplement) {
+        std::cout << "\033[1;31m{\033[0m";
+    }
+    this->_dumpCore();
+    if(this->_inComplement) {
+        std::cout << "\033[1;31m}\033[0m";
+    }
+}
+
+void TermEmpty::_dumpCore() {
+    std::cout << "\u2205";
+}
+
+void TermProduct::_dumpCore() {
     if(this->subtype == ProductType::E_INTERSECTION) {
         std::cout << "\033[1;32m";
     } else {
@@ -463,19 +514,19 @@ void TermProduct::dump() {
     std::cout << "}\033[0m";
 }
 
-void TermBaseSet::dump() {
-    if(this->states->size() == 0) {
+void TermBaseSet::_dumpCore() {
+    if(this->states.size() == 0) {
         std::cout << "\u2205";
     } else {
-        std::cout << "{";
+        std::cout << "\033[1;35m{";
         for (auto state : this->states) {
             std::cout << (state) << ",";
         }
-        std::cout << "}";
+        std::cout << "}\033[0m";
     }
 }
 
-void TermContinuation::dump() {
+void TermContinuation::_dumpCore() {
     std::cout << "?";
     term->dump();
     std::cout << "?";
@@ -487,24 +538,16 @@ void TermContinuation::dump() {
     std::cout << "?";
 }
 
-void TermList::dump() {
-    if(this->isComplement) {
-        std::cout << "\033[1;31m{\033[0m";
-    } else {
-        std::cout << "{";
-    }
+void TermList::_dumpCore() {
+    std::cout << "\033[1;36m{\033[0m";
     for(auto state : this->list) {
         state->dump();
         std::cout  << ",";
     }
-    if(this->isComplement) {
-        std::cout << "\033[1;31m}\033[0m";
-    } else {
-        std::cout << "}";
-    }
+    std::cout << "\033[1;36m}\033[0m";
 }
 
-void TermFixpoint::dump() {
+void TermFixpoint::_dumpCore() {
     std::cout << "\033[1;34m{\033[0m";
     for(auto item : this->_fixpoint) {
         if(item == nullptr) {

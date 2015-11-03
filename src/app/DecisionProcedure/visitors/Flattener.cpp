@@ -110,15 +110,7 @@ AST* Flattener::visit(ASTForm_Equal1* form) {
             ASTTerm2_Plus* plus = new ASTTerm2_Plus(x, temp->n, form->pos);
             // Y = X + 1
             ASTForm_Equal2* eq2 = new ASTForm_Equal2(y, plus, form->pos);
-            // FO(X)
-            ASTForm_FirstOrder* xInFO = new ASTForm_FirstOrder(xf, form->pos);
-            // FO(Y)
-            ASTForm_FirstOrder* yInFO = new ASTForm_FirstOrder(yf, form->pos);
-            // FO(X) & FO(Y)
-            ASTForm_And* inFirstOrder = new ASTForm_And(xInFO, yInFO, form->pos);
-            // return Y = X + 1 & FO(X) & FO(Y)
-            return new ASTForm_And(eq2, inFirstOrder, form->pos);
-            // y = ti -> ex z: z = t & y = zi
+            return eq2;
         } else {
             unsigned int z = symbolTable.insertFresh(Varname1);
             ASTTerm1_Var1* zVar = new ASTTerm1_Var1(z, form->pos);

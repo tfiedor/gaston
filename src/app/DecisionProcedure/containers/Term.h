@@ -39,20 +39,46 @@ using SymbolType        = ZeroSymbol;
 class Term {
 public:
     TermType type;
+protected:
+    // <<< PRIVATE MEMBERS >>>
+    bool _inComplement;
 
+public:
     // <<< PUBLIC API >>>
     virtual bool IsSubsumedBy(std::list<Term_ptr>& fixpoint) = 0;
     virtual bool IsSubsumed(Term* t);
     virtual bool IsEmpty() = 0;
+    virtual void Complement() {this->_inComplement = true;}
 
     // <<< MEASURING FUNCTIONS >>>
     virtual unsigned int MeasureStateSpace() = 0;
 
     // <<< DUMPING FUNCTIONS >>>
-    virtual void dump() = 0;
-private:
+    virtual void dump();
+protected:
     // <<< PRIVATE FUNCTIONS >>>
     virtual bool _IsSubsumedCore(Term* t) = 0;
+    virtual void _dumpCore() = 0;
+};
+
+class TermEmpty : public Term {
+public:
+    // <<< CONSTRUCTORS >>>
+    TermEmpty();
+
+    // <<< PUBLIC API >>>
+    bool IsSubsumedBy(std::list<Term_ptr>& fixpoint);
+    bool IsEmpty();
+
+    // <<< MEASURING FUNCTIONS >>>
+    unsigned int MeasureStateSpace();
+
+    // <<< DUMPING FUNCTIONS >>>
+private:
+    void _dumpCore();
+
+    // <<< PRIVATE FUNCTIONS >>>
+    virtual bool _IsSubsumedCore(Term* t);
 };
 
 class TermProduct : public Term {
@@ -75,7 +101,8 @@ public:
     unsigned int MeasureStateSpace();
 
     // <<< DUMPING FUNCTIONS >>>
-    void dump();
+private:
+    void _dumpCore();
 private:
     // <<< PRIVATE FUNCTIONS >>>
     virtual bool _IsSubsumedCore(Term* t);
@@ -101,7 +128,8 @@ public:
     unsigned int MeasureStateSpace();
 
     // <<< DUMPING FUNCTIONS >>>
-    void dump();
+private:
+    void _dumpCore();
 private:
     // <<< PRIVATE FUNCTIONS >>>
     virtual bool _IsSubsumedCore(Term* t);
@@ -128,7 +156,8 @@ public:
     unsigned int MeasureStateSpace();
 
     // <<< DUMPING FUNCTIONS >>>
-    void dump();
+private:
+    void _dumpCore();
 private:
     // <<< PRIVATE FUNCTIONS >>>
     virtual bool _IsSubsumedCore(Term* t);
@@ -140,7 +169,6 @@ public:
     static int instances;
 
     TermListStates list;
-    bool isComplement;
 
     // <<< CONSTRUCTORS >>>
     TermList();
@@ -155,7 +183,8 @@ public:
     unsigned int MeasureStateSpace();
 
     // <<< DUMPING FUNCTIONS >>>
-    void dump();
+private:
+    void _dumpCore();
 private:
     // <<< PRIVATE FUNCTIONS >>>
     virtual bool _IsSubsumedCore(Term* t);
@@ -248,7 +277,6 @@ public:
     WorklistType _worklist;
     Symbols _symList;
     bool _bValue;
-    bool _inComplement;
     bool (*_aggregate_result)(bool, bool);
 
     // <<< CONSTRUCTORS >>>
@@ -268,7 +296,8 @@ public:
     unsigned int MeasureStateSpace();
 
     // <<< DUMPING FUNCTIONS >>>
-    void dump();
+private:
+    void _dumpCore();
 
 private:
     // <<< PRIVATE FUNCTIONS >>>
