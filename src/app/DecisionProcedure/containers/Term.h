@@ -86,11 +86,11 @@ public:
     // <<< PUBLIC MEMBERS >>>
     static int instances;
     TermBaseSetStates states;
+    BitMask stateMask;
 
     // <<< CONSTRUCTORS >>>
     TermBaseSet();
-    TermBaseSet(TermBaseSetStates& s);
-    TermBaseSet(VATA::Util::OrdVector<unsigned int>& s);
+    TermBaseSet(VATA::Util::OrdVector<unsigned int>&, unsigned int, unsigned int);
 
     // <<< PUBLIC API >>>
     bool Intersects(TermBaseSet* rhs);

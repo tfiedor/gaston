@@ -46,7 +46,7 @@ void reduce(Automaton &aut) {
  * @param doComplement: whether automaton should be complemented
  */
 void ASTForm_True::toUnaryAutomaton(Automaton &trueAutomaton, bool doComplement) {
-    // (X^k) -> q0
+	// (X^k) -> q0
 	setInitialState(trueAutomaton, 0);
 
     // q0 -(X^k)-> q0
@@ -85,6 +85,8 @@ void ASTForm_False::toUnaryAutomaton(Automaton &falseAutomaton, bool doComplemen
  */
 void ASTForm_Not::toUnaryAutomaton(Automaton &notAutomaton, bool doComplement) {
 	assert(this->f->kind != aOr && this->f->kind != aAnd && this->f->kind != aEx2 && "Negation should be only on leaves!");
+	assert(this->f->kind != aTrue && this->f->kind != aFalse && "True/False should be optimized away by BooleanUnfolder!");
+
 	// Inner formula is first conversed to unary automaton
 	this->f->toUnaryAutomaton(notAutomaton, true);
 }
@@ -99,6 +101,9 @@ void ASTForm_Not::toUnaryAutomaton(Automaton &notAutomaton, bool doComplement) {
  * @param doComplement: whether automaton should be complemented
  */
 void ASTForm_And::toUnaryAutomaton(Automaton &andAutomaton, bool doComplement) {
+	assert(this->f1->kind != aTrue && this->f1->kind != aFalse && "True/False should be optimized away by BooleanUnfolder!");
+	assert(this->f2->kind != aTrue && this->f2->kind != aFalse && "True/False should be optimized away by BooleanUnfolder!");
+
 	// Inner formulas are first conversed to unary automatons
 	Automaton left, right;
 	this->f1->toUnaryAutomaton(left, doComplement);
@@ -148,6 +153,9 @@ void ASTForm_And::toUnaryAutomaton(Automaton &andAutomaton, bool doComplement) {
  * @param doComplement: whether automaton should be complemented
  */
 void ASTForm_Or::toUnaryAutomaton(Automaton &orAutomaton, bool doComplement) {
+	assert(this->f1->kind != aTrue && this->f1->kind != aFalse && "True/False should be optimized away by BooleanUnfolder!");
+	assert(this->f2->kind != aTrue && this->f2->kind != aFalse && "True/False should be optimized away by BooleanUnfolder!");
+
 	// Inner formulas are first conversed to unary automatons
 	Automaton left, right;
 	this->f1->toUnaryAutomaton(left, doComplement);

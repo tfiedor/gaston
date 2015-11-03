@@ -264,7 +264,7 @@ Term_ptr SymbolicAutomaton::GetInitialStates() {
  */
 void BaseAutomaton::_InitializeAutomaton() {
     // TODO: Maybe this could be done only, if we are dumping the automaton?
-    //this->_RenameStates();
+    this->_RenameStates();
     this->_InitializeInitialStates();
     this->_InitializeFinalStates();
 }
@@ -304,6 +304,7 @@ void ProjectionAutomaton::_InitializeInitialStates() {
 void BaseAutomaton::_InitializeInitialStates() {
     // NOTE: The automaton is constructed backwards, so final states are initial
     assert(this->_initialStates == nullptr);
+    assert(this->_stateSpace != 0);
 
     TermBaseSet* temp = new TermBaseSet();
     for(auto state : this->_base_automaton->GetFinalStates()) {
@@ -332,6 +333,7 @@ void ProjectionAutomaton::_InitializeFinalStates() {
 void BaseAutomaton::_InitializeFinalStates() {
     // NOTE: The automaton is constructed backwards, so initial states are finals
     assert(this->_finalStates == nullptr);
+    assert(this->_stateSpace != 0);
 
     // Obtain the MTBDD for Initial states
     BaseAutomatonStateSet finalStates;
@@ -395,7 +397,7 @@ Term_ptr BaseAutomaton::Pre(Symbol_ptr symbol, Term_ptr finalApproximation, bool
         collector._isFirst = false;
     }
 
-    return std::shared_ptr<Term>(new TermBaseSet(states));
+    return std::shared_ptr<Term>(new TermBaseSet(states, this->_stateOffset, this->_stateSpace));
 }
 
 /**
@@ -541,17 +543,26 @@ ResultType BaseAutomaton::_IntersectNonEmptyCore(Symbol_ptr symbol, Term_ptr app
 }
 
 void BinaryOpAutomaton::DumpAutomaton() {
-    std::cout << "(";
+    if(this->type == AutType::INTERSECTION) {
+        std::cout << "\033[1;32m";
+    } else {
+        std::cout << "\033[1;33m";
+    }
+    std::cout << "(\033[0m";
     _lhs_aut->DumpAutomaton();
     if(this->type == AutType::INTERSECTION) {
-        //std::cout << " \u22C2 ";
-        std::cout << " \u2229 ";
+        std::cout << "\033[1;32m \u2229 \033[0m";
     } else {
         //std::cout << " \u22C3 ";
-        std::cout << " \u222A ";
+        std::cout << "\033[1;33m \u222A \033[0m";
     };
     _rhs_aut->DumpAutomaton();
-    std::cout << ")";
+    if(this->type == AutType::INTERSECTION) {
+        std::cout << "\033[1;32m";
+    } else {
+        std::cout << "\033[1;33m";
+    }
+    std::cout << ")\033[0m";
 }
 
 void ComplementAutomaton::DumpAutomaton() {
@@ -647,10 +658,12 @@ void LessEqAutomaton::DumpAutomaton() {
  * Renames the states according to the translation function so we get unique states.
  */
 void BaseAutomaton::_RenameStates() {
+    this->_stateOffset = SymbolicAutomaton::stateCnt;
     StateToStateMap translMap;
     StateToStateTranslator stateTransl(translMap,
                                        [](const StateType &) { return SymbolicAutomaton::stateCnt++; });
     this->_base_automaton.reset(new BaseAutomatonType(this->_base_automaton->ReindexStates(stateTransl)));
+    this->_stateSpace = SymbolicAutomaton::stateCnt - this->_stateOffset;
 }
 
 void BaseAutomaton::BaseAutDump() {

@@ -20,9 +20,7 @@ extern Options options;
  * @return: fresh first-order variable
  */
 ASTTerm1_Var1* Flattener::generateFreshFirstOrder() {
-    unsigned int z;
-    z = symbolTable.insertFresh(Varname1);
-    return new ASTTerm1_Var1(z, Pos());
+    return new ASTTerm1_Var1(symbolTable.insertFresh(Varname1), Pos());
 }
 
 /**
@@ -31,9 +29,7 @@ ASTTerm1_Var1* Flattener::generateFreshFirstOrder() {
  * @return: fresh second-order variable
  */
 ASTTerm2_Var2* Flattener::generateFreshSecondOrder() {
-    unsigned int Z;
-    Z = symbolTable.insertFresh(Varname2);
-    return new ASTTerm2_Var2(Z, Pos());
+    return new ASTTerm2_Var2(symbolTable.insertFresh(Varname2), Pos());
 }
 
 /**
@@ -43,14 +39,14 @@ ASTTerm2_Var2* Flattener::generateFreshSecondOrder() {
  */
 AST* Flattener::visit(ASTTerm1_Plus* term) {
     assert(term != nullptr);
-    assert(term->n >= 1); // ASSERTION = y = x + i; i in N
+    assert(term->n >= 1);
 
-    int n = term->n;
+    int i = term->n;
 
     ASTTerm1 *prev = static_cast<ASTTerm1*>((term->t)->accept(*this));
-    while(n != 1) {
+    while(i != 1) {
         prev = new ASTTerm1_Plus(prev, 1, term->pos);
-        --n;
+        --i;
     }
 
     // Return this, cannot unfold anymore
@@ -369,7 +365,7 @@ ASTForm* substituteFreshLessEq(ASTTerm1* leftTerm, ASTTerm1* rightTerm, bool sub
  *
  * @param[in] form:    traversed LessEq node
  */
-AST* Flattener::visit(ASTForm_LessEq* form) {
+ AST* Flattener::visit(ASTForm_LessEq* form) {
     assert(form != nullptr);
     assert(form->t1 != nullptr);
     assert(form->t2 != nullptr);
@@ -570,7 +566,7 @@ AST* Flattener::visit(ASTForm_Ex1* form) {
     assert(form != nullptr);
     assert(form->f != nullptr);
 
-    Ident* it = form->vl->begin();
+    /*Ident* it = form->vl->begin();
     ASTForm_And* conjuction;
     ASTForm* restrictedFormula = new ASTForm_FirstOrder(new ASTTerm1_Var1(*it, form->pos), form->pos);
     inFirstOrder.insert(*it);
@@ -581,9 +577,10 @@ AST* Flattener::visit(ASTForm_Ex1* form) {
         restrictedFormula = new ASTForm_And(restrictedFormula, singleton, form->pos);
         ++it;
     }
-    restrictedFormula = new ASTForm_And(restrictedFormula, form->f, form->pos);
+    restrictedFormula = new ASTForm_And(restrictedFormula, form->f, form->pos);*/
 
-    return new ASTForm_Ex2(form->ul, form->vl, restrictedFormula, form->pos);
+    //return new ASTForm_Ex2(form->ul, form->vl, restrictedFormula, form->pos);
+    return new ASTForm_Ex2(form->ul, form->vl, form->f, form->pos);
 }
 
 /**
@@ -595,7 +592,7 @@ AST* Flattener::visit(ASTForm_All1* form) {
     assert(form != nullptr);
     assert(form->f != nullptr);
 
-    Ident* it = form->vl->begin();
+    /*Ident* it = form->vl->begin();
     ASTForm_Impl* implication;
     ASTForm* restrictedFormula = new ASTForm_FirstOrder(new ASTTerm1_Var1(*it, form->pos), form->pos);
     inFirstOrder.insert(*it);
@@ -608,8 +605,10 @@ AST* Flattener::visit(ASTForm_All1* form) {
         ++it;
     }
     restrictedFormula = new ASTForm_Impl(restrictedFormula, form->f, form->pos);
+     */
 
-    return new ASTForm_All2(form->ul, form->vl, restrictedFormula, form->pos);
+    //return new ASTForm_All2(form->ul, form->vl, restrictedFormula, form->pos);
+    return new ASTForm_All2(form->ul, form->vl, form->f, form->pos);
 }
 
 /**

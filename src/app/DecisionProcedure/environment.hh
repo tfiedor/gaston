@@ -140,6 +140,15 @@ enum FixpointTermSem {E_FIXTERM_FIXPOINT, E_FIXTERM_PRE};
  * SYMBOLIC METHOD RELATED DEFINES *
  ***********************************/
 
+/* >>> Printing Options <<< *
+ ****************************/
+#define PRINT_PRETTY					true
+
+/* >>> Other Options <<< *
+ *************************/
+#define AUT_ALWAYS_DETERMINISTIC		false
+#define AUT_ALWAYS_CONSTRAINT_FO		false
+
 /* >>> Debugging Options <<< *
  *****************************/
 #define DEBUG_BASE_AUTOMATA 			false
@@ -162,9 +171,9 @@ enum FixpointTermSem {E_FIXTERM_FIXPOINT, E_FIXTERM_PRE};
 
 /* >>> Optimizations <<< *
  *************************/
-#define OPT_DRAW_NEGATION_IN_BASE 		false
+#define OPT_DRAW_NEGATION_IN_BASE 		true
 #define OPT_CREATE_QF_AUTOMATON 		false
 #define OPT_REDUCE_AUTOMATA 			false
-#define OPT_EARLY_EVALUATION 			true
+#define OPT_EARLY_EVALUATION 			false
 #define OPT_CACHE_RESULTS 				true
 #endif

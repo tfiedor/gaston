@@ -196,6 +196,8 @@ class BaseAutomaton : public SymbolicAutomaton {
 protected:
     /// <<< PRIVATE MEMBERS >>>
     std::shared_ptr<BaseAutomatonType> _base_automaton;
+    unsigned int _stateSpace;               // Number of states in automaton
+    unsigned int _stateOffset;              // Offset of states used for mask
 
     /// <<< PRIVATE FUNCTIONS >>>
     virtual void _InitializeAutomaton();

@@ -21,6 +21,7 @@
 #include <typeinfo>
 #include "ast.h"
 #include "symboltable.h"
+#include "../DecisionProcedure/environment.hh"
 
 using std::cout;
 
@@ -101,7 +102,11 @@ ASTUniv::dump()
 void 
 ASTTerm1_Var1::dump()
 {
-  cout << "Var1 " << symbolTable.lookupSymbol(n);
+  #if (PRINT_PRETTY == true)
+  cout << symbolTable.lookupSymbol(n);
+  #else
+  cout << "Var2 " << symbolTable.lookupSymbol(n);
+  #endif
 }
   
 void 
@@ -135,19 +140,31 @@ ASTTerm1_Root::dump()
 void 
 ASTTerm1_Int::dump()
 {
+  #if (PRINT_PRETTY == true)
+  cout << n;
+  #else
   cout << "Int " << n;
+  #endif
 }
     
 void 
 ASTTerm1_Plus::dump()
 {
+  #if (PRINT_PRETTY == true)
+  cout << "("; t->dump(); cout << " + " << n << ")";
+  #else
   cout << "Plus1("; t->dump(); cout << "," << n << ")";
+  #endif
 }
     
 void 
 ASTTerm1_Minus::dump()
 {
+  #if (PRINT_PRETTY == true)
+  cout << "("; t->dump(); cout << " - " << n << ")";
+  #else
   cout << "Minus1("; t->dump(); cout << "," << n << ")";
+  #endif
 }
     
 void 
@@ -185,7 +202,11 @@ ASTTerm1_TreeRoot::dump()
 void 
 ASTTerm2_Var2::dump()
 {
+  #if (PRINT_PRETTY == true)
+  cout << symbolTable.lookupSymbol(n);
+  #else
   cout << "Var2 " << symbolTable.lookupSymbol(n);
+  #endif
 }
     
 void 
@@ -253,13 +274,21 @@ ASTTerm2_Set::dump()
 void 
 ASTTerm2_Plus::dump()
 {
+  #if (PRINT_PRETTY == true)
+  cout << "("; T->dump(); cout << " + " << n << ")";
+  #else
   cout << "Plus2("; T->dump(); cout << "," << n << ")";
+  #endif
 }
     
 void 
 ASTTerm2_Minus::dump()
 {
+  #if (PRINT_PRETTY == true)
+  cout << "("; T->dump(); cout << " - " << n << ")";
+  #else
   cout << "Minus2("; T->dump(); cout << "," << n << ")";
+  #endif
 }
     
 void 
@@ -302,13 +331,22 @@ ASTForm_False::dump()
 void 
 ASTForm_In::dump()
 {
+
+  #if (PRINT_PRETTY == true)
+  cout << "("; t1->dump(); cout << " \u2208 "; T2->dump(); cout  << ")";
+  #else
   cout << "In("; t1->dump(); cout << ","; T2->dump(); cout << ")";
+  #endif
 }
     
 void 
 ASTForm_Notin::dump()
 {
+  #if (PRINT_PRETTY == true)
+  cout << "("; t1->dump(); cout << " \u2209 "; T2->dump(); cout << ")";
+  #else
   cout << "Notin("; t1->dump(); cout << ","; T2->dump(); cout << ")";
+  #endif
 }
     
 void
@@ -332,43 +370,71 @@ ASTForm_FirstOrder::dump()
 void 
 ASTForm_Sub::dump()
 {
+  #if (PRINT_PRETTY == true)
+  cout << "("; T1->dump(); cout << " \u2286 "; T2->dump(); cout << ")";
+  #else
   cout << "Sub("; T1->dump(); cout << ","; T2->dump(); cout << ")";
+  #endif
 }
     
 void 
 ASTForm_Equal1::dump()
 {
+  #if (PRINT_PRETTY == true)
+  cout << "("; t1->dump(); cout << " \u003D "; t2->dump(); cout << ")";
+  #else
   cout << "Equal1("; t1->dump(); cout << ","; t2->dump(); cout << ")";
+  #endif
 }
     
 void 
 ASTForm_Equal2::dump()
 {
+  #if (PRINT_PRETTY == true)
+  cout << "("; T1->dump(); cout << " \u003D "; T2->dump(); cout << ")";
+  #else
   cout << "Equal2("; T1->dump(); cout << ","; T2->dump(); cout << ")";
+  #endif
 }
     
 void 
 ASTForm_NotEqual1::dump()
 {
+  #if (PRINT_PRETTY == true)
+  cout << "("; t1->dump(); cout << " \u2260 "; t2->dump(); cout << ")";
+  #else
   cout << "NotEqual1("; t1->dump(); cout << ","; t2->dump(); cout << ")";
+  #endif
 }
     
 void 
 ASTForm_NotEqual2::dump()
 {
+  #if (PRINT_PRETTY == true)
+  cout << "("; T1->dump(); cout << " \u2260 "; T2->dump(); cout << ")";
+  #else
   cout << "NotEqual2("; T1->dump(); cout << ","; T2->dump(); cout << ")";
+  #endif
 }
     
 void 
 ASTForm_Less::dump()
 {
+  #if (PRINT_PRETTY == true)
+  cout << "("; t1->dump(); cout << " \u003C "; t2->dump(); cout << ")";
+  #else
   cout << "Less("; t1->dump(); cout << ","; t2->dump(); cout << ")";
+  #endif
 }
     
 void 
 ASTForm_LessEq::dump()
 {
+  #if (PRINT_PRETTY == true)
+  cout << "("; t1->dump(); cout << " \u2264 "; t2->dump(); cout << ")";
+  #else
   cout << "LessEq("; t1->dump(); cout << ","; t2->dump(); cout << ")";
+  #endif
 }
     
 void 
@@ -392,7 +458,11 @@ ASTForm_Biimpl::dump()
 void 
 ASTForm_And::dump()
 {
+  #if (PRINT_PRETTY == true)
   cout << "("; f1->dump(); cout << " \u2227 "; f2->dump(); cout << ")";
+  #else
+  cout << "("; f1->dump(); cout << " & "; f2->dump(); cout << ")";
+  #endif
 }
     
 void 
@@ -404,49 +474,81 @@ ASTForm_IdLeft::dump()
 void 
 ASTForm_Or::dump()
 {
+  #if (PRINT_PRETTY == true)
   cout << "("; f1->dump(); cout << " \u2228 "; f2->dump(); cout << ")";
+  #else
+  cout << "("; f1->dump(); cout << " | "; f2->dump(); cout << ")";
+  #endif
 }
     
 void 
 ASTForm_Not::dump()
 {
+  #if (PRINT_PRETTY == true)
   cout << "\u00AC("; f->dump(); cout << ")";
+  #else
+  cout << "~("; f->dump(); cout << ")";
+  #endif
 }
     
 void 
 ASTForm_Ex0::dump()
 {
+  #if (PRINT_PRETTY == true)
   cout << "\u22030("; vl->dump(); cout << ","; f->dump(); cout << ")";
+  #else
+  cout << "Ex0("; vl->dump(); cout << ","; f->dump(); cout << ")";
+  #endif
 }
     
 void 
 ASTForm_Ex1::dump()
 {
+  #if (PRINT_PRETTY == true)
   cout << "\u22031("; vl->dump(); cout << ","; f->dump(); cout << ")";
+  #else
+  cout << "Ex1("; vl->dump(); cout << ","; f->dump(); cout << ")";
+  #endif
 }
     
 void 
 ASTForm_Ex2::dump()
 {
+  #if (PRINT_PRETTY == true)
   cout << "\u22032("; vl->dump(); cout << ","; f->dump(); cout << ")";
+  #else
+  cout << "Ex2("; vl->dump(); cout << ","; f->dump(); cout << ")";
+  #endif
 }
     
 void 
 ASTForm_All0::dump()
 {
+  #if (PRINT_PRETTY == true)
   cout << "\u22000("; vl->dump(); cout << ","; f->dump(); cout << ")";
+  #else
+  cout << "All0("; vl->dump(); cout << ","; f->dump(); cout << ")";
+  #endif
 }
     
 void 
 ASTForm_All1::dump()
 {
+  #if (PRINT_PRETTY == true)
   cout << "\u22001("; vl->dump(); cout << ","; f->dump(); cout << ")";
+  #else
+  cout << "All1("; vl->dump(); cout << ","; f->dump(); cout << ")";
+  #endif
 }
     
 void 
 ASTForm_All2::dump()
 {
+  #if (PRINT_PRETTY == true)
   cout << "\u22002("; vl->dump(); cout << ","; f->dump(); cout << ")";
+  #else
+  cout << "All2("; vl->dump(); cout << ","; f->dump(); cout << ")";
+  #endif
 }
     
 void 

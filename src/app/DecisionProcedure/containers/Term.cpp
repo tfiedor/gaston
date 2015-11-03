@@ -48,30 +48,21 @@ TermProduct::TermProduct(Term_ptr lhs, Term_ptr rhs, ProductType pt) : left(lhs)
     subtype = pt;
 }
 
-TermBaseSet::TermBaseSet() : states() {
+TermBaseSet::TermBaseSet() : states(), stateMask(0) {
     #if (MEASURE_STATE_SPACE == true)
     ++TermBaseSet::instances;
     #endif
     type = TERM_BASE;
 }
 
-TermBaseSet::TermBaseSet(TermBaseSetStates& s) : states()  {
+TermBaseSet::TermBaseSet(VATA::Util::OrdVector<unsigned int>& s, unsigned int offset, unsigned int stateNo) : states(), stateMask(stateNo)  {
     #if (MEASURE_STATE_SPACE == true)
     ++TermBaseSet::instances;
     #endif
     type = TERM_BASE;
     for(auto state : s) {
         this->states.push_back(state);
-    }
-}
-
-TermBaseSet::TermBaseSet(VATA::Util::OrdVector<unsigned int>& s) : states()  {
-    #if (MEASURE_STATE_SPACE == true)
-    ++TermBaseSet::instances;
-    #endif
-    type = TERM_BASE;
-    for(auto state : s) {
-        this->states.push_back(state);
+        this->stateMask.set(state-offset, true);
     }
 }
 
@@ -450,25 +441,38 @@ unsigned int TermFixpoint::MeasureStateSpace() {
  * Dumping functions
  */
 void TermProduct::dump() {
-    // TODO: distinguish if it is intersecto or unionoproduct
-    std::cout << "{";
+    if(this->subtype == ProductType::E_INTERSECTION) {
+        std::cout << "\033[1;32m";
+    } else {
+        std::cout << "\033[1;33m";
+    }
+    std::cout << "{\033[0m";
     left->dump();
     if(this->subtype == ProductType::E_INTERSECTION) {
-        std::cout << " \u2A2F ";
+        std::cout << "\033[1;32m \u2293 \033[0m";
     } else {
-        assert(this->subtype == ProductType::E_UNION);
-        std::cout << " \u228E ";
-    }
+        //std::cout << " \u22C3 ";
+        std::cout << "\033[1;33m \u2294 \033[0m";
+    };
     right->dump();
-    std::cout << "}";
+    if(this->subtype == ProductType::E_INTERSECTION) {
+        std::cout << "\033[1;32m";
+    } else {
+        std::cout << "\033[1;33m";
+    }
+    std::cout << "}\033[0m";
 }
 
 void TermBaseSet::dump() {
-    std::cout << "{";
-    for(auto state : this->states) {
-        std::cout << (state) << ",";
+    if(this->states->size() == 0) {
+        std::cout << "\u2205";
+    } else {
+        std::cout << "{";
+        for (auto state : this->states) {
+            std::cout << (state) << ",";
+        }
+        std::cout << "}";
     }
-    std::cout << "}";
 }
 
 void TermContinuation::dump() {
