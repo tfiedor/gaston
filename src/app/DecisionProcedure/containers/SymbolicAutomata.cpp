@@ -211,7 +211,7 @@ ResultType SymbolicAutomaton::IntersectNonEmpty(Symbol_ptr symbol, Term_ptr stat
     #endif
 
     #if (DEBUG_INTERSECT_NON_EMPTY == true)
-    std::cout << "\nIntersectNonEmpty(";
+    std::cout << "Computed for (";
     if(symbol != nullptr) {
         std::cout << (*symbol);
     } else {
@@ -423,6 +423,12 @@ ResultType BinaryOpAutomaton::_IntersectNonEmptyCore(Symbol_ptr symbol, Term_ptr
     // Checks if left automaton's initial states intersects the final states
     ResultType lhs_result = this->_lhs_aut->IntersectNonEmpty(symbol, productStateApproximation->left, underComplement);
 
+    // We can prune the state if left side was evaluated as Empty term
+    // TODO: This is different for Unionmat!
+    if(lhs_result.first->type == TERM_EMPTY && this->_productType == ProductType::E_INTERSECTION) {
+        return std::make_pair(lhs_result.first, underComplement);
+    }
+
     #if (OPT_EARLY_EVALUATION == true)
     // Sometimes we can evaluate the experession early and return the continuation.
     // For intersection of automata we can return early, if left term was evaluated
@@ -443,13 +449,18 @@ ResultType BinaryOpAutomaton::_IntersectNonEmptyCore(Symbol_ptr symbol, Term_ptr
 
     // Otherwise compute the right side and return full fixpoint
     ResultType rhs_result = this->_rhs_aut->IntersectNonEmpty(symbol, productStateApproximation->right, underComplement);
+    // We can prune the state if right side was evaluated as Empty term
+    // TODO: This is different for Unionmat!
+    if(rhs_result.first->type == TERM_EMPTY && this->_productType == ProductType::E_INTERSECTION) {
+        return std::make_pair(rhs_result.first, underComplement);
+    }
+
     Term_ptr combined = std::shared_ptr<Term>(new TermProduct(lhs_result.first, rhs_result.first, this->_productType));
     return std::make_pair(combined, this->_eval_result(lhs_result.second, rhs_result.second, underComplement));
 }
 
 ResultType ComplementAutomaton::_IntersectNonEmptyCore(Symbol_ptr symbol, Term_ptr finalApproximaton, bool underComplement) {
     // Compute the result of nested automaton with switched complement
-    finalApproximaton->Complement();
     ResultType result = this->_aut->IntersectNonEmpty(symbol, finalApproximaton, !underComplement);
     result.first->Complement();
 
@@ -527,13 +538,20 @@ ResultType BaseAutomaton::_IntersectNonEmptyCore(Symbol_ptr symbol, Term_ptr app
     if(symbol == nullptr) {
         // Testing if epsilon is in language, i.e. testing if final states intersect initial ones
         return std::make_pair(this->_finalStates, initial->Intersects(final) != underComplement);
+    } else if(approximation->type == TERM_EMPTY) {
+        // Empty set has no Pre
+        return std::make_pair(approximation, underComplement);
     } else {
         // First do the pre of the approximation
         Term_ptr preSet = this->Pre(symbol, approximation, underComplement);
         TermBaseSet* preFinal = reinterpret_cast<TermBaseSet*>(preSet.get());
 
         // Return the pre and true if it intersects the initial states
-        return std::make_pair(preSet, initial->Intersects(preFinal) != underComplement);
+        if(preFinal->IsEmpty()) {
+            return std::make_pair(std::shared_ptr<Term>(new TermEmpty()), underComplement);
+        } else {
+            return std::make_pair(preSet, initial->Intersects(preFinal) != underComplement);
+        }
     }
 }
 
@@ -589,63 +607,63 @@ void GenericBaseAutomaton::DumpAutomaton() { std::cout << "<Aut>";
 void SubAutomaton::DumpAutomaton() {
     this->_form->dump();
     #if (DEBUG_BASE_AUTOMATA == true)
-    this->baseAutDump();
+    this->BaseAutDump();
     #endif
 }
 
 void TrueAutomaton::DumpAutomaton() {
     this->_form->dump();
     #if (DEBUG_BASE_AUTOMATA == true)
-    this->baseAutDump();
+    this->BaseAutDump();
     #endif
 }
 
 void FalseAutomaton::DumpAutomaton() {
     this->_form->dump();
     #if (DEBUG_BASE_AUTOMATA == true)
-    this->baseAutDump();
+    this->BaseAutDump();
     #endif
 }
 
 void InAutomaton::DumpAutomaton() {
     this->_form->dump();
     #if (DEBUG_BASE_AUTOMATA == true)
-    this->baseAutDump();
+    this->BaseAutDump();
     #endif
 }
 
 void FirstOrderAutomaton::DumpAutomaton() {
     this->_form->dump();
     #if (DEBUG_BASE_AUTOMATA == true)
-    this->baseAutDump();
+    this->BaseAutDump();
     #endif
 }
 
 void EqualFirstAutomaton::DumpAutomaton() {
     this->_form->dump();
     #if (DEBUG_BASE_AUTOMATA == true)
-    this->baseAutDump();
+    this->BaseAutDump();
     #endif
 }
 
 void EqualSecondAutomaton::DumpAutomaton() {
     this->_form->dump();
     #if (DEBUG_BASE_AUTOMATA == true)
-    this->baseAutDump();
+    this->BaseAutDump();
     #endif
 }
 
 void LessAutomaton::DumpAutomaton() {
     this->_form->dump();
     #if (DEBUG_BASE_AUTOMATA == true)
-    this->baseAutDump();
+    this->BaseAutDump();
     #endif
 }
 
 void LessEqAutomaton::DumpAutomaton() {
     this->_form->dump();
     #if (DEBUG_BASE_AUTOMATA == true)
-    this->baseAutDump();
+    this->BaseAutDump();
     #endif
 }
 

@@ -175,18 +175,34 @@ bool Term::IsSubsumed(Term *t) {
     // unfold the continuation
     if(t->type == TERM_CONTINUATION) {
         // TODO: We should check that maybe we have different continuations
-        TermContinuation* continuation = reinterpret_cast<TermContinuation*>(t);
-        if(this->type == TERM_CONTINUATION) {
-            TermContinuation* thisCont = reinterpret_cast<TermContinuation*>(this);
+        TermContinuation *continuation = reinterpret_cast<TermContinuation *>(t);
+        if (this->type == TERM_CONTINUATION) {
+            TermContinuation *thisCont = reinterpret_cast<TermContinuation *>(this);
             assert(continuation->underComplement == thisCont->underComplement);
         }
-        auto unfoldedContinuation = (continuation->aut->IntersectNonEmpty(continuation->symbol.get(), continuation->term, continuation->underComplement)).first;
+        auto unfoldedContinuation = (continuation->aut->IntersectNonEmpty(continuation->symbol.get(),
+                                                                          continuation->term,
+                                                                          continuation->underComplement)).first;
         return this->IsSubsumed(unfoldedContinuation.get());
+    } else if(this->type == TERM_CONTINUATION) {
+        TermContinuation *continuation = reinterpret_cast<TermContinuation *>(this);
+        auto unfoldedContinuation = (continuation->aut->IntersectNonEmpty(continuation->symbol.get(),
+                                                                          continuation->term,
+                                                                          continuation->underComplement)).first;
+        return unfoldedContinuation->IsSubsumed(t);
     } else {
         if(this->_inComplement) {
-            return t->_IsSubsumedCore(this);
+            if(this->type == TERM_EMPTY) {
+                return t->type == TERM_EMPTY;
+            } else {
+                return t->_IsSubsumedCore(this);
+            }
         } else {
-            return this->_IsSubsumedCore(t);
+            if(t->type == TERM_EMPTY) {
+                return this->type == TERM_EMPTY;
+            } else {
+                return this->_IsSubsumedCore(t);
+            }
         }
     }
 }
@@ -515,15 +531,11 @@ void TermProduct::_dumpCore() {
 }
 
 void TermBaseSet::_dumpCore() {
-    if(this->states.size() == 0) {
-        std::cout << "\u2205";
-    } else {
-        std::cout << "\033[1;35m{";
-        for (auto state : this->states) {
-            std::cout << (state) << ",";
-        }
-        std::cout << "}\033[0m";
+    std::cout << "\033[1;35m{";
+    for (auto state : this->states) {
+        std::cout << (state) << ",";
     }
+    std::cout << "}\033[0m";
 }
 
 void TermContinuation::_dumpCore() {

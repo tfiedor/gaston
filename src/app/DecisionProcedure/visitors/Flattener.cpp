@@ -102,15 +102,7 @@ AST* Flattener::visit(ASTForm_Equal1* form) {
         // y = xi -> Xy = Xx i
         assert(temp->n == 1 && "Expected Plus(Var, 1)"); // ASSERTION = {y = x + 1}
         if (temp->t->kind == aVar1) {
-            ASTTerm1_Var1* yf = static_cast<ASTTerm1_Var1*>(form->t1);
-            y = new ASTTerm2_Var2(yf->getVar(), form->pos);
-            ASTTerm1_Var1* xf = static_cast<ASTTerm1_Var1*>(temp->t);
-            x = new ASTTerm2_Var2(xf->getVar(), form->pos);
-            // X + 1
-            ASTTerm2_Plus* plus = new ASTTerm2_Plus(x, temp->n, form->pos);
-            // Y = X + 1
-            ASTForm_Equal2* eq2 = new ASTForm_Equal2(y, plus, form->pos);
-            return eq2;
+            return form;
         } else {
             unsigned int z = symbolTable.insertFresh(Varname1);
             ASTTerm1_Var1* zVar = new ASTTerm1_Var1(z, form->pos);

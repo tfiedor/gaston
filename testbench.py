@@ -20,6 +20,7 @@ dwina_error = (-1, -1, -1, -1, -1)
 mona_error = (-1, -1)
 mona_expnf_error = (-1, -1, -1)
 test_dir="./tests/basic"
+#test_dir="./tests/exhaustive"
 
 def createArgumentParser():
 	'''
@@ -58,11 +59,11 @@ def run_mona_expnf(test, timeout, checkonly=False):
 		return mona_expnf_error, ""
 	return parseMonaOutput(output, True, checkonly)
 
-def run_dwina(test, timeout, checkonly=False):
+def run_gaston(test, timeout, checkonly=False):
 	'''
 	Runs dWiNA with following arguments: --method=backward
 	'''
-	args = ('./dWiNA', '--method=backward', '"{}"'.format(test))
+	args = ('./gaston', '"{}"'.format(test))
 	args2 = ('./dWiNA-no-prune', '--method=backward', '"{}"'.format(test))
 	output, retcode = runProcess(args, timeout)
 	if checkonly:
@@ -251,15 +252,15 @@ def parsedWiNAOutput(output, unprunedOutput, checkonly=False):
 	# get dp time
 	times = [line for line in strippedLines if line.startswith('[*] Decision procedure elapsed time:')]
 	time_dp = parseTotalTime(times[0])
-	
+
 	# get size of state
 	sizes = [line for line in strippedLines if line.startswith('[*] Number of states in resulting automaton:')]
 	base_aut = int(re.search('[0-9]+', sizes[0]).group(0))
-	
+
 	# get size of state
 	sizes = [line for line in strippedLines if line.startswith('[*] Size of the searched space:')]
 	size = int(re.search('[0-9]+', sizes[0]).group(0))
-	
+
 	strippedLines = [line.lstrip() for line in unprunedOutput]
 	sizes = [line for line in strippedLines if line.startswith('[*] Size of the searched space:')]
 	size_unpruned = int(re.search('[0-9]+', sizes[0]).group(0))
@@ -468,7 +469,7 @@ if __name__ == '__main__':
 			print("[!] Invalid number of binaries")
 			quit()
 		bins = ['mona', 'mona-expnf', 'dwina', 'dwina-dfa'] if (options.bin is None) else options.bin
-		bins = ['mona', 'dwina'] if options.check else bins
+		bins = ['mona', 'gaston'] if options.check else bins
 		wdir = test_dir if options.check else options.dir
 		
 		# iterate through all files in dir
@@ -493,29 +494,29 @@ if __name__ == '__main__':
 				
 				print("[*] Running test bench:"),
 				print(colored("'{}'".format(benchmark), "grey", attrs=["bold"]))
-				rets = {'dwina' : ""}
+				rets = {'gaston' : ""}
 				for bin in bins:
 					method_name = "_".join(["run"] + bin.split('-'))
 					method_call = getattr(sys.modules[__name__], method_name)
 					data[benchmark][bin], rets[bin] = method_call(benchmark, options.timeout, options.check)
-					if rets['dwina'] == "" and 'dwina-dfa' in rets.keys():
-						rets['dwina'] = rets['dwina-dfa']
+					if rets['gaston'] == "" and 'dwina-dfa' in rets.keys():
+						rets['gaston'] = rets['dwina-dfa']
 				cases += 1
 				if rets['mona'] == -1 or rets['mona'] == "":
 					print("\t-> MONA failed or could not be determined")
-				elif rets['mona'].upper() != rets['dwina']:
+				elif rets['mona'].upper() != rets['gaston']:
 					print("\t->"),
 					print(colored("FAIL", "red")),
 					print("; Formula is "),
 					print(colored("'{}'".format(rets['mona']), "white")),
 					print(" (dWiNA returned "),
-					print(colored("'{}'".format(rets['dwina'].lower()), "white")),
+					print(colored("'{}'".format(rets['gaston'].lower()), "white")),
 					print(")")
 					fails += 1
-					failed_cases.append("'{}': dWiNA ('{}') vs mona ('{}')".format(benchmark, rets['dwina'], rets['mona'].lower()))	
-					all_cases.append("FAIL : '{}': dWiNA ('{}') vs mona ('{}')".format(benchmark, rets['dwina'], rets['mona'].lower()))	
+					failed_cases.append("'{}': gaston ('{}') vs mona ('{}')".format(benchmark, rets['gaston'], rets['mona'].lower()))
+					all_cases.append("FAIL : '{}': gaston ('{}') vs mona ('{}')".format(benchmark, rets['gaston'], rets['mona'].lower()))
 				else:
-					all_cases.append("OK : '{}': dWiNA ('{}') vs mona ('{}')".format(benchmark, rets['dwina'], rets['mona'].lower()))	
+					all_cases.append("OK : '{}': gaston ('{}') vs mona ('{}')".format(benchmark, rets['gaston'], rets['mona'].lower()))
 					print("\t->"),
 					print(colored("OK","green")),
 					print("; Formula is"),

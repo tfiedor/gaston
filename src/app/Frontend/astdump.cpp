@@ -151,7 +151,7 @@ void
 ASTTerm1_Plus::dump()
 {
   #if (PRINT_PRETTY == true)
-  cout << "("; t->dump(); cout << " + " << n << ")";
+  cout << "("; t->dump(); cout << " +\u00B9 " << n << ")";
   #else
   cout << "Plus1("; t->dump(); cout << "," << n << ")";
   #endif
@@ -161,7 +161,7 @@ void
 ASTTerm1_Minus::dump()
 {
   #if (PRINT_PRETTY == true)
-  cout << "("; t->dump(); cout << " - " << n << ")";
+  cout << "("; t->dump(); cout << " -\u00B9 " << n << ")";
   #else
   cout << "Minus1("; t->dump(); cout << "," << n << ")";
   #endif
@@ -275,7 +275,7 @@ void
 ASTTerm2_Plus::dump()
 {
   #if (PRINT_PRETTY == true)
-  cout << "("; T->dump(); cout << " + " << n << ")";
+  cout << ""; T->dump(); cout << " +\u00B2 " << n << "";
   #else
   cout << "Plus2("; T->dump(); cout << "," << n << ")";
   #endif
@@ -285,7 +285,7 @@ void
 ASTTerm2_Minus::dump()
 {
   #if (PRINT_PRETTY == true)
-  cout << "("; T->dump(); cout << " - " << n << ")";
+  cout << ""; T->dump(); cout << " -\u00B2 " << n << "";
   #else
   cout << "Minus2("; T->dump(); cout << "," << n << ")";
   #endif
@@ -381,7 +381,7 @@ void
 ASTForm_Equal1::dump()
 {
   #if (PRINT_PRETTY == true)
-  cout << "("; t1->dump(); cout << " \u003D "; t2->dump(); cout << ")";
+  cout << "("; t1->dump(); cout << " \u003D\u00B9 "; t2->dump(); cout << ")";
   #else
   cout << "Equal1("; t1->dump(); cout << ","; t2->dump(); cout << ")";
   #endif
@@ -391,7 +391,7 @@ void
 ASTForm_Equal2::dump()
 {
   #if (PRINT_PRETTY == true)
-  cout << "("; T1->dump(); cout << " \u003D "; T2->dump(); cout << ")";
+  cout << "("; T1->dump(); cout << " \u003D\u00B2 "; T2->dump(); cout << ")";
   #else
   cout << "Equal2("; T1->dump(); cout << ","; T2->dump(); cout << ")";
   #endif
@@ -401,7 +401,7 @@ void
 ASTForm_NotEqual1::dump()
 {
   #if (PRINT_PRETTY == true)
-  cout << "("; t1->dump(); cout << " \u2260 "; t2->dump(); cout << ")";
+  cout << "("; t1->dump(); cout << " \u2260\u00B9 "; t2->dump(); cout << ")";
   #else
   cout << "NotEqual1("; t1->dump(); cout << ","; t2->dump(); cout << ")";
   #endif
@@ -411,7 +411,7 @@ void
 ASTForm_NotEqual2::dump()
 {
   #if (PRINT_PRETTY == true)
-  cout << "("; T1->dump(); cout << " \u2260 "; T2->dump(); cout << ")";
+  cout << "("; T1->dump(); cout << " \u2260\u00B2 "; T2->dump(); cout << ")";
   #else
   cout << "NotEqual2("; T1->dump(); cout << ","; T2->dump(); cout << ")";
   #endif
@@ -421,7 +421,7 @@ void
 ASTForm_Less::dump()
 {
   #if (PRINT_PRETTY == true)
-  cout << "("; t1->dump(); cout << " \u003C "; t2->dump(); cout << ")";
+  cout << "("; t1->dump(); cout << " \u003C\u00B9 "; t2->dump(); cout << ")";
   #else
   cout << "Less("; t1->dump(); cout << ","; t2->dump(); cout << ")";
   #endif
@@ -431,7 +431,7 @@ void
 ASTForm_LessEq::dump()
 {
   #if (PRINT_PRETTY == true)
-  cout << "("; t1->dump(); cout << " \u2264 "; t2->dump(); cout << ")";
+  cout << "("; t1->dump(); cout << " \u2264\u00B9 "; t2->dump(); cout << ")";
   #else
   cout << "LessEq("; t1->dump(); cout << ","; t2->dump(); cout << ")";
   #endif

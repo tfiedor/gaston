@@ -393,20 +393,14 @@ void ASTForm_Sub::toUnaryAutomaton(Automaton &aut, bool doComplement) {
 	// final state q0
 	setFinalState(aut, doComplement, 0);
 
-#if CONSTRUCT_ALWAYS_DTA
-	if(doComplement) {
-#endif
-		// q0 -(x10x)-> q1 = sink
-		addTransition(aut, 0, T1, T2, (char *) "10", 1);
+	// q0 -(x10x)-> q1 = sink
+	addTransition(aut, 0, T1, T2, (char *) "10", 1);
 
-		// q1 -(xxxx)-> q1
-		addUniversalTransition(aut, 1, 1);
+	// q1 -(xxxx)-> q1
+	addUniversalTransition(aut, 1, 1);
 
-		// nonfinal state q1
-		setNonFinalState(aut, doComplement, 1);
-#if CONSTRUCT_ALWAYS_DTA
-	}
-#endif
+	// nonfinal state q1
+	setNonFinalState(aut, doComplement, 1);
 }
 
 /**
@@ -455,7 +449,8 @@ void ASTForm_FirstOrder::toUnaryAutomaton(Automaton &aut, bool doComplement) {
  * @return Automaton corresponding to the formula x <= y
  */
 void ASTForm_LessEq::toUnaryAutomaton(Automaton &aut, bool doComplement) {
-	// TODO: I think this is fucking wrong o.O
+	assert(this->t1->kind == aVar1 && this->t2->kind == aVar1);
+
 	ASTTerm1_Var1 *xVar = (ASTTerm1_Var1*) this->t1;
 	unsigned int x = (unsigned int) xVar->n;
 	ASTTerm1_Var1 *yVar = (ASTTerm1_Var1*) this->t2;
@@ -467,45 +462,30 @@ void ASTForm_LessEq::toUnaryAutomaton(Automaton &aut, bool doComplement) {
 	// q0 -(x00x)-> q0
 	addTransition(aut, 0, x, y, (char *) "00", 0);
 
-	// q1 -(x00x)-> q1
-	addTransition(aut, 1, x, y, (char *) "00", 1);
+	// q0 -(x11x)-> q2
+	addTransition(aut, 0, x, y, (char *) "11", 2);
 
-	// q2 -(x00x)-> q2
-	addTransition(aut, 2, x, y, (char *) "00", 2);
+	// q0 -(x10x)-> q1
+	addTransition(aut, 0, x, y, (char *) "10", 1);
 
-	// q0 -(x10x)-> q2
-	addTransition(aut, 0, x, y, (char *) "10", 2);
+	// q1 -(xX0x)-> q1
+	addTransition(aut, 1, x, y, (char *) "X0", 1);
 
-	// q0 -(x11x)-> q1
-	addTransition(aut, 0, x, y, (char *) "11", 1);
+	// q1 -(xX1x)-> q2
+	addTransition(aut, 1, x, y, (char *) "X1", 2);
 
-	// q2 -(x01x)-> q1
-	addTransition(aut, 2, x, y, (char *) "01", 1);
+	// q2 -(xXXx)-> q2
+	addUniversalTransition(aut, 2, 2);
 
 	setNonFinalState(aut, doComplement, 0);
-	setFinalState(aut, doComplement, 1);
-	setNonFinalState(aut, doComplement, 2);
+	setNonFinalState(aut, doComplement, 1);
+	setFinalState(aut, doComplement, 2);
 
 #if CONSTRUCT_ALWAYS_DTA
 	if(doComplement){
 #endif
-		// q0 -(x01x)-> q3
+		// q0 -(xX1x)-> q3
 		addTransition(aut, 0, x, y, (char *) "01", 3);
-
-		// q1 -(x01x)-> q3
-		addTransition(aut, 1, x, y, (char *) "01", 3);
-
-		// q1 -(x01x)-> q3
-		addTransition(aut, 1, x, y, (char *) "10", 3);
-
-		// q1 -(x01x)-> q3
-		addTransition(aut, 1, x, y, (char *) "11", 3);
-
-		// q2 -(x10x)-> q3
-		addTransition(aut, 2, x, y, (char *) "10", 3);
-
-		// q2 -(x11x)-> q3
-		addTransition(aut, 2, x, y, (char *) "11", 3);
 
 		// q3 -(xxx)-> q3
 		addUniversalTransition(aut, 3, 3);
@@ -522,6 +502,8 @@ void ASTForm_LessEq::toUnaryAutomaton(Automaton &aut, bool doComplement) {
  * @return Automaton corresponding to the formula x <= y
  */
 void ASTForm_Less::toUnaryAutomaton(Automaton &aut, bool doComplement) {
+	assert(this->t1->kind == aVar1 && this->t2->kind == aVar1);
+
 	ASTTerm1_Var1 *xVar = (ASTTerm1_Var1*) this->t1;
 	unsigned int x = (unsigned int) xVar->n;
 	ASTTerm1_Var1 *yVar = (ASTTerm1_Var1*) this->t2;
@@ -530,43 +512,37 @@ void ASTForm_Less::toUnaryAutomaton(Automaton &aut, bool doComplement) {
 	// -(xxx)-> q0
 	setInitialState(aut, 0);
 
-	// q0 -(00)-> q0
+	// q0 -(x00x)-> q0
 	addTransition(aut, 0, x, y, (char *) "00", 0);
 
-	// q0 -(10)-> q1
+	// q0 -(x10x)-> q1
 	addTransition(aut, 0, x, y, (char *) "10", 1);
 
-	// q0 -(11)-> _
-	addTransition(aut, 0, x, y, (char *) "11", 3);
+	// q1 -(xX0x)-> q1
+	addTransition(aut, 1, x, y, (char *) "X0", 1);
 
-	// q0 -(01)-> _
-	addTransition(aut, 0, x, y, (char *) "01", 3);
+	// q1 -(xX1x)-> q2
+	addTransition(aut, 1, x, y, (char *) "X1", 2);
 
-	// q1 -(00)-> q1
-	addTransition(aut, 1, x, y, (char *) "00", 1);
-
-	// q1 -(01)-> q2
-	addTransition(aut, 1, x, y, (char *) "01", 2);
-
-	// q1 -(1X)-> _
-	addTransition(aut, 1, x, y, (char *) "1X", 3);
-
-	// q2 -(00)-> q2
-	addTransition(aut, 2, x, y, (char *) "00", 2);
-
-	// q2 -(01)-> _
-	addTransition(aut, 2, x, y, (char *) "01", 3);
-
-	// q2 -(1X)-> _
-	addTransition(aut, 2, x, y, (char *) "1X", 3);
-
-	// _  -(XX)-> _
-	addUniversalTransition(aut, 3, 3);
+	// q2 -(xXXx)-> q2
+	addUniversalTransition(aut, 2, 2);
 
 	setNonFinalState(aut, doComplement, 0);
 	setNonFinalState(aut, doComplement, 1);
 	setFinalState(aut, doComplement, 2);
-	setNonFinalState(aut, doComplement, 3);
+
+#if CONSTRUCT_ALWAYS_DTA
+	if(doComplement){
+#endif
+		// q0 -(xX1x)-> q3
+		addTransition(aut, 0, x, y, (char *) "X1", 3);
+
+		// q3 -(xxx)-> q3
+		addUniversalTransition(aut, 3, 3);
+		setNonFinalState(aut, doComplement, 3);
+#if CONSTRUCT_ALWAYS_DTA
+	}
+#endif
 }
 
 /**
@@ -577,60 +553,83 @@ void ASTForm_Less::toUnaryAutomaton(Automaton &aut, bool doComplement) {
  * @return Automaton corresponding to the formula x = Int
  */
 void ASTForm_Equal1::toUnaryAutomaton(Automaton &aut, bool doComplement) {
-	// x = int
-	ASTTerm1_Var1 *XVar = (ASTTerm1_Var1*) this->t1;
-	unsigned int X = (unsigned int) XVar->n;
-	ASTTerm1_Int *iVar = (ASTTerm1_Int*) this->t2;
-	unsigned int i = (unsigned int) iVar->n;
+	if(this->t1->kind == aVar1 && this->t2->kind == aPlus1) {
+		ASTTerm1_Var1 *xVar = (ASTTerm1_Var1 *) this->t1;
+		unsigned int x = (unsigned int) xVar->n;
+		ASTTerm1_Var1 *yTerm = (ASTTerm1_Var1 *) ((ASTTerm1_Plus *) this->t2)->t;
+		unsigned int y = yTerm->n;
 
-	// -(xxx)-> q1
-	setInitialState(aut, 1);
-	setNonFinalState(aut, doComplement, 1);
+		// -(xxx)-> q0
+		setInitialState(aut, 0);
 
-	for(unsigned j = 1; (j-1) != i;) {
-		// j -(x0x)-> j+1
-		addTransition(aut, j, X, '0', j+1);
-		// j -(x1x)-> q0
-#if CONSTRUCT_ALWAYS_DTA
-		if(doComplement) {
-#endif
-			addTransition(aut, j, X, '1', 0);
-#if CONSTRUCT_ALWAYS_DTA
-		}
-#endif
+		// q0 -(x00x)-> q0
+		addTransition(aut, 0, x, y, (char *) "00", 0);
 
-		setNonFinalState(aut, doComplement, j++);
-	}
+		// q0 -(x01x)-> q1
+		addTransition(aut, 0, x, y, (char *) "01", 1);
 
-	// i+1 -(x1x)-> i+2
-	addTransition(aut, i+1, X, '1', i+2);
-	// i+1 -(x0x)-> q0
-#if CONSTRUCT_ALWAYS_DTA
-	if(doComplement) {
-#endif
-		addTransition(aut, i+1, X, '0', 0);
-#if CONSTRUCT_ALWAYS_DTA
-	}
-#endif
+		// q0 -(x1Xx)-> q3
+		addTransition(aut, 0, x, y, (char *) "1X", 3);
 
-	// state i+2 is final
-	setFinalState(aut, doComplement, i+2);
+		// q1 -(x1Xx)-> q2
+		addTransition(aut, 1, x, y, (char *) "1X", 2);
 
-	addTransition(aut, i+2, X, '0', i+2);
+		// q1 -(x0Xx)-> q3
+		addTransition(aut, 1, x, y, (char *) "0X", 3);
 
-#if CONSTRUCT_ALWAYS_DTA
-	if(doComplement) {
-#endif
-		// since set X can contain ONLY i
-		// i+2 -(xxx)-> 0
-		addTransition(aut, i+2, X, '1', 0);
+		// q2 -(xXXx)-> q2
+		addUniversalTransition(aut, 2, 2);
 
-		// q0 is sink state
+		// q3 -(xXXx)-> q3
+		addUniversalTransition(aut, 3, 3);
+
 		setNonFinalState(aut, doComplement, 0);
-		addUniversalTransition(aut, 0, 0);
-#if CONSTRUCT_ALWAYS_DTA
+		setNonFinalState(aut, doComplement, 1);
+		setFinalState(aut, doComplement, 2);
+		setNonFinalState(aut, doComplement, 3); // < SINK >
+	} else if(this->t1->kind == aVar1 && this->t2->kind == aVar1) {
+		ASTTerm1_Var1 *xVar = (ASTTerm1_Var1 *) this->t1;
+		unsigned int x = (unsigned int) xVar->n;
+		ASTTerm1_Var1 *yVar = (ASTTerm1_Var1 *) this->t2;
+		unsigned int y = (unsigned int) yVar->n;
+
+		setInitialState(aut, 0);
+
+		addTransition(aut, 0, x, y, (char *) "00", 0);    // q0 -(x00x)-> q0
+		addTransition(aut, 0, x, y, (char *) "01", 2);    // q0 -(x01x)-> q2
+		addTransition(aut, 0, x, y, (char *) "10", 2);    // q0 -(x10x)-> q2
+		addTransition(aut, 0, x, y, (char *) "11", 1);    // q0 -(x11x)-> q1
+
+		addUniversalTransition(aut, 1, 1);                // q1 -(xXXx)-> q1
+
+		addUniversalTransition(aut, 2, 2);                // q2 -(xXXx)-> q2
+
+		setNonFinalState(aut, doComplement, 0);
+		setFinalState(aut, doComplement, 1);
+		setNonFinalState(aut, doComplement, 2);	// < SINK >
+	} else if(this->t1->kind == aVar1 && this->t2->kind == aInt) {
+		ASTTerm1_Var1 *xVar = reinterpret_cast<ASTTerm1_Var1*>(this->t1);
+		unsigned int x = (unsigned int) xVar->n;
+		ASTTerm1_Int *cVar = reinterpret_cast<ASTTerm1_Int*>(this->t2);
+		unsigned int c = cVar->n;
+
+		assert(c == 0 && "Constants > 0 are not supported");
+
+		setInitialState(aut, 0);
+
+		addTransition(aut, 0, x, '1', 1);				// q0 -(x1x)-> q1
+		addTransition(aut, 0, x, '0', 2);				// q0 -(x0x)-> q2
+
+		addUniversalTransition(aut, 1, 1);				// q1 -(xXx)-> q1
+
+		addUniversalTransition(aut, 2, 2);				// q2 -(xXx)-> q2
+
+		setNonFinalState(aut, doComplement, 0);
+		setFinalState(aut, doComplement, 1);
+		setNonFinalState(aut, doComplement, 2);	// < SINK >
+	} else {
+		assert(false && "Unsupported Equal1 operation");
 	}
-#endif
 }
 
 /**
@@ -688,27 +687,24 @@ void ASTForm_In::toUnaryAutomaton(Automaton &aut, bool doComplement) {
 		// -(xxx)-> q0
 		setInitialState(aut, 0);
 
-		// q0 -(x00x)-> q0
-		addTransition(aut, 0, x, X, (char *) "00", 0);
+		// q0 -(x0Xx)-> q0
+		addTransition(aut, 0, x, X, (char *) "0X", 0);
 
-		// q0 -(x01x)-> q0
-		addTransition(aut, 0, x, X, (char *) "01", 0);
+		// q0 -(x11x)-> q1
+		addTransition(aut, 0, x, X, (char *) "11", 1);
 
-		if(doComplement) {
-			// q0 -(x10x)-> q1
-			addTransition(aut, 0, x, X, (char *) "10", 1);
-		} else {
-			// q0 -(x11x)-> q1
-			addTransition(aut, 0, x, X, (char *) "11", 1);
-		}
+		// q0 -(x10x)-> q2
+		addTransition(aut, 0, x, X, (char *) "10", 2);
 
-		// q1 -(x00x)-> q1
-		addTransition(aut, 1, x, X, (char *) "00", 1);
+		// q1 -(xXXx)-> q1
+		addUniversalTransition(aut, 1, 1);
 
-		// q1 -(x01x)-> q1
-		addTransition(aut, 1, x, X, (char *) "01", 1);
+		// q2 -(xXXx)-> q2
+		addUniversalTransition(aut, 2, 2);
 
-		setFinalState(aut, false, 1);
+		setNonFinalState(aut, doComplement, 0);
+		setFinalState(aut, doComplement, 1);
+		setNonFinalState(aut, doComplement, 2); // < SINK >
 	}
 }
 

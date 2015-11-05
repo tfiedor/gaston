@@ -681,13 +681,16 @@ int main(int argc, char *argv[]) {
 		cout << "[!] Formula is ";
 		switch(decided) {
 			case SATISFIABLE:
-				cout << "\033[1;34m'SATISFIABLE'\033[0m";
+				//cout << "\033[1;34m'SATISFIABLE'\033[0m";
+				cout << "'SATISFIABLE'";
 				break;
 			case UNSATISFIABLE:
-				cout << "\033[1;31m'UNSATISFIABLE'\033[0m";
+				//cout << "\033[1;31m'UNSATISFIABLE'\033[0m";
+				cout << "'UNSATISFIABLE'";
 				break;
 			case VALID:
-				cout << "\033[1;32m'VALID'\033[0m";
+				//cout << "\033[1;32m'VALID'\033[0m";
+				cout << "'VALID'";
 				break;
 			default:
 				cout << "undecided due to an error.\n";
