@@ -34,9 +34,14 @@ SymbolicAutomaton::SymbolicAutomaton(Formula_ptr form) : _form(form) {
 
     IdentList free, bound;
     this->_form->freeVars(&free, &bound);
-    for(auto it = free.begin(); it != free.end(); ++it) {
+    IdentList* allVars;
+    allVars = ident_union(&free, &bound);
+
+    for(auto it = allVars->begin(); it != allVars->end(); ++it) {
         _freeVars.insert(varMap[(*it)]);
     }
+
+    delete allVars;
 }
 
 BinaryOpAutomaton::BinaryOpAutomaton(SymbolicAutomaton_raw lhs, SymbolicAutomaton_raw rhs, Formula_ptr form)
@@ -223,7 +228,7 @@ ResultType SymbolicAutomaton::IntersectNonEmpty(Symbol_ptr symbol, Term_ptr stat
     } else {
         stateApproximation->dump();
     }
-    std::cout << ") = " << (result.second ? "True" : "False") << "\n";
+    std::cout << ") = <" << (result.second ? "True" : "False") << ","; result.first->dump(); std::cout << ">\n";
     #endif
 
     // Return results
@@ -294,7 +299,6 @@ void BinaryOpAutomaton::_InitializeInitialStates() {
 
 void ComplementAutomaton::_InitializeInitialStates() {
     this->_initialStates = this->_aut->GetInitialStates();
-    this->_initialStates->Complement();
 }
 
 void ProjectionAutomaton::_InitializeInitialStates() {
@@ -324,7 +328,6 @@ void BinaryOpAutomaton::_InitializeFinalStates() {
 
 void ComplementAutomaton::_InitializeFinalStates() {
     this->_finalStates = this->_aut->GetFinalStates();
-    this->_finalStates->Complement();
 }
 
 void ProjectionAutomaton::_InitializeFinalStates() {
@@ -425,7 +428,7 @@ ResultType BinaryOpAutomaton::_IntersectNonEmptyCore(Symbol_ptr symbol, Term_ptr
 
     // We can prune the state if left side was evaluated as Empty term
     // TODO: This is different for Unionmat!
-    if(lhs_result.first->type == TERM_EMPTY && this->_productType == ProductType::E_INTERSECTION) {
+    if(false && lhs_result.first->type == TERM_EMPTY && this->_productType == ProductType::E_INTERSECTION) {
         return std::make_pair(lhs_result.first, underComplement);
     }
 
@@ -451,7 +454,7 @@ ResultType BinaryOpAutomaton::_IntersectNonEmptyCore(Symbol_ptr symbol, Term_ptr
     ResultType rhs_result = this->_rhs_aut->IntersectNonEmpty(symbol, productStateApproximation->right, underComplement);
     // We can prune the state if right side was evaluated as Empty term
     // TODO: This is different for Unionmat!
-    if(rhs_result.first->type == TERM_EMPTY && this->_productType == ProductType::E_INTERSECTION) {
+    if(false && rhs_result.first->type == TERM_EMPTY && this->_productType == ProductType::E_INTERSECTION) {
         return std::make_pair(rhs_result.first, underComplement);
     }
 
@@ -474,7 +477,7 @@ ResultType ProjectionAutomaton::_IntersectNonEmptyCore(Symbol_ptr symbol, Term_p
 
     if(symbol == nullptr) {
         // We are doing the initial step by evaluating the epsilon
-        TermList*projectionApproximation = reinterpret_cast<TermList*>(finalApproximation.get());
+        TermList* projectionApproximation = reinterpret_cast<TermList*>(finalApproximation.get());
         assert(projectionApproximation->list.size() == 1);
 
         // Evaluate the initial unfolding of epsilon
@@ -504,7 +507,7 @@ ResultType ProjectionAutomaton::_IntersectNonEmptyCore(Symbol_ptr symbol, Term_p
 
         // While the fixpoint is not fully unfolded and while we cannot evaluate early
         while( ((fixpointTerm = it.GetNext()) != nullptr) && (underComplement == fixpoint->GetResult())) {}
-        //                                            ^--- is this right?
+        //                                                    ^--- is this right?
         #endif
 
         // Return (fixpoint, bool)

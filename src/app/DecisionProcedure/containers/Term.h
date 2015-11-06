@@ -41,6 +41,7 @@ public:
     TermType type;
 protected:
     // <<< PRIVATE MEMBERS >>>
+    bool _nonMembershipTesting;
     bool _inComplement;
 
 public:
@@ -48,7 +49,7 @@ public:
     virtual bool IsSubsumedBy(std::list<Term_ptr>& fixpoint) = 0;
     virtual bool IsSubsumed(Term* t);
     virtual bool IsEmpty() = 0;
-    virtual void Complement() {this->_inComplement = true;}
+    virtual void Complement() {this->_inComplement = (this->_inComplement == false);}
 
     // <<< MEASURING FUNCTIONS >>>
     virtual unsigned int MeasureStateSpace() = 0;

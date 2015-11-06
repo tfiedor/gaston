@@ -687,24 +687,15 @@ void ASTForm_In::toUnaryAutomaton(Automaton &aut, bool doComplement) {
 		// -(xxx)-> q0
 		setInitialState(aut, 0);
 
-		// q0 -(x0Xx)-> q0
-		addTransition(aut, 0, x, X, (char *) "0X", 0);
-
-		// q0 -(x11x)-> q1
-		addTransition(aut, 0, x, X, (char *) "11", 1);
-
-		// q0 -(x10x)-> q2
-		addTransition(aut, 0, x, X, (char *) "10", 2);
-
-		// q1 -(xXXx)-> q1
-		addUniversalTransition(aut, 1, 1);
-
-		// q2 -(xXXx)-> q2
-		addUniversalTransition(aut, 2, 2);
+		addTransition(aut, 0, x, X, (char *) "0X", 0);	// q0 -(x0Xx)-> q0
+		addTransition(aut, 0, x, X, (char *) "11", 1);	// q0 -(x11x)-> q1
+		addTransition(aut, 0, x, X, (char *) "10", 2);	// q0 -(x10x)-> q2
+		addUniversalTransition(aut, 1, 1);				// q1 -(xXXx)-> q1
+		addUniversalTransition(aut, 2, 2);				// q2 -(xXXx)-> q2
 
 		setNonFinalState(aut, doComplement, 0);
 		setFinalState(aut, doComplement, 1);
-		setNonFinalState(aut, doComplement, 2); // < SINK >
+		setNonFinalState(aut, doComplement, 2); 		// < SINK >
 	}
 }
 

@@ -85,7 +85,8 @@ TermContinuation::TermContinuation(std::shared_ptr<SymbolicAutomaton> a, Term_pt
     t->dump();
     std::cout << "]\n";
     #endif
-    this->_inComplement = b;
+    this->_nonMembershipTesting = b;
+    this->_inComplement = false;
 }
 
 TermList::TermList() {
@@ -102,7 +103,8 @@ TermList::TermList(Term_ptr first, bool isCompl) {
     #endif
     this->type = TERM_LIST;
     this->list.push_back(first);
-    this->_inComplement = isCompl;
+    this->_nonMembershipTesting = isCompl;
+    this->_inComplement = false;
 }
 
 TermList::TermList(Term_ptr f, Term_ptr s, bool isCompl) {
@@ -112,7 +114,8 @@ TermList::TermList(Term_ptr f, Term_ptr s, bool isCompl) {
     this->type = TERM_LIST;
     this->list.push_back(f);
     this->list.push_back(s);
-    this->_inComplement = isCompl;
+    this->_nonMembershipTesting = isCompl;
+    this->_inComplement = false;
 }
 
 TermFixpoint::TermFixpoint(std::shared_ptr<SymbolicAutomaton> aut, Term_ptr startingTerm, Symbols symList, bool inComplement, bool initbValue)
@@ -123,7 +126,8 @@ TermFixpoint::TermFixpoint(std::shared_ptr<SymbolicAutomaton> aut, Term_ptr star
 
     // Initialize the aggregate function
     this->_InitializeAggregateFunction(inComplement);
-    this->_inComplement = inComplement;
+    this->_nonMembershipTesting = inComplement;
+    this->_inComplement = false;
     this->type = TERM_FIXPOINT;
 
     // Initialize the fixpoint as [nullptr, startingTerm]
@@ -139,7 +143,7 @@ TermFixpoint::TermFixpoint(std::shared_ptr<SymbolicAutomaton> aut, Term_ptr star
 
 TermFixpoint::TermFixpoint(std::shared_ptr<SymbolicAutomaton> aut, Term_ptr sourceTerm, Symbols symList, bool inComplement)
         : _sourceTerm(sourceTerm), _sourceIt(reinterpret_cast<TermFixpoint*>(sourceTerm.get())->GetIteratorDynamic()),
-        _aut(aut), _worklist(), _bValue(false) {
+        _aut(aut), _worklist(), _bValue(inComplement) {
     #if (MEASURE_STATE_SPACE == true)
     ++TermFixpoint::instances;
     #endif
@@ -148,7 +152,8 @@ TermFixpoint::TermFixpoint(std::shared_ptr<SymbolicAutomaton> aut, Term_ptr sour
     // Initialize the aggregate function
     this->_InitializeAggregateFunction(inComplement);
     this->type = TERM_FIXPOINT;
-    this->_inComplement = inComplement;
+    this->_nonMembershipTesting = inComplement;
+    this->_inComplement = false;
 
     // Initialize the fixpoint
     this->_fixpoint.push_front(nullptr);
@@ -372,17 +377,7 @@ bool TermList::IsSubsumedBy(std::list<Term_ptr>& fixpoint) {
         // Nullptr is skipped
         if(item == nullptr) continue;
 
-        // Test the subsumption of terms, if we are under complement
-        //   we switch the subsumption relation
-        if(this->_inComplement) {
-            if (item->IsSubsumed(this)) {
-                return true;
-            }
-        } else {
-            if (this->IsSubsumed(item.get())) {
-                return true;
-            }
-        }
+        return this->IsSubsumed(item.get());
     }
 
     return false;
@@ -596,7 +591,7 @@ void TermFixpoint::ComputeNextFixpoint() {
     _worklist.pop_front();
 
     // Compute the results
-    ResultType result = _aut->IntersectNonEmpty(&item.second, item.first, this->_inComplement);
+    ResultType result = _aut->IntersectNonEmpty(&item.second, item.first, this->_nonMembershipTesting);
 
     // If it is subsumed by fixpoint, we don't add it
     if(result.first->IsSubsumedBy(_fixpoint)) {
@@ -625,7 +620,7 @@ void TermFixpoint::ComputeNextPre() {
     _worklist.pop_front();
 
     // Compute the results
-    ResultType result = _aut->IntersectNonEmpty(&item.second, item.first, this->_inComplement);
+    ResultType result = _aut->IntersectNonEmpty(&item.second, item.first, this->_nonMembershipTesting);
 
     // If it is subsumed we return
     if(result.first->IsSubsumedBy(_fixpoint)) {
