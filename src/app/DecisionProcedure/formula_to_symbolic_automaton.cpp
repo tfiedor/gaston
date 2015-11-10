@@ -14,8 +14,12 @@ SymbolicAutomaton* baseToSymbolicAutomaton(ASTForm* form, bool doComplement) {
     NegationUnfolder nu_visitor;
     ASTForm* nonNegatedAutomaton = reinterpret_cast<ASTForm*>(form->accept(nu_visitor));
     nonNegatedAutomaton->toUnaryAutomaton(aut, doComplement);
-    /*auto aut1 = aut.RemoveUnreachableStates();
-    aut = aut1.RemoveUselessStates();*/
+
+    #if (OPT_REDUCE_AUT_LAST == true)
+    aut = aut.RemoveUnreachableStates();
+    //aut = aut1.RemoveUselessStates();
+    #endif
+
     return new TemplatedAutomaton(new Automaton(aut), form);
 }
 

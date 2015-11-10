@@ -109,11 +109,13 @@ void ASTForm_And::toUnaryAutomaton(Automaton &andAutomaton, bool doComplement) {
 	this->f1->toUnaryAutomaton(left, doComplement);
 	this->f2->toUnaryAutomaton(right, doComplement);
 
-	#if (OPT_REDUCE_AUTOMATA == true)
-	auto l1 = left.RemoveUnreachableStates();
+	#if (OPT_REDUCE_AUT_EVERYTIME == true)
+	left = left.RemoveUnreachableStates();
+	right = right.RemoveUnreachableStates();
+	/*auto l1 = left.RemoveUnreachableStates();
 	left = l1.RemoveUselessStates();
 	auto r1 = left.RemoveUnreachableStates();
-	right = r1.RemoveUselessStates();
+	right = r1.RemoveUselessStates();*/
 	#endif
 
 	// TODO: Dangerous, not sure if this is valid!!!
@@ -134,9 +136,10 @@ void ASTForm_And::toUnaryAutomaton(Automaton &andAutomaton, bool doComplement) {
 		andAutomaton = Automaton::Intersection(left, right);
 	}
 
-	#if (OPT_REDUCE_AUTOMATA == true)
-	auto a1 = andAutomaton.RemoveUnreachableStates();
-	andAutomaton = a1.RemoveUselessStates();
+	#if (OPT_REDUCE_AUT_EVERYTIME == true)
+	andAutomaton = andAutomaton.RemoveUnreachableStates();
+	//auto a1 = andAutomaton.RemoveUnreachableStates();
+	//andAutomaton = a1.RemoveUselessStates();
 	#endif
 
 	/*StateHT reachable;
@@ -161,12 +164,14 @@ void ASTForm_Or::toUnaryAutomaton(Automaton &orAutomaton, bool doComplement) {
 	this->f1->toUnaryAutomaton(left, doComplement);
 	this->f2->toUnaryAutomaton(right, doComplement);
 
-#if (OPT_REDUCE_AUTOMATA == true)
-	auto l1 = left.RemoveUnreachableStates();
+	#if (OPT_REDUCE_AUT_EVERYTIME == true)
+	left = left.RemoveUnreachableStates();
+	right = right.RemoveUnreachableStates();
+	/*auto l1 = left.RemoveUnreachableStates();
 	left = l1.RemoveUselessStates();
 	auto r1 = left.RemoveUnreachableStates();
-	right = r1.RemoveUselessStates();
-#endif
+	right = r1.RemoveUselessStates();*/
+	#endif
 
 	// TODO: This may be dangerous as well
 	// if CheckInclusion(left,right) returns 1, that means that right
@@ -184,10 +189,11 @@ void ASTForm_Or::toUnaryAutomaton(Automaton &orAutomaton, bool doComplement) {
 		orAutomaton = Automaton::Union(left, right);
 	}
 
-#if (OPT_REDUCE_AUTOMATA == true)
-	auto a1 = orAutomaton.RemoveUnreachableStates();
-	orAutomaton = a1.RemoveUselessStates();
-#endif
+	#if (OPT_REDUCE_AUT_EVERYTIME == true)
+	orAutomaton = orAutomaton.RemoveUnreachableStates();
+	//auto a1 = orAutomaton.RemoveUnreachableStates();
+	//orAutomaton = a1.RemoveUselessStates();
+	#endif
 }
 
 /**

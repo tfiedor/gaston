@@ -428,9 +428,11 @@ ResultType BinaryOpAutomaton::_IntersectNonEmptyCore(Symbol_ptr symbol, Term_ptr
 
     // We can prune the state if left side was evaluated as Empty term
     // TODO: This is different for Unionmat!
-    if(false && lhs_result.first->type == TERM_EMPTY && this->_productType == ProductType::E_INTERSECTION) {
+    #if (OPT_PRUNE_EMPTY == true)
+    if(lhs_result.first->type == TERM_EMPTY && this->_productType == ProductType::E_INTERSECTION) {
         return std::make_pair(lhs_result.first, underComplement);
     }
+    #endif
 
     #if (OPT_EARLY_EVALUATION == true)
     // Sometimes we can evaluate the experession early and return the continuation.
@@ -454,9 +456,11 @@ ResultType BinaryOpAutomaton::_IntersectNonEmptyCore(Symbol_ptr symbol, Term_ptr
     ResultType rhs_result = this->_rhs_aut->IntersectNonEmpty(symbol, productStateApproximation->right, underComplement);
     // We can prune the state if right side was evaluated as Empty term
     // TODO: This is different for Unionmat!
-    if(false && rhs_result.first->type == TERM_EMPTY && this->_productType == ProductType::E_INTERSECTION) {
+    #if (OPT_PRUNE_EMPTY == true)
+    if(rhs_result.first->type == TERM_EMPTY && this->_productType == ProductType::E_INTERSECTION) {
         return std::make_pair(rhs_result.first, underComplement);
     }
+    #endif
 
     Term_ptr combined = std::shared_ptr<Term>(new TermProduct(lhs_result.first, rhs_result.first, this->_productType));
     return std::make_pair(combined, this->_eval_result(lhs_result.second, rhs_result.second, underComplement));

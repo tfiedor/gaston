@@ -235,7 +235,7 @@ def parsedWiNAOutput(output, unprunedOutput, checkonly=False):
 	strippedLines = [line.lstrip() for line in output]
 	ret = ""
 	for line in strippedLines:
-		match = re.search("\[!\] Formula is '([A-Z]+)'", line)
+		match = re.search("\[!\] Formula is [^']*'([A-Z]+)'[^']*", line)
 		if match is not None:
 			ret = match.group(1)
 			break

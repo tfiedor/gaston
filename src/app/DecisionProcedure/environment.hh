@@ -151,7 +151,7 @@ enum FixpointTermSem {E_FIXTERM_FIXPOINT, E_FIXTERM_PRE};
 
 /* >>> Debugging Options <<< *
  *****************************/
-#define DEBUG_BASE_AUTOMATA 			false
+#define DEBUG_BASE_AUTOMATA 			true
 #define DEBUG_FIXPOINT 					false
 #define DEBUG_INITIAL_APPROX 			false
 #define DEBUG_INTERSECT_NON_EMPTY 		false
@@ -172,8 +172,10 @@ enum FixpointTermSem {E_FIXTERM_FIXPOINT, E_FIXTERM_PRE};
 /* >>> Optimizations <<< *
  *************************/
 #define OPT_DRAW_NEGATION_IN_BASE 		false
-#define OPT_CREATE_QF_AUTOMATON 		false
-#define OPT_REDUCE_AUTOMATA 			false
-#define OPT_EARLY_EVALUATION 			false
+#define OPT_CREATE_QF_AUTOMATON 		true
+#define OPT_REDUCE_AUT_EVERYTIME		true
+#define OPT_REDUCE_AUT_LAST				true
+#define OPT_EARLY_EVALUATION 			true
+#define OPT_PRUNE_EMPTY					true
 #define OPT_CACHE_RESULTS 				true
 #endif
