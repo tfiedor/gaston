@@ -36,6 +36,10 @@ void addTransition(Automaton& aut, unsigned int q, char* transition, unsigned qf
 void addTransition(Automaton& aut, unsigned int q, Automaton::SymbolType transition, unsigned qf);
 void addUniversalTransition(Automaton& automaton, unsigned int from, unsigned int to);
 void convertMonaToVataAutomaton(Automaton& v_aut, DFA* m_aut, IdentList* vars, int varNum, unsigned* offsets);
+void initializeOffsets(unsigned *offs, IdentList *vars);
+void initializeVars(ASTForm *form, IdentList *vars);
+void toMonaAutomaton(ASTForm *form, DFA* dfa);
+void constructAutomatonByMona(ASTForm *form, Automaton& v_aut);
 
 Automaton::SymbolType constructUniversalTrack();
 

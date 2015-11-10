@@ -11,6 +11,7 @@
 #include "../Frontend/ast.h"
 #include "../Frontend/symboltable.h"
 #include "../Frontend/env.h"
+#include "../Frontend/offsets.h"
 
 #include <cstring>
 #include <list>
@@ -30,7 +31,9 @@ using std::cout;
 
 extern SymbolTable symbolTable;
 extern Options options;
+extern Offsets offsets;
 extern VarToTrackMap varMap;
+extern CodeTable *codeTable;
 
 using Automaton = VATA::BDDBottomUpTreeAut;
 
@@ -702,6 +705,56 @@ void ASTForm_In::toUnaryAutomaton(Automaton &aut, bool doComplement) {
 		setNonFinalState(aut, doComplement, 0);
 		setFinalState(aut, doComplement, 1);
 		setNonFinalState(aut, doComplement, 2); 		// < SINK >
+	}
+}
+
+void constructAutomatonByMona(ASTForm *form, Automaton& v_aut) {
+	int numVars = varMap.TrackLength();
+	unsigned *offs = new unsigned[numVars];
+	IdentList *vars;
+	DFA *dfa = nullptr;
+
+	initializeVars(form, vars);
+	initializeOffsets(offs, vars);
+	toMonaAutomaton(form, dfa);
+	convertMonaToVataAutomaton(v_aut, dfa, vars, numVars, offs);
+}
+
+void toMonaAutomaton(ASTForm* form, DFA* dfa) {
+	// First code is generated, should be in DAG
+	codeTable = new CodeTable;
+	VarCode formulaCode = form->makeCode();
+
+	dfa = nullptr;
+
+	// Initialization
+	bdd_init();
+	codeTable->init_print_progress();
+
+	dfa = formulaCode.DFATranslate();
+	formulaCode.remove();
+
+	// unrestrict automata
+	DFA *temp = dfaCopy(dfa);
+	dfaUnrestrict(temp);
+	dfa = dfaMinimize(temp);
+	dfaFree(temp);
+}
+
+void initializeVars(ASTForm *form, IdentList *vars) {
+	IdentList free, bounded;
+	form->freeVars(&free, &bounded);
+	vars = ident_union(&free, &bounded);
+}
+
+void initializeOffsets(unsigned *offs, IdentList *vars) {
+	// some freaking crappy initializations
+	IdentList::iterator id;
+	int ix = 0;
+
+	// iterate through all variables
+	for (id = vars->begin(); id != vars->end(); id++, ix++) {
+		offs[ix] = offsets.off(*id);
 	}
 }
 

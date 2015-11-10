@@ -537,45 +537,8 @@ int main(int argc, char *argv[]) {
 		// -> this may fail on insufficient memory
 		if (options.construction == AutomataConstruction::DETERMINISTIC_AUT) {
 			std::cout << "[*] Constructing 'Deterministic' Automaton using MONA\n";
-
-			// First code is generated, should be in DAG
-			codeTable = new CodeTable;
-			VarCode formulaCode = matrix->makeCode();
-
-			DFA *dfa = nullptr;
-
-			// Initialization
-			bdd_init();
-			codeTable->init_print_progress();
-
-			dfa = formulaCode.DFATranslate();
-			formulaCode.remove();
-
-			// unrestrict automata
-			DFA *temp = dfaCopy(dfa);
-			dfaUnrestrict(temp);
-			dfa = dfaMinimize(temp);
-			dfaFree(temp);
-
-			// some freaking crappy initializations
-			IdentList::iterator id;
-			int ix = 0;
-			int numVars = varMap.TrackLength();
-			char **vnames = new char *[numVars];
-			unsigned *offs = new unsigned[numVars];
-
-			IdentList free, bounded;
-			matrix->freeVars(&free, &bounded);
-			IdentList *vars = ident_union(&free, &bounded);
-
-			// iterate through all variables
-			for (id = vars->begin(); id != vars->end(); id++, ix++) {
-				vnames[ix] = symbolTable.lookupSymbol(*id);
-				offs[ix] = offsets.off(*id);
-			}
-
-			convertMonaToVataAutomaton(vataAutomaton, dfa, vars, numVars, offs);
-			std::cout << "[*] Converting 'Deterministic' Automaton to 'NonDeterministic' Automaton\n";
+			constructAutomatonByMona(matrix, vataAutomaton);
+			std::cout << "[*] Converted 'Deterministic' Automaton to 'NonDeterministic' Automaton\n";
 			// Build automaton by ourselves, may build huge automata
 		} else {
 			// WS1S formula is transformed to unary NTA
