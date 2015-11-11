@@ -309,7 +309,6 @@ void ProjectionAutomaton::_InitializeInitialStates() {
 void BaseAutomaton::_InitializeInitialStates() {
     // NOTE: The automaton is constructed backwards, so final states are initial
     assert(this->_initialStates == nullptr);
-    assert(this->_stateSpace != 0);
 
     TermBaseSet* temp = new TermBaseSet();
     for(auto state : this->_base_automaton->GetFinalStates()) {
@@ -338,7 +337,6 @@ void ProjectionAutomaton::_InitializeFinalStates() {
 void BaseAutomaton::_InitializeFinalStates() {
     // NOTE: The automaton is constructed backwards, so initial states are finals
     assert(this->_finalStates == nullptr);
-    assert(this->_stateSpace != 0);
 
     // Obtain the MTBDD for Initial states
     BaseAutomatonStateSet finalStates;

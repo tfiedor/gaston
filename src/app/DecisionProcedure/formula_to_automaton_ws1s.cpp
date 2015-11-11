@@ -709,45 +709,56 @@ void ASTForm_In::toUnaryAutomaton(Automaton &aut, bool doComplement) {
 }
 
 void constructAutomatonByMona(ASTForm *form, Automaton& v_aut) {
+	assert(form != nullptr);
+
 	int numVars = varMap.TrackLength();
 	unsigned *offs = new unsigned[numVars];
-	IdentList *vars;
+	IdentList *vars = nullptr;
 	DFA *dfa = nullptr;
 
-	initializeVars(form, vars);
+	vars = initializeVars(form);
 	initializeOffsets(offs, vars);
 	toMonaAutomaton(form, dfa);
 	convertMonaToVataAutomaton(v_aut, dfa, vars, numVars, offs);
 }
 
-void toMonaAutomaton(ASTForm* form, DFA* dfa) {
-	// First code is generated, should be in DAG
+void toMonaAutomaton(ASTForm* form, DFA*& dfa) {
+	assert(form != nullptr);
+
+	// Conversion of formula representation from AST to DAG
 	codeTable = new CodeTable;
 	VarCode formulaCode = form->makeCode();
 
 	dfa = nullptr;
 
-	// Initialization
+	// Initialization of BDD
 	bdd_init();
 	codeTable->init_print_progress();
 
+	// Translation to DFA
 	dfa = formulaCode.DFATranslate();
 	formulaCode.remove();
 
-	// unrestrict automata
+	// Unrestriction of MONA automaton
+	// Note: This is optimization of MONA
 	DFA *temp = dfaCopy(dfa);
 	dfaUnrestrict(temp);
 	dfa = dfaMinimize(temp);
 	dfaFree(temp);
 }
 
-void initializeVars(ASTForm *form, IdentList *vars) {
+IdentList* initializeVars(ASTForm *form) {
+	assert(form != nullptr);
+
 	IdentList free, bounded;
 	form->freeVars(&free, &bounded);
-	vars = ident_union(&free, &bounded);
+	return ident_union(&free, &bounded);
 }
 
 void initializeOffsets(unsigned *offs, IdentList *vars) {
+	assert(offs != nullptr);
+	assert(vars != nullptr);
+
 	// some freaking crappy initializations
 	IdentList::iterator id;
 	int ix = 0;
@@ -761,14 +772,19 @@ void initializeOffsets(unsigned *offs, IdentList *vars) {
 /**
  * Alternative way of constructing automaton. We use deterministic automata
  * and construct the automaton by MONA, use the minimization and then convert
- * the automaton from MONA representation to VATA representation
+ * the automaton from MONA representation to VATA representation by switching
+ * the post transitions to pre transitions
  *
- * @param[out] v_aut: output automaton in VATA representation
- * @param[in] m_aut: input automaton in MONA representation
- * @param[in] varNum: numberof variables in automaton
- * @param[in] offsets: offsets of concrete variables
+ * @param[out] v_aut: 		output automaton in VATA representation
+ * @param[in] m_aut: 		input automaton in MONA representation
+ * @param[in] varNum: 		numberof variables in automaton
+ * @param[in] offsets: 		offsets of concrete variables
  */
 void convertMonaToVataAutomaton(Automaton& v_aut, DFA* m_aut, IdentList* vars, int varNum, unsigned* offsets) {
+	assert(m_aut != nullptr);
+	assert(offsets != nullptr);
+	assert(vars != nullptr);
+
 	char* transition = new char[varNum];
 
 	paths state_paths, pp;
@@ -798,17 +814,16 @@ void convertMonaToVataAutomaton(Automaton& v_aut, DFA* m_aut, IdentList* vars, i
 				for (tp = pp->trace; tp && (tp->index != offsets[j]); tp = tp->next);
 				if(tp) {
 					if (tp->value) {
-						transition[varMap[vars->get(j)]] = '1';
+						transition[j] = '1';
 					} else {
-						transition[varMap[vars->get(j)]] = '0';
+						transition[j] = '0';
 					}
 				} else {
-					transition[varMap[vars->get(j)]] = 'X';
+					transition[j] = 'X';
 				}
 			}
 			transition[j] = '\0';
 
-			//std::cout << i << " -(" << transition << ")-> " << pp->to << "\n";
 			addTransition(v_aut, i, transition, pp->to);
 
 			pp = pp->next;

@@ -5,19 +5,24 @@
 #include "../Frontend/ast.h"
 #include "../DecisionProcedure/containers/SymbolicAutomata.h"
 #include "../DecisionProcedure/environment.hh"
+#include "../DecisionProcedure/automata.hh"
 #include "../DecisionProcedure/visitors/NegationUnfolder.h"
 #include <memory>
 
 template<class TemplatedAutomaton>
 SymbolicAutomaton* baseToSymbolicAutomaton(ASTForm* form, bool doComplement) {
     Automaton aut;
+    #if (AUT_CONSTRUCT_BY_MONA == true)
+    constructAutomatonByMona(form, aut);
+    #else
     NegationUnfolder nu_visitor;
     ASTForm* nonNegatedAutomaton = reinterpret_cast<ASTForm*>(form->accept(nu_visitor));
     nonNegatedAutomaton->toUnaryAutomaton(aut, doComplement);
+    #endif
 
     #if (OPT_REDUCE_AUT_LAST == true)
-    aut = aut.RemoveUnreachableStates();
-    //aut = aut1.RemoveUselessStates();
+    auto aut1 = aut.RemoveUnreachableStates();
+    aut = aut1.RemoveUselessStates();
     #endif
 
     return new TemplatedAutomaton(new Automaton(aut), form);

@@ -148,13 +148,14 @@ enum FixpointTermSem {E_FIXTERM_FIXPOINT, E_FIXTERM_PRE};
  *************************/
 #define AUT_ALWAYS_DETERMINISTIC		false
 #define AUT_ALWAYS_CONSTRAINT_FO		false
+#define AUT_CONSTRUCT_BY_MONA			true
 
 /* >>> Debugging Options <<< *
  *****************************/
 #define DEBUG_BASE_AUTOMATA 			true
 #define DEBUG_FIXPOINT 					false
 #define DEBUG_INITIAL_APPROX 			false
-#define DEBUG_INTERSECT_NON_EMPTY 		false
+#define DEBUG_INTERSECT_NON_EMPTY 		true
 #define DEBUG_TERM_SUBSUMPTION 			false
 #define DEBUG_CONTINUATIONS 			false
 #define DEBUG_COMPUTE_FULL_FIXPOINT 	false
