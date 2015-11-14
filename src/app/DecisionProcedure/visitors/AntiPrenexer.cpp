@@ -25,7 +25,7 @@ AST* AntiPrenexer::visit(ASTForm_Ex0* form) {
  * @param[in] form:     traversed Ex1 node
  */
 AST* AntiPrenexer::visit(ASTForm_Ex1* form) {
-    // TODO: implement;
+    assert(false && "Called base AntiPrenexer method!");
     return form;
 }
 
@@ -33,7 +33,7 @@ AST* AntiPrenexer::visit(ASTForm_Ex1* form) {
  * @param[in] form:     traversed Ex2 node
  */
 AST* AntiPrenexer::visit(ASTForm_Ex2* form) {
-    // TODO: implement
+    assert(false && "Called base AntiPrenexer method!");
     return form;
 }
 
@@ -41,7 +41,7 @@ AST* AntiPrenexer::visit(ASTForm_Ex2* form) {
  * @param[in] form:     traversed All0 node
  */
 AST* AntiPrenexer::visit(ASTForm_All0* form) {
-    // TODO: implement
+    assert(false && "Called base AntiPrenexer method!");
     return form;
 }
 
@@ -49,7 +49,7 @@ AST* AntiPrenexer::visit(ASTForm_All0* form) {
  * @param[in] form:     traversed All1 node
  */
 AST* AntiPrenexer::visit(ASTForm_All1* form) {
-    // TODO: implement
+    assert(false && "Called base AntiPrenexer method!");
     return form;
 }
 
@@ -57,6 +57,71 @@ AST* AntiPrenexer::visit(ASTForm_All1* form) {
  * @param[in] form:     traversed All2 node
  */
 AST* AntiPrenexer::visit(ASTForm_All2* form) {
-    // TODO: implement
+    assert(false && "Called base AntiPrenexer method!");
     return form;
+}
+
+/**********************
+ * FULL ANTI-PRENEXER *
+ *********************/
+/*-------------------------------------------------------------------------*
+ | Ex X . f1          ->    f1                 -- if X \notin freeVars(f1) |
+ | Ex X . f1 /\ f2    ->    (Ex X. f1) /\ f2   -- if X \notin freeVars(f2) |
+ | Ex X . f1 /\ f2    ->    f1 /\ (Ex X. f2)   -- if X \notin freeVars(f1) |
+ | Ex X . f1 \/ f2    ->    (Ex X. f1) \/ (Ex X. f2)                       |
+ *-------------------------------------------------------------------------*
+ |All X . f1          ->    f1                 -- if X \notin freeVars(f1) |
+ |All X . f1 \/ f2    ->    (All X. f1) \/ f2  -- if X \notin freeVars(f2) |
+ |All X . f1 \/ f2    ->    f1 \/ (All X. f2)  -- if X \notin freeVars(f1) |
+ |All X . f1 /\ f2    ->    (All X. f1) /\ (All X. f2)\                    |
+ *-------------------------------------------------------------------------*/
+
+/*-------------------------------------------------------------------------*
+ | Ex X . f1          ->    f1                 -- if X \notin freeVars(f1) |
+ | Ex X . f1 /\ f2    ->    (Ex X. f1) /\ f2   -- if X \notin freeVars(f2) |
+ | Ex X . f1 /\ f2    ->    f1 /\ (Ex X. f2)   -- if X \notin freeVars(f1) |
+ | Ex X . f1 \/ f2    ->    (Ex X. f1) \/ (Ex X. f2)                       |
+ *-------------------------------------------------------------------------*/
+template<class ExistClass>
+ASTForm* existentialAntiPrenex(ASTForm *form) {
+    static_assert(std::is_base_of<ASTForm_q, ExistClass>::value, "ExistClass is not derived from 'ASTForm_q' class");
+
+    ExistClass* exForm = static_cast<ExistClass*>(form);
+    std::cout << "Exists with [";
+    IdentList *bound = exForm->vl;
+    for(auto it = bound->begin(); it != bound->end(); ++it) {
+        std::cout << (*it) << ",";
+    }
+    std::cout << "]\n";
+
+    return form;
+}
+
+AST* FullAntiPrenexer::visit(ASTForm_Ex1 *form) {
+    return existentialAntiPrenex<ASTForm_Ex1>(form);
+}
+
+AST* FullAntiPrenexer::visit(ASTForm_Ex2 *form) {
+    return existentialAntiPrenex<ASTForm_Ex1>(form);
+}
+
+/*-------------------------------------------------------------------------*
+ |All X . f1          ->    f1                 -- if X \notin freeVars(f1) |
+ |All X . f1 \/ f2    ->    (All X. f1) \/ f2  -- if X \notin freeVars(f2) |
+ |All X . f1 \/ f2    ->    f1 \/ (All X. f2)  -- if X \notin freeVars(f1) |
+ |All X . f1 /\ f2    ->    (All X. f1) /\ (All X. f2)\                    |
+ *-------------------------------------------------------------------------*/
+template<class ForallClass>
+ASTForm* universalAntiPrenex(ASTForm *form) {
+    static_assert(std::is_base_of<ASTForm_q, ForallClass>::value, "ForallClass is not derived from 'ASTForm_q' class");
+
+    return form;
+}
+
+AST* FullAntiPrenexer::visit(ASTForm_All1 *form) {
+    return universalAntiPrenex<ASTForm_All1>(form);
+}
+
+AST* FullAntiPrenexer::visit(ASTForm_All2 *form) {
+    return universalAntiPrenex<ASTForm_All2>(form);
 }

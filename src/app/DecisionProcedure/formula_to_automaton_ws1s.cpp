@@ -786,19 +786,23 @@ void convertMonaToVataAutomaton(Automaton& v_aut, DFA* m_aut, IdentList* vars, i
 	assert(vars != nullptr);
 
 	char* transition = new char[varNum];
+	int usedVarNum = vars->size();
 
 	paths state_paths, pp;
 	trace_descr tp;
 
 	// add initial transition
-	setInitialState(v_aut, 0);
+	setInitialState(v_aut, 1);
 
 	if(options.dump) {
 		std::cout << "[*] Number of states in MONA deterministic automaton: " << m_aut->ns << "\n";
 	}
 
-	for (unsigned int i = 0; i < m_aut->ns; ++i) {
-		// set final states
+	for (unsigned int i = 1; i < m_aut->ns; ++i) {
+	//                ^--- my assumption why this is correct:
+	// MONA has one additional transition 0 -(X*)-> 1 for zeroth order variables
+	// since we are not using this, we can skip it
+	// set final states
 		if(m_aut->f[i] == 1) {
 			setFinalState(v_aut, false, i);
 		}
@@ -810,20 +814,26 @@ void convertMonaToVataAutomaton(Automaton& v_aut, DFA* m_aut, IdentList* vars, i
 			// TODO: this may need few augmentation, because mona probably
 			// has different order of variables
 			int j;
-			for (j = 0; j < varNum; ++j) {
-				for (tp = pp->trace; tp && (tp->index != offsets[j]); tp = tp->next);
-				if(tp) {
-					if (tp->value) {
-						transition[j] = '1';
-					} else {
-						transition[j] = '0';
-					}
-				} else {
-					transition[j] = 'X';
-				}
+			// Initialize transition
+			for(j = 0; j < varNum; ++j) {
+				transition[j] = 'X';
 			}
 			transition[j] = '\0';
 
+			for (j = 0; j < usedVarNum; ++j) {
+				for (tp = pp->trace; tp && (tp->index != offsets[j]); tp = tp->next);
+				if(tp) {
+					if (tp->value) {
+						transition[varMap[vars->get(j)]] = '1';
+					} else {
+						transition[varMap[vars->get(j)]] = '0';
+					}
+				} else {
+					transition[varMap[vars->get(j)]] = 'X';
+				}
+			}
+
+			//std::cout << i << " -(" << transition << ")-> " << pp->to << "\n";
 			addTransition(v_aut, i, transition, pp->to);
 
 			pp = pp->next;

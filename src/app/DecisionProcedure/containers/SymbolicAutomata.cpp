@@ -603,7 +603,9 @@ void ProjectionAutomaton::DumpAutomaton() {
     std::cout << "\033[1;34m)\033[0m";
 }
 
-void GenericBaseAutomaton::DumpAutomaton() { std::cout << "<Aut>";
+void GenericBaseAutomaton::DumpAutomaton() {
+    std::cout << "Automaton";
+    _form->dump();
     #if (DEBUG_BASE_AUTOMATA == true)
     this->BaseAutDump();
     #endif
@@ -693,7 +695,7 @@ void BaseAutomaton::BaseAutDump() {
 
     std::cout << "[!] Initial states:\n";
     if(this->_initialStates != nullptr) {
-        this->_finalStates->dump();
+        this->_initialStates->dump();
         std::cout << "\n";
     } else {
         std::cout << "-> not initialized\n";
@@ -701,7 +703,7 @@ void BaseAutomaton::BaseAutDump() {
 
     std::cout << "[!] Final states:\n";
     if(this->_finalStates != nullptr) {
-        this->_initialStates->dump();
+        this->_finalStates->dump();
         std::cout << "\n";
     } else {
         std::cout << "-> not initialized\n";

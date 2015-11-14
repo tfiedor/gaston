@@ -46,6 +46,7 @@
 #include "DecisionProcedure/containers/Cache.hh"
 #include "DecisionProcedure/containers/SymbolicAutomata.h"
 #include "DecisionProcedure/containers/Term.h"
+#include "DecisionProcedure/visitors/AntiPrenexer.h"
 #include "DecisionProcedure/visitors/BooleanUnfolder.h"
 #include "DecisionProcedure/visitors/UniversalQuantifierRemover.h"
 #include "DecisionProcedure/visitors/SyntaxRestricter.h"
@@ -552,6 +553,18 @@ int main(int argc, char *argv[]) {
 			}
 		}
 	} else {
+		#if (OPT_ANTIPRENEXING == true)
+		std::cout << "[*] Filtering formula by Anti-Prenexer\n";
+		#if (ANTIPRENEXING_FULL == true)
+		FullAntiPrenexer antiPrenexer;
+		#endif
+		(ast->formula) = static_cast<ASTForm*>((ast->formula)->accept(antiPrenexer));
+		if(options.dump) {
+			(ast->formula)->dump();
+			std::cout << "\n";
+		}
+		#endif
+
 		std::cout << "[*] Constructing 'Symbolic' Automaton using gaston\n";
 		symAutomaton = std::shared_ptr<SymbolicAutomaton>((ast->formula)->toSymbolicAutomaton(false));
 		symAutomaton->DumpAutomaton();
