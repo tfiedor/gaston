@@ -393,16 +393,32 @@ int main(int argc, char *argv[]) {
 		// Remove implication and stuff
 		SyntaxRestricter sr_visitor;
 		ast->formula = static_cast<ASTForm *>(ast->formula->accept(sr_visitor));
-		// Restrict to second order
-		SecondOrderRestricter sor_visitor;
-		ast->formula = static_cast<ASTForm *>(ast->formula->accept(sor_visitor));
+
+
+		#if (OPT_ANTIPRENEXING == true)
+			G_DEBUG_FORMULA_AFTER_PHASE("anti-prenexing");
+			#if (ANTIPRENEXING_FULL == true)
+			FullAntiPrenexer antiPrenexer;
+			#endif
+			(ast->formula) = static_cast<ASTForm*>((ast->formula)->accept(antiPrenexer));
+			if(options.dump) {
+				(ast->formula)->dump();
+				std::cout << "\n";
+			}
+		#endif
+
 		// Remove universal quantification
 		UniversalQuantifierRemover uqr_visitor;
 		ast->formula = static_cast<ASTForm *>(ast->formula->accept(uqr_visitor));
+
 		// Push the negation towards the leaves
 		// TODO: Ex2 and All2 may be unsupported
 		NegationUnfolder nu_visitor;
 		ast->formula = static_cast<ASTForm *>(ast->formula->accept(nu_visitor));
+
+		// Restrict to second order
+		SecondOrderRestricter sor_visitor;
+		ast->formula = static_cast<ASTForm *>(ast->formula->accept(sor_visitor));
 	}
 	timer_formula.stop();
 
@@ -553,18 +569,6 @@ int main(int argc, char *argv[]) {
 			}
 		}
 	} else {
-		#if (OPT_ANTIPRENEXING == true)
-		std::cout << "[*] Filtering formula by Anti-Prenexer\n";
-		#if (ANTIPRENEXING_FULL == true)
-		FullAntiPrenexer antiPrenexer;
-		#endif
-		(ast->formula) = static_cast<ASTForm*>((ast->formula)->accept(antiPrenexer));
-		if(options.dump) {
-			(ast->formula)->dump();
-			std::cout << "\n";
-		}
-		#endif
-
 		std::cout << "[*] Constructing 'Symbolic' Automaton using gaston\n";
 		symAutomaton = std::shared_ptr<SymbolicAutomaton>((ast->formula)->toSymbolicAutomaton(false));
 		symAutomaton->DumpAutomaton();
