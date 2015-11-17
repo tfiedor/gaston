@@ -111,6 +111,11 @@ enum TermType {TERM, TERM_EMPTY, TERM_FIXPOINT, TERM_PRODUCT, TERM_BASE, TERM_LI
 enum ProductType {E_INTERSECTION, E_UNION};
 enum FixpointTermSem {E_FIXTERM_FIXPOINT, E_FIXTERM_PRE};
 
+/****************
+ * DEBUG MACROS *
+ ****************/
+#define G_DEBUG_FORMULA_AFTER_PHASE(str) cout << "\n\n[*] Formula after '" << str << "' phase:\n"
+
 /*********************************
  * OTHER METHODS RELATED DEFINES *
  *********************************/
@@ -184,4 +189,16 @@ enum FixpointTermSem {E_FIXTERM_FIXPOINT, E_FIXTERM_PRE};
 #define OPT_EARLY_EVALUATION 			true
 #define OPT_PRUNE_EMPTY					true
 #define OPT_CACHE_RESULTS 				true
+
+/*******************************
+ * DEFINITION OF FILTER PHASES *
+ *******************************/
+
+#define FILTER_LIST(code) \
+	code(SyntaxRestricter)				\
+	code(Reorderer)						\
+	code(FullAntiPrenexer)				\
+	code(UniversalQuantifierRemover)	\
+	code(NegationUnfolder)				\
+	code(SecondOrderRestricter)
 #endif

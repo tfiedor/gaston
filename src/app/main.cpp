@@ -54,9 +54,11 @@
 #include "DecisionProcedure/visitors/PrenexNormalFormTransformer.h"
 #include "DecisionProcedure/visitors/Flattener.h"
 #include "DecisionProcedure/visitors/NegationUnfolder.h"
+#include "DecisionProcedure/visitors/Reorderer.h"
 
 // < Typedefs and usings >
 using std::cout;
+using std::cerr;
 using StateToStateTranslator = VATA::AutBase::StateToStateTranslWeak;
 using StateToStateMap        = std::unordered_map<StateType, StateType>;
 using Automaton 			 = VATA::BDDBottomUpTreeAut;
@@ -76,8 +78,6 @@ VarToTrackMap varMap;
 IdentList inFirstOrder;
 int numTypes = 0;
 bool regenerate = false;
-
-#define G_DEBUG_FORMULA_AFTER_PHASE(str) cout << "\n\n[*] Formula after '" << str << "' phase:\n"
 
 #if (USE_STATECACHE == true)
 MultiLevelMCache<bool> StateCache;
@@ -388,37 +388,18 @@ int main(int argc, char *argv[]) {
 
 	if (options.noExpnf == false) {
 		// Transform AST to existentional Prenex Normal Form
-		ast->formula = (ASTForm *) (ast->formula)->toExistentionalPNF();
+		cerr << "[!] Called [deprecated] parameter '--no-expnf'";
+		return 0;
 	} else {
-		// Remove implication and stuff
-		SyntaxRestricter sr_visitor;
-		ast->formula = static_cast<ASTForm *>(ast->formula->accept(sr_visitor));
-
-
-		#if (OPT_ANTIPRENEXING == true)
-			G_DEBUG_FORMULA_AFTER_PHASE("anti-prenexing");
-			#if (ANTIPRENEXING_FULL == true)
-			FullAntiPrenexer antiPrenexer;
-			#endif
-			(ast->formula) = static_cast<ASTForm*>((ast->formula)->accept(antiPrenexer));
-			if(options.dump) {
-				(ast->formula)->dump();
-				std::cout << "\n";
-			}
-		#endif
-
-		// Remove universal quantification
-		UniversalQuantifierRemover uqr_visitor;
-		ast->formula = static_cast<ASTForm *>(ast->formula->accept(uqr_visitor));
-
-		// Push the negation towards the leaves
-		// TODO: Ex2 and All2 may be unsupported
-		NegationUnfolder nu_visitor;
-		ast->formula = static_cast<ASTForm *>(ast->formula->accept(nu_visitor));
-
-		// Restrict to second order
-		SecondOrderRestricter sor_visitor;
-		ast->formula = static_cast<ASTForm *>(ast->formula->accept(sor_visitor));
+		#define CALL_FILTER(filter) \
+			filter filter##_visitor;	\
+			ast->formula = static_cast<ASTForm *>(ast->formula->accept(filter##_visitor));	\
+			if(options.dump) {    \
+                G_DEBUG_FORMULA_AFTER_PHASE(#filter);    \
+                (ast->formula)->dump();    std::cout << "\n";    \
+            }
+		FILTER_LIST(CALL_FILTER)
+		#undef CALL_FILTER
 	}
 	timer_formula.stop();
 

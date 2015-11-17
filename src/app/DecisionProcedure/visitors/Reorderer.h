@@ -21,7 +21,6 @@ public:
     Reorderer() : TransformerVisitor(Traverse::PostOrder) {}
     // Postorder traversal
     // Assumption: are not Impl and Biimpls
-    AST* visit(ASTForm_ff* form);
     AST* visit(ASTForm_And* form);
     AST* visit(ASTForm_Or* form);
     AST* visit(ASTForm_Impl* form);
