@@ -18,7 +18,7 @@
 
 class AntiPrenexer : public TransformerVisitor {
 public:
-    AntiPrenexer() : TransformerVisitor(Traverse::PreOrder) {}
+    AntiPrenexer() : TransformerVisitor(Traverse::PostOrder) {}
 
     // Works in preorder
     virtual AST* visit(ASTForm_Ex0* form);
@@ -47,6 +47,15 @@ public:
 class FullAntiPrenexer : public AntiPrenexer {
 public:
     FullAntiPrenexer() {}
+
+    template<class QuantifierClass, class BinopClass>
+    ASTForm* distributiveRule(QuantifierClass *qForm);
+    template<class QuantifierClass, class BinopClass>
+    ASTForm* nonDistributiveRule(QuantifierClass *qForm);
+    template<class ExistClass>
+    ASTForm* existentialAntiPrenex(ASTForm *form);
+    template<class ForallClass>
+    ASTForm* universalAntiPrenex(ASTForm *form);
 
     // Works in preorder
     virtual AST* visit(ASTForm_Ex1* form);

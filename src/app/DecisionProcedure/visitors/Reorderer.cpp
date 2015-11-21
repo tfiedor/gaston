@@ -23,7 +23,6 @@ AST* switchOperands(BinopClass* binopForm) {
 
     if(boundRight.size() < boundLeft.size()) {
         // Switch, so leftmost is always thing with less quantifications
-        std::cout << "[HIT]" << boundRight.size() << " vs " << boundLeft.size() << "\n";
         ASTForm* temp;
         temp = binopForm->f1;
         binopForm->f1 = binopForm->f2;

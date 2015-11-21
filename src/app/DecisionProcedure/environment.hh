@@ -186,7 +186,7 @@ enum FixpointTermSem {E_FIXTERM_FIXPOINT, E_FIXTERM_PRE};
 #define OPT_CREATE_QF_AUTOMATON 		true
 #define OPT_REDUCE_AUT_EVERYTIME		false
 #define OPT_REDUCE_AUT_LAST				true
-#define OPT_EARLY_EVALUATION 			true
+#define OPT_EARLY_EVALUATION 			false
 #define OPT_PRUNE_EMPTY					true
 #define OPT_CACHE_RESULTS 				true
 
@@ -196,9 +196,9 @@ enum FixpointTermSem {E_FIXTERM_FIXPOINT, E_FIXTERM_PRE};
 
 #define FILTER_LIST(code) \
 	code(SyntaxRestricter)				\
-	code(Reorderer)						\
 	code(FullAntiPrenexer)				\
 	code(UniversalQuantifierRemover)	\
 	code(NegationUnfolder)				\
 	code(SecondOrderRestricter)
+
 #endif
