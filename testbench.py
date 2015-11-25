@@ -64,15 +64,11 @@ def run_gaston(test, timeout, checkonly=False):
 	Runs dWiNA with following arguments: --method=backward
 	'''
 	args = ('./gaston', '"{}"'.format(test))
-	args2 = ('./dWiNA-no-prune', '--method=backward', '"{}"'.format(test))
 	output, retcode = runProcess(args, timeout)
-	if checkonly:
-		output2, retcode2 = "", 0
-	else:
-		output2, retcode2 = runProcess(args2, timeout)
-	if (retcode != 0) and (retcode2 != 0):
+
+	if (retcode != 0):
 		return dwina_error, ""
-	return parsedWiNAOutput(output, output2, checkonly)
+	return parsedWiNAOutput(output, "", checkonly)
 
 def run_dwina_dfa(test, timeout, checkonly=False):
 	'''
@@ -123,8 +119,8 @@ def exportToCSV(data, bins):
 	data should be like this:
 	data[benchmark]['mona'] = (time, space)
 				   ['mona-expnf'] = (time, space, prefix-space)
-				   ['dwina'] = (time, time-dp-only, base-aut, space, space-unpruned)
-				   ['dwina-dfa'] = (time, time-dp-only, base-aut, space, space-unpruned) 
+				   ['gaston'] = (time, time-dp-only, base-aut, space, space-unpruned)
+				   ['gaston-dfa'] = (time, time-dp-only, base-aut, space, space-unpruned)
 	
 	'''
 	saveTo = generateCSVname()
@@ -135,8 +131,8 @@ def exportToCSV(data, bins):
 			csvFile.write('mona-time, mona-space, ')
 		if 'mona-expnf' in bins:
 			csvFile.write('mona-expnf-time, mona-expnf-space, mona-expnf-prefix-space, ')
-		if 'dwina' in bins:
-			csvFile.write('dwina-time, dwina-time-dp-only, base-aut, dwina-space, dwina-space-pruned, ')
+		if 'gaston' in bins:
+			csvFile.write('gaston-time, gaston-time-dp-only, base-aut, gaston-space, gaston-space-pruned, ')
 		if 'dwina-dfa' in bins:
 			csvFile.write('dwina-dfa-time, dwina-dfa-time-dp-only, base-aut, dwina-dfa-space, dwina-dfa-space-pruned')
 		csvFile.write('\n')
@@ -248,24 +244,19 @@ def parsedWiNAOutput(output, unprunedOutput, checkonly=False):
 	if (len(times) != 1):
 		return 
 	time = parseTotalTime(times[0])
-	
+
+	# get size of state
+	sizes = [line for line in strippedLines if line.startswith('[*] Overall State Space:')]
+	size = int(re.search('[0-9]+', sizes[0]).group(0))
+
+	sizes = [line for line in strippedLines if line.startswith('[*] Explored Fixpoint Space:')]
+	size_unpruned = int(re.search('[0-9]+', sizes[0]).group(0))
+
 	# get dp time
 	times = [line for line in strippedLines if line.startswith('[*] Decision procedure elapsed time:')]
 	time_dp = parseTotalTime(times[0])
-
-	# get size of state
-	sizes = [line for line in strippedLines if line.startswith('[*] Number of states in resulting automaton:')]
-	base_aut = int(re.search('[0-9]+', sizes[0]).group(0))
-
-	# get size of state
-	sizes = [line for line in strippedLines if line.startswith('[*] Size of the searched space:')]
-	size = int(re.search('[0-9]+', sizes[0]).group(0))
-
-	strippedLines = [line.lstrip() for line in unprunedOutput]
-	sizes = [line for line in strippedLines if line.startswith('[*] Size of the searched space:')]
-	size_unpruned = int(re.search('[0-9]+', sizes[0]).group(0))
 	
-	return (time, time_dp, base_aut, size, size_unpruned), ret
+	return (time, time_dp, 0, size, size_unpruned), ret
 
 def parseArguments():
 	'''
@@ -468,7 +459,7 @@ if __name__ == '__main__':
 		if options.bin is not None and len(options.bin) > 4:
 			print("[!] Invalid number of binaries")
 			quit()
-		bins = ['mona', 'mona-expnf', 'dwina', 'dwina-dfa'] if (options.bin is None) else options.bin
+		bins = ['mona', 'gaston'] if (options.bin is None) else options.bin
 		bins = ['mona', 'gaston'] if options.check else bins
 		wdir = test_dir if options.check else options.dir
 		
@@ -509,7 +500,7 @@ if __name__ == '__main__':
 					print(colored("FAIL", "red")),
 					print("; Formula is "),
 					print(colored("'{}'".format(rets['mona']), "white")),
-					print(" (dWiNA returned "),
+					print(" (gaston returned "),
 					print(colored("'{}'".format(rets['gaston'].lower()), "white")),
 					print(")")
 					fails += 1

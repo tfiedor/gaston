@@ -37,16 +37,11 @@ class ZeroSymbol;
 class Term;
 class ASTForm;
 
-struct ResultHashType {
-	/**
-      * @param set: set we are computing hash of
-      * @return hash of @p set
-      */
+/*struct ResultHashType {
 	int operator()(std::pair<Term*, std::shared_ptr<ZeroSymbol>> set) const {
-		// TODO: OPTIMIZE THIS
 		return 1;
 	}
-};
+};*/
 
 /***************************
  * GLOBAL USING DIRECTIVES *
@@ -78,6 +73,8 @@ namespace Gaston {
 	using VarValue			     = char;
 	using TrackType				 = Automaton::SymbolType;
 
+	using ResultKey				 = std::pair<Term_raw, Symbol_shared>;
+	using ResultHashType		 = boost::hash<ResultKey>;
 	using ResultCache            = BinaryCache<Term_raw, Symbol_shared, ResultType, ResultHashType>;
 	using SubsumptionCache       = VATA::Util::CachedBinaryOp<Term_ptr, Term_ptr, bool>;
 
@@ -153,7 +150,7 @@ enum FixpointTermSem {E_FIXTERM_FIXPOINT, E_FIXTERM_PRE};
  *************************/
 #define AUT_ALWAYS_DETERMINISTIC		false
 #define AUT_ALWAYS_CONSTRAINT_FO		false
-#define AUT_CONSTRUCT_BY_MONA			true
+#define AUT_CONSTRUCT_BY_MONA			false
 
 /* >>> Debugging Options <<< *
  *****************************/

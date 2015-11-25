@@ -1,7 +1,7 @@
 /*****************************************************************************
  *  dWiNA - Deciding WSkS using non-deterministic automata
  *
- *  Copyright (c) 2015  Tomas Fiedor <ifiedortom1@fit.vutbr.cz>
+ *  Copyright (c) 2015  Tomas Fiedor <ifiedortom@fit.vutbr.cz>
  *
  *  Description:
  *    Visitor for doing the reordering of the formulae. This could be

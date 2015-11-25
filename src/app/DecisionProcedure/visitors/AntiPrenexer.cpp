@@ -18,7 +18,7 @@
  * @param[in] form:     traversed Ex0 node
  */
 AST* AntiPrenexer::visit(ASTForm_Ex0* form) {
-    // TODO: implement
+    assert(false && "Called base AntiPrenexer method!");
     return form;
 }
 
