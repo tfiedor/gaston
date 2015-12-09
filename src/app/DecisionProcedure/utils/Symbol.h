@@ -56,6 +56,7 @@ public:
     // <<< FRIENDS >>>
     friend std::ostream& operator <<(std::ostream& osObject, const ZeroSymbol& z);
     friend bool operator==(const std::shared_ptr<ZeroSymbol>& lhs, const std::shared_ptr<ZeroSymbol>& rhs);
+    friend size_t Gaston::hash_value(std::shared_ptr <ZeroSymbol> &);
 };
 
 /**

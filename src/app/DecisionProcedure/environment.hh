@@ -18,6 +18,7 @@
 #define __DWINA_ENV__H__
 
 #include <boost/dynamic_bitset.hpp>
+#include <boost/functional/hash.hpp>
 #include <exception>
 #include <iostream>
 #include <memory>
@@ -28,6 +29,7 @@
 #include "utils/cached_binary_op.hh"
 #include "mtbdd/ondriks_mtbdd.hh"
 #include "containers/SymbolicCache.hh"
+#include <typeinfo>
 
 /*****************************
  * FORWARD CLASS DECLARATION *
@@ -37,16 +39,22 @@ class ZeroSymbol;
 class Term;
 class ASTForm;
 
-/*struct ResultHashType {
-	int operator()(std::pair<Term*, std::shared_ptr<ZeroSymbol>> set) const {
-		return 1;
-	}
-};*/
+namespace Gaston {
+	extern size_t hash_value(Term*);
+	extern size_t hash_value(std::shared_ptr<ZeroSymbol>&);
+
+	struct ResultHashType {
+		size_t operator()(std::pair<Term*, std::shared_ptr<ZeroSymbol>> set) const {
+			size_t seed = 0;
+			boost::hash_combine(seed, hash_value(set.first));
+			boost::hash_combine(seed, hash_value(set.second));
+			return seed;
+		}
+	};
 
 /***************************
  * GLOBAL USING DIRECTIVES *
  ***************************/
-namespace Gaston {
 	using Automaton 			 = VATA::BDDBottomUpTreeAut;
 	using Formula_ptr            = ASTForm*;
 	using Term_ptr				 = std::shared_ptr<Term>;
@@ -74,7 +82,7 @@ namespace Gaston {
 	using TrackType				 = Automaton::SymbolType;
 
 	using ResultKey				 = std::pair<Term_raw, Symbol_shared>;
-	using ResultHashType		 = boost::hash<ResultKey>;
+	//using ResultHashType		 = boost::hash<ResultKey>;
 	using ResultCache            = BinaryCache<Term_raw, Symbol_shared, ResultType, ResultHashType>;
 	using SubsumptionCache       = VATA::Util::CachedBinaryOp<Term_ptr, Term_ptr, bool>;
 
@@ -150,7 +158,7 @@ enum FixpointTermSem {E_FIXTERM_FIXPOINT, E_FIXTERM_PRE};
  *************************/
 #define AUT_ALWAYS_DETERMINISTIC		false
 #define AUT_ALWAYS_CONSTRAINT_FO		false
-#define AUT_CONSTRUCT_BY_MONA			false
+#define AUT_CONSTRUCT_BY_MONA			true
 
 /* >>> Debugging Options <<< *
  *****************************/

@@ -609,7 +609,7 @@ int main(int argc, char *argv[]) {
 	try {
 	// Deciding WS1S formula
 		timer_deciding.start();
-		try {
+		//try {
 			if(options.method == Method::FORWARD) {
 				if(options.mode != TREE) {
 					decided = decideWS1S(vataAutomaton, plist, nplist);
@@ -632,10 +632,10 @@ int main(int argc, char *argv[]) {
 			} else {
 				std::cout << "[!] Unsupported mode for deciding\n";
 			}
-		} catch (std::bad_alloc) {
-			std::cout << "[!] Insufficient memory for deciding\n";
-			decided = -1;
-		}
+		/*} catch (std::bad_alloc) {
+			std::cerr << "[!] Insufficient memory for deciding\n";
+			exit(EXIT_FAILURE);
+		}*/
 		timer_deciding.stop();
 
 		// Outing the results of decision procedure

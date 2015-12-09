@@ -60,6 +60,10 @@ protected:
     // <<< PRIVATE FUNCTIONS >>>
     virtual bool _IsSubsumedCore(Term* t) = 0;
     virtual void _dumpCore() = 0;
+
+    friend size_t hash_value(Term* s);
+    friend size_t hash_value(Term* &s);
+    friend size_t hash_value(const Term& s);
 };
 
 class TermEmpty : public Term {

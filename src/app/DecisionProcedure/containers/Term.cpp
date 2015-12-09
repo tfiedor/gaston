@@ -13,6 +13,13 @@
  *****************************************************************************/
 
 #include "Term.h"
+#include <boost/functional/hash.hpp>
+
+namespace Gaston {
+    size_t hash_value(Term* s) {
+        return boost::hash_value(s);
+    }
+}
 
 // <<< STATIC MEMBER INITIALIZATION >>>
 int TermProduct::instances = 0;

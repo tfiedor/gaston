@@ -1,5 +1,4 @@
 cmake_minimum_required(VERSION 2.8)
-#project(dWiNA2014)
 project(gaston2015)
 
 set(REQUIRED_G++_VERSION 4.8.0)

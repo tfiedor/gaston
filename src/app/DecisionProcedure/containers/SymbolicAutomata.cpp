@@ -160,7 +160,7 @@ ResultType SymbolicAutomaton::IntersectNonEmpty(Symbol_ptr symbol, Term_ptr stat
 
     // Trim the variables that are not occuring in the formula away
     if(symbol != nullptr) {
-        symbol = new Symbol(symbol->GetTrack());
+        symbol = new Symbol(symbol->GetTrack()); // TODO: #2 Memory consumption
 
         auto it = this->_freeVars.begin();
         auto end = this->_freeVars.end();
@@ -177,7 +177,8 @@ ResultType SymbolicAutomaton::IntersectNonEmpty(Symbol_ptr symbol, Term_ptr stat
     // Create a new symbol for cache
     std::shared_ptr<Symbol> symbolKey = nullptr;
     if(symbol != nullptr) {
-        symbolKey = std::shared_ptr<Symbol>(new Symbol(symbol->GetTrack()));
+        //symbolKey = std::shared_ptr<Symbol>(new Symbol(symbol->GetTrack())); // TODO: #1 Memory consumption
+        symbolKey = std::shared_ptr<Symbol>(symbol);
     }
 
     // Look up in cache, if in cache, return the result
@@ -199,7 +200,7 @@ ResultType SymbolicAutomaton::IntersectNonEmpty(Symbol_ptr symbol, Term_ptr stat
     assert(stateApproximation->type != TERM_CONTINUATION);
 
     // Call the core function
-    result = this->_IntersectNonEmptyCore(symbol, stateApproximation, underComplement);
+    result = this->_IntersectNonEmptyCore(symbol, stateApproximation, underComplement); // TODO: Memory consumption
     #if (MEASURE_RESULT_HITS == true || MEASURE_ALL == true)
     if(result.second) {
         ++this->_trueCounter;
@@ -230,6 +231,10 @@ ResultType SymbolicAutomaton::IntersectNonEmpty(Symbol_ptr symbol, Term_ptr stat
     }
     std::cout << ") = <" << (result.second ? "True" : "False") << ","; result.first->dump(); std::cout << ">\n";
     #endif
+
+    if(symbol != nullptr) {
+        //delete symbol;
+    }
 
     // Return results
     return result;
@@ -422,7 +427,7 @@ ResultType BinaryOpAutomaton::_IntersectNonEmptyCore(Symbol_ptr symbol, Term_ptr
     TermProduct* productStateApproximation = reinterpret_cast<TermProduct*>(finalApproximation.get());
 
     // Checks if left automaton's initial states intersects the final states
-    ResultType lhs_result = this->_lhs_aut->IntersectNonEmpty(symbol, productStateApproximation->left, underComplement);
+    ResultType lhs_result = this->_lhs_aut->IntersectNonEmpty(symbol, productStateApproximation->left, underComplement); // TODO: another memory consumption
 
     // We can prune the state if left side was evaluated as Empty term
     // TODO: This is different for Unionmat!
@@ -460,7 +465,7 @@ ResultType BinaryOpAutomaton::_IntersectNonEmptyCore(Symbol_ptr symbol, Term_ptr
     }
     #endif
 
-    Term_ptr combined = std::shared_ptr<Term>(new TermProduct(lhs_result.first, rhs_result.first, this->_productType));
+    Term_ptr combined = std::shared_ptr<Term>(new TermProduct(lhs_result.first, rhs_result.first, this->_productType)); // TODO: #3 memory consumption
     return std::make_pair(combined, this->_eval_result(lhs_result.second, rhs_result.second, underComplement));
 }
 

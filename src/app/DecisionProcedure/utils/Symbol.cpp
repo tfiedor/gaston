@@ -171,3 +171,13 @@ std::ostream& operator <<(std::ostream& osObject, const ZeroSymbol& z) {
     osObject << z._track.ToString();
     return osObject;
 }
+
+namespace Gaston {
+    size_t hash_value(std::shared_ptr <ZeroSymbol> &s) {
+        if(s == nullptr) {
+            return 0;
+        } else {
+            return s->_trackMask.count();
+        }
+    }
+}
