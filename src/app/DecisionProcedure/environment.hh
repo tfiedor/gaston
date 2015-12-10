@@ -23,13 +23,12 @@
 #include <iostream>
 #include <memory>
 #include <list>
+#include <typeinfo>
 #include <vata/bdd_bu_tree_aut.hh>
 #include <vata/parsing/timbuk_parser.hh>
 #include <vata/serialization/timbuk_serializer.hh>
 #include "utils/cached_binary_op.hh"
 #include "mtbdd/ondriks_mtbdd.hh"
-#include "containers/SymbolicCache.hh"
-#include <typeinfo>
 
 /*****************************
  * FORWARD CLASS DECLARATION *
@@ -38,6 +37,8 @@ class SymbolicAutomaton;
 class ZeroSymbol;
 class Term;
 class ASTForm;
+template<class A, class B, class C, class D>
+class BinaryCache;
 
 namespace Gaston {
 	extern size_t hash_value(Term*);
@@ -82,7 +83,6 @@ namespace Gaston {
 	using TrackType				 = Automaton::SymbolType;
 
 	using ResultKey				 = std::pair<Term_raw, Symbol_shared>;
-	//using ResultHashType		 = boost::hash<ResultKey>;
 	using ResultCache            = BinaryCache<Term_raw, Symbol_shared, ResultType, ResultHashType>;
 	using SubsumptionCache       = VATA::Util::CachedBinaryOp<Term_ptr, Term_ptr, bool>;
 
@@ -120,6 +120,7 @@ enum FixpointTermSem {E_FIXTERM_FIXPOINT, E_FIXTERM_PRE};
  * DEBUG MACROS *
  ****************/
 #define G_DEBUG_FORMULA_AFTER_PHASE(str) cout << "\n\n[*] Formula after '" << str << "' phase:\n"
+#define G_NOT_IMPLEMENTED_YET(str) assert(false && "TODO: '" str "' Not Supported yet")
 
 /*********************************
  * OTHER METHODS RELATED DEFINES *
@@ -166,9 +167,13 @@ enum FixpointTermSem {E_FIXTERM_FIXPOINT, E_FIXTERM_PRE};
 #define DEBUG_FIXPOINT 					false
 #define DEBUG_INITIAL_APPROX 			false
 #define DEBUG_INTERSECT_NON_EMPTY 		false
+#define DEBUG_TERM_UNIQUENESS			false
+#define DEBUG_TERM_CACHE				false
 #define DEBUG_TERM_SUBSUMPTION 			false
+#define DEBUG_TERM_CACHE_COMPARISON		false
 #define DEBUG_CONTINUATIONS 			false
 #define DEBUG_COMPUTE_FULL_FIXPOINT 	false
+#define DEBUG_TERM_CREATION				false
 
 /* >>> Measuring Options <<< *
  *****************************/

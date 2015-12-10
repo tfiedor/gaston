@@ -50,6 +50,7 @@ public:
     virtual bool IsSubsumed(Term* t);
     virtual bool IsEmpty() = 0;
     virtual void Complement() {this->_inComplement = (this->_inComplement == false);}
+    bool operator==(const Term &t);
 
     // <<< MEASURING FUNCTIONS >>>
     virtual unsigned int MeasureStateSpace() = 0;
@@ -60,10 +61,13 @@ protected:
     // <<< PRIVATE FUNCTIONS >>>
     virtual bool _IsSubsumedCore(Term* t) = 0;
     virtual void _dumpCore() = 0;
+    virtual bool _eqCore(const Term&) = 0;
 
     friend size_t hash_value(Term* s);
     friend size_t hash_value(Term* &s);
     friend size_t hash_value(const Term& s);
+
+    friend std::ostream& operator <<(std::ostream& osObject, Term& z);
 };
 
 class TermEmpty : public Term {
@@ -81,6 +85,7 @@ public:
     // <<< DUMPING FUNCTIONS >>>
 private:
     void _dumpCore();
+    bool _eqCore(const Term&);
 
     // <<< PRIVATE FUNCTIONS >>>
     virtual bool _IsSubsumedCore(Term* t);
@@ -108,6 +113,8 @@ public:
     // <<< DUMPING FUNCTIONS >>>
 private:
     void _dumpCore();
+    bool _eqCore(const Term&);
+
 private:
     // <<< PRIVATE FUNCTIONS >>>
     virtual bool _IsSubsumedCore(Term* t);
@@ -135,6 +142,8 @@ public:
     // <<< DUMPING FUNCTIONS >>>
 private:
     void _dumpCore();
+    bool _eqCore(const Term&);
+
 private:
     // <<< PRIVATE FUNCTIONS >>>
     virtual bool _IsSubsumedCore(Term* t);
@@ -165,6 +174,7 @@ private:
     void _dumpCore();
 private:
     // <<< PRIVATE FUNCTIONS >>>
+    bool _eqCore(const Term&);
     virtual bool _IsSubsumedCore(Term* t);
 };
 
@@ -190,9 +200,11 @@ public:
     // <<< DUMPING FUNCTIONS >>>
 private:
     void _dumpCore();
+
 private:
     // <<< PRIVATE FUNCTIONS >>>
     virtual bool _IsSubsumedCore(Term* t);
+    bool _eqCore(const Term&);
 };
 
 class TermFixpoint : public Term {
@@ -310,5 +322,6 @@ private:
     void ComputeNextPre();
     void _InitializeAggregateFunction(bool inComplement);
     virtual bool _IsSubsumedCore(Term* t);
+    bool _eqCore(const Term&);
 };
 #endif //WSKS_TERM_H

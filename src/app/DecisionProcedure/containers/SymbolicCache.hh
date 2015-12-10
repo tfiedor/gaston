@@ -16,6 +16,7 @@
 #include <vector>
 #include <unordered_map>
 #include "StateSet.hh"
+#include "../environment.hh"
 
 #include <boost/functional/hash.hpp>
 
@@ -41,7 +42,29 @@ private:
          */
 		bool operator()(Key lhs, Key rhs) const
 		{
-			return (lhs.first == rhs.first) && (lhs.second == rhs.second);
+			#if (DEBUG_TERM_CACHE_COMPARISON == true)
+				auto keyFirst = lhs.first;
+				auto keySecond = lhs.second;
+				if(keySecond == nullptr) {
+					std::cout << "(" << (*keyFirst) << ", \u03B5) vs";
+				} else {
+					std::cout << "(" << (*keyFirst) << ", " << (*keySecond) << ") vs";
+				}
+				auto dkeyFirst = rhs.first;
+				auto dkeySecond = rhs.second;
+				if(dkeySecond == nullptr) {
+					std::cout << "(" << (*dkeyFirst) << ", \u03B5)";
+				} else {
+					std::cout << "(" << (*dkeyFirst) << ", " << (*dkeySecond) << ")";
+				}
+			#endif
+			bool lhsresult = (*lhs.first == *rhs.first);
+			bool rhsresult = (lhs.second == rhs.second);
+			bool result = lhsresult && rhsresult;
+			#if (DEBUG_TERM_CACHE_COMPARISON == true)
+				std::cout << " = (" << lhsresult << " + " << rhsresult << ") =  " << result << "\n";
+			#endif
+			return  result;
 		}
 	};
 
@@ -136,11 +159,27 @@ public:
 	 */
 	unsigned int dumpStats() {
 		unsigned int size = this->_cache.size();
+
 		std::cout << "Size: " << size;
 		if(this->cacheHits+this->cacheMisses != 0)
 			std::cout << ", Hit:Miss (" << this->cacheHits << ":" << this->cacheMisses << ")	->	"<< std::fixed << std::setprecision(2) << (this->cacheHits/(double)(this->cacheHits+this->cacheMisses))*100 <<"%\n";
 		else
 			std::cout << "\n";
+
+		#if (DEBUG_TERM_CACHE == true)
+		std::cout << "[";
+		for(auto it = this->_cache.begin(); it != this->_cache.end(); ++it) {
+			auto keyFirst = it->first.first;
+			auto keySecond = it->first.second;
+			if(keySecond == nullptr) {
+				std::cout << "(" << (*keyFirst) << ", \u03B5), ";
+			} else {
+				std::cout << "(" << (*keyFirst) << ", " << (*keySecond) << "), ";
+			}
+		}
+		std::cout << "]";
+		#endif
+
 		return size;
 	}
 };

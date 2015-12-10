@@ -183,7 +183,8 @@ ResultType SymbolicAutomaton::IntersectNonEmpty(Symbol_ptr symbol, Term_ptr stat
 
     // Look up in cache, if in cache, return the result
     auto key = std::make_pair(stateApproximation.get(), symbolKey);
-    if(this->_resCache.retrieveFromCache(key, result)) {
+    bool inCache;
+    if(inCache = this->_resCache.retrieveFromCache(key, result)) {
         return result;
     }
     #endif
@@ -211,7 +212,7 @@ ResultType SymbolicAutomaton::IntersectNonEmpty(Symbol_ptr symbol, Term_ptr stat
 
     // Cache Results
     #if (OPT_CACHE_RESULTS == true)
-    if(!this->_resCache.inCache(key)) {
+    if(!inCache) {
         this->_resCache.StoreIn(key, result);
     }
     #endif
@@ -352,10 +353,7 @@ void BaseAutomaton::_InitializeFinalStates() {
     collector(*initBDD);
 
     // Push states to new Base Set
-    TermBaseSet* finalStateSet = new TermBaseSet();
-    for(auto state : finalStates) {
-        finalStateSet->states.push_back(state);
-    }
+    TermBaseSet* finalStateSet = new TermBaseSet(finalStates, this->_stateOffset, this->_stateSpace);
 
     // Return new state set
     this->_finalStates = std::shared_ptr<Term>(finalStateSet);

@@ -23,6 +23,7 @@
 #include "../mtbdd/ondriks_mtbdd.hh"
 #include "../utils/Symbol.h"
 #include "../environment.hh"
+#include "../containers/SymbolicCache.hh"
 #include "../../Frontend/ident.h"
 #include "../../Frontend/ast.h"
 #include "../containers/VarToTrackMap.hh"

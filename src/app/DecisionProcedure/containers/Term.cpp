@@ -17,7 +17,7 @@
 
 namespace Gaston {
     size_t hash_value(Term* s) {
-        return boost::hash_value(s);
+        return boost::hash_value(s->MeasureStateSpace());
     }
 }
 
@@ -42,6 +42,12 @@ TermEmpty::TermEmpty() {
  * @param[in] rhs:  right operand of term intersection
  */
 TermProduct::TermProduct(Term_ptr lhs, Term_ptr rhs) : left(lhs), right(rhs) {
+    #if (DEBUG_TERM_CREATION == true)
+    std::cout << "[" << this << "]";
+    std::cout << "TermProduct::";
+    this->dump();
+    std::cout << "\n";
+    #endif
     #if (MEASURE_STATE_SPACE == true)
     ++TermProduct::instances;
     #endif
@@ -54,6 +60,12 @@ TermProduct::TermProduct(Term_ptr lhs, Term_ptr rhs) : left(lhs), right(rhs) {
  * Constructor of Term Product---other type
  */
 TermProduct::TermProduct(Term_ptr lhs, Term_ptr rhs, ProductType pt) : left(lhs), right(rhs) {
+    #if (DEBUG_TERM_CREATION == true)
+    std::cout << "[" << this << "]";
+    std::cout << "TermProduct::";
+    this->dump();
+    std::cout << "\n";
+    #endif
     #if (MEASURE_STATE_SPACE == true)
     ++TermProduct::instances;
     #endif
@@ -63,6 +75,12 @@ TermProduct::TermProduct(Term_ptr lhs, Term_ptr rhs, ProductType pt) : left(lhs)
 }
 
 TermBaseSet::TermBaseSet() : states(), stateMask(0) {
+    #if (DEBUG_TERM_CREATION == true)
+    std::cout << "[" << this << "]";
+    std::cout << "TermBaseSet::";
+    this->dump();
+    std::cout << "\n";
+    #endif
     #if (MEASURE_STATE_SPACE == true)
     ++TermBaseSet::instances;
     #endif
@@ -80,9 +98,21 @@ TermBaseSet::TermBaseSet(VATA::Util::OrdVector<unsigned int>& s, unsigned int of
         this->stateMask.set(state-offset, true);
     }
     this->_inComplement = false;
+    #if (DEBUG_TERM_CREATION == true)
+    std::cout << "[" << this << "]";
+    std::cout << "TermBaseSet::";
+    this->dump();
+    std::cout << "\n";
+    #endif
 }
 
 TermContinuation::TermContinuation(std::shared_ptr<SymbolicAutomaton> a, Term_ptr t, std::shared_ptr<SymbolType> s, bool b) : aut(a), term(t), symbol(s), underComplement(b) {
+    #if (DEBUG_TERM_CREATION == true)
+    std::cout << "[" << this << "]";
+    std::cout << "TermContinuation::";
+    this->dump();
+    std::cout << "\n";
+    #endif
     #if (MEASURE_STATE_SPACE == true)
     ++TermContinuation::instances;
     #endif
@@ -97,6 +127,12 @@ TermContinuation::TermContinuation(std::shared_ptr<SymbolicAutomaton> a, Term_pt
 }
 
 TermList::TermList() {
+    #if (DEBUG_TERM_CREATION == true)
+    std::cout << "[" << this << "]";
+    std::cout << "TermList::";
+    this->dump();
+    std::cout << "\n";
+    #endif
     #if (MEASURE_STATE_SPACE == true)
     ++TermList::instances;
     #endif
@@ -105,6 +141,12 @@ TermList::TermList() {
 }
 
 TermList::TermList(Term_ptr first, bool isCompl) {
+    #if (DEBUG_TERM_CREATION == true)
+    std::cout << "[" << this << "]";
+    std::cout << "TermList::";
+    this->dump();
+    std::cout << "\n";
+    #endif
     #if (MEASURE_STATE_SPACE == true)
     ++TermList::instances;
     #endif
@@ -115,6 +157,12 @@ TermList::TermList(Term_ptr first, bool isCompl) {
 }
 
 TermList::TermList(Term_ptr f, Term_ptr s, bool isCompl) {
+    #if (DEBUG_TERM_CREATION == true)
+    std::cout << "[" << this << "]";
+    std::cout << "TermList::";
+    this->dump();
+    std::cout << "\n";
+    #endif
     #if (MEASURE_STATE_SPACE == true)
     ++TermList::instances;
     #endif
@@ -127,6 +175,12 @@ TermList::TermList(Term_ptr f, Term_ptr s, bool isCompl) {
 
 TermFixpoint::TermFixpoint(std::shared_ptr<SymbolicAutomaton> aut, Term_ptr startingTerm, Symbols symList, bool inComplement, bool initbValue)
         : _sourceTerm(nullptr), _sourceIt(nullptr), _aut(aut), _bValue(initbValue) {
+    #if (DEBUG_TERM_CREATION == true)
+    std::cout << "[" << this << "]";
+    std::cout << "TermFixpoint::";
+    this->dump();
+    std::cout << "\n";
+    #endif
     #if (MEASURE_STATE_SPACE == true)
     ++TermFixpoint::instances;
     #endif
@@ -151,6 +205,12 @@ TermFixpoint::TermFixpoint(std::shared_ptr<SymbolicAutomaton> aut, Term_ptr star
 TermFixpoint::TermFixpoint(std::shared_ptr<SymbolicAutomaton> aut, Term_ptr sourceTerm, Symbols symList, bool inComplement)
         : _sourceTerm(sourceTerm), _sourceIt(reinterpret_cast<TermFixpoint*>(sourceTerm.get())->GetIteratorDynamic()),
         _aut(aut), _worklist(), _bValue(inComplement) {
+    #if (DEBUG_TERM_CREATION == true)
+    std::cout << "[" << this << "]";
+    std::cout << "TermFixpoint::";
+    this->dump();
+    std::cout << "\n";
+    #endif
     #if (MEASURE_STATE_SPACE == true)
     ++TermFixpoint::instances;
     #endif
@@ -495,6 +555,15 @@ unsigned int TermFixpoint::MeasureStateSpace() {
 /**
  * Dumping functions
  */
+std::ostream& operator <<(std::ostream& osObject, Term& z) {
+    // TODO: Optimize this you lazy fuck!
+#if (DEBUG_TERM_UNIQUENESS == true)
+    osObject << "[" << &z <<"]";
+#endif
+    z.dump();
+    return osObject;
+}
+
 void Term::dump() {
     if(this->_inComplement) {
         std::cout << "\033[1;31m{\033[0m";
@@ -670,4 +739,79 @@ bool TermFixpoint::GetResult() {
  */
 FixpointTermSem TermFixpoint::GetSemantics() const {
     return (nullptr == _sourceTerm) ? E_FIXTERM_FIXPOINT : E_FIXTERM_PRE;
+}
+
+// <<< EQUALITY CHECKING FUNCTIONS >>>
+/**
+ * Operation for equality checking, tests first whether the two pointers
+ * are the same (this is for the (future) unique pointer cache), checks
+ * if the types are the same to optimize the equality checking.
+ *
+ * Otherwise it calls the _eqCore() function for specific comparison of
+ * terms
+ *
+ * @param[in] t:        tested term
+ */
+bool Term::operator==(const Term &t) {
+    if(this == &t) {
+        // Same thing
+        return true;
+    } else if (this->type != t.type) {
+        // Terms are of different type
+        return false;
+    } else {
+        return this->_eqCore(t);
+    }
+}
+
+bool TermEmpty::_eqCore(const Term &t) {
+    assert(t.type == TERM_EMPTY && "Testing equality of different term types");
+    return true;
+}
+
+bool TermProduct::_eqCore(const Term &t) {
+    assert(t.type == TERM_PRODUCT && "Testing equality of different term types");
+
+    const TermProduct &tProduct = static_cast<const TermProduct&>(t);
+    return (*tProduct.left == *this->left) && (*tProduct.right == *this->right);
+}
+
+bool TermBaseSet::_eqCore(const Term &t) {
+    assert(t.type == TERM_BASE && "Testing equality of different term types");
+
+    const TermBaseSet &tBase = static_cast<const TermBaseSet&>(t);
+    if(this->states.size() != tBase.states.size()) {
+        return false;
+    } else {
+        // check the things, should be sorted
+        auto lhsIt = this->states.begin();
+        auto rhsIt = tBase.states.begin();
+        for(; lhsIt != this->states.end(); ++lhsIt, ++rhsIt) {
+            if(*lhsIt != *rhsIt) {
+                return false;
+            }
+        }
+        return true;
+    }
+}
+
+bool TermContinuation::_eqCore(const Term &t) {
+    assert(t.type == TERM_CONTINUATION && "Testing equality of different term types");
+    G_NOT_IMPLEMENTED_YET("TermContinuation::_eqCore");
+}
+
+bool TermList::_eqCore(const Term &t) {
+    assert(t.type == TERM_LIST && "Testing equality of different term types");
+
+    const TermList &tList = static_cast<const TermList&>(t);
+    G_NOT_IMPLEMENTED_YET("TermList::_eqCore");
+}
+
+bool TermFixpoint::_eqCore(const Term &t) {
+    assert(t.type == TERM_FIXPOINT && "Testing equality of different term types");
+
+    return this == &t;
+
+    const TermFixpoint &tFix = static_cast<const TermFixpoint&>(t);
+    G_NOT_IMPLEMENTED_YET("TermFixpoint::_eqCore");
 }
