@@ -43,28 +43,28 @@ private:
 		bool operator()(Key lhs, Key rhs) const
 		{
 			#if (DEBUG_TERM_CACHE_COMPARISON == true)
-				auto keyFirst = lhs.first;
-				auto keySecond = lhs.second;
-				if(keySecond == nullptr) {
-					std::cout << "(" << (*keyFirst) << ", \u03B5) vs";
-				} else {
-					std::cout << "(" << (*keyFirst) << ", " << (*keySecond) << ") vs";
-				}
-				auto dkeyFirst = rhs.first;
-				auto dkeySecond = rhs.second;
-				if(dkeySecond == nullptr) {
-					std::cout << "(" << (*dkeyFirst) << ", \u03B5)";
-				} else {
-					std::cout << "(" << (*dkeyFirst) << ", " << (*dkeySecond) << ")";
-				}
-			#endif
+			auto keyFirst = lhs.first;
+			auto keySecond = lhs.second;
+			if(keySecond == nullptr) {
+				std::cout << "(" << (*keyFirst) << ", \u03B5) vs";
+			} else {
+				std::cout << "(" << (*keyFirst) << ", " << (*keySecond) << ") vs";
+			}
+			auto dkeyFirst = rhs.first;
+			auto dkeySecond = rhs.second;
+			if(dkeySecond == nullptr) {
+				std::cout << "(" << (*dkeyFirst) << ", \u03B5)";
+			} else {
+				std::cout << "(" << (*dkeyFirst) << ", " << (*dkeySecond) << ")";
+			}
 			bool lhsresult = (*lhs.first == *rhs.first);
 			bool rhsresult = (lhs.second == rhs.second);
 			bool result = lhsresult && rhsresult;
-			#if (DEBUG_TERM_CACHE_COMPARISON == true)
 				std::cout << " = (" << lhsresult << " + " << rhsresult << ") =  " << result << "\n";
-			#endif
 			return  result;
+            #else
+            return (lhs.second == rhs.second) && (*lhs.first == *rhs.first);
+            #endif
 		}
 	};
 

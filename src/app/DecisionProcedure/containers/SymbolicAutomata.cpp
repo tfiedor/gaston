@@ -65,9 +65,9 @@ ProjectionAutomaton::ProjectionAutomaton(SymbolicAutomaton_raw aut, Formula_ptr 
 // Derive of BinaryOpAutomaton
 IntersectionAutomaton::IntersectionAutomaton(SymbolicAutomaton_raw lhs, SymbolicAutomaton_raw rhs, Formula_ptr form)
         : BinaryOpAutomaton(lhs, rhs, form) {
-    this->_InitializeAutomaton();
     this->type = AutType::INTERSECTION;
     this->_productType = E_INTERSECTION;
+    this->_InitializeAutomaton();
     this->_eval_result = [](bool a, bool b, bool underC) {
         // e in A cap B == e in A && e in B
         if(!underC) {return a && b;}
@@ -87,9 +87,9 @@ IntersectionAutomaton::IntersectionAutomaton(SymbolicAutomaton_raw lhs, Symbolic
 // Derive of BinaryOpAutomaton
 UnionAutomaton::UnionAutomaton(SymbolicAutomaton_raw lhs, SymbolicAutomaton_raw rhs, Formula_ptr form)
         : BinaryOpAutomaton(lhs, rhs, form) {
-    this->_InitializeAutomaton();
     this->type = AutType::UNION;
     this->_productType = E_UNION;
+    this->_InitializeAutomaton();
     this->_eval_result = [](bool a, bool b, bool underC) {
         // e in A cup B == e in A || e in B
         if(!underC) {return a || b;}
@@ -137,7 +137,7 @@ void initialize_symbols(SymbolList &symbols, IdentList* vars) {
  * @param[in] underComplement:      true, if we are under the complement
  * @return:                         (fixpoint, true if nonemptyintersect)
  */
-ResultType SymbolicAutomaton::IntersectNonEmpty(Symbol_ptr symbol, Term_ptr stateApproximation, bool underComplement) {
+ResultType SymbolicAutomaton::IntersectNonEmpty(Symbol_ptr symbol, Term_ptr& stateApproximation, bool underComplement) {
     assert(this->type != AutType::SYMBOLIC_BASE);
     ResultType result;
 
@@ -300,7 +300,7 @@ void ProjectionAutomaton::_InitializeAutomaton() {
  * Initialization of initial states for automata wrt. the structure of the symbolic automaton
  */
 void BinaryOpAutomaton::_InitializeInitialStates() {
-    this->_initialStates = std::shared_ptr<Term>(new TermProduct(this->_lhs_aut->GetInitialStates(), this->_rhs_aut->GetInitialStates(), this->_productType));
+    this->_initialStates = std::make_shared<TermProduct>(this->_lhs_aut->GetInitialStates(), this->_rhs_aut->GetInitialStates(), this->_productType);
 }
 
 void ComplementAutomaton::_InitializeInitialStates() {
@@ -308,7 +308,7 @@ void ComplementAutomaton::_InitializeInitialStates() {
 }
 
 void ProjectionAutomaton::_InitializeInitialStates() {
-    this->_initialStates = std::shared_ptr<Term>(new TermList(this->_aut->GetInitialStates(), false));
+    this->_initialStates = std::make_shared<TermList>(this->_aut->GetInitialStates(), false);
 }
 
 // TODO: Optimize so this uses boost::dynamic_bitset instead
@@ -328,7 +328,7 @@ void BaseAutomaton::_InitializeInitialStates() {
  * Initialization of final states for automata wrt. the structure of the symbolic automaton
  */
 void BinaryOpAutomaton::_InitializeFinalStates() {
-    this->_finalStates = std::shared_ptr<Term>(new TermProduct(this->_lhs_aut->GetFinalStates(), this->_rhs_aut->GetFinalStates(), this->_productType));
+    this->_finalStates = std::make_shared<TermProduct>(this->_lhs_aut->GetFinalStates(), this->_rhs_aut->GetFinalStates(), this->_productType);
 }
 
 void ComplementAutomaton::_InitializeFinalStates() {
@@ -336,7 +336,7 @@ void ComplementAutomaton::_InitializeFinalStates() {
 }
 
 void ProjectionAutomaton::_InitializeFinalStates() {
-    this->_finalStates = std::shared_ptr<Term>(new TermList(this->_aut->GetFinalStates(), false));
+    this->_finalStates = std::make_shared<TermList>(this->_aut->GetFinalStates(), false);
 }
 
 // TODO: Refactor a little
@@ -403,7 +403,7 @@ Term_ptr BaseAutomaton::Pre(Symbol_ptr symbol, Term_ptr finalApproximation, bool
         collector._isFirst = false;
     }
 
-    return std::shared_ptr<Term>(new TermBaseSet(states, this->_stateOffset, this->_stateSpace));
+    return std::make_shared<TermBaseSet>(states, this->_stateOffset, this->_stateSpace);
 }
 
 /**
@@ -416,7 +416,7 @@ Term_ptr BaseAutomaton::Pre(Symbol_ptr symbol, Term_ptr finalApproximation, bool
  * @param[in] underComplement:      true, if we are computing interesction under complement
  * @return (fixpoint, bool)
  */
-ResultType BinaryOpAutomaton::_IntersectNonEmptyCore(Symbol_ptr symbol, Term_ptr finalApproximation, bool underComplement) {
+ResultType BinaryOpAutomaton::_IntersectNonEmptyCore(Symbol_ptr symbol, Term_ptr& finalApproximation, bool underComplement) {
     // TODO: Add counter of continuations per node
     assert(finalApproximation != nullptr);
     assert(finalApproximation->type == TERM_PRODUCT);
@@ -463,11 +463,11 @@ ResultType BinaryOpAutomaton::_IntersectNonEmptyCore(Symbol_ptr symbol, Term_ptr
     }
     #endif
 
-    Term_ptr combined = std::shared_ptr<Term>(new TermProduct(lhs_result.first, rhs_result.first, this->_productType)); // TODO: #3 memory consumption
+    Term_ptr combined = std::make_shared<TermProduct>(lhs_result.first, rhs_result.first, this->_productType);
     return std::make_pair(combined, this->_eval_result(lhs_result.second, rhs_result.second, underComplement));
 }
 
-ResultType ComplementAutomaton::_IntersectNonEmptyCore(Symbol_ptr symbol, Term_ptr finalApproximaton, bool underComplement) {
+ResultType ComplementAutomaton::_IntersectNonEmptyCore(Symbol_ptr symbol, Term_ptr& finalApproximaton, bool underComplement) {
     // Compute the result of nested automaton with switched complement
     ResultType result = this->_aut->IntersectNonEmpty(symbol, finalApproximaton, !underComplement);
     result.first->Complement();
@@ -475,7 +475,7 @@ ResultType ComplementAutomaton::_IntersectNonEmptyCore(Symbol_ptr symbol, Term_p
     return result;
 }
 
-ResultType ProjectionAutomaton::_IntersectNonEmptyCore(Symbol_ptr symbol, Term_ptr finalApproximation, bool underComplement) {
+ResultType ProjectionAutomaton::_IntersectNonEmptyCore(Symbol_ptr symbol, Term_ptr& finalApproximation, bool underComplement) {
     // TODO: There can be continutation probably
     assert(finalApproximation != nullptr);
     assert(finalApproximation->type == TERM_LIST || finalApproximation->type == TERM_FIXPOINT);
@@ -538,7 +538,7 @@ ResultType ProjectionAutomaton::_IntersectNonEmptyCore(Symbol_ptr symbol, Term_p
     }
 }
 
-ResultType BaseAutomaton::_IntersectNonEmptyCore(Symbol_ptr symbol, Term_ptr approximation, bool underComplement) {
+ResultType BaseAutomaton::_IntersectNonEmptyCore(Symbol_ptr symbol, Term_ptr& approximation, bool underComplement) {
     // Reinterpret the initial and final states
     TermBaseSet* initial = reinterpret_cast<TermBaseSet*>(this->_initialStates.get());
     TermBaseSet* final = reinterpret_cast<TermBaseSet*>(this->_finalStates.get());
@@ -556,7 +556,7 @@ ResultType BaseAutomaton::_IntersectNonEmptyCore(Symbol_ptr symbol, Term_ptr app
 
         // Return the pre and true if it intersects the initial states
         if(preFinal->IsEmpty()) {
-            return std::make_pair(std::shared_ptr<Term>(new TermEmpty()), underComplement);
+            return std::make_pair(std::make_shared<TermEmpty>(), underComplement);
         } else {
             return std::make_pair(preSet, initial->Intersects(preFinal) != underComplement);
         }

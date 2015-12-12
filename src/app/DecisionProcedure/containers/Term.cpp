@@ -810,8 +810,26 @@ bool TermList::_eqCore(const Term &t) {
 bool TermFixpoint::_eqCore(const Term &t) {
     assert(t.type == TERM_FIXPOINT && "Testing equality of different term types");
 
-    return this == &t;
-
     const TermFixpoint &tFix = static_cast<const TermFixpoint&>(t);
-    G_NOT_IMPLEMENTED_YET("TermFixpoint::_eqCore");
+    if(this->_fixpoint.size() != tFix._fixpoint.size()) {
+        return false;
+    } else {
+        for(auto it = this->_fixpoint.begin(); it != this->_fixpoint.end(); ++it) {
+            if(*it == nullptr)
+                continue;
+            bool found = false;
+            for(auto tit = tFix._fixpoint.begin(); tit != tFix._fixpoint.end(); ++tit) {
+                if(*tit == nullptr)
+                    continue;
+                if(**it == **tit) {
+                    found = true;
+                    break;
+                }
+            }
+            if(!found) {
+                return false;
+            }
+        }
+        return true;
+    }
 }

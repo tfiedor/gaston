@@ -59,7 +59,6 @@ namespace Gaston {
 	using Automaton 			 = VATA::BDDBottomUpTreeAut;
 	using Formula_ptr            = ASTForm*;
 	using Term_ptr				 = std::shared_ptr<Term>;
-	using Term_weak				 = std::weak_ptr<Term>;
 	using Term_raw 				 = Term*;
 	using ResultType			 = std::pair<Term_ptr, bool>;
 
@@ -164,8 +163,8 @@ enum FixpointTermSem {E_FIXTERM_FIXPOINT, E_FIXTERM_PRE};
 /* >>> Debugging Options <<< *
  *****************************/
 #define DEBUG_BASE_AUTOMATA 			false
-#define DEBUG_FIXPOINT 					false
-#define DEBUG_INITIAL_APPROX 			false
+#define DEBUG_FIXPOINT 					true
+#define DEBUG_INITIAL_APPROX 			true
 #define DEBUG_INTERSECT_NON_EMPTY 		false
 #define DEBUG_TERM_UNIQUENESS			false
 #define DEBUG_TERM_CACHE				false

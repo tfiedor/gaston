@@ -60,7 +60,7 @@ protected:
     virtual void _InitializeAutomaton() = 0;
     virtual void _InitializeInitialStates() = 0;
     virtual void _InitializeFinalStates() = 0;
-    virtual ResultType _IntersectNonEmptyCore(Symbol*, Term_ptr, bool) = 0;
+    virtual ResultType _IntersectNonEmptyCore(Symbol*, Term_ptr&, bool) = 0;
 
     // <<< MEASURES >>>
     unsigned int _falseCounter = 0;
@@ -78,7 +78,7 @@ public:
     virtual Term_ptr GetInitialStates();
     virtual Term_ptr GetFinalStates();
     virtual Term_ptr Pre(Symbol*, Term_ptr, bool) = 0;
-    ResultType IntersectNonEmpty(Symbol*, Term_ptr, bool);
+    ResultType IntersectNonEmpty(Symbol*, Term_ptr&, bool);
 
     // <<< DUMPING FUNCTIONS >>>
     virtual void DumpAutomaton() = 0;
@@ -105,7 +105,7 @@ protected:
     virtual void _InitializeAutomaton();
     virtual void _InitializeInitialStates();
     virtual void _InitializeFinalStates();
-    virtual ResultType _IntersectNonEmptyCore(Symbol*, Term_ptr, bool);
+    virtual ResultType _IntersectNonEmptyCore(Symbol*, Term_ptr&, bool);
 
 public:
     BinaryOpAutomaton(SymbolicAutomaton_raw lhs, SymbolicAutomaton_raw rhs, Formula_ptr form);
@@ -147,7 +147,7 @@ protected:
     virtual void _InitializeAutomaton();
     virtual void _InitializeInitialStates();
     virtual void _InitializeFinalStates();
-    virtual ResultType _IntersectNonEmptyCore(Symbol*, Term_ptr, bool);
+    virtual ResultType _IntersectNonEmptyCore(Symbol*, Term_ptr&, bool);
 
 public:
     // <<< CONSTRUCTORS >>>
@@ -175,7 +175,7 @@ protected:
     virtual void _InitializeAutomaton();
     virtual void _InitializeInitialStates();
     virtual void _InitializeFinalStates();
-    virtual ResultType _IntersectNonEmptyCore(Symbol*, Term_ptr, bool);
+    virtual ResultType _IntersectNonEmptyCore(Symbol*, Term_ptr&, bool);
 
 public:
     /// <<< CONSTRUCTORS >>>
@@ -204,7 +204,7 @@ protected:
     virtual void _InitializeAutomaton();
     virtual void _InitializeInitialStates();
     virtual void _InitializeFinalStates();
-    virtual ResultType _IntersectNonEmptyCore(Symbol*, Term_ptr, bool);
+    virtual ResultType _IntersectNonEmptyCore(Symbol*, Term_ptr&, bool);
     void _RenameStates();
 
 public:
