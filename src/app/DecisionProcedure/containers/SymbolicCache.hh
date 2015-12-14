@@ -83,7 +83,7 @@ public:
 	 * @param key: key of the looked up macro state
 	 * @return: data corresponding to the @p key
 	 */
-	CacheData LookUp(Key key){
+	CacheData LookUp(Key& key){
 		auto search = this->_cache.find(key);
 		if (search != this->_cache.end()) {
 			return search->second;
@@ -118,7 +118,7 @@ public:
 	 * @param data: reference to the data
 	 * @return true if found;
 	 */
-	bool retrieveFromCache(Key & key, CacheData & data) {
+	bool retrieveFromCache(Key& key, CacheData & data) {
 		auto search = this->_cache.find(key);
 		if (search == this->_cache.end()) {
 			++cacheMisses;

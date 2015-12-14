@@ -43,9 +43,10 @@ class BinaryCache;
 namespace Gaston {
 	extern size_t hash_value(Term*);
 	extern size_t hash_value(std::shared_ptr<ZeroSymbol>&);
+	extern size_t hash_value(const ZeroSymbol&);
 
 	struct ResultHashType {
-		size_t operator()(std::pair<Term*, std::shared_ptr<ZeroSymbol>> set) const {
+		size_t operator()(std::pair<Term*,std::shared_ptr<ZeroSymbol>> set) const {
 			size_t seed = 0;
 			boost::hash_combine(seed, hash_value(set.first));
 			boost::hash_combine(seed, hash_value(set.second));

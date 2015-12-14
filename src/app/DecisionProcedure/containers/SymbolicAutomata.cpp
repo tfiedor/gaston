@@ -368,25 +368,25 @@ void BaseAutomaton::_InitializeFinalStates() {
  * @param[in] finalApproximation:   approximation of states that we are computing Pre for
  * @param[in] underComplement:      true, if we are under complement
  */
-Term_ptr BinaryOpAutomaton::Pre(Symbol_ptr symbol, Term_ptr finalApproximation, bool underComplement) {
+Term* BinaryOpAutomaton::Pre(Symbol_ptr symbol, Term* finalApproximation, bool underComplement) {
     assert(false && "Doing Pre on BinaryOp Automaton!");
 }
 
-Term_ptr ComplementAutomaton::Pre(Symbol_ptr symbol, Term_ptr finalApproximation, bool underComplement) {
+Term* ComplementAutomaton::Pre(Symbol_ptr symbol, Term* finalApproximation, bool underComplement) {
     assert(false && "Doing Pre on Complement Automaton!");
 }
 
-Term_ptr ProjectionAutomaton::Pre(Symbol_ptr symbol, Term_ptr finalApproximation, bool underComplement) {
+Term* ProjectionAutomaton::Pre(Symbol_ptr symbol, Term* finalApproximation, bool underComplement) {
     assert(false && "Doing Pre on Projection Automaton!");
 }
 
-Term_ptr BaseAutomaton::Pre(Symbol_ptr symbol, Term_ptr finalApproximation, bool underComplement) {
+Term* BaseAutomaton::Pre(Symbol_ptr symbol, Term* finalApproximation, bool underComplement) {
     assert(symbol != nullptr);
     // TODO: Cache MTBDD for pre?
     // TODO: Consult the correctness of cpre/pre computation
 
     // Reinterpret the approximation as base states
-    TermBaseSet* baseSet = reinterpret_cast<TermBaseSet*>(finalApproximation.get());
+    TermBaseSet* baseSet = reinterpret_cast<TermBaseSet*>(finalApproximation);
     BaseAutomatonStateSet states;
 
     for(auto state : baseSet->states) {
@@ -403,7 +403,7 @@ Term_ptr BaseAutomaton::Pre(Symbol_ptr symbol, Term_ptr finalApproximation, bool
         collector._isFirst = false;
     }
 
-    return std::make_shared<TermBaseSet>(states, this->_stateOffset, this->_stateSpace);
+    return new TermBaseSet(states, this->_stateOffset, this->_stateSpace);
 }
 
 /**
@@ -551,14 +551,14 @@ ResultType BaseAutomaton::_IntersectNonEmptyCore(Symbol_ptr symbol, Term_ptr& ap
         return std::make_pair(approximation, underComplement);
     } else {
         // First do the pre of the approximation
-        Term_ptr preSet = this->Pre(symbol, approximation, underComplement);
-        TermBaseSet* preFinal = reinterpret_cast<TermBaseSet*>(preSet.get());
+
+        TermBaseSet* preFinal = reinterpret_cast<TermBaseSet*>(this->Pre(symbol, approximation.get(), underComplement));
 
         // Return the pre and true if it intersects the initial states
         if(preFinal->IsEmpty()) {
             return std::make_pair(std::make_shared<TermEmpty>(), underComplement);
         } else {
-            return std::make_pair(preSet, initial->Intersects(preFinal) != underComplement);
+            return std::make_pair(std::shared_ptr<Term>(preFinal), initial->Intersects(preFinal) != underComplement);
         }
     }
 }

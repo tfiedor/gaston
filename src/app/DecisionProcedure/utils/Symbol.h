@@ -56,7 +56,9 @@ public:
     // <<< FRIENDS >>>
     friend std::ostream& operator <<(std::ostream& osObject, const ZeroSymbol& z);
     friend bool operator==(const std::shared_ptr<ZeroSymbol>& lhs, const std::shared_ptr<ZeroSymbol>& rhs);
+    friend bool operator==(const ZeroSymbol& lhs, const ZeroSymbol& rhs);
     friend size_t Gaston::hash_value(std::shared_ptr <ZeroSymbol> &);
+    friend size_t Gaston::hash_value(const ZeroSymbol&);
 };
 
 /**
@@ -73,6 +75,10 @@ inline bool operator==(const std::shared_ptr<ZeroSymbol>& lhs, const std::shared
     } else {
         return lhs->_trackMask == rhs->_trackMask;
     }
+}
+
+inline bool operator==(const ZeroSymbol& lhs, const ZeroSymbol& rhs) {
+    return lhs._trackMask == rhs._trackMask;
 }
 
 #endif //WSKS_SYMBOL_H

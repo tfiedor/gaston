@@ -180,4 +180,8 @@ namespace Gaston {
             return s->_trackMask.count();
         }
     }
+
+    size_t hash_value(const ZeroSymbol &s) {
+        return s._trackMask.count();
+    }
 }

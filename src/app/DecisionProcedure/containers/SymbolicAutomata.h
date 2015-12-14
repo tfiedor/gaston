@@ -77,7 +77,7 @@ public:
     // <<< PUBLIC API >>>
     virtual Term_ptr GetInitialStates();
     virtual Term_ptr GetFinalStates();
-    virtual Term_ptr Pre(Symbol*, Term_ptr, bool) = 0;
+    virtual Term* Pre(Symbol*, Term*, bool) = 0;
     ResultType IntersectNonEmpty(Symbol*, Term_ptr&, bool);
 
     // <<< DUMPING FUNCTIONS >>>
@@ -111,7 +111,7 @@ public:
     BinaryOpAutomaton(SymbolicAutomaton_raw lhs, SymbolicAutomaton_raw rhs, Formula_ptr form);
 
     // <<< PUBLIC API >>>
-    virtual Term_ptr Pre(Symbol*, Term_ptr, bool);
+    virtual Term* Pre(Symbol*, Term*, bool);
 
     // <<< DUMPING FUNCTIONS >>>
     virtual void DumpAutomaton();
@@ -154,7 +154,7 @@ public:
     ComplementAutomaton(SymbolicAutomaton *aut, Formula_ptr form);
 
     // <<< PUBLIC API >>>
-    virtual Term_ptr Pre(Symbol*, Term_ptr, bool);
+    virtual Term* Pre(Symbol*, Term*, bool);
 
     // <<< DUMPING FUNCTIONS >>>
     virtual void DumpAutomaton();
@@ -182,7 +182,7 @@ public:
     ProjectionAutomaton(SymbolicAutomaton* aut, Formula_ptr form);
 
     // <<< PUBLIC API >>>
-    virtual Term_ptr Pre(Symbol*, Term_ptr, bool);
+    virtual Term* Pre(Symbol*, Term*, bool);
 
     // <<< DUMPING FUNCTIONS >>>
     virtual void DumpAutomaton();
@@ -212,7 +212,7 @@ public:
     BaseAutomaton(BaseAutomatonType* aut, Formula_ptr form) : SymbolicAutomaton(form), _base_automaton(aut){ this->_InitializeAutomaton();type = AutType::BASE; }
 
     // <<< PUBLIC API >>>
-    virtual Term_ptr Pre(Symbol*, Term_ptr, bool);
+    virtual Term* Pre(Symbol*, Term*, bool);
 
     // <<< DUMPING FUNCTIONS >>>
     virtual void BaseAutDump();
