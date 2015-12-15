@@ -44,9 +44,10 @@ namespace Gaston {
 	extern size_t hash_value(Term*);
 	extern size_t hash_value(std::shared_ptr<ZeroSymbol>&);
 	extern size_t hash_value(const ZeroSymbol&);
+	extern size_t hash_value(ZeroSymbol*);
 
 	struct ResultHashType {
-		size_t operator()(std::pair<Term*,std::shared_ptr<ZeroSymbol>> set) const {
+		size_t operator()(std::pair<Term*, ZeroSymbol*> set) const {
 			size_t seed = 0;
 			boost::hash_combine(seed, hash_value(set.first));
 			boost::hash_combine(seed, hash_value(set.second));
@@ -82,8 +83,8 @@ namespace Gaston {
 	using VarValue			     = char;
 	using TrackType				 = Automaton::SymbolType;
 
-	using ResultKey				 = std::pair<Term_raw, Symbol_shared>;
-	using ResultCache            = BinaryCache<Term_raw, Symbol_shared, ResultType, ResultHashType>;
+	using ResultKey				 = std::pair<Term_raw, Symbol_ptr>;
+	using ResultCache            = BinaryCache<Term_raw, Symbol_ptr, ResultType, ResultHashType>;
 	using SubsumptionCache       = VATA::Util::CachedBinaryOp<Term_ptr, Term_ptr, bool>;
 
 	using WorkListTerm           = Term;
@@ -164,8 +165,8 @@ enum FixpointTermSem {E_FIXTERM_FIXPOINT, E_FIXTERM_PRE};
 /* >>> Debugging Options <<< *
  *****************************/
 #define DEBUG_BASE_AUTOMATA 			false
-#define DEBUG_FIXPOINT 					true
-#define DEBUG_INITIAL_APPROX 			true
+#define DEBUG_FIXPOINT 					false
+#define DEBUG_INITIAL_APPROX 			false
 #define DEBUG_INTERSECT_NON_EMPTY 		false
 #define DEBUG_TERM_UNIQUENESS			false
 #define DEBUG_TERM_CACHE				false

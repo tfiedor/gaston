@@ -42,10 +42,10 @@ EQUALS = =
 CMAKE_EDIT_COMMAND = /usr/bin/ccmake
 
 # The top-level source directory on which CMake was run.
-CMAKE_SOURCE_DIR = /home/raph/wsks/git
+CMAKE_SOURCE_DIR = /media/sf_WSkS/git
 
 # The top-level build directory on which CMake was run.
-CMAKE_BINARY_DIR = /home/raph/wsks/git
+CMAKE_BINARY_DIR = /media/sf_WSkS/git
 
 #=============================================================================
 # Targets provided globally by CMake.
@@ -72,9 +72,9 @@ rebuild_cache/fast: rebuild_cache
 
 # The main all target
 all: cmake_check_build_system
-	$(CMAKE_COMMAND) -E cmake_progress_start /home/raph/wsks/git/CMakeFiles /home/raph/wsks/git/CMakeFiles/progress.marks
+	$(CMAKE_COMMAND) -E cmake_progress_start /media/sf_WSkS/git/CMakeFiles /media/sf_WSkS/git/CMakeFiles/progress.marks
 	$(MAKE) -f CMakeFiles/Makefile2 all
-	$(CMAKE_COMMAND) -E cmake_progress_start /home/raph/wsks/git/CMakeFiles 0
+	$(CMAKE_COMMAND) -E cmake_progress_start /media/sf_WSkS/git/CMakeFiles 0
 .PHONY : all
 
 # The main clean target

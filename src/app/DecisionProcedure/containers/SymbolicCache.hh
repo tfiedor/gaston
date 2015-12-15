@@ -63,7 +63,7 @@ private:
 				std::cout << " = (" << lhsresult << " + " << rhsresult << ") =  " << result << "\n";
 			return  result;
             #else
-            return (lhs.second == rhs.second) && (*lhs.first == *rhs.first);
+            return (*lhs.second == *rhs.second) && (*lhs.first == *rhs.first);
             #endif
 		}
 	};

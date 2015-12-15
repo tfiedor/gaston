@@ -13,6 +13,7 @@
  *****************************************************************************/
 
 #include "Symbol.h"
+#include <boost/functional/hash.hpp>
 
 extern VarToTrackMap varMap;
 
@@ -21,7 +22,6 @@ extern VarToTrackMap varMap;
  * Constructor that creates a new zero symbol
  */
 ZeroSymbol::ZeroSymbol() : _trackMask(varMap.TrackLength() << 1) {
-    this->_track = ZeroSymbol::constructZeroTrack();
     this->_bdd = nullptr;
 }
 
@@ -30,11 +30,9 @@ ZeroSymbol::ZeroSymbol() : _trackMask(varMap.TrackLength() << 1) {
  *
  * @param[in] track:    track of the constructed symbol
  */
-ZeroSymbol::ZeroSymbol(TrackType track) : _trackMask(varMap.TrackLength() << 1) {
-    this->_track = track;
+ZeroSymbol::ZeroSymbol(BitMask track) {
+    this->_trackMask = track;
     this->_bdd = nullptr;
-
-    this->_InitializeTrackMask();
 }
 
 /**
@@ -45,14 +43,10 @@ ZeroSymbol::ZeroSymbol(TrackType track) : _trackMask(varMap.TrackLength() << 1) 
  * @param[in] var:      variable that is set to certain value @val
  * @param[in] val:      value of @p var
  */
-ZeroSymbol::ZeroSymbol(TrackType track, VarType var, VarValue val) : _trackMask(varMap.TrackLength() << 1) {
-    this->_track = track;
-    if(this->_track.GetIthVariableValue(var) != charToAsgn('X')) {
-        this->_track.SetIthVariableValue(var, charToAsgn(val));
-    }
+ZeroSymbol::ZeroSymbol(BitMask track, VarType var, VarValue val) {
+    this->_trackMask = track;
+    this->_SetValueAt(var, ZeroSymbol::charToAsgn(val));
     this->_bdd = nullptr;
-
-    this->_InitializeTrackMask();
 }
 
 // <<< PRIVATE METHODS >>>
@@ -71,25 +65,38 @@ void ZeroSymbol::_SetOneAt(VarType var) {
     this->_trackMask.set(2*var+1, false);
 }
 
-void ZeroSymbol::_InitializeTrackMask() {
-    for (auto i = 0; i < this->_track.length(); ++i)
-    {	// append all variables to the string
-        switch (this->_track.GetIthVariableValue(i))
-        {
-            case 0x01:
-                this->_SetZeroAt(i);
-                break;
-            case 0x02:
-                this->_SetOneAt(i);
-                break;
-            case 0x03:
-                this->_SetDontCareAt(i);
-                break;
-            default:
-                assert(false);
-                break;   // fail gracefully
+void ZeroSymbol::_SetValueAt(VarType var, VarValue val) {
+    switch(val) {
+        case 0x01:
+            this->_SetZeroAt(var);
+            break;
+        case 0x02:
+            this->_SetOneAt(var);
+            break;
+        case 0x03:
+            this->_SetDontCareAt(var);
+            break;
+        default:
+            assert(false);
+            break;   // fail gracefully
+    }
+}
+
+std::string ZeroSymbol::ToString() const {
+    std::string s("");
+    for(int i = 0; i < this->_trackMask.size(); i = i + 2) {
+        bool lTest = this->_trackMask.test(i);
+        bool rTest = this->_trackMask.test(i+1);
+        if(lTest && !rTest) {
+            s += "1";
+        } else if(!lTest && !rTest) {
+            s += "0";
+        } else {
+            s += "X";
         }
     }
+
+    return s;
 }
 
 // <<< STATIC FUNCTIONS >>>
@@ -119,6 +126,7 @@ char ZeroSymbol::charToAsgn(char c) {
  * Static member that constructs the universal track X*
  */
 TrackType ZeroSymbol::constructUniversalTrack() {
+    assert(false);
     unsigned int trackLen = varMap.TrackLength() - 1;
     Automaton::SymbolType transitionTrack;
     transitionTrack.AddVariablesUpTo(trackLen);
@@ -140,7 +148,7 @@ TrackType ZeroSymbol::constructZeroTrack() {
  */
 BaseAutomatonMTBDD* ZeroSymbol::GetMTBDD() {
     if(this->_bdd == nullptr) {
-        this->_bdd = new BaseAutomatonMTBDD(this->_track, BaseAutomatonStateSet(StateTuple({0})), BaseAutomatonStateSet(StateTuple({})));
+        this->_bdd = new BaseAutomatonMTBDD(TrackType(this->ToString()), BaseAutomatonStateSet(StateTuple({0})), BaseAutomatonStateSet(StateTuple({})));
     }
 
     // Initialization was successful
@@ -155,8 +163,6 @@ BaseAutomatonMTBDD* ZeroSymbol::GetMTBDD() {
  */
 void ZeroSymbol::ProjectVar(VarType var) {
     assert(this->_bdd == nullptr);
-
-    this->_track.SetIthVariableValue(var, charToAsgn('X'));
     this->_SetDontCareAt(var);
 }
 
@@ -168,20 +174,6 @@ void ZeroSymbol::ProjectVar(VarType var) {
  * @param[in] z:            printed zero symbol
  */
 std::ostream& operator <<(std::ostream& osObject, const ZeroSymbol& z) {
-    osObject << z._track.ToString();
+    osObject << z.ToString();
     return osObject;
-}
-
-namespace Gaston {
-    size_t hash_value(std::shared_ptr <ZeroSymbol> &s) {
-        if(s == nullptr) {
-            return 0;
-        } else {
-            return s->_trackMask.count();
-        }
-    }
-
-    size_t hash_value(const ZeroSymbol &s) {
-        return s._trackMask.count();
-    }
 }

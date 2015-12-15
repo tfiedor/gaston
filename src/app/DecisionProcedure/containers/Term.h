@@ -64,8 +64,6 @@ protected:
     virtual bool _eqCore(const Term&) = 0;
 
     friend size_t hash_value(Term* s);
-    friend size_t hash_value(Term* &s);
-    friend size_t hash_value(const Term& s);
 
     friend std::ostream& operator <<(std::ostream& osObject, Term& z);
 };

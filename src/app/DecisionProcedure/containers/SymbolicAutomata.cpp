@@ -121,8 +121,8 @@ void initialize_symbols(SymbolList &symbols, IdentList* vars) {
         for(auto i = symNum; i != 0; --i) {
             Symbol symF = symbols.front();
             symbols.pop_front();
-            Symbol zero(symF.GetTrack(), varMap[(*var)], '0');
-            Symbol one(symF.GetTrack(), varMap[(*var)], '1');
+            Symbol zero(symF.GetTrackMask(), varMap[(*var)], '0');
+            Symbol one(symF.GetTrackMask(), varMap[(*var)], '1');
             symbols.push_back(zero);
             symbols.push_back(one);
         }
@@ -160,7 +160,7 @@ ResultType SymbolicAutomaton::IntersectNonEmpty(Symbol_ptr symbol, Term_ptr& sta
 
     // Trim the variables that are not occuring in the formula away
     if(symbol != nullptr) {
-        symbol = new Symbol(symbol->GetTrack()); // TODO: #2 Memory consumption
+        symbol = new Symbol(symbol->GetTrackMask()); // TODO: #2 Memory consumption
 
         auto it = this->_freeVars.begin();
         auto end = this->_freeVars.end();
@@ -174,18 +174,14 @@ ResultType SymbolicAutomaton::IntersectNonEmpty(Symbol_ptr symbol, Term_ptr& sta
     }
 
     #if (OPT_CACHE_RESULTS == true)
-    // Create a new symbol for cache
-    std::shared_ptr<Symbol> symbolKey = nullptr;
-    if(symbol != nullptr) {
-        //symbolKey = std::shared_ptr<Symbol>(new Symbol(symbol->GetTrack())); // TODO: #1 Memory consumption
-        symbolKey = std::shared_ptr<Symbol>(symbol);
-    }
-
     // Look up in cache, if in cache, return the result
-    auto key = std::make_pair(stateApproximation.get(), symbolKey);
-    bool inCache;
-    if(inCache = this->_resCache.retrieveFromCache(key, result)) {
-        return result;
+    bool inCache = true;
+    //             ^--- note that this will ensure that empty symbol will not be stored in cache
+    if(symbol != nullptr) {
+        auto key = std::make_pair(stateApproximation.get(), symbol);
+        if (inCache = this->_resCache.retrieveFromCache(key, result)) {
+            return result;
+        }
     }
     #endif
 
@@ -213,6 +209,8 @@ ResultType SymbolicAutomaton::IntersectNonEmpty(Symbol_ptr symbol, Term_ptr& sta
     // Cache Results
     #if (OPT_CACHE_RESULTS == true)
     if(!inCache) {
+        assert(symbol != nullptr);
+        auto key = std::make_pair(stateApproximation.get(), symbol);
         this->_resCache.StoreIn(key, result);
     }
     #endif
@@ -442,7 +440,7 @@ ResultType BinaryOpAutomaton::_IntersectNonEmptyCore(Symbol_ptr symbol, Term_ptr
     // was true.
     if(this->_eval_early(lhs_result.second, underComplement)) {
         // Construct the pointer for symbol (either symbol or epsilon---nullptr)
-        std::shared_ptr<Symbol> suspendedSymbol = (symbol == nullptr) ? nullptr : std::shared_ptr<Symbol>(new ZeroSymbol(symbol->GetTrack()));
+        std::shared_ptr<Symbol> suspendedSymbol = (symbol == nullptr) ? nullptr : std::shared_ptr<Symbol>(new ZeroSymbol(symbol->GetTrackMask()));
 
         #if (MEASURE_CONTINUATION_CREATION == true || MEASURE_ALL == true)
         ++this->_contCreationCounter;

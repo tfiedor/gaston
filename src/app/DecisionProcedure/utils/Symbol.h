@@ -24,29 +24,28 @@ using namespace Gaston;
  * Class that represents one symbol on track
  */
 class ZeroSymbol {
-private:
+protected:
     // <<< PRIVATE MEMBERS >>>
-    TrackType _track;
     BaseAutomatonMTBDD* _bdd;
     BitMask _trackMask;
 
     // <<< PRIVATE METHODS >>>
-    void _InitializeTrackMask();
     void _SetZeroAt(VarType var);
     void _SetOneAt(VarType var);
     void _SetDontCareAt(VarType var);
+    void _SetValueAt(VarType var, VarValue val);
 
 public:
     // <<< CONSTRUCTORS >>>
     ZeroSymbol();
-    ZeroSymbol(TrackType);
-    ZeroSymbol(TrackType, VarType, VarValue);
+    ZeroSymbol(BitMask);
+    ZeroSymbol(BitMask, VarType, VarValue);
 
     // <<< PUBLIC API >>>
     void ProjectVar(VarType var);
-    TrackType GetTrack() { return this->_track; }
     BitMask GetTrackMask() { return this->_trackMask; }
     BaseAutomatonMTBDD* GetMTBDD();
+    std::string ToString() const;
 
     // <<< STATIC METHODS >>>
     static TrackType constructUniversalTrack();
@@ -57,8 +56,19 @@ public:
     friend std::ostream& operator <<(std::ostream& osObject, const ZeroSymbol& z);
     friend bool operator==(const std::shared_ptr<ZeroSymbol>& lhs, const std::shared_ptr<ZeroSymbol>& rhs);
     friend bool operator==(const ZeroSymbol& lhs, const ZeroSymbol& rhs);
-    friend size_t Gaston::hash_value(std::shared_ptr <ZeroSymbol> &);
-    friend size_t Gaston::hash_value(const ZeroSymbol&);
+    friend size_t Gaston::hash_value(std::shared_ptr <ZeroSymbol> &s){
+        if(s == nullptr) {
+            return 0;
+        } else {
+            return s->_trackMask.count();
+        }
+    }
+    friend size_t Gaston::hash_value(const ZeroSymbol& s){
+        return s._trackMask.count();
+    }
+    friend size_t Gaston::hash_value(ZeroSymbol* s){
+        return s->_trackMask.count();
+    }
 };
 
 /**
