@@ -314,12 +314,13 @@ void BaseAutomaton::_InitializeInitialStates() {
     // NOTE: The automaton is constructed backwards, so final states are initial
     assert(this->_initialStates == nullptr);
 
-    TermBaseSet* temp = new TermBaseSet();
+    // TODO: Yeah this sucks, could be better, but it is called only once
+    BaseAutomatonStateSet initialStates;
     for(auto state : this->_base_automaton->GetFinalStates()) {
-        temp->states.push_back(state);
+        initialStates.insert(state);
     }
 
-    this->_initialStates = std::shared_ptr<Term>(temp);
+    this->_initialStates = std::make_shared<TermBaseSet>(initialStates, this->_stateOffset, this->_stateSpace);
 }
 
 /**

@@ -41,24 +41,6 @@ TermEmpty::TermEmpty() {
  * @param[in] lhs:  left operand of term intersection
  * @param[in] rhs:  right operand of term intersection
  */
-TermProduct::TermProduct(Term_ptr lhs, Term_ptr rhs) : left(lhs), right(rhs) {
-    #if (DEBUG_TERM_CREATION == true)
-    std::cout << "[" << this << "]";
-    std::cout << "TermProduct::";
-    this->dump();
-    std::cout << "\n";
-    #endif
-    #if (MEASURE_STATE_SPACE == true)
-    ++TermProduct::instances;
-    #endif
-    type = TermType::TERM_PRODUCT;
-    subtype = ProductType::E_INTERSECTION;
-    this->_inComplement = false;
-}
-
-/**
- * Constructor of Term Product---other type
- */
 TermProduct::TermProduct(Term_ptr lhs, Term_ptr rhs, ProductType pt) : left(lhs), right(rhs) {
     #if (DEBUG_TERM_CREATION == true)
     std::cout << "[" << this << "]";
@@ -71,20 +53,6 @@ TermProduct::TermProduct(Term_ptr lhs, Term_ptr rhs, ProductType pt) : left(lhs)
     #endif
     type = TermType::TERM_PRODUCT;
     subtype = pt;
-    this->_inComplement = false;
-}
-
-TermBaseSet::TermBaseSet() : states(), stateMask(0) {
-    #if (DEBUG_TERM_CREATION == true)
-    std::cout << "[" << this << "]";
-    std::cout << "TermBaseSet::";
-    this->dump();
-    std::cout << "\n";
-    #endif
-    #if (MEASURE_STATE_SPACE == true)
-    ++TermBaseSet::instances;
-    #endif
-    type = TERM_BASE;
     this->_inComplement = false;
 }
 
@@ -126,20 +94,6 @@ TermContinuation::TermContinuation(std::shared_ptr<SymbolicAutomaton> a, Term_pt
     this->_inComplement = false;
 }
 
-TermList::TermList() {
-    #if (DEBUG_TERM_CREATION == true)
-    std::cout << "[" << this << "]";
-    std::cout << "TermList::";
-    this->dump();
-    std::cout << "\n";
-    #endif
-    #if (MEASURE_STATE_SPACE == true)
-    ++TermList::instances;
-    #endif
-    type = TERM_LIST;
-    this->_inComplement = false;
-}
-
 TermList::TermList(Term_ptr first, bool isCompl) {
     #if (DEBUG_TERM_CREATION == true)
     std::cout << "[" << this << "]";
@@ -152,23 +106,6 @@ TermList::TermList(Term_ptr first, bool isCompl) {
     #endif
     this->type = TERM_LIST;
     this->list.push_back(first);
-    this->_nonMembershipTesting = isCompl;
-    this->_inComplement = false;
-}
-
-TermList::TermList(Term_ptr f, Term_ptr s, bool isCompl) {
-    #if (DEBUG_TERM_CREATION == true)
-    std::cout << "[" << this << "]";
-    std::cout << "TermList::";
-    this->dump();
-    std::cout << "\n";
-    #endif
-    #if (MEASURE_STATE_SPACE == true)
-    ++TermList::instances;
-    #endif
-    this->type = TERM_LIST;
-    this->list.push_back(f);
-    this->list.push_back(s);
     this->_nonMembershipTesting = isCompl;
     this->_inComplement = false;
 }
@@ -423,18 +360,6 @@ bool TermContinuation::IsSubsumedBy(std::list<Term_ptr>& fixpoint) {
 
 bool TermList::IsSubsumedBy(std::list<Term_ptr>& fixpoint) {
     // TODO: Add caching
-    #if (DEBUG_TERM_SUBSUMPTION == true)
-    this->dump();
-    std::cout << " <?= ";
-    std::cout << "{";
-    for(auto item : fixpoint) {
-        if(item == nullptr) continue;
-        item->dump();
-        std::cout << ",";
-    }
-    std::cout << "}";
-    std::cout << "\n";
-    #endif
     if(this->IsEmpty()) {
         return true;
     }
@@ -797,7 +722,9 @@ bool TermBaseSet::_eqCore(const Term &t) {
 
 bool TermContinuation::_eqCore(const Term &t) {
     assert(t.type == TERM_CONTINUATION && "Testing equality of different term types");
-    G_NOT_IMPLEMENTED_YET("TermContinuation::_eqCore");
+
+    const TermContinuation &tCont = static_cast<const TermContinuation&>(t);
+    return (this->symbol == tCont.symbol) && (this->term == tCont.term);
 }
 
 bool TermList::_eqCore(const Term &t) {

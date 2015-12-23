@@ -98,7 +98,6 @@ public:
     ProductType subtype;
 
     // <<< CONSTRUCTORS >>>
-    TermProduct(Term_ptr lhs, Term_ptr rhs);
     TermProduct(Term_ptr lhs, Term_ptr rhs, ProductType subtype);
 
     // <<< PUBLIC API >>>
@@ -126,7 +125,6 @@ public:
     BitMask stateMask;
 
     // <<< CONSTRUCTORS >>>
-    TermBaseSet();
     TermBaseSet(VATA::Util::OrdVector<unsigned int>&, unsigned int, unsigned int);
 
     // <<< PUBLIC API >>>
@@ -184,9 +182,7 @@ public:
     TermListStates list;
 
     // <<< CONSTRUCTORS >>>
-    TermList();
     TermList(Term_ptr first, bool isCompl);
-    TermList(Term_ptr f, Term_ptr s, bool isCompl);
 
     // <<< PUBLIC API >>>
     bool IsSubsumedBy(std::list<Term_ptr>& fixpoint);

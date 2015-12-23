@@ -55,6 +55,15 @@ namespace Gaston {
 		}
 	};
 
+	struct SubsumptionHashType {
+		size_t operator()(std::pair<Term*, Term*> set) const {
+			size_t seed = 0;
+			boost::hash_combine(seed, hash_value(set.first));
+			boost::hash_combine(seed, hash_value(set.second));
+			return seed;
+		}
+	};
+
 /***************************
  * GLOBAL USING DIRECTIVES *
  ***************************/
@@ -85,7 +94,7 @@ namespace Gaston {
 
 	using ResultKey				 = std::pair<Term_raw, Symbol_ptr>;
 	using ResultCache            = BinaryCache<Term_raw, Symbol_ptr, ResultType, ResultHashType>;
-	using SubsumptionCache       = VATA::Util::CachedBinaryOp<Term_ptr, Term_ptr, bool>;
+	using SubsumptionCache       = BinaryCache<Term_raw, Term_raw, bool, SubsumptionHashType>;
 
 	using WorkListTerm           = Term;
 	using WorkListTerm_raw       = Term*;
