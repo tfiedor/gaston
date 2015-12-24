@@ -177,13 +177,13 @@ enum FixpointTermSem {E_FIXTERM_FIXPOINT, E_FIXTERM_PRE};
 #define DEBUG_FIXPOINT 					false
 #define DEBUG_INITIAL_APPROX 			false
 #define DEBUG_INTERSECT_NON_EMPTY 		false
-#define DEBUG_TERM_UNIQUENESS			false
+#define DEBUG_TERM_UNIQUENESS			true
+#define DEBUG_TERM_CREATION				true
 #define DEBUG_TERM_CACHE				false
 #define DEBUG_TERM_SUBSUMPTION 			false
 #define DEBUG_TERM_CACHE_COMPARISON		false
 #define DEBUG_CONTINUATIONS 			false
 #define DEBUG_COMPUTE_FULL_FIXPOINT 	false
-#define DEBUG_TERM_CREATION				false
 
 /* >>> Measuring Options <<< *
  *****************************/
@@ -203,7 +203,7 @@ enum FixpointTermSem {E_FIXTERM_FIXPOINT, E_FIXTERM_PRE};
  *************************/
 #define OPT_ANTIPRENEXING				true
 #define OPT_DRAW_NEGATION_IN_BASE 		false
-#define OPT_CREATE_QF_AUTOMATON 		true
+#define OPT_CREATE_QF_AUTOMATON 		false
 #define OPT_REDUCE_AUT_EVERYTIME		false
 #define OPT_REDUCE_AUT_LAST				true
 #define OPT_EARLY_EVALUATION 			false

@@ -51,6 +51,7 @@ add_executable(gaston
 	src/app/DecisionProcedure/containers/StateSet.cpp
 	src/app/DecisionProcedure/containers/SymbolicAutomata.cpp
 	src/app/DecisionProcedure/containers/Term.cpp
+	src/app/DecisionProcedure/containers/Workshops.cpp
 	src/app/DecisionProcedure/utils/Symbol.cpp
 	src/app/DecisionProcedure/visitors/BooleanUnfolder.cpp
 	src/app/DecisionProcedure/visitors/Flattener.cpp

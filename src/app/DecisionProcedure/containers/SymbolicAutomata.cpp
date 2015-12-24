@@ -19,6 +19,7 @@
 #include "../environment.hh"
 #include "../decision_procedures.hh"
 #include "../containers/VarToTrackMap.hh"
+#include "../containers/Workshops.h"
 #include "../../Frontend/symboltable.h"
 
 extern VarToTrackMap varMap;
@@ -352,7 +353,7 @@ void BaseAutomaton::_InitializeFinalStates() {
     collector(*initBDD);
 
     // Push states to new Base Set
-    TermBaseSet* finalStateSet = new TermBaseSet(finalStates, this->_stateOffset, this->_stateSpace);
+    TermBaseSet* finalStateSet = this->_factory.CreateBaseSet(finalStates, this->_stateOffset, this->_stateSpace);
 
     // Return new state set
     this->_finalStates = std::shared_ptr<Term>(finalStateSet);
@@ -402,7 +403,7 @@ Term* BaseAutomaton::Pre(Symbol_ptr symbol, Term* finalApproximation, bool under
         collector._isFirst = false;
     }
 
-    return new TermBaseSet(states, this->_stateOffset, this->_stateSpace);
+    return this->_factory.CreateBaseSet(states, this->_stateOffset, this->_stateSpace);
 }
 
 /**

@@ -32,6 +32,13 @@ int TermContinuation::instances = 0;
 TermEmpty::TermEmpty() {
     this->_inComplement = false;
     this->type = TERM_EMPTY;
+
+    #if (DEBUG_TERM_CREATION == true)
+    std::cout << "[" << this << "]";
+    std::cout << "TermEmpty::";
+    this->dump();
+    std::cout << "\n";
+    #endif
 }
 
 /**

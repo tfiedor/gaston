@@ -24,6 +24,7 @@
 #include "../utils/Symbol.h"
 #include "../environment.hh"
 #include "../containers/SymbolicCache.hh"
+#include "../containers/Workshops.h"
 #include "../../Frontend/ident.h"
 #include "../../Frontend/ast.h"
 #include "../containers/VarToTrackMap.hh"
@@ -52,6 +53,7 @@ protected:
     Formula_ptr _form;
     Term_ptr _initialStates;
     Term_ptr _finalStates;
+    TermWorkshop _factory;          // Creates terms
     ResultCache _resCache;          // Caches (states, symbol) = (fixpoint, bool)
     SubsumptionCache _subCache;     // Caches (term, term) = bool
     VarList _freeVars;
