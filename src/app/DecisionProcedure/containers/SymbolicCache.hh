@@ -20,30 +20,18 @@
 
 #include <boost/functional/hash.hpp>
 
-
-/**
- * Class representing cache for storing @p CacheData according to the
- * @p CacheKey
- *
- * CacheKey represents the key for lookup of CacheData
- * CacheData represents pure data that are stored inside cache
- */
-template<class KeyFirst, class KeySecond, class CacheData, class Binary_Hash>
-class BinaryCache {
-private:
-	typedef std::pair<KeyFirst, KeySecond> Key;
-
-	struct BinaryCompare : public std::binary_function<Key, Key, bool>
+template<class Key>
+struct PairCompare : public std::binary_function<Key, Key, bool>
+{
+	/**
+     * @param lhs: left operand
+     * @param rhs: right operand
+     * @return true if lhs = rhs
+     */
+	bool operator()(Key lhs, Key rhs) const
 	{
-		/**
-         * @param lhs: left operand
-         * @param rhs: right operand
-         * @return true if lhs = rhs
-         */
-		bool operator()(Key lhs, Key rhs) const
-		{
-			#if (DEBUG_TERM_CACHE_COMPARISON == true)
-			auto keyFirst = lhs.first;
+#if (DEBUG_TERM_CACHE_COMPARISON == true)
+		auto keyFirst = lhs.first;
 			auto keySecond = lhs.second;
 			if(keySecond == nullptr) {
 				std::cout << "(" << (*keyFirst) << ", \u03B5) vs";
@@ -62,22 +50,32 @@ private:
 			bool result = lhsresult && rhsresult;
 				std::cout << " = (" << lhsresult << " + " << rhsresult << ") =  " << result << "\n";
 			return  result;
-            #else
-            return (*lhs.second == *rhs.second) && (*lhs.first == *rhs.first);
-            #endif
-		}
-	};
+#else
+		return (*lhs.second == *rhs.second) && (*lhs.first == *rhs.first);
+#endif
+	}
+};
 
+/**
+ * Class representing cache for storing @p CacheData according to the
+ * @p CacheKey
+ *
+ * CacheKey represents the key for lookup of CacheData
+ * CacheData represents pure data that are stored inside cache
+ */
+template<class Key, class CacheData, class KeyHash, class KeyCompare, void (*KeyDump)(Key const&), void (*DataDump)(CacheData&)>
+class BinaryCache {
+//	                                     this could be done better --^------------------^
+private:
 	// < Typedefs >
-	typedef std::unordered_map<Key, CacheData, Binary_Hash, BinaryCompare> KeyToValueMap;
+	typedef std::unordered_map<Key, CacheData, KeyHash, KeyCompare> KeyToValueMap;
 
 	// < Private Members >
 	KeyToValueMap _cache;
 	unsigned int cacheHits = 0;
 	unsigned int cacheMisses = 0;
+
 public:
-
-
 	// < Public Methods >
 	/**
 	 * @param key: key of the looked up macro state
@@ -100,17 +98,6 @@ public:
 		{
 			(itBoolPair.first)->second = data;
 		}
-	}
-
-	void StoreIn(KeyFirst k1, KeySecond k2, const CacheData &data) {
-		auto itBoolPair = _cache.insert(std::make_pair(std::make_pair(k1, k2), data));
-		if(!itBoolPair.second) {
-			(itBoolPair.first)->second = data;
-		}
-	}
-
-	bool retrieveFromCache(KeyFirst k1, KeySecond k2, CacheData & data) {
-		return retrieveFromCache(std::make_pair(k1, k2), data);
 	}
 
 	/**
@@ -167,17 +154,15 @@ public:
 			std::cout << "\n";
 
 		#if (DEBUG_TERM_CACHE == true)
-		std::cout << "[";
+		std::cout << "{\n";
 		for(auto it = this->_cache.begin(); it != this->_cache.end(); ++it) {
-			auto keyFirst = it->first.first;
-			auto keySecond = it->first.second;
-			if(keySecond == nullptr) {
-				std::cout << "(" << (*keyFirst) << ", \u03B5), ";
-			} else {
-				std::cout << "(" << (*keyFirst) << ", " << (*keySecond) << "), ";
-			}
+			std::cout << "\t";
+			KeyDump(it->first);
+			std::cout << " : ";
+			DataDump(it->second);
+			std::cout << "\n";
 		}
-		std::cout << "]";
+		std::cout << "}\n";
 		#endif
 
 		return size;

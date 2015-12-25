@@ -496,6 +496,48 @@ std::ostream& operator <<(std::ostream& osObject, Term& z) {
     return osObject;
 }
 
+namespace {
+    std::ostream &operator<<(std::ostream &osObject, std::pair<Term *, ZeroSymbol *> const& z) {
+        auto left = z.first;
+        auto right = z.second;
+
+        std::cout << "<" << left << ", " << right << ">";
+        return osObject;
+    }
+
+    std::ostream &operator<<(std::ostream &osObject, std::pair<std::shared_ptr<Term>, bool> const& z) {
+        auto fixpoint = z.first.get();
+        auto result = z.second;
+
+        osObject << "<" << fixpoint << ", " << (result ? "True" : "False") << ">";
+        return osObject;
+    }
+}
+
+namespace Gaston {
+    void dumpResultKey(std::pair<Term*, Symbol*> const& s) {
+        assert(s.first != nullptr);
+        assert(s.second != nullptr);
+
+        std::cout << "<" << (*s.first) << ", " << (*s.second) << ">";
+    }
+
+    void dumpResultData(std::pair<std::shared_ptr<Term>, bool> &s) {
+        std::cout << "<" << (*s.first) << ", " << (s.second ? "True" : "False") << ">";
+    }
+
+    void dumpSubsumptionKey(std::pair < Term * , Term * > const& s) {
+        assert(s.first != nullptr);
+        assert(s.second != nullptr);
+
+        std::cout << "<" << (*s.first) << ", " << (*s.second) << ">";
+    }
+
+    void dumpSubsumptionData(bool &s) {
+        std::cout << (s ? "True" : "False");
+    }
+}
+
 void Term::dump() {
     if(this->_inComplement) {
         std::cout << "\033[1;31m{\033[0m";

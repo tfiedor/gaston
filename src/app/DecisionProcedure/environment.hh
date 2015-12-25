@@ -37,8 +37,10 @@ class SymbolicAutomaton;
 class ZeroSymbol;
 class Term;
 class ASTForm;
-template<class A, class B, class C, class D>
+template<class A, class B, class C, class D, void (*E)(A const&),void (*F)(B&)>
 class BinaryCache;
+template<class A>
+class PairCompare;
 
 namespace Gaston {
 	extern size_t hash_value(Term*);
@@ -63,6 +65,11 @@ namespace Gaston {
 			return seed;
 		}
 	};
+
+	void dumpResultKey(std::pair<Term*, ZeroSymbol*> const& s);
+	void dumpResultData(std::pair<std::shared_ptr<Term>, bool>& s);
+	void dumpSubsumptionKey(std::pair<Term*, Term*> const& s);
+	void dumpSubsumptionData(bool& s);
 
 /***************************
  * GLOBAL USING DIRECTIVES *
@@ -93,8 +100,9 @@ namespace Gaston {
 	using TrackType				 = Automaton::SymbolType;
 
 	using ResultKey				 = std::pair<Term_raw, Symbol_ptr>;
-	using ResultCache            = BinaryCache<Term_raw, Symbol_ptr, ResultType, ResultHashType>;
-	using SubsumptionCache       = BinaryCache<Term_raw, Term_raw, bool, SubsumptionHashType>;
+	using ResultCache            = BinaryCache<ResultKey, ResultType, ResultHashType, PairCompare<ResultKey>, dumpResultKey, dumpResultData>;
+	using SubsumptionKey		 = std::pair<Term_raw, Term_raw>;
+	using SubsumptionCache       = BinaryCache<SubsumptionKey, bool, SubsumptionHashType, PairCompare<SubsumptionKey>, dumpSubsumptionKey, dumpSubsumptionData>;
 
 	using WorkListTerm           = Term;
 	using WorkListTerm_raw       = Term*;
@@ -179,7 +187,7 @@ enum FixpointTermSem {E_FIXTERM_FIXPOINT, E_FIXTERM_PRE};
 #define DEBUG_INTERSECT_NON_EMPTY 		false
 #define DEBUG_TERM_UNIQUENESS			true
 #define DEBUG_TERM_CREATION				true
-#define DEBUG_TERM_CACHE				false
+#define DEBUG_TERM_CACHE				true
 #define DEBUG_TERM_SUBSUMPTION 			false
 #define DEBUG_TERM_CACHE_COMPARISON		false
 #define DEBUG_CONTINUATIONS 			false
