@@ -47,6 +47,7 @@ public:
     // <<< PUBLIC MEMBERS >>>
     static StateType stateCnt;
     AutType type;
+    using TermWorkshop  = Workshops::TermWorkshop;
 
 protected:
     // <<< PRIVATE MEMBERS >>>

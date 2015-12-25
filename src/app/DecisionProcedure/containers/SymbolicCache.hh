@@ -97,6 +97,7 @@ public:
 		if (!itBoolPair.second)
 		{
 			(itBoolPair.first)->second = data;
+			// TODO: This is shady...is it needed?
 		}
 	}
 
@@ -153,7 +154,7 @@ public:
 		else
 			std::cout << "\n";
 
-		#if (DEBUG_TERM_CACHE == true)
+		#if (DEBUG_CACHE_MEMBERS == true)
 		std::cout << "{\n";
 		for(auto it = this->_cache.begin(); it != this->_cache.end(); ++it) {
 			std::cout << "\t";

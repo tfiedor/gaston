@@ -753,6 +753,11 @@ bool TermProduct::_eqCore(const Term &t) {
 bool TermBaseSet::_eqCore(const Term &t) {
     assert(t.type == TERM_BASE && "Testing equality of different term types");
 
+    #if (OPT_EQ_THROUGH_POINTERS == true)
+    // As we cannot get to _eqCore with unique pointers, it must mean t and this are different;
+    assert(this != &t);
+    return false;
+    #else
     const TermBaseSet &tBase = static_cast<const TermBaseSet&>(t);
     if(this->states.size() != tBase.states.size()) {
         return false;
@@ -767,6 +772,7 @@ bool TermBaseSet::_eqCore(const Term &t) {
         }
         return true;
     }
+    #endif
 }
 
 bool TermContinuation::_eqCore(const Term &t) {

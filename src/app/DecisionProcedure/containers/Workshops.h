@@ -38,17 +38,44 @@
 #ifndef WSKS_WORKSHOPS_H
 #define WSKS_WORKSHOPS_H
 
+
+#include <boost/functional/hash.hpp>
+#include <unordered_map>
+#include <functional>
 #include "../environment.hh"
+#include "SymbolicCache.hh"
 
 class TermBaseSet;
 
-class TermWorkshop {
-public:
-    // <<< CONSTRUCTORS >>>
-    TermWorkshop() {};
+// TODO: 1) Dump it out
+// TODO: 2) Cache it out
+// TODO: 3) More shops
 
-    // <<< PUBLIC API >>>
-    TermBaseSet* CreateBaseSet(VATA::Util::OrdVector<unsigned int>& states, unsigned int offset, unsigned int stateno);
-};
+namespace Workshops {
+    // TODO: Maybe I forgot to take measure of the complement?
+    void dumpBaseKey(VATA::Util::OrdVector<unsigned int> const&);
+    void dumpCacheData(Term *&);
+
+    using CacheData     = Term *;
+    using BaseKey       = VATA::Util::OrdVector<unsigned int>;
+    using BaseHash      = boost::hash<BaseKey>;
+    using BaseCompare   = std::equal_to<BaseKey>;
+    using BaseCache     = BinaryCache<BaseKey, CacheData, BaseHash, BaseCompare, dumpBaseKey, dumpCacheData>;
+
+    class TermWorkshop {
+        //using SubsumptionCache       = BinaryCache<SubsumptionKey, bool, SubsumptionHashType, PairCompare<SubsumptionKey>, dumpSubsumptionKey, dumpSubsumptionData>;
+    private:
+        // <<< PRIVATE MEMBERS >>>
+        BaseCache* _bCache;
+    public:
+        // <<< CONSTRUCTORS >>>
+        TermWorkshop();
+
+        // <<< PUBLIC API >>>
+        TermBaseSet *CreateBaseSet(BaseKey &states, unsigned int offset, unsigned int stateno);
+
+        void Dump();
+    };
+}
 
 #endif //WSKS_WORKSHOPS_H

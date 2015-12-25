@@ -762,6 +762,9 @@ void BinaryOpAutomaton::DumpStats() {
     std::cout << "\n";
     std::cout << "  \u2218 Cache stats -> ";
     this->_resCache.dumpStats();
+    #if (DEBUG_WORKSHOPS)
+    this->_factory.Dump();
+    #endif
     print_stat("True Hits", this->_trueCounter);
     print_stat("False Hits", this->_falseCounter);
     print_stat("Continuation Generation", this->_contCreationCounter);
@@ -776,6 +779,9 @@ void ProjectionAutomaton::DumpStats() {
     std::cout << "\n";
     std::cout << "  \u2218 Cache stats -> ";
     this->_resCache.dumpStats();
+    #if (DEBUG_WORKSHOPS)
+    this->_factory.Dump();
+    #endif
     print_stat("True Hits", this->_trueCounter);
     print_stat("False Hits", this->_falseCounter);
     print_stat("Continuation Evaluation", this->_contUnfoldingCounter);
@@ -788,6 +794,9 @@ void ComplementAutomaton::DumpStats() {
     std::cout << "\n";
     std::cout << "  \u2218 Cache stats -> ";
     this->_resCache.dumpStats();
+    #if (DEBUG_WORKSHOPS)
+    this->_factory.Dump();
+    #endif
     print_stat("True Hits", this->_trueCounter);
     print_stat("False Hits", this->_falseCounter);
     print_stat("Continuation Evaluation", this->_contUnfoldingCounter);
@@ -800,6 +809,9 @@ void BaseAutomaton::DumpStats() {
     std::cout << "\n";
     std::cout << "  \u2218 Cache stats -> ";
     this->_resCache.dumpStats();
+    #if (DEBUG_WORKSHOPS)
+    this->_factory.Dump();
+    #endif
     print_stat("True Hits", this->_trueCounter);
     print_stat("False Hits", this->_falseCounter);
     print_stat("Continuation Evaluation", this->_contUnfoldingCounter);
