@@ -28,28 +28,27 @@ struct PairCompare : public std::binary_function<Key, Key, bool>
      * @param rhs: right operand
      * @return true if lhs = rhs
      */
-	bool operator()(Key lhs, Key rhs) const
-	{
+	bool operator()(Key const& lhs, Key const& rhs) const {
 #if (DEBUG_TERM_CACHE_COMPARISON == true)
 		auto keyFirst = lhs.first;
-			auto keySecond = lhs.second;
-			if(keySecond == nullptr) {
-				std::cout << "(" << (*keyFirst) << ", \u03B5) vs";
-			} else {
-				std::cout << "(" << (*keyFirst) << ", " << (*keySecond) << ") vs";
-			}
-			auto dkeyFirst = rhs.first;
-			auto dkeySecond = rhs.second;
-			if(dkeySecond == nullptr) {
-				std::cout << "(" << (*dkeyFirst) << ", \u03B5)";
-			} else {
-				std::cout << "(" << (*dkeyFirst) << ", " << (*dkeySecond) << ")";
-			}
-			bool lhsresult = (*lhs.first == *rhs.first);
-			bool rhsresult = (lhs.second == rhs.second);
-			bool result = lhsresult && rhsresult;
-				std::cout << " = (" << lhsresult << " + " << rhsresult << ") =  " << result << "\n";
-			return  result;
+		auto keySecond = lhs.second;
+		if(keySecond == nullptr) {
+			std::cout << "(" << (*keyFirst) << ", \u03B5) vs";
+		} else {
+			std::cout << "(" << (*keyFirst) << ", " << (*keySecond) << ") vs";
+		}
+		auto dkeyFirst = rhs.first;
+		auto dkeySecond = rhs.second;
+		if(dkeySecond == nullptr) {
+			std::cout << "(" << (*dkeyFirst) << ", \u03B5)";
+		} else {
+			std::cout << "(" << (*dkeyFirst) << ", " << (*dkeySecond) << ")";
+		}
+		bool lhsresult = (*lhs.first == *rhs.first);
+		bool rhsresult = (lhs.second == rhs.second);
+		bool result = lhsresult && rhsresult;
+			std::cout << " = (" << lhsresult << " + " << rhsresult << ") =  " << result << "\n";
+		return  result;
 #else
 		return (*lhs.second == *rhs.second) && (*lhs.first == *rhs.first);
 #endif
@@ -65,7 +64,7 @@ struct PairCompare : public std::binary_function<Key, Key, bool>
  */
 template<class Key, class CacheData, class KeyHash, class KeyCompare, void (*KeyDump)(Key const&), void (*DataDump)(CacheData&)>
 class BinaryCache {
-//	                                     this could be done better --^------------------^
+//	                                     this could be done better ---^----------------------------^
 private:
 	// < Typedefs >
 	typedef std::unordered_map<Key, CacheData, KeyHash, KeyCompare> KeyToValueMap;
@@ -94,15 +93,10 @@ public:
 	 */
 	void StoreIn(Key & key, const CacheData & data){
 		auto itBoolPair = _cache.insert(std::make_pair(key, data));
-		if (!itBoolPair.second)
-		{
-			(itBoolPair.first)->second = data;
-			// TODO: This is shady...is it needed?
-		}
 	}
 
 	/**
-	 * @param key: kew we are looking for
+	 * @param key: key we are looking for
 	 * @param data: reference to the data
 	 * @return true if found;
 	 */
@@ -115,19 +109,6 @@ public:
 			data = search->second;
 			++cacheHits;
 			return true;
-		}
-	}
-
-	/**
-	 * @param key:
-	 * @return true if @p key in cache
-	 */
-	bool inCache(Key & key) {
-		bool inC = (this->_cache.find(key)) != this->_cache.end();
-		if(inC) {
-			++cacheHits;
-		} else {
-			++cacheMisses;
 		}
 	}
 

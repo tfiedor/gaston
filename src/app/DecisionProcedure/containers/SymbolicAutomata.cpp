@@ -165,7 +165,8 @@ ResultType SymbolicAutomaton::IntersectNonEmpty(Symbol_ptr symbol, Term* stateAp
 
         auto it = this->_freeVars.begin();
         auto end = this->_freeVars.end();
-        for(size_t var = 0; var < varMap.TrackLength(); ++var) {
+        auto varNum = varMap.TrackLength();
+        for(size_t var = 0; var < varNum; ++var) {
             if (it != end && var == *it) {
                 ++it;
             } else {

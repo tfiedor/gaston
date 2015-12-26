@@ -73,6 +73,7 @@ TermBaseSet::TermBaseSet(VATA::Util::OrdVector<unsigned int>& s, unsigned int of
         this->stateMask.set(state-offset, true);
     }
     this->_inComplement = false;
+    this->_stateSpace = this->states.size();
     #if (DEBUG_TERM_CREATION == true)
     std::cout << "[" << this << "]";
     std::cout << "TermBaseSet::";
@@ -233,7 +234,18 @@ bool TermProduct::_IsSubsumedCore(Term* t) {
 
     // Retype and test the subsumption component-wise
     TermProduct *rhs = reinterpret_cast<TermProduct*>(t);
-    return (this->left->IsSubsumed(rhs->left.get())) && (this->right->IsSubsumed(rhs->right.get()));
+    Term *lhsl = this->left.get();
+    Term *lhsr = this->right.get();
+    Term *rhsl = rhs->left.get();
+    Term *rhsr = rhs->right.get();
+
+    if(lhsl == rhsl) {
+        return lhsr->IsSubsumed(rhsr);
+    } else if(lhsr == rhsr) {
+        return lhsl->IsSubsumed(rhsl);
+    } else {
+        return lhsl->IsSubsumed(rhsl) && lhsr->IsSubsumed(rhsr);
+    }
 }
 
 bool TermBaseSet::_IsSubsumedCore(Term* term) {
@@ -242,18 +254,28 @@ bool TermBaseSet::_IsSubsumedCore(Term* term) {
     // Test component-wise, not very efficient though
     // TODO: Change to bit-vectors if possible
     TermBaseSet *t = reinterpret_cast<TermBaseSet*>(term);
-    if(t->states.size() < this->states.size()) {
+    if (this == term) {
+        return true;
+    } else if(t->states.size() < this->states.size()) {
         return false;
     } else {
         // TODO: Maybe we could exploit that we have ordered vectors
-        for(auto state : this->states) {
-            auto isIn = std::find(t->states.begin(), t->states.end(), state);
-            if(isIn == t->states.end()) {
-                // Not in, false
+        auto it = this->states.begin();
+        auto end = this->states.end();
+        auto tit = t->states.begin();
+        auto tend = t->states.end();
+        while(it != end && tit != tend) {
+            if(*it == *tit) {
+                ++it;
+                ++tit;
+            } else if(*it > *tit) {
+                ++tit;
+            } else {
+                // *it < *tit
                 return false;
             }
         }
-        return true;
+        return (it == end);
     }
 }
 
@@ -455,7 +477,7 @@ unsigned int TermProduct::MeasureStateSpace() {
 }
 
 unsigned int TermBaseSet::MeasureStateSpace() {
-    return this->states.size();
+    return this->_stateSpace;
 }
 
 unsigned int TermContinuation::MeasureStateSpace() {

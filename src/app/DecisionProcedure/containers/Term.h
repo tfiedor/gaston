@@ -43,6 +43,7 @@ protected:
     // <<< PRIVATE MEMBERS >>>
     bool _nonMembershipTesting;
     bool _inComplement;
+    size_t _stateSpace;
 
 public:
     // <<< PUBLIC API >>>

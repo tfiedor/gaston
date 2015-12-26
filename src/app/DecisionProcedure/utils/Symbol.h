@@ -30,10 +30,10 @@ protected:
     BitMask _trackMask;
 
     // <<< PRIVATE METHODS >>>
-    void _SetZeroAt(VarType var);
-    void _SetOneAt(VarType var);
-    void _SetDontCareAt(VarType var);
-    void _SetValueAt(VarType var, VarValue val);
+    inline void _SetZeroAt(VarType var);
+    inline void _SetOneAt(VarType var);
+    inline void _SetDontCareAt(VarType var);
+    inline void _SetValueAt(VarType var, VarValue val);
 
 public:
     // <<< CONSTRUCTORS >>>
