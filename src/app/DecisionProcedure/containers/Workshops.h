@@ -45,7 +45,9 @@
 #include "../environment.hh"
 #include "SymbolicCache.hh"
 
+// <<< FORWARD DECLARATION >>>
 class TermBaseSet;
+class TermProduct;
 
 // TODO: 1) Dump it out
 // TODO: 2) Cache it out
@@ -53,26 +55,34 @@ class TermBaseSet;
 
 namespace Workshops {
     // TODO: Maybe I forgot to take measure of the complement?
-    void dumpBaseKey(VATA::Util::OrdVector<unsigned int> const&);
-    void dumpCacheData(Term *&);
 
-    using CacheData     = Term *;
-    using BaseKey       = VATA::Util::OrdVector<unsigned int>;
-    using BaseHash      = boost::hash<BaseKey>;
-    using BaseCompare   = std::equal_to<BaseKey>;
+    using CacheData         = Term*;
+    using BaseKey           = VATA::Util::OrdVector<unsigned int>;
+    using BaseHash          = boost::hash<BaseKey>;
+    using BaseCompare       = std::equal_to<BaseKey>;
+    using ProductKey        = std::pair<Term*, Term*>;
+    using ProductHash       = boost::hash<ProductKey>;
+    using ProductCompare    = PairCompare<ProductKey>;
+
+    void dumpBaseKey(BaseKey const&);
+    void dumpProductKey(ProductKey const&);
+    void dumpCacheData(CacheData &);
+
     using BaseCache     = BinaryCache<BaseKey, CacheData, BaseHash, BaseCompare, dumpBaseKey, dumpCacheData>;
+    using ProductCache  = BinaryCache<ProductKey, CacheData, ProductHash, ProductCompare, dumpProductKey, dumpCacheData>;
 
     class TermWorkshop {
-        //using SubsumptionCache       = BinaryCache<SubsumptionKey, bool, SubsumptionHashType, PairCompare<SubsumptionKey>, dumpSubsumptionKey, dumpSubsumptionData>;
     private:
         // <<< PRIVATE MEMBERS >>>
         BaseCache* _bCache;
+        ProductCache* _pCache;
     public:
         // <<< CONSTRUCTORS >>>
         TermWorkshop();
 
         // <<< PUBLIC API >>>
-        TermBaseSet *CreateBaseSet(BaseKey &states, unsigned int offset, unsigned int stateno);
+        TermBaseSet* CreateBaseSet(BaseKey &states, unsigned int offset, unsigned int stateno);
+        TermProduct* CreateProduct(Term*&, Term*&, ProductType);
 
         void Dump();
     };
