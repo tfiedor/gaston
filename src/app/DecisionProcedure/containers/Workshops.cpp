@@ -4,6 +4,7 @@
 namespace Workshops {
     TermWorkshop::TermWorkshop() {
         this->_bCache = new BaseCache();
+        this->_pCache = new ProductCache();
     }
 
     /**

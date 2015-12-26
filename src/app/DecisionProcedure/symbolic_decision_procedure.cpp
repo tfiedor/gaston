@@ -40,7 +40,7 @@ int ws1s_symbolic_decision_procedure(SymbolicAutomaton_ptr symbolicAutomaton) {
     #endif
 
     // Checks if Initial States intersect Final states
-    std::pair<Term_ptr, bool> result = symbolicAutomaton->IntersectNonEmpty(nullptr, finalStatesApproximation, false);
+    std::pair<Term_ptr, bool> result = symbolicAutomaton->IntersectNonEmpty(nullptr, finalStatesApproximation.get(), false);
     Term_ptr fixpoint = result.first;
     bool isValid = result.second;
 

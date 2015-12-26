@@ -197,13 +197,13 @@ bool Term::IsSubsumed(Term *t) {
             assert(continuation->underComplement == thisCont->underComplement);
         }
         auto unfoldedContinuation = (continuation->aut->IntersectNonEmpty(continuation->symbol.get(),
-                                                                          continuation->term,
+                                                                          continuation->term.get(),
                                                                           continuation->underComplement)).first;
         return this->IsSubsumed(unfoldedContinuation.get());
     } else if(this->type == TERM_CONTINUATION) {
         TermContinuation *continuation = reinterpret_cast<TermContinuation *>(this);
         auto unfoldedContinuation = (continuation->aut->IntersectNonEmpty(continuation->symbol.get(),
-                                                                          continuation->term,
+                                                                          continuation->term.get(),
                                                                           continuation->underComplement)).first;
         return unfoldedContinuation->IsSubsumed(t);
     } else {
@@ -262,7 +262,7 @@ bool TermContinuation::_IsSubsumedCore(Term *t) {
     // TODO: Maybe if we have {} we can answer sooner, without unpacking
 
     // We unpack this term
-    auto unfoldedTerm = (this->aut->IntersectNonEmpty(this->symbol.get(), this->term, this->underComplement)).first;
+    auto unfoldedTerm = (this->aut->IntersectNonEmpty(this->symbol.get(), this->term.get(), this->underComplement)).first;
     return unfoldedTerm->IsSubsumed(t);
 }
 
@@ -641,7 +641,7 @@ void TermFixpoint::ComputeNextFixpoint() {
     _worklist.pop_front();
 
     // Compute the results
-    ResultType result = _aut->IntersectNonEmpty(&item.second, item.first, this->_nonMembershipTesting);
+    ResultType result = _aut->IntersectNonEmpty(&item.second, item.first.get(), this->_nonMembershipTesting);
 
     // If it is subsumed by fixpoint, we don't add it
     if(result.first->IsSubsumedBy(_fixpoint)) {
@@ -670,7 +670,7 @@ void TermFixpoint::ComputeNextPre() {
     _worklist.pop_front();
 
     // Compute the results
-    ResultType result = _aut->IntersectNonEmpty(&item.second, item.first, this->_nonMembershipTesting);
+    ResultType result = _aut->IntersectNonEmpty(&item.second, item.first.get(), this->_nonMembershipTesting);
 
     // If it is subsumed we return
     if(result.first->IsSubsumedBy(_fixpoint)) {
