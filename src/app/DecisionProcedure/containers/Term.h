@@ -39,11 +39,13 @@ using SymbolType        = ZeroSymbol;
 class Term {
 public:
     TermType type;
+    size_t stateSpace;         // << Exact size of the state space, 0 if unknown
+    size_t stateSpaceApprox;   // << Approximation of the state space, used for heuristics
+
 protected:
     // <<< PRIVATE MEMBERS >>>
     bool _nonMembershipTesting;
     bool _inComplement;
-    size_t _stateSpace;
 
 public:
     // <<< PUBLIC API >>>

@@ -33,6 +33,10 @@ TermEmpty::TermEmpty() {
     this->_inComplement = false;
     this->type = TERM_EMPTY;
 
+    // Initialization of state space
+    this->stateSpace = 0;
+    this->stateSpaceApprox = 0;
+
     #if (DEBUG_TERM_CREATION == true)
     std::cout << "[" << this << "]";
     std::cout << "TermEmpty::";
@@ -49,18 +53,28 @@ TermEmpty::TermEmpty() {
  * @param[in] rhs:  right operand of term intersection
  */
 TermProduct::TermProduct(Term_ptr lhs, Term_ptr rhs, ProductType pt) : left(lhs), right(rhs) {
+    #if (MEASURE_STATE_SPACE == true)
+    ++TermProduct::instances;
+    #endif
+
+    this->_inComplement = false;
+    this->type = TermType::TERM_PRODUCT;
+    this->subtype = pt;
+
+    // Initialization of state space
+    if(this->left->stateSpace != 0 && this->right->stateSpace != 0) {
+        this->stateSpace = this->left->stateSpace + this->right->stateSpace +1;
+    } else {
+        this->stateSpace = 0;
+    }
+    this->stateSpaceApprox = this->left->stateSpaceApprox + this->right->stateSpaceApprox + 1;
+
     #if (DEBUG_TERM_CREATION == true)
     std::cout << "[" << this << "]";
     std::cout << "TermProduct::";
     this->dump();
     std::cout << "\n";
     #endif
-    #if (MEASURE_STATE_SPACE == true)
-    ++TermProduct::instances;
-    #endif
-    type = TermType::TERM_PRODUCT;
-    subtype = pt;
-    this->_inComplement = false;
 }
 
 TermBaseSet::TermBaseSet(VATA::Util::OrdVector<unsigned int>& s, unsigned int offset, unsigned int stateNo) : states(), stateMask(stateNo)  {
@@ -72,8 +86,12 @@ TermBaseSet::TermBaseSet(VATA::Util::OrdVector<unsigned int>& s, unsigned int of
         this->states.push_back(state);
         this->stateMask.set(state-offset, true);
     }
+
+    // Initialization of state space
     this->_inComplement = false;
-    this->_stateSpace = this->states.size();
+    this->stateSpace = this->states.size();
+    this->stateSpaceApprox = this->stateSpace;
+
     #if (DEBUG_TERM_CREATION == true)
     std::cout << "[" << this << "]";
     std::cout << "TermBaseSet::";
@@ -92,7 +110,13 @@ TermContinuation::TermContinuation(std::shared_ptr<SymbolicAutomaton> a, Term_pt
     #if (MEASURE_STATE_SPACE == true)
     ++TermContinuation::instances;
     #endif
+
     this->type = TERM_CONTINUATION;
+
+    // Initialization of state space
+    this->stateSpace = 1;
+    this->stateSpaceApprox = 1;
+
     #if (DEBUG_CONTINUATIONS == true)
     std::cout << "Postponing computation as [";
     t->dump();
@@ -112,7 +136,15 @@ TermList::TermList(Term_ptr first, bool isCompl) {
     #if (MEASURE_STATE_SPACE == true)
     ++TermList::instances;
     #endif
+
     this->type = TERM_LIST;
+
+    // Initialization of state space
+    if(first->stateSpace) {
+        this->stateSpace = first->stateSpace + 1;
+    }
+    this->stateSpaceApprox = first->stateSpaceApprox;
+
     this->list.push_back(first);
     this->_nonMembershipTesting = isCompl;
     this->_inComplement = false;
@@ -135,6 +167,10 @@ TermFixpoint::TermFixpoint(std::shared_ptr<SymbolicAutomaton> aut, Term_ptr star
     this->_nonMembershipTesting = inComplement;
     this->_inComplement = false;
     this->type = TERM_FIXPOINT;
+
+    // Initialize the state space
+    this->stateSpace = 0;
+    this->stateSpaceApprox = startingTerm->stateSpaceApprox;
 
     // Initialize the fixpoint as [nullptr, startingTerm]
     this->_fixpoint.push_front(startingTerm);
@@ -160,6 +196,10 @@ TermFixpoint::TermFixpoint(std::shared_ptr<SymbolicAutomaton> aut, Term_ptr sour
     ++TermFixpoint::instances;
     #endif
     assert(sourceTerm->type == TERM_FIXPOINT);
+
+    // Initialize the state space
+    this->stateSpace = 0;
+    this->stateSpaceApprox = sourceTerm->stateSpaceApprox;
 
     // Initialize the aggregate function
     this->_InitializeAggregateFunction(inComplement);
@@ -244,7 +284,11 @@ bool TermProduct::_IsSubsumedCore(Term* t) {
     } else if(lhsr == rhsr) {
         return lhsl->IsSubsumed(rhsl);
     } else {
-        return lhsl->IsSubsumed(rhsl) && lhsr->IsSubsumed(rhsr);
+        if(lhsl->stateSpaceApprox < lhsr->stateSpaceApprox) {
+            return lhsl->IsSubsumed(rhsl) && lhsr->IsSubsumed(rhsr);
+        } else {
+            return lhsr->IsSubsumed(rhsr) && lhsl->IsSubsumed(rhsl);
+        }
     }
 }
 
@@ -477,7 +521,7 @@ unsigned int TermProduct::MeasureStateSpace() {
 }
 
 unsigned int TermBaseSet::MeasureStateSpace() {
-    return this->_stateSpace;
+    return this->stateSpace;
 }
 
 unsigned int TermContinuation::MeasureStateSpace() {
