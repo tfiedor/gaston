@@ -17,7 +17,14 @@
 
 namespace Gaston {
     size_t hash_value(Term* s) {
+        #if (OPT_TERM_HASH_BY_APPROX == true)
+        size_t seed = 0;
+        boost::hash_combine(seed, boost::hash_value(s->stateSpaceApprox));
+        boost::hash_combine(seed, boost::hash_value(s->MeasureStateSpace()));
+        return seed;
+        #else
         return boost::hash_value(s->MeasureStateSpace());
+        #endif
     }
 }
 
@@ -512,23 +519,31 @@ bool TermFixpoint::IsEmpty() {
 /**
  * Measures the state space as number of states
  */
-unsigned int TermEmpty::MeasureStateSpace() {
+unsigned int Term::MeasureStateSpace() {
+    if(this->stateSpace != 0) {
+        return this->stateSpace;
+    } else {
+        return this->_MeasureStateSpaceCore();
+    }
+}
+
+unsigned int TermEmpty::_MeasureStateSpaceCore() {
     return 0;
 }
 
-unsigned int TermProduct::MeasureStateSpace() {
+unsigned int TermProduct::_MeasureStateSpaceCore() {
     return this->left->MeasureStateSpace() + this->right->MeasureStateSpace() + 1;
 }
 
-unsigned int TermBaseSet::MeasureStateSpace() {
+unsigned int TermBaseSet::_MeasureStateSpaceCore() {
     return this->stateSpace;
 }
 
-unsigned int TermContinuation::MeasureStateSpace() {
+unsigned int TermContinuation::_MeasureStateSpaceCore() {
     return 1;
 }
 
-unsigned int TermList::MeasureStateSpace() {
+unsigned int TermList::_MeasureStateSpaceCore() {
     unsigned int count = 0;
     // Measure state spaces of all subterms
     for(auto item : this->list) {
@@ -538,7 +553,7 @@ unsigned int TermList::MeasureStateSpace() {
     return count;
 }
 
-unsigned int TermFixpoint::MeasureStateSpace() {
+unsigned int TermFixpoint::_MeasureStateSpaceCore() {
     unsigned count = 1;
     for(auto item : this->_fixpoint) {
         if(item == nullptr) {
@@ -560,24 +575,6 @@ std::ostream& operator <<(std::ostream& osObject, Term& z) {
 #endif
     z.dump();
     return osObject;
-}
-
-namespace {
-    std::ostream &operator<<(std::ostream &osObject, std::pair<Term *, ZeroSymbol *> const& z) {
-        auto left = z.first;
-        auto right = z.second;
-
-        std::cout << "<" << left << ", " << right << ">";
-        return osObject;
-    }
-
-    std::ostream &operator<<(std::ostream &osObject, std::pair<std::shared_ptr<Term>, bool> const& z) {
-        auto fixpoint = z.first.get();
-        auto result = z.second;
-
-        osObject << "<" << fixpoint << ", " << (result ? "True" : "False") << ">";
-        return osObject;
-    }
 }
 
 namespace Gaston {

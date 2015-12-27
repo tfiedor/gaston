@@ -56,12 +56,13 @@ public:
     bool operator==(const Term &t);
 
     // <<< MEASURING FUNCTIONS >>>
-    virtual unsigned int MeasureStateSpace() = 0;
+    virtual unsigned int MeasureStateSpace();
 
     // <<< DUMPING FUNCTIONS >>>
     virtual void dump();
 protected:
     // <<< PRIVATE FUNCTIONS >>>
+    virtual unsigned int _MeasureStateSpaceCore() = 0;
     virtual bool _IsSubsumedCore(Term* t) = 0;
     virtual void _dumpCore() = 0;
     virtual bool _eqCore(const Term&) = 0;
@@ -80,15 +81,13 @@ public:
     bool IsSubsumedBy(std::list<Term_ptr>& fixpoint);
     bool IsEmpty();
 
-    // <<< MEASURING FUNCTIONS >>>
-    unsigned int MeasureStateSpace();
-
     // <<< DUMPING FUNCTIONS >>>
 private:
     void _dumpCore();
     bool _eqCore(const Term&);
 
     // <<< PRIVATE FUNCTIONS >>>
+    unsigned int _MeasureStateSpaceCore();
     virtual bool _IsSubsumedCore(Term* t);
 };
 
@@ -107,9 +106,6 @@ public:
     bool IsSubsumedBy(std::list<Term_ptr>& fixpoint);
     bool IsEmpty();
 
-    // <<< MEASURING FUNCTIONS >>>
-    unsigned int MeasureStateSpace();
-
     // <<< DUMPING FUNCTIONS >>>
 private:
     void _dumpCore();
@@ -117,6 +113,7 @@ private:
 
 private:
     // <<< PRIVATE FUNCTIONS >>>
+    unsigned int _MeasureStateSpaceCore();
     virtual bool _IsSubsumedCore(Term* t);
 };
 
@@ -135,9 +132,6 @@ public:
     bool IsSubsumedBy(std::list<Term_ptr>& fixpoint);
     bool IsEmpty();
 
-    // <<< MEASURING FUNCTIONS >>>
-    unsigned int MeasureStateSpace();
-
     // <<< DUMPING FUNCTIONS >>>
 private:
     void _dumpCore();
@@ -145,6 +139,7 @@ private:
 
 private:
     // <<< PRIVATE FUNCTIONS >>>
+    unsigned int _MeasureStateSpaceCore();
     virtual bool _IsSubsumedCore(Term* t);
 };
 
@@ -166,13 +161,13 @@ public:
     bool IsEmpty();
 
     // <<< MEASURING FUNCTIONS >>>
-    unsigned int MeasureStateSpace();
 
     // <<< DUMPING FUNCTIONS >>>
 private:
     void _dumpCore();
 private:
     // <<< PRIVATE FUNCTIONS >>>
+    unsigned int _MeasureStateSpaceCore();
     bool _eqCore(const Term&);
     virtual bool _IsSubsumedCore(Term* t);
 };
@@ -191,15 +186,13 @@ public:
     bool IsSubsumedBy(std::list<Term_ptr>& fixpoint);
     bool IsEmpty();
 
-    // <<< MEASURING FUNCTIONS >>>
-    unsigned int MeasureStateSpace();
-
     // <<< DUMPING FUNCTIONS >>>
 private:
     void _dumpCore();
 
 private:
     // <<< PRIVATE FUNCTIONS >>>
+    unsigned int _MeasureStateSpaceCore();
     virtual bool _IsSubsumedCore(Term* t);
     bool _eqCore(const Term&);
 };
@@ -306,9 +299,6 @@ public:
     iterator GetIterator() { return iterator(*this); }
     iterator* GetIteratorDynamic() { return new iterator(*this); }
 
-    // <<< MEASURING FUNCTIONS >>>
-    unsigned int MeasureStateSpace();
-
     // <<< DUMPING FUNCTIONS >>>
 private:
     void _dumpCore();
@@ -320,5 +310,6 @@ private:
     void _InitializeAggregateFunction(bool inComplement);
     virtual bool _IsSubsumedCore(Term* t);
     bool _eqCore(const Term&);
+    unsigned int _MeasureStateSpaceCore();
 };
 #endif //WSKS_TERM_H

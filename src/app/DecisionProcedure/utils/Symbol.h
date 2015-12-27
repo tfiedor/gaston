@@ -64,10 +64,16 @@ public:
         }
     }
     friend size_t Gaston::hash_value(const ZeroSymbol& s){
-        return s._trackMask.count();
+        size_t seed = 0;
+        boost::hash_combine(seed, boost::hash_value(s._trackMask.count()));
+        boost::hash_combine(seed, boost::hash_value(s._trackMask.find_first()));
+        return seed;
     }
     friend size_t Gaston::hash_value(ZeroSymbol* s){
-        return s->_trackMask.count();
+        size_t seed = 0;
+        boost::hash_combine(seed, boost::hash_value(s->_trackMask.count()));
+        boost::hash_combine(seed, boost::hash_value(s->_trackMask.find_first()));
+        return seed;
     }
 };
 

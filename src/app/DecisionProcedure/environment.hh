@@ -210,8 +210,9 @@ enum FixpointTermSem {E_FIXTERM_FIXPOINT, E_FIXTERM_PRE};
 
 /* >>> Optimizations <<< *
  *************************/
-#define OPT_EQ_THROUGH_POINTERS			true
-#define OPT_GENERATE_UNIQUE_TERMS		true
+#define OPT_EQ_THROUGH_POINTERS			true	// < Tests equality through pointers not by structure
+#define OPT_GENERATE_UNIQUE_TERMS		true	// < Uses Workshop to generate unique pointers
+#define OPT_TERM_HASH_BY_APPROX			true	// < Includes stateSpaceApprox into hash
 #define OPT_ANTIPRENEXING				true
 #define OPT_DRAW_NEGATION_IN_BASE 		false
 #define OPT_CREATE_QF_AUTOMATON 		true
