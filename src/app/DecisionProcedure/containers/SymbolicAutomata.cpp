@@ -161,7 +161,7 @@ ResultType SymbolicAutomaton::IntersectNonEmpty(Symbol_ptr symbol, Term* stateAp
 
     // Trim the variables that are not occuring in the formula away
     if(symbol != nullptr) {
-        symbol = new Symbol(symbol->GetTrackMask()); // TODO: #2 Memory consumption
+        symbol = new Symbol(symbol->GetTrackMask()); // TODO: #1 Memory consumption
 
         auto it = this->_freeVars.begin();
         auto end = this->_freeVars.end();
@@ -321,8 +321,8 @@ void BaseAutomaton::_InitializeInitialStates() {
     for(auto state : this->_base_automaton->GetFinalStates()) {
         initialStates.insert(state);
     }
-
-    this->_initialStates = std::make_shared<TermBaseSet>(initialStates, this->_stateOffset, this->_stateSpace);
+    
+    this->_initialStates = std::shared_ptr<TermBaseSet>(this->_factory.CreateBaseSet(initialStates, this->_stateOffset, this->_stateSpace));
 }
 
 /**

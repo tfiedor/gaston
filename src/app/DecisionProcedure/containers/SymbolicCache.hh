@@ -136,15 +136,17 @@ public:
 			std::cout << "\n";
 
 		#if (DEBUG_CACHE_MEMBERS == true)
-		std::cout << "{\n";
-		for(auto it = this->_cache.begin(); it != this->_cache.end(); ++it) {
-			std::cout << "\t";
-			KeyDump(it->first);
-			std::cout << " : ";
-			DataDump(it->second);
-			std::cout << "\n";
+        if(size) {
+			std::cout << "{\n";
+			for (auto it = this->_cache.begin(); it != this->_cache.end(); ++it) {
+				std::cout << "\t";
+				KeyDump(it->first);
+				std::cout << " : ";
+				DataDump(it->second);
+				std::cout << "\n";
+			}
+			std::cout << "}\n";
 		}
-		std::cout << "}\n";
 		#endif
 
 		return size;

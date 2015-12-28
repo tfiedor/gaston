@@ -300,6 +300,9 @@ bool TermProduct::_IsSubsumedCore(Term* t) {
 }
 
 bool TermBaseSet::_IsSubsumedCore(Term* term) {
+    if(term->type != TERM_BASE) {
+        std::cout << "Term type = " << term->type << "\n";
+    }
     assert(term->type == TERM_BASE);
 
     // Test component-wise, not very efficient though
@@ -401,6 +404,7 @@ bool TermProduct::IsSubsumedBy(std::list<Term_ptr>& fixpoint) {
     }
 
     // For each item in fixpoint
+    // TODO: This should be holikoptimized
     for(auto item : fixpoint) {
         // Nullptr is skipped
         if(item == nullptr) continue;
@@ -421,6 +425,7 @@ bool TermBaseSet::IsSubsumedBy(std::list<Term_ptr>& fixpoint) {
     }
 
     // For each item in fixpoint
+    // TODO: Maybe during this shit we could remove some of the things from fixpoint?
     for(auto item : fixpoint) {
         // Nullptr is skipped
         if(item == nullptr) continue;
@@ -428,6 +433,10 @@ bool TermBaseSet::IsSubsumedBy(std::list<Term_ptr>& fixpoint) {
         // Test the subsumption
         if(this->IsSubsumed(item.get())) {
             return true;
+        #if (OPT_PRUNE_FIXPOINT == true)
+        } else if(this->type == TERM_BASE && item->IsSubsumed(this)) {
+            fixpoint.remove(item);
+        #endif
         }
     }
 
@@ -810,7 +819,11 @@ bool TermProduct::_eqCore(const Term &t) {
     assert(t.type == TERM_PRODUCT && "Testing equality of different term types");
 
     const TermProduct &tProduct = static_cast<const TermProduct&>(t);
-    return (*tProduct.left == *this->left) && (*tProduct.right == *this->right);
+    if(this->left->stateSpaceApprox < this->right->stateSpaceApprox) {
+        return (*tProduct.left == *this->left) && (*tProduct.right == *this->right);
+    } else {
+        return (*tProduct.right == *this->right) && (*tProduct.left == *this->left);
+    }
 }
 
 bool TermBaseSet::_eqCore(const Term &t) {

@@ -185,10 +185,10 @@ enum FixpointTermSem {E_FIXTERM_FIXPOINT, E_FIXTERM_PRE};
 #define DEBUG_FIXPOINT 					false
 #define DEBUG_INITIAL_APPROX 			false
 #define DEBUG_INTERSECT_NON_EMPTY 		false
-#define DEBUG_TERM_UNIQUENESS			false
-#define DEBUG_TERM_CREATION				false
-#define DEBUG_CACHE_MEMBERS				false
-#define DEBUG_WORKSHOPS					false
+#define DEBUG_TERM_UNIQUENESS			true
+#define DEBUG_TERM_CREATION				true
+#define DEBUG_CACHE_MEMBERS				true
+#define DEBUG_WORKSHOPS					true
 #define DEBUG_TERM_SUBSUMPTION 			false
 #define DEBUG_TERM_CACHE_COMPARISON		false
 #define DEBUG_CONTINUATIONS 			false
@@ -213,14 +213,16 @@ enum FixpointTermSem {E_FIXTERM_FIXPOINT, E_FIXTERM_PRE};
 #define OPT_EQ_THROUGH_POINTERS			true	// < Tests equality through pointers not by structure
 #define OPT_GENERATE_UNIQUE_TERMS		true	// < Uses Workshop to generate unique pointers
 #define OPT_TERM_HASH_BY_APPROX			true	// < Includes stateSpaceApprox into hash
-#define OPT_ANTIPRENEXING				true
-#define OPT_DRAW_NEGATION_IN_BASE 		false
-#define OPT_CREATE_QF_AUTOMATON 		true
-#define OPT_REDUCE_AUT_EVERYTIME		false
-#define OPT_REDUCE_AUT_LAST				true
-#define OPT_EARLY_EVALUATION 			false
-#define OPT_PRUNE_EMPTY					true
-#define OPT_CACHE_RESULTS 				true
+#define OPT_ANTIPRENEXING				true	// < Transforms formula to anti-prenex form (i.e. all of the quantifiers are deepest on leaves)
+#define OPT_DRAW_NEGATION_IN_BASE 		false	// < Negation is handled on formula level and not on computation level
+#define OPT_CREATE_QF_AUTOMATON 		false	// < Transforms Quantifier-free automaton to formula
+#define OPT_REDUCE_AUT_EVERYTIME		false	// < Calls reduce everytime VATA automaton is created
+#define OPT_REDUCE_AUT_LAST				true	// < Calls reduce after the final automaton is created
+#define OPT_EARLY_EVALUATION 			false	// < Evaluates early interesection of products
+#define OPT_PRUNE_EMPTY					true	// < Prunes empty sets
+#define OPT_PRUNE_FIXPOINT				false	// < Prunes fixpoint during IsSubsumedBy TODO: For BaseSet only for now
+#define OPT_CACHE_RESULTS 				true	// < Cache results
+#define OPT_CACHE_SUBSUMPTION			false
 
 /*******************************
  * DEFINITION OF FILTER PHASES *
