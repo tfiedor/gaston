@@ -48,7 +48,6 @@ SymbolicAutomaton::SymbolicAutomaton(Formula_ptr form) : _form(form) {
 BinaryOpAutomaton::BinaryOpAutomaton(SymbolicAutomaton_raw lhs, SymbolicAutomaton_raw rhs, Formula_ptr form)
         : SymbolicAutomaton(form), _lhs_aut(lhs), _rhs_aut(rhs) {
     type = AutType::BINARY;
-    this->_InitializeAutomaton();
 }
 
 ComplementAutomaton::ComplementAutomaton(SymbolicAutomaton *aut, Formula_ptr form)
@@ -68,7 +67,6 @@ IntersectionAutomaton::IntersectionAutomaton(SymbolicAutomaton_raw lhs, Symbolic
         : BinaryOpAutomaton(lhs, rhs, form) {
     this->type = AutType::INTERSECTION;
     this->_productType = E_INTERSECTION;
-    this->_InitializeAutomaton();
     this->_eval_result = [](bool a, bool b, bool underC) {
         // e in A cap B == e in A && e in B
         if(!underC) {return a && b;}
@@ -83,6 +81,8 @@ IntersectionAutomaton::IntersectionAutomaton(SymbolicAutomaton_raw lhs, Symbolic
     this->_early_val = [](bool underC) {
         return underC;
     };
+
+    this->_InitializeAutomaton();
 }
 
 // Derive of BinaryOpAutomaton
@@ -90,7 +90,6 @@ UnionAutomaton::UnionAutomaton(SymbolicAutomaton_raw lhs, SymbolicAutomaton_raw 
         : BinaryOpAutomaton(lhs, rhs, form) {
     this->type = AutType::UNION;
     this->_productType = E_UNION;
-    this->_InitializeAutomaton();
     this->_eval_result = [](bool a, bool b, bool underC) {
         // e in A cup B == e in A || e in B
         if(!underC) {return a || b;}
@@ -105,6 +104,8 @@ UnionAutomaton::UnionAutomaton(SymbolicAutomaton_raw lhs, SymbolicAutomaton_raw 
     this->_early_val = [](bool underC) {
         return !underC;
     };
+
+    this->_InitializeAutomaton();
 }
 
 /**
@@ -300,7 +301,12 @@ void ProjectionAutomaton::_InitializeAutomaton() {
  * Initialization of initial states for automata wrt. the structure of the symbolic automaton
  */
 void BinaryOpAutomaton::_InitializeInitialStates() {
+    // #TERM_CREATION
+    #if (DEBUG_NO_WORKSHOPS)
     this->_initialStates = std::make_shared<TermProduct>(this->_lhs_aut->GetInitialStates(), this->_rhs_aut->GetInitialStates(), this->_productType);
+    #else
+    this->_initialStates = std::shared_ptr<TermProduct>(this->_factory.CreateProduct(this->_lhs_aut->GetInitialStates(), this->_rhs_aut->GetInitialStates(), this->_productType));
+    #endif
 }
 
 void ComplementAutomaton::_InitializeInitialStates() {
@@ -321,7 +327,7 @@ void BaseAutomaton::_InitializeInitialStates() {
     for(auto state : this->_base_automaton->GetFinalStates()) {
         initialStates.insert(state);
     }
-    
+
     this->_initialStates = std::shared_ptr<TermBaseSet>(this->_factory.CreateBaseSet(initialStates, this->_stateOffset, this->_stateSpace));
 }
 
@@ -329,7 +335,12 @@ void BaseAutomaton::_InitializeInitialStates() {
  * Initialization of final states for automata wrt. the structure of the symbolic automaton
  */
 void BinaryOpAutomaton::_InitializeFinalStates() {
+    // #TERM_CREATION
+    #if (DEBUG_NO_WORKSHOPS == true)
     this->_finalStates = std::make_shared<TermProduct>(this->_lhs_aut->GetFinalStates(), this->_rhs_aut->GetFinalStates(), this->_productType);
+    #else
+    this->_finalStates = std::shared_ptr<TermProduct>(this->_factory.CreateProduct(this->_lhs_aut->GetFinalStates(), this->_rhs_aut->GetFinalStates(), this->_productType));
+    #endif
 }
 
 void ComplementAutomaton::_InitializeFinalStates() {
@@ -354,6 +365,7 @@ void BaseAutomaton::_InitializeFinalStates() {
     collector(*initBDD);
 
     // Push states to new Base Set
+    // #TERM_CREATION
     TermBaseSet* finalStateSet = this->_factory.CreateBaseSet(finalStates, this->_stateOffset, this->_stateSpace);
 
     // Return new state set
@@ -383,7 +395,6 @@ Term* ProjectionAutomaton::Pre(Symbol_ptr symbol, Term* finalApproximation, bool
 
 Term* BaseAutomaton::Pre(Symbol_ptr symbol, Term* finalApproximation, bool underComplement) {
     assert(symbol != nullptr);
-    // TODO: Cache MTBDD for pre?
     // TODO: Consult the correctness of cpre/pre computation
 
     // Reinterpret the approximation as base states
@@ -392,6 +403,7 @@ Term* BaseAutomaton::Pre(Symbol_ptr symbol, Term* finalApproximation, bool under
 
     for(auto state : baseSet->states) {
         // Get MTBDD for Pre of states @p state
+        // TODO: Cache MTBDD for pre?
         BaseAut_MTBDD* preState = getMTBDDForStateTuple(*this->_base_automaton, StateTuple({state}));
 
         // Create the masker functor, that will mask the states away
@@ -448,8 +460,10 @@ ResultType BinaryOpAutomaton::_IntersectNonEmptyCore(Symbol_ptr symbol, Term* fi
         #if (MEASURE_CONTINUATION_CREATION == true || MEASURE_ALL == true)
         ++this->_contCreationCounter;
         #endif
+        // TODO: #TERM_CREATION
         TermContinuation *continuation = new TermContinuation(this->_rhs_aut, productStateApproximation->right, suspendedSymbol, underComplement);
-        Term_ptr leftCombined = std::shared_ptr<Term>(new TermProduct(lhs_result.first, std::shared_ptr<Term>(continuation), this->_productType));
+        // TODO: #TERM_CREATION
+        Term_ptr leftCombined = std::shared_ptr<Term>(this->_factory.CreateProduct(lhs_result.first, std::shared_ptr<Term>(continuation), this->_productType));
         return std::make_pair(leftCombined, this->_early_val(underComplement));
     }
     #endif
@@ -464,7 +478,12 @@ ResultType BinaryOpAutomaton::_IntersectNonEmptyCore(Symbol_ptr symbol, Term* fi
     }
     #endif
 
+    // TODO: #TERM_CREATION
+    #if (DEBUG_NO_WORKSHOPS == true)
     Term_ptr combined = std::make_shared<TermProduct>(lhs_result.first, rhs_result.first, this->_productType);
+    #else
+    Term_ptr combined = std::shared_ptr<TermProduct>(this->_factory.CreateProduct(lhs_result.first, rhs_result.first, this->_productType));
+    #endif
     return std::make_pair(combined, this->_eval_result(lhs_result.second, rhs_result.second, underComplement));
 }
 
@@ -498,6 +517,7 @@ ResultType ProjectionAutomaton::_IntersectNonEmptyCore(Symbol_ptr symbol, Term* 
         initialize_symbols(symbols, form->vl);
 
         // Create a new fixpoint term and iterator on it
+        // TODO: #TERM_CREATION
         TermFixpoint* fixpoint = new TermFixpoint(this->_aut, result.first, symbols, underComplement, result.second);
         TermFixpoint::iterator it = fixpoint->GetIterator();
         Term_ptr fixpointTerm;
@@ -527,6 +547,7 @@ ResultType ProjectionAutomaton::_IntersectNonEmptyCore(Symbol_ptr symbol, Term* 
         initialize_symbols(symbols, form->vl);
 
         // Create a new fixpoint term and iterator on it
+        // TODO: #TERM_CREATION
         TermFixpoint* fixpoint = new TermFixpoint(this->_aut, std::shared_ptr<Term>(finalApproximation), symbols, underComplement);
         TermFixpoint::iterator it = fixpoint->GetIterator();
         Term_ptr fixpointTerm;

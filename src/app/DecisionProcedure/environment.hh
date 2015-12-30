@@ -185,14 +185,15 @@ enum FixpointTermSem {E_FIXTERM_FIXPOINT, E_FIXTERM_PRE};
 #define DEBUG_FIXPOINT 					false
 #define DEBUG_INITIAL_APPROX 			false
 #define DEBUG_INTERSECT_NON_EMPTY 		false
-#define DEBUG_TERM_UNIQUENESS			true
-#define DEBUG_TERM_CREATION				true
-#define DEBUG_CACHE_MEMBERS				true
-#define DEBUG_WORKSHOPS					true
+#define DEBUG_TERM_UNIQUENESS			false
+#define DEBUG_TERM_CREATION				false
+#define DEBUG_CACHE_MEMBERS				false
+#define DEBUG_WORKSHOPS					false
 #define DEBUG_TERM_SUBSUMPTION 			false
 #define DEBUG_TERM_CACHE_COMPARISON		false
 #define DEBUG_CONTINUATIONS 			false
 #define DEBUG_COMPUTE_FULL_FIXPOINT 	false
+#define DEBUG_NO_WORKSHOPS				true
 
 /* >>> Measuring Options <<< *
  *****************************/
@@ -211,7 +212,7 @@ enum FixpointTermSem {E_FIXTERM_FIXPOINT, E_FIXTERM_PRE};
 /* >>> Optimizations <<< *
  *************************/
 #define OPT_EQ_THROUGH_POINTERS			true	// < Tests equality through pointers not by structure
-#define OPT_GENERATE_UNIQUE_TERMS		true	// < Uses Workshop to generate unique pointers
+#define OPT_GENERATE_UNIQUE_TERMS		false	// < Uses Workshop to generate unique pointers
 #define OPT_TERM_HASH_BY_APPROX			true	// < Includes stateSpaceApprox into hash
 #define OPT_ANTIPRENEXING				true	// < Transforms formula to anti-prenex form (i.e. all of the quantifiers are deepest on leaves)
 #define OPT_DRAW_NEGATION_IN_BASE 		false	// < Negation is handled on formula level and not on computation level

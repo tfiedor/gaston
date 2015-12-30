@@ -59,7 +59,7 @@ TermEmpty::TermEmpty() {
  * @param[in] lhs:  left operand of term intersection
  * @param[in] rhs:  right operand of term intersection
  */
-TermProduct::TermProduct(Term_ptr lhs, Term_ptr rhs, ProductType pt) : left(lhs), right(rhs) {
+TermProduct::TermProduct(Term_ptr lhs, Term_ptr rhs, ProductType pt) : left(move(lhs)), right(move(rhs)) {
     #if (MEASURE_STATE_SPACE == true)
     ++TermProduct::instances;
     #endif
@@ -77,7 +77,7 @@ TermProduct::TermProduct(Term_ptr lhs, Term_ptr rhs, ProductType pt) : left(lhs)
     this->stateSpaceApprox = this->left->stateSpaceApprox + this->right->stateSpaceApprox + 1;
 
     #if (DEBUG_TERM_CREATION == true)
-    std::cout << "[" << this << "]";
+    //std::cout << "[" << this << "]";
     std::cout << "TermProduct::";
     this->dump();
     std::cout << "\n";
@@ -100,7 +100,7 @@ TermBaseSet::TermBaseSet(VATA::Util::OrdVector<unsigned int>& s, unsigned int of
     this->stateSpaceApprox = this->stateSpace;
 
     #if (DEBUG_TERM_CREATION == true)
-    std::cout << "[" << this << "]";
+    //std::cout << "[" << this << "]";
     std::cout << "TermBaseSet::";
     this->dump();
     std::cout << "\n";
@@ -134,12 +134,6 @@ TermContinuation::TermContinuation(std::shared_ptr<SymbolicAutomaton> a, Term_pt
 }
 
 TermList::TermList(Term_ptr first, bool isCompl) {
-    #if (DEBUG_TERM_CREATION == true)
-    std::cout << "[" << this << "]";
-    std::cout << "TermList::";
-    this->dump();
-    std::cout << "\n";
-    #endif
     #if (MEASURE_STATE_SPACE == true)
     ++TermList::instances;
     #endif
@@ -155,16 +149,17 @@ TermList::TermList(Term_ptr first, bool isCompl) {
     this->list.push_back(first);
     this->_nonMembershipTesting = isCompl;
     this->_inComplement = false;
+
+    #if (DEBUG_TERM_CREATION == true)
+    std::cout << "[" << this << "]";
+    std::cout << "TermList::";
+    this->dump();
+    std::cout << "\n";
+    #endif
 }
 
 TermFixpoint::TermFixpoint(std::shared_ptr<SymbolicAutomaton> aut, Term_ptr startingTerm, Symbols symList, bool inComplement, bool initbValue)
         : _sourceTerm(nullptr), _sourceIt(nullptr), _aut(aut), _bValue(initbValue) {
-    #if (DEBUG_TERM_CREATION == true)
-    std::cout << "[" << this << "]";
-    std::cout << "TermFixpoint::";
-    this->dump();
-    std::cout << "\n";
-    #endif
     #if (MEASURE_STATE_SPACE == true)
     ++TermFixpoint::instances;
     #endif
@@ -188,17 +183,18 @@ TermFixpoint::TermFixpoint(std::shared_ptr<SymbolicAutomaton> aut, Term_ptr star
         this->_symList.push_back(symbol);
         this->_worklist.insert(this->_worklist.cbegin(), std::make_pair(startingTerm, symbol));
     }
-}
 
-TermFixpoint::TermFixpoint(std::shared_ptr<SymbolicAutomaton> aut, Term_ptr sourceTerm, Symbols symList, bool inComplement)
-        : _sourceTerm(sourceTerm), _sourceIt(reinterpret_cast<TermFixpoint*>(sourceTerm.get())->GetIteratorDynamic()),
-        _aut(aut), _worklist(), _bValue(inComplement) {
     #if (DEBUG_TERM_CREATION == true)
     std::cout << "[" << this << "]";
     std::cout << "TermFixpoint::";
     this->dump();
     std::cout << "\n";
     #endif
+}
+
+TermFixpoint::TermFixpoint(std::shared_ptr<SymbolicAutomaton> aut, Term_ptr sourceTerm, Symbols symList, bool inComplement)
+        : _sourceTerm(sourceTerm), _sourceIt(reinterpret_cast<TermFixpoint*>(sourceTerm.get())->GetIteratorDynamic()),
+        _aut(aut), _worklist(), _bValue(inComplement) {
     #if (MEASURE_STATE_SPACE == true)
     ++TermFixpoint::instances;
     #endif
@@ -220,6 +216,13 @@ TermFixpoint::TermFixpoint(std::shared_ptr<SymbolicAutomaton> aut, Term_ptr sour
     for(auto symbol : symList) {
         this->_symList.push_back(symbol);
     }
+
+    #if (DEBUG_TERM_CREATION == true)
+    std::cout << "[" << this << "]";
+    std::cout << "TermFixpointPre::";
+    this->dump();
+    std::cout << "\n";
+    #endif
 }
 
 /**
@@ -611,6 +614,9 @@ namespace Gaston {
 }
 
 void Term::dump() {
+    #if (DEBUG_TERM_UNIQUENESS == true)
+    std::cout << "[" << this << "]";
+    #endif
     if(this->_inComplement) {
         std::cout << "\033[1;31m{\033[0m";
     }

@@ -63,6 +63,7 @@ namespace Workshops {
     using ProductKey        = std::pair<Term*, Term*>;
     using ProductHash       = boost::hash<ProductKey>;
     using ProductCompare    = PairCompare<ProductKey>;
+    using Term_ptr          = std::shared_ptr<Term>;
 
     void dumpBaseKey(BaseKey const&);
     void dumpProductKey(ProductKey const&);
@@ -82,7 +83,7 @@ namespace Workshops {
 
         // <<< PUBLIC API >>>
         TermBaseSet* CreateBaseSet(BaseKey &states, unsigned int offset, unsigned int stateno);
-        TermProduct* CreateProduct(Term*&, Term*&, ProductType);
+        TermProduct* CreateProduct(Term_ptr const&, Term_ptr const&, ProductType);
 
         void Dump();
     };
