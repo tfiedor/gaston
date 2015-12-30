@@ -22,7 +22,7 @@ namespace Workshops {
 
         Term* termPtr = nullptr;
         if(!this->_bCache->retrieveFromCache(states, termPtr)) {
-            #if (DEBUG_WORKSHOPS == true)
+            #if (DEBUG_WORKSHOPS == true && DEBUG_TERM_CREATION == true)
             std::cout << "[*] Creating BaseSet: ";
             #endif
             // The object was not created yet, so we create it and store it in cache
@@ -54,7 +54,7 @@ namespace Workshops {
         Term* termPtr = nullptr;
         auto productKey = std::make_pair(lptr.get(), rptr.get());
         if(!this->_pCache->retrieveFromCache(productKey, termPtr)) {
-            #if (DEBUG_WORKSHOPS == true)
+            #if (DEBUG_WORKSHOPS == true && DEBUG_TERM_CREATION == true)
             std::cout << "[*] Creating Product: ";
             std::cout << "from ["<< lptr << "] + [" << rptr << "] to ";
             #endif

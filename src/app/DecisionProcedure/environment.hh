@@ -133,6 +133,7 @@ enum AutType {SYMBOLIC_BASE, BINARY, INTERSECTION, UNION, PROJECTION, BASE, COMP
 enum TermType {TERM, TERM_EMPTY, TERM_FIXPOINT, TERM_PRODUCT, TERM_BASE, TERM_LIST, TERM_CONTINUATION};
 enum ProductType {E_INTERSECTION, E_UNION};
 enum FixpointTermSem {E_FIXTERM_FIXPOINT, E_FIXTERM_PRE};
+enum ComparisonType {E_BY_SAME_PTR, E_BY_DIFFERENT_TYPE, E_BY_STRUCTURE};
 
 /****************
  * DEBUG MACROS *
@@ -188,12 +189,12 @@ enum FixpointTermSem {E_FIXTERM_FIXPOINT, E_FIXTERM_PRE};
 #define DEBUG_TERM_UNIQUENESS			false
 #define DEBUG_TERM_CREATION				false
 #define DEBUG_CACHE_MEMBERS				false
-#define DEBUG_WORKSHOPS					false
+#define DEBUG_WORKSHOPS					true
 #define DEBUG_TERM_SUBSUMPTION 			false
 #define DEBUG_TERM_CACHE_COMPARISON		false
 #define DEBUG_CONTINUATIONS 			false
 #define DEBUG_COMPUTE_FULL_FIXPOINT 	false
-#define DEBUG_NO_WORKSHOPS				true
+#define DEBUG_NO_WORKSHOPS				false
 
 /* >>> Measuring Options <<< *
  *****************************/
@@ -204,6 +205,7 @@ enum FixpointTermSem {E_FIXTERM_FIXPOINT, E_FIXTERM_PRE};
 #define MEASURE_RESULT_HITS				true
 #define MEASURE_PROJECTION				true
 #define MEASURE_ALL						true
+#define MEASURE_COMPARISONS				false
 
 /* >>> Anti-Prenexing Options <<< *
  **********************************/
@@ -212,11 +214,11 @@ enum FixpointTermSem {E_FIXTERM_FIXPOINT, E_FIXTERM_PRE};
 /* >>> Optimizations <<< *
  *************************/
 #define OPT_EQ_THROUGH_POINTERS			true	// < Tests equality through pointers not by structure
-#define OPT_GENERATE_UNIQUE_TERMS		false	// < Uses Workshop to generate unique pointers
+#define OPT_GENERATE_UNIQUE_TERMS		true	// < Uses Workshop to generate unique pointers
 #define OPT_TERM_HASH_BY_APPROX			true	// < Includes stateSpaceApprox into hash
 #define OPT_ANTIPRENEXING				true	// < Transforms formula to anti-prenex form (i.e. all of the quantifiers are deepest on leaves)
 #define OPT_DRAW_NEGATION_IN_BASE 		false	// < Negation is handled on formula level and not on computation level
-#define OPT_CREATE_QF_AUTOMATON 		false	// < Transforms Quantifier-free automaton to formula
+#define OPT_CREATE_QF_AUTOMATON 		true	// < Transforms Quantifier-free automaton to formula
 #define OPT_REDUCE_AUT_EVERYTIME		false	// < Calls reduce everytime VATA automaton is created
 #define OPT_REDUCE_AUT_LAST				true	// < Calls reduce after the final automaton is created
 #define OPT_EARLY_EVALUATION 			false	// < Evaluates early interesection of products

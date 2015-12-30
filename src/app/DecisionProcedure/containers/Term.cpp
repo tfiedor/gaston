@@ -29,11 +29,16 @@ namespace Gaston {
 }
 
 // <<< STATIC MEMBER INITIALIZATION >>>
-int TermProduct::instances = 0;
-int TermBaseSet::instances = 0;
-int TermList::instances = 0;
-int TermFixpoint::instances = 0;
-int TermContinuation::instances = 0;
+
+#define INIT_STATIC_MEASURE(prefix, measure) \
+    size_t prefix::measure;
+
+#define INIT_ALL_STATIC_MEASURES(measure) \
+    TERM_TYPELIST(INIT_STATIC_MEASURE, measure)
+
+TERM_MEASURELIST(INIT_ALL_STATIC_MEASURES)
+#undef INIT_ALL_STATIC_MEASURES
+#undef INIT_STATIC_MEASURE
 
 // <<< TERM CONSTRUCTORS >>>
 TermEmpty::TermEmpty() {
@@ -793,6 +798,78 @@ FixpointTermSem TermFixpoint::GetSemantics() const {
     return (nullptr == _sourceTerm) ? E_FIXTERM_FIXPOINT : E_FIXTERM_PRE;
 }
 
+// <<< EQUALITY MEASURING FUNCTIONS
+#if (MEASURE_COMPARISONS == true)
+void Term::comparedBySamePtr(TermType t) {
+    ++Term::comparisonsBySamePtr;
+    switch(t) {
+        case TERM_BASE:
+            ++TermBaseSet::comparisonsBySamePtr;
+            break;
+        case TERM_LIST:
+            ++TermList::comparisonsBySamePtr;
+            break;
+        case TERM_PRODUCT:
+            ++TermProduct::comparisonsBySamePtr;
+            break;
+        case TERM_FIXPOINT:
+            ++TermFixpoint::comparisonsBySamePtr;
+            break;
+        case TERM_CONTINUATION:
+            ++TermContinuation::comparisonsBySamePtr;
+            break;
+        default:
+            assert(false);
+    }
+}
+
+void Term::comparedByDifferentType(TermType t) {
+    ++Term::comparisonsByDiffType;
+    switch(t) {
+        case TERM_BASE:
+            ++TermBaseSet::comparisonsByDiffType;
+            break;
+        case TERM_LIST:
+            ++TermList::comparisonsByDiffType;
+            break;
+        case TERM_PRODUCT:
+            ++TermProduct::comparisonsByDiffType;
+            break;
+        case TERM_FIXPOINT:
+            ++TermFixpoint::comparisonsByDiffType;
+            break;
+        case TERM_CONTINUATION:
+            ++TermContinuation::comparisonsByDiffType;
+            break;
+        default:
+            assert(false);
+    }
+}
+
+void Term::comparedByStructure(TermType t) {
+    ++Term::comparisonsByStructure;
+    switch(t) {
+        case TERM_BASE:
+            ++TermBaseSet::comparisonsByStructure;
+            break;
+        case TERM_LIST:
+            ++TermList::comparisonsByStructure;
+            break;
+        case TERM_PRODUCT:
+            ++TermProduct::comparisonsByStructure;
+            break;
+        case TERM_FIXPOINT:
+            ++TermFixpoint::comparisonsByStructure;
+            break;
+        case TERM_CONTINUATION:
+            ++TermContinuation::comparisonsByStructure;
+            break;
+        default:
+            assert(false);
+    }
+}
+#endif
+
 // <<< EQUALITY CHECKING FUNCTIONS >>>
 /**
  * Operation for equality checking, tests first whether the two pointers
@@ -805,13 +882,23 @@ FixpointTermSem TermFixpoint::GetSemantics() const {
  * @param[in] t:        tested term
  */
 bool Term::operator==(const Term &t) {
+    // TODO: Add measure here
     if(this == &t) {
         // Same thing
+        #if (MEASURE_COMPARISONS == true)
+        Term::comparedBySamePtr(this->type);
+        #endif
         return true;
     } else if (this->type != t.type) {
         // Terms are of different type
+        #if (MEASURE_COMPARISONS == true)
+        Term::comparedByDifferentType(this->type);
+        #endif
         return false;
     } else {
+        #if (MEASURE_COMPARISONS == true)
+        Term::comparedByStructure(this->type);
+        #endif
         return this->_eqCore(t);
     }
 }

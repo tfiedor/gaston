@@ -24,6 +24,25 @@
 #include "../containers/SymbolicAutomata.h"
 #include "../environment.hh"
 
+// <<< MACROS >>>
+
+#define TERM_TYPELIST(code, var) \
+    code(Term, var)              \
+	code(TermProduct, var)		\
+	code(TermBaseSet, var)		\
+	code(TermList, var)			\
+	code(TermFixpoint, var)		\
+	code(TermContinuation, var)
+
+#define TERM_MEASURELIST(code) \
+    code(instances)             \
+    code(comparisonsBySamePtr)  \
+    code(comparisonsByDiffType) \
+    code(comparisonsByStructure)
+
+#define DEFINE_STATIC_MEASURE(measure) \
+    static size_t measure;
+
 // <<< FORWARD CLASS DECLARATION >>>
 class SymbolicAutomaton;
 
@@ -42,6 +61,9 @@ public:
     size_t stateSpace;         // << Exact size of the state space, 0 if unknown
     size_t stateSpaceApprox;   // << Approximation of the state space, used for heuristics
 
+    // See #L29
+    TERM_MEASURELIST(DEFINE_STATIC_MEASURE)
+
 protected:
     // <<< PRIVATE MEMBERS >>>
     bool _nonMembershipTesting;
@@ -58,6 +80,12 @@ public:
     // <<< MEASURING FUNCTIONS >>>
     virtual unsigned int MeasureStateSpace();
 
+    #if (MEASURE_COMPARISONS == true)
+    static void comparedBySamePtr(TermType);
+    static void comparedByDifferentType(TermType);
+    static void comparedByStructure(TermType);
+    #endif
+
     // <<< DUMPING FUNCTIONS >>>
     virtual void dump();
 protected:
@@ -68,7 +96,6 @@ protected:
     virtual bool _eqCore(const Term&) = 0;
 
     friend size_t hash_value(Term* s);
-
     friend std::ostream& operator <<(std::ostream& osObject, Term& z);
 };
 
@@ -94,10 +121,11 @@ private:
 class TermProduct : public Term {
 public:
     // <<< PUBLIC MEMBERS >>>
-    static int instances;
     Term_ptr left;
     Term_ptr right;
     ProductType subtype;
+    // See #L29
+    TERM_MEASURELIST(DEFINE_STATIC_MEASURE)
 
     // <<< CONSTRUCTORS >>>
     TermProduct(Term_ptr lhs, Term_ptr rhs, ProductType subtype);
@@ -120,9 +148,10 @@ private:
 class TermBaseSet : public Term {
 public:
     // <<< PUBLIC MEMBERS >>>
-    static int instances;
     TermBaseSetStates states;
     BitMask stateMask;
+    // See #L29
+    TERM_MEASURELIST(DEFINE_STATIC_MEASURE)
 
     // <<< CONSTRUCTORS >>>
     TermBaseSet(VATA::Util::OrdVector<unsigned int>&, unsigned int, unsigned int);
@@ -146,12 +175,13 @@ private:
 class TermContinuation : public Term {
 public:
     // <<< PUBLIC MEMBERS >>>
-    static int instances;
 
     std::shared_ptr<SymbolicAutomaton> aut;
     Term_ptr term;
     std::shared_ptr<SymbolType> symbol;
     bool underComplement;
+    // See #L29
+    TERM_MEASURELIST(DEFINE_STATIC_MEASURE)
 
     // <<< CONSTRUCTORS >>>
     TermContinuation(std::shared_ptr<SymbolicAutomaton>, Term_ptr, std::shared_ptr<SymbolType>, bool);
@@ -175,7 +205,8 @@ private:
 class TermList : public Term {
 public:
     // <<< PUBLIC MEMBERS >>>
-    static int instances;
+    // See #L29
+    TERM_MEASURELIST(DEFINE_STATIC_MEASURE)
 
     TermListStates list;
 
@@ -207,7 +238,9 @@ public:
     using Symbols = std::list<SymbolType>;
 
     // <<< PUBLIC MEMBERS >>>
-    static int instances;
+    // See #L29
+    TERM_MEASURELIST(DEFINE_STATIC_MEASURE)
+
     struct iterator {
     private:
         TermFixpoint &_termFixpoint;
@@ -312,4 +345,6 @@ private:
     bool _eqCore(const Term&);
     unsigned int _MeasureStateSpaceCore();
 };
+
+#undef DEFINE_STATIC_MEASURE
 #endif //WSKS_TERM_H
