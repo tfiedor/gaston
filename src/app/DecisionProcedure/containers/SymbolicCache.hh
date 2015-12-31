@@ -92,7 +92,7 @@ public:
 	 * @param data: data we are storing
 	 */
 	void StoreIn(Key & key, const CacheData & data){
-		auto itBoolPair = _cache.insert(std::make_pair(key, data));
+		auto itBoolPair = _cache.insert(std::make_pair(std::move(key), std::move(data)));
 	}
 
 	/**

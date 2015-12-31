@@ -189,7 +189,7 @@ enum ComparisonType {E_BY_SAME_PTR, E_BY_DIFFERENT_TYPE, E_BY_STRUCTURE};
 #define DEBUG_TERM_UNIQUENESS			false
 #define DEBUG_TERM_CREATION				false
 #define DEBUG_CACHE_MEMBERS				false
-#define DEBUG_WORKSHOPS					true
+#define DEBUG_WORKSHOPS					false
 #define DEBUG_TERM_SUBSUMPTION 			false
 #define DEBUG_TERM_CACHE_COMPARISON		false
 #define DEBUG_CONTINUATIONS 			false

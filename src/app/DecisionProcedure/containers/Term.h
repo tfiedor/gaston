@@ -28,6 +28,7 @@
 
 #define TERM_TYPELIST(code, var) \
     code(Term, var)              \
+    code(TermEmpty, var)        \
 	code(TermProduct, var)		\
 	code(TermBaseSet, var)		\
 	code(TermList, var)			\
@@ -101,6 +102,9 @@ protected:
 
 class TermEmpty : public Term {
 public:
+    // See #L29
+    TERM_MEASURELIST(DEFINE_STATIC_MEASURE)
+
     // <<< CONSTRUCTORS >>>
     TermEmpty();
 

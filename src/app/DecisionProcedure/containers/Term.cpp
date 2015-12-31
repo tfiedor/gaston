@@ -19,8 +19,12 @@ namespace Gaston {
     size_t hash_value(Term* s) {
         #if (OPT_TERM_HASH_BY_APPROX == true)
         size_t seed = 0;
-        boost::hash_combine(seed, boost::hash_value(s->stateSpaceApprox));
-        boost::hash_combine(seed, boost::hash_value(s->MeasureStateSpace()));
+        if(s->type == TERM_PRODUCT || s->type == TERM_BASE) {
+            boost::hash_combine(seed, boost::hash_value(s));
+        } else {
+            boost::hash_combine(seed, boost::hash_value(s->stateSpaceApprox));
+            boost::hash_combine(seed, boost::hash_value(s->MeasureStateSpace()));
+        }
         return seed;
         #else
         return boost::hash_value(s->MeasureStateSpace());
@@ -42,6 +46,9 @@ TERM_MEASURELIST(INIT_ALL_STATIC_MEASURES)
 
 // <<< TERM CONSTRUCTORS >>>
 TermEmpty::TermEmpty() {
+    #if (MEASURE_STATE_SPACE == true)
+    ++TermEmpty::instances;
+    #endif
     this->_inComplement = false;
     this->type = TERM_EMPTY;
 
@@ -245,7 +252,9 @@ bool Term::IsSubsumed(Term *t) {
     std::cout << "\n";
     #endif
     // unfold the continuation
-    if(t->type == TERM_CONTINUATION) {
+    if(this == t) {
+        return true;
+    } else if(t->type == TERM_CONTINUATION) {
         // TODO: We should check that maybe we have different continuations
         TermContinuation *continuation = reinterpret_cast<TermContinuation *>(t);
         if (this->type == TERM_CONTINUATION) {

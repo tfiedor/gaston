@@ -60,6 +60,7 @@ int ws1s_symbolic_decision_procedure(SymbolicAutomaton_ptr symbolicAutomaton) {
         std::cout << " (" << std::fixed << std::setprecision(2) << (TermType::comparisonsByStructure/(double)Term::comparisonsByStructure)*100 <<"%)\n";
 
     std::cout << "[*] Measured State Space: \n";
+    std::cout << "	\u2218 Term Empty: " << TermEmpty::instances << "\n";
     std::cout << "	\u2218 Term Products: " << TermProduct::instances << "\n";
     #if (MEASURE_COMPARISONS == true)
     OUTPUT_MEASURES(TermProduct)
