@@ -244,6 +244,7 @@ public:
     // <<< PUBLIC MEMBERS >>>
     // See #L29
     TERM_MEASURELIST(DEFINE_STATIC_MEASURE)
+    static size_t subsumedByHits;
 
     struct iterator {
     private:
@@ -315,6 +316,7 @@ public:
     // Only for the pre-semantics to link into the source of the pre
     Term_ptr _sourceTerm;
     std::shared_ptr<iterator> _sourceIt;
+    TermCache _subsumedByCache;
 
     Aut_ptr _aut;
     FixpointType _fixpoint;
@@ -346,6 +348,7 @@ private:
     void ComputeNextPre();
     void _InitializeAggregateFunction(bool inComplement);
     virtual bool _IsSubsumedCore(Term* t);
+    bool _testIfSubsumes(Term_ptr &term);
     bool _eqCore(const Term&);
     unsigned int _MeasureStateSpaceCore();
 };

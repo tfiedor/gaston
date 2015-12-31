@@ -68,6 +68,7 @@ namespace Gaston {
 
 	void dumpResultKey(std::pair<Term*, ZeroSymbol*> const& s);
 	void dumpResultData(std::pair<std::shared_ptr<Term>, bool>& s);
+	void dumpTermKey(Term* const& s);
 	void dumpSubsumptionKey(std::pair<Term*, Term*> const& s);
 	void dumpSubsumptionData(bool& s);
 
@@ -99,6 +100,9 @@ namespace Gaston {
 	using VarValue			     = char;
 	using TrackType				 = Automaton::SymbolType;
 
+	using TermHash 				 = boost::hash<Term_raw>;
+	using TermCompare			 = std::equal_to<Term_raw>;
+	using TermCache				 = BinaryCache<Term_raw, bool, TermHash, TermCompare, dumpTermKey, dumpSubsumptionData>;
 	using ResultKey				 = std::pair<Term_raw, Symbol_ptr>;
 	using ResultCache            = BinaryCache<ResultKey, ResultType, ResultHashType, PairCompare<ResultKey>, dumpResultKey, dumpResultData>;
 	using SubsumptionKey		 = std::pair<Term_raw, Term_raw>;
@@ -206,6 +210,7 @@ enum ComparisonType {E_BY_SAME_PTR, E_BY_DIFFERENT_TYPE, E_BY_STRUCTURE};
 #define MEASURE_PROJECTION				true
 #define MEASURE_ALL						true
 #define MEASURE_COMPARISONS				false
+#define MEASURE_SUBSUMEDBY_HITS			true
 
 /* >>> Anti-Prenexing Options <<< *
  **********************************/
@@ -225,7 +230,7 @@ enum ComparisonType {E_BY_SAME_PTR, E_BY_DIFFERENT_TYPE, E_BY_STRUCTURE};
 #define OPT_PRUNE_EMPTY					true	// < Prunes empty sets
 #define OPT_PRUNE_FIXPOINT				false	// < Prunes fixpoint during IsSubsumedBy TODO: For BaseSet only for now
 #define OPT_CACHE_RESULTS 				true	// < Cache results
-#define OPT_CACHE_SUBSUMPTION			false
+#define OPT_CACHE_SUBSUMED_BY			true	// < Caches the results of IsSubsumedBy function in fixpoints
 
 /*******************************
  * DEFINITION OF FILTER PHASES *

@@ -43,6 +43,7 @@ namespace Gaston {
 TERM_MEASURELIST(INIT_ALL_STATIC_MEASURES)
 #undef INIT_ALL_STATIC_MEASURES
 #undef INIT_STATIC_MEASURE
+size_t TermFixpoint::subsumedByHits = 0;
 
 // <<< TERM CONSTRUCTORS >>>
 TermEmpty::TermEmpty() {
@@ -723,6 +724,39 @@ bool TermBaseSet::Intersects(TermBaseSet* rhs) {
 // <<< ADDITIONAL TERMFIXPOINT FUNCTIONS >>>
 
 /**
+ * Tests if term is subsumed by fixpoint, either it is already computed in cache
+ * or we have to compute the subsumption testing for each of the fixpoint members
+ * and finally store the results in the cache.
+ *
+ * @param[in] term:     term we are testing subsumption for
+ * @return:             true if term is subsumed by fixpoint
+ */
+bool TermFixpoint::_testIfSubsumes(Term_ptr &term) {
+    #if (OPT_CACHE_SUBSUMED_BY == true)
+    bool result;
+    Term* key = term.get();
+    if(!this->_subsumedByCache.retrieveFromCache(key, result)) {
+        if(result = term->IsSubsumedBy(this->_fixpoint)) {
+            this->_subsumedByCache.StoreIn(key, result);
+        }
+    }
+    #if (MEASURE_SUBSUMEDBY_HITS == true)
+    else {
+        ++TermFixpoint::subsumedByHits;
+    }
+    #endif
+
+    return result;
+    #else
+    if(term->IsSubsumedBy(this->_fixpoint)) {
+        return true;
+    }
+
+    return false;
+    #endif
+}
+
+/**
  * Does the computation of the next fixpoint, i.e. the next iteration.
  */
 void TermFixpoint::ComputeNextFixpoint() {
@@ -736,7 +770,7 @@ void TermFixpoint::ComputeNextFixpoint() {
     ResultType result = _aut->IntersectNonEmpty(&item.second, item.first.get(), this->_nonMembershipTesting);
 
     // If it is subsumed by fixpoint, we don't add it
-    if(result.first->IsSubsumedBy(_fixpoint)) {
+    if(this->_testIfSubsumes(result.first)) {
         return;
     }
 
@@ -765,7 +799,8 @@ void TermFixpoint::ComputeNextPre() {
     ResultType result = _aut->IntersectNonEmpty(&item.second, item.first.get(), this->_nonMembershipTesting);
 
     // If it is subsumed we return
-    if(result.first->IsSubsumedBy(_fixpoint)) {
+    //if(result.first->IsSubsumedBy(_fixpoint)) {
+    if(this->_testIfSubsumes(result.first)) {
         return;
     }
 
