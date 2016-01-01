@@ -230,6 +230,7 @@ enum ComparisonType {E_BY_SAME_PTR, E_BY_DIFFERENT_TYPE, E_BY_STRUCTURE};
 #define OPT_PRUNE_EMPTY					true	// < Prunes empty sets
 #define OPT_PRUNE_FIXPOINT				false	// < Prunes fixpoint during IsSubsumedBy TODO: For BaseSet only for now
 #define OPT_CACHE_RESULTS 				true	// < Cache results
+#define OPT_CACHE_SUBSUMES				true	// < Caches the results of IsSubsumed function on terms
 #define OPT_CACHE_SUBSUMED_BY			true	// < Caches the results of IsSubsumedBy function in fixpoints
 
 /*******************************
@@ -238,6 +239,7 @@ enum ComparisonType {E_BY_SAME_PTR, E_BY_DIFFERENT_TYPE, E_BY_STRUCTURE};
 
 #define FILTER_LIST(code) \
 	code(SyntaxRestricter)				\
+	code(BinaryReorderer)				\
 	code(FullAntiPrenexer)				\
 	code(UniversalQuantifierRemover)	\
 	code(NegationUnfolder)				\

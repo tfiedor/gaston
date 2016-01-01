@@ -69,6 +69,7 @@ protected:
     // <<< PRIVATE MEMBERS >>>
     bool _nonMembershipTesting;
     bool _inComplement;
+    TermCache _isSubsumedCache;
 
 public:
     // <<< PUBLIC API >>>
@@ -76,6 +77,7 @@ public:
     virtual bool IsSubsumed(Term* t);
     virtual bool IsEmpty() = 0;
     virtual void Complement() {this->_inComplement = (this->_inComplement == false);}
+    virtual bool InComplement() {return this->_inComplement;}
     bool operator==(const Term &t);
 
     // <<< MEASURING FUNCTIONS >>>
@@ -179,7 +181,6 @@ private:
 class TermContinuation : public Term {
 public:
     // <<< PUBLIC MEMBERS >>>
-
     std::shared_ptr<SymbolicAutomaton> aut;
     Term_ptr term;
     std::shared_ptr<SymbolType> symbol;
@@ -194,12 +195,10 @@ public:
     bool IsSubsumedBy(std::list<Term_ptr>& fixpoint);
     bool IsEmpty();
 
-    // <<< MEASURING FUNCTIONS >>>
-
+protected:
     // <<< DUMPING FUNCTIONS >>>
-private:
     void _dumpCore();
-private:
+
     // <<< PRIVATE FUNCTIONS >>>
     unsigned int _MeasureStateSpaceCore();
     bool _eqCore(const Term&);

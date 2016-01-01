@@ -498,6 +498,30 @@ src/app/DecisionProcedure/visitors/AntiPrenexer.cpp.s:
 	$(MAKE) -f CMakeFiles/gaston.dir/build.make CMakeFiles/gaston.dir/src/app/DecisionProcedure/visitors/AntiPrenexer.cpp.s
 .PHONY : src/app/DecisionProcedure/visitors/AntiPrenexer.cpp.s
 
+src/app/DecisionProcedure/visitors/BinaryReorderer.o: src/app/DecisionProcedure/visitors/BinaryReorderer.cpp.o
+.PHONY : src/app/DecisionProcedure/visitors/BinaryReorderer.o
+
+# target to build an object file
+src/app/DecisionProcedure/visitors/BinaryReorderer.cpp.o:
+	$(MAKE) -f CMakeFiles/gaston.dir/build.make CMakeFiles/gaston.dir/src/app/DecisionProcedure/visitors/BinaryReorderer.cpp.o
+.PHONY : src/app/DecisionProcedure/visitors/BinaryReorderer.cpp.o
+
+src/app/DecisionProcedure/visitors/BinaryReorderer.i: src/app/DecisionProcedure/visitors/BinaryReorderer.cpp.i
+.PHONY : src/app/DecisionProcedure/visitors/BinaryReorderer.i
+
+# target to preprocess a source file
+src/app/DecisionProcedure/visitors/BinaryReorderer.cpp.i:
+	$(MAKE) -f CMakeFiles/gaston.dir/build.make CMakeFiles/gaston.dir/src/app/DecisionProcedure/visitors/BinaryReorderer.cpp.i
+.PHONY : src/app/DecisionProcedure/visitors/BinaryReorderer.cpp.i
+
+src/app/DecisionProcedure/visitors/BinaryReorderer.s: src/app/DecisionProcedure/visitors/BinaryReorderer.cpp.s
+.PHONY : src/app/DecisionProcedure/visitors/BinaryReorderer.s
+
+# target to generate assembly for a file
+src/app/DecisionProcedure/visitors/BinaryReorderer.cpp.s:
+	$(MAKE) -f CMakeFiles/gaston.dir/build.make CMakeFiles/gaston.dir/src/app/DecisionProcedure/visitors/BinaryReorderer.cpp.s
+.PHONY : src/app/DecisionProcedure/visitors/BinaryReorderer.cpp.s
+
 src/app/DecisionProcedure/visitors/BooleanUnfolder.o: src/app/DecisionProcedure/visitors/BooleanUnfolder.cpp.o
 .PHONY : src/app/DecisionProcedure/visitors/BooleanUnfolder.o
 
@@ -1347,6 +1371,9 @@ help:
 	@echo "... src/app/DecisionProcedure/visitors/AntiPrenexer.o"
 	@echo "... src/app/DecisionProcedure/visitors/AntiPrenexer.i"
 	@echo "... src/app/DecisionProcedure/visitors/AntiPrenexer.s"
+	@echo "... src/app/DecisionProcedure/visitors/BinaryReorderer.o"
+	@echo "... src/app/DecisionProcedure/visitors/BinaryReorderer.i"
+	@echo "... src/app/DecisionProcedure/visitors/BinaryReorderer.s"
 	@echo "... src/app/DecisionProcedure/visitors/BooleanUnfolder.o"
 	@echo "... src/app/DecisionProcedure/visitors/BooleanUnfolder.i"
 	@echo "... src/app/DecisionProcedure/visitors/BooleanUnfolder.s"

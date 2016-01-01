@@ -345,6 +345,7 @@ void BinaryOpAutomaton::_InitializeFinalStates() {
 
 void ComplementAutomaton::_InitializeFinalStates() {
     this->_finalStates = this->_aut->GetFinalStates();
+    this->_finalStates->Complement();
 }
 
 void ProjectionAutomaton::_InitializeFinalStates() {
@@ -490,7 +491,10 @@ ResultType BinaryOpAutomaton::_IntersectNonEmptyCore(Symbol_ptr symbol, Term* fi
 ResultType ComplementAutomaton::_IntersectNonEmptyCore(Symbol_ptr symbol, Term* finalApproximaton, bool underComplement) {
     // Compute the result of nested automaton with switched complement
     ResultType result = this->_aut->IntersectNonEmpty(symbol, finalApproximaton, !underComplement);
-    result.first->Complement();
+    // TODO: fix, because there may be falsely complemented things
+    if(finalApproximaton->InComplement() != result.first->InComplement()) {
+        result.first->Complement();
+    }
 
     return result;
 }

@@ -245,6 +245,7 @@ TermFixpoint::TermFixpoint(std::shared_ptr<SymbolicAutomaton> aut, Term_ptr sour
  * @return:         true if this is subsumed by @p t
  */
 bool Term::IsSubsumed(Term *t) {
+    assert(this->_inComplement == t->_inComplement);
     // TODO: Add Caching
     #if (DEBUG_TERM_SUBSUMPTION == true)
     this->dump();
@@ -255,7 +256,9 @@ bool Term::IsSubsumed(Term *t) {
     // unfold the continuation
     if(this == t) {
         return true;
-    } else if(t->type == TERM_CONTINUATION) {
+    }
+
+    if(t->type == TERM_CONTINUATION) {
         // TODO: We should check that maybe we have different continuations
         TermContinuation *continuation = reinterpret_cast<TermContinuation *>(t);
         if (this->type == TERM_CONTINUATION) {
@@ -272,21 +275,31 @@ bool Term::IsSubsumed(Term *t) {
                                                                           continuation->term.get(),
                                                                           continuation->underComplement)).first;
         return unfoldedContinuation->IsSubsumed(t);
-    } else {
-        if(this->_inComplement) {
-            if(this->type == TERM_EMPTY) {
-                return t->type == TERM_EMPTY;
+    }
+
+    // Else if it is not continuation we first look into cache and then recompute if needed
+    bool result;
+#if (OPT_CACHE_SUBSUMES == true)
+    if(!this->_isSubsumedCache.retrieveFromCache(t, result)) {
+#endif
+        if (this->_inComplement) {
+            if (this->type == TERM_EMPTY) {
+                result = t->type == TERM_EMPTY;
             } else {
-                return t->_IsSubsumedCore(this);
+                result = t->_IsSubsumedCore(this);
             }
         } else {
-            if(t->type == TERM_EMPTY) {
-                return this->type == TERM_EMPTY;
+            if (t->type == TERM_EMPTY) {
+                result = this->type == TERM_EMPTY;
             } else {
-                return this->_IsSubsumedCore(t);
+                result = this->_IsSubsumedCore(t);
             }
         }
+#if (OPT_CACHE_SUBSUMES == true)
+        this->_isSubsumedCache.StoreIn(t, result);
     }
+#endif
+    return result;
 }
 
 bool TermEmpty::_IsSubsumedCore(Term *t) {
