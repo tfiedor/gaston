@@ -30,7 +30,7 @@ StateType SymbolicAutomaton::stateCnt = 0;
 using namespace Gaston;
 
 // <<< CONSTRUCTORS >>>
-SymbolicAutomaton::SymbolicAutomaton(Formula_ptr form) : _form(form) {
+SymbolicAutomaton::SymbolicAutomaton(Formula_ptr form) : _form(form), _factory(this) {
     type = AutType::SYMBOLIC_BASE;
 
     IdentList free, bound;
@@ -52,14 +52,14 @@ BinaryOpAutomaton::BinaryOpAutomaton(SymbolicAutomaton_raw lhs, SymbolicAutomato
 
 ComplementAutomaton::ComplementAutomaton(SymbolicAutomaton *aut, Formula_ptr form)
         : SymbolicAutomaton(form), _aut(aut) {
-    this->_InitializeAutomaton();
     type = AutType::COMPLEMENT;
+    this->_InitializeAutomaton();
 }
 
 ProjectionAutomaton::ProjectionAutomaton(SymbolicAutomaton_raw aut, Formula_ptr form)
         : SymbolicAutomaton(form), _aut(aut) {
-    this->_InitializeAutomaton();
     type = AutType::PROJECTION;
+    this->_InitializeAutomaton();
 }
 
 // Derive of BinaryOpAutomaton
@@ -276,22 +276,26 @@ Term_ptr SymbolicAutomaton::GetInitialStates() {
  */
 void BaseAutomaton::_InitializeAutomaton() {
     // TODO: Maybe this could be done only, if we are dumping the automaton?
+    this->_factory.InitializeWorkshop();
     this->_RenameStates();
     this->_InitializeInitialStates();
     this->_InitializeFinalStates();
 }
 
 void BinaryOpAutomaton::_InitializeAutomaton() {
+    this->_factory.InitializeWorkshop();
     this->_InitializeInitialStates();
     this->_InitializeFinalStates();
 }
 
 void ComplementAutomaton::_InitializeAutomaton() {
+    this->_factory.InitializeWorkshop();
     this->_InitializeInitialStates();
     this->_InitializeFinalStates();
 }
 
 void ProjectionAutomaton::_InitializeAutomaton() {
+    this->_factory.InitializeWorkshop();
     this->_InitializeInitialStates();
     this->_InitializeFinalStates();
     this->_projected_vars = static_cast<ASTForm_uvf*>(this->_form)->vl;

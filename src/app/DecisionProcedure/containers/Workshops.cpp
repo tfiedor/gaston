@@ -2,9 +2,27 @@
 #include "Term.h"
 
 namespace Workshops {
-    TermWorkshop::TermWorkshop() {
-        this->_bCache = new BaseCache();
-        this->_pCache = new ProductCache();
+    TermWorkshop::TermWorkshop(SymbolicAutomaton* aut) : _aut(aut) { }
+
+    void TermWorkshop::InitializeWorkshop() {
+        switch(this->_aut->type) {
+            case AutType::BASE:
+                this->_bCache = new BaseCache();
+                break;
+            case AutType::BINARY:
+            case AutType::INTERSECTION:
+            case AutType::UNION:
+                this->_pCache = new ProductCache();
+                break;
+            case AutType::COMPLEMENT:
+                break;
+            case AutType::PROJECTION:
+                this->_lCache = new ListCache();
+                break;
+            default:
+                assert(false && "Missing implementation for this type");
+                break;
+        }
     }
 
     /**
@@ -67,6 +85,35 @@ namespace Workshops {
 #else
         return new TermProduct(lptr, rptr, type);
 #endif
+    }
+
+    //TermFixpoint::TermFixpoint(std::shared_ptr<SymbolicAutomaton> aut, Term_ptr startingTerm, Symbols symList, bool inComplement, bool initbValue)
+    //TermFixpoint::TermFixpoint(std::shared_ptr<SymbolicAutomaton> aut, Term_ptr sourceTerm, Symbols symList, bool inComplement)
+    //TermList::TermList(Term_ptr first, bool isCompl)
+    //TermContinuation::TermContinuation(std::shared_ptr<SymbolicAutomaton> a, Term_ptr t, std::shared_ptr<SymbolType> s, bool b)
+    TermFixpoint* CreateFixpoint(Term_ptr const& source, SymbolList &symbols, bool inCompl, bool initValue) {
+        G_NOT_IMPLEMENTED_YET("CreateFixpoint");
+        return nullptr;
+    };
+
+    TermFixpoint* CreateFixpointPre(Term_ptr const& source, SymbolList &symbols, bool inCompl) {
+        G_NOT_IMPLEMENTED_YET("CreateFixpointPre");
+        return nullptr;
+    }
+
+    TermList* CreateList(Term_ptr const&, bool) {
+        G_NOT_IMPLEMENTED_YET("CreateList");
+        return nullptr;
+    }
+
+    TermContinuation* CreateContinuation(Term_ptr const&, Symbol_shared&, bool) {
+        G_NOT_IMPLEMENTED_YET("CreateContinuation");
+        return nullptr;
+    }
+
+    TermList* ExtendList(Term*, Term*) {
+        G_NOT_IMPLEMENTED_YET("ExtendList");
+        return nullptr;
     }
 
     /***

@@ -48,6 +48,10 @@
 // <<< FORWARD DECLARATION >>>
 class TermBaseSet;
 class TermProduct;
+class TermFixpoint;
+class TermList;
+class TermContinuation;
+class SymbolicAutomaton;
 
 // TODO: 1) Dump it out
 // TODO: 2) Cache it out
@@ -55,6 +59,8 @@ class TermProduct;
 
 namespace Workshops {
     // TODO: Maybe I forgot to take measure of the complement?
+    using SymbolList        = Gaston::SymbolList;
+    using Symbol_shared     = Gaston::Symbol_shared;
 
     using CacheData         = Term*;
     using BaseKey           = VATA::Util::OrdVector<unsigned int>;
@@ -63,27 +69,43 @@ namespace Workshops {
     using ProductKey        = std::pair<Term*, Term*>;
     using ProductHash       = boost::hash<ProductKey>;
     using ProductCompare    = PairCompare<ProductKey>;
+    using ListKey           = Term*;
+    using ListHash          = boost::hash<ListKey>;
+    using ListCompare       = std::equal_to<ListKey>;
     using Term_ptr          = std::shared_ptr<Term>;
 
     void dumpBaseKey(BaseKey const&);
     void dumpProductKey(ProductKey const&);
+    void dumpListKey(ListKey const&);
     void dumpCacheData(CacheData &);
 
     using BaseCache     = BinaryCache<BaseKey, CacheData, BaseHash, BaseCompare, dumpBaseKey, dumpCacheData>;
     using ProductCache  = BinaryCache<ProductKey, CacheData, ProductHash, ProductCompare, dumpProductKey, dumpCacheData>;
+    using ListCache     = BinaryCache<ListKey, CacheData, ListHash, ListCompare, dumpListKey, dumpCacheData>;
 
     class TermWorkshop {
     private:
         // <<< PRIVATE MEMBERS >>>
         BaseCache* _bCache;
         ProductCache* _pCache;
+        ListCache* _lCache;
+
+        SymbolicAutomaton* _aut;
+
     public:
         // <<< CONSTRUCTORS >>>
-        TermWorkshop();
+        TermWorkshop(SymbolicAutomaton*);
+        void InitializeWorkshop();
 
         // <<< PUBLIC API >>>
         TermBaseSet* CreateBaseSet(BaseKey &states, unsigned int offset, unsigned int stateno);
         TermProduct* CreateProduct(Term_ptr const&, Term_ptr const&, ProductType);
+        TermFixpoint* CreateFixpoint(Term_ptr const&, SymbolList &, bool, bool);
+        TermFixpoint* CreateFixpointPre(Term_ptr const&, SymbolList&, bool);
+        TermList* CreateList(Term_ptr const&, bool);
+        TermContinuation* CreateContinuation(Term_ptr const&, Symbol_shared&, bool);
+
+        TermList* ExtendList(Term*, Term*);
 
         void Dump();
     };

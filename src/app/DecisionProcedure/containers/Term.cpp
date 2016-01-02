@@ -246,7 +246,6 @@ TermFixpoint::TermFixpoint(std::shared_ptr<SymbolicAutomaton> aut, Term_ptr sour
  */
 bool Term::IsSubsumed(Term *t) {
     assert(this->_inComplement == t->_inComplement);
-    // TODO: Add Caching
     #if (DEBUG_TERM_SUBSUMPTION == true)
     this->dump();
     std::cout << " <?= ";
@@ -464,10 +463,6 @@ bool TermBaseSet::IsSubsumedBy(std::list<Term_ptr>& fixpoint) {
         // Test the subsumption
         if(this->IsSubsumed(item.get())) {
             return true;
-        #if (OPT_PRUNE_FIXPOINT == true)
-        } else if(this->type == TERM_BASE && item->IsSubsumed(this)) {
-            fixpoint.remove(item);
-        #endif
         }
     }
 
