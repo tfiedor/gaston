@@ -61,6 +61,7 @@ namespace Workshops {
     // TODO: Maybe I forgot to take measure of the complement?
     using SymbolList        = Gaston::SymbolList;
     using Symbol_shared     = Gaston::Symbol_shared;
+    using Symbol            = Gaston::Symbol;
 
     using CacheData         = Term*;
     using BaseKey           = VATA::Util::OrdVector<unsigned int>;
@@ -72,16 +73,23 @@ namespace Workshops {
     using ListKey           = Term*;
     using ListHash          = boost::hash<ListKey>;
     using ListCompare       = std::equal_to<ListKey>;
+    using FixpointKey       = std::pair<Term*, Symbol*>;
+    using FixpointHash      = boost::hash<FixpointKey>;
+    using FixpointCompare   = PairCompare<FixpointKey>;
     using Term_ptr          = std::shared_ptr<Term>;
 
     void dumpBaseKey(BaseKey const&);
     void dumpProductKey(ProductKey const&);
     void dumpListKey(ListKey const&);
+    void dumpFixpointKey(FixpointKey const&);
     void dumpCacheData(CacheData &);
 
+    //TermFixpoint::TermFixpoint(Term_ptr startingTerm, symbol, bool initbValue)
+    //TermFixpoint::TermFixpoint(Term_ptr sourceTerm, symbol)
     using BaseCache     = BinaryCache<BaseKey, CacheData, BaseHash, BaseCompare, dumpBaseKey, dumpCacheData>;
     using ProductCache  = BinaryCache<ProductKey, CacheData, ProductHash, ProductCompare, dumpProductKey, dumpCacheData>;
     using ListCache     = BinaryCache<ListKey, CacheData, ListHash, ListCompare, dumpListKey, dumpCacheData>;
+    using FixpointCache = BinaryCache<FixpointCache, CacheData, FixpointHash, FixpointCompare, dumpFixpointKey, dumpCacheData>;
 
     class TermWorkshop {
     private:
@@ -89,6 +97,7 @@ namespace Workshops {
         BaseCache* _bCache;
         ProductCache* _pCache;
         ListCache* _lCache;
+        FixpointCache* _fpCache;
 
         SymbolicAutomaton* _aut;
 

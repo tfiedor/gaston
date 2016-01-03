@@ -18,6 +18,7 @@ namespace Workshops {
                 break;
             case AutType::PROJECTION:
                 this->_lCache = new ListCache();
+                this->_fpCache = new FixpointCache();
                 break;
             default:
                 assert(false && "Missing implementation for this type");
@@ -115,12 +116,23 @@ namespace Workshops {
         return new TermList(startTerm, inComplement);
 #endif
     }
-    //TermFixpoint::TermFixpoint(std::shared_ptr<SymbolicAutomaton> aut, Term_ptr startingTerm, Symbols symList, bool inComplement, bool initbValue)
-    //TermFixpoint::TermFixpoint(std::shared_ptr<SymbolicAutomaton> aut, Term_ptr sourceTerm, Symbols symList, bool inComplement)
-    //TermContinuation::TermContinuation(std::shared_ptr<SymbolicAutomaton> a, Term_ptr t, std::shared_ptr<SymbolType> s, bool b)
+
     TermFixpoint* TermWorkshop::CreateFixpoint(Term_ptr const& source, SymbolList &symbols, bool inCompl, bool initValue) {
 #if (OPT_GENERATE_UNIQUE_TERMS == true && UNIQUE_FIXPOINTS == true)
+        assert(this->_fpCache != nullptr);
 
+        Term* termPtr = nullptr;
+        auto fixpointKey = std::make_pair(source.get(), nullptr);
+        if(!this->_fpCache->retrieveFromCache(fixpointKey, termPtr)) {
+            #if (DEBUG_WORKSHOPS == true && DEBUG_TERM_CREATION == true)
+            std::cout << "[*] Creating Fixpoint: ";
+            std::cout << "from [" << startTerm << "] to ";
+            #endif
+            termPtr = new TermFixpoint(std::shared_ptr<SymbolicAutomaton>(this->_aut), source, symbols, inCompl, initValue);
+            this->_fpCache->StoreIn(fixpointKey, termPtr);
+        }
+        assert(termPtr != nullptr);
+        return reinterpret_cast<TermFixpoint*>(termPtr);
 #else
         return new TermFixpoint(std::shared_ptr<SymbolicAutomaton>(this->_aut), source, symbols, inCompl, initValue);
 #endif
@@ -128,12 +140,26 @@ namespace Workshops {
 
     TermFixpoint* TermWorkshop::CreateFixpointPre(Term_ptr const& source, SymbolList &symbols, bool inCompl) {
 #if (OPT_GENERATE_UNIQUE_TERMS == true && UNIQUE_FIXPOINTS == true)
+        assert(this->_fpCache != nullptr);
 
+        Term* termPtr = nullptr;
+        auto fixpointKey = std::make_pair(source.get(), symbols.get(0).get());
+        if(!this->_fpCache->retrieveFromCache(fixpointKey, termPtr)) {
+            #if (DEBUG_WORKSHOPS == true && DEBUG_TERM_CREATION == true)
+            std::cout << "[*] Creating FixpointPre: ";
+            std::cout << "from [" << startTerm << "] to ";
+            #endif
+            termPtr = new TermFixpoint(std::shared_ptr<SymbolicAutomaton>(this->_aut), source, symbols, inCompl);
+            this->_fpCache->StoreIn(fixpointKey, termPtr);
+        }
+        assert(termPtr != nullptr);
+        return reinterpret_cast<TermFixpoint*>(termPtr);
 #else
         return new TermFixpoint(std::shared_ptr<SymbolicAutomaton>(this->_aut), source, symbols, inCompl);
 #endif
     }
 
+    //TermContinuation::TermContinuation(std::shared_ptr<SymbolicAutomaton> a, Term_ptr t, std::shared_ptr<SymbolType> s, bool b)
     TermContinuation* TermWorkshop::CreateContinuation(Term_ptr const&, Symbol_shared&, bool) {
         G_NOT_IMPLEMENTED_YET("CreateContinuation");
         return nullptr;
@@ -156,6 +182,14 @@ namespace Workshops {
             std::cout << "  \u2218 ProductCache stats -> ";
             this->_pCache->dumpStats();
         }
+        if(this->_lCache != nullptr) {
+            std::cout << "  \u2218 ListCache stats -> ";
+            this->_lCache->dumpStats();
+        }
+        if(this->_fpCache != nullptr) {
+            std::cout << "  \u2218 FixpointCache stats -> ";
+            this->_fpCache->dumpStats();
+        }
     }
 
     void dumpBaseKey(BaseKey const&s) {
@@ -163,6 +197,10 @@ namespace Workshops {
     }
 
     void dumpProductKey(ProductKey const&s) {
+        std::cout << "<" << (*s.first) << ", " << (*s.second) << ">";
+    }
+
+    void dumpFixpointKey(FixpointKey const&s) {
         std::cout << "<" << (*s.first) << ", " << (*s.second) << ">";
     }
 
