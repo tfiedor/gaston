@@ -35,7 +35,7 @@ namespace Workshops {
      * @return:                 unique pointer for TermBaseSet
      */
     TermBaseSet* TermWorkshop::CreateBaseSet(VATA::Util::OrdVector<unsigned int>& states, unsigned int offset, unsigned int stateno) {
-#if (OPT_GENERATE_UNIQUE_TERMS == true)
+#if (OPT_GENERATE_UNIQUE_TERMS == true && UNIQUE_BASE == true)
         assert(this->_bCache != nullptr);
 
         Term* termPtr = nullptr;
@@ -66,7 +66,7 @@ namespace Workshops {
         // TODO: Can there be sets that have same lhs rhs, but different product type??
         // TODO: I don't think so actually, because this is on the node, so it cannot generate different things
         // TODO: And same thing goes for complements
-#if (OPT_GENERATE_UNIQUE_TERMS == true)
+#if (OPT_GENERATE_UNIQUE_TERMS == true && UNIQUE_PRODUCTS == true)
         assert(this->_pCache != nullptr);
 
         Term* termPtr = nullptr;
@@ -87,31 +87,59 @@ namespace Workshops {
 #endif
     }
 
+    /**
+     * Checks if there is already created list with one symbol, in case there is
+     * not it creates the new object and populates the cache
+     *
+     * @param[in] startTerm:        first term in list
+     * @param[in] inComplement:     whether the list is complemented
+     * @return: unique pointer
+     */
+    TermList* TermWorkshop::CreateList(Term_ptr const& startTerm, bool inComplement) {
+#if (OPT_GENERATE_UNIQUE_TERMS == true && UNIQUE_LISTS == true)
+        assert(this->_lCache != nullptr);
+
+        Term* termPtr = nullptr;
+        auto productKey = startTerm.get();
+        if(!this->_lCache->retrieveFromCache(productKey, termPtr)) {
+            #if (DEBUG_WORKSHOPS == true && DEBUG_TERM_CREATION == true)
+            std::cout << "[*] Creating List: ";
+            std::cout << "from ["<< startTerm << "] to ";
+            #endif
+            termPtr = new TermList(startTerm, inComplement);
+            this->_lCache->StoreIn(productKey, termPtr);
+        }
+        assert(termPtr != nullptr);
+        return reinterpret_cast<TermList*>(termPtr);
+#else
+        return new TermList(startTerm, inComplement);
+#endif
+    }
     //TermFixpoint::TermFixpoint(std::shared_ptr<SymbolicAutomaton> aut, Term_ptr startingTerm, Symbols symList, bool inComplement, bool initbValue)
     //TermFixpoint::TermFixpoint(std::shared_ptr<SymbolicAutomaton> aut, Term_ptr sourceTerm, Symbols symList, bool inComplement)
-    //TermList::TermList(Term_ptr first, bool isCompl)
     //TermContinuation::TermContinuation(std::shared_ptr<SymbolicAutomaton> a, Term_ptr t, std::shared_ptr<SymbolType> s, bool b)
-    TermFixpoint* CreateFixpoint(Term_ptr const& source, SymbolList &symbols, bool inCompl, bool initValue) {
-        G_NOT_IMPLEMENTED_YET("CreateFixpoint");
-        return nullptr;
+    TermFixpoint* TermWorkshop::CreateFixpoint(Term_ptr const& source, SymbolList &symbols, bool inCompl, bool initValue) {
+#if (OPT_GENERATE_UNIQUE_TERMS == true && UNIQUE_FIXPOINTS == true)
+
+#else
+        return new TermFixpoint(std::shared_ptr<SymbolicAutomaton>(this->_aut), source, symbols, inCompl, initValue);
+#endif
     };
 
-    TermFixpoint* CreateFixpointPre(Term_ptr const& source, SymbolList &symbols, bool inCompl) {
-        G_NOT_IMPLEMENTED_YET("CreateFixpointPre");
-        return nullptr;
+    TermFixpoint* TermWorkshop::CreateFixpointPre(Term_ptr const& source, SymbolList &symbols, bool inCompl) {
+#if (OPT_GENERATE_UNIQUE_TERMS == true && UNIQUE_FIXPOINTS == true)
+
+#else
+        return new TermFixpoint(std::shared_ptr<SymbolicAutomaton>(this->_aut), source, symbols, inCompl);
+#endif
     }
 
-    TermList* CreateList(Term_ptr const&, bool) {
-        G_NOT_IMPLEMENTED_YET("CreateList");
-        return nullptr;
-    }
-
-    TermContinuation* CreateContinuation(Term_ptr const&, Symbol_shared&, bool) {
+    TermContinuation* TermWorkshop::CreateContinuation(Term_ptr const&, Symbol_shared&, bool) {
         G_NOT_IMPLEMENTED_YET("CreateContinuation");
         return nullptr;
     }
 
-    TermList* ExtendList(Term*, Term*) {
+    TermList* TermWorkshop::ExtendList(Term* list, Term* newTerm) {
         G_NOT_IMPLEMENTED_YET("ExtendList");
         return nullptr;
     }

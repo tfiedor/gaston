@@ -121,7 +121,7 @@ private:
 
     // <<< PRIVATE FUNCTIONS >>>
     unsigned int _MeasureStateSpaceCore();
-    virtual bool _IsSubsumedCore(Term* t);
+    bool _IsSubsumedCore(Term* t);
 };
 
 class TermProduct : public Term {
@@ -148,7 +148,7 @@ private:
 private:
     // <<< PRIVATE FUNCTIONS >>>
     unsigned int _MeasureStateSpaceCore();
-    virtual bool _IsSubsumedCore(Term* t);
+    bool _IsSubsumedCore(Term* t);
 };
 
 class TermBaseSet : public Term {
@@ -175,7 +175,7 @@ private:
 private:
     // <<< PRIVATE FUNCTIONS >>>
     unsigned int _MeasureStateSpaceCore();
-    virtual bool _IsSubsumedCore(Term* t);
+    bool _IsSubsumedCore(Term* t);
 };
 
 class TermContinuation : public Term {
@@ -202,7 +202,7 @@ protected:
     // <<< PRIVATE FUNCTIONS >>>
     unsigned int _MeasureStateSpaceCore();
     bool _eqCore(const Term&);
-    virtual bool _IsSubsumedCore(Term* t);
+    bool _IsSubsumedCore(Term* t);
 };
 
 class TermList : public Term {
@@ -227,7 +227,7 @@ private:
 private:
     // <<< PRIVATE FUNCTIONS >>>
     unsigned int _MeasureStateSpaceCore();
-    virtual bool _IsSubsumedCore(Term* t);
+    bool _IsSubsumedCore(Term* t);
     bool _eqCore(const Term&);
 };
 
@@ -346,7 +346,7 @@ private:
     void ComputeNextFixpoint();
     void ComputeNextPre();
     void _InitializeAggregateFunction(bool inComplement);
-    virtual bool _IsSubsumedCore(Term* t);
+    bool _IsSubsumedCore(Term* t);
     bool _testIfSubsumes(Term_ptr &term);
     bool _eqCore(const Term&);
     unsigned int _MeasureStateSpaceCore();

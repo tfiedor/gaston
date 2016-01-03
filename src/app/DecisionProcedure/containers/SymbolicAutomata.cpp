@@ -318,7 +318,11 @@ void ComplementAutomaton::_InitializeInitialStates() {
 }
 
 void ProjectionAutomaton::_InitializeInitialStates() {
+    #if (DEBUG_NO_WORKSHOPS == true)
     this->_initialStates = std::make_shared<TermList>(this->_aut->GetInitialStates(), false);
+    #else
+    this->_initialStates = std::shared_ptr<TermList>(this->_factory.CreateList(this->_aut->GetInitialStates(), false));
+    #endif
 }
 
 // TODO: Optimize so this uses boost::dynamic_bitset instead
@@ -353,7 +357,11 @@ void ComplementAutomaton::_InitializeFinalStates() {
 }
 
 void ProjectionAutomaton::_InitializeFinalStates() {
+    #if (DEBUG_NO_WORKSHOPS == true)
     this->_finalStates = std::make_shared<TermList>(this->_aut->GetFinalStates(), false);
+    #else
+    this->_finalStates = std::shared_ptr<TermList>(this->_factory.CreateList(this->_aut->GetFinalStates(), false));
+    #endif
 }
 
 // TODO: Refactor a little
@@ -517,6 +525,7 @@ ResultType ProjectionAutomaton::_IntersectNonEmptyCore(Symbol_ptr symbol, Term* 
         ResultType result = this->_aut->IntersectNonEmpty(symbol, projectionApproximation->list[0].get(), underComplement);
 
         // Create the new Zero symbol and initialize the symbol list with all projections
+        // TODO: This should be inside the fixpoint creation
         SymbolList symbols;
         symbol = new ZeroSymbol();
         symbols.push_back(*symbol);
@@ -548,6 +557,7 @@ ResultType ProjectionAutomaton::_IntersectNonEmptyCore(Symbol_ptr symbol, Term* 
         return std::make_pair(std::shared_ptr<Term>(fixpoint), fixpoint->GetResult());
     } else {
         // Project the quantified symbols and push them to symbol list
+        // TODO: This should be inside the fixpoint creation
         SymbolList symbols;
         symbols.push_back(*symbol);
         // Transform the symbols

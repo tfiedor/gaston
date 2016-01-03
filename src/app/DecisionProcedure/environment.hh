@@ -216,6 +216,15 @@ enum ComparisonType {E_BY_SAME_PTR, E_BY_DIFFERENT_TYPE, E_BY_STRUCTURE};
  **********************************/
 #define ANTIPRENEXING_FULL				true
 
+/*
+ * >>> Unique Terms options *
+ ****************************/
+#define UNIQUE_BASE						true
+#define UNIQUE_LISTS					true
+#define UNIQUE_PRODUCTS					true
+#define UNIQUE_FIXPOINTS				false
+#define UNIQUE_CONTINUATIONS			false
+
 /* >>> Optimizations <<< *
  *************************/
 #define OPT_EQ_THROUGH_POINTERS			true	// < Tests equality through pointers not by structure
