@@ -44,6 +44,7 @@ TERM_MEASURELIST(INIT_ALL_STATIC_MEASURES)
 #undef INIT_ALL_STATIC_MEASURES
 #undef INIT_STATIC_MEASURE
 size_t TermFixpoint::subsumedByHits = 0;
+size_t TermFixpoint::preInstances = 0;
 
 // <<< TERM CONSTRUCTORS >>>
 TermEmpty::TermEmpty() {
@@ -171,8 +172,8 @@ TermList::TermList(Term_ptr first, bool isCompl) {
     #endif
 }
 
-TermFixpoint::TermFixpoint(std::shared_ptr<SymbolicAutomaton> aut, Term_ptr startingTerm, Symbols symList, bool inComplement, bool initbValue)
-        : _sourceTerm(nullptr), _sourceIt(nullptr), _aut(aut), _bValue(initbValue) {
+TermFixpoint::TermFixpoint(Aut_ptr aut, Term_ptr startingTerm, Symbol* symbol, bool inComplement, bool initbValue)
+        : _sourceTerm(nullptr), _sourceIt(nullptr), _aut(reinterpret_cast<ProjectionAutomaton*>(aut)->GetBase()), _bValue(initbValue) {
     #if (MEASURE_STATE_SPACE == true)
     ++TermFixpoint::instances;
     #endif
@@ -192,8 +193,8 @@ TermFixpoint::TermFixpoint(std::shared_ptr<SymbolicAutomaton> aut, Term_ptr star
     this->_fixpoint.push_front(nullptr);
 
     // Push symbols to worklist
-    for(auto symbol : symList) {
-        this->_symList.push_back(symbol);
+    this->_InitializeSymbols(reinterpret_cast<ProjectionAutomaton*>(aut)->projectedVars, symbol);
+    for(auto symbol : this->_symList) {
         this->_worklist.insert(this->_worklist.cbegin(), std::make_pair(startingTerm, symbol));
     }
 
@@ -205,11 +206,12 @@ TermFixpoint::TermFixpoint(std::shared_ptr<SymbolicAutomaton> aut, Term_ptr star
     #endif
 }
 
-TermFixpoint::TermFixpoint(std::shared_ptr<SymbolicAutomaton> aut, Term_ptr sourceTerm, Symbols symList, bool inComplement)
+TermFixpoint::TermFixpoint(Aut_ptr aut, Term_ptr sourceTerm, Symbol* symbol, bool inComplement)
         : _sourceTerm(sourceTerm), _sourceIt(reinterpret_cast<TermFixpoint*>(sourceTerm.get())->GetIteratorDynamic()),
-        _aut(aut), _worklist(), _bValue(inComplement) {
+        _aut(reinterpret_cast<ProjectionAutomaton*>(aut)->GetBase()), _worklist(), _bValue(inComplement) {
     #if (MEASURE_STATE_SPACE == true)
     ++TermFixpoint::instances;
+    ++TermFixpoint::preInstances;
     #endif
     assert(sourceTerm->type == TERM_FIXPOINT);
 
@@ -226,9 +228,7 @@ TermFixpoint::TermFixpoint(std::shared_ptr<SymbolicAutomaton> aut, Term_ptr sour
     // Initialize the fixpoint
     this->_fixpoint.push_front(nullptr);
     // Push things into worklist
-    for(auto symbol : symList) {
-        this->_symList.push_back(symbol);
-    }
+    this->_InitializeSymbols(reinterpret_cast<ProjectionAutomaton*>(aut)->projectedVars, symbol);
 
     #if (DEBUG_TERM_CREATION == true)
     std::cout << "[" << this << "]";
@@ -275,6 +275,7 @@ bool Term::IsSubsumed(Term *t) {
                                                                           continuation->underComplement)).first;
         return unfoldedContinuation->IsSubsumed(t);
     }
+    assert(this->type != TERM_CONTINUATION && t->type != TERM_CONTINUATION);
 
     // Else if it is not continuation we first look into cache and then recompute if needed
     bool result;
@@ -330,9 +331,6 @@ bool TermProduct::_IsSubsumedCore(Term* t) {
 }
 
 bool TermBaseSet::_IsSubsumedCore(Term* term) {
-    if(term->type != TERM_BASE) {
-        std::cout << "Term type = " << term->type << "\n";
-    }
     assert(term->type == TERM_BASE);
 
     // Test component-wise, not very efficient though
@@ -832,6 +830,33 @@ void TermFixpoint::_InitializeAggregateFunction(bool inComplement) {
         this->_aggregate_result = [](bool a, bool b) {return a && b;};
     }
 }
+
+/**
+ * Transforms @p symbols according to the bound variable in @p vars, by pumping
+ *  0 and 1 on the tracks
+ *
+ * @param[in,out] symbols:  list of symbols, that will be transformed
+ * @param[in] vars:         list of used vars, that are projected
+ */
+void TermFixpoint::_InitializeSymbols(IdentList* vars, Symbol *startingSymbol) {
+    this->_symList.push_back(*startingSymbol);
+    // TODO: Optimize, this sucks
+    unsigned int symNum = 1;
+    for(auto var = vars->begin(); var != vars->end(); ++var) {
+        // Pop symbol;
+        for(auto i = symNum; i != 0; --i) {
+            Symbol symF = this->_symList.front();
+            this->_symList.pop_front();
+            Symbol zero(symF.GetTrackMask(), varMap[(*var)], '0');
+            Symbol one(symF.GetTrackMask(), varMap[(*var)], '1');
+            this->_symList.push_back(zero);
+            this->_symList.push_back(one);
+        }
+
+        symNum <<= 1;// times 2
+    }
+}
+
 
 /**
  * @return: result of fixpoint

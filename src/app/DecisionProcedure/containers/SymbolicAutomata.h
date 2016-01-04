@@ -169,10 +169,14 @@ public:
  * Automaotn corresponding to the formulae: Exists X. phi
  */
 class ProjectionAutomaton : public SymbolicAutomaton {
+public:
+    // <<< PUBLIC MEMBERS >>>
+public:
+    IdentList* projectedVars;
+
 protected:
     // <<< PRIVATE MEMBERS >>>
     std::shared_ptr<SymbolicAutomaton> _aut;
-    IdentList* _projected_vars;
 
     // <<< PRIVATE FUNCTIONS >>>
     virtual void _InitializeAutomaton();
@@ -186,6 +190,7 @@ public:
 
     // <<< PUBLIC API >>>
     virtual Term* Pre(Symbol*, Term*, bool);
+    SymbolicAutomaton* GetBase() { return this->_aut.get();}
 
     // <<< DUMPING FUNCTIONS >>>
     virtual void DumpAutomaton();

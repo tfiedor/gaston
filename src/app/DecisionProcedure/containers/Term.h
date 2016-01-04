@@ -234,7 +234,7 @@ private:
 class TermFixpoint : public Term {
 public:
     using FixpointType = std::list<Term_ptr>;
-    using Aut_ptr = std::shared_ptr<SymbolicAutomaton>;
+    using Aut_ptr = SymbolicAutomaton*;
 
     using WorklistItemType = std::pair<Term_ptr, SymbolType>;
     using WorklistType = std::list<WorklistItemType>;
@@ -244,6 +244,7 @@ public:
     // See #L29
     TERM_MEASURELIST(DEFINE_STATIC_MEASURE)
     static size_t subsumedByHits;
+    static size_t preInstances;
 
     struct iterator {
     private:
@@ -325,8 +326,8 @@ public:
     bool (*_aggregate_result)(bool, bool);
 
     // <<< CONSTRUCTORS >>>
-    TermFixpoint(std::shared_ptr<SymbolicAutomaton> aut,Term_ptr startingTerm, Symbols symList, bool inComplement, bool initbValue);
-    TermFixpoint(std::shared_ptr<SymbolicAutomaton> aut, Term_ptr sourceTerm, Symbols symList, bool inComplement);
+    TermFixpoint(Aut_ptr aut, Term_ptr startingTerm, Symbol* startingSymbol, bool inComplement, bool initbValue);
+    TermFixpoint(Aut_ptr aut, Term_ptr sourceTerm, Symbol* startingSymbol, bool inComplement);
 
     // <<< PUBLIC API >>>
     FixpointTermSem GetSemantics() const;
@@ -346,6 +347,7 @@ private:
     void ComputeNextFixpoint();
     void ComputeNextPre();
     void _InitializeAggregateFunction(bool inComplement);
+    void _InitializeSymbols(IdentList*, Symbol*);
     bool _IsSubsumedCore(Term* t);
     bool _testIfSubsumes(Term_ptr &term);
     bool _eqCore(const Term&);

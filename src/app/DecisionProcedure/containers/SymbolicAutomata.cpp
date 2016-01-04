@@ -109,31 +109,6 @@ UnionAutomaton::UnionAutomaton(SymbolicAutomaton_raw lhs, SymbolicAutomaton_raw 
 }
 
 /**
- * Transforms @p symbols according to the bound variable in @p vars, by pumping
- *  0 and 1 on the tracks
- *
- * @param[in,out] symbols:  list of symbols, that will be transformed
- * @param[in] vars:         list of used vars, that are projected
- */
-void initialize_symbols(SymbolList &symbols, IdentList* vars) {
-    // TODO: Optimize, this sucks
-    unsigned int symNum = 1;
-    for(auto var = vars->begin(); var != vars->end(); ++var) {
-        // Pop symbol;
-        for(auto i = symNum; i != 0; --i) {
-            Symbol symF = symbols.front();
-            symbols.pop_front();
-            Symbol zero(symF.GetTrackMask(), varMap[(*var)], '0');
-            Symbol one(symF.GetTrackMask(), varMap[(*var)], '1');
-            symbols.push_back(zero);
-            symbols.push_back(one);
-        }
-
-        symNum <<= 1;// times 2
-    }
-}
-
-/**
  * @param[in] symbol:               symbol we are minusing away
  * @param[in] stateApproximation:   approximation of final states
  * @param[in] underComplement:      true, if we are under the complement
@@ -298,7 +273,7 @@ void ProjectionAutomaton::_InitializeAutomaton() {
     this->_factory.InitializeWorkshop();
     this->_InitializeInitialStates();
     this->_InitializeFinalStates();
-    this->_projected_vars = static_cast<ASTForm_uvf*>(this->_form)->vl;
+    this->projectedVars = static_cast<ASTForm_uvf*>(this->_form)->vl;
 }
 
 /**
@@ -524,18 +499,12 @@ ResultType ProjectionAutomaton::_IntersectNonEmptyCore(Symbol_ptr symbol, Term* 
         // Evaluate the initial unfolding of epsilon
         ResultType result = this->_aut->IntersectNonEmpty(symbol, projectionApproximation->list[0].get(), underComplement);
 
-        // Create the new Zero symbol and initialize the symbol list with all projections
-        // TODO: This should be inside the fixpoint creation
-        SymbolList symbols;
-        symbol = new ZeroSymbol();
-        symbols.push_back(*symbol);
-        // Transform the symbols
-        ASTForm_uvf* form = reinterpret_cast<ASTForm_uvf*>(this->_form);
-        initialize_symbols(symbols, form->vl);
-
         // Create a new fixpoint term and iterator on it
-        // TODO: #TERM_CREATION
-        TermFixpoint* fixpoint = new TermFixpoint(this->_aut, result.first, symbols, underComplement, result.second);
+        #if (DEBUG_NO_WORKSHOPS == true || true)
+        TermFixpoint* fixpoint = new TermFixpoint(this, result.first, new ZeroSymbol(), underComplement, result.second);
+        #else
+        TermFixpoint* fixpoint = this->_factory.CreateFixpoint(result.first, new ZeroSymbol(), underComplement, result.second);
+        #endif
         TermFixpoint::iterator it = fixpoint->GetIterator();
         Term_ptr fixpointTerm;
 
@@ -556,17 +525,12 @@ ResultType ProjectionAutomaton::_IntersectNonEmptyCore(Symbol_ptr symbol, Term* 
         // Return (fixpoint, bool)
         return std::make_pair(std::shared_ptr<Term>(fixpoint), fixpoint->GetResult());
     } else {
-        // Project the quantified symbols and push them to symbol list
-        // TODO: This should be inside the fixpoint creation
-        SymbolList symbols;
-        symbols.push_back(*symbol);
-        // Transform the symbols
-        ASTForm_uvf* form = reinterpret_cast<ASTForm_uvf*>(this->_form);
-        initialize_symbols(symbols, form->vl);
-
         // Create a new fixpoint term and iterator on it
-        // TODO: #TERM_CREATION
-        TermFixpoint* fixpoint = new TermFixpoint(this->_aut, std::shared_ptr<Term>(finalApproximation), symbols, underComplement);
+        #if (DEBUG_NO_WORKSHOPS == true || true)
+        TermFixpoint* fixpoint = new TermFixpoint(this, std::shared_ptr<Term>(finalApproximation), symbol, underComplement);
+        #else
+        TermFixpoint* fixpoint = this->_factory.CreateFixpointPre(std::shared_ptr<Term>(finalApproximation), symbol, underComplement);
+        #endif
         TermFixpoint::iterator it = fixpoint->GetIterator();
         Term_ptr fixpointTerm;
 
@@ -635,9 +599,9 @@ void ComplementAutomaton::DumpAutomaton() {
 void ProjectionAutomaton::DumpAutomaton() {
     std::cout << "\033[1;34m";
     std::cout << "\u2203";
-    for(auto it = this->_projected_vars->begin(); it != this->_projected_vars->end(); ++it) {
+    for(auto it = this->projectedVars->begin(); it != this->projectedVars->end(); ++it) {
         std::cout << symbolTable.lookupSymbol(*it);
-        if((it + 1) != this->_projected_vars->end()) {
+        if((it + 1) != this->projectedVars->end()) {
             std::cout << ", ";
         }
     }

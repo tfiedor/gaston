@@ -69,7 +69,7 @@ int ws1s_symbolic_decision_procedure(SymbolicAutomaton_ptr symbolicAutomaton) {
     #if (MEASURE_COMPARISONS == true)
     OUTPUT_MEASURES(TermBaseSet)
     #endif
-    std::cout << "	\u2218 Term Fixpoints: " << TermFixpoint::instances << "\n";
+    std::cout << "	\u2218 Term Fixpoints: " << TermFixpoint::instances << " (" << (TermFixpoint::instances - TermFixpoint::preInstances) << " + " << TermFixpoint::preInstances <<")\n";
     #if (MEASURE_SUBSUMEDBY_HITS == true)
     std::cout << "		\u2218 subsumedBy hits: " << TermFixpoint::subsumedByHits << "\n";
     #endif

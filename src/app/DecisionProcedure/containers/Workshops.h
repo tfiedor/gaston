@@ -89,7 +89,7 @@ namespace Workshops {
     using BaseCache     = BinaryCache<BaseKey, CacheData, BaseHash, BaseCompare, dumpBaseKey, dumpCacheData>;
     using ProductCache  = BinaryCache<ProductKey, CacheData, ProductHash, ProductCompare, dumpProductKey, dumpCacheData>;
     using ListCache     = BinaryCache<ListKey, CacheData, ListHash, ListCompare, dumpListKey, dumpCacheData>;
-    using FixpointCache = BinaryCache<FixpointCache, CacheData, FixpointHash, FixpointCompare, dumpFixpointKey, dumpCacheData>;
+    using FixpointCache = BinaryCache<FixpointKey, CacheData, FixpointHash, FixpointCompare, dumpFixpointKey, dumpCacheData>;
 
     class TermWorkshop {
     private:
@@ -109,8 +109,8 @@ namespace Workshops {
         // <<< PUBLIC API >>>
         TermBaseSet* CreateBaseSet(BaseKey &states, unsigned int offset, unsigned int stateno);
         TermProduct* CreateProduct(Term_ptr const&, Term_ptr const&, ProductType);
-        TermFixpoint* CreateFixpoint(Term_ptr const&, SymbolList &, bool, bool);
-        TermFixpoint* CreateFixpointPre(Term_ptr const&, SymbolList&, bool);
+        TermFixpoint* CreateFixpoint(Term_ptr const&, Symbol*, bool, bool);
+        TermFixpoint* CreateFixpointPre(Term_ptr const&, Symbol*, bool);
         TermList* CreateList(Term_ptr const&, bool);
         TermContinuation* CreateContinuation(Term_ptr const&, Symbol_shared&, bool);
 
