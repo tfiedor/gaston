@@ -500,7 +500,7 @@ ResultType ProjectionAutomaton::_IntersectNonEmptyCore(Symbol_ptr symbol, Term* 
         ResultType result = this->_aut->IntersectNonEmpty(symbol, projectionApproximation->list[0].get(), underComplement);
 
         // Create a new fixpoint term and iterator on it
-        #if (DEBUG_NO_WORKSHOPS == true || true)
+        #if (DEBUG_NO_WORKSHOPS == true)
         TermFixpoint* fixpoint = new TermFixpoint(this, result.first, new ZeroSymbol(), underComplement, result.second);
         #else
         TermFixpoint* fixpoint = this->_factory.CreateFixpoint(result.first, new ZeroSymbol(), underComplement, result.second);
@@ -518,15 +518,19 @@ ResultType ProjectionAutomaton::_IntersectNonEmptyCore(Symbol_ptr symbol, Term* 
         }
 
         // While the fixpoint is not fully unfolded and while we cannot evaluate early
-        while( ((fixpointTerm = it.GetNext()) != nullptr) && (underComplement == fixpoint->GetResult())) {}
-        //                                                    ^--- is this right?
+        while( ((fixpointTerm = it.GetNext()) != nullptr) && (underComplement == fixpoint->GetResult())) {
+            //                                                ^--- is this right?
+            #if (MEASURE_PROJECTION == true)
+            ++this->fixpointNext;
+            #endif
+        }
         #endif
 
         // Return (fixpoint, bool)
         return std::make_pair(std::shared_ptr<Term>(fixpoint), fixpoint->GetResult());
     } else {
         // Create a new fixpoint term and iterator on it
-        #if (DEBUG_NO_WORKSHOPS == true || true)
+        #if (DEBUG_NO_WORKSHOPS == true)
         TermFixpoint* fixpoint = new TermFixpoint(this, std::shared_ptr<Term>(finalApproximation), symbol, underComplement);
         #else
         TermFixpoint* fixpoint = this->_factory.CreateFixpointPre(std::shared_ptr<Term>(finalApproximation), symbol, underComplement);
@@ -535,9 +539,17 @@ ResultType ProjectionAutomaton::_IntersectNonEmptyCore(Symbol_ptr symbol, Term* 
         Term_ptr fixpointTerm;
 
         // Compute the Pre of the fixpoint
-        while( ((fixpointTerm = it.GetNext()) != nullptr) && (underComplement == fixpoint->GetResult())) {}
-
-        // Return (fixpoint, bool)
+        #if (DEBUG_COMPUTE_FULL_FIXPOINT == true)
+            while((fixpointTerm = it.GetNext()) != nullptr) {};
+        #else
+            while( ((fixpointTerm = it.GetNext()) != nullptr) && (underComplement == fixpoint->GetResult())) {
+                #if (MEASURE_PROJECTION == true)
+                ++this->fixpointPreNext;
+                #endif
+            }
+        #endif
+        
+        // TODO: Fixpoint cache should probably be here!
         return std::make_pair(std::shared_ptr<Term>(fixpoint), fixpoint->GetResult());
     }
 }
@@ -785,6 +797,10 @@ void ProjectionAutomaton::DumpStats() {
     this->_resCache.dumpStats();
     #if (DEBUG_WORKSHOPS)
     this->_factory.Dump();
+    #endif
+    #if (MEASURE_PROJECTION == true)
+    print_stat("Fixpoint Nexts", this->fixpointNext);
+    print_stat("FixpointPre Nexts", this->fixpointPreNext);
     #endif
     print_stat("True Hits", this->_trueCounter);
     print_stat("False Hits", this->_falseCounter);

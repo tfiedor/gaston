@@ -104,6 +104,7 @@ void PrintUsage()
 		<< "Options:\n"
 		<< " -t, --time 		 Print elapsed time\n"
 		<< " -d, --dump-all		 Dump AST, symboltable, and code DAG\n"
+		<< " -ga, --print-aut	 Print automaton in graphviz only and end\n"
 		<< "     --no-automaton  Don't dump Automaton\n"
 		<< "     --use-mona-dfa  Uses MONA for building base automaton\n"
 		<< "     --no-expnf      Implies --use-mona-dfa, does not convert formula to exPNF\n"
@@ -155,6 +156,8 @@ bool ParseArguments(int argc, char *argv[])
 				options.reorder = RANDOM;
 			else if(strcmp(argv[i], "--reorder-bdd=heuristic") == 0)
 				options.reorder = HEURISTIC;
+			else if(strcmp(argv[i], "-ga") == 0 || strcmp(argv[i], "--print-aut") == 0)
+				options.graphvizDAG = true;
 			else if(strcmp(argv[i], "--no-automaton") == 0)
 				options.dontDumpAutomaton = true;
 			else if(strcmp(argv[i], "--use-mona-dfa") == 0) {
@@ -409,9 +412,11 @@ int main(int argc, char *argv[]) {
 		(ast->formula)->dump();
 
 		// dumping symbol table
-		cout << "\n\n[*] Created symbol table:";
-		symbolTable.dump();
-		cout << "\n";
+		#if (DUMP_NO_SYMBOL_TABLE == false)
+			cout << "\n\n[*] Created symbol table:";
+			symbolTable.dump();
+			cout << "\n";
+		#endif
 
 		// Dump ASTs for predicates and macros
 		PredLibEntry *pred = predicateLib.first();
@@ -590,18 +595,18 @@ int main(int argc, char *argv[]) {
 		}
 
 		#if (DEBUG_BDDS == true)
-		StateHT allStates;
-		auto vataAut = vataAutomaton.RemoveUnreachableStates(&allStates);
-		vataAutomaton = vataAut.RemoveUselessStates();
-		TransMTBDD * tbdd = getMTBDDForStateTuple(vataAutomaton, Automaton::StateTuple({}));
-		std::cout << "Leaf : bdd\n";
-		std::cout << TransMTBDD::DumpToDot({tbdd}) << "\n\n";
-		// Dump bdds
-		for (auto state : allStates) {
-			TransMTBDD* bdd = getMTBDDForStateTuple(vataAutomaton, Automaton::StateTuple({state}));
-			std::cout << state << " : bdd\n";
-			std::cout << TransMTBDD::DumpToDot({bdd}) << "\n\n";
-		}
+			StateHT allStates;
+			auto vataAut = vataAutomaton.RemoveUnreachableStates(&allStates);
+			vataAutomaton = vataAut.RemoveUselessStates();
+			TransMTBDD * tbdd = getMTBDDForStateTuple(vataAutomaton, Automaton::StateTuple({}));
+			std::cout << "Leaf : bdd\n";
+			std::cout << TransMTBDD::DumpToDot({tbdd}) << "\n\n";
+			// Dump bdds
+			for (auto state : allStates) {
+				TransMTBDD* bdd = getMTBDDForStateTuple(vataAutomaton, Automaton::StateTuple({state}));
+				std::cout << state << " : bdd\n";
+				std::cout << TransMTBDD::DumpToDot({bdd}) << "\n\n";
+			}
 		#endif
 	}
 

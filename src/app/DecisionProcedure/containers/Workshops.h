@@ -77,6 +77,9 @@ namespace Workshops {
     using FixpointHash      = boost::hash<FixpointKey>;
     using FixpointCompare   = PairCompare<FixpointKey>;
     using Term_ptr          = std::shared_ptr<Term>;
+    using FixpointType  = std::list<Term*>;
+    using WorklistItemType = std::pair<Term*, Symbol*>;
+    using WorklistType = std::list<WorklistItemType>;
 
     void dumpBaseKey(BaseKey const&);
     void dumpProductKey(ProductKey const&);
@@ -84,8 +87,6 @@ namespace Workshops {
     void dumpFixpointKey(FixpointKey const&);
     void dumpCacheData(CacheData &);
 
-    //TermFixpoint::TermFixpoint(Term_ptr startingTerm, symbol, bool initbValue)
-    //TermFixpoint::TermFixpoint(Term_ptr sourceTerm, symbol)
     using BaseCache     = BinaryCache<BaseKey, CacheData, BaseHash, BaseCompare, dumpBaseKey, dumpCacheData>;
     using ProductCache  = BinaryCache<ProductKey, CacheData, ProductHash, ProductCompare, dumpProductKey, dumpCacheData>;
     using ListCache     = BinaryCache<ListKey, CacheData, ListHash, ListCompare, dumpListKey, dumpCacheData>;
@@ -97,7 +98,8 @@ namespace Workshops {
         BaseCache* _bCache;
         ProductCache* _pCache;
         ListCache* _lCache;
-        FixpointCache* _fpCache;
+        ListCache* _fpCache;
+        FixpointCache* _fppCache;
 
         SymbolicAutomaton* _aut;
 
@@ -111,10 +113,9 @@ namespace Workshops {
         TermProduct* CreateProduct(Term_ptr const&, Term_ptr const&, ProductType);
         TermFixpoint* CreateFixpoint(Term_ptr const&, Symbol*, bool, bool);
         TermFixpoint* CreateFixpointPre(Term_ptr const&, Symbol*, bool);
+        TermFixpoint* GetUniqueFixpoint(FixpointType&, WorklistType &);
         TermList* CreateList(Term_ptr const&, bool);
         TermContinuation* CreateContinuation(Term_ptr const&, Symbol_shared&, bool);
-
-        TermList* ExtendList(Term*, Term*);
 
         void Dump();
     };

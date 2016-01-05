@@ -208,7 +208,7 @@ TermFixpoint::TermFixpoint(Aut_ptr aut, Term_ptr startingTerm, Symbol* symbol, b
 
 TermFixpoint::TermFixpoint(Aut_ptr aut, Term_ptr sourceTerm, Symbol* symbol, bool inComplement)
         : _sourceTerm(sourceTerm), _sourceIt(reinterpret_cast<TermFixpoint*>(sourceTerm.get())->GetIteratorDynamic()),
-        _aut(reinterpret_cast<ProjectionAutomaton*>(aut)->GetBase()), _worklist(), _bValue(inComplement) {
+          _aut(reinterpret_cast<ProjectionAutomaton*>(aut)->GetBase()), _worklist(), _bValue(inComplement) {
     #if (MEASURE_STATE_SPACE == true)
     ++TermFixpoint::instances;
     ++TermFixpoint::preInstances;
@@ -602,10 +602,6 @@ unsigned int TermFixpoint::_MeasureStateSpaceCore() {
  * Dumping functions
  */
 std::ostream& operator <<(std::ostream& osObject, Term& z) {
-    // TODO: Optimize this you lazy fuck!
-#if (DEBUG_TERM_UNIQUENESS == true)
-    osObject << "[" << &z <<"]";
-#endif
     z.dump();
     return osObject;
 }
@@ -712,6 +708,13 @@ void TermFixpoint::_dumpCore() {
         item->dump();
         std::cout << "\033[1;34m,\033[0m";
     }
+    #if (DEBUG_FIXPOINT_SYMBOLS == true)
+        std::cout << "[";
+        for(auto item : this->_worklist) {
+            std::cout << "(" << item.first << "+" << item.second << ") , ";
+        }
+        std::cout << "]";
+    #endif
     std::cout << "\033[1;34m}\033[0m";
 }
 // <<< ADDITIONAL TERMBASESET FUNCTIONS >>>
@@ -805,7 +808,6 @@ void TermFixpoint::ComputeNextPre() {
     ResultType result = _aut->IntersectNonEmpty(&item.second, item.first.get(), this->_nonMembershipTesting);
 
     // If it is subsumed we return
-    //if(result.first->IsSubsumedBy(_fixpoint)) {
     if(this->_testIfSubsumes(result.first)) {
         return;
     }

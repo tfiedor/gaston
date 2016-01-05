@@ -794,9 +794,11 @@ void convertMonaToVataAutomaton(Automaton& v_aut, DFA* m_aut, IdentList* vars, i
 	// add initial transition
 	setInitialState(v_aut, 1);
 
-	if(options.dump) {
-		std::cout << "[*] Number of states in MONA deterministic automaton: " << m_aut->ns << "\n";
-	}
+	#if (DUMP_INTERMEDIATE_AUTOMATA == true)
+		if(options.dump) {
+			std::cout << "[*] Number of states in MONA deterministic automaton: " << m_aut->ns << "\n";
+		}
+	#endif
 
 	for (unsigned int i = 1; i < m_aut->ns; ++i) {
 	//                ^--- my assumption why this is correct:

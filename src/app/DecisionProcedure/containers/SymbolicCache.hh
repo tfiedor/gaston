@@ -29,29 +29,29 @@ struct PairCompare : public std::binary_function<Key, Key, bool>
      * @return true if lhs = rhs
      */
 	bool operator()(Key const& lhs, Key const& rhs) const {
-#if (DEBUG_TERM_CACHE_COMPARISON == true)
-		auto keyFirst = lhs.first;
-		auto keySecond = lhs.second;
-		if(keySecond == nullptr) {
-			std::cout << "(" << (*keyFirst) << ", \u03B5) vs";
-		} else {
-			std::cout << "(" << (*keyFirst) << ", " << (*keySecond) << ") vs";
-		}
-		auto dkeyFirst = rhs.first;
-		auto dkeySecond = rhs.second;
-		if(dkeySecond == nullptr) {
-			std::cout << "(" << (*dkeyFirst) << ", \u03B5)";
-		} else {
-			std::cout << "(" << (*dkeyFirst) << ", " << (*dkeySecond) << ")";
-		}
-		bool lhsresult = (*lhs.first == *rhs.first);
-		bool rhsresult = (lhs.second == rhs.second);
-		bool result = lhsresult && rhsresult;
-			std::cout << " = (" << lhsresult << " + " << rhsresult << ") =  " << result << "\n";
-		return  result;
-#else
-		return (*lhs.second == *rhs.second) && (*lhs.first == *rhs.first);
-#endif
+		#if (DEBUG_TERM_CACHE_COMPARISON == true)
+			auto keyFirst = lhs.first;
+			auto keySecond = lhs.second;
+			if(keySecond == nullptr) {
+				std::cout << "(" << (*keyFirst) << ", \u03B5) vs";
+			} else {
+				std::cout << "(" << (*keyFirst) << ", " << (*keySecond) << ") vs";
+			}
+			auto dkeyFirst = rhs.first;
+			auto dkeySecond = rhs.second;
+			if(dkeySecond == nullptr) {
+				std::cout << "(" << (*dkeyFirst) << ", \u03B5)";
+			} else {
+				std::cout << "(" << (*dkeyFirst) << ", " << (*dkeySecond) << ")";
+			}
+			bool lhsresult = (*lhs.first == *rhs.first);
+			bool rhsresult = (lhs.second == rhs.second);
+			bool result = lhsresult && rhsresult;
+				std::cout << " = (" << lhsresult << " + " << rhsresult << ") =  " << result << "\n";
+			return  result;
+		#else
+			return (*lhs.second == *rhs.second) && (*lhs.first == *rhs.first);
+		#endif
 	}
 };
 

@@ -5,6 +5,12 @@ namespace Workshops {
     TermWorkshop::TermWorkshop(SymbolicAutomaton* aut) : _aut(aut) { }
 
     void TermWorkshop::InitializeWorkshop() {
+        this->_bCache = nullptr;
+        this->_fpCache = nullptr;
+        this->_fppCache = nullptr;
+        this->_pCache = nullptr;
+        this->_lCache = nullptr;
+
         switch(this->_aut->type) {
             case AutType::BASE:
                 this->_bCache = new BaseCache();
@@ -18,7 +24,8 @@ namespace Workshops {
                 break;
             case AutType::PROJECTION:
                 this->_lCache = new ListCache();
-                this->_fpCache = new FixpointCache();
+                this->_fpCache = new ListCache();
+                this->_fppCache = new FixpointCache();
                 break;
             default:
                 assert(false && "Missing implementation for this type");
@@ -122,7 +129,7 @@ namespace Workshops {
             assert(this->_fpCache != nullptr);
 
             Term* termPtr = nullptr;
-            auto fixpointKey = std::make_pair(source.get(), nullptr);
+            auto fixpointKey = source.get();
             if(!this->_fpCache->retrieveFromCache(fixpointKey, termPtr)) {
                 #if (DEBUG_WORKSHOPS == true && DEBUG_TERM_CREATION == true)
                 std::cout << "[*] Creating Fixpoint: ";
@@ -140,17 +147,18 @@ namespace Workshops {
 
     TermFixpoint* TermWorkshop::CreateFixpointPre(Term_ptr const& source, Symbol* symbol, bool inCompl) {
         #if (OPT_GENERATE_UNIQUE_TERMS == true && UNIQUE_FIXPOINTS == true)
+            // Project the symbol as key
             assert(this->_fpCache != nullptr);
 
             Term* termPtr = nullptr;
             auto fixpointKey = std::make_pair(source.get(), symbol);
-            if(!this->_fpCache->retrieveFromCache(fixpointKey, termPtr)) {
+            if(!this->_fppCache->retrieveFromCache(fixpointKey, termPtr)) {
                 #if (DEBUG_WORKSHOPS == true && DEBUG_TERM_CREATION == true)
                 std::cout << "[*] Creating FixpointPre: ";
                 std::cout << "from [" << startTerm << "] to ";
                 #endif
                 termPtr = new TermFixpoint(this->_aut, source, symbol, inCompl);
-                this->_fpCache->StoreIn(fixpointKey, termPtr);
+                this->_fppCache->StoreIn(fixpointKey, termPtr);
             }
             assert(termPtr != nullptr);
             return reinterpret_cast<TermFixpoint*>(termPtr);
@@ -159,14 +167,21 @@ namespace Workshops {
         #endif
     }
 
+    /**
+     * Tries to look into the cache, if there is already created fixpoint,
+     * with the same parameters. Otherwise it stores it in the cache
+     *
+     * @param[in] fixpoint:         list of terms (fixpoint representation)
+     * @param[in] worklist:         list of pairs (term, symbol)
+     * @return:                     pointer to unique fixpoint
+     */
+    TermFixpoint* GetUniqueFixpoint(FixpointType& fixpoint, WorklistType & worklist) {
+
+    }
+
     //TermContinuation::TermContinuation(std::shared_ptr<SymbolicAutomaton> a, Term_ptr t, std::shared_ptr<SymbolType> s, bool b)
     TermContinuation* TermWorkshop::CreateContinuation(Term_ptr const&, Symbol_shared&, bool) {
         G_NOT_IMPLEMENTED_YET("CreateContinuation");
-        return nullptr;
-    }
-
-    TermList* TermWorkshop::ExtendList(Term* list, Term* newTerm) {
-        G_NOT_IMPLEMENTED_YET("ExtendList");
         return nullptr;
     }
 
@@ -189,6 +204,10 @@ namespace Workshops {
         if(this->_fpCache != nullptr) {
             std::cout << "  \u2218 FixpointCache stats -> ";
             this->_fpCache->dumpStats();
+        }
+        if(this->_fppCache != nullptr) {
+            std::cout << "  \u2218 FixpointCachePre stats -> ";
+            this->_fppCache->dumpStats();
         }
     }
 

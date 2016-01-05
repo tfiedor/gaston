@@ -171,8 +171,11 @@ public:
 class ProjectionAutomaton : public SymbolicAutomaton {
 public:
     // <<< PUBLIC MEMBERS >>>
-public:
     IdentList* projectedVars;
+    #if (MEASURE_PROJECTION == true)
+    size_t fixpointNext = 0;
+    size_t fixpointPreNext = 0;
+    #endif
 
 protected:
     // <<< PRIVATE MEMBERS >>>

@@ -188,6 +188,7 @@ enum ComparisonType {E_BY_SAME_PTR, E_BY_DIFFERENT_TYPE, E_BY_STRUCTURE};
  *****************************/
 #define DEBUG_BASE_AUTOMATA 			false
 #define DEBUG_FIXPOINT 					false
+#define DEBUG_FIXPOINT_SYMBOLS			false
 #define DEBUG_INITIAL_APPROX 			false
 #define DEBUG_INTERSECT_NON_EMPTY 		false
 #define DEBUG_TERM_UNIQUENESS			false
@@ -197,19 +198,24 @@ enum ComparisonType {E_BY_SAME_PTR, E_BY_DIFFERENT_TYPE, E_BY_STRUCTURE};
 #define DEBUG_TERM_SUBSUMPTION 			false
 #define DEBUG_TERM_CACHE_COMPARISON		false
 #define DEBUG_CONTINUATIONS 			false
-#define DEBUG_COMPUTE_FULL_FIXPOINT 	false
 #define DEBUG_NO_WORKSHOPS				false
+#define DEBUG_COMPUTE_FULL_FIXPOINT 	false
+
+/* >>> Dumping Options <<< *
+ ***************************/
+#define DUMP_NO_SYMBOL_TABLE			true
+#define DUMP_INTERMEDIATE_AUTOMATA		false
 
 /* >>> Measuring Options <<< *
  *****************************/
-#define MEASURE_STATE_SPACE 			true
-#define MEASURE_CACHE_HITS 				true
+#define MEASURE_STATE_SPACE 			true	// < Measures how many instances of terms were created
+#define MEASURE_CACHE_HITS 				false	// < Prints the statistics for each cache on each node
 #define MEASURE_CONTINUATION_CREATION	true
 #define MEASURE_CONTINUATION_EVALUATION	true
 #define MEASURE_RESULT_HITS				true
-#define MEASURE_PROJECTION				true
-#define MEASURE_ALL						true
-#define MEASURE_COMPARISONS				false
+#define MEASURE_PROJECTION				false	// < Measures several things about projection (how many steps, how big, etc.)
+#define MEASURE_ALL						true	// < Measure everything, not really useful
+#define MEASURE_COMPARISONS				false	// < Measure how many ti
 #define MEASURE_SUBSUMEDBY_HITS			true
 
 /* >>> Anti-Prenexing Options <<< *
@@ -221,8 +227,8 @@ enum ComparisonType {E_BY_SAME_PTR, E_BY_DIFFERENT_TYPE, E_BY_STRUCTURE};
  ****************************/
 #define UNIQUE_BASE						true
 #define UNIQUE_PRODUCTS					true
-#define UNIQUE_LISTS					false
-#define UNIQUE_FIXPOINTS				false
+#define UNIQUE_LISTS					true
+#define UNIQUE_FIXPOINTS				true
 #define UNIQUE_CONTINUATIONS			false
 
 /* >>> Optimizations <<< *
