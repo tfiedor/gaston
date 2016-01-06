@@ -761,7 +761,7 @@ void BaseAutomaton::_RenameStates() {
     StateToStateMap translMap;
     StateToStateTranslator stateTransl(translMap,
                                        [](const StateType &) { return SymbolicAutomaton::stateCnt++; });
-    this->_base_automaton.reset(new BaseAutomatonType(this->_base_automaton->ReindexStates(stateTransl)));
+    this->_base_automaton = new BaseAutomatonType(this->_base_automaton->ReindexStates(stateTransl));
     this->_stateSpace = SymbolicAutomaton::stateCnt - this->_stateOffset;
 }
 

@@ -98,8 +98,8 @@ public:
 class BinaryOpAutomaton : public SymbolicAutomaton {
 protected:
     // <<< PRIVATE MEMBERS >>>
-    SymbolicAutomaton_ptr _lhs_aut;
-    SymbolicAutomaton_ptr _rhs_aut;
+    SymbolicAutomaton* _lhs_aut;
+    SymbolicAutomaton* _rhs_aut;
     ProductType _productType;
     bool (*_eval_result)(bool, bool, bool);     // Boolean function for evaluation of left and right results
     bool (*_eval_early)(bool, bool);            // Boolean function for evaluating early evaluation
@@ -145,7 +145,7 @@ public:
 class ComplementAutomaton : public SymbolicAutomaton {
 protected:
     // <<< PRIVATE MEMBERS >>>
-    std::shared_ptr<SymbolicAutomaton> _aut;
+    SymbolicAutomaton* _aut;
 
     // <<< PRIVATE FUNCTIONS >>>
     virtual void _InitializeAutomaton();
@@ -182,7 +182,7 @@ public:
 
 protected:
     // <<< PRIVATE MEMBERS >>>
-    std::shared_ptr<SymbolicAutomaton> _aut;
+    SymbolicAutomaton* _aut;
 
     // <<< PRIVATE FUNCTIONS >>>
     virtual void _InitializeAutomaton();
@@ -196,7 +196,7 @@ public:
 
     // <<< PUBLIC API >>>
     virtual Term* Pre(Symbol*, Term*, bool);
-    SymbolicAutomaton* GetBase() { return this->_aut.get();}
+    SymbolicAutomaton* GetBase() { return this->_aut;}
 
     // <<< DUMPING FUNCTIONS >>>
     virtual void DumpAutomaton();
@@ -210,7 +210,7 @@ public:
 class BaseAutomaton : public SymbolicAutomaton {
 protected:
     /// <<< PRIVATE MEMBERS >>>
-    std::shared_ptr<BaseAutomatonType> _base_automaton;
+    BaseAutomatonType* _base_automaton;
     unsigned int _stateSpace;               // Number of states in automaton
     unsigned int _stateOffset;              // Offset of states used for mask
 
