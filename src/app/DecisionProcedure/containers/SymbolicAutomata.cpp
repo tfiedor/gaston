@@ -601,6 +601,9 @@ ResultType BaseAutomaton::_IntersectNonEmptyCore(Symbol_ptr symbol, Term* approx
 }
 
 void BinaryOpAutomaton::DumpAutomaton() {
+    #if (DEBUG_AUTOMATA_ADDRESSES == true)
+        std::cout << "[" << this << "]";
+    #endif
     if(this->type == AutType::INTERSECTION) {
         std::cout << "\033[1;32m";
     } else {
@@ -624,12 +627,18 @@ void BinaryOpAutomaton::DumpAutomaton() {
 }
 
 void ComplementAutomaton::DumpAutomaton() {
+    #if (DEBUG_AUTOMATA_ADDRESSES == true)
+        std::cout << "[" << this << "]";
+    #endif
     std::cout << "\033[1;31m\u2201(\033[0m";
     this->_aut->DumpAutomaton();
     std::cout << "\033[1;31m)\033[0m";
 }
 
 void ProjectionAutomaton::DumpAutomaton() {
+    #if (DEBUG_AUTOMATA_ADDRESSES == true)
+        std::cout << "[" << this << "]";
+    #endif
     std::cout << "\033[1;34m";
     std::cout << "\u2203";
     for(auto it = this->projectedVars->begin(); it != this->projectedVars->end(); ++it) {
@@ -644,6 +653,9 @@ void ProjectionAutomaton::DumpAutomaton() {
 }
 
 void GenericBaseAutomaton::DumpAutomaton() {
+    #if (DEBUG_AUTOMATA_ADDRESSES == true)
+        std::cout << "[" << this << "]";
+    #endif
     std::cout << "Automaton";
     _form->dump();
     #if (DEBUG_BASE_AUTOMATA == true)
@@ -652,6 +664,9 @@ void GenericBaseAutomaton::DumpAutomaton() {
 }
 
 void SubAutomaton::DumpAutomaton() {
+    #if (DEBUG_AUTOMATA_ADDRESSES == true)
+        std::cout << "[" << this << "]";
+    #endif
     this->_form->dump();
     #if (DEBUG_BASE_AUTOMATA == true)
     this->BaseAutDump();
@@ -659,6 +674,9 @@ void SubAutomaton::DumpAutomaton() {
 }
 
 void TrueAutomaton::DumpAutomaton() {
+    #if (DEBUG_AUTOMATA_ADDRESSES == true)
+        std::cout << "[" << this << "]";
+    #endif
     this->_form->dump();
     #if (DEBUG_BASE_AUTOMATA == true)
     this->BaseAutDump();
@@ -666,6 +684,9 @@ void TrueAutomaton::DumpAutomaton() {
 }
 
 void FalseAutomaton::DumpAutomaton() {
+    #if (DEBUG_AUTOMATA_ADDRESSES == true)
+        std::cout << "[" << this << "]";
+    #endif
     this->_form->dump();
     #if (DEBUG_BASE_AUTOMATA == true)
     this->BaseAutDump();
@@ -673,6 +694,9 @@ void FalseAutomaton::DumpAutomaton() {
 }
 
 void InAutomaton::DumpAutomaton() {
+    #if (DEBUG_AUTOMATA_ADDRESSES == true)
+        std::cout << "[" << this << "]";
+    #endif
     this->_form->dump();
     #if (DEBUG_BASE_AUTOMATA == true)
     this->BaseAutDump();
@@ -680,6 +704,9 @@ void InAutomaton::DumpAutomaton() {
 }
 
 void FirstOrderAutomaton::DumpAutomaton() {
+    #if (DEBUG_AUTOMATA_ADDRESSES == true)
+        std::cout << "[" << this << "]";
+    #endif
     this->_form->dump();
     #if (DEBUG_BASE_AUTOMATA == true)
     this->BaseAutDump();
@@ -687,6 +714,9 @@ void FirstOrderAutomaton::DumpAutomaton() {
 }
 
 void EqualFirstAutomaton::DumpAutomaton() {
+    #if (DEBUG_AUTOMATA_ADDRESSES == true)
+        std::cout << "[" << this << "]";
+    #endif
     this->_form->dump();
     #if (DEBUG_BASE_AUTOMATA == true)
     this->BaseAutDump();
@@ -694,6 +724,9 @@ void EqualFirstAutomaton::DumpAutomaton() {
 }
 
 void EqualSecondAutomaton::DumpAutomaton() {
+    #if (DEBUG_AUTOMATA_ADDRESSES == true)
+        std::cout << "[" << this << "]";
+    #endif
     this->_form->dump();
     #if (DEBUG_BASE_AUTOMATA == true)
     this->BaseAutDump();
@@ -701,6 +734,9 @@ void EqualSecondAutomaton::DumpAutomaton() {
 }
 
 void LessAutomaton::DumpAutomaton() {
+    #if (DEBUG_AUTOMATA_ADDRESSES == true)
+        std::cout << "[" << this << "]";
+    #endif
     this->_form->dump();
     #if (DEBUG_BASE_AUTOMATA == true)
     this->BaseAutDump();
@@ -708,6 +744,9 @@ void LessAutomaton::DumpAutomaton() {
 }
 
 void LessEqAutomaton::DumpAutomaton() {
+    #if (DEBUG_AUTOMATA_ADDRESSES == true)
+        std::cout << "[" << this << "]";
+    #endif
     this->_form->dump();
     #if (DEBUG_BASE_AUTOMATA == true)
     this->BaseAutDump();
