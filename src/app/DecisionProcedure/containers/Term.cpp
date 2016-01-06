@@ -410,7 +410,7 @@ bool TermFixpoint::_IsSubsumedCore(Term* t) {
         if(!subsumes) return false;
     }
 
-    #if (DEBUG_COMPARE_WORKLISTS == true && false)
+    #if (DEBUG_COMPARE_WORKLISTS == true)
     for(auto it = this->_worklist.begin(); it != this->_worklist.end(); ++it) {
         bool found = false;
         for(auto tit = tt->_worklist.begin(); tit != tt->_worklist.end(); ++tit) {
@@ -439,6 +439,9 @@ bool TermEmpty::IsSubsumedBy(std::list < Term_ptr > &fixpoint) {
 }
 
 bool TermProduct::IsSubsumedBy(std::list<Term_ptr>& fixpoint) {
+    if(this->IsEmpty()) {
+        return true;
+    }
     // For each item in fixpoint
     // TODO: This should be holikoptimized
     for(auto item : fixpoint) {
@@ -455,6 +458,9 @@ bool TermProduct::IsSubsumedBy(std::list<Term_ptr>& fixpoint) {
 }
 
 bool TermBaseSet::IsSubsumedBy(std::list<Term_ptr>& fixpoint) {
+    if(this->IsEmpty()) {
+        return true;
+    }
     // For each item in fixpoint
     // TODO: Maybe during this shit we could remove some of the things from fixpoint?
     for(auto item : fixpoint) {
@@ -475,6 +481,9 @@ bool TermContinuation::IsSubsumedBy(std::list<Term_ptr>& fixpoint) {
 }
 
 bool TermList::IsSubsumedBy(std::list<Term_ptr>& fixpoint) {
+    if(this->IsEmpty()) {
+        return true;
+    }
     // For each item in fixpoint
     for(auto item : fixpoint) {
         // Nullptr is skipped
@@ -544,7 +553,8 @@ bool TermList::IsEmpty() {
 }
 
 bool TermFixpoint::IsEmpty() {
-    return this->_worklist.empty();
+    // TODO: It should not happen that it is PreSemantics and was not computed at all
+    return this->_fixpoint.empty() && this->_worklist.empty();
 }
 
 /**
