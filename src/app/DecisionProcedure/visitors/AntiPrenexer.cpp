@@ -243,3 +243,88 @@ AST* FullAntiPrenexer::visit(ASTForm_All1 *form) {
 AST* FullAntiPrenexer::visit(ASTForm_All2 *form) {
     return universalAntiPrenex<ASTForm_All2>(form);
 }
+
+
+/*----------------------------------------------------------------------*
+ | Ex X. f1 /\ (f2 \/ f3)     -> Ex X. (f1 /\ f2) \/ (f2 /\ f3)         |
+ |                            -> (Ex X. f1 /\ f2) \/  (Ex X. f2 /\ f3)  |
+ *----------------------------------------------------------------------*/
+template <class QuantifierClass>
+ASTForm* DistributiveAntiPrenexer::distributeDisjunction(QuantifierClass *form) {
+    return form;
+}
+
+template <class ExistClass>
+ASTForm* DistributiveAntiPrenexer::existentialDistributiveAntiPrenex(ASTForm *form) {
+    static_assert(std::is_base_of<ASTForm_q, ExistClass>::value, "ExistClass is not derived from 'ASTForm_q' class");
+
+    // First call the anti-prenexing rule to push the quantifier as deep as possible
+    ASTForm* antiPrenexedForm = existentialAntiPrenex<ExistClass>(form);
+
+    if(antiPrenexedForm->kind == aEx1 || antiPrenexedForm->kind == aEx2) {
+        ExistClass* exForm = reinterpret_cast<ExistClass*>(antiPrenexedForm);
+        switch(exForm->f->kind) {
+            case aOr:
+                assert(false && "Full-antiprenexer failed. ExistClass was not pushed through disjunction.");
+                break;
+            case aAnd:
+                return distributeDisjunction<ExistClass>(exForm);
+            default:
+                return antiPrenexedForm;
+        }
+    } else {
+        // We are done
+        return antiPrenexedForm;
+    }
+}
+
+AST* DistributiveAntiPrenexer::visit(ASTForm_Ex1 *form) {
+    return existentialDistributiveAntiPrenex<ASTForm_Ex1>(form);
+}
+
+AST* DistributiveAntiPrenexer::visit(ASTForm_Ex2 *form) {
+    return existentialDistributiveAntiPrenex<ASTForm_Ex2>(form);
+}
+
+/*----------------------------------------------------------------------*
+ | All X. f1 \/ (f2 /\ f3)    -> All X. (f1 \/ f2) /\ (f2 \/ f3)        |
+ |                            -> (All X. f1 \/ f2) /\ (All X. f2 \/ f3) |
+ *----------------------------------------------------------------------*/
+template <class QuantifierClass>
+ASTForm* DistributiveAntiPrenexer::distributeConjunction(QuantifierClass *form) {
+    return form;
+}
+
+template <class ForallClass>
+ASTForm* DistributiveAntiPrenexer::universalDistributiveAntiPrenex(ASTForm *form) {
+    static_assert(std::is_base_of<ASTForm_q, ForallClass>::value, "ForallClass is not derived from 'ASTForm_q' class");
+
+    // First call the anti-prenexing rule to push the quantifier as deep as possible
+    ASTForm* antiPrenexedForm = universalAntiPrenex<ForallClass>(form);
+
+    if(antiPrenexedForm->kind == aAll1 || antiPrenexedForm->kind == aAll2) {
+        // Not everything was pushed, we can try to call the distribution
+        ForallClass* allForm = reinterpret_cast<ForallClass*>(antiPrenexedForm);
+        switch(allForm->f->kind) {
+            case aOr:
+                return distributeConjunction<ForallClass>(allForm);
+            case aAnd:
+                assert(false && "Full-antiprenexer failed. ForallClass was not pushed through conjunction.");
+                break;
+            default:
+                return antiPrenexedForm;
+        }
+    } else {
+        // We are done
+        return antiPrenexedForm;
+    }
+}
+
+AST* DistributiveAntiPrenexer::visit(ASTForm_All1 *form) {
+    return universalDistributiveAntiPrenex<ASTForm_All1>(form);
+}
+
+AST* DistributiveAntiPrenexer::visit(ASTForm_All2 *form) {
+    return universalDistributiveAntiPrenex<ASTForm_All2>(form);
+}
+

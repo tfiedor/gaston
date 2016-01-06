@@ -64,4 +64,33 @@ public:
     virtual AST* visit(ASTForm_All2* form);
 };
 
+/**
+ * Full Anti-Prenexer that tries to unfold some and/or sequences in order
+ * to maximize the anti-prenexing
+ *
+ * *----------------------------------------------------------------------*
+ * | Ex X. f1 /\ (f2 \/ f3)     -> Ex X. (f1 /\ f2) \/ (f2 /\ f3)         |
+ * |                            -> (Ex X. f1 /\ f2) \/  (Ex X. f2 /\ f3)  |
+ * *----------------------------------------------------------------------*
+ * | All X. f1 \/ (f2 /\ f3)    -> All X. (f1 \/ f2) /\ (f2 \/ f3)        |
+ * |                            -> (All X. f1 \/ f2) /\ (All X. f2 \/ f3) |
+ * *----------------------------------------------------------------------*
+ */
+class DistributiveAntiPrenexer : public FullAntiPrenexer {
+    template <class ExistClass>
+    ASTForm* existentialDistributiveAntiPrenex(ASTForm *form);
+    template <class QuantifierClass>
+    ASTForm* distributeDisjunction(QuantifierClass *form);
+    template <class ForallClass>
+    ASTForm* universalDistributiveAntiPrenex(ASTForm *form);
+    template <class QuantifierClass>
+    ASTForm* distributeConjunction(QuantifierClass *form);
+
+    // Works in preorder
+    virtual AST* visit(ASTForm_Ex1* form);
+    virtual AST* visit(ASTForm_Ex2* form);
+    virtual AST* visit(ASTForm_All1* form);
+    virtual AST* visit(ASTForm_All2* form);
+};
+
 #endif //WSKS_ANTIPRENEXER_H

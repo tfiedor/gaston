@@ -221,7 +221,8 @@ enum ComparisonType {E_BY_SAME_PTR, E_BY_DIFFERENT_TYPE, E_BY_STRUCTURE};
 
 /* >>> Anti-Prenexing Options <<< *
  **********************************/
-#define ANTIPRENEXING_FULL				true
+#define ANTIPRENEXING_FULL				false
+#define ANTIPRENEXING_DISTRIBUTIVE		true
 
 /*
  * >>> Unique Terms options *
@@ -253,10 +254,16 @@ enum ComparisonType {E_BY_SAME_PTR, E_BY_DIFFERENT_TYPE, E_BY_STRUCTURE};
  * DEFINITION OF FILTER PHASES *
  *******************************/
 
+#if (ANTIPRENEXING_DISTRIBUTIVE == true)
+#define ANTIPRENEXER DistributiveAntiPrenexer
+#else
+#define ANTIPRENEXER FullAntiPrenexer
+#endif
+
 #define FILTER_LIST(code) \
 	code(SyntaxRestricter)				\
 	code(BinaryReorderer)				\
-	code(FullAntiPrenexer)				\
+	code(ANTIPRENEXER)					\
 	code(UniversalQuantifierRemover)	\
 	code(NegationUnfolder)				\
 	code(SecondOrderRestricter)
