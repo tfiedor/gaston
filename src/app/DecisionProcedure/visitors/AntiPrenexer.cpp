@@ -12,6 +12,7 @@
  *****************************************************************************/
 
 #include "AntiPrenexer.h"
+#include "BooleanUnfolder.h"
 #include "../../Frontend/ast.h"
 
 /**
@@ -305,6 +306,10 @@ ASTForm* DistributiveAntiPrenexer::distributeDisjunction(QuantifierClass *form) 
         form->f = newRoot;
     }
 
+    // Unfold the True/False
+    BooleanUnfolder bu_visitor;
+    form = reinterpret_cast<QuantifierClass*>(form->accept(bu_visitor));
+
     // Restart the computation
     return existentialDistributiveAntiPrenex<QuantifierClass>(form);
 }
@@ -399,6 +404,10 @@ ASTForm* DistributiveAntiPrenexer::distributeConjunction(QuantifierClass *form) 
         ASTForm_And* newRoot = new ASTForm_And(leftConjunction, rightConjunction, Pos());
         form->f = newRoot;
     }
+
+    // Unfold the True/False
+    BooleanUnfolder bu_visitor;
+    form = reinterpret_cast<QuantifierClass*>(form->accept(bu_visitor));
 
     return universalDistributiveAntiPrenex<QuantifierClass>(form);
 }
