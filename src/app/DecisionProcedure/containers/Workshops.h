@@ -53,10 +53,6 @@ class TermList;
 class TermContinuation;
 class SymbolicAutomaton;
 
-// TODO: 1) Dump it out
-// TODO: 2) Cache it out
-// TODO: 3) More shops
-
 namespace Workshops {
     // TODO: Maybe I forgot to take measure of the complement?
     using SymbolList        = Gaston::SymbolList;
@@ -77,9 +73,9 @@ namespace Workshops {
     using FixpointHash      = boost::hash<FixpointKey>;
     using FixpointCompare   = PairCompare<FixpointKey>;
     using Term_ptr          = std::shared_ptr<Term>;
-    using FixpointType  = std::list<Term*>;
-    using WorklistItemType = std::pair<Term*, Symbol*>;
-    using WorklistType = std::list<WorklistItemType>;
+    using FixpointType      = std::list<Term*>;
+    using WorklistItemType  = std::pair<Term*, Symbol*>;
+    using WorklistType      = std::list<WorklistItemType>;
 
     void dumpBaseKey(BaseKey const&);
     void dumpProductKey(ProductKey const&);

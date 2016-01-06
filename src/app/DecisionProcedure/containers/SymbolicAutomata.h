@@ -30,6 +30,7 @@
 #include "../containers/VarToTrackMap.hh"
 #include <vector>
 #include <vata/util/binary_relation.hh>
+#include <string>
 
 // <<< FORWARD CLASS DECLARATIONS >>>
 class Term;
@@ -175,6 +176,8 @@ public:
     #if (MEASURE_PROJECTION == true)
     size_t fixpointNext = 0;
     size_t fixpointPreNext = 0;
+    std::string fixpointRes = "";
+    std::string fixpointPreRes = "";
     #endif
 
 protected:

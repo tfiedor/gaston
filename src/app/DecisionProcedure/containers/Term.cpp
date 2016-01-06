@@ -395,7 +395,6 @@ bool TermFixpoint::_IsSubsumedCore(Term* t) {
 
     // Reinterpret
     TermFixpoint* tt = reinterpret_cast<TermFixpoint*>(t);
-
     // Do the piece-wise comparison
     for(auto item : this->_fixpoint) {
         // Skip the nullptr
@@ -411,6 +410,21 @@ bool TermFixpoint::_IsSubsumedCore(Term* t) {
         if(!subsumes) return false;
     }
 
+    #if (DEBUG_COMPARE_WORKLISTS == true && false)
+    for(auto it = this->_worklist.begin(); it != this->_worklist.end(); ++it) {
+        bool found = false;
+        for(auto tit = tt->_worklist.begin(); tit != tt->_worklist.end(); ++tit) {
+            if(*(it->first) == *(tit->first) && (it->second == tit->second)) {
+                found = true;
+                break;
+            }
+        }
+        if(!found) {
+            return false;
+        }
+    }
+    #endif
+
     return true;
 }
 
@@ -425,12 +439,6 @@ bool TermEmpty::IsSubsumedBy(std::list < Term_ptr > &fixpoint) {
 }
 
 bool TermProduct::IsSubsumedBy(std::list<Term_ptr>& fixpoint) {
-    // TODO: Add caching
-    // Empty things is always subsumed
-    if(this->IsEmpty()) {
-        return true;
-    }
-
     // For each item in fixpoint
     // TODO: This should be holikoptimized
     for(auto item : fixpoint) {
@@ -447,11 +455,6 @@ bool TermProduct::IsSubsumedBy(std::list<Term_ptr>& fixpoint) {
 }
 
 bool TermBaseSet::IsSubsumedBy(std::list<Term_ptr>& fixpoint) {
-    // TODO: Add caching
-    if(this->IsEmpty()) {
-        return true;
-    }
-
     // For each item in fixpoint
     // TODO: Maybe during this shit we could remove some of the things from fixpoint?
     for(auto item : fixpoint) {
@@ -472,11 +475,6 @@ bool TermContinuation::IsSubsumedBy(std::list<Term_ptr>& fixpoint) {
 }
 
 bool TermList::IsSubsumedBy(std::list<Term_ptr>& fixpoint) {
-    // TODO: Add caching
-    if(this->IsEmpty()) {
-        return true;
-    }
-
     // For each item in fixpoint
     for(auto item : fixpoint) {
         // Nullptr is skipped
@@ -716,6 +714,11 @@ void TermFixpoint::_dumpCore() {
         std::cout << "]";
     #endif
     std::cout << "\033[1;34m}\033[0m";
+    if(this->_bValue) {
+        std::cout << "\033[1;34m\u22A8\033[0m";
+    } else {
+        std::cout << "\033[1;34m\u22AD\033[0m";
+    }
 }
 // <<< ADDITIONAL TERMBASESET FUNCTIONS >>>
 
@@ -1042,6 +1045,7 @@ bool TermFixpoint::_eqCore(const Term &t) {
 
     const TermFixpoint &tFix = static_cast<const TermFixpoint&>(t);
     if(this->_fixpoint.size() != tFix._fixpoint.size()) {
+        // TODO: Can this happen: that we have something twice in fixpoint?
         return false;
     } else {
         for(auto it = this->_fixpoint.begin(); it != this->_fixpoint.end(); ++it) {
@@ -1060,6 +1064,21 @@ bool TermFixpoint::_eqCore(const Term &t) {
                 return false;
             }
         }
+        #if (DEBUG_COMPARE_WORKLISTS == true)
+            for(auto it = this->_worklist.begin(); it != this->_worklist.end(); ++it) {
+                bool found = false;
+                for(auto tit = tFix._worklist.begin(); tit != tFix._worklist.end(); ++tit) {
+                    if(*(it->first) == *(tit->first) && (it->second == tit->second)) {
+                        found = true;
+                        break;
+                    }
+                }
+                if(!found) {
+                    return false;
+                }
+            }
+        #endif
         return true;
     }
+
 }

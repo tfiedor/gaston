@@ -510,10 +510,18 @@ ResultType ProjectionAutomaton::_IntersectNonEmptyCore(Symbol_ptr symbol, Term* 
 
         #if (DEBUG_COMPUTE_FULL_FIXPOINT == true)
         // Computes the whole fixpoint, withouth early evaluation
-        while((fixpointTerm = it.GetNext()) != nullptr) {}
+        while((fixpointTerm = it.GetNext()) != nullptr) {
+            #if (MEASURE_PROJECTION == true)
+            ++this->fixpointNext;
+            #endif
+        }
         #else
         // Early evaluation of fixpoint
         if(result.second == !underComplement) {
+            #if (MEASURE_PROJECTION == true)
+            this->DumpAutomaton();
+            std::cout << (fixpoint->GetResult() ? "-> early True" : "-> early False") << "\n";
+            #endif
             return std::make_pair(std::shared_ptr<Term>(fixpoint), result.second);
         }
 
@@ -526,6 +534,10 @@ ResultType ProjectionAutomaton::_IntersectNonEmptyCore(Symbol_ptr symbol, Term* 
         }
         #endif
 
+        #if (MEASURE_PROJECTION == true)
+        this->DumpAutomaton();
+        std::cout << (fixpoint->GetResult() ? "-> fix True" : "-> fix False") << "\n";
+        #endif
         // Return (fixpoint, bool)
         return std::make_pair(std::shared_ptr<Term>(fixpoint), fixpoint->GetResult());
     } else {
@@ -540,7 +552,11 @@ ResultType ProjectionAutomaton::_IntersectNonEmptyCore(Symbol_ptr symbol, Term* 
 
         // Compute the Pre of the fixpoint
         #if (DEBUG_COMPUTE_FULL_FIXPOINT == true)
-            while((fixpointTerm = it.GetNext()) != nullptr) {};
+            while((fixpointTerm = it.GetNext()) != nullptr) {
+                #if (MEASURE_PROJECTION == true)
+                ++this->fixpointPreNext;
+                #endif
+            };
         #else
             while( ((fixpointTerm = it.GetNext()) != nullptr) && (underComplement == fixpoint->GetResult())) {
                 #if (MEASURE_PROJECTION == true)
@@ -548,7 +564,12 @@ ResultType ProjectionAutomaton::_IntersectNonEmptyCore(Symbol_ptr symbol, Term* 
                 #endif
             }
         #endif
-        
+
+        #if (MEASURE_PROJECTION == true)
+        this->DumpAutomaton();
+        std::cout << "(" << (*symbol) << ") ";
+        std::cout << (fixpoint->GetResult() ? "-> pre True" : "-> pre False") << "\n";
+        #endif
         // TODO: Fixpoint cache should probably be here!
         return std::make_pair(std::shared_ptr<Term>(fixpoint), fixpoint->GetResult());
     }
@@ -773,6 +794,10 @@ void print_stat(std::string statName, unsigned int stat) {
     }
 }
 
+void print_stat(std::string statName, std::string stat) {
+    std::cout << "  \u2218 " << statName << " -> " << stat << "\n";
+}
+
 void BinaryOpAutomaton::DumpStats() {
     this->_form->dump();
     std::cout << "\n";
@@ -800,7 +825,9 @@ void ProjectionAutomaton::DumpStats() {
     #endif
     #if (MEASURE_PROJECTION == true)
     print_stat("Fixpoint Nexts", this->fixpointNext);
+    print_stat("Fixpoint Results", this->fixpointRes);
     print_stat("FixpointPre Nexts", this->fixpointPreNext);
+    print_stat("FixpointPre Results", this->fixpointPreRes);
     #endif
     print_stat("True Hits", this->_trueCounter);
     print_stat("False Hits", this->_falseCounter);

@@ -200,6 +200,7 @@ enum ComparisonType {E_BY_SAME_PTR, E_BY_DIFFERENT_TYPE, E_BY_STRUCTURE};
 #define DEBUG_CONTINUATIONS 			false
 #define DEBUG_NO_WORKSHOPS				false
 #define DEBUG_COMPUTE_FULL_FIXPOINT 	false
+#define DEBUG_COMPARE_WORKLISTS			true
 
 /* >>> Dumping Options <<< *
  ***************************/
@@ -209,14 +210,14 @@ enum ComparisonType {E_BY_SAME_PTR, E_BY_DIFFERENT_TYPE, E_BY_STRUCTURE};
 /* >>> Measuring Options <<< *
  *****************************/
 #define MEASURE_STATE_SPACE 			true	// < Measures how many instances of terms were created
-#define MEASURE_CACHE_HITS 				false	// < Prints the statistics for each cache on each node
+#define MEASURE_CACHE_HITS 				true	// < Prints the statistics for each cache on each node
 #define MEASURE_CONTINUATION_CREATION	true
 #define MEASURE_CONTINUATION_EVALUATION	true
 #define MEASURE_RESULT_HITS				true
 #define MEASURE_PROJECTION				false	// < Measures several things about projection (how many steps, how big, etc.)
 #define MEASURE_ALL						true	// < Measure everything, not really useful
-#define MEASURE_COMPARISONS				false	// < Measure how many ti
-#define MEASURE_SUBSUMEDBY_HITS			true
+#define MEASURE_COMPARISONS				false	// < Measure how many times we sucessfully compared and how
+#define MEASURE_SUBSUMEDBY_HITS			true	// < Measure how many times subsumedBy cache worked
 
 /* >>> Anti-Prenexing Options <<< *
  **********************************/
