@@ -553,7 +553,7 @@ bool TermList::IsEmpty() {
 }
 
 bool TermFixpoint::IsEmpty() {
-    // TODO: It should not happen that it is PreSemantics and was not computed at all
+    // TODO: I hope It should not happen that it is PreSemantics and was not computed at all
     return this->_fixpoint.empty() && this->_worklist.empty();
 }
 

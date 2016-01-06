@@ -249,9 +249,64 @@ AST* FullAntiPrenexer::visit(ASTForm_All2 *form) {
  | Ex X. f1 /\ (f2 \/ f3)     -> Ex X. (f1 /\ f2) \/ (f2 /\ f3)         |
  |                            -> (Ex X. f1 /\ f2) \/  (Ex X. f2 /\ f3)  |
  *----------------------------------------------------------------------*/
+ASTForm* DistributiveAntiPrenexer::findConjunctiveDistributivePoint(ASTForm *form) {
+    // First look to the left
+    ASTForm* point;
+    if(form->kind == aAnd) {
+        ASTForm_And *andForm = reinterpret_cast<ASTForm_And *>(form);
+        if(andForm->f1->kind == aOr) {
+            return form;
+        } else if(andForm->f1->kind == aAnd) {
+            return this->findConjunctiveDistributivePoint(andForm->f1);
+        } else if(andForm->f2->kind == aOr) {
+            return form;
+        } else if(andForm->f2->kind == aAnd) {
+            return this->findConjunctiveDistributivePoint(andForm->f2);
+        } else {
+            return nullptr;
+        }
+    } else {
+        return nullptr;
+    }
+}
+
 template <class QuantifierClass>
 ASTForm* DistributiveAntiPrenexer::distributeDisjunction(QuantifierClass *form) {
-    return form;
+    // First try to find the conjunctive distributive point---i.e. the point
+    // where Conjunction is followed by disjunction and thus can be transformed
+    // by distributive law
+    ASTForm* distPoint = this->findConjunctiveDistributivePoint(form->f);
+    if(distPoint == nullptr) {
+        // Conjunctive Distributive point was not found and so it should not exists,
+        // we can end
+        return form;
+    } else {
+        // Do some things
+        ASTForm_And* andForm = reinterpret_cast<ASTForm_And*>(distPoint);
+        ASTForm_Or* orForm = nullptr;
+        // Switch the OR node to true (neutral to conjunction)
+        // f1 /\ (f2 \/ f3) -> f1 /\ true
+        if(andForm->f1->kind == aOr) {
+            orForm = reinterpret_cast<ASTForm_Or*>(andForm->f1);
+            andForm->f1 = new ASTForm_True(Pos());
+        } else {
+            assert(andForm->f2->kind == aOr);
+            orForm = reinterpret_cast<ASTForm_Or*>(andForm->f2);
+            andForm->f2 = new ASTForm_True(Pos());
+        }
+        assert(orForm != nullptr);
+
+        ASTForm* f1 = orForm->f1;
+        ASTForm* f2 = orForm->f2;
+
+        ASTForm_And* leftConjunction = new ASTForm_And(f1, andForm, Pos());
+        ASTForm_And* rightConjunction = new ASTForm_And(andForm->clone(), f2, Pos());
+        ASTForm_Or* newRoot = new ASTForm_Or(leftConjunction, rightConjunction, Pos());
+        form->f = newRoot;
+    }
+
+    // Restart the computation
+    return existentialDistributiveAntiPrenex<QuantifierClass>(form);
 }
 
 template <class ExistClass>
@@ -290,9 +345,62 @@ AST* DistributiveAntiPrenexer::visit(ASTForm_Ex2 *form) {
  | All X. f1 \/ (f2 /\ f3)    -> All X. (f1 \/ f2) /\ (f2 \/ f3)        |
  |                            -> (All X. f1 \/ f2) /\ (All X. f2 \/ f3) |
  *----------------------------------------------------------------------*/
+ASTForm* DistributiveAntiPrenexer::findDisjunctiveDistributivePoint(ASTForm *form) {
+    ASTForm* point;
+    if(form->kind == aOr) {
+        ASTForm_Or* orForm = reinterpret_cast<ASTForm_Or*>(form);
+        if(orForm->f1->kind == aAnd) {
+            return form;
+        } else if(orForm->f1->kind == aOr) {
+            return this->findDisjunctiveDistributivePoint(orForm->f1);
+        } else if(orForm->f2->kind == aAnd) {
+            return form;
+        } else if(orForm->f2->kind == aOr) {
+            return this->findDisjunctiveDistributivePoint(orForm->f2);
+        } else {
+            return nullptr;
+        }
+    } else {
+        return nullptr;
+    }
+}
+
 template <class QuantifierClass>
 ASTForm* DistributiveAntiPrenexer::distributeConjunction(QuantifierClass *form) {
-    return form;
+    // First try to find the disjunctive distributive point---i.e. the point
+    // where Disjunction is followed by conjunction and thus can be distributed
+    // by distributive law
+    ASTForm* distPoint = this->findDisjunctiveDistributivePoint(form->f);
+    if(distPoint == nullptr) {
+        // Disjunctive Distributive point was not found and so it should not exists,
+        // we can end
+        return form;
+    } else {
+        // Do some things
+        ASTForm_Or* orForm = reinterpret_cast<ASTForm_Or*>(distPoint);
+        ASTForm_And* andForm = nullptr;
+        // Switch the OR node to true (neutral to conjunction)
+        // f1 \/ (f2 /\ f3) -> f1 \/ false
+        if(orForm->f1->kind == aAnd) {
+            andForm = reinterpret_cast<ASTForm_And*>(orForm->f1);
+            orForm->f1 = new ASTForm_False(Pos());
+        } else {
+            assert(orForm->f2->kind == aAnd);
+            andForm = reinterpret_cast<ASTForm_And*>(orForm->f2);
+            orForm->f2 = new ASTForm_False(Pos());
+        }
+        assert(andForm != nullptr);
+
+        ASTForm* f1 = andForm->f1;
+        ASTForm* f2 = andForm->f2;
+
+        ASTForm_Or* leftConjunction = new ASTForm_Or(f1, orForm, Pos());
+        ASTForm_Or* rightConjunction = new ASTForm_Or(orForm->clone(), f2, Pos());
+        ASTForm_And* newRoot = new ASTForm_And(leftConjunction, rightConjunction, Pos());
+        form->f = newRoot;
+    }
+
+    return universalDistributiveAntiPrenex<QuantifierClass>(form);
 }
 
 template <class ForallClass>

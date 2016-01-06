@@ -77,6 +77,9 @@ public:
  * *----------------------------------------------------------------------*
  */
 class DistributiveAntiPrenexer : public FullAntiPrenexer {
+    ASTForm* findDisjunctiveDistributivePoint(ASTForm *form);
+    ASTForm* findConjunctiveDistributivePoint(ASTForm *form);
+
     template <class ExistClass>
     ASTForm* existentialDistributiveAntiPrenex(ASTForm *form);
     template <class QuantifierClass>
