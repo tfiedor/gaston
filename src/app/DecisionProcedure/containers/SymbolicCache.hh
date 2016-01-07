@@ -49,8 +49,12 @@ struct PairCompare : public std::binary_function<Key, Key, bool>
 			bool result = lhsresult && rhsresult;
 				std::cout << " = (" << lhsresult << " + " << rhsresult << ") =  " << result << "\n";
 			return  result;
-		#else
-			return (*lhs.second == *rhs.second) && (*lhs.first == *rhs.first);
+        #else
+        	if(lhs.second != nullptr && rhs.second != nullptr) {
+				return (*lhs.second == *rhs.second) && (*lhs.first == *rhs.first);
+			} else {
+				return (*lhs.first == *rhs.first);
+			}
 		#endif
 	}
 };

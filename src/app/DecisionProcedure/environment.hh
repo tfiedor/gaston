@@ -186,7 +186,7 @@ enum ComparisonType {E_BY_SAME_PTR, E_BY_DIFFERENT_TYPE, E_BY_STRUCTURE};
 
 /* >>> Debugging Options <<< *
  *****************************/
-#define DEBUG_AUTOMATA_ADDRESSES		true
+#define DEBUG_AUTOMATA_ADDRESSES		false
 #define DEBUG_BASE_AUTOMATA 			false
 #define DEBUG_FIXPOINT 					false
 #define DEBUG_FIXPOINT_SYMBOLS			false
@@ -268,6 +268,7 @@ enum ComparisonType {E_BY_SAME_PTR, E_BY_DIFFERENT_TYPE, E_BY_STRUCTURE};
 	code(BooleanUnfolder)				\
 	code(UniversalQuantifierRemover)	\
 	code(NegationUnfolder)				\
+	code(FullAntiPrenexer)				\
 	code(SecondOrderRestricter)
 
 #endif

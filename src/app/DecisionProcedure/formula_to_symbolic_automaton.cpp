@@ -9,6 +9,16 @@
 #include "../DecisionProcedure/visitors/NegationUnfolder.h"
 #include <memory>
 
+SymbolicAutomaton* ASTForm::toSymbolicAutomaton(bool doComplement) {
+    // If the sfa was already initialized (it is thus shared somehow,
+    // we return the pointer, otherwise we first create the symbolic
+    // automaton and return the thing.
+    if(this->sfa == nullptr) {
+        this->sfa = this->_toSymbolicAutomatonCore(doComplement);
+    }
+    return this->sfa;
+}
+
 template<class TemplatedAutomaton>
 SymbolicAutomaton* baseToSymbolicAutomaton(ASTForm* form, bool doComplement) {
     Automaton aut;
@@ -28,39 +38,39 @@ SymbolicAutomaton* baseToSymbolicAutomaton(ASTForm* form, bool doComplement) {
     return new TemplatedAutomaton(new Automaton(aut), form);
 }
 
-SymbolicAutomaton* ASTForm_True::toSymbolicAutomaton(bool doComplement) {
+SymbolicAutomaton* ASTForm_True::_toSymbolicAutomatonCore(bool doComplement) {
     return baseToSymbolicAutomaton<TrueAutomaton>(this, doComplement);
 }
 
-SymbolicAutomaton* ASTForm_False::toSymbolicAutomaton(bool doComplement) {
+SymbolicAutomaton* ASTForm_False::_toSymbolicAutomatonCore(bool doComplement) {
     return baseToSymbolicAutomaton<FalseAutomaton>(this, doComplement);
 }
 
-SymbolicAutomaton* ASTForm_In::toSymbolicAutomaton(bool doComplement) {
+SymbolicAutomaton* ASTForm_In::_toSymbolicAutomatonCore(bool doComplement) {
     return baseToSymbolicAutomaton<InAutomaton>(this, doComplement);
 }
 
-SymbolicAutomaton* ASTForm_FirstOrder::toSymbolicAutomaton(bool doComplement) {
+SymbolicAutomaton* ASTForm_FirstOrder::_toSymbolicAutomatonCore(bool doComplement) {
     return baseToSymbolicAutomaton<FirstOrderAutomaton>(this, doComplement);
 }
 
-SymbolicAutomaton* ASTForm_Equal1::toSymbolicAutomaton(bool doComplement) {
+SymbolicAutomaton* ASTForm_Equal1::_toSymbolicAutomatonCore(bool doComplement) {
     return baseToSymbolicAutomaton<EqualFirstAutomaton>(this, doComplement);
 }
 
-SymbolicAutomaton* ASTForm_Equal2::toSymbolicAutomaton(bool doComplement) {
+SymbolicAutomaton* ASTForm_Equal2::_toSymbolicAutomatonCore(bool doComplement) {
     return baseToSymbolicAutomaton<EqualSecondAutomaton>(this, doComplement);
 }
 
-SymbolicAutomaton* ASTForm_Less::toSymbolicAutomaton(bool doComplement) {
+SymbolicAutomaton* ASTForm_Less::_toSymbolicAutomatonCore(bool doComplement) {
     return baseToSymbolicAutomaton<LessAutomaton>(this, doComplement);
 }
 
-SymbolicAutomaton* ASTForm_LessEq::toSymbolicAutomaton(bool doComplement) {
+SymbolicAutomaton* ASTForm_LessEq::_toSymbolicAutomatonCore(bool doComplement) {
     return baseToSymbolicAutomaton<LessEqAutomaton>(this, doComplement);
 }
 
-SymbolicAutomaton* ASTForm_Sub::toSymbolicAutomaton(bool doComplement) {
+SymbolicAutomaton* ASTForm_Sub::_toSymbolicAutomatonCore(bool doComplement) {
     return baseToSymbolicAutomaton<SubAutomaton>(this, doComplement);
 }
 
@@ -69,7 +79,7 @@ SymbolicAutomaton* ASTForm_Sub::toSymbolicAutomaton(bool doComplement) {
  *
  * @param doComplement: true if we are making complementon
  */
-SymbolicAutomaton* ASTForm_And::toSymbolicAutomaton(bool doComplement) {
+SymbolicAutomaton* ASTForm_And::_toSymbolicAutomatonCore(bool doComplement) {
     SymbolicAutomaton* lhs_aut;
 #if (OPT_CREATE_QF_AUTOMATON == true)
     // TODO: WE ARE MISSING COMPLEMENTATION
@@ -100,7 +110,7 @@ SymbolicAutomaton* ASTForm_And::toSymbolicAutomaton(bool doComplement) {
     return new IntersectionAutomaton(lhs_aut, rhs_aut, this);
 }
 
-SymbolicAutomaton* ASTForm_Or::toSymbolicAutomaton(bool doComplement) {
+SymbolicAutomaton* ASTForm_Or::_toSymbolicAutomatonCore(bool doComplement) {
     SymbolicAutomaton* lhs_aut;
 #if (OPT_CREATE_QF_AUTOMATON == true)
     // TODO: WE ARE MISSING COMPLEMENTATION
@@ -137,7 +147,7 @@ bool is_base_automaton(ASTForm* f) {
            f->kind != aEx2;
 }
 
-SymbolicAutomaton* ASTForm_Not::toSymbolicAutomaton(bool doComplement) {
+SymbolicAutomaton* ASTForm_Not::_toSymbolicAutomatonCore(bool doComplement) {
     #if (OPT_CREATE_QF_AUTOMATON == true)
         // TODO: WE ARE MISSING COMPLEMENTATION
         IdentList free, bound;
@@ -158,7 +168,7 @@ SymbolicAutomaton* ASTForm_Not::toSymbolicAutomaton(bool doComplement) {
     return new ComplementAutomaton(aut, this);
 }
 
-SymbolicAutomaton* ASTForm_Ex2::toSymbolicAutomaton(bool doComplement) {
+SymbolicAutomaton* ASTForm_Ex2::_toSymbolicAutomatonCore(bool doComplement) {
     #if (OPT_CREATE_QF_AUTOMATON == true)
         // TODO: WE ARE MISSING COMPLEMENTATION
         IdentList free, bound;

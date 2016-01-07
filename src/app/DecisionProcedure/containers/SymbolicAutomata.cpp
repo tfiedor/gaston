@@ -155,12 +155,12 @@ ResultType SymbolicAutomaton::IntersectNonEmpty(Symbol_ptr symbol, Term* stateAp
     // Look up in cache, if in cache, return the result
     bool inCache = true;
     //             ^--- note that this will ensure that empty symbol will not be stored in cache
-    if(symbol != nullptr) {
+    //if(symbol != nullptr) {
         auto key = std::make_pair(stateApproximation, symbol);
         if (inCache = this->_resCache.retrieveFromCache(key, result)) {
             return result;
         }
-    }
+    //}
     #endif
 
     // If we have continuation, we have to unwind it
@@ -187,7 +187,6 @@ ResultType SymbolicAutomaton::IntersectNonEmpty(Symbol_ptr symbol, Term* stateAp
     // Cache Results
     #if (OPT_CACHE_RESULTS == true)
     if(!inCache) {
-        assert(symbol != nullptr);
         auto key = std::make_pair(stateApproximation, symbol);
         this->_resCache.StoreIn(key, result);
     }

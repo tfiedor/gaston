@@ -71,6 +71,7 @@ public:
     }
     friend size_t Gaston::hash_value(ZeroSymbol* s){
         size_t seed = 0;
+        if(s == nullptr) return seed;
         boost::hash_combine(seed, boost::hash_value(s->_trackMask.count()));
         boost::hash_combine(seed, boost::hash_value(s->_trackMask.find_first()));
         return seed;
