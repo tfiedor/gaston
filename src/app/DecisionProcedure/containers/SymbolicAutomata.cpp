@@ -397,8 +397,8 @@ Term* BaseAutomaton::Pre(Symbol_ptr symbol, Term* finalApproximation, bool under
         MaskerFunctor masker;
         const BaseAut_MTBDD &temp = masker(*preState, *(symbol->GetMTBDD()));
 
-        // Collect the states and set the flag that we already got some states
         BaseCollectorFunctor collector(states, underComplement);
+        // Collect the states and set the flag that we already got some states
         collector(temp);
         collector._isFirst = false;
     }
@@ -535,7 +535,11 @@ ResultType ProjectionAutomaton::_IntersectNonEmptyCore(Symbol_ptr symbol, Term* 
 
         #if (MEASURE_PROJECTION == true)
         this->DumpAutomaton();
-        std::cout << (fixpoint->GetResult() ? "-> fix True" : "-> fix False") << "\n";
+        if(fixpointTerm == nullptr) {
+            std::cout << (fixpoint->GetResult() ? "-> fix True" : "-> fix False") << "\n";
+        } else {
+            std::cout << (fixpoint->GetResult() ? "-> early True" : "-> early False") << "\n";
+        }
         #endif
         // Return (fixpoint, bool)
         return std::make_pair(std::shared_ptr<Term>(fixpoint), fixpoint->GetResult());

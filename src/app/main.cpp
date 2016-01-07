@@ -56,6 +56,7 @@
 #include "DecisionProcedure/visitors/NegationUnfolder.h"
 #include "DecisionProcedure/visitors/Reorderer.h"
 #include "DecisionProcedure/visitors/BinaryReorderer.h"
+#include "DecisionProcedure/visitors/QuantificationMerger.h"
 
 // < Typedefs and usings >
 using std::cout;

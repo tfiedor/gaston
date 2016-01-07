@@ -618,6 +618,30 @@ src/app/DecisionProcedure/visitors/PrenexNormalFormTransformer.cpp.s:
 	$(MAKE) -f CMakeFiles/gaston.dir/build.make CMakeFiles/gaston.dir/src/app/DecisionProcedure/visitors/PrenexNormalFormTransformer.cpp.s
 .PHONY : src/app/DecisionProcedure/visitors/PrenexNormalFormTransformer.cpp.s
 
+src/app/DecisionProcedure/visitors/QuantificationMerger.o: src/app/DecisionProcedure/visitors/QuantificationMerger.cpp.o
+.PHONY : src/app/DecisionProcedure/visitors/QuantificationMerger.o
+
+# target to build an object file
+src/app/DecisionProcedure/visitors/QuantificationMerger.cpp.o:
+	$(MAKE) -f CMakeFiles/gaston.dir/build.make CMakeFiles/gaston.dir/src/app/DecisionProcedure/visitors/QuantificationMerger.cpp.o
+.PHONY : src/app/DecisionProcedure/visitors/QuantificationMerger.cpp.o
+
+src/app/DecisionProcedure/visitors/QuantificationMerger.i: src/app/DecisionProcedure/visitors/QuantificationMerger.cpp.i
+.PHONY : src/app/DecisionProcedure/visitors/QuantificationMerger.i
+
+# target to preprocess a source file
+src/app/DecisionProcedure/visitors/QuantificationMerger.cpp.i:
+	$(MAKE) -f CMakeFiles/gaston.dir/build.make CMakeFiles/gaston.dir/src/app/DecisionProcedure/visitors/QuantificationMerger.cpp.i
+.PHONY : src/app/DecisionProcedure/visitors/QuantificationMerger.cpp.i
+
+src/app/DecisionProcedure/visitors/QuantificationMerger.s: src/app/DecisionProcedure/visitors/QuantificationMerger.cpp.s
+.PHONY : src/app/DecisionProcedure/visitors/QuantificationMerger.s
+
+# target to generate assembly for a file
+src/app/DecisionProcedure/visitors/QuantificationMerger.cpp.s:
+	$(MAKE) -f CMakeFiles/gaston.dir/build.make CMakeFiles/gaston.dir/src/app/DecisionProcedure/visitors/QuantificationMerger.cpp.s
+.PHONY : src/app/DecisionProcedure/visitors/QuantificationMerger.cpp.s
+
 src/app/DecisionProcedure/visitors/Reorderer.o: src/app/DecisionProcedure/visitors/Reorderer.cpp.o
 .PHONY : src/app/DecisionProcedure/visitors/Reorderer.o
 
@@ -1386,6 +1410,9 @@ help:
 	@echo "... src/app/DecisionProcedure/visitors/PrenexNormalFormTransformer.o"
 	@echo "... src/app/DecisionProcedure/visitors/PrenexNormalFormTransformer.i"
 	@echo "... src/app/DecisionProcedure/visitors/PrenexNormalFormTransformer.s"
+	@echo "... src/app/DecisionProcedure/visitors/QuantificationMerger.o"
+	@echo "... src/app/DecisionProcedure/visitors/QuantificationMerger.i"
+	@echo "... src/app/DecisionProcedure/visitors/QuantificationMerger.s"
 	@echo "... src/app/DecisionProcedure/visitors/Reorderer.o"
 	@echo "... src/app/DecisionProcedure/visitors/Reorderer.i"
 	@echo "... src/app/DecisionProcedure/visitors/Reorderer.s"

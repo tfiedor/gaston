@@ -66,11 +66,22 @@ namespace Gaston {
 		}
 	};
 
+	struct PreHashType {
+		size_t operator()(std::pair<size_t, ZeroSymbol*> set) const {
+			size_t seed = 0;
+			boost::hash_combine(seed, boost::hash_value(set.first));
+			boost::hash_combine(seed, hash_value(set.second));
+			return seed;
+		}
+	};
+
 	void dumpResultKey(std::pair<Term*, ZeroSymbol*> const& s);
 	void dumpResultData(std::pair<std::shared_ptr<Term>, bool>& s);
 	void dumpTermKey(Term* const& s);
 	void dumpSubsumptionKey(std::pair<Term*, Term*> const& s);
 	void dumpSubsumptionData(bool& s);
+	void dumpPreKey(std::pair<size_t, ZeroSymbol*> const& s);
+	void dumpPreData(VATA::Util::OrdVector<size_t>& s);
 
 /***************************
  * GLOBAL USING DIRECTIVES *
@@ -116,6 +127,9 @@ namespace Gaston {
 	using BaseAutomatonType      = VATA::BDDBottomUpTreeAut;
 	using BaseAutomatonStateSet  = VATA::Util::OrdVector<StateType>;
 	using BaseAutomatonMTBDD	 = VATA::MTBDDPkg::OndriksMTBDD<BaseAutomatonStateSet>;
+
+	using PreKey				 = std::pair<StateType, Symbol_ptr>;
+	using PreCache				 = BinaryCache<PreKey, BaseAutomatonStateSet, PairCompare<PreKey>, PreHashType, dumpPreKey, dumpPreData>;
 }
 
 /*************************
@@ -268,7 +282,8 @@ enum ComparisonType {E_BY_SAME_PTR, E_BY_DIFFERENT_TYPE, E_BY_STRUCTURE};
 	code(BooleanUnfolder)				\
 	code(UniversalQuantifierRemover)	\
 	code(NegationUnfolder)				\
-	code(FullAntiPrenexer)				\
+	code(QuantificationMerger)			\
+	code(Reorderer)						\
 	code(SecondOrderRestricter)
 
 #endif

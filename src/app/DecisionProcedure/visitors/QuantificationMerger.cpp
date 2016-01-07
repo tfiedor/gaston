@@ -3,3 +3,42 @@
 //
 
 #include "QuantificationMerger.h"
+#include "../../Frontend/ast.h"
+
+template<class ForallClass>
+AST* mergeUniversal(ForallClass* form) {
+    if(form->f->kind == aAll1 || form->f->kind == aAll2) {
+        ASTForm_uvf* innerQuantifier = reinterpret_cast<ASTForm_uvf*>(form->f);
+        form->f = innerQuantifier->f;
+        innerQuantifier->f == nullptr;
+        form->vl = ident_union(form->vl, innerQuantifier->vl);
+    }
+    return form;
+}
+
+AST* QuantificationMerger::visit(ASTForm_All1 *form) {
+    return mergeUniversal<ASTForm_All1>(form);
+}
+
+AST* QuantificationMerger::visit(ASTForm_All2 *form) {
+    return mergeUniversal<ASTForm_All2>(form);
+}
+
+template<class ExistClass>
+AST* mergeExistential(ExistClass* form) {
+    if(form->f->kind == aEx1 || form->f->kind == aEx2) {
+        ASTForm_uvf* innerQuantifier = reinterpret_cast<ASTForm_uvf*>(form->f);
+        form->f = innerQuantifier->f;
+        innerQuantifier->f == nullptr;
+        form->vl = ident_union(form->vl, innerQuantifier->vl);
+    }
+    return form;
+}
+
+AST* QuantificationMerger::visit(ASTForm_Ex1 *form) {
+    return mergeExistential<ASTForm_Ex1>(form);
+}
+
+AST* QuantificationMerger::visit(ASTForm_Ex2 *form) {
+    return mergeExistential<ASTForm_Ex2>(form);
+}

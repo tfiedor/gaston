@@ -300,15 +300,14 @@ ASTForm* DistributiveAntiPrenexer::distributeDisjunction(QuantifierClass *form) 
         ASTForm* f1 = orForm->f1;
         ASTForm* f2 = orForm->f2;
 
-        ASTForm_And* leftConjunction = new ASTForm_And(f1, andForm, Pos());
-        ASTForm_And* rightConjunction = new ASTForm_And(f2, andForm, Pos());
+        ASTForm_And* leftConjunction = new ASTForm_And(f1, form->f, Pos());
+        ASTForm_And* rightConjunction = new ASTForm_And(f2, form->f, Pos());
         ASTForm_Or* newRoot = new ASTForm_Or(leftConjunction, rightConjunction, Pos());
         form->f = newRoot;
+        // Unfold the True/False
+        BooleanUnfolder bu_visitor;
+        form = reinterpret_cast<QuantifierClass*>(form->accept(bu_visitor));
     }
-
-    // Unfold the True/False
-    BooleanUnfolder bu_visitor;
-    form = reinterpret_cast<QuantifierClass*>(form->accept(bu_visitor));
 
     // Restart the computation
     return existentialDistributiveAntiPrenex<QuantifierClass>(form);
@@ -399,15 +398,15 @@ ASTForm* DistributiveAntiPrenexer::distributeConjunction(QuantifierClass *form) 
         ASTForm* f1 = andForm->f1;
         ASTForm* f2 = andForm->f2;
 
-        ASTForm_Or* leftConjunction = new ASTForm_Or(f1, orForm, Pos());
-        ASTForm_Or* rightConjunction = new ASTForm_Or(f2, orForm, Pos());
+        ASTForm_Or* leftConjunction = new ASTForm_Or(f1, form->f, Pos());
+        ASTForm_Or* rightConjunction = new ASTForm_Or(f2, form->f, Pos());
         ASTForm_And* newRoot = new ASTForm_And(leftConjunction, rightConjunction, Pos());
         form->f = newRoot;
-    }
 
-    // Unfold the True/False
-    BooleanUnfolder bu_visitor;
-    form = reinterpret_cast<QuantifierClass*>(form->accept(bu_visitor));
+        // Unfold the True/False
+        BooleanUnfolder bu_visitor;
+        form = reinterpret_cast<QuantifierClass*>(form->accept(bu_visitor));
+    }
 
     return universalDistributiveAntiPrenex<QuantifierClass>(form);
 }

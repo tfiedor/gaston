@@ -636,6 +636,15 @@ namespace Gaston {
     void dumpSubsumptionData(bool &s) {
         std::cout << (s ? "True" : "False");
     }
+
+    void dumpPreKey(std::pair<size_t, ZeroSymbol*> const& s) {
+        std::cout << "(" << s.first << ", " << (*s.second) << ")";
+    }
+
+    void dumpPreData(VATA::Util::OrdVector<size_t>& s) {
+        std::cout << s;
+    }
+
 }
 
 void Term::dump() {
