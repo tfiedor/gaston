@@ -214,6 +214,7 @@ enum ComparisonType {E_BY_SAME_PTR, E_BY_DIFFERENT_TYPE, E_BY_STRUCTURE};
 #define DEBUG_TERM_CACHE_COMPARISON		false
 #define DEBUG_CONTINUATIONS 			false
 #define DEBUG_NO_WORKSHOPS				false
+#define DEBUG_PRE						false
 #define DEBUG_COMPUTE_FULL_FIXPOINT 	false
 #define DEBUG_COMPARE_WORKLISTS			true
 
@@ -283,7 +284,6 @@ enum ComparisonType {E_BY_SAME_PTR, E_BY_DIFFERENT_TYPE, E_BY_STRUCTURE};
 	code(UniversalQuantifierRemover)	\
 	code(NegationUnfolder)				\
 	code(QuantificationMerger)			\
-	code(Reorderer)						\
 	code(SecondOrderRestricter)
 
 #endif

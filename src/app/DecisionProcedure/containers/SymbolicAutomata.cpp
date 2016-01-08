@@ -382,11 +382,22 @@ Term* ProjectionAutomaton::Pre(Symbol_ptr symbol, Term* finalApproximation, bool
 
 Term* BaseAutomaton::Pre(Symbol_ptr symbol, Term* finalApproximation, bool underComplement) {
     assert(symbol != nullptr);
-    // TODO: Consult the correctness of cpre/pre computation
+    // TODO: Implement the -minus
 
     // Reinterpret the approximation as base states
     TermBaseSet* baseSet = reinterpret_cast<TermBaseSet*>(finalApproximation);
     BaseAutomatonStateSet states;
+    bool isFirst = true;
+
+    #if (DEBUG_PRE == true)
+    std::cout << "Computing: ";
+    finalApproximation->dump();
+    std::cout << " \u2212\u222A ";
+    std::cout << (*symbol) << "\n";
+    #endif
+
+    BaseAutomatonStateSet null;
+    //for(int i = this->_stateOffset; i < this->_stateSpace; ++i) {
 
     for(auto state : baseSet->states) {
         // Get MTBDD for Pre of states @p state
@@ -394,14 +405,21 @@ Term* BaseAutomaton::Pre(Symbol_ptr symbol, Term* finalApproximation, bool under
         BaseAut_MTBDD* preState = getMTBDDForStateTuple(*this->_base_automaton, StateTuple({state}));
 
         // Create the masker functor, that will mask the states away
-        MaskerFunctor masker;
+        MaskerFunctor masker(null);
         const BaseAut_MTBDD &temp = masker(*preState, *(symbol->GetMTBDD()));
 
-        BaseCollectorFunctor collector(states, underComplement);
+        BaseCollectorFunctor collector(states, false, isFirst);
         // Collect the states and set the flag that we already got some states
         collector(temp);
-        collector._isFirst = false;
+        #if (DEBUG_PRE == true)
+        std::cout << "{" << state << "} \u2212 " << (*symbol) << " = " << states << "\n";
+        #endif
+        isFirst = collector._isFirst;
     }
+
+    #if (DEBUG_PRE == true)
+    std::cout << "= " << states << "\n";
+    #endif
 
     return this->_factory.CreateBaseSet(states, this->_stateOffset, this->_stateSpace);
 }
@@ -591,7 +609,6 @@ ResultType BaseAutomaton::_IntersectNonEmptyCore(Symbol_ptr symbol, Term* approx
         return std::make_pair(std::shared_ptr<Term>(approximation), underComplement);
     } else {
         // First do the pre of the approximation
-
         TermBaseSet* preFinal = reinterpret_cast<TermBaseSet*>(this->Pre(symbol, approximation, underComplement));
 
         // Return the pre and true if it intersects the initial states

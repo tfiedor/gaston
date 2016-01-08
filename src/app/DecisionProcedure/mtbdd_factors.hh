@@ -310,7 +310,7 @@ private:
 public:
 	bool _isFirst;
 	// < Public Constructors >
-	BaseCollectorFunctor(BaseAutomatonStateSet& l, bool minusIntersect) : collected(l), _minusInteresect(minusIntersect), _isFirst(true) {}
+	BaseCollectorFunctor(BaseAutomatonStateSet& l, bool minusIntersect, bool isFirst) : collected(l), _minusInteresect(minusIntersect), _isFirst(isFirst) {}
 
 	// < Public Methods >
 	/**
@@ -320,13 +320,14 @@ public:
 		if(_minusInteresect) {
 			if(_isFirst) {
 				collected.insert(rhs);
+				_isFirst = false;
 				return;
 			}
 			auto itLhs = collected.begin();
 			auto itRhs = rhs.begin();
 			BaseAutomatonStateSet intersection;
 
-			while ((itLhs != collected.end()) || (itRhs != rhs.end()))
+			while ((itLhs != collected.end()) && (itRhs != rhs.end()))
 			{	// until we drop out of the array (or find a common element)
 				if (*itLhs == *itRhs)
 				{	// in case there exists a common element
@@ -348,6 +349,7 @@ public:
 			collected.clear();
 			collected.insert(intersection);
 		} else {
+			assert(!_minusInteresect);
 			collected.insert(rhs);
 		}
 	}
@@ -356,7 +358,10 @@ public:
 GCC_DIAG_OFF(effc++)
 class MaskerFunctor : public VATA::MTBDDPkg::Apply2Functor<MaskerFunctor, BaseAutomatonStateSet, BaseAutomatonStateSet, BaseAutomatonStateSet> {
 	GCC_DIAG_ON(effc++)
+private:
+	BaseAutomatonStateSet _null;
 public:
+	MaskerFunctor(BaseAutomatonStateSet null) : _null(null) {}
 	// < Public Methods >
 	/**
      * @param lhs: left operand
@@ -365,7 +370,7 @@ public:
      */
 	inline BaseAutomatonStateSet ApplyOperation(BaseAutomatonStateSet lhs, BaseAutomatonStateSet rhs) {
 		if(rhs.size() == 0) {
-			return rhs;
+			return _null;
 		} else {
 			return lhs;
 		}
