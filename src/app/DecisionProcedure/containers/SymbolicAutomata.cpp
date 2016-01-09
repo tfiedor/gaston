@@ -387,7 +387,7 @@ Term* BaseAutomaton::Pre(Symbol_ptr symbol, Term* finalApproximation, bool under
     // Reinterpret the approximation as base states
     TermBaseSet* baseSet = reinterpret_cast<TermBaseSet*>(finalApproximation);
     BaseAutomatonStateSet states;
-    bool isFirst = true;
+    BaseAutomatonStateSet preStates;
 
     #if (DEBUG_PRE == true)
     std::cout << "Computing: ";
@@ -401,20 +401,21 @@ Term* BaseAutomaton::Pre(Symbol_ptr symbol, Term* finalApproximation, bool under
 
     for(auto state : baseSet->states) {
         // Get MTBDD for Pre of states @p state
-        // TODO: Cache MTBDD for pre?
-        BaseAut_MTBDD* preState = getMTBDDForStateTuple(*this->_base_automaton, StateTuple({state}));
+        auto key = std::make_pair(state, symbol);
+        preStates.clear();
+        if(!this->_preCache.retrieveFromCache(key, preStates)) {
+            BaseAut_MTBDD *preState = getMTBDDForStateTuple(*this->_base_automaton, StateTuple({state}));
 
-        // Create the masker functor, that will mask the states away
-        MaskerFunctor masker(null);
-        const BaseAut_MTBDD &temp = masker(*preState, *(symbol->GetMTBDD()));
+            // Create the masker functor, that will mask the states away
+            PreFunctor pre(preStates);
+            pre(*preState, *(symbol->GetMTBDD()));
 
-        BaseCollectorFunctor collector(states, false, isFirst);
-        // Collect the states and set the flag that we already got some states
-        collector(temp);
-        #if (DEBUG_PRE == true)
-        std::cout << "{" << state << "} \u2212 " << (*symbol) << " = " << states << "\n";
-        #endif
-        isFirst = collector._isFirst;
+            #if (DEBUG_PRE == true)
+            std::cout << "{" << state << "} \u2212 " << (*symbol) << " = " << states << "\n";
+            #endif
+            this->_preCache.StoreIn(key, preStates);
+        }
+        states.insert(preStates);
     }
 
     #if (DEBUG_PRE == true)

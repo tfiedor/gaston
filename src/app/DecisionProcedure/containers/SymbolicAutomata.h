@@ -213,6 +213,7 @@ protected:
     BaseAutomatonType* _base_automaton;
     unsigned int _stateSpace;               // Number of states in automaton
     unsigned int _stateOffset;              // Offset of states used for mask
+    PreCache _preCache;
 
     /// <<< PRIVATE FUNCTIONS >>>
     virtual void _InitializeAutomaton();

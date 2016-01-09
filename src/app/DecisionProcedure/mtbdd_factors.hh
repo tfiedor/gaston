@@ -377,5 +377,20 @@ public:
 	}
 };
 
+GCC_DIAG_OFF(effc++)
+class PreFunctor : public VATA::MTBDDPkg::Apply2Functor<PreFunctor, BaseAutomatonStateSet, BaseAutomatonStateSet, BaseAutomatonStateSet > {
+GCC_DIAG_ON(effc++)
+private:
+	BaseAutomatonStateSet& collected;
+public:
+	PreFunctor(BaseAutomatonStateSet &c) : collected(c) {}
+
+	inline BaseAutomatonStateSet ApplyOperation(BaseAutomatonStateSet lhs, BaseAutomatonStateSet rhs) {
+		if(rhs.size() != 0) {
+			collected.insert(lhs);
+		}
+		return rhs;
+	}
+};
 
 #endif

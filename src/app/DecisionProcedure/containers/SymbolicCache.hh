@@ -59,6 +59,19 @@ struct PairCompare : public std::binary_function<Key, Key, bool>
 	}
 };
 
+template<class Key>
+struct PrePairCompare : public std::binary_function<Key, Key, bool>
+{
+	/**
+     * @param lhs: left operand
+     * @param rhs: right operand
+     * @return true if lhs = rhs
+     */
+	bool operator()(Key const& lhs, Key const& rhs) const {
+		return (lhs.first == rhs.first) && (*lhs.second == *rhs.second);
+	}
+};
+
 /**
  * Class representing cache for storing @p CacheData according to the
  * @p CacheKey

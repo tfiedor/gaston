@@ -41,6 +41,8 @@ template<class A, class B, class C, class D, void (*E)(A const&),void (*F)(B&)>
 class BinaryCache;
 template<class A>
 class PairCompare;
+template<class A>
+class PrePairCompare;
 
 namespace Gaston {
 	extern size_t hash_value(Term*);
@@ -129,7 +131,7 @@ namespace Gaston {
 	using BaseAutomatonMTBDD	 = VATA::MTBDDPkg::OndriksMTBDD<BaseAutomatonStateSet>;
 
 	using PreKey				 = std::pair<StateType, Symbol_ptr>;
-	using PreCache				 = BinaryCache<PreKey, BaseAutomatonStateSet, PairCompare<PreKey>, PreHashType, dumpPreKey, dumpPreData>;
+	using PreCache				 = BinaryCache<PreKey, BaseAutomatonStateSet, PreHashType, PrePairCompare<PreKey>, dumpPreKey, dumpPreData>;
 }
 
 /*************************

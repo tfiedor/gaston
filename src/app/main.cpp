@@ -57,6 +57,7 @@
 #include "DecisionProcedure/visitors/Reorderer.h"
 #include "DecisionProcedure/visitors/BinaryReorderer.h"
 #include "DecisionProcedure/visitors/QuantificationMerger.h"
+#include "DecisionProcedure/visitors/DotWalker.h"
 
 // < Typedefs and usings >
 using std::cout;
@@ -105,7 +106,7 @@ void PrintUsage()
 		<< "Options:\n"
 		<< " -t, --time 		 Print elapsed time\n"
 		<< " -d, --dump-all		 Dump AST, symboltable, and code DAG\n"
-		<< " -ga, --print-aut	 Print automaton in graphviz only and end\n"
+		<< " -ga, --print-aut	 Print automaton in graphviz\n"
 		<< "     --no-automaton  Don't dump Automaton\n"
 		<< "     --use-mona-dfa  Uses MONA for building base automaton\n"
 		<< "     --no-expnf      Implies --use-mona-dfa, does not convert formula to exPNF\n"
@@ -397,14 +398,27 @@ int main(int argc, char *argv[]) {
 		return 0;
 	} else {
 		#define CALL_FILTER(filter) \
-			filter filter##_visitor;	\
-			ast->formula = static_cast<ASTForm *>(ast->formula->accept(filter##_visitor));	\
-			if(options.dump) {    \
+            filter filter##_visitor;    \
+            ast->formula = static_cast<ASTForm *>(ast->formula->accept(filter##_visitor));    \
+            if(options.dump) {    \
                 G_DEBUG_FORMULA_AFTER_PHASE(#filter);    \
                 (ast->formula)->dump();    std::cout << "\n";    \
+            } \
+            if(options.graphvizDAG) {\
+                std::string filter##_dotName(""); \
+				filter##_dotName += #filter; \
+                filter##_dotName += ".dot"; \
+                DotWalker filter##_dw_visitor(filter##_dotName); \
+                (ast->formula)->accept(filter##_dw_visitor); \
             }
 		FILTER_LIST(CALL_FILTER)
 		#undef CALL_FILTER
+        if(options.graphvizDAG) {
+			std::string dotFileName(inputFileName);
+			dotFileName += ".dot";
+			DotWalker dw_visitor(dotFileName);
+			(ast->formula)->accept(dw_visitor);
+		}
 	}
 	timer_formula.stop();
 

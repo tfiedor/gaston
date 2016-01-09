@@ -546,6 +546,30 @@ src/app/DecisionProcedure/visitors/BooleanUnfolder.cpp.s:
 	$(MAKE) -f CMakeFiles/gaston.dir/build.make CMakeFiles/gaston.dir/src/app/DecisionProcedure/visitors/BooleanUnfolder.cpp.s
 .PHONY : src/app/DecisionProcedure/visitors/BooleanUnfolder.cpp.s
 
+src/app/DecisionProcedure/visitors/DotWalker.o: src/app/DecisionProcedure/visitors/DotWalker.cpp.o
+.PHONY : src/app/DecisionProcedure/visitors/DotWalker.o
+
+# target to build an object file
+src/app/DecisionProcedure/visitors/DotWalker.cpp.o:
+	$(MAKE) -f CMakeFiles/gaston.dir/build.make CMakeFiles/gaston.dir/src/app/DecisionProcedure/visitors/DotWalker.cpp.o
+.PHONY : src/app/DecisionProcedure/visitors/DotWalker.cpp.o
+
+src/app/DecisionProcedure/visitors/DotWalker.i: src/app/DecisionProcedure/visitors/DotWalker.cpp.i
+.PHONY : src/app/DecisionProcedure/visitors/DotWalker.i
+
+# target to preprocess a source file
+src/app/DecisionProcedure/visitors/DotWalker.cpp.i:
+	$(MAKE) -f CMakeFiles/gaston.dir/build.make CMakeFiles/gaston.dir/src/app/DecisionProcedure/visitors/DotWalker.cpp.i
+.PHONY : src/app/DecisionProcedure/visitors/DotWalker.cpp.i
+
+src/app/DecisionProcedure/visitors/DotWalker.s: src/app/DecisionProcedure/visitors/DotWalker.cpp.s
+.PHONY : src/app/DecisionProcedure/visitors/DotWalker.s
+
+# target to generate assembly for a file
+src/app/DecisionProcedure/visitors/DotWalker.cpp.s:
+	$(MAKE) -f CMakeFiles/gaston.dir/build.make CMakeFiles/gaston.dir/src/app/DecisionProcedure/visitors/DotWalker.cpp.s
+.PHONY : src/app/DecisionProcedure/visitors/DotWalker.cpp.s
+
 src/app/DecisionProcedure/visitors/Flattener.o: src/app/DecisionProcedure/visitors/Flattener.cpp.o
 .PHONY : src/app/DecisionProcedure/visitors/Flattener.o
 
@@ -1401,6 +1425,9 @@ help:
 	@echo "... src/app/DecisionProcedure/visitors/BooleanUnfolder.o"
 	@echo "... src/app/DecisionProcedure/visitors/BooleanUnfolder.i"
 	@echo "... src/app/DecisionProcedure/visitors/BooleanUnfolder.s"
+	@echo "... src/app/DecisionProcedure/visitors/DotWalker.o"
+	@echo "... src/app/DecisionProcedure/visitors/DotWalker.i"
+	@echo "... src/app/DecisionProcedure/visitors/DotWalker.s"
 	@echo "... src/app/DecisionProcedure/visitors/Flattener.o"
 	@echo "... src/app/DecisionProcedure/visitors/Flattener.i"
 	@echo "... src/app/DecisionProcedure/visitors/Flattener.s"

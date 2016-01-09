@@ -64,6 +64,7 @@ add_executable(gaston
 	src/app/DecisionProcedure/visitors/Reorderer.cpp
 	src/app/DecisionProcedure/visitors/BinaryReorderer.cpp
 	src/app/DecisionProcedure/visitors/QuantificationMerger.cpp
+	src/app/DecisionProcedure/visitors/DotWalker.cpp
 )
 
 link_directories(${CMAKE_SOURCE_DIR}/src/libs/)
