@@ -31,6 +31,8 @@
 #include <vector>
 #include <vata/util/binary_relation.hh>
 #include <string>
+#include <iostream>
+#include <fstream>
 
 // <<< FORWARD CLASS DECLARATIONS >>>
 class Term;
@@ -88,6 +90,8 @@ public:
     virtual void DumpAutomaton() = 0;
     virtual void DumpCacheStats() = 0;
     virtual void DumpStats() = 0;
+    virtual void DumpToDot(std::ofstream&) = 0;
+    static void AutomatonToDot(std::string, SymbolicAutomaton*);
 };
 
 /**
@@ -119,6 +123,7 @@ public:
 
     // <<< DUMPING FUNCTIONS >>>
     virtual void DumpAutomaton();
+    virtual void DumpToDot(std::ofstream&);
     virtual void DumpStats();
     virtual void DumpCacheStats();
 };
@@ -162,6 +167,7 @@ public:
 
     // <<< DUMPING FUNCTIONS >>>
     virtual void DumpAutomaton();
+    virtual void DumpToDot(std::ofstream&);
     virtual void DumpStats();
     virtual void DumpCacheStats();
 };
@@ -200,6 +206,7 @@ public:
 
     // <<< DUMPING FUNCTIONS >>>
     virtual void DumpAutomaton();
+    virtual void DumpToDot(std::ofstream&);
     virtual void DumpStats();
     virtual void DumpCacheStats();
 };
@@ -230,6 +237,7 @@ public:
     virtual Term* Pre(Symbol*, Term*, bool);
 
     // <<< DUMPING FUNCTIONS >>>
+    virtual void DumpToDot(std::ofstream&);
     virtual void BaseAutDump();
     virtual void DumpStats();
     virtual void DumpCacheStats();

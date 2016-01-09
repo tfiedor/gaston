@@ -217,6 +217,7 @@ enum ComparisonType {E_BY_SAME_PTR, E_BY_DIFFERENT_TYPE, E_BY_STRUCTURE};
 #define DEBUG_CONTINUATIONS 			false
 #define DEBUG_NO_WORKSHOPS				false
 #define DEBUG_PRE						false
+#define DEBUG_GENERATE_DOT_AUTOMATON	true
 #define DEBUG_COMPUTE_FULL_FIXPOINT 	false
 #define DEBUG_COMPARE_WORKLISTS			true
 

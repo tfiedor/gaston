@@ -21,6 +21,7 @@
 #include "../containers/VarToTrackMap.hh"
 #include "../containers/Workshops.h"
 #include "../../Frontend/symboltable.h"
+#include <stdint.h>
 
 extern VarToTrackMap varMap;
 extern SymbolTable symbolTable;
@@ -772,6 +773,50 @@ void LessEqAutomaton::DumpAutomaton() {
     #if (DEBUG_BASE_AUTOMATA == true)
     this->BaseAutDump();
     #endif
+}
+
+void SymbolicAutomaton::AutomatonToDot(std::string filename, SymbolicAutomaton *aut) {
+    std::ofstream os;
+    os.open(filename);
+    // TODO: Add exception handling
+    os << "strict graph aut {\n";
+    aut->DumpToDot(os);
+    os << "}\n";
+    os.close();
+}
+
+void BinaryOpAutomaton::DumpToDot(std::ofstream & os) {
+    os << "\t" << (uintptr_t) &*this << "[label=\"";
+    if(this->_productType == ProductType::E_INTERSECTION) {
+        os << "\u2227";
+    } else {
+        os << "\u2228";
+    }
+    os << " (" << this->_trueCounter << "\u22A8, " << this->_falseCounter << "\u22AD)\"];\n";
+    os << "\t" << (uintptr_t) &*this << " -- " << (uintptr_t) (this->_lhs_aut) << ";\n";
+    os << "\t" << (uintptr_t) &*this << " -- " << (uintptr_t) (this->_rhs_aut) << ";\n";
+    this->_lhs_aut->DumpToDot(os);
+    this->_rhs_aut->DumpToDot(os);
+}
+
+void ComplementAutomaton::DumpToDot(std::ofstream & os) {
+    os << "\t" << (uintptr_t) &*this << "[label=\"\u00AC";
+    os << " (" << this->_trueCounter << "\u22A8, " << this->_falseCounter << "\u22AD)\"];\n";
+    os << "\t" << (uintptr_t) &*this << " -- " << (uintptr_t) (this->_aut) << ";\n";
+    this->_aut->DumpToDot(os);
+}
+
+void ProjectionAutomaton::DumpToDot(std::ofstream & os) {
+    os << "\t" << (uintptr_t) &*this << "[label=\"\u2203";
+    os << " (" << this->_trueCounter << "\u22A8, " << this->_falseCounter << "\u22AD)\"];\n";
+    os << "\t" << (uintptr_t) &*this << " -- " << (uintptr_t) (this->_aut) << ";\n";
+    this->_aut->DumpToDot(os);
+}
+
+void BaseAutomaton::DumpToDot(std::ofstream & os) {
+    os << "\t" << (uintptr_t) &*this << "[label=\"Aut";
+    os << " (" << this->_trueCounter << "\u22A8, " << this->_falseCounter << "\u22AD)\"];\n";
+
 }
 
 /**
