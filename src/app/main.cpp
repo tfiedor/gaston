@@ -573,7 +573,8 @@ int main(int argc, char *argv[]) {
 	} else {
 		std::cout << "[*] Constructing 'Symbolic' Automaton using gaston\n";
 		symAutomaton = std::shared_ptr<SymbolicAutomaton>((ast->formula)->toSymbolicAutomaton(false));
-		symAutomaton->DumpAutomaton();
+		if(options.printProgress)
+			symAutomaton->DumpAutomaton();
 	}
 
 	timer_automaton.stop();

@@ -13,6 +13,8 @@
 
 #include "AntiPrenexer.h"
 #include "BooleanUnfolder.h"
+#include "NegationUnfolder.h"
+#include "UniversalQuantifierRemover.h"
 #include "../../Frontend/ast.h"
 
 /**
@@ -119,11 +121,7 @@ ASTForm* FullAntiPrenexer::distributiveRule(QuantifierClass *qForm) {
         binopForm->f2 = static_cast<ASTForm*>(tempResult->accept(*this));
     }
 
-    if(!middle.empty()) {
-        return new QuantifierClass(nullptr, new IdentList(middle), binopForm, binopForm->pos);
-    } else {
-        return binopForm;
-    }
+    return binopForm;
 }
 
 template<class QuantifierClass, class BinopClass>
@@ -318,14 +316,21 @@ ASTForm* DistributiveAntiPrenexer::existentialDistributiveAntiPrenex(ASTForm *fo
     static_assert(std::is_base_of<ASTForm_q, ExistClass>::value, "ExistClass is not derived from 'ASTForm_q' class");
 
     // First call the anti-prenexing rule to push the quantifier as deep as possible
-    ASTForm* antiPrenexedForm = existentialAntiPrenex<ExistClass>(form);
+    //ASTForm* antiPrenexedForm = existentialAntiPrenex<ExistClass>(form);
+
+    // Expand Universal Quantifier
+    UniversalQuantifierRemover universalUnfolding;
+    ASTForm* antiPrenexedForm = reinterpret_cast<ASTForm*>(form->accept(universalUnfolding));
+
+    // Push negations down as well
+    NegationUnfolder negationUnfolding;
+    antiPrenexedForm = reinterpret_cast<ASTForm*>(antiPrenexedForm->accept(negationUnfolding));
 
     if(antiPrenexedForm->kind == aEx1 || antiPrenexedForm->kind == aEx2) {
         ExistClass* exForm = reinterpret_cast<ExistClass*>(antiPrenexedForm);
         switch(exForm->f->kind) {
             case aOr:
-                assert(false && "Full-antiprenexer failed. ExistClass was not pushed through disjunction.");
-                break;
+                return distributiveRule<ExistClass, ASTForm_Or>(exForm);
             case aAnd:
                 return distributeDisjunction<ExistClass>(exForm);
             default:
@@ -378,7 +383,10 @@ ASTForm* DistributiveAntiPrenexer::distributeConjunction(QuantifierClass *form) 
     if(distPoint == nullptr) {
         // Disjunctive Distributive point was not found and so it should not exists,
         // we can end
-        return form;
+        // Expand Universal Quantifier
+        UniversalQuantifierRemover universalUnfolding;
+        ASTForm* form2 = reinterpret_cast<ASTForm*>(form->accept(universalUnfolding));
+        return reinterpret_cast<ASTForm*>(form2->accept(*this));
     } else {
         // Do some things
         ASTForm_Or* orForm = reinterpret_cast<ASTForm_Or*>(distPoint);
@@ -416,7 +424,11 @@ ASTForm* DistributiveAntiPrenexer::universalDistributiveAntiPrenex(ASTForm *form
     static_assert(std::is_base_of<ASTForm_q, ForallClass>::value, "ForallClass is not derived from 'ASTForm_q' class");
 
     // First call the anti-prenexing rule to push the quantifier as deep as possible
-    ASTForm* antiPrenexedForm = universalAntiPrenex<ForallClass>(form);
+    //ASTForm* antiPrenexedForm = universalAntiPrenex<ForallClass>(form);
+
+    // Push negations down as well
+    NegationUnfolder negationUnfolding;
+    ASTForm* antiPrenexedForm = reinterpret_cast<ASTForm*>(form->accept(negationUnfolding));
 
     if(antiPrenexedForm->kind == aAll1 || antiPrenexedForm->kind == aAll2) {
         // Not everything was pushed, we can try to call the distribution
@@ -425,10 +437,11 @@ ASTForm* DistributiveAntiPrenexer::universalDistributiveAntiPrenex(ASTForm *form
             case aOr:
                 return distributeConjunction<ForallClass>(allForm);
             case aAnd:
-                assert(false && "Full-antiprenexer failed. ForallClass was not pushed through conjunction.");
-                break;
+                return distributiveRule<ForallClass, ASTForm_And>(allForm);
             default:
-                return antiPrenexedForm;
+                UniversalQuantifierRemover universalRemover;
+                antiPrenexedForm = reinterpret_cast<ASTForm*>(antiPrenexedForm->accept(universalRemover));
+                return reinterpret_cast<ASTForm*>(antiPrenexedForm->accept(negationUnfolding));
         }
     } else {
         // We are done

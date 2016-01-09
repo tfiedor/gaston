@@ -12,7 +12,8 @@ DotWalker::DotWalker(std::string filename) : VoidVisitor(Traverse::PreOrder) {
         std::cerr << "[!] Unable to open '" << filename << "'\n";
         throw std::ios_base::failure("Unable to open file");
     }
-    this->_dotFile << "graph " << "formulae" << " {\n";
+    this->_dotFile << "strict graph " << "formulae" << " {\n";
+    this->_dotFile << "\tgraph [splines=false];\n";
 }
 
 DotWalker::~DotWalker() {

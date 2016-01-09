@@ -228,7 +228,7 @@ enum ComparisonType {E_BY_SAME_PTR, E_BY_DIFFERENT_TYPE, E_BY_STRUCTURE};
 /* >>> Measuring Options <<< *
  *****************************/
 #define MEASURE_STATE_SPACE 			true	// < Measures how many instances of terms were created
-#define MEASURE_CACHE_HITS 				true	// < Prints the statistics for each cache on each node
+#define MEASURE_CACHE_HITS 				false	// < Prints the statistics for each cache on each node
 #define MEASURE_CONTINUATION_CREATION	true
 #define MEASURE_CONTINUATION_EVALUATION	true
 #define MEASURE_RESULT_HITS				true
@@ -239,8 +239,8 @@ enum ComparisonType {E_BY_SAME_PTR, E_BY_DIFFERENT_TYPE, E_BY_STRUCTURE};
 
 /* >>> Anti-Prenexing Options <<< *
  **********************************/
-#define ANTIPRENEXING_FULL				false
-#define ANTIPRENEXING_DISTRIBUTIVE		true
+#define ANTIPRENEXING_FULL				true
+#define ANTIPRENEXING_DISTRIBUTIVE		false
 
 /*
  * >>> Unique Terms options *
@@ -273,19 +273,21 @@ enum ComparisonType {E_BY_SAME_PTR, E_BY_DIFFERENT_TYPE, E_BY_STRUCTURE};
  *******************************/
 
 #if (ANTIPRENEXING_DISTRIBUTIVE == true)
-#define ANTIPRENEXER DistributiveAntiPrenexer
-#else
-#define ANTIPRENEXER FullAntiPrenexer
-#endif
-
 #define FILTER_LIST(code) \
 	code(SyntaxRestricter)				\
 	code(BinaryReorderer)				\
-	code(ANTIPRENEXER)					\
+	code(DistributiveAntiPrenexer)		\
+	code(SecondOrderRestricter)
+#else
+#define FILTER_LIST(code) \
+	code(SyntaxRestricter)				\
+	code(BinaryReorderer)				\
+	code(FullAntiPrenexer)				\
 	code(BooleanUnfolder)				\
 	code(UniversalQuantifierRemover)	\
 	code(NegationUnfolder)				\
 	code(QuantificationMerger)			\
 	code(SecondOrderRestricter)
+#endif
 
 #endif
