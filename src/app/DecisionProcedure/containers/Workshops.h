@@ -72,7 +72,7 @@ namespace Workshops {
     using FixpointKey       = std::pair<Term*, Symbol*>;
     using FixpointHash      = boost::hash<FixpointKey>;
     using FixpointCompare   = PairCompare<FixpointKey>;
-    using Term_ptr          = std::shared_ptr<Term>;
+    using Term_ptr          = Term*;
     using FixpointType      = std::list<Term*>;
     using WorklistItemType  = std::pair<Term*, Symbol*>;
     using WorklistType      = std::list<WorklistItemType>;

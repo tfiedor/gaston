@@ -31,7 +31,8 @@ StateType SymbolicAutomaton::stateCnt = 0;
 using namespace Gaston;
 
 // <<< CONSTRUCTORS >>>
-SymbolicAutomaton::SymbolicAutomaton(Formula_ptr form) : _form(form), _factory(this) {
+SymbolicAutomaton::SymbolicAutomaton(Formula_ptr form) :
+        _form(form), _factory(this), _initialStates(nullptr), _finalStates(nullptr) {
     type = AutType::SYMBOLIC_BASE;
 
     IdentList free, bound;
@@ -172,7 +173,7 @@ ResultType SymbolicAutomaton::IntersectNonEmpty(Symbol_ptr symbol, Term* stateAp
         #endif
         TermContinuation* continuation = reinterpret_cast<TermContinuation*>(stateApproximation);
         assert(continuation->term != nullptr);
-        stateApproximation = (continuation->aut->IntersectNonEmpty((continuation->symbol == nullptr ? nullptr : continuation->symbol.get()), continuation->term, continuation->underComplement)).first.get();
+        stateApproximation = (continuation->aut->IntersectNonEmpty((continuation->symbol == nullptr ? nullptr : continuation->symbol.get()), continuation->term, continuation->underComplement)).first;
         //                                                                                                           ^--- is this ok?
     }
     assert(stateApproximation != nullptr);
@@ -286,9 +287,9 @@ void ProjectionAutomaton::_InitializeAutomaton() {
 void BinaryOpAutomaton::_InitializeInitialStates() {
     // #TERM_CREATION
     #if (DEBUG_NO_WORKSHOPS)
-    this->_initialStates = std::make_shared<TermProduct>(this->_lhs_aut->GetInitialStates(), this->_rhs_aut->GetInitialStates(), this->_productType);
+    this->_initialStates = new TermProduct(this->_lhs_aut->GetInitialStates(), this->_rhs_aut->GetInitialStates(), this->_productType);
     #else
-    this->_initialStates = std::shared_ptr<TermProduct>(this->_factory.CreateProduct(this->_lhs_aut->GetInitialStates(), this->_rhs_aut->GetInitialStates(), this->_productType));
+    this->_initialStates = this->_factory.CreateProduct(this->_lhs_aut->GetInitialStates(), this->_rhs_aut->GetInitialStates(), this->_productType);
     #endif
 }
 
@@ -298,9 +299,9 @@ void ComplementAutomaton::_InitializeInitialStates() {
 
 void ProjectionAutomaton::_InitializeInitialStates() {
     #if (DEBUG_NO_WORKSHOPS == true)
-    this->_initialStates = std::make_shared<TermList>(this->_aut->GetInitialStates(), false);
+    this->_initialStates = new TermList(this->_aut->GetInitialStates(), false);
     #else
-    this->_initialStates = std::shared_ptr<TermList>(this->_factory.CreateList(this->_aut->GetInitialStates(), false));
+    this->_initialStates = this->_factory.CreateList(this->_aut->GetInitialStates(), false);
     #endif
 }
 
@@ -315,7 +316,7 @@ void BaseAutomaton::_InitializeInitialStates() {
         initialStates.insert(state);
     }
 
-    this->_initialStates = std::shared_ptr<TermBaseSet>(this->_factory.CreateBaseSet(initialStates, this->_stateOffset, this->_stateSpace));
+    this->_initialStates = this->_factory.CreateBaseSet(initialStates, this->_stateOffset, this->_stateSpace);
 }
 
 /**
@@ -324,9 +325,9 @@ void BaseAutomaton::_InitializeInitialStates() {
 void BinaryOpAutomaton::_InitializeFinalStates() {
     // #TERM_CREATION
     #if (DEBUG_NO_WORKSHOPS == true)
-    this->_finalStates = std::make_shared<TermProduct>(this->_lhs_aut->GetFinalStates(), this->_rhs_aut->GetFinalStates(), this->_productType);
+    this->_finalStates = new TermProduct(this->_lhs_aut->GetFinalStates(), this->_rhs_aut->GetFinalStates(), this->_productType);
     #else
-    this->_finalStates = std::shared_ptr<TermProduct>(this->_factory.CreateProduct(this->_lhs_aut->GetFinalStates(), this->_rhs_aut->GetFinalStates(), this->_productType));
+    this->_finalStates = this->_factory.CreateProduct(this->_lhs_aut->GetFinalStates(), this->_rhs_aut->GetFinalStates(), this->_productType);
     #endif
 }
 
@@ -337,9 +338,9 @@ void ComplementAutomaton::_InitializeFinalStates() {
 
 void ProjectionAutomaton::_InitializeFinalStates() {
     #if (DEBUG_NO_WORKSHOPS == true)
-    this->_finalStates = std::make_shared<TermList>(this->_aut->GetFinalStates(), false);
+    this->_finalStates = new TermList(this->_aut->GetFinalStates(), false);
     #else
-    this->_finalStates = std::shared_ptr<TermList>(this->_factory.CreateList(this->_aut->GetFinalStates(), false));
+    this->_finalStates = this->_factory.CreateList(this->_aut->GetFinalStates(), false);
     #endif
 }
 
@@ -358,10 +359,7 @@ void BaseAutomaton::_InitializeFinalStates() {
 
     // Push states to new Base Set
     // #TERM_CREATION
-    TermBaseSet* finalStateSet = this->_factory.CreateBaseSet(finalStates, this->_stateOffset, this->_stateSpace);
-
-    // Return new state set
-    this->_finalStates = std::shared_ptr<Term>(finalStateSet);
+    this->_finalStates = reinterpret_cast<Term*>(this->_factory.CreateBaseSet(finalStates, this->_stateOffset, this->_stateSpace));
 }
 
 /**
@@ -449,7 +447,7 @@ ResultType BinaryOpAutomaton::_IntersectNonEmptyCore(Symbol_ptr symbol, Term* fi
     TermProduct* productStateApproximation = reinterpret_cast<TermProduct*>(finalApproximation);
 
     // Checks if left automaton's initial states intersects the final states
-    ResultType lhs_result = this->_lhs_aut->IntersectNonEmpty(symbol, productStateApproximation->left.get(), underComplement); // TODO: another memory consumption
+    ResultType lhs_result = this->_lhs_aut->IntersectNonEmpty(symbol, productStateApproximation->left, underComplement); // TODO: another memory consumption
 
     // We can prune the state if left side was evaluated as Empty term
     // TODO: This is different for Unionmat!
@@ -472,18 +470,18 @@ ResultType BinaryOpAutomaton::_IntersectNonEmptyCore(Symbol_ptr symbol, Term* fi
         ++this->_contCreationCounter;
         #endif
         #if (DEBUG_NO_WORKSHOPS == true)
-        TermContinuation *continuation = new TermContinuation(this->_rhs_aut, productStateApproximation->right.get(), suspendedSymbol, underComplement);
-        Term_ptr leftCombined = std::shared_ptr<Term>(new TermProduct(lhs_result.first, std::shared_ptr<Term>(continuation), this->_productType));
+        TermContinuation *continuation = new TermContinuation(this->_rhs_aut, productStateApproximation->right, suspendedSymbol, underComplement);
+        Term_ptr leftCombined = new TermProduct(lhs_result.first, continuation, this->_productType);
         #else
-        TermContinuation* continuation = this->_factory.CreateContinuation(this->_rhs_aut, productStateApproximation->right.get(), suspendedSymbol, underComplement);
-        Term_ptr leftCombined = std::shared_ptr<Term>(this->_factory.CreateProduct(lhs_result.first, std::shared_ptr<Term>(continuation), this->_productType));
+        TermContinuation* continuation = this->_factory.CreateContinuation(this->_rhs_aut, productStateApproximation->right, suspendedSymbol, underComplement);
+        Term_ptr leftCombined = this->_factory.CreateProduct(lhs_result.first, continuation, this->_productType);
         #endif
         return std::make_pair(leftCombined, this->_early_val(underComplement));
     }
     #endif
 
     // Otherwise compute the right side and return full fixpoint
-    ResultType rhs_result = this->_rhs_aut->IntersectNonEmpty(symbol, productStateApproximation->right.get(), underComplement);
+    ResultType rhs_result = this->_rhs_aut->IntersectNonEmpty(symbol, productStateApproximation->right, underComplement);
     // We can prune the state if right side was evaluated as Empty term
     // TODO: This is different for Unionmat!
     #if (OPT_PRUNE_EMPTY == true)
@@ -494,9 +492,9 @@ ResultType BinaryOpAutomaton::_IntersectNonEmptyCore(Symbol_ptr symbol, Term* fi
 
     // TODO: #TERM_CREATION
     #if (DEBUG_NO_WORKSHOPS == true)
-    Term_ptr combined = std::make_shared<TermProduct>(lhs_result.first, rhs_result.first, this->_productType);
+    Term_ptr combined = new TermProduct(lhs_result.first, rhs_result.first, this->_productType);
     #else
-    Term_ptr combined = std::shared_ptr<TermProduct>(this->_factory.CreateProduct(lhs_result.first, rhs_result.first, this->_productType));
+    Term_ptr combined = this->_factory.CreateProduct(lhs_result.first, rhs_result.first, this->_productType);
     #endif
     return std::make_pair(combined, this->_eval_result(lhs_result.second, rhs_result.second, underComplement));
 }
@@ -523,7 +521,7 @@ ResultType ProjectionAutomaton::_IntersectNonEmptyCore(Symbol_ptr symbol, Term* 
         assert(projectionApproximation->list.size() == 1);
 
         // Evaluate the initial unfolding of epsilon
-        ResultType result = this->_aut->IntersectNonEmpty(symbol, projectionApproximation->list[0].get(), underComplement);
+        ResultType result = this->_aut->IntersectNonEmpty(symbol, projectionApproximation->list[0], underComplement);
 
         // Create a new fixpoint term and iterator on it
         #if (DEBUG_NO_WORKSHOPS == true)
@@ -548,7 +546,7 @@ ResultType ProjectionAutomaton::_IntersectNonEmptyCore(Symbol_ptr symbol, Term* 
             this->DumpAutomaton();
             std::cout << (fixpoint->GetResult() ? "-> early True" : "-> early False") << "\n";
             #endif
-            return std::make_pair(std::shared_ptr<Term>(fixpoint), result.second);
+            return std::make_pair(fixpoint, result.second);
         }
 
         // While the fixpoint is not fully unfolded and while we cannot evaluate early
@@ -569,13 +567,13 @@ ResultType ProjectionAutomaton::_IntersectNonEmptyCore(Symbol_ptr symbol, Term* 
         }
         #endif
         // Return (fixpoint, bool)
-        return std::make_pair(std::shared_ptr<Term>(fixpoint), fixpoint->GetResult());
+        return std::make_pair(fixpoint, fixpoint->GetResult());
     } else {
         // Create a new fixpoint term and iterator on it
         #if (DEBUG_NO_WORKSHOPS == true)
-        TermFixpoint* fixpoint = new TermFixpoint(this, std::shared_ptr<Term>(finalApproximation), symbol, underComplement);
+        TermFixpoint* fixpoint = new TermFixpoint(this, finalApproximation, symbol, underComplement);
         #else
-        TermFixpoint* fixpoint = this->_factory.CreateFixpointPre(std::shared_ptr<Term>(finalApproximation), symbol, underComplement);
+        TermFixpoint* fixpoint = this->_factory.CreateFixpointPre(finalApproximation, symbol, underComplement);
         #endif
         TermFixpoint::iterator it = fixpoint->GetIterator();
         Term_ptr fixpointTerm;
@@ -601,30 +599,30 @@ ResultType ProjectionAutomaton::_IntersectNonEmptyCore(Symbol_ptr symbol, Term* 
         std::cout << (fixpoint->GetResult() ? "-> pre True" : "-> pre False") << "\n";
         #endif
         // TODO: Fixpoint cache should probably be here!
-        return std::make_pair(std::shared_ptr<Term>(fixpoint), fixpoint->GetResult());
+        return std::make_pair(fixpoint, fixpoint->GetResult());
     }
 }
 
 ResultType BaseAutomaton::_IntersectNonEmptyCore(Symbol_ptr symbol, Term* approximation, bool underComplement) {
     // Reinterpret the initial and final states
-    TermBaseSet* initial = reinterpret_cast<TermBaseSet*>(this->_initialStates.get());
-    TermBaseSet* final = reinterpret_cast<TermBaseSet*>(this->_finalStates.get());
+    TermBaseSet* initial = reinterpret_cast<TermBaseSet*>(this->_initialStates);
+    TermBaseSet* final = reinterpret_cast<TermBaseSet*>(this->_finalStates);
 
     if(symbol == nullptr) {
         // Testing if epsilon is in language, i.e. testing if final states intersect initial ones
         return std::make_pair(this->_finalStates, initial->Intersects(final) != underComplement);
     } else if(approximation->type == TERM_EMPTY) {
         // Empty set has no Pre
-        return std::make_pair(std::shared_ptr<Term>(approximation), underComplement);
+        return std::make_pair(approximation, underComplement);
     } else {
         // First do the pre of the approximation
         TermBaseSet* preFinal = reinterpret_cast<TermBaseSet*>(this->Pre(symbol, approximation, underComplement));
 
         // Return the pre and true if it intersects the initial states
         if(preFinal->IsEmpty()) {
-            return std::make_pair(std::make_shared<TermEmpty>(), underComplement);
+            return std::make_pair(new TermEmpty(), underComplement);
         } else {
-            return std::make_pair(std::shared_ptr<Term>(preFinal), initial->Intersects(preFinal) != underComplement);
+            return std::make_pair(preFinal, initial->Intersects(preFinal) != underComplement);
         }
     }
 }

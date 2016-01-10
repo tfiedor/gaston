@@ -80,7 +80,7 @@ namespace Workshops {
             assert(this->_pCache != nullptr);
 
             Term* termPtr = nullptr;
-            auto productKey = std::make_pair(lptr.get(), rptr.get());
+            auto productKey = std::make_pair(lptr, rptr);
             if(!this->_pCache->retrieveFromCache(productKey, termPtr)) {
                 #if (DEBUG_WORKSHOPS == true && DEBUG_TERM_CREATION == true)
                 std::cout << "[*] Creating Product: ";
@@ -110,7 +110,7 @@ namespace Workshops {
             assert(this->_lCache != nullptr);
 
             Term* termPtr = nullptr;
-            auto productKey = startTerm.get();
+            auto productKey = startTerm;
             if(!this->_lCache->retrieveFromCache(productKey, termPtr)) {
                 #if (DEBUG_WORKSHOPS == true && DEBUG_TERM_CREATION == true)
                 std::cout << "[*] Creating List: ";
@@ -131,11 +131,11 @@ namespace Workshops {
             assert(this->_fpCache != nullptr);
 
             Term* termPtr = nullptr;
-            auto fixpointKey = source.get();
+            auto fixpointKey = source;
             if(!this->_fpCache->retrieveFromCache(fixpointKey, termPtr)) {
                 #if (DEBUG_WORKSHOPS == true && DEBUG_TERM_CREATION == true)
                 std::cout << "[*] Creating Fixpoint: ";
-                std::cout << "from [" << startTerm << "] to ";
+                std::cout << "from [" << source << "] to ";
                 #endif
                 termPtr = new TermFixpoint(this->_aut, source, symbol, inCompl, initValue);
                 this->_fpCache->StoreIn(fixpointKey, termPtr);
@@ -153,11 +153,11 @@ namespace Workshops {
             assert(this->_fpCache != nullptr);
 
             Term* termPtr = nullptr;
-            auto fixpointKey = std::make_pair(source.get(), symbol);
+            auto fixpointKey = std::make_pair(source, symbol);
             if(!this->_fppCache->retrieveFromCache(fixpointKey, termPtr)) {
                 #if (DEBUG_WORKSHOPS == true && DEBUG_TERM_CREATION == true)
                 std::cout << "[*] Creating FixpointPre: ";
-                std::cout << "from [" << startTerm << "] to ";
+                std::cout << "from [" << source << "] to ";
                 #endif
                 termPtr = new TermFixpoint(this->_aut, source, symbol, inCompl);
                 this->_fppCache->StoreIn(fixpointKey, termPtr);
@@ -187,7 +187,7 @@ namespace Workshops {
             assert(this->_contCache != nullptr);
 
             Term* termPtr = nullptr;
-            auto contKey = std::make_pair(term, symbol.get());
+            auto contKey = std::make_pair(term, symbol);
             if(!this->_contCache->retrieveFromCache(contKey, termPtr)) {
                 #if (DEBUG_WORKSHOPS == true && DEBUG_TERM_CREATION == true)
                 std::cout << "[*] Creating Continuation: ";

@@ -78,7 +78,7 @@ namespace Gaston {
 	};
 
 	void dumpResultKey(std::pair<Term*, ZeroSymbol*> const& s);
-	void dumpResultData(std::pair<std::shared_ptr<Term>, bool>& s);
+	void dumpResultData(std::pair<Term*, bool>& s);
 	void dumpTermKey(Term* const& s);
 	void dumpSubsumptionKey(std::pair<Term*, Term*> const& s);
 	void dumpSubsumptionData(bool& s);
@@ -90,7 +90,7 @@ namespace Gaston {
  ***************************/
 	using Automaton 			 = VATA::BDDBottomUpTreeAut;
 	using Formula_ptr            = ASTForm*;
-	using Term_ptr				 = std::shared_ptr<Term>;
+	using Term_ptr				 = Term*;
 	using Term_raw 				 = Term*;
 	using ResultType			 = std::pair<Term_ptr, bool>;
 
@@ -256,13 +256,14 @@ enum ComparisonType {E_BY_SAME_PTR, E_BY_DIFFERENT_TYPE, E_BY_STRUCTURE};
  *************************/
 #define OPT_EQ_THROUGH_POINTERS			true	// < Tests equality through pointers not by structure
 #define OPT_GENERATE_UNIQUE_TERMS		true	// < Uses Workshop to generate unique pointers
+// NOTE! From v1.0 onwards, disable this will introduce not only leaks, but will fuck everything up!
 #define OPT_TERM_HASH_BY_APPROX			true	// < Includes stateSpaceApprox into hash
 #define OPT_ANTIPRENEXING				true	// < Transforms formula to anti-prenex form (i.e. all of the quantifiers are deepest on leaves)
 #define OPT_DRAW_NEGATION_IN_BASE 		false	// < Negation is handled on formula level and not on computation level
 #define OPT_CREATE_QF_AUTOMATON 		true	// < Transforms Quantifier-free automaton to formula
 #define OPT_REDUCE_AUT_EVERYTIME		false	// < Calls reduce everytime VATA automaton is created
 #define OPT_REDUCE_AUT_LAST				true	// < Calls reduce after the final automaton is created
-#define OPT_EARLY_EVALUATION 			true	// < Evaluates early interesection of products
+#define OPT_EARLY_EVALUATION 			false	// < Evaluates early interesection of products
 #define OPT_PRUNE_EMPTY					true	// < Prunes empty sets
 #define OPT_PRUNE_FIXPOINT				true	// < Prunes fixpoint during IsSubsumedBy TODO: For BaseSet only for now
 #define OPT_CACHE_RESULTS 				true	// < Cache results

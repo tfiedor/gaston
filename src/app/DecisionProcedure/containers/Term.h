@@ -48,7 +48,7 @@
 class SymbolicAutomaton;
 
 // TODO: Move away the usings
-using Term_ptr          = std::shared_ptr<Term>;
+using Term_ptr          = Term*;
 using TermProductStates = std::pair<Term_ptr, Term_ptr>;
 using TermListStates    = std::vector<Term_ptr>;
 using BaseState         = size_t;

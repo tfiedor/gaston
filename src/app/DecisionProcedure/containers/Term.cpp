@@ -73,7 +73,7 @@ TermEmpty::TermEmpty() {
  * @param[in] lhs:  left operand of term intersection
  * @param[in] rhs:  right operand of term intersection
  */
-TermProduct::TermProduct(Term_ptr lhs, Term_ptr rhs, ProductType pt) : left(move(lhs)), right(move(rhs)) {
+TermProduct::TermProduct(Term_ptr lhs, Term_ptr rhs, ProductType pt) : left(lhs), right(rhs) {
     #if (MEASURE_STATE_SPACE == true)
     ++TermProduct::instances;
     #endif
@@ -208,7 +208,7 @@ TermFixpoint::TermFixpoint(Aut_ptr aut, Term_ptr startingTerm, Symbol* symbol, b
 }
 
 TermFixpoint::TermFixpoint(Aut_ptr aut, Term_ptr sourceTerm, Symbol* symbol, bool inComplement)
-        : _sourceTerm(sourceTerm), _sourceIt(reinterpret_cast<TermFixpoint*>(sourceTerm.get())->GetIteratorDynamic()),
+        : _sourceTerm(sourceTerm), _sourceIt(reinterpret_cast<TermFixpoint*>(sourceTerm)->GetIteratorDynamic()),
           _aut(reinterpret_cast<ProjectionAutomaton*>(aut)->GetBase()), _worklist(), _bValue(inComplement) {
     #if (MEASURE_STATE_SPACE == true)
     ++TermFixpoint::instances;
@@ -268,7 +268,7 @@ bool Term::IsSubsumed(Term *t) {
         auto unfoldedContinuation = (continuation->aut->IntersectNonEmpty(continuation->symbol.get(),
                                                                           continuation->term,
                                                                           continuation->underComplement)).first;
-        return this->IsSubsumed(unfoldedContinuation.get());
+        return this->IsSubsumed(unfoldedContinuation);
     } else if(this->type == TERM_CONTINUATION) {
         TermContinuation *continuation = reinterpret_cast<TermContinuation *>(this);
         assert(continuation->term != nullptr);
@@ -315,10 +315,10 @@ bool TermProduct::_IsSubsumedCore(Term* t) {
 
     // Retype and test the subsumption component-wise
     TermProduct *rhs = reinterpret_cast<TermProduct*>(t);
-    Term *lhsl = this->left.get();
-    Term *lhsr = this->right.get();
-    Term *rhsl = rhs->left.get();
-    Term *rhsr = rhs->right.get();
+    Term *lhsl = this->left;
+    Term *lhsr = this->right;
+    Term *rhsl = rhs->left;
+    Term *rhsr = rhs->right;
 
     if(lhsl == rhsl) {
         return lhsr->IsSubsumed(rhsr);
@@ -382,7 +382,7 @@ bool TermList::_IsSubsumedCore(Term* t) {
     for(auto item : this->list) {
         bool subsumes = false;
         for(auto tt_item : tt->list) {
-            if(item->IsSubsumed(tt_item.get())) {
+            if(item->IsSubsumed(tt_item)) {
                 subsumes = true;
                 break;
             }
@@ -405,7 +405,7 @@ bool TermFixpoint::_IsSubsumedCore(Term* t) {
         bool subsumes = false;
         for(auto tt_item : tt->_fixpoint) {
             if(tt_item == nullptr) continue;
-            if(item->IsSubsumed(tt_item.get())) {
+            if(item->IsSubsumed(tt_item)) {
                 subsumes = true;
                 break;
             }
@@ -452,7 +452,7 @@ bool TermProduct::IsSubsumedBy(std::list<Term_ptr>& fixpoint) {
         if(item == nullptr) continue;
 
         // Test the subsumption
-        if(this->IsSubsumed(item.get())) {
+        if(this->IsSubsumed(item)) {
             return true;
         }
     }
@@ -471,7 +471,7 @@ bool TermBaseSet::IsSubsumedBy(std::list<Term_ptr>& fixpoint) {
         if(item == nullptr) continue;
 
         // Test the subsumption
-        if(this->IsSubsumed(item.get())) {
+        if(this->IsSubsumed(item)) {
             return true;
         }
     }
@@ -492,7 +492,7 @@ bool TermList::IsSubsumedBy(std::list<Term_ptr>& fixpoint) {
         // Nullptr is skipped
         if(item == nullptr) continue;
 
-        return this->IsSubsumed(item.get());
+        return this->IsSubsumed(item);
     }
 
     return false;
@@ -516,7 +516,7 @@ bool TermFixpoint::IsSubsumedBy(std::list<Term_ptr>& fixpoint) {
     // Component-wise comparison
     for(auto item : fixpoint) {
         if(item == nullptr) continue;
-        if (this->IsSubsumed(item.get())) {
+        if (this->IsSubsumed(item)) {
             return true;
         }
     }
@@ -628,7 +628,7 @@ namespace Gaston {
         }
     }
 
-    void dumpResultData(std::pair<std::shared_ptr<Term>, bool> &s) {
+    void dumpResultData(std::pair<Term*, bool> &s) {
         std::cout << "<" << (*s.first) << ", " << (s.second ? "True" : "False") << ">";
     }
 
@@ -771,7 +771,7 @@ bool TermBaseSet::Intersects(TermBaseSet* rhs) {
 bool TermFixpoint::_testIfSubsumes(Term_ptr &term) {
     #if (OPT_CACHE_SUBSUMED_BY == true)
     bool result;
-    Term* key = term.get();
+    Term* key = term;
     if(!this->_subsumedByCache.retrieveFromCache(key, result)) {
         if(result = term->IsSubsumedBy(this->_fixpoint)) {
             this->_subsumedByCache.StoreIn(key, result);
@@ -804,7 +804,7 @@ void TermFixpoint::ComputeNextFixpoint() {
     _worklist.pop_front();
 
     // Compute the results
-    ResultType result = _aut->IntersectNonEmpty(&item.second, item.first.get(), this->_nonMembershipTesting);
+    ResultType result = _aut->IntersectNonEmpty(&item.second, item.first, this->_nonMembershipTesting);
 
     // If it is subsumed by fixpoint, we don't add it
     if(this->_testIfSubsumes(result.first)) {
@@ -833,7 +833,7 @@ void TermFixpoint::ComputeNextPre() {
     _worklist.pop_front();
 
     // Compute the results
-    ResultType result = _aut->IntersectNonEmpty(&item.second, item.first.get(), this->_nonMembershipTesting);
+    ResultType result = _aut->IntersectNonEmpty(&item.second, item.first, this->_nonMembershipTesting);
 
     // If it is subsumed we return
     if(this->_testIfSubsumes(result.first)) {
