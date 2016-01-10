@@ -181,15 +181,15 @@ private:
 class TermContinuation : public Term {
 public:
     // <<< PUBLIC MEMBERS >>>
-    std::shared_ptr<SymbolicAutomaton> aut;
-    Term_ptr term;
+    SymbolicAutomaton* aut;
+    Term* term;
     std::shared_ptr<SymbolType> symbol;
     bool underComplement;
     // See #L29
     TERM_MEASURELIST(DEFINE_STATIC_MEASURE)
 
     // <<< CONSTRUCTORS >>>
-    TermContinuation(std::shared_ptr<SymbolicAutomaton>, Term_ptr, std::shared_ptr<SymbolType>, bool);
+    TermContinuation(SymbolicAutomaton*, Term*, std::shared_ptr<SymbolType>, bool);
 
     // <<< PUBLIC API >>>
     bool IsSubsumedBy(std::list<Term_ptr>& fixpoint);

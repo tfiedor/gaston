@@ -159,6 +159,7 @@ ResultType SymbolicAutomaton::IntersectNonEmpty(Symbol_ptr symbol, Term* stateAp
     //if(symbol != nullptr) {
         auto key = std::make_pair(stateApproximation, symbol);
         if (inCache = this->_resCache.retrieveFromCache(key, result)) {
+            assert(result.first != nullptr);
             return result;
         }
     //}
@@ -170,9 +171,11 @@ ResultType SymbolicAutomaton::IntersectNonEmpty(Symbol_ptr symbol, Term* stateAp
         ++this->_contUnfoldingCounter;
         #endif
         TermContinuation* continuation = reinterpret_cast<TermContinuation*>(stateApproximation);
-        stateApproximation = (continuation->aut->IntersectNonEmpty((continuation->symbol == nullptr ? nullptr : continuation->symbol.get()), continuation->term.get(), continuation->underComplement)).first.get();
+        assert(continuation->term != nullptr);
+        stateApproximation = (continuation->aut->IntersectNonEmpty((continuation->symbol == nullptr ? nullptr : continuation->symbol.get()), continuation->term, continuation->underComplement)).first.get();
         //                                                                                                           ^--- is this ok?
     }
+    assert(stateApproximation != nullptr);
     assert(stateApproximation->type != TERM_CONTINUATION);
 
     // Call the core function
@@ -214,6 +217,7 @@ ResultType SymbolicAutomaton::IntersectNonEmpty(Symbol_ptr symbol, Term* stateAp
     }
 
     // Return results
+    assert(result.first != nullptr);
     return result;
 }
 
@@ -467,10 +471,13 @@ ResultType BinaryOpAutomaton::_IntersectNonEmptyCore(Symbol_ptr symbol, Term* fi
         #if (MEASURE_CONTINUATION_CREATION == true || MEASURE_ALL == true)
         ++this->_contCreationCounter;
         #endif
-        // TODO: #TERM_CREATION
-        TermContinuation *continuation = new TermContinuation(this->_rhs_aut, productStateApproximation->right, suspendedSymbol, underComplement);
-        // TODO: #TERM_CREATION
+        #if (DEBUG_NO_WORKSHOPS == true)
+        TermContinuation *continuation = new TermContinuation(this->_rhs_aut, productStateApproximation->right.get(), suspendedSymbol, underComplement);
+        Term_ptr leftCombined = std::shared_ptr<Term>(new TermProduct(lhs_result.first, std::shared_ptr<Term>(continuation), this->_productType));
+        #else
+        TermContinuation* continuation = this->_factory.CreateContinuation(this->_rhs_aut, productStateApproximation->right.get(), suspendedSymbol, underComplement);
         Term_ptr leftCombined = std::shared_ptr<Term>(this->_factory.CreateProduct(lhs_result.first, std::shared_ptr<Term>(continuation), this->_productType));
+        #endif
         return std::make_pair(leftCombined, this->_early_val(underComplement));
     }
     #endif
@@ -636,7 +643,6 @@ void BinaryOpAutomaton::DumpAutomaton() {
     if(this->type == AutType::INTERSECTION) {
         std::cout << "\033[1;32m \u2229 \033[0m";
     } else {
-        //std::cout << " \u22C3 ";
         std::cout << "\033[1;33m \u222A \033[0m";
     };
     _rhs_aut->DumpAutomaton();
@@ -788,9 +794,9 @@ void SymbolicAutomaton::AutomatonToDot(std::string filename, SymbolicAutomaton *
 void BinaryOpAutomaton::DumpToDot(std::ofstream & os) {
     os << "\t" << (uintptr_t) &*this << "[label=\"";
     if(this->_productType == ProductType::E_INTERSECTION) {
-        os << "\u2227";
+        os << "\u2229";
     } else {
-        os << "\u2228";
+        os << "\u222A";
     }
     os << " (" << this->_trueCounter << "\u22A8, " << this->_falseCounter << "\u22AD)\"];\n";
     os << "\t" << (uintptr_t) &*this << " -- " << (uintptr_t) (this->_lhs_aut) << ";\n";

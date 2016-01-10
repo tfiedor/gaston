@@ -121,7 +121,7 @@ TermBaseSet::TermBaseSet(VATA::Util::OrdVector<unsigned int>& s, unsigned int of
     #endif
 }
 
-TermContinuation::TermContinuation(std::shared_ptr<SymbolicAutomaton> a, Term_ptr t, std::shared_ptr<SymbolType> s, bool b) : aut(a), term(t), symbol(s), underComplement(b) {
+TermContinuation::TermContinuation(SymbolicAutomaton* a, Term* t, std::shared_ptr<SymbolType> s, bool b) : aut(a), term(t), symbol(s), underComplement(b) {
     #if (DEBUG_TERM_CREATION == true)
     std::cout << "[" << this << "]";
     std::cout << "TermContinuation::";
@@ -131,12 +131,13 @@ TermContinuation::TermContinuation(std::shared_ptr<SymbolicAutomaton> a, Term_pt
     #if (MEASURE_STATE_SPACE == true)
     ++TermContinuation::instances;
     #endif
+    assert(t != nullptr);
 
     this->type = TERM_CONTINUATION;
 
     // Initialization of state space
-    this->stateSpace = 1;
-    this->stateSpaceApprox = 1;
+    this->stateSpace = 0;
+    this->stateSpaceApprox = t->stateSpaceApprox;
 
     #if (DEBUG_CONTINUATIONS == true)
     std::cout << "Postponing computation as [";
@@ -245,7 +246,6 @@ TermFixpoint::TermFixpoint(Aut_ptr aut, Term_ptr sourceTerm, Symbol* symbol, boo
  * @return:         true if this is subsumed by @p t
  */
 bool Term::IsSubsumed(Term *t) {
-    assert(this->_inComplement == t->_inComplement);
     #if (DEBUG_TERM_SUBSUMPTION == true)
     this->dump();
     std::cout << " <?= ";
@@ -264,17 +264,20 @@ bool Term::IsSubsumed(Term *t) {
             TermContinuation *thisCont = reinterpret_cast<TermContinuation *>(this);
             assert(continuation->underComplement == thisCont->underComplement);
         }
+        assert(continuation->term != nullptr);
         auto unfoldedContinuation = (continuation->aut->IntersectNonEmpty(continuation->symbol.get(),
-                                                                          continuation->term.get(),
+                                                                          continuation->term,
                                                                           continuation->underComplement)).first;
         return this->IsSubsumed(unfoldedContinuation.get());
     } else if(this->type == TERM_CONTINUATION) {
         TermContinuation *continuation = reinterpret_cast<TermContinuation *>(this);
+        assert(continuation->term != nullptr);
         auto unfoldedContinuation = (continuation->aut->IntersectNonEmpty(continuation->symbol.get(),
-                                                                          continuation->term.get(),
+                                                                          continuation->term,
                                                                           continuation->underComplement)).first;
         return unfoldedContinuation->IsSubsumed(t);
     }
+    assert(this->_inComplement == t->_inComplement);
     assert(this->type != TERM_CONTINUATION && t->type != TERM_CONTINUATION);
 
     // Else if it is not continuation we first look into cache and then recompute if needed
@@ -366,7 +369,7 @@ bool TermContinuation::_IsSubsumedCore(Term *t) {
     // TODO: Maybe if we have {} we can answer sooner, without unpacking
 
     // We unpack this term
-    auto unfoldedTerm = (this->aut->IntersectNonEmpty(this->symbol.get(), this->term.get(), this->underComplement)).first;
+    auto unfoldedTerm = (this->aut->IntersectNonEmpty(this->symbol.get(), this->term, this->underComplement)).first;
     return unfoldedTerm->IsSubsumed(t);
 }
 
@@ -617,16 +620,19 @@ std::ostream& operator <<(std::ostream& osObject, Term& z) {
 namespace Gaston {
     void dumpResultKey(std::pair<Term*, Symbol*> const& s) {
         assert(s.first != nullptr);
-        assert(s.second != nullptr);
 
-        std::cout << "<" << (*s.first) << ", " << (*s.second) << ">";
+        if(s.second == nullptr) {
+            std::cout << "<" << (*s.first) << ", \u0437>";
+        } else {
+            std::cout << "<" << (*s.first) << ", " << (*s.second) << ">";
+        }
     }
 
     void dumpResultData(std::pair<std::shared_ptr<Term>, bool> &s) {
         std::cout << "<" << (*s.first) << ", " << (s.second ? "True" : "False") << ">";
     }
 
-    void dumpSubsumptionKey(std::pair < Term * , Term * > const& s) {
+    void dumpSubsumptionKey(std::pair<Term*, Term*> const& s) {
         assert(s.first != nullptr);
         assert(s.second != nullptr);
 

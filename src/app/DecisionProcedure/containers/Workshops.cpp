@@ -10,6 +10,7 @@ namespace Workshops {
         this->_fppCache = nullptr;
         this->_pCache = nullptr;
         this->_lCache = nullptr;
+        this->_contCache = nullptr;
 
         switch(this->_aut->type) {
             case AutType::BASE:
@@ -19,6 +20,7 @@ namespace Workshops {
             case AutType::INTERSECTION:
             case AutType::UNION:
                 this->_pCache = new ProductCache();
+                this->_contCache = new FixpointCache();
                 break;
             case AutType::COMPLEMENT:
                 break;
@@ -180,9 +182,25 @@ namespace Workshops {
     }
 
     //TermContinuation::TermContinuation(std::shared_ptr<SymbolicAutomaton> a, Term_ptr t, std::shared_ptr<SymbolType> s, bool b)
-    TermContinuation* TermWorkshop::CreateContinuation(Term_ptr const&, Symbol_shared&, bool) {
-        G_NOT_IMPLEMENTED_YET("CreateContinuation");
-        return nullptr;
+    TermContinuation* TermWorkshop::CreateContinuation(SymbolicAutomaton* aut, Term* const& term, Symbol_shared& symbol, bool underComplement) {
+        #if (OPT_GENERATE_UNIQUE_TERMS == true && UNIQUE_CONTINUATIONS == true)
+            assert(this->_contCache != nullptr);
+
+            Term* termPtr = nullptr;
+            auto contKey = std::make_pair(term, symbol.get());
+            if(!this->_contCache->retrieveFromCache(contKey, termPtr)) {
+                #if (DEBUG_WORKSHOPS == true && DEBUG_TERM_CREATION == true)
+                std::cout << "[*] Creating Continuation: ";
+                std::cout << "from [" << term << "] + " << *symbol << " to ";
+                #endif
+                termPtr = new TermContinuation(aut, term, symbol, underComplement);
+                this->_contCache->StoreIn(contKey, termPtr);
+            }
+            assert(termPtr != nullptr);
+            return reinterpret_cast<TermContinuation*>(termPtr);
+        #else
+            return new TermContinuation(aut, term, symbol, underComplement);
+        #endif
     }
 
     /***
@@ -196,6 +214,10 @@ namespace Workshops {
         if(this->_pCache != nullptr) {
             std::cout << "  \u2218 ProductCache stats -> ";
             this->_pCache->dumpStats();
+        }
+        if(this->_contCache != nullptr) {
+            std::cout << "  \u2218 ContinuationCache stats -> ";
+            this->_contCache->dumpStats();
         }
         if(this->_lCache != nullptr) {
             std::cout << "  \u2218 ListCache stats -> ";
@@ -224,7 +246,11 @@ namespace Workshops {
     }
 
     void dumpFixpointKey(FixpointKey const&s) {
-        std::cout << "<" << (*s.first) << ", " << (*s.second) << ">";
+        if(s.second != nullptr) {
+            std::cout << "<" << (*s.first) << ", " << (*s.second) << ">";
+        } else {
+            std::cout << "<" << (*s.first) << ", \u0437>";
+        }
     }
 
     void dumpCacheData(Term *&s) {

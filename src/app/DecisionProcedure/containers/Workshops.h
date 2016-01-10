@@ -96,6 +96,7 @@ namespace Workshops {
         ListCache* _lCache;
         ListCache* _fpCache;
         FixpointCache* _fppCache;
+        FixpointCache* _contCache;
 
         SymbolicAutomaton* _aut;
 
@@ -111,7 +112,7 @@ namespace Workshops {
         TermFixpoint* CreateFixpointPre(Term_ptr const&, Symbol*, bool);
         TermFixpoint* GetUniqueFixpoint(FixpointType&, WorklistType &);
         TermList* CreateList(Term_ptr const&, bool);
-        TermContinuation* CreateContinuation(Term_ptr const&, Symbol_shared&, bool);
+        TermContinuation* CreateContinuation(SymbolicAutomaton*, Term* const&, Symbol_shared&, bool);
 
         void Dump();
     };
