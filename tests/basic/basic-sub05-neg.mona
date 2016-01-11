@@ -1,0 +1,7 @@
+# WSkS Benchmarks
+# Batch: Atomic
+# Validity: unsatisfiable
+# Long: testing functionality of sub - def 2
+
+ws1s;
+~ex2 X, Y: X sub Y & ex1 x: x in X & x notin Y;

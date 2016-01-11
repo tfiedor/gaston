@@ -1,0 +1,7 @@
+# WSkS Benchmarks
+# Batch: Atomic
+# Validity: valid
+# Long: testing reflexivity of sub
+
+ws1s;
+~ex2 X, Y: (X sub Y & Y sub X) => X = Y;

@@ -1,0 +1,7 @@
+# WSkS Benchmarks
+# Batch: Atomic
+# Validity: valid
+# Long: testing lesseq - transitivity 2
+
+ws1s;
+~ex1 x, y, z: x >= y & y >= z & z >= x; 

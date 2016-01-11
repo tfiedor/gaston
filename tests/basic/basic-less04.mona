@@ -1,0 +1,7 @@
+# WSkS Benchmarks
+# Batch: Atomic
+# Validity: valid
+# Long: testing less with neg
+
+ws1s;
+ex1 x, y: x > y & ~y > x;

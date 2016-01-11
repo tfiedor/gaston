@@ -1,0 +1,7 @@
+# WSkS Benchmarks
+# Batch: Atomic
+# Validity: valid
+# Long: testing transitivity of sub 2
+
+ws1s;
+ex2 X, Y, Z: X sub Y & Y sub Z & Z sub X;

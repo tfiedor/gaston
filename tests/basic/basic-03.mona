@@ -1,0 +1,7 @@
+# WSkS Benchmarks
+# Batch: Atomic
+# Validity: valid
+# Long: testing double step of less
+
+ws1s;
+ex1 x, y, z: x > y & y > z & x = z + 1; 

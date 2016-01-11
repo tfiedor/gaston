@@ -1,0 +1,7 @@
+# WSkS Benchmarks
+# Batch: Atomic
+# Validity: valid
+# Long: testing plus - ordering
+
+ws1s;
+ex1 x, y, z: (x = y + 1 & y = z + 1) => x > z;

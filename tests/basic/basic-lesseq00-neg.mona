@@ -1,0 +1,7 @@
+# WSkS Benchmarks
+# Batch: Atomic
+# Validity: valid
+# Long: testing lesseq - symmetry
+
+ws1s;
+~ex1 x, y: x >= y & y >= x;

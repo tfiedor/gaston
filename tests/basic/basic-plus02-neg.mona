@@ -1,0 +1,7 @@
+# WSkS Benchmarks
+# Batch: Atomic
+# Validity: unsat
+# Long: testing plus - nontransitivity
+
+ws1s;
+~ex1 x, y, z: x = y + 1 & y = z + 1 & z = x + 1;

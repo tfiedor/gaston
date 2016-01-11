@@ -1,0 +1,7 @@
+# WSkS Benchmarks
+# Batch: Atomic
+# Validity: valid
+# Long: testing subset with membership
+
+ws1s;
+~ex2 X, Y: (all1 x: x in X => x in Y) => X sub Y; 

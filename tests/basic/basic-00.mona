@@ -1,0 +1,7 @@
+# WSkS Benchmarks
+# Batch: Atomic
+# Validity: valid
+# Long: testing extending less to lesseq
+
+ws1s;
+ex1 x, y: (x > y | x = y) => x >= y; 

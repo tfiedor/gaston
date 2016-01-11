@@ -1,0 +1,7 @@
+# WSkS Benchmarks
+# Batch: Atomic
+# Validity: unsat
+# Long: testing plus - nonsymmetry
+
+ws1s;
+ex1 x, y: x = y + 1 & y = x + 1;
