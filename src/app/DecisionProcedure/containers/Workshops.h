@@ -42,6 +42,7 @@
 #include <boost/functional/hash.hpp>
 #include <unordered_map>
 #include <functional>
+#include <tuple>
 #include "../environment.hh"
 #include "SymbolicCache.hh"
 
@@ -58,8 +59,13 @@ namespace Workshops {
     using SymbolList        = Gaston::SymbolList;
     using Symbol_shared     = Gaston::Symbol_shared;
     using Symbol            = Gaston::Symbol;
+    using VarType           = Gaston::VarType;
+    using ValType           = Gaston::VarValue;
 
     using CacheData         = Term*;
+    using SymbolKey         = std::tuple<Symbol*, VarType, ValType>;
+    using SymbolHash        = boost::hash<SymbolKey>;
+    using SymbolCompare     = std::equal_to<SymbolKey>;
     using BaseKey           = VATA::Util::OrdVector<unsigned int>;
     using BaseHash          = boost::hash<BaseKey>;
     using BaseCompare       = std::equal_to<BaseKey>;
@@ -82,7 +88,10 @@ namespace Workshops {
     void dumpListKey(ListKey const&);
     void dumpFixpointKey(FixpointKey const&);
     void dumpCacheData(CacheData &);
+    void dumpSymbolKey(SymbolKey const&);
+    void dumpSymbolData(Symbol* &);
 
+    using SymbolCache   = BinaryCache<SymbolKey, Symbol*, SymbolHash, SymbolCompare, dumpSymbolKey, dumpSymbolData>;
     using BaseCache     = BinaryCache<BaseKey, CacheData, BaseHash, BaseCompare, dumpBaseKey, dumpCacheData>;
     using ProductCache  = BinaryCache<ProductKey, CacheData, ProductHash, ProductCompare, dumpProductKey, dumpCacheData>;
     using ListCache     = BinaryCache<ListKey, CacheData, ListHash, ListCompare, dumpListKey, dumpCacheData>;
@@ -115,6 +124,19 @@ namespace Workshops {
         TermContinuation* CreateContinuation(SymbolicAutomaton*, Term* const&, Symbol_shared&, bool);
 
         void Dump();
+    };
+
+    class SymbolWorkshop {
+    private:
+        Symbol* _zeroSymbol = nullptr;
+        SymbolCache* _symbolCache = nullptr;
+
+    public:
+        // <<< CONSTRUCTORS >>>
+        SymbolWorkshop();
+
+        Symbol* CreateZeroSymbol();
+        Symbol* CreateProjectedSymbol(Symbol*, VarType, ValType);
     };
 }
 

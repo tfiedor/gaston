@@ -233,6 +233,25 @@ namespace Workshops {
         }
     }
 
+    SymbolWorkshop::SymbolWorkshop() {
+        this->_symbolCache = new SymbolCache();
+    }
+
+    Symbol* SymbolWorkshop::CreateZeroSymbol() {
+        if(_zeroSymbol == nullptr) {
+            this->_zeroSymbol = new ZeroSymbol();
+        }
+        return this->_zeroSymbol;
+    }
+
+    void dumpSymbolKey(SymbolKey const&s) {
+        std::cout << "<" << (*std::get<0>(s)) << ", " << std::get<1>(s) << ", " << std::get<2>(s) << ">";
+    }
+
+    void dumpSymbolData(Symbol*&s) {
+        std::cout << s;
+    }
+
     void dumpBaseKey(BaseKey const&s) {
         std::cout << s;
     }

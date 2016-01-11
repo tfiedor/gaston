@@ -38,8 +38,8 @@ protected:
 public:
     // <<< CONSTRUCTORS >>>
     ZeroSymbol();
-    ZeroSymbol(BitMask);
-    ZeroSymbol(BitMask, VarType, VarValue);
+    ZeroSymbol(BitMask const&);
+    ZeroSymbol(BitMask const&, VarType, VarValue);
 
     // <<< PUBLIC API >>>
     void ProjectVar(VarType var);

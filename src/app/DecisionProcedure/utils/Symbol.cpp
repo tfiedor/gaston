@@ -30,7 +30,7 @@ ZeroSymbol::ZeroSymbol() : _trackMask(varMap.TrackLength() << 1) {
  *
  * @param[in] track:    track of the constructed symbol
  */
-ZeroSymbol::ZeroSymbol(BitMask track) {
+ZeroSymbol::ZeroSymbol(BitMask const& track) {
     this->_trackMask = track;
     this->_bdd = nullptr;
 }
@@ -43,7 +43,7 @@ ZeroSymbol::ZeroSymbol(BitMask track) {
  * @param[in] var:      variable that is set to certain value @val
  * @param[in] val:      value of @p var
  */
-ZeroSymbol::ZeroSymbol(BitMask track, VarType var, VarValue val) {
+ZeroSymbol::ZeroSymbol(BitMask const& track, VarType var, VarValue val) {
     this->_trackMask = track;
     this->_SetValueAt(var, ZeroSymbol::charToAsgn(val));
     this->_bdd = nullptr;

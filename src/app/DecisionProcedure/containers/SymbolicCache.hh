@@ -50,10 +50,10 @@ struct PairCompare : public std::binary_function<Key, Key, bool>
 				std::cout << " = (" << lhsresult << " + " << rhsresult << ") =  " << result << "\n";
 			return  result;
         #else
-        	if(lhs.second != nullptr && rhs.second != nullptr) {
-				return (*lhs.second == *rhs.second) && (*lhs.first == *rhs.first);
+			if(lhs.second == nullptr || rhs.second == nullptr) {
+				return (*lhs.first == *rhs.first) && lhs.second == rhs.second;
 			} else {
-				return (*lhs.first == *rhs.first);
+				return (*lhs.second == *rhs.second) && (*lhs.first == *rhs.first);
 			}
 		#endif
 	}
