@@ -153,31 +153,27 @@ ResultType SymbolicAutomaton::IntersectNonEmpty(Symbol_ptr symbol, Term* stateAp
         }
     }
 
-    #if (OPT_CACHE_RESULTS == true)
-    // Look up in cache, if in cache, return the result
-    bool inCache = true;
-    //             ^--- note that this will ensure that empty symbol will not be stored in cache
-    //if(symbol != nullptr) {
-        auto key = std::make_pair(stateApproximation, symbol);
-        if (inCache = this->_resCache.retrieveFromCache(key, result)) {
-            assert(result.first != nullptr);
-            return result;
-        }
-    //}
-    #endif
-
     // If we have continuation, we have to unwind it
     if(stateApproximation != nullptr && stateApproximation->type == TERM_CONTINUATION) {
         #if (MEASURE_CONTINUATION_EVALUATION == true || MEASURE_ALL == true)
         ++this->_contUnfoldingCounter;
         #endif
         TermContinuation* continuation = reinterpret_cast<TermContinuation*>(stateApproximation);
-        assert(continuation->term != nullptr);
-        stateApproximation = (continuation->aut->IntersectNonEmpty((continuation->symbol == nullptr ? nullptr : continuation->symbol.get()), continuation->term, continuation->underComplement)).first;
-        //                                                                                                           ^--- is this ok?
+        stateApproximation = continuation->unfoldContinuation(UnfoldedInType::E_IN_ISECT_NONEMPTY);
     }
     assert(stateApproximation != nullptr);
     assert(stateApproximation->type != TERM_CONTINUATION);
+
+    #if (OPT_CACHE_RESULTS == true)
+    // Look up in cache, if in cache, return the result
+    bool inCache = true;
+    auto key = std::make_pair(stateApproximation, symbol);
+    if (inCache = this->_resCache.retrieveFromCache(key, result)) {
+        assert(result.first != nullptr);
+        return result;
+    }
+    //}
+    #endif
 
     // Call the core function
     result = this->_IntersectNonEmptyCore(symbol, stateApproximation, underComplement); // TODO: Memory consumption
@@ -191,6 +187,13 @@ ResultType SymbolicAutomaton::IntersectNonEmpty(Symbol_ptr symbol, Term* stateAp
 
     // Cache Results
     #if (OPT_CACHE_RESULTS == true)
+        #if (OPT_DONT_CACHE_CONT == true)
+            if(result.first->type == TERM_PRODUCT) {
+                // If either side is not fully computed, we do not cache it
+                TermProduct* tProduct = reinterpret_cast<TermProduct*>(result.first);
+                inCache = tProduct->left->type == TERM_CONTINUATION || tProduct->right->type == TERM_CONTINUATION;
+            }
+        #endif
     if(!inCache) {
         auto key = std::make_pair(stateApproximation, symbol);
         this->_resCache.StoreIn(key, result);
@@ -908,67 +911,73 @@ void print_stat(std::string statName, std::string stat) {
 }
 
 void BinaryOpAutomaton::DumpStats() {
-    this->_form->dump();
-    std::cout << "\n";
-    std::cout << "  \u2218 Cache stats -> ";
-    this->_resCache.dumpStats();
-    #if (DEBUG_WORKSHOPS)
-    this->_factory.Dump();
+    #if (PRINT_STATS_PRODUCT == true)
+        this->_form->dump();
+        std::cout << "\n";
+        std::cout << "  \u2218 Cache stats -> ";
+        this->_resCache.dumpStats();
+        #if (DEBUG_WORKSHOPS)
+        this->_factory.Dump();
+        #endif
+        print_stat("True Hits", this->_trueCounter);
+        print_stat("False Hits", this->_falseCounter);
+        print_stat("Continuation Generation", this->_contCreationCounter);
+        print_stat("Continuation Evaluation", this->_contUnfoldingCounter);
     #endif
-    print_stat("True Hits", this->_trueCounter);
-    print_stat("False Hits", this->_falseCounter);
-    print_stat("Continuation Generation", this->_contCreationCounter);
-    print_stat("Continuation Evaluation", this->_contUnfoldingCounter);
-
     this->_lhs_aut->DumpStats();
     this->_rhs_aut->DumpStats();
 }
 
 void ProjectionAutomaton::DumpStats() {
-    this->_form->dump();
-    std::cout << "\n";
-    std::cout << "  \u2218 Cache stats -> ";
-    this->_resCache.dumpStats();
-    #if (DEBUG_WORKSHOPS)
-    this->_factory.Dump();
+    #if (PRINT_STATS_PROJECTION == true)
+        this->_form->dump();
+        std::cout << "\n";
+        std::cout << "  \u2218 Cache stats -> ";
+        this->_resCache.dumpStats();
+        #if (DEBUG_WORKSHOPS)
+        this->_factory.Dump();
+        #endif
+        #if (MEASURE_PROJECTION == true)
+        print_stat("Fixpoint Nexts", this->fixpointNext);
+        print_stat("Fixpoint Results", this->fixpointRes);
+        print_stat("FixpointPre Nexts", this->fixpointPreNext);
+        print_stat("FixpointPre Results", this->fixpointPreRes);
+        #endif
+        print_stat("True Hits", this->_trueCounter);
+        print_stat("False Hits", this->_falseCounter);
+        print_stat("Continuation Evaluation", this->_contUnfoldingCounter);
     #endif
-    #if (MEASURE_PROJECTION == true)
-    print_stat("Fixpoint Nexts", this->fixpointNext);
-    print_stat("Fixpoint Results", this->fixpointRes);
-    print_stat("FixpointPre Nexts", this->fixpointPreNext);
-    print_stat("FixpointPre Results", this->fixpointPreRes);
-    #endif
-    print_stat("True Hits", this->_trueCounter);
-    print_stat("False Hits", this->_falseCounter);
-    print_stat("Continuation Evaluation", this->_contUnfoldingCounter);
-
     this->_aut->DumpStats();
 }
 
 void ComplementAutomaton::DumpStats() {
-    this->_form->dump();
-    std::cout << "\n";
-    std::cout << "  \u2218 Cache stats -> ";
-    this->_resCache.dumpStats();
-    #if (DEBUG_WORKSHOPS)
-    this->_factory.Dump();
+    #if (PRINT_STATS_NEGATION == true)
+        this->_form->dump();
+        std::cout << "\n";
+        std::cout << "  \u2218 Cache stats -> ";
+        this->_resCache.dumpStats();
+        #if (DEBUG_WORKSHOPS)
+        this->_factory.Dump();
+        #endif
+        print_stat("True Hits", this->_trueCounter);
+        print_stat("False Hits", this->_falseCounter);
+        print_stat("Continuation Evaluation", this->_contUnfoldingCounter);
     #endif
-    print_stat("True Hits", this->_trueCounter);
-    print_stat("False Hits", this->_falseCounter);
-    print_stat("Continuation Evaluation", this->_contUnfoldingCounter);
 
     this->_aut->DumpStats();
 }
 
 void BaseAutomaton::DumpStats() {
-    this->_form->dump();
-    std::cout << "\n";
-    std::cout << "  \u2218 Cache stats -> ";
-    this->_resCache.dumpStats();
-    #if (DEBUG_WORKSHOPS)
-    this->_factory.Dump();
+    #if (PRINT_STATS_BASE == true)
+        this->_form->dump();
+        std::cout << "\n";
+        std::cout << "  \u2218 Cache stats -> ";
+        this->_resCache.dumpStats();
+        #if (DEBUG_WORKSHOPS)
+        this->_factory.Dump();
+        #endif
+        print_stat("True Hits", this->_trueCounter);
+        print_stat("False Hits", this->_falseCounter);
+        print_stat("Continuation Evaluation", this->_contUnfoldingCounter);
     #endif
-    print_stat("True Hits", this->_trueCounter);
-    print_stat("False Hits", this->_falseCounter);
-    print_stat("Continuation Evaluation", this->_contUnfoldingCounter);
 }

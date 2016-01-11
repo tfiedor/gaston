@@ -187,7 +187,7 @@ namespace Workshops {
             assert(this->_contCache != nullptr);
 
             Term* termPtr = nullptr;
-            auto contKey = std::make_pair(term, symbol);
+            auto contKey = std::make_pair(term, symbol.get());
             if(!this->_contCache->retrieveFromCache(contKey, termPtr)) {
                 #if (DEBUG_WORKSHOPS == true && DEBUG_TERM_CREATION == true)
                 std::cout << "[*] Creating Continuation: ";

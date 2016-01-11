@@ -154,6 +154,7 @@ enum TermType {TERM, TERM_EMPTY, TERM_FIXPOINT, TERM_PRODUCT, TERM_BASE, TERM_LI
 enum ProductType {E_INTERSECTION, E_UNION};
 enum FixpointTermSem {E_FIXTERM_FIXPOINT, E_FIXTERM_PRE};
 enum ComparisonType {E_BY_SAME_PTR, E_BY_DIFFERENT_TYPE, E_BY_STRUCTURE};
+enum UnfoldedInType {E_IN_SUBSUMPTION, E_IN_ISECT_NONEMPTY, E_IN_COMPARISON};
 
 /****************
  * DEBUG MACROS *
@@ -221,6 +222,14 @@ enum ComparisonType {E_BY_SAME_PTR, E_BY_DIFFERENT_TYPE, E_BY_STRUCTURE};
 #define DEBUG_COMPUTE_FULL_FIXPOINT 	false
 #define DEBUG_COMPARE_WORKLISTS			true
 
+/*
+ * >>> Automata stats options
+ *****************************/
+#define PRINT_STATS_PROJECTION			false
+#define PRINT_STATS_PRODUCT				false
+#define PRINT_STATS_NEGATION			false
+#define PRINT_STATS_BASE				true
+
 /* >>> Dumping Options <<< *
  ***************************/
 #define DUMP_NO_SYMBOL_TABLE			true
@@ -240,8 +249,8 @@ enum ComparisonType {E_BY_SAME_PTR, E_BY_DIFFERENT_TYPE, E_BY_STRUCTURE};
 
 /* >>> Anti-Prenexing Options <<< *
  **********************************/
-#define ANTIPRENEXING_FULL				true
-#define ANTIPRENEXING_DISTRIBUTIVE		false
+#define ANTIPRENEXING_FULL				false
+#define ANTIPRENEXING_DISTRIBUTIVE		true
 
 /*
  * >>> Unique Terms options *
@@ -250,10 +259,11 @@ enum ComparisonType {E_BY_SAME_PTR, E_BY_DIFFERENT_TYPE, E_BY_STRUCTURE};
 #define UNIQUE_PRODUCTS					true
 #define UNIQUE_LISTS					true
 #define UNIQUE_FIXPOINTS				true
-#define UNIQUE_CONTINUATIONS			false
+#define UNIQUE_CONTINUATIONS			true
 
 /* >>> Optimizations <<< *
  *************************/
+#define OPT_DONT_CACHE_CONT				false
 #define OPT_EQ_THROUGH_POINTERS			true	// < Tests equality through pointers not by structure
 #define OPT_GENERATE_UNIQUE_TERMS		true	// < Uses Workshop to generate unique pointers
 // NOTE! From v1.0 onwards, disable this will introduce not only leaks, but will fuck everything up!

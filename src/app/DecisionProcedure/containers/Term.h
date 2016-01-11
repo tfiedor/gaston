@@ -179,6 +179,9 @@ private:
 };
 
 class TermContinuation : public Term {
+private:
+    Term* _unfoldedTerm = nullptr;
+
 public:
     // <<< PUBLIC MEMBERS >>>
     SymbolicAutomaton* aut;
@@ -187,6 +190,9 @@ public:
     bool underComplement;
     // See #L29
     TERM_MEASURELIST(DEFINE_STATIC_MEASURE)
+    static size_t continuationUnfolding;
+    static size_t unfoldInSubsumption;
+    static size_t unfoldInIsectNonempty;
 
     // <<< CONSTRUCTORS >>>
     TermContinuation(SymbolicAutomaton*, Term*, std::shared_ptr<SymbolType>, bool);
@@ -194,6 +200,7 @@ public:
     // <<< PUBLIC API >>>
     bool IsSubsumedBy(std::list<Term_ptr>& fixpoint);
     bool IsEmpty();
+    Term* unfoldContinuation(UnfoldedInType);
 
 protected:
     // <<< DUMPING FUNCTIONS >>>

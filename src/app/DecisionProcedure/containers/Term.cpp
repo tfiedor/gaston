@@ -19,7 +19,7 @@ namespace Gaston {
     size_t hash_value(Term* s) {
         #if (OPT_TERM_HASH_BY_APPROX == true)
         size_t seed = 0;
-        if(s->type == TERM_PRODUCT || s->type == TERM_BASE) {
+        if(s->type == TERM_PRODUCT || s->type == TERM_BASE || s->type == TERM_CONTINUATION) {
             boost::hash_combine(seed, boost::hash_value(s));
         } else {
             boost::hash_combine(seed, boost::hash_value(s->stateSpaceApprox));
@@ -45,6 +45,9 @@ TERM_MEASURELIST(INIT_ALL_STATIC_MEASURES)
 #undef INIT_STATIC_MEASURE
 size_t TermFixpoint::subsumedByHits = 0;
 size_t TermFixpoint::preInstances = 0;
+size_t TermContinuation::continuationUnfolding = 0;
+size_t TermContinuation::unfoldInSubsumption = 0;
+size_t TermContinuation::unfoldInIsectNonempty = 0;
 
 // <<< TERM CONSTRUCTORS >>>
 TermEmpty::TermEmpty() {
@@ -260,21 +263,11 @@ bool Term::IsSubsumed(Term *t) {
     if(t->type == TERM_CONTINUATION) {
         // TODO: We should check that maybe we have different continuations
         TermContinuation *continuation = reinterpret_cast<TermContinuation *>(t);
-        if (this->type == TERM_CONTINUATION) {
-            TermContinuation *thisCont = reinterpret_cast<TermContinuation *>(this);
-            assert(continuation->underComplement == thisCont->underComplement);
-        }
-        assert(continuation->term != nullptr);
-        auto unfoldedContinuation = (continuation->aut->IntersectNonEmpty(continuation->symbol.get(),
-                                                                          continuation->term,
-                                                                          continuation->underComplement)).first;
+        Term* unfoldedContinuation = continuation->unfoldContinuation(UnfoldedInType::E_IN_SUBSUMPTION);
         return this->IsSubsumed(unfoldedContinuation);
     } else if(this->type == TERM_CONTINUATION) {
         TermContinuation *continuation = reinterpret_cast<TermContinuation *>(this);
-        assert(continuation->term != nullptr);
-        auto unfoldedContinuation = (continuation->aut->IntersectNonEmpty(continuation->symbol.get(),
-                                                                          continuation->term,
-                                                                          continuation->underComplement)).first;
+        Term* unfoldedContinuation = continuation->unfoldContinuation(UnfoldedInType::E_IN_SUBSUMPTION);
         return unfoldedContinuation->IsSubsumed(t);
     }
     assert(this->_inComplement == t->_inComplement);
@@ -367,6 +360,7 @@ bool TermBaseSet::_IsSubsumedCore(Term* term) {
 bool TermContinuation::_IsSubsumedCore(Term *t) {
     // TODO: How to do this smartly?
     // TODO: Maybe if we have {} we can answer sooner, without unpacking
+    assert(false);
 
     // We unpack this term
     auto unfoldedTerm = (this->aut->IntersectNonEmpty(this->symbol.get(), this->term, this->underComplement)).first;
@@ -702,15 +696,22 @@ void TermBaseSet::_dumpCore() {
 }
 
 void TermContinuation::_dumpCore() {
-    std::cout << "?";
-    term->dump();
-    std::cout << "?";
-    std::cout << "'";
-    if(symbol != nullptr) {
-        std::cout << (*symbol);
+    if(this->_unfoldedTerm == nullptr) {
+        std::cout << "?";
+        term->dump();
+        std::cout << "?";
+        std::cout << "'";
+        if (symbol != nullptr) {
+            std::cout << (*symbol);
+        }
+        std::cout << "'";
+        std::cout << "?";
+    } else {
+        std::cout << "[";
+        std::cout << this->_unfoldedTerm << ":";
+        this->_unfoldedTerm->dump();
+        std::cout << "]";
     }
-    std::cout << "'";
-    std::cout << "?";
 }
 
 void TermList::_dumpCore() {
@@ -903,6 +904,28 @@ bool TermFixpoint::GetResult() {
  */
 FixpointTermSem TermFixpoint::GetSemantics() const {
     return (nullptr == _sourceTerm) ? E_FIXTERM_FIXPOINT : E_FIXTERM_PRE;
+}
+
+// <<< ADDITIONAL TERMCONTINUATION FUNCTIONS >>>
+Term* TermContinuation::unfoldContinuation(UnfoldedInType t) {
+    if(this->_unfoldedTerm == nullptr) {
+        this->_unfoldedTerm = (this->aut->IntersectNonEmpty(
+                (this->symbol == nullptr ? nullptr : this->symbol.get()), this->term, this->underComplement)).first;
+        #if (MEASURE_CONTINUATION_EVALUATION == true)
+        switch(t){
+            case UnfoldedInType::E_IN_SUBSUMPTION:
+                ++TermContinuation::unfoldInSubsumption;
+                break;
+            case UnfoldedInType::E_IN_ISECT_NONEMPTY:
+                ++TermContinuation::unfoldInIsectNonempty;
+                break;
+            default:
+                break;
+        }
+        ++TermContinuation::continuationUnfolding;
+        #endif
+    }
+    return this->_unfoldedTerm;
 }
 
 // <<< EQUALITY MEASURING FUNCTIONS

@@ -81,6 +81,11 @@ int ws1s_symbolic_decision_procedure(SymbolicAutomaton_ptr symbolicAutomaton) {
     OUTPUT_MEASURES(TermList)
     #endif
     std::cout << "	\u2218 Term Continuations: " << (TermContinuation::instances) << "\n";
+    #if (MEASURE_CONTINUATION_EVALUATION == true)
+    std::cout << "\t\t\u2218 evaluated: " << TermContinuation::continuationUnfolding << "\n";
+    std::cout << "\t\t\t\u2218 in subsumption: " << TermContinuation::unfoldInSubsumption << "\n";
+    std::cout << "\t\t\t\u2218 in isect nonempty: " << TermContinuation::unfoldInIsectNonempty << "\n";
+    #endif
     #if (MEASURE_COMPARISONS == true)
     OUTPUT_MEASURES(TermContinuation)
     #endif
