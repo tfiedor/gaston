@@ -128,15 +128,17 @@ namespace Workshops {
 
     class SymbolWorkshop {
     private:
-        Symbol* _zeroSymbol = nullptr;
         SymbolCache* _symbolCache = nullptr;
+        Symbol* _CreateProjectedSymbol(Symbol*, VarType, ValType);
 
     public:
+        static Symbol* _zeroSymbol;
+
         // <<< CONSTRUCTORS >>>
         SymbolWorkshop();
 
-        Symbol* CreateZeroSymbol();
-        Symbol* CreateProjectedSymbol(Symbol*, VarType, ValType);
+        static Symbol* CreateZeroSymbol();
+        Symbol* CreateSymbol(Symbol*, VarType, ValType);
     };
 }
 

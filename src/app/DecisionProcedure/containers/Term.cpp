@@ -723,6 +723,7 @@ void TermList::_dumpCore() {
 }
 
 void TermFixpoint::_dumpCore() {
+    std::cout << "[" << this << "]";
     std::cout << "\033[1;34m{\033[0m";
     for(auto item : this->_fixpoint) {
         if(item == nullptr) {
@@ -738,6 +739,11 @@ void TermFixpoint::_dumpCore() {
         }
         std::cout << "]";
     #endif
+    std::cout << "\033[1;37m[";
+    for(auto workItem : this->_worklist) {
+        std::cout << (workItem.first) << " + " << (workItem.second) << ", ";
+    }
+    std::cout << "]\033[0m";
     std::cout << "\033[1;34m}\033[0m";
     if(this->_bValue) {
         std::cout << "\033[1;34m\u22A8\033[0m";
@@ -745,6 +751,7 @@ void TermFixpoint::_dumpCore() {
         std::cout << "\033[1;34m\u22AD\033[0m";
     }
 }
+
 // <<< ADDITIONAL TERMBASESET FUNCTIONS >>>
 
 bool TermBaseSet::Intersects(TermBaseSet* rhs) {
@@ -877,6 +884,7 @@ void TermFixpoint::_InitializeSymbols(IdentList* vars, Symbol *startingSymbol) {
         for(auto i = symNum; i != 0; --i) {
             Symbol symF = this->_symList.front();
             this->_symList.pop_front();
+            // #SYMBOL_CREATION
             Symbol zero(symF.GetTrackMask(), varMap[(*var)], '0');
             Symbol one(symF.GetTrackMask(), varMap[(*var)], '1');
             this->_symList.push_back(zero);
@@ -975,23 +983,46 @@ void Term::comparedByDifferentType(TermType t) {
     }
 }
 
-void Term::comparedByStructure(TermType t) {
-    ++Term::comparisonsByStructure;
+void Term::comparedByStructure(TermType t, bool res) {
+    if(res)
+        ++Term::comparisonsByStructureTrue;
+    else
+        ++Term::comparisonsByStructureFalse;
     switch(t) {
         case TERM_BASE:
-            ++TermBaseSet::comparisonsByStructure;
+            if(res) {
+                ++TermBaseSet::comparisonsByStructureTrue;
+            } else {
+                ++TermBaseSet::comparisonsByStructureFalse;
+            }
             break;
         case TERM_LIST:
-            ++TermList::comparisonsByStructure;
+            if(res) {
+                ++TermList::comparisonsByStructureTrue;
+            } else {
+                ++TermList::comparisonsByStructureFalse;
+            }
             break;
         case TERM_PRODUCT:
-            ++TermProduct::comparisonsByStructure;
+            if(res) {
+                ++TermProduct::comparisonsByStructureTrue;
+            } else {
+                ++TermProduct::comparisonsByStructureFalse;
+            }
             break;
         case TERM_FIXPOINT:
-            ++TermFixpoint::comparisonsByStructure;
+            if(res) {
+                ++TermFixpoint::comparisonsByStructureTrue;
+            } else {
+                ++TermFixpoint::comparisonsByStructureFalse;
+            }
             break;
         case TERM_CONTINUATION:
-            ++TermContinuation::comparisonsByStructure;
+            if(res) {
+                ++TermContinuation::comparisonsByStructureTrue;
+            } else {
+                ++TermContinuation::comparisonsByStructureFalse;
+            }
             break;
         default:
             assert(false);
@@ -1025,9 +1056,12 @@ bool Term::operator==(const Term &t) {
         return false;
     } else {
         #if (MEASURE_COMPARISONS == true)
-        Term::comparedByStructure(this->type);
-        #endif
+        bool result = this->_eqCore(t);
+        Term::comparedByStructure(this->type, result);
+        return result;
+        #else
         return this->_eqCore(t);
+        #endif
     }
 }
 

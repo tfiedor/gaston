@@ -39,6 +39,7 @@ class Term;
 extern VarToTrackMap varMap;
 
 using namespace Gaston;
+using SymbolWorkshop    = Workshops::SymbolWorkshop;
 
 /**
  * Base class for Symbolic Automata. Each symbolic automaton contains the

@@ -56,8 +56,7 @@ int ws1s_symbolic_decision_procedure(SymbolicAutomaton_ptr symbolicAutomaton) {
         std::cout << " (" << std::fixed << std::setprecision(2) << (TermType::comparisonsBySamePtr/(double)Term::comparisonsBySamePtr)*100 <<"%)\n"; \
         std::cout << "\t\t\u2218 (==) by diff type: " << TermType::comparisonsByDiffType << "/" << Term::comparisonsByDiffType; \
         std::cout << " (" << std::fixed << std::setprecision(2) << (TermType::comparisonsByDiffType/(double)Term::comparisonsByDiffType)*100 <<"%)\n"; \
-        std::cout << "\t\t\u2218 (==) by structure: " << TermType::comparisonsByStructure << "/" << Term::comparisonsByStructure; \
-        std::cout << " (" << std::fixed << std::setprecision(2) << (TermType::comparisonsByStructure/(double)Term::comparisonsByStructure)*100 <<"%)\n";
+        std::cout << "\t\t\u2218 (==) by structure: " << TermType::comparisonsByStructureTrue << " trues /" << TermType::comparisonsByStructureFalse << " falses\n";
 
     std::cout << "[*] Measured State Space: \n";
     std::cout << "\t\u2218 Symbols: " << ZeroSymbol::instances << "\n";

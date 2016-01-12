@@ -237,11 +237,43 @@ namespace Workshops {
         this->_symbolCache = new SymbolCache();
     }
 
+    Symbol* SymbolWorkshop::_zeroSymbol = nullptr;
+
     Symbol* SymbolWorkshop::CreateZeroSymbol() {
         if(_zeroSymbol == nullptr) {
-            this->_zeroSymbol = new ZeroSymbol();
+            SymbolWorkshop::_zeroSymbol = new ZeroSymbol();
         }
-        return this->_zeroSymbol;
+        return SymbolWorkshop::_zeroSymbol;
+    }
+
+    Symbol* SymbolWorkshop::_CreateProjectedSymbol(Symbol* src, VarType val, ValType var) {
+        auto symbolKey = std::make_tuple(src, val, var);
+        Symbol* symPtr;
+        if(!this->_symbolCache->retrieveFromCache(symbolKey, symPtr)) {
+            symPtr  = new ZeroSymbol(src->GetTrackMask(), var, val);
+            this->_symbolCache->StoreIn(symbolKey, symPtr);
+        }
+        return symPtr;
+    }
+
+    Symbol* SymbolWorkshop::CreateSymbol(Symbol* src, VarType var, ValType val) {
+        // Note that we assume some things about the symbols
+        switch(val) {
+            case 'X':
+                if(src->IsDontCareAt(var)) {
+                    return src;
+                } else {
+                    return this->_CreateProjectedSymbol(src, var, val);
+                }
+            case '0':
+                // We know that there cannot be X
+                return src;
+            case '1':
+                return this->_CreateProjectedSymbol(src, var, val);
+            default:
+                assert(false && "Projecting unknown value");
+                break;
+        }
     }
 
     void dumpSymbolKey(SymbolKey const&s) {

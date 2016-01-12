@@ -45,8 +45,9 @@ public:
     ZeroSymbol(BitMask const&, VarType, VarValue);
 
     // <<< PUBLIC API >>>
-    void ProjectVar(VarType var);
+    void ProjectVar(VarType);
     BitMask GetTrackMask() { return this->_trackMask; }
+    bool IsDontCareAt(VarType);
     BaseAutomatonMTBDD* GetMTBDD();
     std::string ToString() const;
 

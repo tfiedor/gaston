@@ -76,6 +76,10 @@ void ZeroSymbol::_SetOneAt(VarType var) {
     this->_trackMask.set(2*var+1, false);
 }
 
+bool ZeroSymbol::IsDontCareAt(VarType var) {
+    return this->_trackMask.get(2*var) && this->_trackMask.get(2*var+1);
+}
+
 void ZeroSymbol::_SetValueAt(VarType var, VarValue val) {
     switch(val) {
         case 0x01:

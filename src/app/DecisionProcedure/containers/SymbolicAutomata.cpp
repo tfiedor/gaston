@@ -139,6 +139,7 @@ ResultType SymbolicAutomaton::IntersectNonEmpty(Symbol_ptr symbol, Term* stateAp
 
     // Trim the variables that are not occuring in the formula away
     if(symbol != nullptr) {
+        // #SYMBOL_CREATION
         symbol = new Symbol(symbol->GetTrackMask()); // TODO: #1 Memory consumption
 
         auto it = this->_freeVars.begin();
@@ -467,6 +468,7 @@ ResultType BinaryOpAutomaton::_IntersectNonEmptyCore(Symbol_ptr symbol, Term* fi
     // was true.
     if(this->_eval_early(lhs_result.second, underComplement)) {
         // Construct the pointer for symbol (either symbol or epsilon---nullptr)
+        // #SYMBOL_CREATION
         std::shared_ptr<Symbol> suspendedSymbol = (symbol == nullptr) ? nullptr : std::shared_ptr<Symbol>(new ZeroSymbol(symbol->GetTrackMask()));
 
         #if (MEASURE_CONTINUATION_CREATION == true || MEASURE_ALL == true)
@@ -528,9 +530,9 @@ ResultType ProjectionAutomaton::_IntersectNonEmptyCore(Symbol_ptr symbol, Term* 
 
         // Create a new fixpoint term and iterator on it
         #if (DEBUG_NO_WORKSHOPS == true)
-        TermFixpoint* fixpoint = new TermFixpoint(this, result.first, new ZeroSymbol(), underComplement, result.second);
+        TermFixpoint* fixpoint = new TermFixpoint(this, result.first, SymbolWorkshop::CreateZeroSymbol(), underComplement, result.second);
         #else
-        TermFixpoint* fixpoint = this->_factory.CreateFixpoint(result.first, new ZeroSymbol(), underComplement, result.second);
+        TermFixpoint* fixpoint = this->_factory.CreateFixpoint(result.first, SymbolWorkshop::CreateZeroSymbol(), underComplement, result.second);
         #endif
         TermFixpoint::iterator it = fixpoint->GetIterator();
         Term_ptr fixpointTerm;
@@ -569,6 +571,7 @@ ResultType ProjectionAutomaton::_IntersectNonEmptyCore(Symbol_ptr symbol, Term* 
             std::cout << (fixpoint->GetResult() ? "-> early True" : "-> early False") << "\n";
         }
         #endif
+
         // Return (fixpoint, bool)
         return std::make_pair(fixpoint, fixpoint->GetResult());
     } else {
@@ -601,6 +604,7 @@ ResultType ProjectionAutomaton::_IntersectNonEmptyCore(Symbol_ptr symbol, Term* 
         std::cout << "(" << (*symbol) << ") ";
         std::cout << (fixpoint->GetResult() ? "-> pre True" : "-> pre False") << "\n";
         #endif
+
         // TODO: Fixpoint cache should probably be here!
         return std::make_pair(fixpoint, fixpoint->GetResult());
     }

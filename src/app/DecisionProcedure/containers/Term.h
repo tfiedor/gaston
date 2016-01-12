@@ -39,7 +39,8 @@
     code(instances)             \
     code(comparisonsBySamePtr)  \
     code(comparisonsByDiffType) \
-    code(comparisonsByStructure)
+    code(comparisonsByStructureTrue) \
+    code(comparisonsByStructureFalse)
 
 #define DEFINE_STATIC_MEASURE(measure) \
     static size_t measure;
@@ -86,7 +87,7 @@ public:
     #if (MEASURE_COMPARISONS == true)
     static void comparedBySamePtr(TermType);
     static void comparedByDifferentType(TermType);
-    static void comparedByStructure(TermType);
+    static void comparedByStructure(TermType, bool);
     #endif
 
     // <<< DUMPING FUNCTIONS >>>
