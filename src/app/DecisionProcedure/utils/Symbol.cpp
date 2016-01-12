@@ -17,11 +17,16 @@
 
 extern VarToTrackMap varMap;
 
+size_t ZeroSymbol::instances = 0;
+
 // <<< CONSTRUCTORS >>>
 /**
  * Constructor that creates a new zero symbol
  */
 ZeroSymbol::ZeroSymbol() : _trackMask(varMap.TrackLength() << 1) {
+    #if (MEASURE_SYMBOLS == true)
+    ++ZeroSymbol::instances;
+    #endif
     this->_bdd = nullptr;
 }
 
@@ -31,6 +36,9 @@ ZeroSymbol::ZeroSymbol() : _trackMask(varMap.TrackLength() << 1) {
  * @param[in] track:    track of the constructed symbol
  */
 ZeroSymbol::ZeroSymbol(BitMask const& track) {
+    #if (MEASURE_SYMBOLS == true)
+    ++ZeroSymbol::instances;
+    #endif
     this->_trackMask = track;
     this->_bdd = nullptr;
 }
@@ -44,6 +52,9 @@ ZeroSymbol::ZeroSymbol(BitMask const& track) {
  * @param[in] val:      value of @p var
  */
 ZeroSymbol::ZeroSymbol(BitMask const& track, VarType var, VarValue val) {
+    #if (MEASURE_SYMBOLS == true)
+    ++ZeroSymbol::instances;
+    #endif
     this->_trackMask = track;
     this->_SetValueAt(var, ZeroSymbol::charToAsgn(val));
     this->_bdd = nullptr;

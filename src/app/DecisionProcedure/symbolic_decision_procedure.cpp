@@ -52,35 +52,36 @@ int ws1s_symbolic_decision_procedure(SymbolicAutomaton_ptr symbolicAutomaton) {
 
     #if (MEASURE_STATE_SPACE == true)
     #define OUTPUT_MEASURES(TermType) \
-        std::cout << "		\u2218 (==) by same ptr: " << TermType::comparisonsBySamePtr << "/" << Term::comparisonsBySamePtr; \
+        std::cout << "\t\t\u2218 (==) by same ptr: " << TermType::comparisonsBySamePtr << "/" << Term::comparisonsBySamePtr; \
         std::cout << " (" << std::fixed << std::setprecision(2) << (TermType::comparisonsBySamePtr/(double)Term::comparisonsBySamePtr)*100 <<"%)\n"; \
-        std::cout << "		\u2218 (==) by diff type: " << TermType::comparisonsByDiffType << "/" << Term::comparisonsByDiffType; \
+        std::cout << "\t\t\u2218 (==) by diff type: " << TermType::comparisonsByDiffType << "/" << Term::comparisonsByDiffType; \
         std::cout << " (" << std::fixed << std::setprecision(2) << (TermType::comparisonsByDiffType/(double)Term::comparisonsByDiffType)*100 <<"%)\n"; \
-        std::cout << "		\u2218 (==) by structure: " << TermType::comparisonsByStructure << "/" << Term::comparisonsByStructure; \
+        std::cout << "\t\t\u2218 (==) by structure: " << TermType::comparisonsByStructure << "/" << Term::comparisonsByStructure; \
         std::cout << " (" << std::fixed << std::setprecision(2) << (TermType::comparisonsByStructure/(double)Term::comparisonsByStructure)*100 <<"%)\n";
 
     std::cout << "[*] Measured State Space: \n";
-    std::cout << "	\u2218 Term Empty: " << TermEmpty::instances << "\n";
-    std::cout << "	\u2218 Term Products: " << TermProduct::instances << "\n";
+    std::cout << "\t\u2218 Symbols: " << ZeroSymbol::instances << "\n";
+    std::cout << "\t\u2218 Term Empty: " << TermEmpty::instances << "\n";
+    std::cout << "\t\u2218 Term Products: " << TermProduct::instances << "\n";
     #if (MEASURE_COMPARISONS == true)
     OUTPUT_MEASURES(TermProduct)
     #endif
-    std::cout << "	\u2218 Term Bases: " << TermBaseSet::instances << "\n";
+    std::cout << "\t\u2218 Term Bases: " << TermBaseSet::instances << "\n";
     #if (MEASURE_COMPARISONS == true)
     OUTPUT_MEASURES(TermBaseSet)
     #endif
-    std::cout << "	\u2218 Term Fixpoints: " << TermFixpoint::instances << " (" << (TermFixpoint::instances - TermFixpoint::preInstances) << " + " << TermFixpoint::preInstances <<")\n";
+    std::cout << "\t\u2218 Term Fixpoints: " << TermFixpoint::instances << " (" << (TermFixpoint::instances - TermFixpoint::preInstances) << " + " << TermFixpoint::preInstances <<")\n";
     #if (MEASURE_SUBSUMEDBY_HITS == true)
-    std::cout << "		\u2218 subsumedBy hits: " << TermFixpoint::subsumedByHits << "\n";
+    std::cout << "\t\t\u2218 subsumedBy hits: " << TermFixpoint::subsumedByHits << "\n";
     #endif
     #if (MEASURE_COMPARISONS == true)
     OUTPUT_MEASURES(TermFixpoint)
     #endif
-    std::cout << "	\u2218 Term Lists: " << TermList::instances << "\n";
+    std::cout << "\t\u2218 Term Lists: " << TermList::instances << "\n";
     #if (MEASURE_COMPARISONS == true)
     OUTPUT_MEASURES(TermList)
     #endif
-    std::cout << "	\u2218 Term Continuations: " << (TermContinuation::instances) << "\n";
+    std::cout << "\t\u2218 Term Continuations: " << (TermContinuation::instances) << "\n";
     #if (MEASURE_CONTINUATION_EVALUATION == true)
     std::cout << "\t\t\u2218 evaluated: " << TermContinuation::continuationUnfolding << "\n";
     std::cout << "\t\t\t\u2218 in subsumption: " << TermContinuation::unfoldInSubsumption << "\n";

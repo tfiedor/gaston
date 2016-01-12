@@ -205,12 +205,12 @@ enum UnfoldedInType {E_IN_SUBSUMPTION, E_IN_ISECT_NONEMPTY, E_IN_COMPARISON};
  *****************************/
 #define DEBUG_AUTOMATA_ADDRESSES		false
 #define DEBUG_BASE_AUTOMATA 			false
-#define DEBUG_FIXPOINT 					false
+#define DEBUG_FIXPOINT 					true
 #define DEBUG_FIXPOINT_SYMBOLS			false
 #define DEBUG_INITIAL_APPROX 			false
 #define DEBUG_INTERSECT_NON_EMPTY 		false
 #define DEBUG_TERM_UNIQUENESS			false
-#define DEBUG_TERM_CREATION				false
+#define DEBUG_TERM_CREATION				true
 #define DEBUG_CACHE_MEMBERS				false
 #define DEBUG_WORKSHOPS					false
 #define DEBUG_TERM_SUBSUMPTION 			false
@@ -242,6 +242,7 @@ enum UnfoldedInType {E_IN_SUBSUMPTION, E_IN_ISECT_NONEMPTY, E_IN_COMPARISON};
 #define MEASURE_CONTINUATION_CREATION	true
 #define MEASURE_CONTINUATION_EVALUATION	true
 #define MEASURE_RESULT_HITS				true
+#define MEASURE_SYMBOLS					true
 #define MEASURE_PROJECTION				false	// < Measures several things about projection (how many steps, how big, etc.)
 #define MEASURE_ALL						true	// < Measure everything, not really useful
 #define MEASURE_COMPARISONS				false	// < Measure how many times we sucessfully compared and how

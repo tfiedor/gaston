@@ -36,6 +36,9 @@ protected:
     inline void _SetValueAt(VarType var, VarValue val);
 
 public:
+    // <<< STATIC MEMBERS >>>
+    static size_t instances;
+
     // <<< CONSTRUCTORS >>>
     ZeroSymbol();
     ZeroSymbol(BitMask const&);

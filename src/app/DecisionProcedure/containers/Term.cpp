@@ -18,14 +18,13 @@
 namespace Gaston {
     size_t hash_value(Term* s) {
         #if (OPT_TERM_HASH_BY_APPROX == true)
-        size_t seed = 0;
         if(s->type == TERM_PRODUCT || s->type == TERM_BASE || s->type == TERM_CONTINUATION) {
-            boost::hash_combine(seed, boost::hash_value(s));
+            return boost::hash_value(s);
         } else {
-            boost::hash_combine(seed, boost::hash_value(s->stateSpaceApprox));
+            size_t seed = boost::hash_value(s->stateSpaceApprox);
             boost::hash_combine(seed, boost::hash_value(s->MeasureStateSpace()));
+            return seed;
         }
-        return seed;
         #else
         return boost::hash_value(s->MeasureStateSpace());
         #endif
@@ -1012,7 +1011,6 @@ void Term::comparedByStructure(TermType t) {
  * @param[in] t:        tested term
  */
 bool Term::operator==(const Term &t) {
-    // TODO: Add measure here
     if(this == &t) {
         // Same thing
         #if (MEASURE_COMPARISONS == true)
