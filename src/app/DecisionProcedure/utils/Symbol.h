@@ -58,48 +58,18 @@ public:
 
     // <<< FRIENDS >>>
     friend std::ostream& operator <<(std::ostream& osObject, const ZeroSymbol& z);
-    friend bool operator==(const std::shared_ptr<ZeroSymbol>& lhs, const std::shared_ptr<ZeroSymbol>& rhs);
     friend bool operator==(const ZeroSymbol& lhs, const ZeroSymbol& rhs);
-    friend size_t Gaston::hash_value(std::shared_ptr <ZeroSymbol> &s){
-        if(s == nullptr) {
-            return 0;
-        } else {
-            return s->_trackMask.count();
-        }
-    }
-    friend size_t Gaston::hash_value(const ZeroSymbol& s){
-        size_t seed = 0;
-        boost::hash_combine(seed, boost::hash_value(s._trackMask.count()));
-        boost::hash_combine(seed, boost::hash_value(s._trackMask.find_first()));
-        return seed;
-    }
+
     friend size_t Gaston::hash_value(ZeroSymbol* s){
-        size_t seed = 0;
-        if(s == nullptr) return seed;
-        boost::hash_combine(seed, boost::hash_value(s->_trackMask.count()));
+        if(s == nullptr) return 0;
+        size_t seed = boost::hash_value(s->_trackMask.count());
         boost::hash_combine(seed, boost::hash_value(s->_trackMask.find_first()));
         return seed;
     }
 };
 
-/**
- * Does the comparison of two Zero Symbols
- *
- * @param[in] lhs:      left operand
- * @param[in] rhs:      right operand
- */
-inline bool operator==(const std::shared_ptr<ZeroSymbol>& lhs, const std::shared_ptr<ZeroSymbol>& rhs) {
-    if(lhs == nullptr || rhs == nullptr) {
-        return lhs == nullptr && rhs == nullptr;
-    } else if(lhs.get() == rhs.get()) {
-        return true;
-    } else {
-        return lhs->_trackMask == rhs->_trackMask;
-    }
-}
-
 inline bool operator==(const ZeroSymbol& lhs, const ZeroSymbol& rhs) {
-    return lhs._trackMask == rhs._trackMask;
+    return &lhs == &rhs || lhs._trackMask == rhs._trackMask;
 }
 
 #endif //WSKS_SYMBOL_H

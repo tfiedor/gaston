@@ -46,8 +46,6 @@ class PrePairCompare;
 
 namespace Gaston {
 	extern size_t hash_value(Term*);
-	extern size_t hash_value(std::shared_ptr<ZeroSymbol>&);
-	extern size_t hash_value(const ZeroSymbol&);
 	extern size_t hash_value(ZeroSymbol*);
 
 	struct ResultHashType {
@@ -104,7 +102,6 @@ namespace Gaston {
 
 	using Symbol				 = ZeroSymbol;
 	using Symbol_ptr			 = Symbol*;
-	using Symbol_shared			 = std::shared_ptr<Symbol>;
 	using SymbolList			 = std::list<Symbol>;
 
 	using BitMask				 = boost::dynamic_bitset<>;

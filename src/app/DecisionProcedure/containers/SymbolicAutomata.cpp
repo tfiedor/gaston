@@ -35,6 +35,7 @@ SymbolicAutomaton::SymbolicAutomaton(Formula_ptr form) :
         _form(form), _factory(this), _initialStates(nullptr), _finalStates(nullptr) {
     type = AutType::SYMBOLIC_BASE;
 
+    this->symbolFactory = new Workshops::SymbolWorkshop();
     IdentList free, bound;
     this->_form->freeVars(&free, &bound);
     IdentList* allVars;
@@ -116,7 +117,7 @@ UnionAutomaton::UnionAutomaton(SymbolicAutomaton_raw lhs, SymbolicAutomaton_raw 
  * @param[in] underComplement:      true, if we are under the complement
  * @return:                         (fixpoint, true if nonemptyintersect)
  */
-ResultType SymbolicAutomaton::IntersectNonEmpty(Symbol_ptr symbol, Term* stateApproximation, bool underComplement) {
+ResultType SymbolicAutomaton::IntersectNonEmpty(Symbol* symbol, Term* stateApproximation, bool underComplement) {
     assert(this->type != AutType::SYMBOLIC_BASE);
     ResultType result;
 
@@ -139,19 +140,7 @@ ResultType SymbolicAutomaton::IntersectNonEmpty(Symbol_ptr symbol, Term* stateAp
 
     // Trim the variables that are not occuring in the formula away
     if(symbol != nullptr) {
-        // #SYMBOL_CREATION
-        symbol = new Symbol(symbol->GetTrackMask()); // TODO: #1 Memory consumption
-
-        auto it = this->_freeVars.begin();
-        auto end = this->_freeVars.end();
-        auto varNum = varMap.TrackLength();
-        for(size_t var = 0; var < varNum; ++var) {
-            if (it != end && var == *it) {
-                ++it;
-            } else {
-                symbol->ProjectVar(var);
-            }
-        }
+        symbol = this->symbolFactory->CreateTrimmedSymbol(symbol, &this->_freeVars);
     }
 
     // If we have continuation, we have to unwind it
@@ -375,19 +364,19 @@ void BaseAutomaton::_InitializeFinalStates() {
  * @param[in] finalApproximation:   approximation of states that we are computing Pre for
  * @param[in] underComplement:      true, if we are under complement
  */
-Term* BinaryOpAutomaton::Pre(Symbol_ptr symbol, Term* finalApproximation, bool underComplement) {
+Term* BinaryOpAutomaton::Pre(Symbol* symbol, Term* finalApproximation, bool underComplement) {
     assert(false && "Doing Pre on BinaryOp Automaton!");
 }
 
-Term* ComplementAutomaton::Pre(Symbol_ptr symbol, Term* finalApproximation, bool underComplement) {
+Term* ComplementAutomaton::Pre(Symbol* symbol, Term* finalApproximation, bool underComplement) {
     assert(false && "Doing Pre on Complement Automaton!");
 }
 
-Term* ProjectionAutomaton::Pre(Symbol_ptr symbol, Term* finalApproximation, bool underComplement) {
+Term* ProjectionAutomaton::Pre(Symbol* symbol, Term* finalApproximation, bool underComplement) {
     assert(false && "Doing Pre on Projection Automaton!");
 }
 
-Term* BaseAutomaton::Pre(Symbol_ptr symbol, Term* finalApproximation, bool underComplement) {
+Term* BaseAutomaton::Pre(Symbol* symbol, Term* finalApproximation, bool underComplement) {
     assert(symbol != nullptr);
     // TODO: Implement the -minus
 
@@ -442,7 +431,7 @@ Term* BaseAutomaton::Pre(Symbol_ptr symbol, Term* finalApproximation, bool under
  * @param[in] underComplement:      true, if we are computing interesction under complement
  * @return (fixpoint, bool)
  */
-ResultType BinaryOpAutomaton::_IntersectNonEmptyCore(Symbol_ptr symbol, Term* finalApproximation, bool underComplement) {
+ResultType BinaryOpAutomaton::_IntersectNonEmptyCore(Symbol* symbol, Term* finalApproximation, bool underComplement) {
     // TODO: Add counter of continuations per node
     assert(finalApproximation != nullptr);
     assert(finalApproximation->type == TERM_PRODUCT);
@@ -468,17 +457,14 @@ ResultType BinaryOpAutomaton::_IntersectNonEmptyCore(Symbol_ptr symbol, Term* fi
     // was true.
     if(this->_eval_early(lhs_result.second, underComplement)) {
         // Construct the pointer for symbol (either symbol or epsilon---nullptr)
-        // #SYMBOL_CREATION
-        std::shared_ptr<Symbol> suspendedSymbol = (symbol == nullptr) ? nullptr : std::shared_ptr<Symbol>(new ZeroSymbol(symbol->GetTrackMask()));
-
         #if (MEASURE_CONTINUATION_CREATION == true || MEASURE_ALL == true)
         ++this->_contCreationCounter;
         #endif
         #if (DEBUG_NO_WORKSHOPS == true)
-        TermContinuation *continuation = new TermContinuation(this->_rhs_aut, productStateApproximation->right, suspendedSymbol, underComplement);
+        TermContinuation *continuation = new TermContinuation(this->_rhs_aut, productStateApproximation->right, symbol, underComplement);
         Term_ptr leftCombined = new TermProduct(lhs_result.first, continuation, this->_productType);
         #else
-        TermContinuation* continuation = this->_factory.CreateContinuation(this->_rhs_aut, productStateApproximation->right, suspendedSymbol, underComplement);
+        TermContinuation* continuation = this->_factory.CreateContinuation(this->_rhs_aut, productStateApproximation->right, symbol, underComplement);
         Term_ptr leftCombined = this->_factory.CreateProduct(lhs_result.first, continuation, this->_productType);
         #endif
         return std::make_pair(leftCombined, this->_early_val(underComplement));
@@ -504,7 +490,7 @@ ResultType BinaryOpAutomaton::_IntersectNonEmptyCore(Symbol_ptr symbol, Term* fi
     return std::make_pair(combined, this->_eval_result(lhs_result.second, rhs_result.second, underComplement));
 }
 
-ResultType ComplementAutomaton::_IntersectNonEmptyCore(Symbol_ptr symbol, Term* finalApproximaton, bool underComplement) {
+ResultType ComplementAutomaton::_IntersectNonEmptyCore(Symbol* symbol, Term* finalApproximaton, bool underComplement) {
     // Compute the result of nested automaton with switched complement
     ResultType result = this->_aut->IntersectNonEmpty(symbol, finalApproximaton, !underComplement);
     // TODO: fix, because there may be falsely complemented things
@@ -515,7 +501,7 @@ ResultType ComplementAutomaton::_IntersectNonEmptyCore(Symbol_ptr symbol, Term* 
     return result;
 }
 
-ResultType ProjectionAutomaton::_IntersectNonEmptyCore(Symbol_ptr symbol, Term* finalApproximation, bool underComplement) {
+ResultType ProjectionAutomaton::_IntersectNonEmptyCore(Symbol* symbol, Term* finalApproximation, bool underComplement) {
     // TODO: There can be continutation probably
     assert(finalApproximation != nullptr);
     assert(finalApproximation->type == TERM_LIST || finalApproximation->type == TERM_FIXPOINT);
@@ -530,7 +516,7 @@ ResultType ProjectionAutomaton::_IntersectNonEmptyCore(Symbol_ptr symbol, Term* 
 
         // Create a new fixpoint term and iterator on it
         #if (DEBUG_NO_WORKSHOPS == true)
-        TermFixpoint* fixpoint = new TermFixpoint(this, result.first, SymbolWorkshop::CreateZeroSymbol(), underComplement, result.second);
+        TermFixpoint* fixpoint = new TermFixpoint(this->aut, result.first, SymbolWorkshop::CreateZeroSymbol(), underComplement, result.second);
         #else
         TermFixpoint* fixpoint = this->_factory.CreateFixpoint(result.first, SymbolWorkshop::CreateZeroSymbol(), underComplement, result.second);
         #endif
@@ -610,7 +596,7 @@ ResultType ProjectionAutomaton::_IntersectNonEmptyCore(Symbol_ptr symbol, Term* 
     }
 }
 
-ResultType BaseAutomaton::_IntersectNonEmptyCore(Symbol_ptr symbol, Term* approximation, bool underComplement) {
+ResultType BaseAutomaton::_IntersectNonEmptyCore(Symbol* symbol, Term* approximation, bool underComplement) {
     // Reinterpret the initial and final states
     TermBaseSet* initial = reinterpret_cast<TermBaseSet*>(this->_initialStates);
     TermBaseSet* final = reinterpret_cast<TermBaseSet*>(this->_finalStates);

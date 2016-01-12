@@ -44,6 +44,7 @@
 #include <functional>
 #include <tuple>
 #include "../environment.hh"
+#include "../../Frontend/ident.h"
 #include "SymbolicCache.hh"
 
 // <<< FORWARD DECLARATION >>>
@@ -57,7 +58,6 @@ class SymbolicAutomaton;
 namespace Workshops {
     // TODO: Maybe I forgot to take measure of the complement?
     using SymbolList        = Gaston::SymbolList;
-    using Symbol_shared     = Gaston::Symbol_shared;
     using Symbol            = Gaston::Symbol;
     using VarType           = Gaston::VarType;
     using ValType           = Gaston::VarValue;
@@ -121,7 +121,7 @@ namespace Workshops {
         TermFixpoint* CreateFixpointPre(Term_ptr const&, Symbol*, bool);
         TermFixpoint* GetUniqueFixpoint(FixpointType&, WorklistType &);
         TermList* CreateList(Term_ptr const&, bool);
-        TermContinuation* CreateContinuation(SymbolicAutomaton*, Term* const&, Symbol_shared&, bool);
+        TermContinuation* CreateContinuation(SymbolicAutomaton*, Term* const&, Symbol*, bool);
 
         void Dump();
     };
@@ -139,6 +139,7 @@ namespace Workshops {
 
         static Symbol* CreateZeroSymbol();
         Symbol* CreateSymbol(Symbol*, VarType, ValType);
+        Symbol* CreateTrimmedSymbol(Symbol*, Gaston::VarList*);
     };
 }
 

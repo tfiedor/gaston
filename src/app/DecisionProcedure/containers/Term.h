@@ -187,7 +187,7 @@ public:
     // <<< PUBLIC MEMBERS >>>
     SymbolicAutomaton* aut;
     Term* term;
-    std::shared_ptr<SymbolType> symbol;
+    SymbolType* symbol;
     bool underComplement;
     // See #L29
     TERM_MEASURELIST(DEFINE_STATIC_MEASURE)
@@ -196,7 +196,7 @@ public:
     static size_t unfoldInIsectNonempty;
 
     // <<< CONSTRUCTORS >>>
-    TermContinuation(SymbolicAutomaton*, Term*, std::shared_ptr<SymbolType>, bool);
+    TermContinuation(SymbolicAutomaton*, Term*, SymbolType*, bool);
 
     // <<< PUBLIC API >>>
     bool IsSubsumedBy(std::list<Term_ptr>& fixpoint);
@@ -244,9 +244,9 @@ public:
     using FixpointType = std::list<Term_ptr>;
     using Aut_ptr = SymbolicAutomaton*;
 
-    using WorklistItemType = std::pair<Term_ptr, SymbolType>;
+    using WorklistItemType = std::pair<Term_ptr, SymbolType*>;
     using WorklistType = std::list<WorklistItemType>;
-    using Symbols = std::list<SymbolType>;
+    using Symbols = std::list<SymbolType*>;
 
     // <<< PUBLIC MEMBERS >>>
     // See #L29
@@ -355,7 +355,7 @@ private:
     void ComputeNextFixpoint();
     void ComputeNextPre();
     void _InitializeAggregateFunction(bool inComplement);
-    void _InitializeSymbols(IdentList*, Symbol*);
+    void _InitializeSymbols(Workshops::SymbolWorkshop* workshop, IdentList*, Symbol*);
     bool _IsSubsumedCore(Term* t);
     bool _testIfSubsumes(Term_ptr &term);
     bool _eqCore(const Term&);

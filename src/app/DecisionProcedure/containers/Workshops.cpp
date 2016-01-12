@@ -1,5 +1,8 @@
 #include "Workshops.h"
 #include "Term.h"
+#include "VarToTrackMap.hh"
+
+extern VarToTrackMap varMap;
 
 namespace Workshops {
     TermWorkshop::TermWorkshop(SymbolicAutomaton* aut) : _aut(aut) { }
@@ -181,13 +184,12 @@ namespace Workshops {
 
     }
 
-    //TermContinuation::TermContinuation(std::shared_ptr<SymbolicAutomaton> a, Term_ptr t, std::shared_ptr<SymbolType> s, bool b)
-    TermContinuation* TermWorkshop::CreateContinuation(SymbolicAutomaton* aut, Term* const& term, Symbol_shared& symbol, bool underComplement) {
+    TermContinuation* TermWorkshop::CreateContinuation(SymbolicAutomaton* aut, Term* const& term, Symbol* symbol, bool underComplement) {
         #if (OPT_GENERATE_UNIQUE_TERMS == true && UNIQUE_CONTINUATIONS == true)
             assert(this->_contCache != nullptr);
 
             Term* termPtr = nullptr;
-            auto contKey = std::make_pair(term, symbol.get());
+            auto contKey = std::make_pair(term, symbol);
             if(!this->_contCache->retrieveFromCache(contKey, termPtr)) {
                 #if (DEBUG_WORKSHOPS == true && DEBUG_TERM_CREATION == true)
                 std::cout << "[*] Creating Continuation: ";
@@ -246,8 +248,28 @@ namespace Workshops {
         return SymbolWorkshop::_zeroSymbol;
     }
 
-    Symbol* SymbolWorkshop::_CreateProjectedSymbol(Symbol* src, VarType val, ValType var) {
-        auto symbolKey = std::make_tuple(src, val, var);
+    Symbol* SymbolWorkshop::CreateTrimmedSymbol(Symbol* src, Gaston::VarList* varList) {
+        auto symbolKey = std::make_tuple(src, 0u, 'T');
+        Symbol* sPtr;
+        if(!this->_symbolCache->retrieveFromCache(symbolKey, sPtr)) {
+            sPtr = new ZeroSymbol(src->GetTrackMask());
+            auto it = varList->begin();
+            auto end = varList->end();
+            auto varNum = varMap.TrackLength();
+            for (size_t var = 0; var < varNum; ++var) {
+                if (it != end && var == *it) {
+                    ++it;
+                } else {
+                    sPtr->ProjectVar(var);
+                }
+            }
+            this->_symbolCache->StoreIn(symbolKey, sPtr);
+        }
+        return sPtr;
+    }
+
+    Symbol* SymbolWorkshop::_CreateProjectedSymbol(Symbol* src, VarType var, ValType val) {
+        auto symbolKey = std::make_tuple(src, var, val);
         Symbol* symPtr;
         if(!this->_symbolCache->retrieveFromCache(symbolKey, symPtr)) {
             symPtr  = new ZeroSymbol(src->GetTrackMask(), var, val);

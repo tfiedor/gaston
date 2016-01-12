@@ -52,6 +52,7 @@ public:
     static StateType stateCnt;
     AutType type;
     using TermWorkshop  = Workshops::TermWorkshop;
+    SymbolWorkshop* symbolFactory;
 
 protected:
     // <<< PRIVATE MEMBERS >>>

@@ -123,7 +123,7 @@ TermBaseSet::TermBaseSet(VATA::Util::OrdVector<unsigned int>& s, unsigned int of
     #endif
 }
 
-TermContinuation::TermContinuation(SymbolicAutomaton* a, Term* t, std::shared_ptr<SymbolType> s, bool b) : aut(a), term(t), symbol(s), underComplement(b) {
+TermContinuation::TermContinuation(SymbolicAutomaton* a, Term* t, SymbolType* s, bool b) : aut(a), term(t), symbol(s), underComplement(b) {
     #if (DEBUG_TERM_CREATION == true)
     std::cout << "[" << this << "]";
     std::cout << "TermContinuation::";
@@ -196,7 +196,7 @@ TermFixpoint::TermFixpoint(Aut_ptr aut, Term_ptr startingTerm, Symbol* symbol, b
     this->_fixpoint.push_front(nullptr);
 
     // Push symbols to worklist
-    this->_InitializeSymbols(reinterpret_cast<ProjectionAutomaton*>(aut)->projectedVars, symbol);
+    this->_InitializeSymbols(aut->symbolFactory, reinterpret_cast<ProjectionAutomaton*>(aut)->projectedVars, symbol);
     for(auto symbol : this->_symList) {
         this->_worklist.insert(this->_worklist.cbegin(), std::make_pair(startingTerm, symbol));
     }
@@ -231,7 +231,7 @@ TermFixpoint::TermFixpoint(Aut_ptr aut, Term_ptr sourceTerm, Symbol* symbol, boo
     // Initialize the fixpoint
     this->_fixpoint.push_front(nullptr);
     // Push things into worklist
-    this->_InitializeSymbols(reinterpret_cast<ProjectionAutomaton*>(aut)->projectedVars, symbol);
+    this->_InitializeSymbols(aut->symbolFactory, reinterpret_cast<ProjectionAutomaton*>(aut)->projectedVars, symbol);
 
     #if (DEBUG_TERM_CREATION == true)
     std::cout << "[" << this << "]";
@@ -362,7 +362,7 @@ bool TermContinuation::_IsSubsumedCore(Term *t) {
     assert(false);
 
     // We unpack this term
-    auto unfoldedTerm = (this->aut->IntersectNonEmpty(this->symbol.get(), this->term, this->underComplement)).first;
+    auto unfoldedTerm = (this->aut->IntersectNonEmpty(this->symbol, this->term, this->underComplement)).first;
     return unfoldedTerm->IsSubsumed(t);
 }
 
@@ -811,7 +811,7 @@ void TermFixpoint::ComputeNextFixpoint() {
     _worklist.pop_front();
 
     // Compute the results
-    ResultType result = _aut->IntersectNonEmpty(&item.second, item.first, this->_nonMembershipTesting);
+    ResultType result = _aut->IntersectNonEmpty(item.second, item.first, this->_nonMembershipTesting);
 
     // If it is subsumed by fixpoint, we don't add it
     if(this->_testIfSubsumes(result.first)) {
@@ -840,7 +840,7 @@ void TermFixpoint::ComputeNextPre() {
     _worklist.pop_front();
 
     // Compute the results
-    ResultType result = _aut->IntersectNonEmpty(&item.second, item.first, this->_nonMembershipTesting);
+    ResultType result = _aut->IntersectNonEmpty(item.second, item.first, this->_nonMembershipTesting);
 
     // If it is subsumed we return
     if(this->_testIfSubsumes(result.first)) {
@@ -875,20 +875,18 @@ void TermFixpoint::_InitializeAggregateFunction(bool inComplement) {
  * @param[in,out] symbols:  list of symbols, that will be transformed
  * @param[in] vars:         list of used vars, that are projected
  */
-void TermFixpoint::_InitializeSymbols(IdentList* vars, Symbol *startingSymbol) {
-    this->_symList.push_back(*startingSymbol);
+void TermFixpoint::_InitializeSymbols(Workshops::SymbolWorkshop* workshop, IdentList* vars, Symbol *startingSymbol) {
+    this->_symList.push_back(startingSymbol);
     // TODO: Optimize, this sucks
     unsigned int symNum = 1;
     for(auto var = vars->begin(); var != vars->end(); ++var) {
         // Pop symbol;
         for(auto i = symNum; i != 0; --i) {
-            Symbol symF = this->_symList.front();
+            Symbol* symF = this->_symList.front();
             this->_symList.pop_front();
             // #SYMBOL_CREATION
-            Symbol zero(symF.GetTrackMask(), varMap[(*var)], '0');
-            Symbol one(symF.GetTrackMask(), varMap[(*var)], '1');
-            this->_symList.push_back(zero);
-            this->_symList.push_back(one);
+            this->_symList.push_back(workshop->CreateSymbol(symF, varMap[(*var)], '0'));
+            this->_symList.push_back(workshop->CreateSymbol(symF, varMap[(*var)], '1'));
         }
 
         symNum <<= 1;// times 2
@@ -917,7 +915,7 @@ FixpointTermSem TermFixpoint::GetSemantics() const {
 Term* TermContinuation::unfoldContinuation(UnfoldedInType t) {
     if(this->_unfoldedTerm == nullptr) {
         this->_unfoldedTerm = (this->aut->IntersectNonEmpty(
-                (this->symbol == nullptr ? nullptr : this->symbol.get()), this->term, this->underComplement)).first;
+                (this->symbol == nullptr ? nullptr : this->symbol), this->term, this->underComplement)).first;
         #if (MEASURE_CONTINUATION_EVALUATION == true)
         switch(t){
             case UnfoldedInType::E_IN_SUBSUMPTION:

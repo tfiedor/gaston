@@ -77,7 +77,7 @@ void ZeroSymbol::_SetOneAt(VarType var) {
 }
 
 bool ZeroSymbol::IsDontCareAt(VarType var) {
-    return this->_trackMask.get(2*var) && this->_trackMask.get(2*var+1);
+    return this->_trackMask.test(2*var) && this->_trackMask.test(2*var+1);
 }
 
 void ZeroSymbol::_SetValueAt(VarType var, VarValue val) {
