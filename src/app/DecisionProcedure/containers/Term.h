@@ -342,6 +342,8 @@ public:
     bool IsEmpty();
     bool IsSubsumedBy(std::list<Term_ptr>& fixpoint);
     bool GetResult();
+    bool IsFullyComputed();
+    void RemoveSubsumed();
 
     iterator GetIterator() { return iterator(*this); }
     iterator* GetIteratorDynamic() { return new iterator(*this); }

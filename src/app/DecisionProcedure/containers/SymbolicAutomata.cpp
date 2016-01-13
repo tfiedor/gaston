@@ -537,6 +537,9 @@ ResultType ProjectionAutomaton::_IntersectNonEmptyCore(Symbol* symbol, Term* fin
             this->DumpAutomaton();
             std::cout << (fixpoint->GetResult() ? "-> early True" : "-> early False") << "\n";
             #endif
+            #if (OPT_REDUCE_FULL_FIXPOINT == true)
+            fixpoint->RemoveSubsumed();
+            #endif
             return std::make_pair(fixpoint, result.second);
         }
 
@@ -559,6 +562,9 @@ ResultType ProjectionAutomaton::_IntersectNonEmptyCore(Symbol* symbol, Term* fin
         #endif
 
         // Return (fixpoint, bool)
+        #if (OPT_REDUCE_FULL_FIXPOINT == true)
+        fixpoint->RemoveSubsumed();
+        #endif
         return std::make_pair(fixpoint, fixpoint->GetResult());
     } else {
         // Create a new fixpoint term and iterator on it

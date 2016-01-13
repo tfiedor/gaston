@@ -50,8 +50,7 @@ namespace Gaston {
 
 	struct ResultHashType {
 		size_t operator()(std::pair<Term*, ZeroSymbol*> set) const {
-			size_t seed = 0;
-			boost::hash_combine(seed, hash_value(set.first));
+			size_t seed = hash_value(set.first);
 			boost::hash_combine(seed, hash_value(set.second));
 			return seed;
 		}
@@ -59,8 +58,7 @@ namespace Gaston {
 
 	struct SubsumptionHashType {
 		size_t operator()(std::pair<Term*, Term*> set) const {
-			size_t seed = 0;
-			boost::hash_combine(seed, hash_value(set.first));
+			size_t seed = hash_value(set.first);
 			boost::hash_combine(seed, hash_value(set.second));
 			return seed;
 		}
@@ -68,8 +66,7 @@ namespace Gaston {
 
 	struct PreHashType {
 		size_t operator()(std::pair<size_t, ZeroSymbol*> set) const {
-			size_t seed = 0;
-			boost::hash_combine(seed, boost::hash_value(set.first));
+			size_t seed = boost::hash_value(set.first);
 			boost::hash_combine(seed, hash_value(set.second));
 			return seed;
 		}
@@ -274,6 +271,7 @@ enum UnfoldedInType {E_IN_SUBSUMPTION, E_IN_ISECT_NONEMPTY, E_IN_COMPARISON};
 #define OPT_EARLY_EVALUATION 			false	// < Evaluates early interesection of products
 #define OPT_PRUNE_EMPTY					true	// < Prunes empty sets
 #define OPT_PRUNE_FIXPOINT				true	// < Prunes fixpoint during IsSubsumedBy TODO: For BaseSet only for now
+#define OPT_REDUCE_FULL_FIXPOINT		true
 #define OPT_CACHE_RESULTS 				true	// < Cache results
 #define OPT_CACHE_SUBSUMES				true	// < Caches the results of IsSubsumed function on terms
 #define OPT_CACHE_SUBSUMED_BY			true	// < Caches the results of IsSubsumedBy function in fixpoints

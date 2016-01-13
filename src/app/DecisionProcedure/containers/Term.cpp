@@ -893,12 +893,43 @@ void TermFixpoint::_InitializeSymbols(Workshops::SymbolWorkshop* workshop, Ident
     }
 }
 
-
 /**
  * @return: result of fixpoint
  */
 bool TermFixpoint::GetResult() {
     return this->_bValue;
+}
+
+bool TermFixpoint::IsFullyComputed() {
+    if(this->_sourceTerm != nullptr) {
+        // E_FIXTERM_PRE
+        // Fixpoints with PreSemantics are fully computed when the source iterator is empty (so we can
+        // get nothing new from the source and if the worklist is empty.
+        return this->_sourceIt == nullptr && this->_worklist.empty();
+    } else {
+        // E_FIXTERM_FIXPOINT
+        // Fixpoints with classic semantics are fully computed when the worklist is empty
+        return this->_worklist.empty();
+    }
+}
+
+void TermFixpoint::RemoveSubsumed() {
+    auto end = this->_fixpoint.end();
+    for(auto it = this->_fixpoint.begin(); it != end;) {
+        if((*it) == nullptr) {
+            ++it;
+            continue;
+        }
+        auto tit = it;
+        for(++tit; tit != end; ++tit) {
+            assert(*tit != nullptr);
+            if((*it)->IsSubsumed(*tit)) {
+                it = this->_fixpoint.erase(it);
+                continue;
+            }
+        }
+        ++it;
+    }
 }
 
 /**
