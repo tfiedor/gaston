@@ -342,7 +342,7 @@ public:
     bool IsEmpty();
     bool IsSubsumedBy(std::list<Term_ptr>& fixpoint);
     bool GetResult();
-    bool IsFullyComputed();
+    bool IsFullyComputed() const;
     void RemoveSubsumed();
 
     iterator GetIterator() { return iterator(*this); }

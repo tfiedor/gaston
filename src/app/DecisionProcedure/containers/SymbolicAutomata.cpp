@@ -184,6 +184,13 @@ ResultType SymbolicAutomaton::IntersectNonEmpty(Symbol* symbol, Term* stateAppro
                 inCache = tProduct->left->type == TERM_CONTINUATION || tProduct->right->type == TERM_CONTINUATION;
             }
         #endif
+        #if (OPT_DONT_CACHE_UNFULL_FIXPOINTS == true)
+            if(result.first->type == TERM_FIXPOINT) {
+                // If it is not fully computed, we do not cache it
+                TermFixpoint* tFix = reinterpret_cast<TermFixpoint*>(result.first);
+                inCache |= !tFix->IsFullyComputed();
+            }
+        #endif
     if(!inCache) {
         auto key = std::make_pair(stateApproximation, symbol);
         this->_resCache.StoreIn(key, result);

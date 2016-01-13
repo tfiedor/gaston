@@ -18,12 +18,12 @@
 namespace Gaston {
     size_t hash_value(Term* s) {
         #if (OPT_TERM_HASH_BY_APPROX == true)
-        if(s->type == TERM_PRODUCT || s->type == TERM_BASE || s->type == TERM_CONTINUATION) {
-            return boost::hash_value(s);
-        } else {
+        if(s->type == TERM_FIXPOINT || s->type == TERM_LIST) {
             size_t seed = boost::hash_value(s->stateSpaceApprox);
             boost::hash_combine(seed, boost::hash_value(s->MeasureStateSpace()));
             return seed;
+        } else {
+            return boost::hash_value(s);
         }
         #else
         return boost::hash_value(s->MeasureStateSpace());
@@ -275,7 +275,7 @@ bool Term::IsSubsumed(Term *t) {
     // Else if it is not continuation we first look into cache and then recompute if needed
     bool result;
 #if (OPT_CACHE_SUBSUMES == true)
-    if(!this->_isSubsumedCache.retrieveFromCache(t, result)) {
+    if(this->type != TERM_FIXPOINT || !this->_isSubsumedCache.retrieveFromCache(t, result)) {
 #endif
         if (this->_inComplement) {
             if (this->type == TERM_EMPTY) {
@@ -291,7 +291,8 @@ bool Term::IsSubsumed(Term *t) {
             }
         }
 #if (OPT_CACHE_SUBSUMES == true)
-        this->_isSubsumedCache.StoreIn(t, result);
+        if(this->type == TERM_FIXPOINT)
+            this->_isSubsumedCache.StoreIn(t, result);
     }
 #endif
     return result;
@@ -391,6 +392,7 @@ bool TermFixpoint::_IsSubsumedCore(Term* t) {
 
     // Reinterpret
     TermFixpoint* tt = reinterpret_cast<TermFixpoint*>(t);
+
     // Do the piece-wise comparison
     for(auto item : this->_fixpoint) {
         // Skip the nullptr
@@ -900,7 +902,7 @@ bool TermFixpoint::GetResult() {
     return this->_bValue;
 }
 
-bool TermFixpoint::IsFullyComputed() {
+bool TermFixpoint::IsFullyComputed() const {
     if(this->_sourceTerm != nullptr) {
         // E_FIXTERM_PRE
         // Fixpoints with PreSemantics are fully computed when the source iterator is empty (so we can

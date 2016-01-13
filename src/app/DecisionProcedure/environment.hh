@@ -259,6 +259,7 @@ enum UnfoldedInType {E_IN_SUBSUMPTION, E_IN_ISECT_NONEMPTY, E_IN_COMPARISON};
 /* >>> Optimizations <<< *
  *************************/
 #define OPT_DONT_CACHE_CONT				false
+#define OPT_DONT_CACHE_UNFULL_FIXPOINTS false
 #define OPT_EQ_THROUGH_POINTERS			true	// < Tests equality through pointers not by structure
 #define OPT_GENERATE_UNIQUE_TERMS		true	// < Uses Workshop to generate unique pointers
 // NOTE! From v1.0 onwards, disable this will introduce not only leaks, but will fuck everything up!
