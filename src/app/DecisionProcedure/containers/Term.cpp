@@ -318,7 +318,7 @@ bool TermProduct::_IsSubsumedCore(Term* t) {
     } else if(lhsr == rhsr) {
         return lhsl->IsSubsumed(rhsl);
     } else {
-        if(lhsl->stateSpaceApprox < lhsr->stateSpaceApprox) {
+        if(lhsl->stateSpaceApprox < lhsr->stateSpaceApprox || lhsr->type == TERM_CONTINUATION || rhsr->type == TERM_CONTINUATION) {
             return lhsl->IsSubsumed(rhsl) && lhsr->IsSubsumed(rhsr);
         } else {
             return lhsr->IsSubsumed(rhsr) && lhsl->IsSubsumed(rhsl);
@@ -522,9 +522,10 @@ bool TermFixpoint::IsSubsumedBy(FixpointType& fixpoint) {
     // Component-wise comparison
     for(auto& item : fixpoint) {
         if(item.first == nullptr) continue;
-        if (this->IsSubsumed(item.first) || !item.second) {
+        if (this->IsSubsumed(item.first)) {
             return true;
         }
+
     }
     return false;
 }
@@ -562,7 +563,6 @@ bool TermList::IsEmpty() {
 }
 
 bool TermFixpoint::IsEmpty() {
-    // TODO: I hope It should not happen that it is PreSemantics and was not computed at all
     return this->_fixpoint.empty() && this->_worklist.empty();
 }
 

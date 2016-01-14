@@ -305,7 +305,6 @@ void ProjectionAutomaton::_InitializeInitialStates() {
     #endif
 }
 
-// TODO: Optimize so this uses boost::dynamic_bitset instead
 void BaseAutomaton::_InitializeInitialStates() {
     // NOTE: The automaton is constructed backwards, so final states are initial
     assert(this->_initialStates == nullptr);
@@ -344,7 +343,6 @@ void ProjectionAutomaton::_InitializeFinalStates() {
     #endif
 }
 
-// TODO: Refactor a little
 void BaseAutomaton::_InitializeFinalStates() {
     // NOTE: The automaton is constructed backwards, so initial states are finals
     assert(this->_finalStates == nullptr);

@@ -58,6 +58,7 @@
 #include "DecisionProcedure/visitors/BinaryReorderer.h"
 #include "DecisionProcedure/visitors/QuantificationMerger.h"
 #include "DecisionProcedure/visitors/DotWalker.h"
+#include "DecisionProcedure/visitors/BaseAutomataMerger.h"
 
 // < Typedefs and usings >
 using std::cout;

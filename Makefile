@@ -498,6 +498,30 @@ src/app/DecisionProcedure/visitors/AntiPrenexer.cpp.s:
 	$(MAKE) -f CMakeFiles/gaston.dir/build.make CMakeFiles/gaston.dir/src/app/DecisionProcedure/visitors/AntiPrenexer.cpp.s
 .PHONY : src/app/DecisionProcedure/visitors/AntiPrenexer.cpp.s
 
+src/app/DecisionProcedure/visitors/BaseAutomataMerger.o: src/app/DecisionProcedure/visitors/BaseAutomataMerger.cpp.o
+.PHONY : src/app/DecisionProcedure/visitors/BaseAutomataMerger.o
+
+# target to build an object file
+src/app/DecisionProcedure/visitors/BaseAutomataMerger.cpp.o:
+	$(MAKE) -f CMakeFiles/gaston.dir/build.make CMakeFiles/gaston.dir/src/app/DecisionProcedure/visitors/BaseAutomataMerger.cpp.o
+.PHONY : src/app/DecisionProcedure/visitors/BaseAutomataMerger.cpp.o
+
+src/app/DecisionProcedure/visitors/BaseAutomataMerger.i: src/app/DecisionProcedure/visitors/BaseAutomataMerger.cpp.i
+.PHONY : src/app/DecisionProcedure/visitors/BaseAutomataMerger.i
+
+# target to preprocess a source file
+src/app/DecisionProcedure/visitors/BaseAutomataMerger.cpp.i:
+	$(MAKE) -f CMakeFiles/gaston.dir/build.make CMakeFiles/gaston.dir/src/app/DecisionProcedure/visitors/BaseAutomataMerger.cpp.i
+.PHONY : src/app/DecisionProcedure/visitors/BaseAutomataMerger.cpp.i
+
+src/app/DecisionProcedure/visitors/BaseAutomataMerger.s: src/app/DecisionProcedure/visitors/BaseAutomataMerger.cpp.s
+.PHONY : src/app/DecisionProcedure/visitors/BaseAutomataMerger.s
+
+# target to generate assembly for a file
+src/app/DecisionProcedure/visitors/BaseAutomataMerger.cpp.s:
+	$(MAKE) -f CMakeFiles/gaston.dir/build.make CMakeFiles/gaston.dir/src/app/DecisionProcedure/visitors/BaseAutomataMerger.cpp.s
+.PHONY : src/app/DecisionProcedure/visitors/BaseAutomataMerger.cpp.s
+
 src/app/DecisionProcedure/visitors/BinaryReorderer.o: src/app/DecisionProcedure/visitors/BinaryReorderer.cpp.o
 .PHONY : src/app/DecisionProcedure/visitors/BinaryReorderer.o
 
@@ -1419,6 +1443,9 @@ help:
 	@echo "... src/app/DecisionProcedure/visitors/AntiPrenexer.o"
 	@echo "... src/app/DecisionProcedure/visitors/AntiPrenexer.i"
 	@echo "... src/app/DecisionProcedure/visitors/AntiPrenexer.s"
+	@echo "... src/app/DecisionProcedure/visitors/BaseAutomataMerger.o"
+	@echo "... src/app/DecisionProcedure/visitors/BaseAutomataMerger.i"
+	@echo "... src/app/DecisionProcedure/visitors/BaseAutomataMerger.s"
 	@echo "... src/app/DecisionProcedure/visitors/BinaryReorderer.o"
 	@echo "... src/app/DecisionProcedure/visitors/BinaryReorderer.i"
 	@echo "... src/app/DecisionProcedure/visitors/BinaryReorderer.s"
