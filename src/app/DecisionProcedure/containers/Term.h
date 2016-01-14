@@ -40,6 +40,7 @@
     code(comparisonsBySamePtr)  \
     code(comparisonsByDiffType) \
     code(comparisonsByStructureTrue) \
+    code(prunable)                  \
     code(comparisonsByStructureFalse)
 
 #define DEFINE_STATIC_MEASURE(measure) \
@@ -62,6 +63,7 @@ public:
     TermType type;
     size_t stateSpace;         // << Exact size of the state space, 0 if unknown
     size_t stateSpaceApprox;   // << Approximation of the state space, used for heuristics
+    bool valid = true;
 
     // See #L29
     TERM_MEASURELIST(DEFINE_STATIC_MEASURE)
@@ -129,7 +131,9 @@ class TermProduct : public Term {
 public:
     // <<< PUBLIC MEMBERS >>>
     Term_ptr left;
+    size_t leftSubFalse = 0;
     Term_ptr right;
+    size_t rightSubFalse = 0;
     ProductType subtype;
     // See #L29
     TERM_MEASURELIST(DEFINE_STATIC_MEASURE)

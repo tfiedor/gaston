@@ -332,9 +332,7 @@ bool TermBaseSet::_IsSubsumedCore(Term* term) {
     // Test component-wise, not very efficient though
     // TODO: Change to bit-vectors if possible
     TermBaseSet *t = reinterpret_cast<TermBaseSet*>(term);
-    if (this == term) {
-        return true;
-    } else if(t->states.size() < this->states.size()) {
+    if(t->states.size() < this->states.size()) {
         return false;
     } else {
         // TODO: Maybe we could exploit that we have ordered vectors
@@ -392,6 +390,10 @@ bool TermFixpoint::_IsSubsumedCore(Term* t) {
 
     // Reinterpret
     TermFixpoint* tt = reinterpret_cast<TermFixpoint*>(t);
+    if(this->_bValue != tt->_bValue) {
+        // we can automatically assume that these two are different
+        return false;
+    }
 
     // Do the piece-wise comparison
     for(auto item : this->_fixpoint) {
@@ -431,7 +433,7 @@ bool TermFixpoint::_IsSubsumedCore(Term* t) {
  *
  * @param[in] fixpoint:     list of terms contained as fixpoint
  */
-bool TermEmpty::IsSubsumedBy(std::list < Term_ptr > &fixpoint) {
+bool TermEmpty::IsSubsumedBy(std::list<Term_ptr>& fixpoint) {
     // Empty term is subsumed by everything
     return true;
 }
@@ -1155,7 +1157,10 @@ bool TermFixpoint::_eqCore(const Term &t) {
     assert(t.type == TERM_FIXPOINT && "Testing equality of different term types");
 
     const TermFixpoint &tFix = static_cast<const TermFixpoint&>(t);
-    if(this->_fixpoint.size() != tFix._fixpoint.size()) {
+    if(this->_bValue != tFix._bValue) {
+        // If the values are different, we can automatically assume that there is some difference
+        return false;
+    } else if(this->_fixpoint.size() != tFix._fixpoint.size()) {
         // TODO: Can this happen: that we have something twice in fixpoint?
         return false;
     } else {

@@ -796,7 +796,7 @@ void convertMonaToVataAutomaton(Automaton& v_aut, DFA* m_aut, IdentList* vars, i
 
 	#if (DUMP_INTERMEDIATE_AUTOMATA == true)
 		if(options.dump) {
-			std::cout << "[*] Number of states in MONA deterministic automaton: " << m_aut->ns << "\n";
+			std::cout << "[*] Converting MONA deterministic automaton with: " << m_aut->ns << " states\n";
 		}
 	#endif
 
@@ -843,4 +843,10 @@ void convertMonaToVataAutomaton(Automaton& v_aut, DFA* m_aut, IdentList* vars, i
 
 		kill_paths(state_paths);
 	}
+
+	#if (DUMP_INTERMEDIATE_AUTOMATA == true)
+		if(options.dump) {
+			std::cout << "\033[1;32m[DONE]\033[0m\n";
+		}
+	#endif
 }

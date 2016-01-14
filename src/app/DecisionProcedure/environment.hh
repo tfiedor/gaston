@@ -219,15 +219,15 @@ enum UnfoldedInType {E_IN_SUBSUMPTION, E_IN_ISECT_NONEMPTY, E_IN_COMPARISON};
 /*
  * >>> Automata stats options
  *****************************/
-#define PRINT_STATS_PROJECTION			false
-#define PRINT_STATS_PRODUCT				false
-#define PRINT_STATS_NEGATION			false
+#define PRINT_STATS_PROJECTION			true
+#define PRINT_STATS_PRODUCT				true
+#define PRINT_STATS_NEGATION			true
 #define PRINT_STATS_BASE				true
 
 /* >>> Dumping Options <<< *
  ***************************/
 #define DUMP_NO_SYMBOL_TABLE			true
-#define DUMP_INTERMEDIATE_AUTOMATA		false
+#define DUMP_INTERMEDIATE_AUTOMATA		true
 
 /* >>> Measuring Options <<< *
  *****************************/
@@ -244,8 +244,8 @@ enum UnfoldedInType {E_IN_SUBSUMPTION, E_IN_ISECT_NONEMPTY, E_IN_COMPARISON};
 
 /* >>> Anti-Prenexing Options <<< *
  **********************************/
-#define ANTIPRENEXING_FULL				false
-#define ANTIPRENEXING_DISTRIBUTIVE		true
+#define ANTIPRENEXING_FULL				true
+#define ANTIPRENEXING_DISTRIBUTIVE		false
 
 /*
  * >>> Unique Terms options *
@@ -258,7 +258,7 @@ enum UnfoldedInType {E_IN_SUBSUMPTION, E_IN_ISECT_NONEMPTY, E_IN_COMPARISON};
 
 /* >>> Optimizations <<< *
  *************************/
-#define OPT_DONT_CACHE_CONT				false
+#define OPT_DONT_CACHE_CONT				true
 #define OPT_DONT_CACHE_UNFULL_FIXPOINTS false
 #define OPT_EQ_THROUGH_POINTERS			true	// < Tests equality through pointers not by structure
 #define OPT_GENERATE_UNIQUE_TERMS		true	// < Uses Workshop to generate unique pointers
@@ -286,6 +286,7 @@ enum UnfoldedInType {E_IN_SUBSUMPTION, E_IN_ISECT_NONEMPTY, E_IN_COMPARISON};
 	code(SyntaxRestricter)				\
 	code(BinaryReorderer)				\
 	code(DistributiveAntiPrenexer)		\
+	code(QuantificationMerger)			\
 	code(SecondOrderRestricter)
 #else
 #define FILTER_LIST(code) \
@@ -296,6 +297,7 @@ enum UnfoldedInType {E_IN_SUBSUMPTION, E_IN_ISECT_NONEMPTY, E_IN_COMPARISON};
 	code(UniversalQuantifierRemover)	\
 	code(NegationUnfolder)				\
 	code(QuantificationMerger)			\
+	code(Reorderer)						\
 	code(SecondOrderRestricter)
 #endif
 

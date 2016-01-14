@@ -52,6 +52,7 @@ int ws1s_symbolic_decision_procedure(SymbolicAutomaton_ptr symbolicAutomaton) {
 
     #if (MEASURE_STATE_SPACE == true)
     #define OUTPUT_MEASURES(TermType) \
+        std::cout << "\t\t\u2218 prunnable: " << TermType::prunable << "\n"; \
         std::cout << "\t\t\u2218 (==) by same ptr: " << TermType::comparisonsBySamePtr << "/" << Term::comparisonsBySamePtr; \
         std::cout << " (" << std::fixed << std::setprecision(2) << (TermType::comparisonsBySamePtr/(double)Term::comparisonsBySamePtr)*100 <<"%)\n"; \
         std::cout << "\t\t\u2218 (==) by diff type: " << TermType::comparisonsByDiffType << "/" << Term::comparisonsByDiffType; \
