@@ -44,6 +44,18 @@ class PairCompare;
 template<class A>
 class PrePairCompare;
 
+/***********************
+ * GLOBAL ENUMERATIONS *
+ ***********************/
+enum Decision {SATISFIABLE, UNSATISFIABLE, VALID, INVALID};
+enum AutType {SYMBOLIC_BASE, BINARY, INTERSECTION, UNION, PROJECTION, BASE, COMPLEMENT};
+enum TermType {TERM, TERM_EMPTY, TERM_FIXPOINT, TERM_PRODUCT, TERM_BASE, TERM_LIST, TERM_CONTINUATION};
+enum ProductType {E_INTERSECTION, E_UNION};
+enum FixpointTermSem {E_FIXTERM_FIXPOINT, E_FIXTERM_PRE};
+enum ComparisonType {E_BY_SAME_PTR, E_BY_DIFFERENT_TYPE, E_BY_STRUCTURE};
+enum UnfoldedInType {E_IN_SUBSUMPTION, E_IN_ISECT_NONEMPTY, E_IN_COMPARISON};
+enum SubsumptionResult {E_FALSE, E_TRUE, E_PARTIALLY};
+
 namespace Gaston {
 	extern size_t hash_value(Term*);
 	extern size_t hash_value(ZeroSymbol*);
@@ -76,7 +88,7 @@ namespace Gaston {
 	void dumpResultData(std::pair<Term*, bool>& s);
 	void dumpTermKey(Term* const& s);
 	void dumpSubsumptionKey(std::pair<Term*, Term*> const& s);
-	void dumpSubsumptionData(bool& s);
+	void dumpSubsumptionData(SubsumptionResult& s);
 	void dumpPreKey(std::pair<size_t, ZeroSymbol*> const& s);
 	void dumpPreData(VATA::Util::OrdVector<size_t>& s);
 
@@ -109,11 +121,11 @@ namespace Gaston {
 
 	using TermHash 				 = boost::hash<Term_raw>;
 	using TermCompare			 = std::equal_to<Term_raw>;
-	using TermCache				 = BinaryCache<Term_raw, bool, TermHash, TermCompare, dumpTermKey, dumpSubsumptionData>;
+	using TermCache				 = BinaryCache<Term_raw, SubsumptionResult, TermHash, TermCompare, dumpTermKey, dumpSubsumptionData>;
 	using ResultKey				 = std::pair<Term_raw, Symbol_ptr>;
 	using ResultCache            = BinaryCache<ResultKey, ResultType, ResultHashType, PairCompare<ResultKey>, dumpResultKey, dumpResultData>;
 	using SubsumptionKey		 = std::pair<Term_raw, Term_raw>;
-	using SubsumptionCache       = BinaryCache<SubsumptionKey, bool, SubsumptionHashType, PairCompare<SubsumptionKey>, dumpSubsumptionKey, dumpSubsumptionData>;
+	using SubsumptionCache       = BinaryCache<SubsumptionKey, SubsumptionResult, SubsumptionHashType, PairCompare<SubsumptionKey>, dumpSubsumptionKey, dumpSubsumptionData>;
 
 	using WorkListTerm           = Term;
 	using WorkListTerm_raw       = Term*;
@@ -138,17 +150,6 @@ public:
 		return "Functionality not implemented yet";
 	}
 };
-
-/***********************
- * GLOBAL ENUMERATIONS *
- ***********************/
-enum Decision {SATISFIABLE, UNSATISFIABLE, VALID, INVALID};
-enum AutType {SYMBOLIC_BASE, BINARY, INTERSECTION, UNION, PROJECTION, BASE, COMPLEMENT};
-enum TermType {TERM, TERM_EMPTY, TERM_FIXPOINT, TERM_PRODUCT, TERM_BASE, TERM_LIST, TERM_CONTINUATION};
-enum ProductType {E_INTERSECTION, E_UNION};
-enum FixpointTermSem {E_FIXTERM_FIXPOINT, E_FIXTERM_PRE};
-enum ComparisonType {E_BY_SAME_PTR, E_BY_DIFFERENT_TYPE, E_BY_STRUCTURE};
-enum UnfoldedInType {E_IN_SUBSUMPTION, E_IN_ISECT_NONEMPTY, E_IN_COMPARISON};
 
 /****************
  * DEBUG MACROS *
@@ -269,7 +270,7 @@ enum UnfoldedInType {E_IN_SUBSUMPTION, E_IN_ISECT_NONEMPTY, E_IN_COMPARISON};
 #define OPT_CREATE_QF_AUTOMATON 		true	// < Transforms Quantifier-free automaton to formula
 #define OPT_REDUCE_AUT_EVERYTIME		false	// < Calls reduce everytime VATA automaton is created
 #define OPT_REDUCE_AUT_LAST				true	// < Calls reduce after the final automaton is created
-#define OPT_EARLY_EVALUATION 			false	// < Evaluates early interesection of products
+#define OPT_EARLY_EVALUATION 			true	// < Evaluates early interesection of products
 #define OPT_PRUNE_EMPTY					true	// < Prunes empty sets
 #define OPT_PRUNE_FIXPOINT				true	// < Prunes fixpoint during IsSubsumedBy TODO: For BaseSet only for now
 #define OPT_REDUCE_FULL_FIXPOINT		true

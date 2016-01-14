@@ -61,6 +61,7 @@ using SymbolType        = ZeroSymbol;
 //using FixpointMember = std::pair<Term_ptr, bool>;
 using FixpointMember = std::pair<Term_ptr, bool>;
 using FixpointType = std::list<FixpointMember>;
+using TermListType = std::list<Term_ptr>;
 using Aut_ptr = SymbolicAutomaton*;
 
 using WorklistItemType = std::pair<Term_ptr, SymbolType*>;
@@ -86,8 +87,8 @@ protected:
 
 public:
     // <<< PUBLIC API >>>
-    virtual bool IsSubsumedBy(FixpointType& fixpoint) = 0;
-    virtual bool IsSubsumed(Term* t);
+    virtual SubsumptionResult IsSubsumedBy(FixpointType& fixpoint) = 0;
+    virtual SubsumptionResult IsSubsumed(Term* t);
     virtual bool IsEmpty() = 0;
     virtual void Complement() {this->_inComplement = (this->_inComplement == false);}
     virtual bool InComplement() {return this->_inComplement;}
@@ -107,7 +108,7 @@ public:
 protected:
     // <<< PRIVATE FUNCTIONS >>>
     virtual unsigned int _MeasureStateSpaceCore() = 0;
-    virtual bool _IsSubsumedCore(Term* t) = 0;
+    virtual SubsumptionResult _IsSubsumedCore(Term* t) = 0;
     virtual void _dumpCore() = 0;
     virtual bool _eqCore(const Term&) = 0;
 
@@ -124,7 +125,7 @@ public:
     TermEmpty();
 
     // <<< PUBLIC API >>>
-    bool IsSubsumedBy(FixpointType& fixpoint);
+    SubsumptionResult IsSubsumedBy(FixpointType& fixpoint);
     bool IsEmpty();
 
     // <<< DUMPING FUNCTIONS >>>
@@ -134,7 +135,7 @@ private:
 
     // <<< PRIVATE FUNCTIONS >>>
     unsigned int _MeasureStateSpaceCore();
-    bool _IsSubsumedCore(Term* t);
+    SubsumptionResult _IsSubsumedCore(Term* t);
 };
 
 class TermProduct : public Term {
@@ -152,7 +153,7 @@ public:
     TermProduct(Term_ptr lhs, Term_ptr rhs, ProductType subtype);
 
     // <<< PUBLIC API >>>
-    bool IsSubsumedBy(FixpointType& fixpoint);
+    SubsumptionResult IsSubsumedBy(FixpointType& fixpoint);
     bool IsEmpty();
 
     // <<< DUMPING FUNCTIONS >>>
@@ -163,7 +164,7 @@ private:
 private:
     // <<< PRIVATE FUNCTIONS >>>
     unsigned int _MeasureStateSpaceCore();
-    bool _IsSubsumedCore(Term* t);
+    SubsumptionResult _IsSubsumedCore(Term* t);
 };
 
 class TermBaseSet : public Term {
@@ -179,7 +180,7 @@ public:
 
     // <<< PUBLIC API >>>
     bool Intersects(TermBaseSet* rhs);
-    bool IsSubsumedBy(FixpointType& fixpoint);
+    SubsumptionResult IsSubsumedBy(FixpointType& fixpoint);
     bool IsEmpty();
 
     // <<< DUMPING FUNCTIONS >>>
@@ -190,7 +191,7 @@ private:
 private:
     // <<< PRIVATE FUNCTIONS >>>
     unsigned int _MeasureStateSpaceCore();
-    bool _IsSubsumedCore(Term* t);
+    SubsumptionResult _IsSubsumedCore(Term* t);
 };
 
 class TermContinuation : public Term {
@@ -213,7 +214,7 @@ public:
     TermContinuation(SymbolicAutomaton*, Term*, SymbolType*, bool);
 
     // <<< PUBLIC API >>>
-    bool IsSubsumedBy(FixpointType& fixpoint);
+    SubsumptionResult IsSubsumedBy(FixpointType& fixpoint);
     bool IsEmpty();
     Term* unfoldContinuation(UnfoldedInType);
 
@@ -224,7 +225,7 @@ protected:
     // <<< PRIVATE FUNCTIONS >>>
     unsigned int _MeasureStateSpaceCore();
     bool _eqCore(const Term&);
-    bool _IsSubsumedCore(Term* t);
+    SubsumptionResult _IsSubsumedCore(Term* t);
 };
 
 class TermList : public Term {
@@ -239,7 +240,7 @@ public:
     TermList(Term_ptr first, bool isCompl);
 
     // <<< PUBLIC API >>>
-    bool IsSubsumedBy(FixpointType& fixpoint);
+    SubsumptionResult IsSubsumedBy(FixpointType& fixpoint);
     bool IsEmpty();
 
     // <<< DUMPING FUNCTIONS >>>
@@ -249,7 +250,7 @@ private:
 private:
     // <<< PRIVATE FUNCTIONS >>>
     unsigned int _MeasureStateSpaceCore();
-    bool _IsSubsumedCore(Term* t);
+    SubsumptionResult _IsSubsumedCore(Term* t);
     bool _eqCore(const Term&);
 };
 
@@ -342,6 +343,7 @@ public:
 
     Aut_ptr _aut;
     FixpointType _fixpoint;
+    TermListType _postponed;
     WorklistType _worklist;
     Symbols _symList;
     bool _bValue;
@@ -354,7 +356,7 @@ public:
     // <<< PUBLIC API >>>
     FixpointTermSem GetSemantics() const;
     bool IsEmpty();
-    bool IsSubsumedBy(FixpointType& fixpoint);
+    SubsumptionResult IsSubsumedBy(FixpointType& fixpoint);
     bool GetResult();
     bool IsFullyComputed() const;
     void RemoveSubsumed();
@@ -372,8 +374,8 @@ private:
     void ComputeNextPre();
     void _InitializeAggregateFunction(bool inComplement);
     void _InitializeSymbols(Workshops::SymbolWorkshop* workshop, IdentList*, Symbol*);
-    bool _IsSubsumedCore(Term* t);
-    bool _testIfSubsumes(Term_ptr &term);
+    SubsumptionResult _IsSubsumedCore(Term* t);
+    SubsumptionResult _testIfSubsumes(Term_ptr &term);
     bool _eqCore(const Term&);
     unsigned int _MeasureStateSpaceCore();
 };

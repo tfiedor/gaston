@@ -247,7 +247,7 @@ TermFixpoint::TermFixpoint(Aut_ptr aut, Term_ptr sourceTerm, Symbol* symbol, boo
  * @param[in] t:    term we are testing subsumption against
  * @return:         true if this is subsumed by @p t
  */
-bool Term::IsSubsumed(Term *t) {
+SubsumptionResult Term::IsSubsumed(Term *t) {
     #if (DEBUG_TERM_SUBSUMPTION == true)
     this->dump();
     std::cout << " <?= ";
@@ -256,7 +256,7 @@ bool Term::IsSubsumed(Term *t) {
     #endif
     // unfold the continuation
     if(this == t) {
-        return true;
+        return E_TRUE;
     }
 
     if(t->type == TERM_CONTINUATION) {
@@ -273,19 +273,19 @@ bool Term::IsSubsumed(Term *t) {
     assert(this->type != TERM_CONTINUATION && t->type != TERM_CONTINUATION);
 
     // Else if it is not continuation we first look into cache and then recompute if needed
-    bool result;
+    SubsumptionResult result;
 #if (OPT_CACHE_SUBSUMES == true)
     if(this->type != TERM_FIXPOINT || !this->_isSubsumedCache.retrieveFromCache(t, result)) {
 #endif
         if (this->_inComplement) {
             if (this->type == TERM_EMPTY) {
-                result = t->type == TERM_EMPTY;
+                result = (t->type == TERM_EMPTY) ? E_TRUE : E_FALSE;
             } else {
                 result = t->_IsSubsumedCore(this);
             }
         } else {
             if (t->type == TERM_EMPTY) {
-                result = this->type == TERM_EMPTY;
+                result = (this->type == TERM_EMPTY) ? E_TRUE : E_FALSE;
             } else {
                 result = this->_IsSubsumedCore(t);
             }
@@ -298,12 +298,12 @@ bool Term::IsSubsumed(Term *t) {
     return result;
 }
 
-bool TermEmpty::_IsSubsumedCore(Term *t) {
+SubsumptionResult TermEmpty::_IsSubsumedCore(Term *t) {
     // Empty term is subsumed by everything (probably)
-    return true;
+    return E_TRUE;
 }
 
-bool TermProduct::_IsSubsumedCore(Term* t) {
+SubsumptionResult TermProduct::_IsSubsumedCore(Term* t) {
     assert(t->type == TERM_PRODUCT);
 
     // Retype and test the subsumption component-wise
@@ -319,21 +319,21 @@ bool TermProduct::_IsSubsumedCore(Term* t) {
         return lhsl->IsSubsumed(rhsl);
     } else {
         if(lhsl->stateSpaceApprox < lhsr->stateSpaceApprox || lhsr->type == TERM_CONTINUATION || rhsr->type == TERM_CONTINUATION) {
-            return lhsl->IsSubsumed(rhsl) && lhsr->IsSubsumed(rhsr);
+            return (lhsl->IsSubsumed(rhsl) != E_FALSE && lhsr->IsSubsumed(rhsr) != E_FALSE) ? E_TRUE : E_FALSE;
         } else {
-            return lhsr->IsSubsumed(rhsr) && lhsl->IsSubsumed(rhsl);
+            return (lhsr->IsSubsumed(rhsr) != E_FALSE && lhsl->IsSubsumed(rhsl) != E_FALSE) ? E_TRUE : E_FALSE;
         }
     }
 }
 
-bool TermBaseSet::_IsSubsumedCore(Term* term) {
+SubsumptionResult TermBaseSet::_IsSubsumedCore(Term* term) {
     assert(term->type == TERM_BASE);
 
     // Test component-wise, not very efficient though
     // TODO: Change to bit-vectors if possible
     TermBaseSet *t = reinterpret_cast<TermBaseSet*>(term);
     if(t->states.size() < this->states.size()) {
-        return false;
+        return E_FALSE;
     } else {
         // TODO: Maybe we could exploit that we have ordered vectors
         auto it = this->states.begin();
@@ -348,14 +348,14 @@ bool TermBaseSet::_IsSubsumedCore(Term* term) {
                 ++tit;
             } else {
                 // *it < *tit
-                return false;
+                return E_FALSE;
             }
         }
-        return (it == end);
+        return (it == end) ? E_TRUE : E_FALSE;
     }
 }
 
-bool TermContinuation::_IsSubsumedCore(Term *t) {
+SubsumptionResult TermContinuation::_IsSubsumedCore(Term *t) {
     // TODO: How to do this smartly?
     // TODO: Maybe if we have {} we can answer sooner, without unpacking
     assert(false);
@@ -365,7 +365,7 @@ bool TermContinuation::_IsSubsumedCore(Term *t) {
     return unfoldedTerm->IsSubsumed(t);
 }
 
-bool TermList::_IsSubsumedCore(Term* t) {
+SubsumptionResult TermList::_IsSubsumedCore(Term* t) {
     assert(t->type == TERM_LIST);
 
     // Reinterpret
@@ -379,20 +379,20 @@ bool TermList::_IsSubsumedCore(Term* t) {
                 break;
             }
         }
-        if(!subsumes) return false;
+        if(!subsumes) return E_FALSE;
     }
 
-    return true;
+    return E_TRUE;
 }
 
-bool TermFixpoint::_IsSubsumedCore(Term* t) {
+SubsumptionResult TermFixpoint::_IsSubsumedCore(Term* t) {
     assert(t->type == TERM_FIXPOINT);
 
     // Reinterpret
     TermFixpoint* tt = reinterpret_cast<TermFixpoint*>(t);
     if(this->_bValue != tt->_bValue) {
         // we can automatically assume that these two are different
-        return false;
+        return E_FALSE;
     }
 
     // Do the piece-wise comparison
@@ -407,7 +407,7 @@ bool TermFixpoint::_IsSubsumedCore(Term* t) {
                 break;
             }
         }
-        if(!subsumes) return false;
+        if(!subsumes) return E_FALSE;
     }
 
     #if (DEBUG_COMPARE_WORKLISTS == true)
@@ -420,12 +420,12 @@ bool TermFixpoint::_IsSubsumedCore(Term* t) {
             }
         }
         if(!found) {
-            return false;
+            return E_FALSE;
         }
     }
     #endif
 
-    return true;
+    return E_TRUE;
 }
 
 /**
@@ -433,24 +433,25 @@ bool TermFixpoint::_IsSubsumedCore(Term* t) {
  *
  * @param[in] fixpoint:     list of terms contained as fixpoint
  */
-bool TermEmpty::IsSubsumedBy(FixpointType& fixpoint) {
+SubsumptionResult TermEmpty::IsSubsumedBy(FixpointType& fixpoint) {
     // Empty term is subsumed by everything
-    return true;
+    return E_TRUE;
 }
 
-bool TermProduct::IsSubsumedBy(FixpointType& fixpoint) {
+SubsumptionResult TermProduct::IsSubsumedBy(FixpointType& fixpoint) {
     if(this->IsEmpty()) {
-        return true;
+        return E_TRUE;
     }
     // For each item in fixpoint
     // TODO: This should be holikoptimized
+    SubsumptionResult result;
     for(auto& item : fixpoint) {
         // Nullptr is skipped
         if(item.first == nullptr || !item.second) continue;
 
         // Test the subsumption
-        if(this->IsSubsumed(item.first)) {
-            return true;
+        if((result = this->IsSubsumed(item.first)) != E_FALSE) {
+            return result;
         }
 
         if(item.first->IsSubsumed(this)) {
@@ -458,12 +459,12 @@ bool TermProduct::IsSubsumedBy(FixpointType& fixpoint) {
         }
     }
 
-    return false;
+    return E_FALSE;
 }
 
-bool TermBaseSet::IsSubsumedBy(FixpointType& fixpoint) {
+SubsumptionResult TermBaseSet::IsSubsumedBy(FixpointType& fixpoint) {
     if(this->IsEmpty()) {
-        return true;
+        return E_TRUE;
     }
     // For each item in fixpoint
     // TODO: Maybe during this shit we could remove some of the things from fixpoint?
@@ -473,23 +474,23 @@ bool TermBaseSet::IsSubsumedBy(FixpointType& fixpoint) {
 
         // Test the subsumption
         if(this->IsSubsumed(item.first)) {
-            return true;
+            return E_TRUE ;
         }
         if(item.first->IsSubsumed(this)) {
             item.second = false;
         }
     }
 
-    return false;
+    return E_FALSE;
 }
 
-bool TermContinuation::IsSubsumedBy(FixpointType& fixpoint) {
+SubsumptionResult TermContinuation::IsSubsumedBy(FixpointType& fixpoint) {
     assert(false && "TermContSubset.IsSubsumedBy() is impossible to happen~!");
 }
 
-bool TermList::IsSubsumedBy(FixpointType& fixpoint) {
+SubsumptionResult TermList::IsSubsumedBy(FixpointType& fixpoint) {
     if(this->IsEmpty()) {
-        return true;
+        return E_TRUE;
     }
     // For each item in fixpoint
     for(auto& item : fixpoint) {
@@ -497,14 +498,14 @@ bool TermList::IsSubsumedBy(FixpointType& fixpoint) {
         if(item.first == nullptr || !item.second) continue;
 
         if (this->IsSubsumed(item.first)) {
-            return true;
+            return E_TRUE;
         }
     }
 
-    return false;
+    return E_FALSE;
 }
 
-bool TermFixpoint::IsSubsumedBy(FixpointType& fixpoint) {
+SubsumptionResult TermFixpoint::IsSubsumedBy(FixpointType& fixpoint) {
     // TODO: There should be unfolding of fixpoint probably
     #if (DEBUG_TERM_SUBSUMPTION == true)
     this->dump();
@@ -523,11 +524,11 @@ bool TermFixpoint::IsSubsumedBy(FixpointType& fixpoint) {
     for(auto& item : fixpoint) {
         if(item.first == nullptr) continue;
         if (this->IsSubsumed(item.first)) {
-            return true;
+            return E_TRUE ;
         }
 
     }
-    return false;
+    return E_FALSE;
 }
 
 /**
@@ -644,8 +645,8 @@ namespace Gaston {
         std::cout << "<" << (*s.first) << ", " << (*s.second) << ">";
     }
 
-    void dumpSubsumptionData(bool &s) {
-        std::cout << (s ? "True" : "False");
+    void dumpSubsumptionData(SubsumptionResult &s) {
+        std::cout << (s != E_FALSE ? "True" : "False");
     }
 
     void dumpPreKey(std::pair<size_t, ZeroSymbol*> const& s) {
@@ -787,12 +788,12 @@ bool TermBaseSet::Intersects(TermBaseSet* rhs) {
  * @param[in] term:     term we are testing subsumption for
  * @return:             true if term is subsumed by fixpoint
  */
-bool TermFixpoint::_testIfSubsumes(Term_ptr &term) {
+SubsumptionResult TermFixpoint::_testIfSubsumes(Term_ptr &term) {
     #if (OPT_CACHE_SUBSUMED_BY == true)
-    bool result;
+    SubsumptionResult result;
     Term* key = term;
     if(!this->_subsumedByCache.retrieveFromCache(key, result)) {
-        if(result = term->IsSubsumedBy(this->_fixpoint)) {
+        if((result = term->IsSubsumedBy(this->_fixpoint)) != E_FALSE) {
             this->_subsumedByCache.StoreIn(key, result);
         }
     }
@@ -804,11 +805,7 @@ bool TermFixpoint::_testIfSubsumes(Term_ptr &term) {
 
     return result;
     #else
-    if(term->IsSubsumedBy(this->_fixpoint)) {
-        return true;
-    }
-
-    return false;
+    return term->IsSubsumedBy(this->_fixpoint);
     #endif
 }
 
