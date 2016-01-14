@@ -783,18 +783,19 @@ void LessEqAutomaton::DumpAutomaton() {
     #endif
 }
 
-void SymbolicAutomaton::AutomatonToDot(std::string filename, SymbolicAutomaton *aut) {
+void SymbolicAutomaton::AutomatonToDot(std::string filename, SymbolicAutomaton *aut, bool inComplement) {
     std::ofstream os;
     os.open(filename);
     // TODO: Add exception handling
     os << "strict graph aut {\n";
-    aut->DumpToDot(os);
+    aut->DumpToDot(os, inComplement);
     os << "}\n";
     os.close();
 }
 
-void BinaryOpAutomaton::DumpToDot(std::ofstream & os) {
+void BinaryOpAutomaton::DumpToDot(std::ofstream & os, bool inComplement) {
     os << "\t" << (uintptr_t) &*this << "[label=\"";
+    os << "\u03B5 " << (inComplement ? "\u2209 " : "\u2208 ");
     if(this->_productType == ProductType::E_INTERSECTION) {
         os << "\u2229";
     } else {
@@ -803,26 +804,29 @@ void BinaryOpAutomaton::DumpToDot(std::ofstream & os) {
     os << " (" << this->_trueCounter << "\u22A8, " << this->_falseCounter << "\u22AD)\"];\n";
     os << "\t" << (uintptr_t) &*this << " -- " << (uintptr_t) (this->_lhs_aut) << ";\n";
     os << "\t" << (uintptr_t) &*this << " -- " << (uintptr_t) (this->_rhs_aut) << ";\n";
-    this->_lhs_aut->DumpToDot(os);
-    this->_rhs_aut->DumpToDot(os);
+    this->_lhs_aut->DumpToDot(os, inComplement);
+    this->_rhs_aut->DumpToDot(os, inComplement);
 }
 
-void ComplementAutomaton::DumpToDot(std::ofstream & os) {
-    os << "\t" << (uintptr_t) &*this << "[label=\"\u00AC";
-    os << " (" << this->_trueCounter << "\u22A8, " << this->_falseCounter << "\u22AD)\"];\n";
+void ComplementAutomaton::DumpToDot(std::ofstream & os, bool inComplement) {
+    os << "\t" << (uintptr_t) &*this << "[label=\"";
+    os << "\u03B5 " << (inComplement ? "\u2209 " : "\u2208 ");
+    os << "\u00AC (" << this->_trueCounter << "\u22A8, " << this->_falseCounter << "\u22AD)\"];\n";
     os << "\t" << (uintptr_t) &*this << " -- " << (uintptr_t) (this->_aut) << ";\n";
-    this->_aut->DumpToDot(os);
+    this->_aut->DumpToDot(os, !inComplement);
 }
 
-void ProjectionAutomaton::DumpToDot(std::ofstream & os) {
-    os << "\t" << (uintptr_t) &*this << "[label=\"\u2203";
-    os << " (" << this->_trueCounter << "\u22A8, " << this->_falseCounter << "\u22AD)\"];\n";
+void ProjectionAutomaton::DumpToDot(std::ofstream & os, bool inComplement) {
+    os << "\t" << (uintptr_t) &*this << "[label=\"";
+    os << "\u03B5 " << (inComplement ? "\u2209 " : "\u2208 ");
+    os << "\u2203 (" << this->_trueCounter << "\u22A8, " << this->_falseCounter << "\u22AD)\"];\n";
     os << "\t" << (uintptr_t) &*this << " -- " << (uintptr_t) (this->_aut) << ";\n";
-    this->_aut->DumpToDot(os);
+    this->_aut->DumpToDot(os, inComplement);
 }
 
-void BaseAutomaton::DumpToDot(std::ofstream & os) {
-    os << "\t" << (uintptr_t) &*this << "[label=\"Aut";
+void BaseAutomaton::DumpToDot(std::ofstream & os, bool inComplement) {
+    os << "\t" << (uintptr_t) &*this << "[label=\"";
+    os << "\u03B5 " << (inComplement ? "\u2209 " : "\u2208 ") << "Aut";
     os << " (" << this->_trueCounter << "\u22A8, " << this->_falseCounter << "\u22AD)\"];\n";
 
 }

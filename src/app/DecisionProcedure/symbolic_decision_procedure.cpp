@@ -103,7 +103,7 @@ int ws1s_symbolic_decision_procedure(SymbolicAutomaton_ptr symbolicAutomaton) {
     #endif
 
     #if (DEBUG_GENERATE_DOT_AUTOMATON == true)
-    SymbolicAutomaton::AutomatonToDot("automaton.dot", symbolicAutomaton.get());
+    SymbolicAutomaton::AutomatonToDot("automaton.dot", symbolicAutomaton.get(), false);
     #endif
 
     // If Initial States does intersect final ones, the formula is valid, else it is unsatisfiable
