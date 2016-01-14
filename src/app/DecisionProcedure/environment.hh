@@ -232,7 +232,7 @@ enum UnfoldedInType {E_IN_SUBSUMPTION, E_IN_ISECT_NONEMPTY, E_IN_COMPARISON};
 /* >>> Measuring Options <<< *
  *****************************/
 #define MEASURE_STATE_SPACE 			true	// < Measures how many instances of terms were created
-#define MEASURE_CACHE_HITS 				true	// < Prints the statistics for each cache on each node
+#define MEASURE_CACHE_HITS 				false	// < Prints the statistics for each cache on each node
 #define MEASURE_CONTINUATION_CREATION	true
 #define MEASURE_CONTINUATION_EVALUATION	true
 #define MEASURE_RESULT_HITS				true
@@ -244,8 +244,8 @@ enum UnfoldedInType {E_IN_SUBSUMPTION, E_IN_ISECT_NONEMPTY, E_IN_COMPARISON};
 
 /* >>> Anti-Prenexing Options <<< *
  **********************************/
-#define ANTIPRENEXING_FULL				true
-#define ANTIPRENEXING_DISTRIBUTIVE		false
+#define ANTIPRENEXING_FULL				false
+#define ANTIPRENEXING_DISTRIBUTIVE		true
 
 /*
  * >>> Unique Terms options *
@@ -269,7 +269,7 @@ enum UnfoldedInType {E_IN_SUBSUMPTION, E_IN_ISECT_NONEMPTY, E_IN_COMPARISON};
 #define OPT_CREATE_QF_AUTOMATON 		true	// < Transforms Quantifier-free automaton to formula
 #define OPT_REDUCE_AUT_EVERYTIME		false	// < Calls reduce everytime VATA automaton is created
 #define OPT_REDUCE_AUT_LAST				true	// < Calls reduce after the final automaton is created
-#define OPT_EARLY_EVALUATION 			false	// < Evaluates early interesection of products
+#define OPT_EARLY_EVALUATION 			true	// < Evaluates early interesection of products
 #define OPT_PRUNE_EMPTY					true	// < Prunes empty sets
 #define OPT_PRUNE_FIXPOINT				true	// < Prunes fixpoint during IsSubsumedBy TODO: For BaseSet only for now
 #define OPT_REDUCE_FULL_FIXPOINT		true

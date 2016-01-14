@@ -371,9 +371,9 @@ bool TermList::_IsSubsumedCore(Term* t) {
     // Reinterpret
     TermList* tt = reinterpret_cast<TermList*>(t);
     // Do the item-wise subsumption check
-    for(auto item : this->list) {
+    for(auto& item : this->list) {
         bool subsumes = false;
-        for(auto tt_item : tt->list) {
+        for(auto& tt_item : tt->list) {
             if(item->IsSubsumed(tt_item)) {
                 subsumes = true;
                 break;
@@ -396,11 +396,11 @@ bool TermFixpoint::_IsSubsumedCore(Term* t) {
     }
 
     // Do the piece-wise comparison
-    for(auto item : this->_fixpoint) {
+    for(auto& item : this->_fixpoint) {
         // Skip the nullptr
         if(item.first == nullptr || !item.second) continue;
         bool subsumes = false;
-        for(auto tt_item : tt->_fixpoint) {
+        for(auto& tt_item : tt->_fixpoint) {
             if(tt_item.first == nullptr || !item.second) continue;
             if((item.first)->IsSubsumed(tt_item.first)) {
                 subsumes = true;
@@ -444,13 +444,17 @@ bool TermProduct::IsSubsumedBy(FixpointType& fixpoint) {
     }
     // For each item in fixpoint
     // TODO: This should be holikoptimized
-    for(auto item : fixpoint) {
+    for(auto& item : fixpoint) {
         // Nullptr is skipped
         if(item.first == nullptr || !item.second) continue;
 
         // Test the subsumption
         if(this->IsSubsumed(item.first)) {
             return true;
+        }
+
+        if(item.first->IsSubsumed(this)) {
+            item.second = false;
         }
     }
 
@@ -463,13 +467,16 @@ bool TermBaseSet::IsSubsumedBy(FixpointType& fixpoint) {
     }
     // For each item in fixpoint
     // TODO: Maybe during this shit we could remove some of the things from fixpoint?
-    for(auto item : fixpoint) {
+    for(auto& item : fixpoint) {
         // Nullptr is skipped
         if(item.first == nullptr || !item.second) continue;
 
         // Test the subsumption
         if(this->IsSubsumed(item.first)) {
             return true;
+        }
+        if(item.first->IsSubsumed(this)) {
+            item.second = false;
         }
     }
 
@@ -485,7 +492,7 @@ bool TermList::IsSubsumedBy(FixpointType& fixpoint) {
         return true;
     }
     // For each item in fixpoint
-    for(auto item : fixpoint) {
+    for(auto& item : fixpoint) {
         // Nullptr is skipped
         if(item.first == nullptr || !item.second) continue;
 
@@ -503,7 +510,7 @@ bool TermFixpoint::IsSubsumedBy(FixpointType& fixpoint) {
     this->dump();
     std::cout << " <?= ";
     std::cout << "{";
-    for(auto item : fixpoint) {
+    for(auto& item : fixpoint) {
         if(item == nullptr) continue;
         item->dump();
         std::cout << ",";
@@ -513,7 +520,7 @@ bool TermFixpoint::IsSubsumedBy(FixpointType& fixpoint) {
     #endif
 
     // Component-wise comparison
-    for(auto item : fixpoint) {
+    for(auto& item : fixpoint) {
         if(item.first == nullptr) continue;
         if (this->IsSubsumed(item.first) || !item.second) {
             return true;
@@ -545,7 +552,7 @@ bool TermList::IsEmpty() {
     if(this->list.size() == 0) {
         return true;
     } else {
-        for(auto item : this->list) {
+        for(auto& item : this->list) {
             if(!item->IsEmpty()) {
                 return false;
             }
@@ -589,7 +596,7 @@ unsigned int TermContinuation::_MeasureStateSpaceCore() {
 unsigned int TermList::_MeasureStateSpaceCore() {
     unsigned int count = 0;
     // Measure state spaces of all subterms
-    for(auto item : this->list) {
+    for(auto& item : this->list) {
         count += item->MeasureStateSpace();
     }
 
@@ -598,7 +605,7 @@ unsigned int TermList::_MeasureStateSpaceCore() {
 
 unsigned int TermFixpoint::_MeasureStateSpaceCore() {
     unsigned count = 1;
-    for(auto item : this->_fixpoint) {
+    for(auto& item : this->_fixpoint) {
         if(item.first == nullptr || !item.second) {
             continue;
         }
@@ -720,7 +727,7 @@ void TermContinuation::_dumpCore() {
 
 void TermList::_dumpCore() {
     std::cout << "\033[1;36m{\033[0m";
-    for(auto state : this->list) {
+    for(auto& state : this->list) {
         state->dump();
         std::cout  << ",";
     }
@@ -730,7 +737,7 @@ void TermList::_dumpCore() {
 void TermFixpoint::_dumpCore() {
     std::cout << "[" << this << "]";
     std::cout << "\033[1;34m{\033[0m";
-    for(auto item : this->_fixpoint) {
+    for(auto& item : this->_fixpoint) {
         if(item.first == nullptr || !(item.second)) {
             continue;
         }
@@ -739,13 +746,13 @@ void TermFixpoint::_dumpCore() {
     }
     #if (DEBUG_FIXPOINT_SYMBOLS == true)
         std::cout << "[";
-        for(auto item : this->_worklist) {
+        for(auto& item : this->_worklist) {
             std::cout << "(" << item.first << "+" << item.second << ") , ";
         }
         std::cout << "]";
     #endif
     std::cout << "\033[1;37m[";
-    for(auto workItem : this->_worklist) {
+    for(auto& workItem : this->_worklist) {
         std::cout << (workItem.first) << " + " << (workItem.second) << ", ";
     }
     std::cout << "]\033[0m";
@@ -761,7 +768,7 @@ void TermFixpoint::_dumpCore() {
 
 bool TermBaseSet::Intersects(TermBaseSet* rhs) {
     for (auto lhs_state : this->states) {
-        for(auto rhs_state : rhs->states) {
+        for(auto& rhs_state : rhs->states) {
             if(lhs_state == rhs_state) {
                 return true;
             }
@@ -828,7 +835,7 @@ void TermFixpoint::ComputeNextFixpoint() {
     // Aggregate the result of the fixpoint computation
     _bValue = this->_aggregate_result(_bValue,result.second);
     // Push new symbols from _symList
-    for(auto symbol : _symList) {
+    for(auto& symbol : _symList) {
         _worklist.insert(_worklist.cbegin(), std::make_pair(result.first, symbol));
     }
 }
