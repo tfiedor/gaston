@@ -192,8 +192,8 @@ TermFixpoint::TermFixpoint(Aut_ptr aut, Term_ptr startingTerm, Symbol* symbol, b
     this->stateSpaceApprox = startingTerm->stateSpaceApprox;
 
     // Initialize the fixpoint as [nullptr, startingTerm]
-    this->_fixpoint.push_front(startingTerm);
-    this->_fixpoint.push_front(nullptr);
+    this->_fixpoint.push_front(std::make_pair(startingTerm, true));
+    this->_fixpoint.push_front(std::make_pair(nullptr, true));
 
     // Push symbols to worklist
     this->_InitializeSymbols(aut->symbolFactory, reinterpret_cast<ProjectionAutomaton*>(aut)->projectedVars, symbol);
@@ -229,7 +229,7 @@ TermFixpoint::TermFixpoint(Aut_ptr aut, Term_ptr sourceTerm, Symbol* symbol, boo
     this->_inComplement = false;
 
     // Initialize the fixpoint
-    this->_fixpoint.push_front(nullptr);
+    this->_fixpoint.push_front(std::make_pair(nullptr, true));
     // Push things into worklist
     this->_InitializeSymbols(aut->symbolFactory, reinterpret_cast<ProjectionAutomaton*>(aut)->projectedVars, symbol);
 
@@ -398,11 +398,11 @@ bool TermFixpoint::_IsSubsumedCore(Term* t) {
     // Do the piece-wise comparison
     for(auto item : this->_fixpoint) {
         // Skip the nullptr
-        if(item == nullptr) continue;
+        if(item.first == nullptr || !item.second) continue;
         bool subsumes = false;
         for(auto tt_item : tt->_fixpoint) {
-            if(tt_item == nullptr) continue;
-            if(item->IsSubsumed(tt_item)) {
+            if(tt_item.first == nullptr || !item.second) continue;
+            if((item.first)->IsSubsumed(tt_item.first)) {
                 subsumes = true;
                 break;
             }
@@ -446,10 +446,10 @@ bool TermProduct::IsSubsumedBy(FixpointType& fixpoint) {
     // TODO: This should be holikoptimized
     for(auto item : fixpoint) {
         // Nullptr is skipped
-        if(item == nullptr) continue;
+        if(item.first == nullptr || !item.second) continue;
 
         // Test the subsumption
-        if(this->IsSubsumed(item)) {
+        if(this->IsSubsumed(item.first)) {
             return true;
         }
     }
@@ -465,10 +465,10 @@ bool TermBaseSet::IsSubsumedBy(FixpointType& fixpoint) {
     // TODO: Maybe during this shit we could remove some of the things from fixpoint?
     for(auto item : fixpoint) {
         // Nullptr is skipped
-        if(item == nullptr) continue;
+        if(item.first == nullptr || !item.second) continue;
 
         // Test the subsumption
-        if(this->IsSubsumed(item)) {
+        if(this->IsSubsumed(item.first)) {
             return true;
         }
     }
@@ -487,9 +487,11 @@ bool TermList::IsSubsumedBy(FixpointType& fixpoint) {
     // For each item in fixpoint
     for(auto item : fixpoint) {
         // Nullptr is skipped
-        if(item == nullptr) continue;
+        if(item.first == nullptr || !item.second) continue;
 
-        return this->IsSubsumed(item);
+        if (this->IsSubsumed(item.first)) {
+            return true;
+        }
     }
 
     return false;
@@ -512,8 +514,8 @@ bool TermFixpoint::IsSubsumedBy(FixpointType& fixpoint) {
 
     // Component-wise comparison
     for(auto item : fixpoint) {
-        if(item == nullptr) continue;
-        if (this->IsSubsumed(item)) {
+        if(item.first == nullptr) continue;
+        if (this->IsSubsumed(item.first) || !item.second) {
             return true;
         }
     }
@@ -597,11 +599,10 @@ unsigned int TermList::_MeasureStateSpaceCore() {
 unsigned int TermFixpoint::_MeasureStateSpaceCore() {
     unsigned count = 1;
     for(auto item : this->_fixpoint) {
-        if(item == nullptr) {
+        if(item.first == nullptr || !item.second) {
             continue;
         }
-        assert(item != nullptr);
-        count += item->MeasureStateSpace();
+        count += (item.first)->MeasureStateSpace();
     }
 
     return count;
@@ -730,10 +731,10 @@ void TermFixpoint::_dumpCore() {
     std::cout << "[" << this << "]";
     std::cout << "\033[1;34m{\033[0m";
     for(auto item : this->_fixpoint) {
-        if(item == nullptr) {
+        if(item.first == nullptr || !(item.second)) {
             continue;
         }
-        item->dump();
+        item.first->dump();
         std::cout << "\033[1;34m,\033[0m";
     }
     #if (DEBUG_FIXPOINT_SYMBOLS == true)
@@ -823,7 +824,7 @@ void TermFixpoint::ComputeNextFixpoint() {
     }
 
     // Push new term to fixpoint
-    _fixpoint.push_back(result.first);
+    _fixpoint.push_back(std::make_pair(result.first, true));
     // Aggregate the result of the fixpoint computation
     _bValue = this->_aggregate_result(_bValue,result.second);
     // Push new symbols from _symList
@@ -852,7 +853,7 @@ void TermFixpoint::ComputeNextPre() {
     }
 
     // Push the computed thing and aggregate the result
-    _fixpoint.push_back(result.first);
+    _fixpoint.push_back(std::make_pair(result.first, true));
     _bValue = this->_aggregate_result(_bValue,result.second);
 }
 
@@ -920,18 +921,22 @@ bool TermFixpoint::IsFullyComputed() const {
 void TermFixpoint::RemoveSubsumed() {
     auto end = this->_fixpoint.end();
     for(auto it = this->_fixpoint.begin(); it != end;) {
-        if((*it) == nullptr) {
+        if((*it).first == nullptr) {
             ++it;
             continue;
         }
-        auto tit = it;
+        if(!(*it).second) {
+            it = this->_fixpoint.erase(it);
+            continue;
+        }
+        /*auto tit = it;
         for(++tit; tit != end; ++tit) {
-            assert(*tit != nullptr);
-            if((*it)->IsSubsumed(*tit)) {
+            assert((*tit).first != nullptr);
+            if((*it).first->IsSubsumed((*tit).first)) {
                 it = this->_fixpoint.erase(it);
                 continue;
             }
-        }
+        }*/
         ++it;
     }
 }
@@ -1165,13 +1170,13 @@ bool TermFixpoint::_eqCore(const Term &t) {
         return false;
     } else {
         for(auto it = this->_fixpoint.begin(); it != this->_fixpoint.end(); ++it) {
-            if(*it == nullptr)
+            if((*it).first == nullptr || !(*it).second)
                 continue;
             bool found = false;
             for(auto tit = tFix._fixpoint.begin(); tit != tFix._fixpoint.end(); ++tit) {
-                if(*tit == nullptr)
+                if((*tit).first == nullptr || !(*tit).second)
                     continue;
-                if(**it == **tit) {
+                if(*(*it).first == *(*tit).first) {
                     found = true;
                     break;
                 }

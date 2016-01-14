@@ -59,7 +59,7 @@ using ResultType        = std::pair<Term_ptr, bool>;
 using SymbolType        = ZeroSymbol;
 
 //using FixpointMember = std::pair<Term_ptr, bool>;
-using FixpointMember = Term_ptr;
+using FixpointMember = std::pair<Term_ptr, bool>;
 using FixpointType = std::list<FixpointMember>;
 using Aut_ptr = SymbolicAutomaton*;
 
@@ -86,7 +86,7 @@ protected:
 
 public:
     // <<< PUBLIC API >>>
-    virtual bool IsSubsumedBy(std::list<Term_ptr>& fixpoint) = 0;
+    virtual bool IsSubsumedBy(FixpointType& fixpoint) = 0;
     virtual bool IsSubsumed(Term* t);
     virtual bool IsEmpty() = 0;
     virtual void Complement() {this->_inComplement = (this->_inComplement == false);}
@@ -124,7 +124,7 @@ public:
     TermEmpty();
 
     // <<< PUBLIC API >>>
-    bool IsSubsumedBy(std::list<Term_ptr>& fixpoint);
+    bool IsSubsumedBy(FixpointType& fixpoint);
     bool IsEmpty();
 
     // <<< DUMPING FUNCTIONS >>>
@@ -152,7 +152,7 @@ public:
     TermProduct(Term_ptr lhs, Term_ptr rhs, ProductType subtype);
 
     // <<< PUBLIC API >>>
-    bool IsSubsumedBy(std::list<Term_ptr>& fixpoint);
+    bool IsSubsumedBy(FixpointType& fixpoint);
     bool IsEmpty();
 
     // <<< DUMPING FUNCTIONS >>>
@@ -179,7 +179,7 @@ public:
 
     // <<< PUBLIC API >>>
     bool Intersects(TermBaseSet* rhs);
-    bool IsSubsumedBy(std::list<Term_ptr>& fixpoint);
+    bool IsSubsumedBy(FixpointType& fixpoint);
     bool IsEmpty();
 
     // <<< DUMPING FUNCTIONS >>>
@@ -213,7 +213,7 @@ public:
     TermContinuation(SymbolicAutomaton*, Term*, SymbolType*, bool);
 
     // <<< PUBLIC API >>>
-    bool IsSubsumedBy(std::list<Term_ptr>& fixpoint);
+    bool IsSubsumedBy(FixpointType& fixpoint);
     bool IsEmpty();
     Term* unfoldContinuation(UnfoldedInType);
 
@@ -239,7 +239,7 @@ public:
     TermList(Term_ptr first, bool isCompl);
 
     // <<< PUBLIC API >>>
-    bool IsSubsumedBy(std::list<Term_ptr>& fixpoint);
+    bool IsSubsumedBy(FixpointType& fixpoint);
     bool IsEmpty();
 
     // <<< DUMPING FUNCTIONS >>>
@@ -280,14 +280,21 @@ public:
 
             if (_termFixpoint._fixpoint.cend() != succIt) {
                 // if we can traverse
-                return *(++_it);
+                if((*succIt).second) {
+                    // fixpoint member is valid
+                    return (*++_it).first;
+                }  else {
+                    ++_it;
+                    return this->GetNext();
+                }
+
             } else {
                 // we need to refine the fixpoint
                 if (E_FIXTERM_FIXPOINT == _termFixpoint.GetSemantics()) {
                     // we need to unfold the fixpoint
                     if (_termFixpoint._worklist.empty()) {
+                        // nothing to fold
                         ++_it;
-
                         return nullptr;
                     } else {
                         _termFixpoint.ComputeNextFixpoint();
@@ -347,7 +354,7 @@ public:
     // <<< PUBLIC API >>>
     FixpointTermSem GetSemantics() const;
     bool IsEmpty();
-    bool IsSubsumedBy(std::list<Term_ptr>& fixpoint);
+    bool IsSubsumedBy(FixpointType& fixpoint);
     bool GetResult();
     bool IsFullyComputed() const;
     void RemoveSubsumed();
