@@ -433,12 +433,12 @@ bool TermFixpoint::_IsSubsumedCore(Term* t) {
  *
  * @param[in] fixpoint:     list of terms contained as fixpoint
  */
-bool TermEmpty::IsSubsumedBy(std::list<Term_ptr>& fixpoint) {
+bool TermEmpty::IsSubsumedBy(FixpointType& fixpoint) {
     // Empty term is subsumed by everything
     return true;
 }
 
-bool TermProduct::IsSubsumedBy(std::list<Term_ptr>& fixpoint) {
+bool TermProduct::IsSubsumedBy(FixpointType& fixpoint) {
     if(this->IsEmpty()) {
         return true;
     }
@@ -457,7 +457,7 @@ bool TermProduct::IsSubsumedBy(std::list<Term_ptr>& fixpoint) {
     return false;
 }
 
-bool TermBaseSet::IsSubsumedBy(std::list<Term_ptr>& fixpoint) {
+bool TermBaseSet::IsSubsumedBy(FixpointType& fixpoint) {
     if(this->IsEmpty()) {
         return true;
     }
@@ -476,11 +476,11 @@ bool TermBaseSet::IsSubsumedBy(std::list<Term_ptr>& fixpoint) {
     return false;
 }
 
-bool TermContinuation::IsSubsumedBy(std::list<Term_ptr>& fixpoint) {
+bool TermContinuation::IsSubsumedBy(FixpointType& fixpoint) {
     assert(false && "TermContSubset.IsSubsumedBy() is impossible to happen~!");
 }
 
-bool TermList::IsSubsumedBy(std::list<Term_ptr>& fixpoint) {
+bool TermList::IsSubsumedBy(FixpointType& fixpoint) {
     if(this->IsEmpty()) {
         return true;
     }
@@ -495,7 +495,7 @@ bool TermList::IsSubsumedBy(std::list<Term_ptr>& fixpoint) {
     return false;
 }
 
-bool TermFixpoint::IsSubsumedBy(std::list<Term_ptr>& fixpoint) {
+bool TermFixpoint::IsSubsumedBy(FixpointType& fixpoint) {
     // TODO: There should be unfolding of fixpoint probably
     #if (DEBUG_TERM_SUBSUMPTION == true)
     this->dump();

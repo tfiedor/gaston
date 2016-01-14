@@ -58,6 +58,16 @@ using TermBaseSetStates = std::vector<BaseState>;
 using ResultType        = std::pair<Term_ptr, bool>;
 using SymbolType        = ZeroSymbol;
 
+//using FixpointMember = std::pair<Term_ptr, bool>;
+using FixpointMember = Term_ptr;
+using FixpointType = std::list<FixpointMember>;
+using Aut_ptr = SymbolicAutomaton*;
+
+using WorklistItemType = std::pair<Term_ptr, SymbolType*>;
+using WorklistType = std::list<WorklistItemType>;
+using Symbols = std::list<SymbolType*>;
+
+
 class Term {
 public:
     TermType type;
@@ -245,13 +255,6 @@ private:
 
 class TermFixpoint : public Term {
 public:
-    using FixpointType = std::list<Term_ptr>;
-    using Aut_ptr = SymbolicAutomaton*;
-
-    using WorklistItemType = std::pair<Term_ptr, SymbolType*>;
-    using WorklistType = std::list<WorklistItemType>;
-    using Symbols = std::list<SymbolType*>;
-
     // <<< PUBLIC MEMBERS >>>
     // See #L29
     TERM_MEASURELIST(DEFINE_STATIC_MEASURE)
