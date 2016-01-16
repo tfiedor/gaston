@@ -61,7 +61,7 @@ using SymbolType        = ZeroSymbol;
 //using FixpointMember = std::pair<Term_ptr, bool>;
 using FixpointMember = std::pair<Term_ptr, bool>;
 using FixpointType = std::list<FixpointMember>;
-using TermListType = std::list<Term_ptr>;
+using TermListType = std::list<std::pair<Term_ptr, Term_ptr>>;
 using Aut_ptr = SymbolicAutomaton*;
 
 using WorklistItemType = std::pair<Term_ptr, SymbolType*>;
@@ -87,12 +87,13 @@ protected:
 
 public:
     // <<< PUBLIC API >>>
-    virtual SubsumptionResult IsSubsumedBy(FixpointType& fixpoint) = 0;
+    virtual SubsumptionResult IsSubsumedBy(FixpointType& fixpoint, Term*&) = 0;
     virtual SubsumptionResult IsSubsumed(Term* t);
     virtual bool IsEmpty() = 0;
     virtual void Complement() {this->_inComplement = (this->_inComplement == false);}
     virtual bool InComplement() {return this->_inComplement;}
     bool operator==(const Term &t);
+    bool IsNotComputed();
 
     // <<< MEASURING FUNCTIONS >>>
     virtual unsigned int MeasureStateSpace();
@@ -125,7 +126,7 @@ public:
     TermEmpty();
 
     // <<< PUBLIC API >>>
-    SubsumptionResult IsSubsumedBy(FixpointType& fixpoint);
+    SubsumptionResult IsSubsumedBy(FixpointType& fixpoint, Term*&);
     bool IsEmpty();
 
     // <<< DUMPING FUNCTIONS >>>
@@ -153,7 +154,7 @@ public:
     TermProduct(Term_ptr lhs, Term_ptr rhs, ProductType subtype);
 
     // <<< PUBLIC API >>>
-    SubsumptionResult IsSubsumedBy(FixpointType& fixpoint);
+    SubsumptionResult IsSubsumedBy(FixpointType& fixpoint, Term*&);
     bool IsEmpty();
 
     // <<< DUMPING FUNCTIONS >>>
@@ -180,7 +181,7 @@ public:
 
     // <<< PUBLIC API >>>
     bool Intersects(TermBaseSet* rhs);
-    SubsumptionResult IsSubsumedBy(FixpointType& fixpoint);
+    SubsumptionResult IsSubsumedBy(FixpointType& fixpoint, Term*&);
     bool IsEmpty();
 
     // <<< DUMPING FUNCTIONS >>>
@@ -195,7 +196,7 @@ private:
 };
 
 class TermContinuation : public Term {
-private:
+protected:
     Term* _unfoldedTerm = nullptr;
 
 public:
@@ -214,7 +215,8 @@ public:
     TermContinuation(SymbolicAutomaton*, Term*, SymbolType*, bool);
 
     // <<< PUBLIC API >>>
-    SubsumptionResult IsSubsumedBy(FixpointType& fixpoint);
+    SubsumptionResult IsSubsumedBy(FixpointType& fixpoint, Term*&);
+    bool IsUnfolded() {return this->_unfoldedTerm == nullptr;}
     bool IsEmpty();
     Term* unfoldContinuation(UnfoldedInType);
 
@@ -240,7 +242,7 @@ public:
     TermList(Term_ptr first, bool isCompl);
 
     // <<< PUBLIC API >>>
-    SubsumptionResult IsSubsumedBy(FixpointType& fixpoint);
+    SubsumptionResult IsSubsumedBy(FixpointType& fixpoint, Term*&);
     bool IsEmpty();
 
     // <<< DUMPING FUNCTIONS >>>
@@ -294,9 +296,19 @@ public:
                 if (E_FIXTERM_FIXPOINT == _termFixpoint.GetSemantics()) {
                     // we need to unfold the fixpoint
                     if (_termFixpoint._worklist.empty()) {
-                        // nothing to fold
-                        ++_it;
-                        return nullptr;
+                        // nothing to fold?
+                        if(_termFixpoint._postponed.empty()) {
+                            // Nothing postponed, we are done
+                            ++_it;
+                            return nullptr;
+                        } else {
+                            // Take something from the postponed shit
+                            if(this->_termFixpoint._processOnePostponed()) {
+                                return this->GetNext();
+                            } else {
+                                return nullptr;
+                            }
+                        }
                     } else {
                         _termFixpoint.ComputeNextFixpoint();
                         return this->GetNext();
@@ -316,11 +328,18 @@ public:
                             _termFixpoint.ComputeNextPre();
                             return this->GetNext();
                         } else {
-                            // we are complete;
-                            ++_it;
-                            // TODO: kill something and make it behave like a fixpoint semantics
-
-                            return nullptr;
+                            // we are complete?
+                            // TODO: Add taking things from postponed
+                            if(_termFixpoint._postponed.empty()) {
+                                ++_it;
+                                return nullptr;
+                            } else {
+                                if(this->_termFixpoint._processOnePostponed()) {
+                                    return this->GetNext();
+                                } else {
+                                    return nullptr;
+                                }
+                            }
                         }
                     } else {
                         _termFixpoint.ComputeNextPre();
@@ -356,7 +375,7 @@ public:
     // <<< PUBLIC API >>>
     FixpointTermSem GetSemantics() const;
     bool IsEmpty();
-    SubsumptionResult IsSubsumedBy(FixpointType& fixpoint);
+    SubsumptionResult IsSubsumedBy(FixpointType& fixpoint, Term*&);
     bool GetResult();
     bool IsFullyComputed() const;
     void RemoveSubsumed();
@@ -372,10 +391,11 @@ private:
     // <<< PRIVATE FUNCTIONS >>>
     void ComputeNextFixpoint();
     void ComputeNextPre();
+    bool _processOnePostponed();
     void _InitializeAggregateFunction(bool inComplement);
     void _InitializeSymbols(Workshops::SymbolWorkshop* workshop, IdentList*, Symbol*);
     SubsumptionResult _IsSubsumedCore(Term* t);
-    SubsumptionResult _testIfSubsumes(Term_ptr &term);
+    SubsumptionResult _testIfSubsumes(Term_ptr const& term);
     bool _eqCore(const Term&);
     unsigned int _MeasureStateSpaceCore();
 };

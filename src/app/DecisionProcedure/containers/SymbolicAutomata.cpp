@@ -178,16 +178,16 @@ ResultType SymbolicAutomaton::IntersectNonEmpty(Symbol* symbol, Term* stateAppro
     // Cache Results
     #if (OPT_CACHE_RESULTS == true)
         #if (OPT_DONT_CACHE_CONT == true)
-            if(result.first->type == TERM_PRODUCT) {
+            if(stateApproximation->type == TERM_PRODUCT) {
                 // If either side is not fully computed, we do not cache it
-                TermProduct* tProduct = reinterpret_cast<TermProduct*>(result.first);
-                inCache = tProduct->left->type == TERM_CONTINUATION || tProduct->right->type == TERM_CONTINUATION;
+                TermProduct* tProduct = reinterpret_cast<TermProduct*>(stateApproximation);
+                inCache = tProduct->left->IsNotComputed() || tProduct->right->IsNotComputed();
             }
         #endif
         #if (OPT_DONT_CACHE_UNFULL_FIXPOINTS == true)
             if(result.first->type == TERM_FIXPOINT) {
                 // If it is not fully computed, we do not cache it
-                TermFixpoint* tFix = reinterpret_cast<TermFixpoint*>(result.first);
+                TermFixpoint* tFix = reinterpret_cast<TermFixpoint*>(stateApproximation);
                 inCache |= !tFix->IsFullyComputed();
             }
         #endif

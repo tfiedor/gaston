@@ -245,8 +245,8 @@ public:
 
 /* >>> Anti-Prenexing Options <<< *
  **********************************/
-#define ANTIPRENEXING_FULL				false
-#define ANTIPRENEXING_DISTRIBUTIVE		true
+#define ANTIPRENEXING_FULL				true
+#define ANTIPRENEXING_DISTRIBUTIVE		false
 
 /*
  * >>> Unique Terms options *
@@ -273,6 +273,8 @@ public:
 #define OPT_EARLY_EVALUATION 			true	// < Evaluates early interesection of products
 #define OPT_PRUNE_EMPTY					true	// < Prunes empty sets
 #define OPT_PRUNE_FIXPOINT				true	// < Prunes fixpoint during IsSubsumedBy TODO: For BaseSet only for now
+#define OPT_POSTPONE_SUBSUMPTION		true
+#define OPT_FIND_POSTPONED_CANDIDATE	true
 #define OPT_REDUCE_FULL_FIXPOINT		true
 #define OPT_CACHE_RESULTS 				true	// < Cache results
 #define OPT_CACHE_SUBSUMES				true	// < Caches the results of IsSubsumed function on terms
@@ -299,7 +301,6 @@ public:
 	code(UniversalQuantifierRemover)	\
 	code(NegationUnfolder)				\
 	code(QuantificationMerger)			\
-	code(BaseAutomataMerger)			\
 	code(SecondOrderRestricter)
 #endif
 
