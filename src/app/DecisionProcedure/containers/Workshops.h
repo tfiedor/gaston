@@ -48,6 +48,7 @@
 #include "SymbolicCache.hh"
 
 // <<< FORWARD DECLARATION >>>
+class TermEmpty;
 class TermBaseSet;
 class TermProduct;
 class TermFixpoint;
@@ -56,6 +57,9 @@ class TermContinuation;
 class SymbolicAutomaton;
 
 namespace Workshops {
+    struct ComputationHash;
+    struct ComputationCompare;
+
     // TODO: Maybe I forgot to take measure of the complement?
     using SymbolList        = Gaston::SymbolList;
     using Symbol            = Gaston::Symbol;
@@ -79,23 +83,26 @@ namespace Workshops {
     using FixpointHash      = boost::hash<FixpointKey>;
     using FixpointCompare   = PairCompare<FixpointKey>;
     using Term_ptr          = Term*;
-    using FixpointType      = std::list<Term*>;
+    using FixpointType      = std::list<std::pair<Term*,bool>>;
     using WorklistItemType  = std::pair<Term*, Symbol*>;
     using WorklistType      = std::list<WorklistItemType>;
+    using ComputationKey    = std::pair<FixpointType*, WorklistType*>;
 
     void dumpBaseKey(BaseKey const&);
     void dumpProductKey(ProductKey const&);
     void dumpListKey(ListKey const&);
     void dumpFixpointKey(FixpointKey const&);
+    void dumpComputationKey(ComputationKey const&);
     void dumpCacheData(CacheData &);
     void dumpSymbolKey(SymbolKey const&);
     void dumpSymbolData(Symbol* &);
 
-    using SymbolCache   = BinaryCache<SymbolKey, Symbol*, SymbolHash, SymbolCompare, dumpSymbolKey, dumpSymbolData>;
-    using BaseCache     = BinaryCache<BaseKey, CacheData, BaseHash, BaseCompare, dumpBaseKey, dumpCacheData>;
-    using ProductCache  = BinaryCache<ProductKey, CacheData, ProductHash, ProductCompare, dumpProductKey, dumpCacheData>;
-    using ListCache     = BinaryCache<ListKey, CacheData, ListHash, ListCompare, dumpListKey, dumpCacheData>;
-    using FixpointCache = BinaryCache<FixpointKey, CacheData, FixpointHash, FixpointCompare, dumpFixpointKey, dumpCacheData>;
+    using SymbolCache       = BinaryCache<SymbolKey, Symbol*, SymbolHash, SymbolCompare, dumpSymbolKey, dumpSymbolData>;
+    using BaseCache         = BinaryCache<BaseKey, CacheData, BaseHash, BaseCompare, dumpBaseKey, dumpCacheData>;
+    using ProductCache      = BinaryCache<ProductKey, CacheData, ProductHash, ProductCompare, dumpProductKey, dumpCacheData>;
+    using ListCache         = BinaryCache<ListKey, CacheData, ListHash, ListCompare, dumpListKey, dumpCacheData>;
+    using FixpointCache     = BinaryCache<FixpointKey, CacheData, FixpointHash, FixpointCompare, dumpFixpointKey, dumpCacheData>;
+    using ComputationCache  = BinaryCache<ComputationKey, CacheData, ComputationHash, ComputationCompare, dumpComputationKey, dumpCacheData>;
 
     class TermWorkshop {
     private:
@@ -106,6 +113,9 @@ namespace Workshops {
         ListCache* _fpCache;
         FixpointCache* _fppCache;
         FixpointCache* _contCache;
+        ComputationCache* _compCache;
+
+        static TermEmpty *_empty;
 
         SymbolicAutomaton* _aut;
 
@@ -115,11 +125,12 @@ namespace Workshops {
         void InitializeWorkshop();
 
         // <<< PUBLIC API >>>
+        static TermEmpty* CreateEmpty();
         TermBaseSet* CreateBaseSet(BaseKey &states, unsigned int offset, unsigned int stateno);
         TermProduct* CreateProduct(Term_ptr const&, Term_ptr const&, ProductType);
         TermFixpoint* CreateFixpoint(Term_ptr const&, Symbol*, bool, bool);
         TermFixpoint* CreateFixpointPre(Term_ptr const&, Symbol*, bool);
-        TermFixpoint* GetUniqueFixpoint(FixpointType&, WorklistType &);
+        TermFixpoint* GetUniqueFixpoint(TermFixpoint*&);
         TermList* CreateList(Term_ptr const&, bool);
         TermContinuation* CreateContinuation(SymbolicAutomaton*, Term* const&, Symbol*, bool);
 

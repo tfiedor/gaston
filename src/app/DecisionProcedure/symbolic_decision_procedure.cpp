@@ -71,6 +71,9 @@ int ws1s_symbolic_decision_procedure(SymbolicAutomaton_ptr symbolicAutomaton) {
     OUTPUT_MEASURES(TermBaseSet)
     #endif
     std::cout << "\t\u2218 Term Fixpoints: " << TermFixpoint::instances << " (" << (TermFixpoint::instances - TermFixpoint::preInstances) << " + " << TermFixpoint::preInstances <<")\n";
+    #if (MEASURE_PROJECTION == true)
+    std::cout << "\t\t\u2218 is not shared: " << TermFixpoint::isNotShared << "\n";
+    #endif
     #if (MEASURE_SUBSUMEDBY_HITS == true)
     std::cout << "\t\t\u2218 subsumedBy hits: " << TermFixpoint::subsumedByHits << "\n";
     #endif

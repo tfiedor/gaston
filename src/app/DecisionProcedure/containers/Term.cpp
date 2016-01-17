@@ -44,6 +44,7 @@ TERM_MEASURELIST(INIT_ALL_STATIC_MEASURES)
 #undef INIT_STATIC_MEASURE
 size_t TermFixpoint::subsumedByHits = 0;
 size_t TermFixpoint::preInstances = 0;
+size_t TermFixpoint::isNotShared = 0;
 size_t TermContinuation::continuationUnfolding = 0;
 size_t TermContinuation::unfoldInSubsumption = 0;
 size_t TermContinuation::unfoldInIsectNonempty = 0;
@@ -1002,18 +1003,25 @@ bool TermFixpoint::IsFullyComputed() const {
     }
 }
 
+bool TermFixpoint::IsShared() {
+    return this->_iteratorNumber != 0;
+}
+
 void TermFixpoint::RemoveSubsumed() {
-    auto end = this->_fixpoint.end();
-    for(auto it = this->_fixpoint.begin(); it != end;) {
-        if((*it).first == nullptr) {
+    if(!this->_iteratorNumber) {
+        assert(this->_iteratorNumber == 0);
+        auto end = this->_fixpoint.end();
+        for (auto it = this->_fixpoint.begin(); it != end;) {
+            if ((*it).first == nullptr) {
+                ++it;
+                continue;
+            }
+            if (!(*it).second) {
+                it = this->_fixpoint.erase(it);
+                continue;
+            }
             ++it;
-            continue;
         }
-        if(!(*it).second) {
-            it = this->_fixpoint.erase(it);
-            continue;
-        }
-        ++it;
     }
 }
 
@@ -1186,6 +1194,11 @@ bool TermEmpty::_eqCore(const Term &t) {
 
 bool TermProduct::_eqCore(const Term &t) {
     assert(t.type == TERM_PRODUCT && "Testing equality of different term types");
+
+    #if (OPT_EQ_THROUGH_POINTERS == true)
+    assert(this != &t);
+    return false;
+    #endif
 
     const TermProduct &tProduct = static_cast<const TermProduct&>(t);
     if(this->left->stateSpaceApprox < this->right->stateSpaceApprox) {

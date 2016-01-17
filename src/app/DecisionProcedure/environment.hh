@@ -238,15 +238,15 @@ public:
 #define MEASURE_CONTINUATION_EVALUATION	true
 #define MEASURE_RESULT_HITS				true
 #define MEASURE_SYMBOLS					true
-#define MEASURE_PROJECTION				false	// < Measures several things about projection (how many steps, how big, etc.)
+#define MEASURE_PROJECTION				true	// < Measures several things about projection (how many steps, how big, etc.)
 #define MEASURE_ALL						true	// < Measure everything, not really useful
 #define MEASURE_COMPARISONS				true	// < Measure how many times we sucessfully compared and how
 #define MEASURE_SUBSUMEDBY_HITS			true	// < Measure how many times subsumedBy cache worked
 
 /* >>> Anti-Prenexing Options <<< *
  **********************************/
-#define ANTIPRENEXING_FULL				true
-#define ANTIPRENEXING_DISTRIBUTIVE		false
+#define ANTIPRENEXING_FULL				false
+#define ANTIPRENEXING_DISTRIBUTIVE		true
 
 /*
  * >>> Unique Terms options *
@@ -270,9 +270,11 @@ public:
 #define OPT_CREATE_QF_AUTOMATON 		true	// < Transforms Quantifier-free automaton to formula
 #define OPT_REDUCE_AUT_EVERYTIME		false	// < Calls reduce everytime VATA automaton is created
 #define OPT_REDUCE_AUT_LAST				true	// < Calls reduce after the final automaton is created
-#define OPT_EARLY_EVALUATION 			true	// < Evaluates early interesection of products
+#define OPT_EARLY_EVALUATION 			false	// < Evaluates early interesection of products
 #define OPT_PRUNE_EMPTY					true	// < Prunes empty sets
 #define OPT_PRUNE_FIXPOINT				true	// < Prunes fixpoint during IsSubsumedBy TODO: For BaseSet only for now
+#define OPT_REDUCE_FIXPOINT_EVERYTIME	false	// < Prunes the fixpoint everytime iterator is invalidating
+#define OPT_REDUCE_PREFIXPOINT			true	// < Prunes the fixpoint when returning pre
 #define OPT_POSTPONE_SUBSUMPTION		true
 #define OPT_FIND_POSTPONED_CANDIDATE	true
 #define OPT_REDUCE_FULL_FIXPOINT		true

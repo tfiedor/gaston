@@ -7,6 +7,59 @@ extern VarToTrackMap varMap;
 namespace Workshops {
     TermWorkshop::TermWorkshop(SymbolicAutomaton* aut) : _aut(aut) { }
 
+    // ComputationKey    = std::pair<FixpointType*, WorklistType*>;
+    struct ComputationCompare : public std::binary_function<ComputationKey, ComputationKey, bool>
+    {
+        /**
+         * @param lhs: left operand
+         * @param rhs: right operand
+         * @return true if lhs = rhs
+         */
+        bool operator()(ComputationKey const& lhs, ComputationKey const& rhs) const {
+            bool result;
+
+            // Compare fixpoints
+            for(auto item : (*lhs.first)) {
+                result = false;
+                for(auto titem : (*rhs.first)) {
+                    if(item == titem) {
+                        result = true;
+                        break;
+                    }
+                }
+                if(!result) {
+                    return false;
+                }
+            }
+
+            // Compare worklists
+            for(auto item : (*lhs.second)) {
+                result = false;
+                for(auto titem : (*rhs.second)) {
+                    if(item == titem) {
+                        result = true;
+                        break;
+                    }
+                }
+                if(!result) {
+                    return false;
+                }
+            }
+
+            return true;
+        }
+    };
+
+    struct ComputationHash {
+        size_t operator()(ComputationKey const& set) const {
+            size_t seed = 0;
+            for(auto item : (*set.first)) {
+                boost::hash_combine(seed, boost::hash_value(item));
+            }
+            return seed;
+        }
+    };
+
     void TermWorkshop::InitializeWorkshop() {
         this->_bCache = nullptr;
         this->_fpCache = nullptr;
@@ -14,6 +67,7 @@ namespace Workshops {
         this->_pCache = nullptr;
         this->_lCache = nullptr;
         this->_contCache = nullptr;
+        this->_compCache = nullptr;
 
         switch(this->_aut->type) {
             case AutType::BASE:
@@ -31,11 +85,22 @@ namespace Workshops {
                 this->_lCache = new ListCache();
                 this->_fpCache = new ListCache();
                 this->_fppCache = new FixpointCache();
+                this->_compCache = new ComputationCache();
                 break;
             default:
                 assert(false && "Missing implementation for this type");
                 break;
         }
+    }
+
+    TermEmpty* TermWorkshop::_empty = nullptr;
+
+    TermEmpty* TermWorkshop::CreateEmpty() {
+        if(TermWorkshop::_empty == nullptr) {
+            TermWorkshop::_empty = new TermEmpty();
+        }
+        assert(TermWorkshop::_empty != nullptr);
+        return TermWorkshop::_empty;
     }
 
     /**
@@ -172,6 +237,8 @@ namespace Workshops {
         #endif
     }
 
+
+
     /**
      * Tries to look into the cache, if there is already created fixpoint,
      * with the same parameters. Otherwise it stores it in the cache
@@ -180,8 +247,16 @@ namespace Workshops {
      * @param[in] worklist:         list of pairs (term, symbol)
      * @return:                     pointer to unique fixpoint
      */
-    TermFixpoint* GetUniqueFixpoint(FixpointType& fixpoint, WorklistType & worklist) {
-
+    TermFixpoint* TermWorkshop::GetUniqueFixpoint(TermFixpoint* &fixpoint) {
+        assert(this->_compCache != nullptr);
+        Term* termPtr = nullptr;
+        auto compKey = std::make_pair(&fixpoint->_fixpoint, &fixpoint->_worklist);
+        if(!this->_compCache->retrieveFromCache(compKey, termPtr)) {
+            termPtr = fixpoint;
+            this->_compCache->StoreIn(compKey, termPtr);
+        }
+        assert(termPtr != nullptr);
+        return reinterpret_cast<TermFixpoint*>(termPtr);
     }
 
     TermContinuation* TermWorkshop::CreateContinuation(SymbolicAutomaton* aut, Term* const& term, Symbol* symbol, bool underComplement) {
@@ -324,6 +399,10 @@ namespace Workshops {
         } else {
             std::cout << "<" << (*s.first) << ", \u0437>";
         }
+    }
+
+    void dumpComputationKey(ComputationKey const&s) {
+        std::cout << "<" << (s.first) << ", " << (s.second) << ">";
     }
 
     void dumpCacheData(Term *&s) {

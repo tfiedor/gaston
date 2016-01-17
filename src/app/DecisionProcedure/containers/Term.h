@@ -23,6 +23,7 @@
 #include "../mtbdd/ondriks_mtbdd.hh"
 #include "../containers/SymbolicAutomata.h"
 #include "../environment.hh"
+#include "../containers/Workshops.h"
 
 // <<< MACROS >>>
 
@@ -70,6 +71,7 @@ using Symbols = std::list<SymbolType*>;
 
 
 class Term {
+    friend class Workshops::TermWorkshop;
 public:
     TermType type;
     size_t stateSpace;         // << Exact size of the state space, 0 if unknown
@@ -257,24 +259,35 @@ private:
 };
 
 class TermFixpoint : public Term {
+    friend class Workshops::TermWorkshop;
 public:
     // <<< PUBLIC MEMBERS >>>
     // See #L29
     TERM_MEASURELIST(DEFINE_STATIC_MEASURE)
     static size_t subsumedByHits;
     static size_t preInstances;
+    static size_t isNotShared;
 
     struct iterator {
     private:
         TermFixpoint &_termFixpoint;
         FixpointType::const_iterator _it;
 
+        Term_ptr _Invalidate() {
+            ++_it;
+            --_termFixpoint._iteratorNumber;
+            #if (OPT_REDUCE_FIXPOINT_EVERYTIME == true)
+                _termFixpoint.RemoveSubsumed();
+            #endif
+            return nullptr;
+        }
+
     public:
         Term_ptr GetNext() {
             assert(!_termFixpoint._fixpoint.empty());
             // TODO: Not sure if this is valid
             if(_termFixpoint._fixpoint.cend() == _it) {
-                return nullptr;
+                return this->_Invalidate();
             }
             assert(_termFixpoint._fixpoint.cend() != _it);
 
@@ -299,14 +312,13 @@ public:
                         // nothing to fold?
                         if(_termFixpoint._postponed.empty()) {
                             // Nothing postponed, we are done
-                            ++_it;
-                            return nullptr;
+                            return this->_Invalidate();
                         } else {
                             // Take something from the postponed shit
                             if(this->_termFixpoint._processOnePostponed()) {
                                 return this->GetNext();
                             } else {
-                                return nullptr;
+                                return this->_Invalidate();
                             }
                         }
                     } else {
@@ -331,13 +343,12 @@ public:
                             // we are complete?
                             // TODO: Add taking things from postponed
                             if(_termFixpoint._postponed.empty()) {
-                                ++_it;
-                                return nullptr;
+                                return this->_Invalidate();
                             } else {
                                 if(this->_termFixpoint._processOnePostponed()) {
                                     return this->GetNext();
                                 } else {
-                                    return nullptr;
+                                    return this->_Invalidate();
                                 }
                             }
                         }
@@ -352,14 +363,18 @@ public:
         iterator(TermFixpoint &termFixpoint) : _termFixpoint(termFixpoint), _it(_termFixpoint._fixpoint.begin()) {
             assert(nullptr != &termFixpoint);
             assert(!_termFixpoint._fixpoint.empty());
+
+            ++_termFixpoint._iteratorNumber;
         }
     };
 
     // Only for the pre-semantics to link into the source of the pre
+protected:
     Term_ptr _sourceTerm;
     std::shared_ptr<iterator> _sourceIt;
     TermCache _subsumedByCache;
 
+    size_t _iteratorNumber = 0;
     Aut_ptr _aut;
     FixpointType _fixpoint;
     TermListType _postponed;
@@ -368,6 +383,7 @@ public:
     bool _bValue;
     bool (*_aggregate_result)(bool, bool);
 
+public:
     // <<< CONSTRUCTORS >>>
     TermFixpoint(Aut_ptr aut, Term_ptr startingTerm, Symbol* startingSymbol, bool inComplement, bool initbValue);
     TermFixpoint(Aut_ptr aut, Term_ptr sourceTerm, Symbol* startingSymbol, bool inComplement);
@@ -378,16 +394,17 @@ public:
     SubsumptionResult IsSubsumedBy(FixpointType& fixpoint, Term*&);
     bool GetResult();
     bool IsFullyComputed() const;
+    bool IsShared();
     void RemoveSubsumed();
 
     iterator GetIterator() { return iterator(*this); }
     iterator* GetIteratorDynamic() { return new iterator(*this); }
 
     // <<< DUMPING FUNCTIONS >>>
-private:
+protected:
     void _dumpCore();
 
-private:
+protected:
     // <<< PRIVATE FUNCTIONS >>>
     void ComputeNextFixpoint();
     void ComputeNextPre();

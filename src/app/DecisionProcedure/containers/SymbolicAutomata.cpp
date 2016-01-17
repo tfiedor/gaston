@@ -538,10 +538,6 @@ ResultType ProjectionAutomaton::_IntersectNonEmptyCore(Symbol* symbol, Term* fin
         #else
         // Early evaluation of fixpoint
         if(result.second == !underComplement) {
-            #if (MEASURE_PROJECTION == true)
-            this->DumpAutomaton();
-            std::cout << (fixpoint->GetResult() ? "-> early True" : "-> early False") << "\n";
-            #endif
             #if (OPT_REDUCE_FULL_FIXPOINT == true)
             fixpoint->RemoveSubsumed();
             #endif
@@ -554,15 +550,6 @@ ResultType ProjectionAutomaton::_IntersectNonEmptyCore(Symbol* symbol, Term* fin
             #if (MEASURE_PROJECTION == true)
             ++this->fixpointNext;
             #endif
-        }
-        #endif
-
-        #if (MEASURE_PROJECTION == true)
-        this->DumpAutomaton();
-        if(fixpointTerm == nullptr) {
-            std::cout << (fixpoint->GetResult() ? "-> fix True" : "-> fix False") << "\n";
-        } else {
-            std::cout << (fixpoint->GetResult() ? "-> early True" : "-> early False") << "\n";
         }
         #endif
 
@@ -596,13 +583,13 @@ ResultType ProjectionAutomaton::_IntersectNonEmptyCore(Symbol* symbol, Term* fin
             }
         #endif
 
-        #if (MEASURE_PROJECTION == true)
-        this->DumpAutomaton();
-        std::cout << "(" << (*symbol) << ") ";
-        std::cout << (fixpoint->GetResult() ? "-> pre True" : "-> pre False") << "\n";
-        #endif
-
         // TODO: Fixpoint cache should probably be here!
+        #if (OPT_REDUCE_PREFIXPOINT == true)
+        fixpoint->RemoveSubsumed();
+        #endif
+        #if (OPT_GENERATE_UNIQUE_TERMS == true && UNIQUE_FIXPOINTS == true)
+        fixpoint = this->_factory.GetUniqueFixpoint(fixpoint);
+        #endif
         return std::make_pair(fixpoint, fixpoint->GetResult());
     }
 }
@@ -624,7 +611,7 @@ ResultType BaseAutomaton::_IntersectNonEmptyCore(Symbol* symbol, Term* approxima
 
         // Return the pre and true if it intersects the initial states
         if(preFinal->IsEmpty()) {
-            return std::make_pair(new TermEmpty(), underComplement);
+            return std::make_pair(Workshops::TermWorkshop::CreateEmpty(), underComplement);
         } else {
             return std::make_pair(preFinal, initial->Intersects(preFinal) != underComplement);
         }
