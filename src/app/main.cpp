@@ -59,6 +59,8 @@
 #include "DecisionProcedure/visitors/QuantificationMerger.h"
 #include "DecisionProcedure/visitors/DotWalker.h"
 #include "DecisionProcedure/visitors/BaseAutomataMerger.h"
+#include "DecisionProcedure/visitors/ExistentialPrenexer.h"
+#include "DecisionProcedure/visitors/ZeroOrderRemover.h"
 
 // < Typedefs and usings >
 using std::cout;
@@ -111,6 +113,7 @@ void PrintUsage()
 		<< "     --no-automaton  Don't dump Automaton\n"
 		<< "     --use-mona-dfa  Uses MONA for building base automaton\n"
 		<< "     --no-expnf      Implies --use-mona-dfa, does not convert formula to exPNF\n"
+		<< "     --test          Test specified problem [val, sat, unsat]\n"
 		<< " -q, --quiet		 Quiet, don't print progress\n"
 		<< " -oX                 Optimization level [1 = safe optimizations [default], 2 = heuristic]\n"
 		<< " --method            Use either symbolic (novel), forward (EEICT'14) or backward method (TACAS'15) for deciding WSkS [symbolic, backward, forward]\n"
@@ -166,6 +169,12 @@ bool ParseArguments(int argc, char *argv[])
 			else if(strcmp(argv[i], "--use-mona-dfa") == 0) {
 				options.useMonaDFA = true;
 				options.construction = AutomataConstruction::DETERMINISTIC_AUT;
+			} else if(strcmp(argv[i], "--test=val") == 0) {
+				options.test = TestType::VALIDITY;
+			} else if(strcmp(argv[i], "--test=sat") == 0) {
+				options.test = TestType::SATISFIABILITY;
+			} else if(strcmp(argv[i], "--test=unsat") == 0) {
+				options.test = TestType::UNSATISFIABILITY;
 			} else if(strcmp(argv[i], "--method=forward") == 0) {
 				options.method = Method::FORWARD;
 			} else if(strcmp(argv[i], "--method=backward") == 0) {
@@ -379,6 +388,26 @@ int main(int argc, char *argv[]) {
 
 	timer_formula.start();
 
+	// First close the formula if we are testing something specific
+	IdentList freeVars, bound;
+	(ast->formula)->freeVars(&freeVars, &bound);
+	bool formulaIsGround = freeVars.empty();
+	if(!formulaIsGround) {
+		switch(options.test) {
+			case TestType::VALIDITY:
+				ast->formula = new ASTForm_All2(nullptr, &freeVars, ast->formula, Pos());
+				break;
+			case TestType::SATISFIABILITY:
+				ast->formula = new ASTForm_Ex2(nullptr, &freeVars, ast->formula, Pos());
+				break;
+			case TestType::UNSATISFIABILITY:
+				ast->formula = new ASTForm_Ex2(nullptr, &freeVars, new ASTForm_Not(ast->formula, Pos()), Pos());
+				break;
+			default:
+				assert(false && "Cannot handle the unground formulae right now.");
+				break;
+		}
+	}
 
 	// Flattening of the formula
 	try {
@@ -398,6 +427,8 @@ int main(int argc, char *argv[]) {
 		cerr << "[!] Called [deprecated] parameter '--no-expnf'";
 		return 0;
 	} else {
+
+
 		#define CALL_FILTER(filter) \
             filter filter##_visitor;    \
             ast->formula = static_cast<ASTForm *>(ast->formula->accept(filter##_visitor));    \
@@ -462,11 +493,6 @@ int main(int argc, char *argv[]) {
 	varMap.dumpMap();
 	std::cout << "\n";
 #endif
-
-	IdentList freeVars, bound;
-	(ast->formula)->freeVars(&freeVars, &bound);
-
-	bool formulaIsGround = freeVars.empty();
 
 #if (DEBUG_VARIABLE_SETS == true)
 	std::cout << "Free Vars:\n";

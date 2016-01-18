@@ -386,7 +386,7 @@ public:
 	PreFunctor(BaseAutomatonStateSet &c) : collected(c) {}
 
 	inline BaseAutomatonStateSet ApplyOperation(BaseAutomatonStateSet lhs, BaseAutomatonStateSet rhs) {
-		if(rhs.size() != 0) {
+		if(rhs.size() != 0 && lhs.size() != 0) {
 			collected.insert(lhs);
 		}
 		return rhs;

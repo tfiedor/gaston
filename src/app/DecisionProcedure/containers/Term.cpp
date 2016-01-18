@@ -575,7 +575,7 @@ bool TermList::IsEmpty() {
                 return false;
             }
         }
-        return false;
+        return true;
     }
 }
 
@@ -611,7 +611,7 @@ unsigned int TermContinuation::_MeasureStateSpaceCore() {
 }
 
 unsigned int TermList::_MeasureStateSpaceCore() {
-    unsigned int count = 0;
+    unsigned int count = 1;
     // Measure state spaces of all subterms
     for(auto& item : this->list) {
         count += item->MeasureStateSpace();
@@ -1062,6 +1062,7 @@ Term* TermContinuation::unfoldContinuation(UnfoldedInType t) {
 void Term::comparedBySamePtr(TermType t) {
     ++Term::comparisonsBySamePtr;
     switch(t) {
+        case TERM_EMPTY:
         case TERM_BASE:
             ++TermBaseSet::comparisonsBySamePtr;
             break;
@@ -1085,6 +1086,7 @@ void Term::comparedBySamePtr(TermType t) {
 void Term::comparedByDifferentType(TermType t) {
     ++Term::comparisonsByDiffType;
     switch(t) {
+        case TERM_EMPTY:
         case TERM_BASE:
             ++TermBaseSet::comparisonsByDiffType;
             break;
@@ -1111,6 +1113,7 @@ void Term::comparedByStructure(TermType t, bool res) {
     else
         ++Term::comparisonsByStructureFalse;
     switch(t) {
+        case TERM_EMPTY:
         case TERM_BASE:
             if(res) {
                 ++TermBaseSet::comparisonsByStructureTrue;

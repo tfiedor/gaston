@@ -594,6 +594,30 @@ src/app/DecisionProcedure/visitors/DotWalker.cpp.s:
 	$(MAKE) -f CMakeFiles/gaston.dir/build.make CMakeFiles/gaston.dir/src/app/DecisionProcedure/visitors/DotWalker.cpp.s
 .PHONY : src/app/DecisionProcedure/visitors/DotWalker.cpp.s
 
+src/app/DecisionProcedure/visitors/ExistentialPrenexer.o: src/app/DecisionProcedure/visitors/ExistentialPrenexer.cpp.o
+.PHONY : src/app/DecisionProcedure/visitors/ExistentialPrenexer.o
+
+# target to build an object file
+src/app/DecisionProcedure/visitors/ExistentialPrenexer.cpp.o:
+	$(MAKE) -f CMakeFiles/gaston.dir/build.make CMakeFiles/gaston.dir/src/app/DecisionProcedure/visitors/ExistentialPrenexer.cpp.o
+.PHONY : src/app/DecisionProcedure/visitors/ExistentialPrenexer.cpp.o
+
+src/app/DecisionProcedure/visitors/ExistentialPrenexer.i: src/app/DecisionProcedure/visitors/ExistentialPrenexer.cpp.i
+.PHONY : src/app/DecisionProcedure/visitors/ExistentialPrenexer.i
+
+# target to preprocess a source file
+src/app/DecisionProcedure/visitors/ExistentialPrenexer.cpp.i:
+	$(MAKE) -f CMakeFiles/gaston.dir/build.make CMakeFiles/gaston.dir/src/app/DecisionProcedure/visitors/ExistentialPrenexer.cpp.i
+.PHONY : src/app/DecisionProcedure/visitors/ExistentialPrenexer.cpp.i
+
+src/app/DecisionProcedure/visitors/ExistentialPrenexer.s: src/app/DecisionProcedure/visitors/ExistentialPrenexer.cpp.s
+.PHONY : src/app/DecisionProcedure/visitors/ExistentialPrenexer.s
+
+# target to generate assembly for a file
+src/app/DecisionProcedure/visitors/ExistentialPrenexer.cpp.s:
+	$(MAKE) -f CMakeFiles/gaston.dir/build.make CMakeFiles/gaston.dir/src/app/DecisionProcedure/visitors/ExistentialPrenexer.cpp.s
+.PHONY : src/app/DecisionProcedure/visitors/ExistentialPrenexer.cpp.s
+
 src/app/DecisionProcedure/visitors/Flattener.o: src/app/DecisionProcedure/visitors/Flattener.cpp.o
 .PHONY : src/app/DecisionProcedure/visitors/Flattener.o
 
@@ -785,6 +809,30 @@ src/app/DecisionProcedure/visitors/UniversalQuantifierRemover.s: src/app/Decisio
 src/app/DecisionProcedure/visitors/UniversalQuantifierRemover.cpp.s:
 	$(MAKE) -f CMakeFiles/gaston.dir/build.make CMakeFiles/gaston.dir/src/app/DecisionProcedure/visitors/UniversalQuantifierRemover.cpp.s
 .PHONY : src/app/DecisionProcedure/visitors/UniversalQuantifierRemover.cpp.s
+
+src/app/DecisionProcedure/visitors/ZeroOrderRemover.o: src/app/DecisionProcedure/visitors/ZeroOrderRemover.cpp.o
+.PHONY : src/app/DecisionProcedure/visitors/ZeroOrderRemover.o
+
+# target to build an object file
+src/app/DecisionProcedure/visitors/ZeroOrderRemover.cpp.o:
+	$(MAKE) -f CMakeFiles/gaston.dir/build.make CMakeFiles/gaston.dir/src/app/DecisionProcedure/visitors/ZeroOrderRemover.cpp.o
+.PHONY : src/app/DecisionProcedure/visitors/ZeroOrderRemover.cpp.o
+
+src/app/DecisionProcedure/visitors/ZeroOrderRemover.i: src/app/DecisionProcedure/visitors/ZeroOrderRemover.cpp.i
+.PHONY : src/app/DecisionProcedure/visitors/ZeroOrderRemover.i
+
+# target to preprocess a source file
+src/app/DecisionProcedure/visitors/ZeroOrderRemover.cpp.i:
+	$(MAKE) -f CMakeFiles/gaston.dir/build.make CMakeFiles/gaston.dir/src/app/DecisionProcedure/visitors/ZeroOrderRemover.cpp.i
+.PHONY : src/app/DecisionProcedure/visitors/ZeroOrderRemover.cpp.i
+
+src/app/DecisionProcedure/visitors/ZeroOrderRemover.s: src/app/DecisionProcedure/visitors/ZeroOrderRemover.cpp.s
+.PHONY : src/app/DecisionProcedure/visitors/ZeroOrderRemover.s
+
+# target to generate assembly for a file
+src/app/DecisionProcedure/visitors/ZeroOrderRemover.cpp.s:
+	$(MAKE) -f CMakeFiles/gaston.dir/build.make CMakeFiles/gaston.dir/src/app/DecisionProcedure/visitors/ZeroOrderRemover.cpp.s
+.PHONY : src/app/DecisionProcedure/visitors/ZeroOrderRemover.cpp.s
 
 src/app/Frontend/ast.o: src/app/Frontend/ast.cpp.o
 .PHONY : src/app/Frontend/ast.o
@@ -1455,6 +1503,9 @@ help:
 	@echo "... src/app/DecisionProcedure/visitors/DotWalker.o"
 	@echo "... src/app/DecisionProcedure/visitors/DotWalker.i"
 	@echo "... src/app/DecisionProcedure/visitors/DotWalker.s"
+	@echo "... src/app/DecisionProcedure/visitors/ExistentialPrenexer.o"
+	@echo "... src/app/DecisionProcedure/visitors/ExistentialPrenexer.i"
+	@echo "... src/app/DecisionProcedure/visitors/ExistentialPrenexer.s"
 	@echo "... src/app/DecisionProcedure/visitors/Flattener.o"
 	@echo "... src/app/DecisionProcedure/visitors/Flattener.i"
 	@echo "... src/app/DecisionProcedure/visitors/Flattener.s"
@@ -1479,6 +1530,9 @@ help:
 	@echo "... src/app/DecisionProcedure/visitors/UniversalQuantifierRemover.o"
 	@echo "... src/app/DecisionProcedure/visitors/UniversalQuantifierRemover.i"
 	@echo "... src/app/DecisionProcedure/visitors/UniversalQuantifierRemover.s"
+	@echo "... src/app/DecisionProcedure/visitors/ZeroOrderRemover.o"
+	@echo "... src/app/DecisionProcedure/visitors/ZeroOrderRemover.i"
+	@echo "... src/app/DecisionProcedure/visitors/ZeroOrderRemover.s"
 	@echo "... src/app/Frontend/ast.o"
 	@echo "... src/app/Frontend/ast.i"
 	@echo "... src/app/Frontend/ast.s"

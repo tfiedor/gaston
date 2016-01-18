@@ -306,23 +306,6 @@ ASTTerm2* ASTTerm2_Var2::unfoldMacro(IdentList* fParams, ASTList* rParams) {
 }
 
 /**
- * Unfolds formal parameters to real parameters
- *
- * @param fParams: list of formal parameters
- * @param rParams: list of real parameters
- * @return: unfolded macro
- */
-ASTForm* ASTForm_Var0::unfoldMacro(IdentList* fParams, ASTList* rParams) {
-	int index = fParams->index(this->n);
-	if (index != -1) {
-		ASTForm* formula = ((ASTForm*) rParams->get(index));
-		return formula->clone();
-	} else {
-		return (ASTForm*) this;
-	}
-}
-
-/**
  * Unfolds formal parameters to real parameters in called function
  *
  * @param fParams: list of formal parameters

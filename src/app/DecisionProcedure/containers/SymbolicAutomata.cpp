@@ -121,8 +121,13 @@ ResultType SymbolicAutomaton::IntersectNonEmpty(Symbol* symbol, Term* stateAppro
     assert(this->type != AutType::SYMBOLIC_BASE);
     ResultType result;
 
+    // Empty set needs not to be computed
+    if(stateApproximation->type == TERM_EMPTY) {
+        return std::make_pair(stateApproximation, underComplement);
+    }
+
     #if (DEBUG_INTERSECT_NON_EMPTY == true)
-    std::cout << "\nIntersectNonEmpty(";
+    std::cout << "\nIntersectNonEm3pty(";
     if(symbol != nullptr) {
         std::cout << (*symbol);
     } else {
@@ -405,6 +410,7 @@ Term* BaseAutomaton::Pre(Symbol* symbol, Term* finalApproximation, bool underCom
         auto key = std::make_pair(state, symbol);
         preStates.clear();
         if(!this->_preCache.retrieveFromCache(key, preStates)) {
+            // TODO: there is probably useless copying --^
             BaseAut_MTBDD *preState = getMTBDDForStateTuple(*this->_base_automaton, StateTuple({state}));
 
             // Create the masker functor, that will mask the states away

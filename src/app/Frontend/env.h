@@ -25,6 +25,7 @@ enum Mode {LINEAR, TREE};
 enum ReorderMode {NO, RANDOM, HEURISTIC};
 enum Method {FORWARD, BACKWARD, SYMBOLIC};
 enum AutomataConstruction {DETERMINISTIC_AUT, NONDETERMINISTIC_AUT, SYMBOLIC_AUT};
+enum TestType {EVERYTHING, VALIDITY, SATISFIABILITY, UNSATISFIABILITY};
 
 class Options {
 public:
@@ -38,7 +39,7 @@ public:
     graphvizSatisfyingEx(false), graphvizCounterEx(false), 
     externalWhole(false), demo(false), 
     inheritedAcceptance(false), unrestrict(false), 
-    alternativeM2LStr(false), reorder(HEURISTIC), optimize(0),
+    alternativeM2LStr(false), test(EVERYTHING), reorder(HEURISTIC), optimize(0),
     useMonaDFA(false) {}
 
   bool useMonaDFA;
@@ -67,6 +68,7 @@ public:
   bool inheritedAcceptance;
   bool unrestrict;
   bool alternativeM2LStr;
+    TestType test;
   ReorderMode reorder;
   unsigned optimize;
 };

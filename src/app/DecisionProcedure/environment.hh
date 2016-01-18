@@ -245,8 +245,8 @@ public:
 
 /* >>> Anti-Prenexing Options <<< *
  **********************************/
-#define ANTIPRENEXING_FULL				false
-#define ANTIPRENEXING_DISTRIBUTIVE		true
+#define ANTIPRENEXING_FULL				true
+#define ANTIPRENEXING_DISTRIBUTIVE		false
 
 /*
  * >>> Unique Terms options *
@@ -266,7 +266,7 @@ public:
 // NOTE! From v1.0 onwards, disable this will introduce not only leaks, but will fuck everything up!
 #define OPT_TERM_HASH_BY_APPROX			true	// < Includes stateSpaceApprox into hash
 #define OPT_ANTIPRENEXING				true	// < Transforms formula to anti-prenex form (i.e. all of the quantifiers are deepest on leaves)
-#define OPT_DRAW_NEGATION_IN_BASE 		false	// < Negation is handled on formula level and not on computation level
+#define OPT_DRAW_NEGATION_IN_BASE 		true	// < Negation is handled on formula level and not on computation level
 #define OPT_CREATE_QF_AUTOMATON 		true	// < Transforms Quantifier-free automaton to formula
 #define OPT_REDUCE_AUT_EVERYTIME		false	// < Calls reduce everytime VATA automaton is created
 #define OPT_REDUCE_AUT_LAST				true	// < Calls reduce after the final automaton is created
@@ -288,6 +288,7 @@ public:
 
 #if (ANTIPRENEXING_DISTRIBUTIVE == true)
 #define FILTER_LIST(code) \
+	code(ZeroOrderRemover)				\
 	code(SyntaxRestricter)				\
 	code(BinaryReorderer)				\
 	code(DistributiveAntiPrenexer)		\
@@ -296,6 +297,7 @@ public:
 	code(SecondOrderRestricter)
 #else
 #define FILTER_LIST(code) \
+	code(ZeroOrderRemover)				\
 	code(SyntaxRestricter)				\
 	code(BinaryReorderer)				\
 	code(FullAntiPrenexer)				\
@@ -303,6 +305,7 @@ public:
 	code(UniversalQuantifierRemover)	\
 	code(NegationUnfolder)				\
 	code(QuantificationMerger)			\
+	code(BaseAutomataMerger)			\
 	code(SecondOrderRestricter)
 #endif
 

@@ -163,7 +163,7 @@ public:   // Public methods
 	void insert(const Key& x)
 	{
 		// Assertions
-		assert(vectorIsSorted());
+		//assert(vectorIsSorted());
 
 		// perform binary search (cannot use std::binary_search because it is
 		// ineffective due to not returning the iterator to the position of the
@@ -202,21 +202,21 @@ public:   // Public methods
 		vec_[first] = x;
 
 		// Assertions
-		assert(vectorIsSorted());
+		//assert(vectorIsSorted());
 	}
 
 
 	void insert(const OrdVector& vec)
 	{
 		// Assertions
-		assert(vectorIsSorted());
-		assert(vec.vectorIsSorted());
+		//assert(vectorIsSorted());
+		//assert(vec.vectorIsSorted());
 
 		OrdVector result = this->Union(vec);
 		vec_ = result.vec_;
 
 		// Assertions
-		assert(vectorIsSorted());
+		//assert(vectorIsSorted());
 	}
 
 
@@ -241,8 +241,8 @@ public:   // Public methods
 	OrdVector Union(const OrdVector& rhs) const
 	{
 		// Assertions
-		assert(vectorIsSorted());
-		assert(rhs.vectorIsSorted());
+		//assert(vectorIsSorted());
+		//assert(rhs.vectorIsSorted());
 
 		VectorType newVector;
 
@@ -285,7 +285,7 @@ public:   // Public methods
 		OrdVector result(newVector);
 
 		// Assertions
-		assert(result.vectorIsSorted());
+		//assert(result.vectorIsSorted());
 
 		return result;
 	}
