@@ -71,16 +71,7 @@ AST* Flattener::visit(ASTForm_Equal1* form) {
 
     // No need to flatten
     if(form->t1->kind == aVar1 && form->t2->kind == aVar1) {
-        ASTTerm1_Var1* yf = static_cast<ASTTerm1_Var1*>(form->t2);
-        ASTTerm1_Var1* xf = static_cast<ASTTerm1_Var1*>(form->t1);
-        // FO(X)
-        ASTForm_FirstOrder* xInFO = new ASTForm_FirstOrder(xf, form->pos);
-        // FO(Y)
-        ASTForm_FirstOrder* yInFO = new ASTForm_FirstOrder(yf, form->pos);
-        // FO(X) & FO(Y)
-        ASTForm_And* inFirstOrder = new ASTForm_And(xInFO, yInFO, form->pos);
-        // return x = y & FO(X) & FO(Y)
-        return new ASTForm_And(form, inFirstOrder, form->pos);
+        return form;
     // switch formula to format x = ...
     } else if(form->t2->kind == aVar1) {
         ASTTerm1* temp;
@@ -145,6 +136,7 @@ AST* Flattener::visit(ASTForm_Equal1* form) {
     // x = y - C => x + C = y
     // TODO: form is probably not valid
     } else if(form->t1->kind == aVar1 && form->t2->kind == aMinus1) {
+        return form;
         ASTTerm1_tn* ft2 = static_cast<ASTTerm1_tn*>(form->t2);
         ASTTerm1_Plus* subPlus = new ASTTerm1_Plus(form->t1, ft2->n, form->pos);
         return new ASTForm_Equal1(ft2->t, subPlus, form->pos);
@@ -550,7 +542,8 @@ AST* Flattener::visit(ASTForm_Ex1* form) {
     assert(form != nullptr);
     assert(form->f != nullptr);
 
-    /*Ident* it = form->vl->begin();
+    #if (AUT_ALWAYS_CONSTRAINT_FO == true)
+    Ident* it = form->vl->begin();
     ASTForm_And* conjuction;
     ASTForm* restrictedFormula = new ASTForm_FirstOrder(new ASTTerm1_Var1(*it, form->pos), form->pos);
     inFirstOrder.insert(*it);
@@ -561,10 +554,12 @@ AST* Flattener::visit(ASTForm_Ex1* form) {
         restrictedFormula = new ASTForm_And(restrictedFormula, singleton, form->pos);
         ++it;
     }
-    restrictedFormula = new ASTForm_And(restrictedFormula, form->f, form->pos);*/
+    restrictedFormula = new ASTForm_And(restrictedFormula, form->f, form->pos);
 
-    //return new ASTForm_Ex2(form->ul, form->vl, restrictedFormula, form->pos);
+    return new ASTForm_Ex2(form->ul, form->vl, restrictedFormula, form->pos);
+    #else
     return new ASTForm_Ex2(form->ul, form->vl, form->f, form->pos);
+    #endif
 }
 
 /**
@@ -576,7 +571,8 @@ AST* Flattener::visit(ASTForm_All1* form) {
     assert(form != nullptr);
     assert(form->f != nullptr);
 
-    /*Ident* it = form->vl->begin();
+    #if (AUT_ALWAYS_CONSTRAINT_FO == true)
+    Ident* it = form->vl->begin();
     ASTForm_Impl* implication;
     ASTForm* restrictedFormula = new ASTForm_FirstOrder(new ASTTerm1_Var1(*it, form->pos), form->pos);
     inFirstOrder.insert(*it);
@@ -589,10 +585,10 @@ AST* Flattener::visit(ASTForm_All1* form) {
         ++it;
     }
     restrictedFormula = new ASTForm_Impl(restrictedFormula, form->f, form->pos);
-     */
-
-    //return new ASTForm_All2(form->ul, form->vl, restrictedFormula, form->pos);
+    return new ASTForm_All2(form->ul, form->vl, restrictedFormula, form->pos);
+    #else
     return new ASTForm_All2(form->ul, form->vl, form->f, form->pos);
+    #endif
 }
 
 /**

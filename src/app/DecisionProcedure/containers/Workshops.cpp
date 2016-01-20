@@ -96,11 +96,12 @@ namespace Workshops {
     TermEmpty* TermWorkshop::_empty = nullptr;
 
     TermEmpty* TermWorkshop::CreateEmpty() {
-        if(TermWorkshop::_empty == nullptr) {
+        /*if(TermWorkshop::_empty == nullptr) {
             TermWorkshop::_empty = new TermEmpty();
         }
         assert(TermWorkshop::_empty != nullptr);
-        return TermWorkshop::_empty;
+        return TermWorkshop::_empty;*/
+        return new TermEmpty();
     }
 
     /**

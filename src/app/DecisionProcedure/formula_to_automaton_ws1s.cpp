@@ -841,7 +841,7 @@ void convertMonaToVataAutomaton(Automaton& v_aut, DFA* m_aut, IdentList* vars, i
 			pp = pp->next;
 		}
 
-		kill_paths(state_paths);
+		//kill_paths(state_paths);
 	}
 
 	#if (DUMP_INTERMEDIATE_AUTOMATA == true)

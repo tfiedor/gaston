@@ -218,7 +218,7 @@ public:
 
     // <<< PUBLIC API >>>
     SubsumptionResult IsSubsumedBy(FixpointType& fixpoint, Term*&);
-    bool IsUnfolded() {return this->_unfoldedTerm == nullptr;}
+    bool IsUnfolded() {return this->_unfoldedTerm != nullptr;}
     bool IsEmpty();
     Term* unfoldContinuation(UnfoldedInType);
 

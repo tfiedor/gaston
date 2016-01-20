@@ -193,7 +193,7 @@ public:
 /* >>> Other Options <<< *
  *************************/
 #define AUT_ALWAYS_DETERMINISTIC		false
-#define AUT_ALWAYS_CONSTRAINT_FO		false
+#define AUT_ALWAYS_CONSTRAINT_FO		true
 #define AUT_CONSTRUCT_BY_MONA			true
 
 /* >>> Debugging Options <<< *
@@ -266,11 +266,12 @@ public:
 // NOTE! From v1.0 onwards, disable this will introduce not only leaks, but will fuck everything up!
 #define OPT_TERM_HASH_BY_APPROX			true	// < Includes stateSpaceApprox into hash
 #define OPT_ANTIPRENEXING				true	// < Transforms formula to anti-prenex form (i.e. all of the quantifiers are deepest on leaves)
-#define OPT_DRAW_NEGATION_IN_BASE 		true	// < Negation is handled on formula level and not on computation level
+#define OPT_DRAW_NEGATION_IN_BASE 		false	// < Negation is handled on formula level and not on computation level
 #define OPT_CREATE_QF_AUTOMATON 		true	// < Transforms Quantifier-free automaton to formula
 #define OPT_REDUCE_AUT_EVERYTIME		false	// < Calls reduce everytime VATA automaton is created
-#define OPT_REDUCE_AUT_LAST				true	// < Calls reduce after the final automaton is created
-#define OPT_EARLY_EVALUATION 			false	// < Evaluates early interesection of products
+#define OPT_REDUCE_AUT_LAST				false	// < Calls reduce after the final automaton is created
+#define OPT_EARLY_EVALUATION 			true	// < Evaluates early interesection of products
+#define OPT_EARLY_PARTIAL_SUB			false
 #define OPT_PRUNE_EMPTY					true	// < Prunes empty sets
 #define OPT_PRUNE_FIXPOINT				true	// < Prunes fixpoint during IsSubsumedBy TODO: For BaseSet only for now
 #define OPT_REDUCE_FIXPOINT_EVERYTIME	false	// < Prunes the fixpoint everytime iterator is invalidating

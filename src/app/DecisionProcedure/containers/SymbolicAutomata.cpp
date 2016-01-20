@@ -159,6 +159,11 @@ ResultType SymbolicAutomaton::IntersectNonEmpty(Symbol* symbol, Term* stateAppro
     assert(stateApproximation != nullptr);
     assert(stateApproximation->type != TERM_CONTINUATION);
 
+    // Empty set needs not to be computed
+    if(stateApproximation->type == TERM_EMPTY) {
+        return std::make_pair(stateApproximation, underComplement);
+    }
+
     #if (OPT_CACHE_RESULTS == true)
     // Look up in cache, if in cache, return the result
     bool inCache = true;
@@ -445,6 +450,10 @@ Term* BaseAutomaton::Pre(Symbol* symbol, Term* finalApproximation, bool underCom
 ResultType BinaryOpAutomaton::_IntersectNonEmptyCore(Symbol* symbol, Term* finalApproximation, bool underComplement) {
     // TODO: Add counter of continuations per node
     assert(finalApproximation != nullptr);
+    if(finalApproximation->type != TERM_PRODUCT) {
+        finalApproximation->dump();
+        std::cout << "\n";
+    }
     assert(finalApproximation->type == TERM_PRODUCT);
 
     // Retype the approximation to TermProduct type
