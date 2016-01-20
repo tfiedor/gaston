@@ -271,7 +271,7 @@ public:
 #define OPT_REDUCE_AUT_EVERYTIME		false	// < Calls reduce everytime VATA automaton is created
 #define OPT_REDUCE_AUT_LAST				false	// < Calls reduce after the final automaton is created
 #define OPT_EARLY_EVALUATION 			true	// < Evaluates early interesection of products
-#define OPT_EARLY_PARTIAL_SUB			false
+#define OPT_EARLY_PARTIAL_SUB			true
 #define OPT_PRUNE_EMPTY					true	// < Prunes empty sets
 #define OPT_PRUNE_FIXPOINT				true	// < Prunes fixpoint during IsSubsumedBy TODO: For BaseSet only for now
 #define OPT_REDUCE_FIXPOINT_EVERYTIME	false	// < Prunes the fixpoint everytime iterator is invalidating

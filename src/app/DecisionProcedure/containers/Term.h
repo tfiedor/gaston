@@ -90,7 +90,7 @@ protected:
 public:
     // <<< PUBLIC API >>>
     virtual SubsumptionResult IsSubsumedBy(FixpointType& fixpoint, Term*&) = 0;
-    virtual SubsumptionResult IsSubsumed(Term* t);
+    virtual SubsumptionResult IsSubsumed(Term* t, bool b = false);
     virtual bool IsEmpty() = 0;
     virtual void Complement() {this->_inComplement = (this->_inComplement == false);}
     virtual bool InComplement() {return this->_inComplement;}
@@ -111,7 +111,7 @@ public:
 protected:
     // <<< PRIVATE FUNCTIONS >>>
     virtual unsigned int _MeasureStateSpaceCore() = 0;
-    virtual SubsumptionResult _IsSubsumedCore(Term* t) = 0;
+    virtual SubsumptionResult _IsSubsumedCore(Term* t, bool b = false) = 0;
     virtual void _dumpCore() = 0;
     virtual bool _eqCore(const Term&) = 0;
 
@@ -138,7 +138,7 @@ private:
 
     // <<< PRIVATE FUNCTIONS >>>
     unsigned int _MeasureStateSpaceCore();
-    SubsumptionResult _IsSubsumedCore(Term* t);
+    SubsumptionResult _IsSubsumedCore(Term* t, bool b = false);
 };
 
 class TermProduct : public Term {
@@ -167,7 +167,7 @@ private:
 private:
     // <<< PRIVATE FUNCTIONS >>>
     unsigned int _MeasureStateSpaceCore();
-    SubsumptionResult _IsSubsumedCore(Term* t);
+    SubsumptionResult _IsSubsumedCore(Term* t, bool b = false);
 };
 
 class TermBaseSet : public Term {
@@ -194,7 +194,7 @@ private:
 private:
     // <<< PRIVATE FUNCTIONS >>>
     unsigned int _MeasureStateSpaceCore();
-    SubsumptionResult _IsSubsumedCore(Term* t);
+    SubsumptionResult _IsSubsumedCore(Term* t, bool b = false);
 };
 
 class TermContinuation : public Term {
@@ -229,7 +229,7 @@ protected:
     // <<< PRIVATE FUNCTIONS >>>
     unsigned int _MeasureStateSpaceCore();
     bool _eqCore(const Term&);
-    SubsumptionResult _IsSubsumedCore(Term* t);
+    SubsumptionResult _IsSubsumedCore(Term* t, bool b = false);
 };
 
 class TermList : public Term {
@@ -254,7 +254,7 @@ private:
 private:
     // <<< PRIVATE FUNCTIONS >>>
     unsigned int _MeasureStateSpaceCore();
-    SubsumptionResult _IsSubsumedCore(Term* t);
+    SubsumptionResult _IsSubsumedCore(Term* t, bool b = false);
     bool _eqCore(const Term&);
 };
 
@@ -411,7 +411,7 @@ protected:
     bool _processOnePostponed();
     void _InitializeAggregateFunction(bool inComplement);
     void _InitializeSymbols(Workshops::SymbolWorkshop* workshop, IdentList*, Symbol*);
-    SubsumptionResult _IsSubsumedCore(Term* t);
+    SubsumptionResult _IsSubsumedCore(Term* t, bool b = false);
     SubsumptionResult _testIfSubsumes(Term_ptr const& term);
     bool _eqCore(const Term&);
     unsigned int _MeasureStateSpaceCore();

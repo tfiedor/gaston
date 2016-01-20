@@ -259,7 +259,7 @@ bool Term::IsNotComputed() {
  * @param[in] t:    term we are testing subsumption against
  * @return:         true if this is subsumed by @p t
  */
-SubsumptionResult Term::IsSubsumed(Term *t) {
+SubsumptionResult Term::IsSubsumed(Term *t, bool unfoldAll) {
     #if (DEBUG_TERM_SUBSUMPTION == true)
     this->dump();
     std::cout << " <?= ";
@@ -299,13 +299,13 @@ SubsumptionResult Term::IsSubsumed(Term *t) {
             if (this->type == TERM_EMPTY) {
                 result = (t->type == TERM_EMPTY) ? E_TRUE : E_FALSE;
             } else {
-                result = t->_IsSubsumedCore(this);
+                result = t->_IsSubsumedCore(this, unfoldAll);
             }
         } else {
             if (t->type == TERM_EMPTY) {
                 result = (this->type == TERM_EMPTY) ? E_TRUE : E_FALSE;
             } else {
-                result = this->_IsSubsumedCore(t);
+                result = this->_IsSubsumedCore(t, unfoldAll);
             }
         }
 #if (OPT_CACHE_SUBSUMES == true)
@@ -316,12 +316,12 @@ SubsumptionResult Term::IsSubsumed(Term *t) {
     return result;
 }
 
-SubsumptionResult TermEmpty::_IsSubsumedCore(Term *t) {
+SubsumptionResult TermEmpty::_IsSubsumedCore(Term *t, bool unfoldAll) {
     // Empty term is subsumed by everything (probably)
     return E_TRUE;
 }
 
-SubsumptionResult TermProduct::_IsSubsumedCore(Term* t) {
+SubsumptionResult TermProduct::_IsSubsumedCore(Term* t, bool unfoldAll) {
     assert(t->type == TERM_PRODUCT);
 
     // Retype and test the subsumption component-wise
@@ -331,26 +331,26 @@ SubsumptionResult TermProduct::_IsSubsumedCore(Term* t) {
     Term *rhsl = rhs->left;
     Term *rhsr = rhs->right;
 
-    if(lhsr->IsNotComputed() && rhsr->IsNotComputed()) {
+    if(!unfoldAll && lhsr->IsNotComputed() && rhsr->IsNotComputed()) {
         #if (OPT_EARLY_PARTIAL_SUB == true)
-        return (lhsl->IsSubsumed(rhsl) == E_FALSE ? E_FALSE : E_PARTIALLY);
+        return (lhsl->IsSubsumed(rhsl, unfoldAll) == E_FALSE ? E_FALSE : E_PARTIALLY);
         #else
         return (lhsl->IsSubsumed(rhsl) != E_FALSE && lhsr->IsSubsumed(rhsr) != E_FALSE) ? E_TRUE : E_FALSE;
         #endif
     } if(lhsl == rhsl) {
-        return lhsr->IsSubsumed(rhsr);
+        return lhsr->IsSubsumed(rhsr, unfoldAll);
     } else if(lhsr == rhsr) {
-        return lhsl->IsSubsumed(rhsl);
+        return lhsl->IsSubsumed(rhsl, unfoldAll);
     } else {
         if(lhsl->stateSpaceApprox < lhsr->stateSpaceApprox) {
-            return (lhsl->IsSubsumed(rhsl) != E_FALSE && lhsr->IsSubsumed(rhsr) != E_FALSE) ? E_TRUE : E_FALSE;
+            return (lhsl->IsSubsumed(rhsl, unfoldAll) != E_FALSE && lhsr->IsSubsumed(rhsr, unfoldAll) != E_FALSE) ? E_TRUE : E_FALSE;
         } else {
-            return (lhsr->IsSubsumed(rhsr) != E_FALSE && lhsl->IsSubsumed(rhsl) != E_FALSE) ? E_TRUE : E_FALSE;
+            return (lhsr->IsSubsumed(rhsr, unfoldAll) != E_FALSE && lhsl->IsSubsumed(rhsl, unfoldAll) != E_FALSE) ? E_TRUE : E_FALSE;
         }
     }
 }
 
-SubsumptionResult TermBaseSet::_IsSubsumedCore(Term* term) {
+SubsumptionResult TermBaseSet::_IsSubsumedCore(Term* term, bool unfoldAll) {
     assert(term->type == TERM_BASE);
 
     // Test component-wise, not very efficient though
@@ -379,17 +379,17 @@ SubsumptionResult TermBaseSet::_IsSubsumedCore(Term* term) {
     }
 }
 
-SubsumptionResult TermContinuation::_IsSubsumedCore(Term *t) {
+SubsumptionResult TermContinuation::_IsSubsumedCore(Term *t, bool unfoldAll) {
     // TODO: How to do this smartly?
     // TODO: Maybe if we have {} we can answer sooner, without unpacking
     assert(false);
 
     // We unpack this term
     auto unfoldedTerm = (this->aut->IntersectNonEmpty(this->symbol, this->term, this->underComplement)).first;
-    return unfoldedTerm->IsSubsumed(t);
+    return unfoldedTerm->IsSubsumed(t, unfoldAll);
 }
 
-SubsumptionResult TermList::_IsSubsumedCore(Term* t) {
+SubsumptionResult TermList::_IsSubsumedCore(Term* t, bool unfoldAll) {
     assert(t->type == TERM_LIST);
 
     // Reinterpret
@@ -398,7 +398,7 @@ SubsumptionResult TermList::_IsSubsumedCore(Term* t) {
     for(auto& item : this->list) {
         bool subsumes = false;
         for(auto& tt_item : tt->list) {
-            if(item->IsSubsumed(tt_item)) {
+            if(item->IsSubsumed(tt_item, unfoldAll)) {
                 subsumes = true;
                 break;
             }
@@ -409,7 +409,7 @@ SubsumptionResult TermList::_IsSubsumedCore(Term* t) {
     return E_TRUE;
 }
 
-SubsumptionResult TermFixpoint::_IsSubsumedCore(Term* t) {
+SubsumptionResult TermFixpoint::_IsSubsumedCore(Term* t, bool unfoldAll) {
     assert(t->type == TERM_FIXPOINT);
 
     // Reinterpret
@@ -426,7 +426,7 @@ SubsumptionResult TermFixpoint::_IsSubsumedCore(Term* t) {
         bool subsumes = false;
         for(auto& tt_item : tt->_fixpoint) {
             if(tt_item.first == nullptr || !item.second) continue;
-            if((item.first)->IsSubsumed(tt_item.first)) {
+            if((item.first)->IsSubsumed(tt_item.first, unfoldAll)) {
                 subsumes = true;
                 break;
             }
@@ -837,21 +837,12 @@ bool TermFixpoint::_processOnePostponed() {
     TermProduct* postponedTerm = reinterpret_cast<TermProduct*>(postponedPair.first);
     TermProduct* postponedFixTerm = reinterpret_cast<TermProduct*>(postponedPair.second);
 
-    if(postponedTerm->right->IsNotComputed()) {
-        reinterpret_cast<TermContinuation*>(postponedTerm->right)->unfoldContinuation(UnfoldedInType::E_IN_SUBSUMPTION);
-    }
-    if(postponedFixTerm->right->IsNotComputed()) {
-        reinterpret_cast<TermContinuation*>(postponedFixTerm->right)->unfoldContinuation(UnfoldedInType::E_IN_SUBSUMPTION);
-    }
-
     assert(postponedPair.second != nullptr);
-    assert(!postponedTerm->right->IsNotComputed());
-    assert(!postponedFixTerm->right->IsNotComputed());
 
     // Test the subsumption
     SubsumptionResult result;
     // Todo: this could be softened to iterators
-    if( (result = postponedTerm->IsSubsumed(postponedFixTerm))== E_FALSE) {
+    if( (result = postponedTerm->IsSubsumed(postponedFixTerm, true))== E_FALSE) {
         // Fixme: This could return E_PARTIALLY, which is not exactly correct i guess?
         // Push new term to fixpoint
         this->_fixpoint.push_back(std::make_pair(postponedTerm, true));
