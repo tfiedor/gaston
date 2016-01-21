@@ -190,12 +190,6 @@ public:
  ****************************/
 #define PRINT_PRETTY					true
 
-/* >>> Other Options <<< *
- *************************/
-#define AUT_ALWAYS_DETERMINISTIC		false
-#define AUT_ALWAYS_CONSTRAINT_FO		true
-#define AUT_CONSTRUCT_BY_MONA			true
-
 /* >>> Debugging Options <<< *
  *****************************/
 #define DEBUG_AUTOMATA_ADDRESSES		false
@@ -257,9 +251,15 @@ public:
 #define UNIQUE_FIXPOINTS				true
 #define UNIQUE_CONTINUATIONS			true
 
+/* >>> Other Options <<< *
+ *************************/
+#define AUT_ALWAYS_DETERMINISTIC		false
+#define AUT_ALWAYS_CONSTRAINT_FO		true
+#define AUT_CONSTRUCT_BY_MONA			true
+
 /* >>> Optimizations <<< *
  *************************/
-#define OPT_DONT_CACHE_CONT				true
+#define OPT_DONT_CACHE_CONT				false
 #define OPT_DONT_CACHE_UNFULL_FIXPOINTS false
 #define OPT_EQ_THROUGH_POINTERS			true	// < Tests equality through pointers not by structure
 #define OPT_GENERATE_UNIQUE_TERMS		true	// < Uses Workshop to generate unique pointers
@@ -276,7 +276,6 @@ public:
 #define OPT_PRUNE_FIXPOINT				true	// < Prunes fixpoint during IsSubsumedBy TODO: For BaseSet only for now
 #define OPT_REDUCE_FIXPOINT_EVERYTIME	false	// < Prunes the fixpoint everytime iterator is invalidating
 #define OPT_REDUCE_PREFIXPOINT			true	// < Prunes the fixpoint when returning pre
-#define OPT_POSTPONE_SUBSUMPTION		true
 #define OPT_FIND_POSTPONED_CANDIDATE	true
 #define OPT_REDUCE_FULL_FIXPOINT		true
 #define OPT_CACHE_RESULTS 				true	// < Cache results

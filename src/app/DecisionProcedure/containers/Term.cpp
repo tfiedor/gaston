@@ -18,7 +18,14 @@
 namespace Gaston {
     size_t hash_value(Term* s) {
         #if (OPT_TERM_HASH_BY_APPROX == true)
-        if(s->type == TERM_FIXPOINT || s->type == TERM_LIST) {
+        if (s->type == TERM_CONTINUATION) {
+            TermContinuation* sCont = reinterpret_cast<TermContinuation*>(s);
+            if(sCont->IsUnfolded()) {
+                return boost::hash_value(sCont->GetUnfoldedTerm());
+            } else {
+                return boost::hash_value(s);
+            }
+        } else if(s->type == TERM_FIXPOINT || s->type == TERM_LIST) {
             size_t seed = boost::hash_value(s->stateSpaceApprox);
             boost::hash_combine(seed, boost::hash_value(s->MeasureStateSpace()));
             return seed;
@@ -275,11 +282,11 @@ SubsumptionResult Term::IsSubsumed(Term *t, bool unfoldAll) {
         // TODO: We should check that maybe we have different continuations
         TermContinuation *continuation = reinterpret_cast<TermContinuation *>(t);
         Term* unfoldedContinuation = continuation->unfoldContinuation(UnfoldedInType::E_IN_SUBSUMPTION);
-        return this->IsSubsumed(unfoldedContinuation);
+        return this->IsSubsumed(unfoldedContinuation, unfoldAll);
     } else if(this->type == TERM_CONTINUATION) {
         TermContinuation *continuation = reinterpret_cast<TermContinuation *>(this);
         Term* unfoldedContinuation = continuation->unfoldContinuation(UnfoldedInType::E_IN_SUBSUMPTION);
-        return unfoldedContinuation->IsSubsumed(t);
+        return unfoldedContinuation->IsSubsumed(t, unfoldAll);
     }
     if(this->_inComplement != t->_inComplement) {
         this->dump();
@@ -819,7 +826,7 @@ bool TermFixpoint::_processOnePostponed() {
     for(auto it = this->_postponed.begin(); it != this->_postponed.end(); ++it) {
         temp = reinterpret_cast<TermProduct*>((*it).first);
         temp2 = reinterpret_cast<TermProduct*>((*it).second);
-        if(!temp->right->IsNotComputed() || !temp2->right->IsNotComputed()) {
+        if(!temp->right->IsNotComputed()) {
             postponedPair = (*it);
             it = this->_postponed.erase(it);
             found = true;
@@ -1177,19 +1184,31 @@ bool Term::operator==(const Term &t) {
         Term::comparedBySamePtr(this->type);
         #endif
         return true;
-    } else if (this->type != t.type) {
+    }
+
+    Term* tt = const_cast<Term*>(&t);
+    if (this->type != tt->type) {
         // Terms are of different type
+        Term* tthis = this;
+        if(tt->type == TERM_CONTINUATION) {
+            TermContinuation* ttCont = reinterpret_cast<TermContinuation*>(tt);
+            tt = ttCont->unfoldContinuation(UnfoldedInType::E_IN_COMPARISON);
+        }
+        if(this->type == TERM_CONTINUATION) {
+            TermContinuation* thisCont = reinterpret_cast<TermContinuation*>(this);
+            tthis = thisCont->unfoldContinuation(UnfoldedInType::E_IN_COMPARISON);
+        }
         #if (MEASURE_COMPARISONS == true)
         Term::comparedByDifferentType(this->type);
         #endif
-        return false;
+        return *tthis == *tt;
     } else {
         #if (MEASURE_COMPARISONS == true)
-        bool result = this->_eqCore(t);
+        bool result = this->_eqCore(*tt);
         Term::comparedByStructure(this->type, result);
         return result;
         #else
-        return this->_eqCore(t);
+        return this->_eqCore(*tt);
         #endif
     }
 }

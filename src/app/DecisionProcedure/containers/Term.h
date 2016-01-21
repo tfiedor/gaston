@@ -220,6 +220,7 @@ public:
     SubsumptionResult IsSubsumedBy(FixpointType& fixpoint, Term*&);
     bool IsUnfolded() {return this->_unfoldedTerm != nullptr;}
     bool IsEmpty();
+    Term* GetUnfoldedTerm() {return this->_unfoldedTerm; }
     Term* unfoldContinuation(UnfoldedInType);
 
 protected:
