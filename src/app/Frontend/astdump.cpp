@@ -108,6 +108,10 @@ ASTTerm1_Var1::dump()
   cout << "Var2 " << symbolTable.lookupSymbol(n);
   #endif
 }
+
+std::string ASTTerm1_Var1::ToString() {
+  return (std::string(symbolTable.lookupSymbol(n)) + "\u00B9");
+}
   
 void 
 ASTTerm1_Dot::dump()
@@ -146,6 +150,10 @@ ASTTerm1_Int::dump()
   cout << "Int " << n;
   #endif
 }
+
+std::string ASTTerm1_Int::ToString() {
+  return std::to_string(n);
+}
     
 void 
 ASTTerm1_Plus::dump()
@@ -156,6 +164,10 @@ ASTTerm1_Plus::dump()
   cout << "Plus1("; t->dump(); cout << "," << n << ")";
   #endif
 }
+
+std::string ASTTerm1_Plus::ToString() {
+  return ("(" + t->ToString() + " +\u00B9 " + std::to_string(n) + ")");
+}
     
 void 
 ASTTerm1_Minus::dump()
@@ -165,6 +177,10 @@ ASTTerm1_Minus::dump()
   #else
   cout << "Minus1("; t->dump(); cout << "," << n << ")";
   #endif
+}
+
+std::string ASTTerm1_Minus::ToString() {
+  return ("(" + t->ToString() + " -\u00B9 " + std::to_string(n) + ")");
 }
     
 void 
@@ -208,6 +224,10 @@ ASTTerm2_Var2::dump()
   cout << "Var2 " << symbolTable.lookupSymbol(n);
   #endif
 }
+
+std::string ASTTerm2_Var2::ToString() {
+  return (std::string(symbolTable.lookupSymbol(n)) + "\u00B2");
+}
     
 void 
 ASTTerm2_VarTree::dump()
@@ -238,6 +258,10 @@ void
 ASTTerm2_Empty::dump()
 {
   cout << "Empty";
+}
+
+std::string ASTTerm2_Empty::ToString() {
+  return std::string("\u2205");
 }
     
 void 
@@ -280,6 +304,10 @@ ASTTerm2_Plus::dump()
   cout << "Plus2("; T->dump(); cout << "," << n << ")";
   #endif
 }
+
+std::string ASTTerm2_Plus::ToString() {
+  return ("(" + T->ToString() + " +\u00B2 " + std::to_string(n) + ")");
+}
     
 void 
 ASTTerm2_Minus::dump()
@@ -289,6 +317,10 @@ ASTTerm2_Minus::dump()
   #else
   cout << "Minus2("; T->dump(); cout << "," << n << ")";
   #endif
+}
+
+std::string ASTTerm2_Minus::ToString() {
+  return ("(" + T->ToString() + " -\u00B2 " + std::to_string(n) + ")");
 }
     
 void 
@@ -338,6 +370,10 @@ ASTForm_In::dump()
   cout << "In("; t1->dump(); cout << ","; T2->dump(); cout << ")";
   #endif
 }
+
+std::string ASTForm_In::ToString() {
+  return ("(" + t1->ToString() + " \u2208 " + T2->ToString() + ")");
+}
     
 void 
 ASTForm_Notin::dump()
@@ -347,6 +383,10 @@ ASTForm_Notin::dump()
   #else
   cout << "Notin("; t1->dump(); cout << ","; T2->dump(); cout << ")";
   #endif
+}
+
+std::string ASTForm_Notin::ToString() {
+  return ("(" + t1->ToString() + " \u2209 " + T2->ToString() + ")");
 }
     
 void
@@ -366,6 +406,10 @@ ASTForm_FirstOrder::dump()
 {
   cout << "FirstOrder("; t->dump(); cout << ")";
 }
+
+std::string ASTForm_FirstOrder::ToString() {
+  return ("(FO (" + t->ToString() + "))");
+}
     
 void 
 ASTForm_Sub::dump()
@@ -375,6 +419,10 @@ ASTForm_Sub::dump()
   #else
   cout << "Sub("; T1->dump(); cout << ","; T2->dump(); cout << ")";
   #endif
+}
+
+std::string ASTForm_Sub::ToString() {
+  return ("(" + T1->ToString() + " \u2286 " + T2->ToString() + ")");
 }
     
 void 
@@ -386,7 +434,11 @@ ASTForm_Equal1::dump()
   cout << "Equal1("; t1->dump(); cout << ","; t2->dump(); cout << ")";
   #endif
 }
-    
+
+std::string ASTForm_Equal1::ToString() {
+  return ("(" + t1->ToString() + " \u003D\u00B9 " + t2->ToString() + ")");
+}
+
 void 
 ASTForm_Equal2::dump()
 {
@@ -395,6 +447,10 @@ ASTForm_Equal2::dump()
   #else
   cout << "Equal2("; T1->dump(); cout << ","; T2->dump(); cout << ")";
   #endif
+}
+
+std::string ASTForm_Equal2::ToString() {
+  return ("(" + T1->ToString() + " \u003D\u00B2 " + T2->ToString() + ")");
 }
     
 void 
@@ -406,6 +462,10 @@ ASTForm_NotEqual1::dump()
   cout << "NotEqual1("; t1->dump(); cout << ","; t2->dump(); cout << ")";
   #endif
 }
+
+std::string ASTForm_NotEqual1::ToString() {
+  return ("(" + t1->ToString() + " \u2260\u00B9 " + t2->ToString() + ")");
+}
     
 void 
 ASTForm_NotEqual2::dump()
@@ -415,6 +475,10 @@ ASTForm_NotEqual2::dump()
   #else
   cout << "NotEqual2("; T1->dump(); cout << ","; T2->dump(); cout << ")";
   #endif
+}
+
+std::string ASTForm_NotEqual2::ToString() {
+  return ("(" + T1->ToString() + " \u2260\u00B2 " + T2->ToString() + ")");
 }
     
 void 
@@ -426,6 +490,10 @@ ASTForm_Less::dump()
   cout << "Less("; t1->dump(); cout << ","; t2->dump(); cout << ")";
   #endif
 }
+
+std::string ASTForm_Less::ToString() {
+  return ("(" + t1->ToString() + " \u003C\u00B9 " + t2->ToString() + ")");
+}
     
 void 
 ASTForm_LessEq::dump()
@@ -435,6 +503,10 @@ ASTForm_LessEq::dump()
   #else
   cout << "LessEq("; t1->dump(); cout << ","; t2->dump(); cout << ")";
   #endif
+}
+
+std::string ASTForm_LessEq::ToString() {
+  return ("(" + t1->ToString() + " \u2264\u00B9 " + t2->ToString() + ")");
 }
     
 void 
@@ -448,11 +520,19 @@ ASTForm_Impl::dump()
 {
   cout << "("; f1->dump(); cout << " => "; f2->dump(); cout << ")";
 }
+
+std::string ASTForm_Impl::ToString() {
+  return ("(" + f1->ToString() + " => " + f2->ToString() + ")");
+}
     
 void 
 ASTForm_Biimpl::dump()
 {
   cout << "("; f1->dump(); cout << " <=> "; f2->dump(); cout << ")";
+}
+
+std::string ASTForm_Biimpl::ToString() {
+  return ("(" + f1->ToString() + " <=> " + f2->ToString() + ")");
 }
     
 void 
@@ -463,6 +543,10 @@ ASTForm_And::dump()
   #else
   cout << "("; f1->dump(); cout << " & "; f2->dump(); cout << ")";
   #endif
+}
+
+std::string ASTForm_And::ToString() {
+  return ("(" + f1->ToString() + " \u2227 " + f2->ToString() + ")");
 }
     
 void 
@@ -480,6 +564,10 @@ ASTForm_Or::dump()
   cout << "("; f1->dump(); cout << " | "; f2->dump(); cout << ")";
   #endif
 }
+
+std::string ASTForm_Or::ToString() {
+  return ("(" + f1->ToString() + " \u2228 " + f2->ToString() + ")");
+}
     
 void 
 ASTForm_Not::dump()
@@ -489,6 +577,10 @@ ASTForm_Not::dump()
   #else
   cout << "~("; f->dump(); cout << ")";
   #endif
+}
+
+std::string ASTForm_Not::ToString() {
+  return ("(\u00AC " + f->ToString() + ")");
 }
     
 void 

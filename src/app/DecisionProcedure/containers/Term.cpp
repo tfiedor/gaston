@@ -255,6 +255,9 @@ TermFixpoint::TermFixpoint(Aut_ptr aut, Term_ptr sourceTerm, Symbol* symbol, boo
 bool Term::IsNotComputed() {
     if(this->type == TERM_CONTINUATION) {
         return !reinterpret_cast<TermContinuation *>(this)->IsUnfolded();
+    } else if(this->type == TERM_PRODUCT) {
+        TermProduct* termProduct = reinterpret_cast<TermProduct*>(this);
+        return termProduct->left->IsNotComputed() || termProduct->right->IsNotComputed();
     } else {
         return false;
     }
@@ -344,12 +347,12 @@ SubsumptionResult TermProduct::_IsSubsumedCore(Term* t, bool unfoldAll) {
         #else
         return (lhsl->IsSubsumed(rhsl) != E_FALSE && lhsr->IsSubsumed(rhsr) != E_FALSE) ? E_TRUE : E_FALSE;
         #endif
-    } if(lhsl == rhsl) {
+    } if(!unfoldAll && lhsl == rhsl) {
         return lhsr->IsSubsumed(rhsr, unfoldAll);
     } else if(lhsr == rhsr) {
         return lhsl->IsSubsumed(rhsl, unfoldAll);
     } else {
-        if(lhsl->stateSpaceApprox < lhsr->stateSpaceApprox) {
+        if(lhsl->stateSpaceApprox < lhsr->stateSpaceApprox || unfoldAll) {
             return (lhsl->IsSubsumed(rhsl, unfoldAll) != E_FALSE && lhsr->IsSubsumed(rhsr, unfoldAll) != E_FALSE) ? E_TRUE : E_FALSE;
         } else {
             return (lhsr->IsSubsumed(rhsr, unfoldAll) != E_FALSE && lhsl->IsSubsumed(rhsl, unfoldAll) != E_FALSE) ? E_TRUE : E_FALSE;
@@ -826,7 +829,8 @@ bool TermFixpoint::_processOnePostponed() {
     for(auto it = this->_postponed.begin(); it != this->_postponed.end(); ++it) {
         temp = reinterpret_cast<TermProduct*>((*it).first);
         temp2 = reinterpret_cast<TermProduct*>((*it).second);
-        if(!temp->right->IsNotComputed()) {
+        if(!temp->right->IsNotComputed() && !temp2->right->IsNotComputed()) {
+            // If left thing was not unfolded it means we don't need to compute more stuff
             postponedPair = (*it);
             it = this->_postponed.erase(it);
             found = true;
@@ -850,11 +854,20 @@ bool TermFixpoint::_processOnePostponed() {
     SubsumptionResult result;
     // Todo: this could be softened to iterators
     if( (result = postponedTerm->IsSubsumed(postponedFixTerm, true))== E_FALSE) {
-        // Fixme: This could return E_PARTIALLY, which is not exactly correct i guess?
         // Push new term to fixpoint
+        // Fixme: But there is probably something other that could subsume this crap
+        for(auto item : this->_fixpoint) {
+            if(item.first == nullptr)
+                continue;
+            if((result = postponedTerm->IsSubsumed(item.first, true)) != E_FALSE) {
+                assert(result != E_PARTIALLY);
+                return false;
+            }
+        }
+
         this->_fixpoint.push_back(std::make_pair(postponedTerm, true));
         // Push new symbols from _symList, if we are in Fixpoint semantics
-        if(this->GetSemantics() == E_FIXTERM_FIXPOINT) {
+        if (this->GetSemantics() == E_FIXTERM_FIXPOINT) {
             for (auto &symbol : this->_symList) {
                 this->_worklist.insert(this->_worklist.cbegin(), std::make_pair(postponedTerm, symbol));
             }

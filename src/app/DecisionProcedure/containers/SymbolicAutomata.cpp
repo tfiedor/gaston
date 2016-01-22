@@ -803,7 +803,11 @@ void BinaryOpAutomaton::DumpToDot(std::ofstream & os, bool inComplement) {
     } else {
         os << "\u222A";
     }
-    os << " (" << this->_trueCounter << "\u22A8, " << this->_falseCounter << "\u22AD)\"];\n";
+    os << "\\n(" << this->_trueCounter << "\u22A8, " << this->_falseCounter << "\u22AD)\"";
+    if(this->_trueCounter == 0) {
+        os << ",style=filled, fillcolor=red";
+    }
+    os << "];\n";
     os << "\t" << (uintptr_t) &*this << " -- " << (uintptr_t) (this->_lhs_aut) << ";\n";
     os << "\t" << (uintptr_t) &*this << " -- " << (uintptr_t) (this->_rhs_aut) << ";\n";
     this->_lhs_aut->DumpToDot(os, inComplement);
@@ -813,7 +817,11 @@ void BinaryOpAutomaton::DumpToDot(std::ofstream & os, bool inComplement) {
 void ComplementAutomaton::DumpToDot(std::ofstream & os, bool inComplement) {
     os << "\t" << (uintptr_t) &*this << "[label=\"";
     os << "\u03B5 " << (inComplement ? "\u2209 " : "\u2208 ");
-    os << "\u00AC (" << this->_trueCounter << "\u22A8, " << this->_falseCounter << "\u22AD)\"];\n";
+    os << "\u00AC\\n(" << this->_trueCounter << "\u22A8, " << this->_falseCounter << "\u22AD)\"";
+    if(this->_trueCounter == 0) {
+        os << ",style=filled, fillcolor=red";
+    }
+    os << "];\n";
     os << "\t" << (uintptr_t) &*this << " -- " << (uintptr_t) (this->_aut) << ";\n";
     this->_aut->DumpToDot(os, !inComplement);
 }
@@ -821,15 +829,27 @@ void ComplementAutomaton::DumpToDot(std::ofstream & os, bool inComplement) {
 void ProjectionAutomaton::DumpToDot(std::ofstream & os, bool inComplement) {
     os << "\t" << (uintptr_t) &*this << "[label=\"";
     os << "\u03B5 " << (inComplement ? "\u2209 " : "\u2208 ");
-    os << "\u2203 (" << this->_trueCounter << "\u22A8, " << this->_falseCounter << "\u22AD)\"];\n";
+    os << "\u2203";
+    for(auto id = this->projectedVars->begin(); id != this->projectedVars->end(); ++id) {
+        os << symbolTable.lookupSymbol(*id) << ",";
+    }
+    os << "\\n(" << this->_trueCounter << "\u22A8, " << this->_falseCounter << "\u22AD)\"";
+    if(this->_trueCounter == 0) {
+        os << ",style=filled, fillcolor=red";
+    }
+    os << "];\n";
     os << "\t" << (uintptr_t) &*this << " -- " << (uintptr_t) (this->_aut) << ";\n";
     this->_aut->DumpToDot(os, inComplement);
 }
 
 void BaseAutomaton::DumpToDot(std::ofstream & os, bool inComplement) {
     os << "\t" << (uintptr_t) &*this << "[label=\"";
-    os << "\u03B5 " << (inComplement ? "\u2209 " : "\u2208 ") << "Aut";
-    os << " (" << this->_trueCounter << "\u22A8, " << this->_falseCounter << "\u22AD)\"];\n";
+    os << "\u03B5 " << (inComplement ? "\u2209 " : "\u2208 ") << this->_form->ToString();
+    os << "\\n(" << this->_trueCounter << "\u22A8, " << this->_falseCounter << "\u22AD)\"";
+    if(this->_trueCounter == 0) {
+        os << ",style=filled, fillcolor=red";
+    }
+    os << "];\n";
 
 }
 
