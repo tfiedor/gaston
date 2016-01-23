@@ -74,8 +74,8 @@ class Term {
     friend class Workshops::TermWorkshop;
 public:
     TermType type;
-    size_t stateSpace;         // << Exact size of the state space, 0 if unknown
-    size_t stateSpaceApprox;   // << Approximation of the state space, used for heuristics
+    size_t stateSpace = 0;         // << Exact size of the state space, 0 if unknown
+    size_t stateSpaceApprox = 0;   // << Approximation of the state space, used for heuristics
     bool valid = true;
 
     // See #L29

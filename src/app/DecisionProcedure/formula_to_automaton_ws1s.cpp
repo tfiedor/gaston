@@ -787,7 +787,7 @@ void convertMonaToVataAutomaton(Automaton& v_aut, DFA* m_aut, IdentList* vars, i
 	assert(offsets != nullptr);
 	assert(vars != nullptr);
 
-	char* transition = new char[varNum];
+	char* transition = new char[varNum+1];
 	int usedVarNum = vars->size();
 
 	paths state_paths, pp;
@@ -845,6 +845,8 @@ void convertMonaToVataAutomaton(Automaton& v_aut, DFA* m_aut, IdentList* vars, i
 
 		//kill_paths(state_paths);
 	}
+
+	delete[] transition;
 
 	#if (DUMP_INTERMEDIATE_AUTOMATA == true)
 		if(options.dump) {
