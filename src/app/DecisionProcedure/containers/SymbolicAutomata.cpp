@@ -475,7 +475,11 @@ ResultType BinaryOpAutomaton::_IntersectNonEmptyCore(Symbol* symbol, Term* final
     // For intersection of automata we can return early, if left term was evaluated
     // as false, whereas for union of automata we can return early if left term
     // was true.
+    #if (OPT_CONT_ONLY_WHILE_UNSAT == true)
+    if(this->_eval_early(lhs_result.second, underComplement) && this->_trueCounter == 0) {
+    #else
     if(this->_eval_early(lhs_result.second, underComplement)) {
+    #endif
         // Construct the pointer for symbol (either symbol or epsilon---nullptr)
         #if (MEASURE_CONTINUATION_CREATION == true || MEASURE_ALL == true)
         ++this->_contCreationCounter;

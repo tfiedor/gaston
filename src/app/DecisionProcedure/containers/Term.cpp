@@ -323,6 +323,7 @@ SubsumptionResult Term::IsSubsumed(Term *t, bool unfoldAll) {
             this->_isSubsumedCache.StoreIn(t, result);
     }
 #endif
+    assert(!unfoldAll || result != E_PARTIALLY);
     return result;
 }
 
@@ -341,9 +342,18 @@ SubsumptionResult TermProduct::_IsSubsumedCore(Term* t, bool unfoldAll) {
     Term *rhsl = rhs->left;
     Term *rhsr = rhs->right;
 
-    if(!unfoldAll && lhsr->IsNotComputed() && rhsr->IsNotComputed()) {
+    if(!unfoldAll && (lhsr->IsNotComputed() && rhsr->IsNotComputed())) {
         #if (OPT_EARLY_PARTIAL_SUB == true)
-        return (lhsl->IsSubsumed(rhsl, unfoldAll) == E_FALSE ? E_FALSE : E_PARTIALLY);
+        if(lhsr->type == TERM_CONTINUATION && rhsr->type == TERM_CONTINUATION) {
+            return (lhsl->IsSubsumed(rhsl, unfoldAll) == E_FALSE ? E_FALSE : E_PARTIALLY);
+        } else {
+            SubsumptionResult leftIsSubsumed = lhsl->IsSubsumed(rhsl, unfoldAll);
+            if(leftIsSubsumed == E_TRUE) {
+                return lhsr->IsSubsumed(rhsr, unfoldAll);
+            } else {
+                return leftIsSubsumed;
+            }
+        }
         #else
         return (lhsl->IsSubsumed(rhsl) != E_FALSE && lhsr->IsSubsumed(rhsr) != E_FALSE) ? E_TRUE : E_FALSE;
         #endif
@@ -826,6 +836,7 @@ bool TermFixpoint::_processOnePostponed() {
     // Get the front of the postponed (must be TermProduct with continuation)
     #if (OPT_FIND_POSTPONED_CANDIDATE == true)
     bool found = false;
+    // first is the postponed term, second is the thing from fixpoint!!!
     for(auto it = this->_postponed.begin(); it != this->_postponed.end(); ++it) {
         temp = reinterpret_cast<TermProduct*>((*it).first);
         temp2 = reinterpret_cast<TermProduct*>((*it).second);
@@ -853,7 +864,7 @@ bool TermFixpoint::_processOnePostponed() {
     // Test the subsumption
     SubsumptionResult result;
     // Todo: this could be softened to iterators
-    if( (result = postponedTerm->IsSubsumed(postponedFixTerm, true))== E_FALSE) {
+    if( (result = postponedTerm->IsSubsumed(postponedFixTerm, true)) == E_FALSE) {
         // Push new term to fixpoint
         // Fixme: But there is probably something other that could subsume this crap
         for(auto item : this->_fixpoint) {
@@ -928,7 +939,7 @@ void TermFixpoint::ComputeNextFixpoint() {
     ResultType result = _aut->IntersectNonEmpty(item.second, item.first, this->_nonMembershipTesting);
 
     // If it is subsumed by fixpoint, we don't add it
-    if(this->_testIfSubsumes(result.first)) {
+    if(this->_testIfSubsumes(result.first) != E_FALSE) {
         return;
     }
 
