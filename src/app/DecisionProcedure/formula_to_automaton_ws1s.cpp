@@ -12,6 +12,7 @@
 #include "../Frontend/symboltable.h"
 #include "../Frontend/env.h"
 #include "../Frontend/offsets.h"
+//#include "mtbdd/mtbddconverter2.hh"
 
 #include <cstring>
 #include <list>
@@ -780,6 +781,7 @@ void initializeOffsets(unsigned *offs, IdentList *vars) {
  * @param[in] varNum: 		numberof variables in automaton
  * @param[in] offsets: 		offsets of concrete variables
  */
+#if (OPT_SMARTER_MONA_CONVERSION == false)
 void convertMonaToVataAutomaton(Automaton& v_aut, DFA* m_aut, IdentList* vars, int varNum, unsigned* offsets) {
 	assert(m_aut != nullptr);
 	assert(offsets != nullptr);
@@ -850,3 +852,11 @@ void convertMonaToVataAutomaton(Automaton& v_aut, DFA* m_aut, IdentList* vars, i
 		}
 	#endif
 }
+#else
+void convertMonaToVataAutomaton(Automaton& v_aut, DFA* m_aut, IdentList* vars, int varNum, unsinged* offsets) {
+	MTBDDConverter2<VATA::Util::OrdVector<VATA::AutBase::StateType>> converter(m_aut->ns, varNum);
+
+	converter.Process(m_aut);
+	converter.SetMTBDDToVATA(v_aut);
+}
+#endif

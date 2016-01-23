@@ -266,8 +266,8 @@ public:
 // NOTE! From v1.0 onwards, disable this will introduce not only leaks, but will fuck everything up!
 #define OPT_TERM_HASH_BY_APPROX			true	// < Includes stateSpaceApprox into hash
 #define OPT_ANTIPRENEXING				true	// < Transforms formula to anti-prenex form (i.e. all of the quantifiers are deepest on leaves)
-#define OPT_DRAW_NEGATION_IN_BASE 		false	// < Negation is handled on formula level and not on computation level
-#define OPT_CREATE_QF_AUTOMATON 		true	// < Transforms Quantifier-free automaton to formula
+#define OPT_DRAW_NEGATION_IN_BASE 		true	// < Negation is handled on formula level and not on computation level
+#define OPT_CREATE_QF_AUTOMATON 		false	// < Transforms Quantifier-free automaton to formula
 #define OPT_REDUCE_AUT_EVERYTIME		false	// < Calls reduce everytime VATA automaton is created
 #define OPT_REDUCE_AUT_LAST				false	// < Calls reduce after the final automaton is created
 #define OPT_EARLY_EVALUATION 			true	// < Evaluates early interesection of products
@@ -282,6 +282,7 @@ public:
 #define OPT_CACHE_RESULTS 				true	// < Cache results
 #define OPT_CACHE_SUBSUMES				true	// < Caches the results of IsSubsumed function on terms
 #define OPT_CACHE_SUBSUMED_BY			true	// < Caches the results of IsSubsumedBy function in fixpoints
+#define OPT_SMARTER_MONA_CONVERSION		false
 
 /*******************************
  * DEFINITION OF FILTER PHASES *

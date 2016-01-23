@@ -904,8 +904,14 @@ SubsumptionResult TermFixpoint::_testIfSubsumes(Term_ptr const& term) {
     SubsumptionResult result;
     Term* key = term, *subsumedByTerm;
     if(!this->_subsumedByCache.retrieveFromCache(key, result)) {
-        if((result = term->IsSubsumedBy(this->_fixpoint, subsumedByTerm)) == E_TRUE) {
+        // True/Partial results are stored in cache
+        if((result = term->IsSubsumedBy(this->_fixpoint, subsumedByTerm))!= E_FALSE) {
             this->_subsumedByCache.StoreIn(key, result);
+        }
+
+        if(result == E_PARTIALLY) {
+            assert(subsumedByTerm != nullptr);
+            this->_postponed.push_back(std::make_pair(term, subsumedByTerm));
         }
     }
     #if (MEASURE_SUBSUMEDBY_HITS == true)
@@ -913,12 +919,6 @@ SubsumptionResult TermFixpoint::_testIfSubsumes(Term_ptr const& term) {
         ++TermFixpoint::subsumedByHits;
     }
     #endif
-    // TODO: There should be pair
-    if(result == E_PARTIALLY) {
-        assert(subsumedByTerm != nullptr);
-        this->_postponed.push_back(std::make_pair(term, subsumedByTerm));
-    }
-
     return result;
     #else
     return term->IsSubsumedBy(this->_fixpoint);
