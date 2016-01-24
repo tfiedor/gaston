@@ -524,7 +524,15 @@ ResultType ComplementAutomaton::_IntersectNonEmptyCore(Symbol* symbol, Term* fin
     ResultType result = this->_aut->IntersectNonEmpty(symbol, finalApproximaton, !underComplement);
     // TODO: fix, because there may be falsely complemented things
     if(finalApproximaton->InComplement() != result.first->InComplement()) {
-        result.first->Complement();
+        if(finalApproximaton->type == TERM_EMPTY) {
+            if(finalApproximaton->InComplement()) {
+                result.first = Workshops::TermWorkshop::CreateEmpty();
+            } else {
+                result.first = Workshops::TermWorkshop::CreateComplementedEmpty();
+            }
+        } else {
+            result.first->Complement();
+        }
     }
 
     return result;

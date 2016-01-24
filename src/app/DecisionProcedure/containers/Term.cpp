@@ -59,11 +59,11 @@ size_t TermContinuation::unfoldInSubsumption = 0;
 size_t TermContinuation::unfoldInIsectNonempty = 0;
 
 // <<< TERM CONSTRUCTORS >>>
-TermEmpty::TermEmpty() {
+TermEmpty::TermEmpty(bool inComplement) {
     #if (MEASURE_STATE_SPACE == true)
     ++TermEmpty::instances;
     #endif
-    this->_inComplement = false;
+    this->_inComplement = inComplement;
     this->type = TERM_EMPTY;
 
     // Initialization of state space
@@ -249,6 +249,10 @@ TermFixpoint::TermFixpoint(Aut_ptr aut, Term_ptr sourceTerm, Symbol* symbol, boo
     this->dump();
     std::cout << "\n";
     #endif
+}
+
+void Term::Complement() {
+    this->_inComplement = (this->_inComplement == false);
 }
 
 /**

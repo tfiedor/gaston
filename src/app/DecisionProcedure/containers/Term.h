@@ -92,7 +92,7 @@ public:
     virtual SubsumptionResult IsSubsumedBy(FixpointType& fixpoint, Term*&) = 0;
     virtual SubsumptionResult IsSubsumed(Term* t, bool b = false);
     virtual bool IsEmpty() = 0;
-    virtual void Complement() {this->_inComplement = (this->_inComplement == false);}
+    virtual void Complement();
     virtual bool InComplement() {return this->_inComplement;}
     bool operator==(const Term &t);
     bool IsNotComputed();
@@ -125,7 +125,7 @@ public:
     TERM_MEASURELIST(DEFINE_STATIC_MEASURE)
 
     // <<< CONSTRUCTORS >>>
-    TermEmpty();
+    TermEmpty(bool inComplement=false);
 
     // <<< PUBLIC API >>>
     SubsumptionResult IsSubsumedBy(FixpointType& fixpoint, Term*&);

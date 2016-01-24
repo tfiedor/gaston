@@ -116,6 +116,7 @@ namespace Workshops {
         ComputationCache* _compCache;
 
         static TermEmpty *_empty;
+        static TermEmpty *_emptyComplement;
 
         SymbolicAutomaton* _aut;
 
@@ -126,6 +127,7 @@ namespace Workshops {
 
         // <<< PUBLIC API >>>
         static TermEmpty* CreateEmpty();
+        static TermEmpty* CreateComplementedEmpty();
         TermBaseSet* CreateBaseSet(BaseKey &states, unsigned int offset, unsigned int stateno);
         TermProduct* CreateProduct(Term_ptr const&, Term_ptr const&, ProductType);
         TermFixpoint* CreateFixpoint(Term_ptr const&, Symbol*, bool, bool);
