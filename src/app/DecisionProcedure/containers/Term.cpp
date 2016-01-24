@@ -1213,26 +1213,26 @@ void Term::comparedByStructure(TermType t, bool res) {
  * @param[in] t:        tested term
  */
 bool Term::operator==(const Term &t) {
-    if(this == &t) {
+
+    Term* tt = const_cast<Term*>(&t);
+    Term* tthis = this;
+    if(tt->type == TERM_CONTINUATION) {
+        TermContinuation* ttCont = reinterpret_cast<TermContinuation*>(tt);
+        tt = ttCont->unfoldContinuation(UnfoldedInType::E_IN_COMPARISON);
+    }
+    if(this->type == TERM_CONTINUATION) {
+        TermContinuation* thisCont = reinterpret_cast<TermContinuation*>(this);
+        tthis = thisCont->unfoldContinuation(UnfoldedInType::E_IN_COMPARISON);
+    }
+
+    if(tthis == tt) {
         // Same thing
         #if (MEASURE_COMPARISONS == true)
         Term::comparedBySamePtr(this->type);
         #endif
         return true;
-    }
-
-    Term* tt = const_cast<Term*>(&t);
-    if (this->type != tt->type) {
+    } else if (tthis->type != tt->type) {
         // Terms are of different type
-        Term* tthis = this;
-        if(tt->type == TERM_CONTINUATION) {
-            TermContinuation* ttCont = reinterpret_cast<TermContinuation*>(tt);
-            tt = ttCont->unfoldContinuation(UnfoldedInType::E_IN_COMPARISON);
-        }
-        if(this->type == TERM_CONTINUATION) {
-            TermContinuation* thisCont = reinterpret_cast<TermContinuation*>(this);
-            tthis = thisCont->unfoldContinuation(UnfoldedInType::E_IN_COMPARISON);
-        }
         #if (MEASURE_COMPARISONS == true)
         Term::comparedByDifferentType(this->type);
         #endif
@@ -1246,7 +1246,7 @@ bool Term::operator==(const Term &t) {
         Term::comparedByStructure(this->type, result);
         return result;
         #else
-        return this->_eqCore(*tt);
+        return tthis->_eqCore(*tt);
         #endif
     }
 }
