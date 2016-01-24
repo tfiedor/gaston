@@ -119,10 +119,15 @@ namespace Workshops {
         static TermEmpty *_emptyComplement;
 
         SymbolicAutomaton* _aut;
+    private:
+        // <<< PRIVATE FUNCTIONS >>>
+        template<class A, class B, class C, class D, void (*E)(const A&), void (*F)(B&)>
+        inline static BinaryCache<A, B, C, D, E, F>* _cleanCache(BinaryCache<A, B, C, D, E, F>*);
 
     public:
         // <<< CONSTRUCTORS >>>
         TermWorkshop(SymbolicAutomaton*);
+        ~TermWorkshop();
         void InitializeWorkshop();
 
         // <<< PUBLIC API >>>
@@ -149,6 +154,7 @@ namespace Workshops {
 
         // <<< CONSTRUCTORS >>>
         SymbolWorkshop();
+        ~SymbolWorkshop();
 
         static Symbol* CreateZeroSymbol();
         Symbol* CreateSymbol(Symbol*, VarType, ValType);

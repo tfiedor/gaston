@@ -81,6 +81,7 @@ protected:
 public:
     // <<< CONSTRUCTORS >>>
     SymbolicAutomaton(Formula_ptr form);
+    virtual ~SymbolicAutomaton();
 
     // <<< PUBLIC API >>>
     virtual Term_ptr GetInitialStates();
@@ -119,6 +120,7 @@ protected:
 
 public:
     BinaryOpAutomaton(SymbolicAutomaton_raw lhs, SymbolicAutomaton_raw rhs, Formula_ptr form);
+    virtual ~BinaryOpAutomaton();
 
     // <<< PUBLIC API >>>
     virtual Term* Pre(Symbol*, Term*, bool);
@@ -163,6 +165,7 @@ protected:
 public:
     // <<< CONSTRUCTORS >>>
     ComplementAutomaton(SymbolicAutomaton *aut, Formula_ptr form);
+    virtual ~ComplementAutomaton();
 
     // <<< PUBLIC API >>>
     virtual Term* Pre(Symbol*, Term*, bool);
@@ -201,6 +204,7 @@ protected:
 public:
     /// <<< CONSTRUCTORS >>>
     ProjectionAutomaton(SymbolicAutomaton* aut, Formula_ptr form);
+    virtual ~ProjectionAutomaton();
 
     // <<< PUBLIC API >>>
     virtual Term* Pre(Symbol*, Term*, bool);

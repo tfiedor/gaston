@@ -85,6 +85,8 @@ class BinaryCache {
 private:
 	// < Typedefs >
 	typedef std::unordered_map<Key, CacheData, KeyHash, KeyCompare> KeyToValueMap;
+	typedef typename KeyToValueMap::iterator iterator;
+	typedef typename KeyToValueMap::const_iterator const_iterator;
 
 	// < Private Members >
 	KeyToValueMap _cache;
@@ -167,6 +169,14 @@ public:
 		#endif
 
 		return size;
+	}
+
+	inline const_iterator begin() const{
+		return this->_cache.begin();
+	}
+
+	inline const_iterator end() const {
+		return this->_cache.end();
 	}
 };
 

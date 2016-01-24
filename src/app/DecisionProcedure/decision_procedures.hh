@@ -93,6 +93,6 @@ MacroStateSet* computeFinalStates(Automaton &aut, PrefixListType prefix, unsigne
 bool initialStateIsInFinalStates(MacroStateSet *initial, MacroStateSet *finalStates, unsigned int level);
 
 // < Symbolic decision procedure functions >
-int ws1s_symbolic_decision_procedure(Gaston::SymbolicAutomaton_ptr aut);
+int ws1s_symbolic_decision_procedure(SymbolicAutomaton* aut);
 
 #endif

@@ -19,6 +19,7 @@ namespace Gaston {
     size_t hash_value(Term* s) {
         #if (OPT_TERM_HASH_BY_APPROX == true)
         if (s->type == TERM_CONTINUATION) {
+            // Todo: this is never hit fuck
             TermContinuation* sCont = reinterpret_cast<TermContinuation*>(s);
             if(sCont->IsUnfolded()) {
                 return boost::hash_value(sCont->GetUnfoldedTerm());
@@ -288,7 +289,6 @@ SubsumptionResult Term::IsSubsumed(Term *t, bool unfoldAll) {
     }
 
     if(t->type == TERM_CONTINUATION) {
-        // TODO: We should check that maybe we have different continuations
         TermContinuation *continuation = reinterpret_cast<TermContinuation *>(t);
         Term* unfoldedContinuation = continuation->unfoldContinuation(UnfoldedInType::E_IN_SUBSUMPTION);
         return this->IsSubsumed(unfoldedContinuation, unfoldAll);
@@ -308,9 +308,9 @@ SubsumptionResult Term::IsSubsumed(Term *t, bool unfoldAll) {
 
     // Else if it is not continuation we first look into cache and then recompute if needed
     SubsumptionResult result;
-#if (OPT_CACHE_SUBSUMES == true)
+    #if (OPT_CACHE_SUBSUMES == true)
     if(this->type != TERM_FIXPOINT || !this->_isSubsumedCache.retrieveFromCache(t, result)) {
-#endif
+    #endif
         if (this->_inComplement) {
             if (this->type == TERM_EMPTY) {
                 result = (t->type == TERM_EMPTY) ? E_TRUE : E_FALSE;
@@ -324,11 +324,11 @@ SubsumptionResult Term::IsSubsumed(Term *t, bool unfoldAll) {
                 result = this->_IsSubsumedCore(t, unfoldAll);
             }
         }
-#if (OPT_CACHE_SUBSUMES == true)
+    #if (OPT_CACHE_SUBSUMES == true)
         if(result != E_PARTIALLY && this->type == TERM_FIXPOINT)
             this->_isSubsumedCache.StoreIn(t, result);
     }
-#endif
+    #endif
     assert(!unfoldAll || result != E_PARTIALLY);
     return result;
 }

@@ -26,7 +26,7 @@ using namespace Gaston;
  * @param[in] symbolicAutomaton: input formula in symbolic automaton representation
  * @return: VALID/UNSATISFIABLE/SATISFIABLE
  */
-int ws1s_symbolic_decision_procedure(SymbolicAutomaton_ptr symbolicAutomaton) {
+int ws1s_symbolic_decision_procedure(SymbolicAutomaton* symbolicAutomaton) {
     // TODO: Extend the notion to ground formulae
     std::cout << "\n[*] Deciding WS1S Symbolically\n";
 
@@ -109,7 +109,7 @@ int ws1s_symbolic_decision_procedure(SymbolicAutomaton_ptr symbolicAutomaton) {
     #endif
 
     #if (DEBUG_GENERATE_DOT_AUTOMATON == true)
-    SymbolicAutomaton::AutomatonToDot("automaton.dot", symbolicAutomaton.get(), false);
+    SymbolicAutomaton::AutomatonToDot("automaton.dot", symbolicAutomaton, false);
     #endif
 
     // If Initial States does intersect final ones, the formula is valid, else it is unsatisfiable

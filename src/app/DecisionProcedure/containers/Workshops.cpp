@@ -7,6 +7,28 @@ extern VarToTrackMap varMap;
 namespace Workshops {
     TermWorkshop::TermWorkshop(SymbolicAutomaton* aut) : _aut(aut) { }
 
+    template<class A, class B, class C, class D, void (*E)(const A&), void (*F)(B&)>
+    BinaryCache<A, B, C, D, E, F>* TermWorkshop::_cleanCache(BinaryCache<A, B, C, D, E, F>* cache) {
+        if(cache != nullptr) {
+            for(auto it = cache->begin(); it != cache->end(); ++it) {
+                delete it->second;
+            }
+            delete cache;
+        }
+
+        return nullptr;
+    }
+
+    TermWorkshop::~TermWorkshop() {
+        this->_bCache = TermWorkshop::_cleanCache(this->_bCache);
+        this->_fpCache = TermWorkshop::_cleanCache(this->_fpCache);
+        this->_fppCache = TermWorkshop::_cleanCache(this->_fppCache);
+        this->_pCache = TermWorkshop::_cleanCache(this->_pCache);
+        this->_lCache = TermWorkshop::_cleanCache(this->_lCache);
+        this->_contCache = TermWorkshop::_cleanCache(this->_contCache);
+        // TODO: Computation cache needs to be here as well?
+    }
+
     // ComputationKey    = std::pair<FixpointType*, WorklistType*>;
     struct ComputationCompare : public std::binary_function<ComputationKey, ComputationKey, bool>
     {
@@ -321,6 +343,14 @@ namespace Workshops {
 
     SymbolWorkshop::SymbolWorkshop() {
         this->_symbolCache = new SymbolCache();
+    }
+
+    SymbolWorkshop::~SymbolWorkshop() {
+        for(auto it = this->_symbolCache->begin(); it != this->_symbolCache->end(); ++it) {
+            // Delete the symbol
+            delete it->second;
+        }
+        delete this->_symbolCache;
     }
 
     Symbol* SymbolWorkshop::_zeroSymbol = nullptr;

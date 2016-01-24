@@ -48,9 +48,18 @@ SymbolicAutomaton::SymbolicAutomaton(Formula_ptr form) :
     delete allVars;
 }
 
+SymbolicAutomaton::~SymbolicAutomaton() {
+    delete this->symbolFactory;
+}
+
 BinaryOpAutomaton::BinaryOpAutomaton(SymbolicAutomaton_raw lhs, SymbolicAutomaton_raw rhs, Formula_ptr form)
         : SymbolicAutomaton(form), _lhs_aut(lhs), _rhs_aut(rhs) {
     type = AutType::BINARY;
+}
+
+BinaryOpAutomaton::~BinaryOpAutomaton() {
+    delete this->_lhs_aut;
+    delete this->_rhs_aut;
 }
 
 ComplementAutomaton::ComplementAutomaton(SymbolicAutomaton *aut, Formula_ptr form)
@@ -59,10 +68,18 @@ ComplementAutomaton::ComplementAutomaton(SymbolicAutomaton *aut, Formula_ptr for
     this->_InitializeAutomaton();
 }
 
+ComplementAutomaton::~ComplementAutomaton() {
+    delete this->_aut;
+}
+
 ProjectionAutomaton::ProjectionAutomaton(SymbolicAutomaton_raw aut, Formula_ptr form)
         : SymbolicAutomaton(form), _aut(aut) {
     type = AutType::PROJECTION;
     this->_InitializeAutomaton();
+}
+
+ProjectionAutomaton::~ProjectionAutomaton() {
+    delete this->_aut;
 }
 
 // Derive of BinaryOpAutomaton
