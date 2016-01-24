@@ -52,6 +52,8 @@ TERM_MEASURELIST(INIT_ALL_STATIC_MEASURES)
 size_t TermFixpoint::subsumedByHits = 0;
 size_t TermFixpoint::preInstances = 0;
 size_t TermFixpoint::isNotShared = 0;
+size_t TermFixpoint::postponedTerms = 0;
+size_t TermFixpoint::postponedProcessed = 0;
 size_t TermContinuation::continuationUnfolding = 0;
 size_t TermContinuation::unfoldInSubsumption = 0;
 size_t TermContinuation::unfoldInIsectNonempty = 0;
@@ -883,7 +885,9 @@ bool TermFixpoint::_processOnePostponed() {
                 this->_worklist.insert(this->_worklist.cbegin(), std::make_pair(postponedTerm, symbol));
             }
         }
-
+        #if (MEASURE_POSTPONED == TRUE)
+        ++TermFixpoint::postponedProcessed;
+        #endif
         return true;
     } else {
         assert(result != E_PARTIALLY);
@@ -912,6 +916,9 @@ SubsumptionResult TermFixpoint::_testIfSubsumes(Term_ptr const& term) {
         if(result == E_PARTIALLY) {
             assert(subsumedByTerm != nullptr);
             this->_postponed.push_back(std::make_pair(term, subsumedByTerm));
+            #if (MEASURE_POSTPONED == true)
+            ++TermFixpoint::postponedTerms;
+            #endif
         }
     }
     #if (MEASURE_SUBSUMEDBY_HITS == true)
@@ -1225,8 +1232,11 @@ bool Term::operator==(const Term &t) {
         #if (MEASURE_COMPARISONS == true)
         Term::comparedByDifferentType(this->type);
         #endif
-        return *tthis == *tt;
+        return tthis == tt;
     } else {
+        #if (OPT_EQ_THROUGH_POINTERS == true)
+        return false;
+        #endif
         #if (MEASURE_COMPARISONS == true)
         bool result = this->_eqCore(*tt);
         Term::comparedByStructure(this->type, result);

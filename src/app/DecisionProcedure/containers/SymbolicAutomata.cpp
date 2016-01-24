@@ -168,7 +168,12 @@ ResultType SymbolicAutomaton::IntersectNonEmpty(Symbol* symbol, Term* stateAppro
     // Look up in cache, if in cache, return the result
     bool inCache = true;
     auto key = std::make_pair(stateApproximation, symbol);
+    #if (OPT_DONT_CACHE_CONT == true)
+    bool dontSearchTheCache = (stateApproximation->type == TERM_PRODUCT && stateApproximation->IsNotComputed());
+    if (!dontSearchTheCache && (inCache = this->_resCache.retrieveFromCache(key, result))) {
+    #else
     if (inCache = this->_resCache.retrieveFromCache(key, result)) {
+    #endif
         assert(result.first != nullptr);
         return result;
     }

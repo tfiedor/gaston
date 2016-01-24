@@ -77,6 +77,9 @@ int ws1s_symbolic_decision_procedure(SymbolicAutomaton_ptr symbolicAutomaton) {
     #if (MEASURE_SUBSUMEDBY_HITS == true)
     std::cout << "\t\t\u2218 subsumedBy hits: " << TermFixpoint::subsumedByHits << "\n";
     #endif
+    #if (MEASURE_POSTPONED == true)
+    std::cout << "\t\t\u2218 postponed terms: " << TermFixpoint::postponedTerms << " (" << TermFixpoint::postponedProcessed << " evaluated)\n";
+    #endif
     #if (MEASURE_COMPARISONS == true)
     OUTPUT_MEASURES(TermFixpoint)
     #endif

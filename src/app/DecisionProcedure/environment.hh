@@ -228,11 +228,12 @@ public:
  *****************************/
 #define MEASURE_STATE_SPACE 			true	// < Measures how many instances of terms were created
 #define MEASURE_CACHE_HITS 				false	// < Prints the statistics for each cache on each node
-#define MEASURE_CONTINUATION_CREATION	true
-#define MEASURE_CONTINUATION_EVALUATION	true
-#define MEASURE_RESULT_HITS				true
-#define MEASURE_SYMBOLS					true
+#define MEASURE_CONTINUATION_CREATION	true	// < Measures how many continuations are created
+#define MEASURE_CONTINUATION_EVALUATION	true	// < Measures how many continuations are actually unfolded
+#define MEASURE_RESULT_HITS				true	// < Measure how many times the result hits in cache
+#define MEASURE_SYMBOLS					true	// < Measure how many symbols are created
 #define MEASURE_PROJECTION				true	// < Measures several things about projection (how many steps, how big, etc.)
+#define MEASURE_POSTPONED				true	// < Measures how many terms are postponed and how many are processed
 #define MEASURE_ALL						true	// < Measure everything, not really useful
 #define MEASURE_COMPARISONS				true	// < Measure how many times we sucessfully compared and how
 #define MEASURE_SUBSUMEDBY_HITS			true	// < Measure how many times subsumedBy cache worked

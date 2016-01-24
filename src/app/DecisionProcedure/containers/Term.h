@@ -268,6 +268,8 @@ public:
     static size_t subsumedByHits;
     static size_t preInstances;
     static size_t isNotShared;
+    static size_t postponedTerms;
+    static size_t postponedProcessed;
 
     struct iterator {
     private:
