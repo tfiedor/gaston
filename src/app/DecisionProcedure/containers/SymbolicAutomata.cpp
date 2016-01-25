@@ -480,10 +480,6 @@ Term* BaseAutomaton::Pre(Symbol* symbol, Term* finalApproximation, bool underCom
 ResultType BinaryOpAutomaton::_IntersectNonEmptyCore(Symbol* symbol, Term* finalApproximation, bool underComplement) {
     // TODO: Add counter of continuations per node
     assert(finalApproximation != nullptr);
-    if(finalApproximation->type != TERM_PRODUCT) {
-        finalApproximation->dump();
-        std::cout << "\n";
-    }
     assert(finalApproximation->type == TERM_PRODUCT);
 
     // Retype the approximation to TermProduct type
@@ -506,7 +502,7 @@ ResultType BinaryOpAutomaton::_IntersectNonEmptyCore(Symbol* symbol, Term* final
     // as false, whereas for union of automata we can return early if left term
     // was true.
     #if (OPT_CONT_ONLY_WHILE_UNSAT == true)
-    if(this->_eval_early(lhs_result.second, underComplement) && this->_trueCounter == 0) {
+    if(this->_trueCounter == 0 && this->_eval_early(lhs_result.second, underComplement)) {
     #else
     if(this->_eval_early(lhs_result.second, underComplement)) {
     #endif
@@ -518,7 +514,7 @@ ResultType BinaryOpAutomaton::_IntersectNonEmptyCore(Symbol* symbol, Term* final
         TermContinuation *continuation = new TermContinuation(this->_rhs_aut, productStateApproximation->right, symbol, underComplement);
         Term_ptr leftCombined = new TermProduct(lhs_result.first, continuation, this->_productType);
         #else
-        TermContinuation* continuation = this->_factory.CreateContinuation(this->_rhs_aut, productStateApproximation->right, symbol, underComplement);
+        Term* continuation = this->_factory.CreateContinuation(this->_rhs_aut, productStateApproximation->right, symbol, underComplement);
         Term_ptr leftCombined = this->_factory.CreateProduct(lhs_result.first, continuation, this->_productType);
         #endif
         return std::make_pair(leftCombined, this->_early_val(underComplement));

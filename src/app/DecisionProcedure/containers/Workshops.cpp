@@ -290,7 +290,7 @@ namespace Workshops {
         return reinterpret_cast<TermFixpoint*>(termPtr);
     }
 
-    TermContinuation* TermWorkshop::CreateContinuation(SymbolicAutomaton* aut, Term* const& term, Symbol* symbol, bool underComplement) {
+    Term* TermWorkshop::CreateContinuation(SymbolicAutomaton* aut, Term* const& term, Symbol* symbol, bool underComplement) {
         #if (OPT_GENERATE_UNIQUE_TERMS == true && UNIQUE_CONTINUATIONS == true)
             assert(this->_contCache != nullptr);
 
@@ -305,7 +305,7 @@ namespace Workshops {
                 this->_contCache->StoreIn(contKey, termPtr);
             }
             assert(termPtr != nullptr);
-            return reinterpret_cast<TermContinuation*>(termPtr);
+            return termPtr;
         #else
             return new TermContinuation(aut, term, symbol, underComplement);
         #endif

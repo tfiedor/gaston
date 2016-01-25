@@ -371,7 +371,7 @@ SubsumptionResult TermProduct::_IsSubsumedCore(Term* t, bool unfoldAll) {
         #endif
     } if(!unfoldAll && lhsl == rhsl) {
         return lhsr->IsSubsumed(rhsr, unfoldAll);
-    } else if(lhsr == rhsr) {
+    } else if(!unfoldAll && lhsr == rhsr) {
         return lhsl->IsSubsumed(rhsl, unfoldAll);
     } else {
         if(lhsl->stateSpaceApprox < lhsr->stateSpaceApprox || unfoldAll) {
@@ -777,10 +777,9 @@ void TermContinuation::_dumpCore() {
         std::cout << "'";
         std::cout << "?";
     } else {
-        std::cout << "[";
-        std::cout << this->_unfoldedTerm << ":";
+        std::cout << "*";
         this->_unfoldedTerm->dump();
-        std::cout << "]";
+        std::cout << "*";
     }
 }
 
@@ -845,6 +844,7 @@ bool TermFixpoint::_processOnePostponed() {
 
     std::pair<Term_ptr, Term_ptr> postponedPair;
     TermProduct* temp = nullptr, *temp2 = nullptr;
+
     // Get the front of the postponed (must be TermProduct with continuation)
     #if (OPT_FIND_POSTPONED_CANDIDATE == true)
     bool found = false;
@@ -925,7 +925,7 @@ SubsumptionResult TermFixpoint::_testIfSubsumes(Term_ptr const& term) {
 
         if(result == E_PARTIALLY) {
             assert(subsumedByTerm != nullptr);
-            this->_postponed.push_back(std::make_pair(term, subsumedByTerm));
+            this->_postponed.insert(this->_postponed.begin(), std::make_pair(term, subsumedByTerm));
             #if (MEASURE_POSTPONED == true)
             ++TermFixpoint::postponedTerms;
             #endif
@@ -1245,11 +1245,11 @@ bool Term::operator==(const Term &t) {
         return tthis == tt;
     } else {
         #if (OPT_EQ_THROUGH_POINTERS == true)
-        return false;
+        //return false;
         #endif
         #if (MEASURE_COMPARISONS == true)
-        bool result = this->_eqCore(*tt);
-        Term::comparedByStructure(this->type, result);
+        bool result = tthis->_eqCore(*tt);
+        Term::comparedByStructure(tthis->type, result);
         return result;
         #else
         return tthis->_eqCore(*tt);

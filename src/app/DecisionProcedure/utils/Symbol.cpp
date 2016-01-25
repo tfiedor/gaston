@@ -20,6 +20,15 @@
 
 extern VarToTrackMap varMap;
 
+namespace Gaston {
+    size_t hash_value(ZeroSymbol* s) {
+        if(s == nullptr) return 0;
+        size_t seed = boost::hash_value(s->_trackMask.count());
+        boost::hash_combine(seed, boost::hash_value(s->_trackMask.find_first()));
+        return seed;
+    }
+}
+
 size_t ZeroSymbol::instances = 0;
 
 // <<< CONSTRUCTORS >>>

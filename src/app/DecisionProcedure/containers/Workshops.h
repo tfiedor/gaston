@@ -139,7 +139,7 @@ namespace Workshops {
         TermFixpoint* CreateFixpointPre(Term_ptr const&, Symbol*, bool);
         TermFixpoint* GetUniqueFixpoint(TermFixpoint*&);
         TermList* CreateList(Term_ptr const&, bool);
-        TermContinuation* CreateContinuation(SymbolicAutomaton*, Term* const&, Symbol*, bool);
+        Term* CreateContinuation(SymbolicAutomaton*, Term* const&, Symbol*, bool);
 
         void Dump();
     };

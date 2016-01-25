@@ -20,6 +20,10 @@
 
 using namespace Gaston;
 
+namespace Gaston {
+    size_t hash_value(ZeroSymbol*);
+}
+
 /**
  * Class that represents one symbol on track
  */
@@ -61,12 +65,7 @@ public:
     friend std::ostream& operator <<(std::ostream& osObject, const ZeroSymbol& z);
     friend bool operator==(const ZeroSymbol& lhs, const ZeroSymbol& rhs);
 
-    friend size_t Gaston::hash_value(ZeroSymbol* s){
-        if(s == nullptr) return 0;
-        size_t seed = boost::hash_value(s->_trackMask.count());
-        boost::hash_combine(seed, boost::hash_value(s->_trackMask.find_first()));
-        return seed;
-    }
+    friend size_t Gaston::hash_value(ZeroSymbol* s);
 };
 
 inline bool operator==(const ZeroSymbol& lhs, const ZeroSymbol& rhs) {

@@ -1,13 +1,19 @@
 /*****************************************************************************
- *  dWiNA - Deciding WSkS using non-deterministic automata
+ *  gaston - We pay homage to Gaston, an Africa-born brown fur seal who
+ *    escaped the Prague Zoo during the floods in 2002 and made a heroic
+ *    journey for freedom of over 300km all the way to Dresden. There he
+ *    was caught and subsequently died due to exhaustion and infection.
+ *    Rest In Piece, brave soldier.
  *
- *  Copyright (c) 2014  Tomas Fiedor <xfiedo01@stud.fit.vutbr.cz>
+ *  Copyright (c) 2016  Tomas Fiedor <ifiedortom@fit.vutbr.cz>
+ *      Notable mentions:   Ondrej Lengal <ondra.lengal@gmail.com>
+ *                              (author of VATA)
+ *                          Petr Janku <ijanku@fit.vutbr.cz>
+ *                              (MTBDD and automata optimizations)
  *
  *  Description:
- *    Implementation of generic cache
- *
+ *      Generic cache and various hashing and comparison structures
  *****************************************************************************/
-
 #ifndef __SYM_CACHE__H__
 #define __SYM_CACHE__H__
 
@@ -19,6 +25,35 @@
 #include "../environment.hh"
 
 #include <boost/functional/hash.hpp>
+
+namespace Gaston {
+	extern size_t hash_value(Term *);
+	extern size_t hash_value(ZeroSymbol *);
+}
+
+struct ResultHashType {
+	size_t operator()(std::pair<Term*, ZeroSymbol*> set) const {
+		size_t seed = Gaston::hash_value(set.first);
+		boost::hash_combine(seed, Gaston::hash_value(set.second));
+		return seed;
+	}
+};
+
+struct SubsumptionHashType {
+	size_t operator()(std::pair<Term*, Term*> set) const {
+		size_t seed = Gaston::hash_value(set.first);
+		boost::hash_combine(seed, Gaston::hash_value(set.second));
+		return seed;
+	}
+};
+
+struct PreHashType {
+	size_t operator()(std::pair<size_t, ZeroSymbol*> set) const {
+		size_t seed = boost::hash_value(set.first);
+		boost::hash_combine(seed, Gaston::hash_value(set.second));
+		return seed;
+	}
+};
 
 template<class Key>
 struct PairCompare : public std::binary_function<Key, Key, bool>

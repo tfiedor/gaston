@@ -44,6 +44,10 @@ class PairCompare;
 template<class A>
 class PrePairCompare;
 
+struct ResultHashType;
+struct SubsumptionHashType;
+struct PreHashType;
+
 /***********************
  * GLOBAL ENUMERATIONS *
  ***********************/
@@ -53,37 +57,10 @@ enum TermType {TERM, TERM_EMPTY, TERM_FIXPOINT, TERM_PRODUCT, TERM_BASE, TERM_LI
 enum ProductType {E_INTERSECTION, E_UNION};
 enum FixpointTermSem {E_FIXTERM_FIXPOINT, E_FIXTERM_PRE};
 enum ComparisonType {E_BY_SAME_PTR, E_BY_DIFFERENT_TYPE, E_BY_STRUCTURE};
-enum UnfoldedInType {E_IN_SUBSUMPTION, E_IN_ISECT_NONEMPTY, E_IN_COMPARISON};
+enum UnfoldedInType {E_IN_SUBSUMPTION, E_IN_ISECT_NONEMPTY, E_IN_COMPARISON, E_IN_NOWHERE};
 enum SubsumptionResult {E_FALSE, E_TRUE, E_PARTIALLY};
 
 namespace Gaston {
-	extern size_t hash_value(Term*);
-	extern size_t hash_value(ZeroSymbol*);
-
-	struct ResultHashType {
-		size_t operator()(std::pair<Term*, ZeroSymbol*> set) const {
-			size_t seed = hash_value(set.first);
-			boost::hash_combine(seed, hash_value(set.second));
-			return seed;
-		}
-	};
-
-	struct SubsumptionHashType {
-		size_t operator()(std::pair<Term*, Term*> set) const {
-			size_t seed = hash_value(set.first);
-			boost::hash_combine(seed, hash_value(set.second));
-			return seed;
-		}
-	};
-
-	struct PreHashType {
-		size_t operator()(std::pair<size_t, ZeroSymbol*> set) const {
-			size_t seed = boost::hash_value(set.first);
-			boost::hash_combine(seed, hash_value(set.second));
-			return seed;
-		}
-	};
-
 	void dumpResultKey(std::pair<Term*, ZeroSymbol*> const& s);
 	void dumpResultData(std::pair<Term*, bool>& s);
 	void dumpTermKey(Term* const& s);

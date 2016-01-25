@@ -25,6 +25,10 @@ struct Timer {
 private:
     std::uint64_t _startTime;
 
+    const unsigned long hour = 360000;
+    const unsigned long min  = 6000;
+    const unsigned long sec  = 100;
+
 public:
     Timer() : _startTime(_takeTimeStamp()) {}
 
@@ -34,7 +38,7 @@ public:
     }
 
     std::uint64_t GetTimeElapsed() {
-        return (_takeTimeStamp() - _startTime)*1e-9;
+        return (_takeTimeStamp() - _startTime)*1e-7;
     }
 
     void Elapsed() {
