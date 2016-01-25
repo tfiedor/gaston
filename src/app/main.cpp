@@ -452,6 +452,7 @@ int main(int argc, char *argv[]) {
 			(ast->formula)->accept(dw_visitor);
 		}
 	}
+
 	timer_formula.stop();
 
 	if (options.dump) {

@@ -82,6 +82,14 @@ ProjectionAutomaton::~ProjectionAutomaton() {
     delete this->_aut;
 }
 
+BaseAutomaton::BaseAutomaton(BaseAutomatonType* aut, Formula_ptr form) : SymbolicAutomaton(form), _base_automaton(aut) {
+    type = AutType::BASE; this->_InitializeAutomaton();
+}
+
+BaseAutomaton::~BaseAutomaton() {
+    delete this->_base_automaton;
+}
+
 // Derive of BinaryOpAutomaton
 IntersectionAutomaton::IntersectionAutomaton(SymbolicAutomaton_raw lhs, SymbolicAutomaton_raw rhs, Formula_ptr form)
         : BinaryOpAutomaton(lhs, rhs, form) {
@@ -895,7 +903,9 @@ void BaseAutomaton::_RenameStates() {
     StateToStateMap translMap;
     StateToStateTranslator stateTransl(translMap,
                                        [](const StateType &) { return SymbolicAutomaton::stateCnt++; });
+    auto temp = this->_base_automaton;
     this->_base_automaton = new BaseAutomatonType(this->_base_automaton->ReindexStates(stateTransl));
+    delete temp;
     this->_stateSpace = SymbolicAutomaton::stateCnt - this->_stateOffset;
 }
 

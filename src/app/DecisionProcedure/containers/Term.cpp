@@ -252,6 +252,12 @@ TermFixpoint::TermFixpoint(Aut_ptr aut, Term_ptr sourceTerm, Symbol* symbol, boo
     #endif
 }
 
+TermFixpoint::~TermFixpoint() {
+    this->_worklist.clear();
+    this->_postponed.clear();
+    this->_symList.clear();
+}
+
 void Term::Complement() {
     this->_inComplement = (this->_inComplement == false);
 }

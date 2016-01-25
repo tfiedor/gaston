@@ -237,7 +237,8 @@ protected:
 
 public:
     // <<< CONSTRUCTORS >>>
-    BaseAutomaton(BaseAutomatonType* aut, Formula_ptr form) : SymbolicAutomaton(form), _base_automaton(aut){type = AutType::BASE; this->_InitializeAutomaton(); }
+    BaseAutomaton(BaseAutomatonType* aut, Formula_ptr form);
+    ~BaseAutomaton();
 
     // <<< PUBLIC API >>>
     virtual Term* Pre(Symbol*, Term*, bool);

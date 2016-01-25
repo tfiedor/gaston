@@ -390,6 +390,7 @@ public:
     // <<< CONSTRUCTORS >>>
     TermFixpoint(Aut_ptr aut, Term_ptr startingTerm, Symbol* startingSymbol, bool inComplement, bool initbValue);
     TermFixpoint(Aut_ptr aut, Term_ptr sourceTerm, Symbol* startingSymbol, bool inComplement);
+    ~TermFixpoint();
 
     // <<< PUBLIC API >>>
     FixpointTermSem GetSemantics() const;

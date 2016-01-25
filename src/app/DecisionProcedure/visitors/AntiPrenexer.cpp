@@ -168,7 +168,8 @@ ASTForm* FullAntiPrenexer::nonDistributiveRule(QuantifierClass *qForm) {
     }
 
     if(!middle.empty()) {
-        return new QuantifierClass(nullptr, new IdentList(middle), binopForm, binopForm->pos);
+        tempResult = new QuantifierClass(nullptr, new IdentList(middle), binopForm, binopForm->pos);
+        return tempResult;
     } else {
         return binopForm;
     }

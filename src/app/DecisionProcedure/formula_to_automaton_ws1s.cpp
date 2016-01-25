@@ -721,6 +721,8 @@ void constructAutomatonByMona(ASTForm *form, Automaton& v_aut) {
 	initializeOffsets(offs, vars);
 	toMonaAutomaton(form, dfa);
 	convertMonaToVataAutomaton(v_aut, dfa, vars, numVars, offs);
+    delete vars;
+    delete[] offs;
 }
 
 void toMonaAutomaton(ASTForm* form, DFA*& dfa) {
@@ -745,7 +747,10 @@ void toMonaAutomaton(ASTForm* form, DFA*& dfa) {
 	DFA *temp = dfaCopy(dfa);
 	dfaUnrestrict(temp);
 	dfa = dfaMinimize(temp);
+
+	// Clean up
 	dfaFree(temp);
+	delete codeTable;
 }
 
 IdentList* initializeVars(ASTForm *form) {
@@ -855,10 +860,13 @@ void convertMonaToVataAutomaton(Automaton& v_aut, DFA* m_aut, IdentList* vars, i
 	#endif
 }
 #else
+/**
+* Second approach to converting MONA automaton to VATA using the PJ's approach
+*/
 void convertMonaToVataAutomaton(Automaton& v_aut, DFA* m_aut, IdentList* vars, int varNum, unsinged* offsets) {
-	MTBDDConverter2<VATA::Util::OrdVector<VATA::AutBase::StateType>> converter(m_aut->ns, varNum);
+    MTBDDConverter2<VATA::Util::OrdVector<VATA::AutBase::StateType>> converter(m_aut->ns, varNum);
 
-	converter.Process(m_aut);
-	converter.SetMTBDDToVATA(v_aut);
+    converter.Process(m_aut);
+    converter.SetMTBDDToVATA(v_aut);
 }
 #endif

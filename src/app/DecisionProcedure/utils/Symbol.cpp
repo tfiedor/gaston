@@ -6,7 +6,10 @@
  *    Rest In Piece, brave soldier.
  *
  *  Copyright (c) 2015  Tomas Fiedor <ifiedortom@fit.vutbr.cz>
- *      Notable mentions: Ondrej Lengal <ondra.lengal@gmail.com>
+ *      Notable mentions:   Ondrej Lengal <ondra.lengal@gmail.com>
+ *                              (author of VATA)
+ *                          Petr Janku <ijanku@fit.vutbr.cz>
+ *                              (MTBDD and automata optimizations)
  *
  *  Description:
  *      Representation of Zero Symbol used in decision procedure
@@ -58,6 +61,13 @@ ZeroSymbol::ZeroSymbol(BitMask const& track, VarType var, VarValue val) {
     this->_trackMask = track;
     this->_SetValueAt(var, ZeroSymbol::charToAsgn(val));
     this->_bdd = nullptr;
+}
+
+ZeroSymbol::~ZeroSymbol() {
+    if(this->_bdd != nullptr) {
+        delete this->_bdd;
+        this->_bdd = nullptr;
+    }
 }
 
 // <<< PRIVATE METHODS >>>

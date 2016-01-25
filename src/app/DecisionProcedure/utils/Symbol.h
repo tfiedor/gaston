@@ -43,6 +43,7 @@ public:
     ZeroSymbol();
     ZeroSymbol(BitMask const&);
     ZeroSymbol(BitMask const&, VarType, VarValue);
+    ~ZeroSymbol();
 
     // <<< PUBLIC API >>>
     void ProjectVar(VarType);
