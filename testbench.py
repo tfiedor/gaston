@@ -46,7 +46,6 @@ def run_mona(test, timeout, checkonly=False):
 	args = ('./mona', '-s', '"{}"'.format(test))
 	output, retcode = runProcess(args, timeout)
 	if(retcode != 0):
-		print(output)
 		return mona_error, ""
 	return parseMonaOutput(output, False, checkonly)
 
