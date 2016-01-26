@@ -502,7 +502,8 @@ ResultType BinaryOpAutomaton::_IntersectNonEmptyCore(Symbol* symbol, Term* final
     // as false, whereas for union of automata we can return early if left term
     // was true.
     #if (OPT_CONT_ONLY_WHILE_UNSAT == true)
-    if(this->_trueCounter == 0 && this->_eval_early(lhs_result.second, underComplement)) {
+    bool canGenerateContinuations = (this->_productType == ProductType::E_INTERSECTION ? this->_trueCounter == 0 : this->_falseCounter == 0);
+    if(canGenerateContinuations && this->_eval_early(lhs_result.second, underComplement)) {
     #else
     if(this->_eval_early(lhs_result.second, underComplement)) {
     #endif

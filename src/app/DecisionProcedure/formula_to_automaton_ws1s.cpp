@@ -28,6 +28,10 @@
 #include "decision_procedures.hh"
 #include "environment.hh"
 
+#if (OPT_SMARTER_MONA_CONVERSION == true)
+#include "mtbdd/mtbddconverter2.hh"
+#endif
+
 using std::cout;
 
 extern SymbolTable symbolTable;
@@ -863,7 +867,7 @@ void convertMonaToVataAutomaton(Automaton& v_aut, DFA* m_aut, IdentList* vars, i
 /**
 * Second approach to converting MONA automaton to VATA using the PJ's approach
 */
-void convertMonaToVataAutomaton(Automaton& v_aut, DFA* m_aut, IdentList* vars, int varNum, unsinged* offsets) {
+void convertMonaToVataAutomaton(Automaton& v_aut, DFA* m_aut, IdentList* vars, int varNum, unsigned* offsets) {
     MTBDDConverter2<VATA::Util::OrdVector<VATA::AutBase::StateType>> converter(m_aut->ns, varNum);
 
     converter.Process(m_aut);
