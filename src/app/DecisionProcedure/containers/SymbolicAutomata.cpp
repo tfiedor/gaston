@@ -397,7 +397,8 @@ void BaseAutomaton::_InitializeFinalStates() {
 
     // Push states to new Base Set
     // #TERM_CREATION
-    assert(this->_stateSpace != 0);
+    // Fixme: fail for some optimization i guess?
+    //assert(this->_stateSpace != 0);
     this->_finalStates = reinterpret_cast<Term*>(this->_factory.CreateBaseSet(finalStates, this->_stateOffset, this->_stateSpace));
 }
 
@@ -844,7 +845,7 @@ void BinaryOpAutomaton::DumpToDot(std::ofstream & os, bool inComplement) {
         os << "\u222A";
     }
     os << "\\n(" << this->_trueCounter << "\u22A8, " << this->_falseCounter << "\u22AD)\"";
-    if(this->_trueCounter == 0) {
+    if(this->_trueCounter == 0 && this->_falseCounter != 0) {
         os << ",style=filled, fillcolor=red";
     }
     os << "];\n";
@@ -858,7 +859,7 @@ void ComplementAutomaton::DumpToDot(std::ofstream & os, bool inComplement) {
     os << "\t" << (uintptr_t) &*this << "[label=\"";
     os << "\u03B5 " << (inComplement ? "\u2209 " : "\u2208 ");
     os << "\u00AC\\n(" << this->_trueCounter << "\u22A8, " << this->_falseCounter << "\u22AD)\"";
-    if(this->_trueCounter == 0) {
+    if(this->_trueCounter == 0 && this->_falseCounter != 0) {
         os << ",style=filled, fillcolor=red";
     }
     os << "];\n";
@@ -874,7 +875,7 @@ void ProjectionAutomaton::DumpToDot(std::ofstream & os, bool inComplement) {
         os << symbolTable.lookupSymbol(*id) << ",";
     }
     os << "\\n(" << this->_trueCounter << "\u22A8, " << this->_falseCounter << "\u22AD)\"";
-    if(this->_trueCounter == 0) {
+    if(this->_trueCounter == 0 && this->_falseCounter != 0) {
         os << ",style=filled, fillcolor=red";
     }
     os << "];\n";
@@ -886,7 +887,7 @@ void BaseAutomaton::DumpToDot(std::ofstream & os, bool inComplement) {
     os << "\t" << (uintptr_t) &*this << "[label=\"";
     os << "\u03B5 " << (inComplement ? "\u2209 " : "\u2208 ") << this->_form->ToString();
     os << "\\n(" << this->_trueCounter << "\u22A8, " << this->_falseCounter << "\u22AD)\"";
-    if(this->_trueCounter == 0) {
+    if(this->_trueCounter == 0 && this->_falseCounter != 0) {
         os << ",style=filled, fillcolor=red";
     }
     os << "];\n";

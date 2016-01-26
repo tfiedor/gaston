@@ -170,7 +170,7 @@ public:
 /* >>> Debugging Options <<< *
  *****************************/
 #define DEBUG_AUTOMATA_ADDRESSES		false
-#define DEBUG_BASE_AUTOMATA 			false
+#define DEBUG_BASE_AUTOMATA 			true
 #define DEBUG_FIXPOINT 					false
 #define DEBUG_FIXPOINT_SYMBOLS			false
 #define DEBUG_INITIAL_APPROX 			false
@@ -247,7 +247,7 @@ public:
 #define OPT_DRAW_NEGATION_IN_BASE 		true	// < Negation is handled on formula level and not on computation level
 #define OPT_CREATE_QF_AUTOMATON 		true	// < Transforms Quantifier-free automaton to formula
 #define OPT_REDUCE_AUT_EVERYTIME		false	// < Calls reduce everytime VATA automaton is created
-#define OPT_REDUCE_AUT_LAST				false	// < Calls reduce after the final automaton is created
+#define OPT_REDUCE_AUT_LAST				true	// < Calls reduce after the final automaton is created
 #define OPT_EARLY_EVALUATION 			true	// < Evaluates early interesection of products
 #define OPT_EARLY_PARTIAL_SUB			true
 #define OPT_CONT_ONLY_WHILE_UNSAT		true	// < Generate continuation only if there wasn't found unsatisfying symbol
@@ -273,7 +273,6 @@ public:
 	code(BinaryReorderer)				\
 	code(DistributiveAntiPrenexer)		\
 	code(QuantificationMerger)			\
-	code(BaseAutomataMerger)			\
 	code(SecondOrderRestricter)
 #else
 #define FILTER_LIST(code) \

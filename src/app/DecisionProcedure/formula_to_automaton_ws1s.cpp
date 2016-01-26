@@ -724,9 +724,20 @@ void constructAutomatonByMona(ASTForm *form, Automaton& v_aut) {
 	vars = initializeVars(form);
 	initializeOffsets(offs, vars);
 	toMonaAutomaton(form, dfa);
+	#if (DUMP_INTERMEDIATE_AUTOMATA == true)
+	if(options.dump) {
+		std::cout << "[*] Converting MONA deterministic automaton with: " << dfa->ns << " states\n";
+	}
+	#endif
 	convertMonaToVataAutomaton(v_aut, dfa, vars, numVars, offs);
     delete vars;
     delete[] offs;
+
+	#if (DUMP_INTERMEDIATE_AUTOMATA == true)
+	if(options.dump) {
+		std::cout << "\033[1;32m[DONE]\033[0m\n";
+	}
+	#endif
 }
 
 void toMonaAutomaton(ASTForm* form, DFA*& dfa) {
@@ -868,6 +879,18 @@ void convertMonaToVataAutomaton(Automaton& v_aut, DFA* m_aut, IdentList* vars, i
 * Second approach to converting MONA automaton to VATA using the PJ's approach
 */
 void convertMonaToVataAutomaton(Automaton& v_aut, DFA* m_aut, IdentList* vars, int varNum, unsigned* offsets) {
+// add initial transition
+	setInitialState(v_aut, 1);
+
+	for (unsigned int i = 1; i < m_aut->ns; ++i) {
+	//                ^--- my assumption why this is correct:
+	// MONA has one additional transition 0 -(X*)-> 1 for zeroth order variables
+	// since we are not using this, we can skip it
+	// set final states
+		if(m_aut->f[i] == 1) {
+			setFinalState(v_aut, false, i);
+		}
+	}
     MTBDDConverter2<VATA::Util::OrdVector<VATA::AutBase::StateType>> converter(m_aut->ns, varNum);
     converter.Process(m_aut, v_aut);
 }

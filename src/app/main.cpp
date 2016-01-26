@@ -395,13 +395,14 @@ int main(int argc, char *argv[]) {
 	if(!formulaIsGround) {
 		switch(options.test) {
 			case TestType::VALIDITY:
-				ast->formula = new ASTForm_All2(nullptr, &freeVars, ast->formula, Pos());
+				// Fixme: this is incorrect, we need to tell that the variable is in first order
+				ast->formula = new ASTForm_All1(nullptr, &freeVars, ast->formula, Pos());
 				break;
 			case TestType::SATISFIABILITY:
-				ast->formula = new ASTForm_Ex2(nullptr, &freeVars, ast->formula, Pos());
+				ast->formula = new ASTForm_Ex1(nullptr, &freeVars, ast->formula, Pos());
 				break;
 			case TestType::UNSATISFIABILITY:
-				ast->formula = new ASTForm_Ex2(nullptr, &freeVars, new ASTForm_Not(ast->formula, Pos()), Pos());
+				ast->formula = new ASTForm_Ex1(nullptr, &freeVars, new ASTForm_Not(ast->formula, Pos()), Pos());
 				break;
 			default:
 				assert(false && "Cannot handle the unground formulae right now.");
