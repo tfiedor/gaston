@@ -712,13 +712,13 @@ int main(int argc, char *argv[]) {
 				break;
 		}
 
-		cout << "\n[*] Decision procedure elapsed time: ";
+		cout << "\n[*] Decision procedure: ";
 		timer_deciding.print();
-		cout << "[*] DFA creation elapsed time: ";
+		cout << "[*] DFA creation:       ";
 		timer_mona.print();
-		cout << "[*] Conversion elapsed time: ";
+		cout << "[*] MONA <-> VATA:      ";
 		timer_conversion.print();
-		cout << "[*] Base elapsed time: ";
+		cout << "[*] Bases creation:     ";
 		timer_base.print();
 		// Something that was used is not supported by dWiNA
 	} catch (NotImplementedException& e) {

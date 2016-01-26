@@ -19,7 +19,8 @@ from termcolor import colored
 dwina_error = (-1, -1, -1, -1, -1)
 mona_error = (-1, -1)
 mona_expnf_error = (-1, -1, -1)
-test_dir="./tests/basic"
+test_dir="./tests/one"
+#test_dir="./tests/basic"
 #test_dir="./tests/basic/strand"
 
 def createArgumentParser():
@@ -63,7 +64,7 @@ def run_gaston(test, timeout, checkonly=False):
 	'''
 	Runs dWiNA with following arguments: --method=backward
 	'''
-	args = ('./gaston', '"{}"'.format(test))
+	args = ('./gaston', '--test=val', '"{}"'.format(test))
 	output, retcode = runProcess(args, timeout)
 
 	if (retcode != 0):
@@ -119,8 +120,8 @@ def exportToCSV(data, bins):
 	data should be like this:
 	data[benchmark]['mona'] = (time, space)
 				   ['mona-expnf'] = (time, space, prefix-space)
-				   ['gaston'] = (time, time-dp-only, base-aut, space, space-unpruned)
-				   ['gaston-dfa'] = (time, time-dp-only, base-aut, space, space-unpruned)
+				   ['gaston'] = (time-overall, time-dp-only, time-dfa, time-conversion, base-aut, space, space-unpruned)
+				   ['gaston-dfa'] = (time, time-dp-only, time-dfa, time-conversion, base-aut, space, space-unpruned)
 	
 	'''
 	saveTo = generateCSVname()
@@ -132,9 +133,9 @@ def exportToCSV(data, bins):
 		if 'mona-expnf' in bins:
 			csvFile.write('mona-expnf-time, mona-expnf-space, mona-expnf-prefix-space, ')
 		if 'gaston' in bins:
-			csvFile.write('gaston-time, gaston-time-dp-only, base-aut, gaston-space, gaston-space-pruned, ')
+			csvFile.write('gaston-time-overall, gaston-time-dp-only, gaston-time-dfa, gaston-time-conversion, base-aut, gaston-space, gaston-space-pruned, ')
 		if 'dwina-dfa' in bins:
-			csvFile.write('dwina-dfa-time, dwina-dfa-time-dp-only, base-aut, dwina-dfa-space, dwina-dfa-space-pruned')
+			csvFile.write('dwina-dfa-time, dwina-dfa-time-dp-only, gaston-time-dfa, gaston-time-conversion, base-aut, dwina-dfa-space, dwina-dfa-space-pruned')
 		csvFile.write('\n')
 			
 		for benchmark in sorted(data.keys()):
@@ -253,10 +254,18 @@ def parsedWiNAOutput(output, unprunedOutput, checkonly=False):
 	size_unpruned = int(re.search('[0-9]+', sizes[0]).group(0))
 
 	# get dp time
-	times = [line for line in strippedLines if line.startswith('[*] Decision procedure elapsed time:')]
+	times = [line for line in strippedLines if line.startswith('[*] Decision procedure:')]
 	time_dp = parseTotalTime(times[0])
-	
-	return (time, time_dp, 0, size, size_unpruned), ret
+
+	# get dp time
+	times = [line for line in strippedLines if line.startswith('[*] DFA creation:')]
+	time_dfa = parseTotalTime(times[0])
+
+	# get dp time
+	times = [line for line in strippedLines if line.startswith('[*] MONA <-> VATA:')]
+	time_conv = parseTotalTime(times[0])
+
+	return (time, time_dp, time_dfa, time_conv, 0, size, size_unpruned), ret
 
 def parseArguments():
 	'''

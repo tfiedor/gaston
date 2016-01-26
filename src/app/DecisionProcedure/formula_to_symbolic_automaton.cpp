@@ -38,7 +38,8 @@ SymbolicAutomaton* baseToSymbolicAutomaton(ASTForm* form, bool doComplement) {
     aut = aut1.RemoveUselessStates();
     #endif
 
-    return new TemplatedAutomaton(new Automaton(aut), form);
+    // Fixme: this is shit, come on!
+    return new TemplatedAutomaton(new Automaton(std::move(aut)), form);
 }
 
 SymbolicAutomaton* ASTForm_True::_toSymbolicAutomatonCore(bool doComplement) {
