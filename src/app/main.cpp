@@ -719,7 +719,7 @@ int main(int argc, char *argv[]) {
 		cout << "[*] MONA <-> VATA:      ";
 		timer_conversion.print();
 		cout << "[*] Bases creation:     ";
-		timer_base.print();
+		timer_automaton.print();
 		// Something that was used is not supported by dWiNA
 	} catch (NotImplementedException& e) {
 		std::cerr << e.what() << std::endl;

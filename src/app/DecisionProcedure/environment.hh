@@ -237,30 +237,29 @@ public:
 
 /* >>> Optimizations <<< *
  *************************/
-#define OPT_DONT_CACHE_CONT				false
-#define OPT_DONT_CACHE_UNFULL_FIXPOINTS false
-#define OPT_EQ_THROUGH_POINTERS			true	// < Tests equality through pointers not by structure
-#define OPT_GENERATE_UNIQUE_TERMS		true	// < Uses Workshop to generate unique pointers
-// NOTE! From v1.0 onwards, disable this will introduce not only leaks, but will fuck everything up!
-#define OPT_TERM_HASH_BY_APPROX			true	// < Includes stateSpaceApprox into hash
-#define OPT_ANTIPRENEXING				true	// < Transforms formula to anti-prenex form (i.e. all of the quantifiers are deepest on leaves)
-#define OPT_DRAW_NEGATION_IN_BASE 		true	// < Negation is handled on formula level and not on computation level
-#define OPT_CREATE_QF_AUTOMATON 		true	// < Transforms Quantifier-free automaton to formula
-#define OPT_REDUCE_AUT_EVERYTIME		false	// < Calls reduce everytime VATA automaton is created
-#define OPT_REDUCE_AUT_LAST				false	// < Calls reduce after the final automaton is created
+#define OPT_DONT_CACHE_CONT				false	// < Do not cache terms containing continuations
+#define OPT_DONT_CACHE_UNFULL_FIXPOINTS false	// < Do not cache fixpoints that were not fully computed
+#define OPT_EQ_THROUGH_POINTERS			true	// < Test equality through pointers, not by structure
+#define OPT_GENERATE_UNIQUE_TERMS		true	// < Use Workshops to generate unique pointers
+// ^- NOTE! From v1.0 onwards, disable this will introduce not only leaks, but will fuck everything up!
+#define OPT_TERM_HASH_BY_APPROX			true	// < Include stateSpaceApprox into hash (i.e. better distribution of cache)
+#define OPT_ANTIPRENEXING				true	// < Transform formula to anti-prenex form (i.e. all of the quantifiers are deepest on leaves)
+#define OPT_DRAW_NEGATION_IN_BASE 		true	// < Negation is handled on formula level and not on computation level on base automata
+#define OPT_CREATE_QF_AUTOMATON 		true	// < Transform quantifier-free automaton to formula
+#define OPT_REDUCE_AUT_EVERYTIME		false	// < Call reduce everytime VATA automaton is created (i.e. as intermediate result)
+#define OPT_REDUCE_AUT_LAST				true	// < Call reduce after the final VATA automaton is created
 #define OPT_EARLY_EVALUATION 			true	// < Evaluates early interesection of products
-#define OPT_EARLY_PARTIAL_SUB			true
-#define OPT_CONT_ONLY_WHILE_UNSAT		true	// < Generate continuation only if there wasn't found unsatisfying symbol
-#define OPT_PRUNE_EMPTY					true	// < Prunes empty sets
-#define OPT_PRUNE_FIXPOINT				true	// < Prunes fixpoint during IsSubsumedBy TODO: For BaseSet only for now
-#define OPT_REDUCE_FIXPOINT_EVERYTIME	false	// < Prunes the fixpoint everytime iterator is invalidating
-#define OPT_REDUCE_PREFIXPOINT			true	// < Prunes the fixpoint when returning pre
-#define OPT_FIND_POSTPONED_CANDIDATE	true
-#define OPT_REDUCE_FULL_FIXPOINT		true
-#define OPT_CACHE_RESULTS 				true	// < Cache results
-#define OPT_CACHE_SUBSUMES				true	// < Caches the results of IsSubsumed function on terms
-#define OPT_CACHE_SUBSUMED_BY			true	// < Caches the results of IsSubsumedBy function in fixpoints
-#define OPT_SMARTER_MONA_CONVERSION		false
+#define OPT_EARLY_PARTIAL_SUB			true	// < Postpone the partially subsumed terms
+#define OPT_CONT_ONLY_WHILE_UNSAT		true	// < Generate continuation only if there wasn't found (un)satisfying (counter)example yet
+#define OPT_PRUNE_EMPTY					true	// < Prune terms by empty set
+#define OPT_REDUCE_FIXPOINT_EVERYTIME	false	// < Prune the fixpoint everytime any iterator is invalidated
+#define OPT_REDUCE_PREFIXPOINT			true	// < Prune the fixpoint when returning pre (i.e. fixpoint - symbol)
+#define OPT_FIND_POSTPONED_CANDIDATE	true	// < Chose better candidate from list of postponed subsumption testing pairs
+#define OPT_REDUCE_FULL_FIXPOINT		true	// < Prune the fixpoint by subsumption
+#define OPT_CACHE_RESULTS 				true	// < Cache results of intersectnonempty(term, symbol)
+#define OPT_CACHE_SUBSUMES				true	// < Cache the results of subsumption testing between terms
+#define OPT_CACHE_SUBSUMED_BY			true	// < Cache the results of term subsumption by fixpoints
+#define OPT_SMARTER_MONA_CONVERSION		false	// < Use faster conversion from MONA to VATA (courtesy of PJ)
 
 /*******************************
  * DEFINITION OF FILTER PHASES *
@@ -276,16 +275,16 @@ public:
 	code(SecondOrderRestricter)
 #else
 #define FILTER_LIST(code) \
-	code(ZeroOrderRemover)				\
-	code(SyntaxRestricter)				\
-	code(BinaryReorderer)				\
-	code(FullAntiPrenexer)				\
-	code(BooleanUnfolder)				\
-	code(UniversalQuantifierRemover)	\
-	code(NegationUnfolder)				\
-	code(QuantificationMerger)			\
-	code(BaseAutomataMerger)			\
-	code(SecondOrderRestricter)
+	code(ZeroOrderRemover)				/* Transform zero-order variables to second-order interpretation */ \
+	code(SyntaxRestricter)				/* Restrict unsupported formula constructs to supported subset*/ \
+	code(BinaryReorderer)				/* Reorder the formula for better antiprenexing */ \
+	code(FullAntiPrenexer)				/* Push quantifiers as deep as possible */ \
+	code(BooleanUnfolder)				/* Simplify formula through various boolean laws*/ \
+	code(UniversalQuantifierRemover)	/* Remove universal quantifier from formula*/ \
+	code(NegationUnfolder)				/* Push negations deeply*/ \
+	code(QuantificationMerger)			/* Merge some quantifications */ \
+	code(BaseAutomataMerger)			/* Merge some base automata for more quantifier free subformulae*/ \
+	code(SecondOrderRestricter)			/* Restrict the formula to second order*/
 #endif
 
 #endif

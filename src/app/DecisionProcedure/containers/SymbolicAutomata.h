@@ -57,8 +57,8 @@ public:
 protected:
     // <<< PRIVATE MEMBERS >>>
     Formula_ptr _form;
-    Term_ptr _initialStates;
-    Term_ptr _finalStates;
+    Term_ptr _initialStates = nullptr;
+    Term_ptr _finalStates = nullptr;
     TermWorkshop _factory;          // Creates terms
     ResultCache _resCache;          // Caches (states, symbol) = (fixpoint, bool)
     SubsumptionCache _subCache;     // Caches (term, term) = bool
@@ -84,6 +84,7 @@ public:
     virtual ~SymbolicAutomaton();
 
     // <<< PUBLIC API >>>
+    void InitializeStates();
     virtual Term_ptr GetInitialStates();
     virtual Term_ptr GetFinalStates();
     virtual Term* Pre(Symbol*, Term*, bool) = 0;
@@ -237,11 +238,12 @@ protected:
 
 public:
     // <<< CONSTRUCTORS >>>
-    BaseAutomaton(BaseAutomatonType* aut, Formula_ptr form);
+    BaseAutomaton(BaseAutomatonType* aut, Formula_ptr form, bool lateInit = false);
     ~BaseAutomaton();
 
     // <<< PUBLIC API >>>
     virtual Term* Pre(Symbol*, Term*, bool);
+    BaseAutomatonType& GetAutomatonHandle() {return (*this->_base_automaton);}
 
     // <<< DUMPING FUNCTIONS >>>
     virtual void DumpToDot(std::ofstream&, bool);

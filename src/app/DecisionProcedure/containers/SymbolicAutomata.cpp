@@ -82,8 +82,11 @@ ProjectionAutomaton::~ProjectionAutomaton() {
     delete this->_aut;
 }
 
-BaseAutomaton::BaseAutomaton(BaseAutomatonType* aut, Formula_ptr form) : SymbolicAutomaton(form), _base_automaton(aut) {
-    type = AutType::BASE; this->_InitializeAutomaton();
+BaseAutomaton::BaseAutomaton(BaseAutomatonType* aut, Formula_ptr form, bool lateInit) : SymbolicAutomaton(form), _base_automaton(aut) {
+    type = AutType::BASE;
+    if(lateInit) {
+        this->_InitializeAutomaton();
+    }
 }
 
 BaseAutomaton::~BaseAutomaton() {
@@ -294,6 +297,12 @@ Term_ptr SymbolicAutomaton::GetInitialStates() {
  *
  * Then we initialize Initial and Base states.
  */
+void SymbolicAutomaton::InitializeStates() {
+    assert(this->_initialStates == nullptr);
+    assert(this->_finalStates == nullptr);
+    this->_InitializeAutomaton();
+}
+
 void BaseAutomaton::_InitializeAutomaton() {
     // TODO: Maybe this could be done only, if we are dumping the automaton?
     this->_factory.InitializeWorkshop();
@@ -504,7 +513,9 @@ ResultType BinaryOpAutomaton::_IntersectNonEmptyCore(Symbol* symbol, Term* final
     // as false, whereas for union of automata we can return early if left term
     // was true.
     #if (OPT_CONT_ONLY_WHILE_UNSAT == true)
-    bool canGenerateContinuations = (this->_productType == ProductType::E_INTERSECTION ? this->_trueCounter == 0 : this->_falseCounter == 0);
+    bool canGenerateContinuations = (this->_productType == ProductType::E_INTERSECTION ?
+                                     (this->_trueCounter == 0 && this->_falseCounter > 0) :
+                                     (this->_falseCounter == 0 && this->_trueCounter > 0) );
     if(canGenerateContinuations && this->_eval_early(lhs_result.second, underComplement)) {
     #else
     if(this->_eval_early(lhs_result.second, underComplement)) {
