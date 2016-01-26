@@ -3,11 +3,14 @@
 //
 
 #include "../Frontend/ast.h"
+#include "../Frontend/timer.h"
 #include "../DecisionProcedure/containers/SymbolicAutomata.h"
 #include "../DecisionProcedure/environment.hh"
 #include "../DecisionProcedure/automata.hh"
 #include "../DecisionProcedure/visitors/NegationUnfolder.h"
 #include <memory>
+
+extern Timer timer_base;
 
 SymbolicAutomaton* ASTForm::toSymbolicAutomaton(bool doComplement) {
     // If the sfa was already initialized (it is thus shared somehow,

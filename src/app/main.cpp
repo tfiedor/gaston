@@ -84,6 +84,7 @@ VarToTrackMap varMap;
 IdentList inFirstOrder;
 int numTypes = 0;
 bool regenerate = false;
+Timer timer_conversion, timer_mona, timer_base;
 
 #if (USE_STATECACHE == true)
 MultiLevelMCache<bool> StateCache;
@@ -487,6 +488,11 @@ int main(int argc, char *argv[]) {
 		cout << "\n";
 	}
 
+	cout << "[*] Input file transformed into formula in Existential Prenex Normal Form\n";
+	cout << "[*] Elapsed time: ";
+	timer_formula.print();
+	cout << "\n";
+
 	///////// Conversion to Tree Automata ////////
 
 	// Table or BDD tracks are reordered
@@ -607,12 +613,12 @@ int main(int argc, char *argv[]) {
 	}
 
 	timer_automaton.stop();
-	if (options.dump) {
-		std::cout << "[*] Formula translation to Automaton [DONE]\n";
+	//if (options.dump) {
+		std::cout << "\n[*] Formula translation to Automaton [DONE]\n";
 		cout << "[*] Elapsed time: ";
 		timer_automaton.print();
 		cout << "\n";
-	}
+	//}
 
 	if(options.construction != SYMBOLIC_AUT) {
 		std::cout << "[*] Reindexing states in VATA Automaton\n";
@@ -654,7 +660,6 @@ int main(int argc, char *argv[]) {
 			}
 		#endif
 	}
-
 	///////// DECISION PROCEDURE /////////////////////////////////////////////
 	int decided;
 	try {
@@ -709,7 +714,12 @@ int main(int argc, char *argv[]) {
 
 		cout << "\n[*] Decision procedure elapsed time: ";
 		timer_deciding.print();
-		cout << "\n";
+		cout << "[*] DFA creation elapsed time: ";
+		timer_mona.print();
+		cout << "[*] Conversion elapsed time: ";
+		timer_conversion.print();
+		cout << "[*] Base elapsed time: ";
+		timer_base.print();
 		// Something that was used is not supported by dWiNA
 	} catch (NotImplementedException& e) {
 		std::cerr << e.what() << std::endl;

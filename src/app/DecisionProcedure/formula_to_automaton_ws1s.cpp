@@ -27,6 +27,7 @@
 #include "automata.hh"
 #include "decision_procedures.hh"
 #include "environment.hh"
+#include "../Frontend/timer.h"
 
 #if (OPT_SMARTER_MONA_CONVERSION == true)
 #include "mtbdd/mtbddconverter2.hh"
@@ -39,6 +40,7 @@ extern Options options;
 extern Offsets offsets;
 extern VarToTrackMap varMap;
 extern CodeTable *codeTable;
+extern Timer timer_conversion, timer_mona;
 
 using Automaton = VATA::BDDBottomUpTreeAut;
 
@@ -721,15 +723,19 @@ void constructAutomatonByMona(ASTForm *form, Automaton& v_aut) {
 	IdentList *vars = nullptr;
 	DFA *dfa = nullptr;
 
+	timer_mona.start();
 	vars = initializeVars(form);
 	initializeOffsets(offs, vars);
 	toMonaAutomaton(form, dfa);
+	timer_mona.stop();
 	#if (DUMP_INTERMEDIATE_AUTOMATA == true)
 	if(options.dump) {
 		std::cout << "[*] Converting MONA deterministic automaton with: " << dfa->ns << " states\n";
 	}
-	#endif
+    #endif
+    timer_conversion.start();
 	convertMonaToVataAutomaton(v_aut, dfa, vars, numVars, offs);
+	timer_conversion.stop();
     delete vars;
     delete[] offs;
 
