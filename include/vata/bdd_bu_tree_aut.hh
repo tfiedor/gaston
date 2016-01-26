@@ -36,17 +36,26 @@ namespace VATA
 		class>
 	class LoadableAut;
 
-	class BDDBUTreeAutCore;
+    class BDDBUTreeAutCore;
 }
 
-GCC_DIAG_OFF(effc++)
+namespace VATA
+{
+    namespace MTBDDPkg
+    {
+        template<class>
+        class OndriksMTBDD;
+    }
+}
+
 class VATA::BDDBottomUpTreeAut : public SymbolicTreeAutBase
 {
-GCC_DIAG_ON(effc++)
-
 private:  // data types
 
 	using CoreAut        = VATA::LoadableAut<BDDBUTreeAutCore>;
+
+    using StateSet       = VATA::Util::OrdVector<StateType>;
+    using TransMTBDD     = VATA::MTBDDPkg::OndriksMTBDD<StateSet>;
 
 private:  // data members
 
@@ -92,6 +101,9 @@ public:   // methods
 		const SymbolType&      symbol,
 		const StateType&       parent);
 
+    void SetMtbdd(
+        const StateTuple&      children,
+        const TransMTBDD&      mtbdd);
 
 	void LoadFromString(
 		VATA::Parsing::AbstrParser&     parser,
