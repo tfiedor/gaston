@@ -493,7 +493,7 @@ if __name__ == '__main__':
 					continue
 				
 				print("[*] Running test bench:"),
-				print(colored("'{}'".format(benchmark), "grey", attrs=["bold"]))
+				print(colored("'{}'".format(benchmark), "white", attrs=["bold"]))
 				rets = {'gaston' : ""}
 				for bin in bins:
 					method_name = "_".join(["run"] + bin.split('-'))
