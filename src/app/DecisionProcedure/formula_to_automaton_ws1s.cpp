@@ -869,8 +869,6 @@ void convertMonaToVataAutomaton(Automaton& v_aut, DFA* m_aut, IdentList* vars, i
 */
 void convertMonaToVataAutomaton(Automaton& v_aut, DFA* m_aut, IdentList* vars, int varNum, unsigned* offsets) {
     MTBDDConverter2<VATA::Util::OrdVector<VATA::AutBase::StateType>> converter(m_aut->ns, varNum);
-
-    converter.Process(m_aut);
-    converter.SetMTBDDToVATA(v_aut);
+    converter.Process(m_aut, v_aut);
 }
 #endif

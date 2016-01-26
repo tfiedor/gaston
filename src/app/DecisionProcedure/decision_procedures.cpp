@@ -493,7 +493,7 @@ MacroStateSet* GetZeroMacroPost(Automaton & aut, TStateSet*& state, unsigned lev
 					[&transPost, projecting](size_t var) { return var < projecting;}, muf);
 #if (DEBUG_BDDS == true)
 			std::cout << "[?] BDD: \n";
-			std::cout << MacroTransMTBDD::DumpToDot({&projectedMtbdd}) << "\n\n";
+			//std::cout << MacroTransMTBDD::DumpToDot({&projectedMtbdd}) << "\n\n";
 #endif
 
 			MacroStateSet *postStates = projectedMtbdd.GetValue(constructUniversalTrack());

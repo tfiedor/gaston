@@ -79,6 +79,10 @@ TermEmpty::TermEmpty(bool inComplement) {
     #endif
 }
 
+/*Term::~Term() {
+    this->_isSubsumedCache.clear();
+}*/
+
 /**
  * Constructor of Term Product---construct intersecting product of
  * @p lhs and @p rhs
@@ -252,11 +256,11 @@ TermFixpoint::TermFixpoint(Aut_ptr aut, Term_ptr sourceTerm, Symbol* symbol, boo
     #endif
 }
 
-TermFixpoint::~TermFixpoint() {
+/*TermFixpoint::~TermFixpoint() {
     this->_worklist.clear();
     this->_postponed.clear();
     this->_symList.clear();
-}
+}*/
 
 void Term::Complement() {
     this->_inComplement = (this->_inComplement == false);
@@ -1244,9 +1248,6 @@ bool Term::operator==(const Term &t) {
         #endif
         return tthis == tt;
     } else {
-        #if (OPT_EQ_THROUGH_POINTERS == true)
-        //return false;
-        #endif
         #if (MEASURE_COMPARISONS == true)
         bool result = tthis->_eqCore(*tt);
         Term::comparedByStructure(tthis->type, result);
@@ -1267,15 +1268,26 @@ bool TermProduct::_eqCore(const Term &t) {
 
     #if (OPT_EQ_THROUGH_POINTERS == true)
     assert(this != &t);
-    return false;
-    #endif
-
+    const TermProduct &tProduct = static_cast<const TermProduct&>(t);
+    // TODO: We should consider that continuation can be on left side, if we chose the different computation strategy
+    if(!this->right->IsNotComputed() && !tProduct.right->IsNotComputed()) {
+        // If something was continuation we try the structural compare, as there could be something unfolded
+        if(this->left->stateSpaceApprox < this->right->stateSpaceApprox) {
+            return (*tProduct.left == *this->left) && (*tProduct.right == *this->right);
+        } else {
+            return (*tProduct.right == *this->right) && (*tProduct.left == *this->left);
+        }
+    } else {
+        return false;
+    }
+    #else
     const TermProduct &tProduct = static_cast<const TermProduct&>(t);
     if(this->left->stateSpaceApprox < this->right->stateSpaceApprox) {
         return (*tProduct.left == *this->left) && (*tProduct.right == *this->right);
     } else {
         return (*tProduct.right == *this->right) && (*tProduct.left == *this->left);
     }
+    #endif
 }
 
 bool TermBaseSet::_eqCore(const Term &t) {
@@ -1324,6 +1336,10 @@ bool TermList::_eqCore(const Term &t) {
 bool TermFixpoint::_eqCore(const Term &t) {
     assert(t.type == TERM_FIXPOINT && "Testing equality of different term types");
 
+    #if (OPT_EQ_THROUGH_POINTERS == true)
+    assert(this != &t);
+    return false;
+    #else
     const TermFixpoint &tFix = static_cast<const TermFixpoint&>(t);
     if(this->_bValue != tFix._bValue) {
         // If the values are different, we can automatically assume that there is some difference
@@ -1364,5 +1380,5 @@ bool TermFixpoint::_eqCore(const Term &t) {
         #endif
         return true;
     }
-
+    #endif
 }

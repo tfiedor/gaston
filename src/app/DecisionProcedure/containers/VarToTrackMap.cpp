@@ -48,8 +48,12 @@ uint VarToTrackMap::TrackLength() {
  * @return: track number associanted to variable val
  */
 uint VarToTrackMap::operator[](uint val) {
+	#if (OPT_SMARTER_MONA_CONVERSION == true)
+	return this->vttMap[val];
+	#else
 	unsigned int mapSize = this->vttMap.size();
 	return mapSize - 1 - this->vttMap[val];
+	#endif
 }
 
 /**

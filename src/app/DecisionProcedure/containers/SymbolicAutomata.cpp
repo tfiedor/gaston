@@ -397,6 +397,7 @@ void BaseAutomaton::_InitializeFinalStates() {
 
     // Push states to new Base Set
     // #TERM_CREATION
+    assert(this->_stateSpace != 0);
     this->_finalStates = reinterpret_cast<Term*>(this->_factory.CreateBaseSet(finalStates, this->_stateOffset, this->_stateSpace));
 }
 

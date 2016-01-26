@@ -212,7 +212,7 @@ public:
 #define MEASURE_PROJECTION				true	// < Measures several things about projection (how many steps, how big, etc.)
 #define MEASURE_POSTPONED				true	// < Measures how many terms are postponed and how many are processed
 #define MEASURE_ALL						true	// < Measure everything, not really useful
-#define MEASURE_COMPARISONS				true	// < Measure how many times we sucessfully compared and how
+#define MEASURE_COMPARISONS				false	// < Measure how many times we sucessfully compared and how
 #define MEASURE_SUBSUMEDBY_HITS			true	// < Measure how many times subsumedBy cache worked
 
 /* >>> Anti-Prenexing Options <<< *
@@ -245,7 +245,7 @@ public:
 #define OPT_TERM_HASH_BY_APPROX			true	// < Includes stateSpaceApprox into hash
 #define OPT_ANTIPRENEXING				true	// < Transforms formula to anti-prenex form (i.e. all of the quantifiers are deepest on leaves)
 #define OPT_DRAW_NEGATION_IN_BASE 		true	// < Negation is handled on formula level and not on computation level
-#define OPT_CREATE_QF_AUTOMATON 		false	// < Transforms Quantifier-free automaton to formula
+#define OPT_CREATE_QF_AUTOMATON 		true	// < Transforms Quantifier-free automaton to formula
 #define OPT_REDUCE_AUT_EVERYTIME		false	// < Calls reduce everytime VATA automaton is created
 #define OPT_REDUCE_AUT_LAST				false	// < Calls reduce after the final automaton is created
 #define OPT_EARLY_EVALUATION 			true	// < Evaluates early interesection of products
@@ -260,7 +260,7 @@ public:
 #define OPT_CACHE_RESULTS 				true	// < Cache results
 #define OPT_CACHE_SUBSUMES				true	// < Caches the results of IsSubsumed function on terms
 #define OPT_CACHE_SUBSUMED_BY			true	// < Caches the results of IsSubsumedBy function in fixpoints
-#define OPT_SMARTER_MONA_CONVERSION		false
+#define OPT_SMARTER_MONA_CONVERSION		true
 
 /*******************************
  * DEFINITION OF FILTER PHASES *

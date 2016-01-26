@@ -55,7 +55,7 @@ namespace VATA
 		class VoidApply2Functor;
 
 		template <class, typename, typename, typename>
-		class VoidApply3Functor;
+        class VoidApply3Functor;
 	}
 }
 
@@ -91,6 +91,9 @@ class VATA::MTBDDPkg::OndriksMTBDD
 	template <class, typename, typename, typename>
 	friend class VoidApply3Functor;
 
+    template <class>
+    friend class MTBDDConverter2;
+
 public:   // public data types
 
 	typedef Data DataType;
@@ -104,6 +107,8 @@ public:   // public data types
 	typedef typename NodePtrType::VarType VarType;
 	typedef std::vector<VarType> PermutationTable;
 	typedef std::shared_ptr<PermutationTable> PermutationTablePtr;
+
+	using SymVarToValueList = std::vector<std::pair<SymbolicVarAsgn, DataType>>;
 
 private:  // private data types
 
@@ -201,15 +206,6 @@ private:  // private methods
 		return procNode;
 	}
 
-	OndriksMTBDD(
-		NodePtrType                   root,
-		const DataType&               defaultValue) :
-		root_(root),
-		defaultValue_(defaultValue)
-	{
-		// Assertions
-		assert(!IsNull(root_));
-	}
 
 
 	NodePtrType getRoot() const
@@ -348,12 +344,17 @@ private:  // private methods
 		{
 			assert(IsInternal(ptr));
 
-			return "var(" + Convert::ToString(GetVarFromInternal(ptr)) + ")" + Convert::ToString(ptr) + " -> " +
+			std::string result = Convert::ToString(ptr) + "[label=\"var:"
+				+ Convert::ToString(GetVarFromInternal(ptr)) + "\"];\n";
+
+			result += Convert::ToString(ptr) + " -> " +
 				Convert::ToString(GetLowFromInternal(ptr)) + " [style = dashed];\n" +
-				"var(" + Convert::ToString(GetVarFromInternal(ptr)) + ")" + Convert::ToString(ptr) + " -> " +
+				Convert::ToString(ptr) + " -> " +
 				Convert::ToString(GetHighFromInternal(ptr)) + " [style = solid];\n" +
 				mtbddNodeToDotString(GetLowFromInternal(ptr), cache) +
 				mtbddNodeToDotString(GetHighFromInternal(ptr), cache);
+
+			return result;
 		}
 	}
 
@@ -415,8 +416,89 @@ private:  // private methods
 	}
 
 
+	template <
+		class RenameFunc>
+	static NodePtrType renameNode(
+		const NodePtrType             node,
+		RenameFunc&                   renamer)
+	{
+		assert(!IsNull(node));
+
+		if (IsLeaf(node))
+		{
+			return OndriksMTBDD::spawnLeaf(GetDataFromLeaf(node));
+		}
+
+		VarType var = GetVarFromInternal(node);
+		NodePtrType lowTree = GetLowFromInternal(node);
+		NodePtrType highTree = GetHighFromInternal(node);
+
+		assert(lowTree != highTree);
+		assert(node != lowTree);
+		assert(node != highTree);
+
+		lowTree = renameNode(lowTree, renamer);
+		highTree = renameNode(highTree, renamer);
+		assert(!IsNull(lowTree) && !IsNull(highTree));
+		assert(lowTree != highTree);
+
+		VarType newVar = renamer(var);
+		NodePtrType result = OndriksMTBDD::spawnInternal(lowTree, highTree, newVar);
+		assert(!IsNull(result));
+
+		if (IsInternal(lowTree))
+		{	// check some invariants
+			assert(GetVarFromInternal(lowTree) < newVar);
+		}
+
+		if (IsInternal(highTree))
+		{
+			assert(GetVarFromInternal(highTree) < newVar);
+		}
+
+		return result;
+	}
+
+	static void getPathsRec(
+		SymVarToValueList&         list,
+		SymbolicVarAsgn            asgn,
+		const NodePtrType          node)
+	{
+		assert(!IsNull(node));
+
+		if (IsLeaf(node))
+		{
+			list.push_back(std::make_pair(asgn, GetDataFromLeaf(node)));
+			return;
+		}
+
+		VarType var = GetVarFromInternal(node);
+		NodePtrType lowTree = GetLowFromInternal(node);
+		NodePtrType highTree = GetHighFromInternal(node);
+
+		assert(lowTree != highTree);
+		assert(node != lowTree);
+		assert(node != highTree);
+
+		asgn.AddVariablesUpTo(var);
+		asgn.SetIthVariableValue(var, SymbolicVarAsgn::ZERO);
+		getPathsRec(list, asgn, lowTree);
+		asgn.SetIthVariableValue(var, SymbolicVarAsgn::ONE);
+		getPathsRec(list, asgn, highTree);
+	}
+
+
 public:   // public methods
 
+    OndriksMTBDD(
+        NodePtrType                   root,
+        const DataType&               defaultValue) :
+        root_(root),
+        defaultValue_(defaultValue)
+    {
+        // Assertions
+        assert(!IsNull(root_));
+    }
 
 	/**
 	 * @brief  Constructor with given variable ordering
@@ -486,6 +568,19 @@ public:   // public methods
 		return defaultValue_;
 	}
 
+	bool operator==(const OndriksMTBDD& rhs) const
+	{
+		assert(!IsNull(this->getRoot()));
+		assert(!IsNull(rhs.getRoot()));
+
+		return this->getRoot() == rhs.getRoot();
+	}
+
+	bool operator!=(const OndriksMTBDD& rhs) const
+	{
+		return !(this->operator==(rhs));
+	}
+
 	OndriksMTBDD ExtendWith(
 		const SymbolicVarAsgn&         asgn,
 		const size_t&                  offset) const
@@ -531,17 +626,18 @@ public:   // public methods
 	}
 
 	static std::string DumpToDot(
-		const std::vector<const OndriksMTBDD*>&           mtbdds)
+		const std::vector<OndriksMTBDD>&           mtbdds)
 	{
 		std::string result = "digraph mtbdd {\n";
 
 		NodePtrSet cache;
 
-		for (const OndriksMTBDD* bdd : mtbdds)
+		for (const OndriksMTBDD& bdd : mtbdds)
 		{
-			assert(bdd != nullptr);
-
-			result +=	mtbddNodeToDotString(bdd->getRoot(), cache);
+			if (!IsNull(bdd.getRoot()))
+			{
+				result +=	mtbddNodeToDotString(bdd.getRoot(), cache);
+			}
 		}
 
 		return result + "}";
@@ -635,15 +731,30 @@ public:   // public methods
 	 *
 	 * @returns  An MTBDD with renamed variables
 	 *
-	 * @note  The @p renamer must respect the ordering of variables. That is, for
-	 *        all x, y, if x < y, then it must hold that renamer(x) < renamer(y)
+	 * @note  The @p renamer must respect the ordering of ALL variables. That is,
+	 *        for all x, y, if x < y, then it must hold that renamer(x) <
+	 *        renamer(y)
 	 */
 	template <
 		class RenamingF>
 	OndriksMTBDD Rename(
 		RenamingF                renamer) const
 	{
-		throw NotImplementedException(__func__);
+		assert(!IsNull(this->getRoot()));
+
+		NodePtrType newRoot = OndriksMTBDD::renameNode(
+			this->getRoot(), renamer);
+		IncrementRefCnt(newRoot);
+		return OndriksMTBDD(newRoot, this->GetDefaultValue());
+	}
+
+
+	SymVarToValueList GetPaths() const
+	{
+		SymVarToValueList list;
+
+		getPathsRec(list, SymbolicVarAsgn(), this->getRoot());
+		return list;
 	}
 
 

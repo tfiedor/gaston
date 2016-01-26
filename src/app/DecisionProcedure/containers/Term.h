@@ -80,7 +80,6 @@ public:
 
     // See #L29
     TERM_MEASURELIST(DEFINE_STATIC_MEASURE)
-
 protected:
     // <<< PRIVATE MEMBERS >>>
     bool _nonMembershipTesting;
@@ -88,6 +87,8 @@ protected:
     TermCache _isSubsumedCache;
 
 public:
+    //virtual ~Term();
+
     // <<< PUBLIC API >>>
     virtual SubsumptionResult IsSubsumedBy(FixpointType& fixpoint, Term*&) = 0;
     virtual SubsumptionResult IsSubsumed(Term* t, bool b = false);
@@ -390,7 +391,7 @@ public:
     // <<< CONSTRUCTORS >>>
     TermFixpoint(Aut_ptr aut, Term_ptr startingTerm, Symbol* startingSymbol, bool inComplement, bool initbValue);
     TermFixpoint(Aut_ptr aut, Term_ptr sourceTerm, Symbol* startingSymbol, bool inComplement);
-    ~TermFixpoint();
+    //~TermFixpoint();
 
     // <<< PUBLIC API >>>
     FixpointTermSem GetSemantics() const;

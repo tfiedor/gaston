@@ -14,6 +14,7 @@
 #include <map>
 
 #include "../../Frontend/ident.h"
+#include "../environment.hh"
 
 class VarToTrackMap {
 private:
