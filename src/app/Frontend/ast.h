@@ -109,6 +109,7 @@ public:
   virtual void dump() {};
 	virtual std::string ToString() { return std::string("");}
 
+	size_t tag = 0;
   ASTOrder order;
   ASTKind kind;
   Pos pos;

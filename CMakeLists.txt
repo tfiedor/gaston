@@ -64,6 +64,7 @@ add_executable(gaston
 	src/app/DecisionProcedure/visitors/Reorderer.cpp
 	src/app/DecisionProcedure/visitors/BinaryReorderer.cpp
 	src/app/DecisionProcedure/visitors/QuantificationMerger.cpp
+	src/app/DecisionProcedure/visitors/Tagger.cpp
 	src/app/DecisionProcedure/visitors/DotWalker.cpp
 	src/app/DecisionProcedure/visitors/MonaAutomataDotWalker.cpp
 	src/app/DecisionProcedure/visitors/BaseAutomataMerger.cpp

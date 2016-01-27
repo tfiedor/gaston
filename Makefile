@@ -810,6 +810,30 @@ src/app/DecisionProcedure/visitors/SyntaxRestricter.cpp.s:
 	$(MAKE) -f CMakeFiles/gaston.dir/build.make CMakeFiles/gaston.dir/src/app/DecisionProcedure/visitors/SyntaxRestricter.cpp.s
 .PHONY : src/app/DecisionProcedure/visitors/SyntaxRestricter.cpp.s
 
+src/app/DecisionProcedure/visitors/Tagger.o: src/app/DecisionProcedure/visitors/Tagger.cpp.o
+.PHONY : src/app/DecisionProcedure/visitors/Tagger.o
+
+# target to build an object file
+src/app/DecisionProcedure/visitors/Tagger.cpp.o:
+	$(MAKE) -f CMakeFiles/gaston.dir/build.make CMakeFiles/gaston.dir/src/app/DecisionProcedure/visitors/Tagger.cpp.o
+.PHONY : src/app/DecisionProcedure/visitors/Tagger.cpp.o
+
+src/app/DecisionProcedure/visitors/Tagger.i: src/app/DecisionProcedure/visitors/Tagger.cpp.i
+.PHONY : src/app/DecisionProcedure/visitors/Tagger.i
+
+# target to preprocess a source file
+src/app/DecisionProcedure/visitors/Tagger.cpp.i:
+	$(MAKE) -f CMakeFiles/gaston.dir/build.make CMakeFiles/gaston.dir/src/app/DecisionProcedure/visitors/Tagger.cpp.i
+.PHONY : src/app/DecisionProcedure/visitors/Tagger.cpp.i
+
+src/app/DecisionProcedure/visitors/Tagger.s: src/app/DecisionProcedure/visitors/Tagger.cpp.s
+.PHONY : src/app/DecisionProcedure/visitors/Tagger.s
+
+# target to generate assembly for a file
+src/app/DecisionProcedure/visitors/Tagger.cpp.s:
+	$(MAKE) -f CMakeFiles/gaston.dir/build.make CMakeFiles/gaston.dir/src/app/DecisionProcedure/visitors/Tagger.cpp.s
+.PHONY : src/app/DecisionProcedure/visitors/Tagger.cpp.s
+
 src/app/DecisionProcedure/visitors/UniversalQuantifierRemover.o: src/app/DecisionProcedure/visitors/UniversalQuantifierRemover.cpp.o
 .PHONY : src/app/DecisionProcedure/visitors/UniversalQuantifierRemover.o
 
@@ -1554,6 +1578,9 @@ help:
 	@echo "... src/app/DecisionProcedure/visitors/SyntaxRestricter.o"
 	@echo "... src/app/DecisionProcedure/visitors/SyntaxRestricter.i"
 	@echo "... src/app/DecisionProcedure/visitors/SyntaxRestricter.s"
+	@echo "... src/app/DecisionProcedure/visitors/Tagger.o"
+	@echo "... src/app/DecisionProcedure/visitors/Tagger.i"
+	@echo "... src/app/DecisionProcedure/visitors/Tagger.s"
 	@echo "... src/app/DecisionProcedure/visitors/UniversalQuantifierRemover.o"
 	@echo "... src/app/DecisionProcedure/visitors/UniversalQuantifierRemover.i"
 	@echo "... src/app/DecisionProcedure/visitors/UniversalQuantifierRemover.s"

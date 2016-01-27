@@ -62,6 +62,7 @@
 #include "DecisionProcedure/visitors/BaseAutomataMerger.h"
 #include "DecisionProcedure/visitors/ExistentialPrenexer.h"
 #include "DecisionProcedure/visitors/ZeroOrderRemover.h"
+#include "DecisionProcedure/visitors/Tagger.h"
 
 // < Typedefs and usings >
 using std::cout;
@@ -451,6 +452,10 @@ int main(int argc, char *argv[]) {
             }
 		FILTER_LIST(CALL_FILTER)
 		#undef CALL_FILTER
+
+		Tagger tagger;
+		(ast->formula)->accept(tagger);
+
         if(options.graphvizDAG) {
 			std::string dotFileName(inputFileName);
 			dotFileName += ".dot";

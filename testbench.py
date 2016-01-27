@@ -296,6 +296,17 @@ def generate_horn_sub(n):
 	string += " & ".join(["(X{0} sub X => X{1} sub X)".format(i, i+1) for i in range(1, n)]) + ";"
 	return string
 
+def generate_simple(n):
+    '''
+    '''
+    if n < 2:
+        print("[*] Skipping n = {}".format(n))
+        return None
+    string = "ws1s;\n"
+    string += "ex2 " + ", ".join(["X" + str(i) for i in range(1, n+1)]) + ": "
+    string += " & ".join(["(X{0} sub X{1})".format(i, i+1) for i in range(1, n)]) + ";"
+    return string
+
 def generate_horn_sub_alt(n):
 	'''
 	Generate simple horn formula in form of:

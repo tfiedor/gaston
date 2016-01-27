@@ -22,37 +22,37 @@ DotWalker::~DotWalker() {
 }
 
 void DotWalker::visit(ASTForm_And* form) {
-    this->_dotFile << "\t" << (uintptr_t) form << " [label=\"\u2227\"];\n";
+    this->_dotFile << "\t" << (uintptr_t) form << " [label=\"[" << (std::to_string(form->tag)) << "] \u2227\"];\n";
     this->_dotFile << "\t" << (uintptr_t) form << " -- " << (uintptr_t) form->f1 << ";\n";
     this->_dotFile << "\t" << (uintptr_t) form << " -- " << (uintptr_t) form->f2 << ";\n";
 }
 
 void DotWalker::visit(ASTForm_Or* form) {
-    this->_dotFile << "\t" << (uintptr_t) form << " [label=\"\u2228\"];\n";
+    this->_dotFile << "\t" << (uintptr_t) form << " [label=\"[" << (std::to_string(form->tag)) << "] \u2228\"];\n";
     this->_dotFile << "\t" << (uintptr_t) form << " -- " << (uintptr_t) form->f1 << ";\n";
     this->_dotFile << "\t" << (uintptr_t) form << " -- " << (uintptr_t) form->f2 << ";\n";
 }
 
 void DotWalker::visit(ASTForm_Impl* form) {
-    this->_dotFile << "\t" << (uintptr_t) form << " [label=\"\u21D2\"];\n";
+    this->_dotFile << "\t" << (uintptr_t) form << " [label=\"[" << (std::to_string(form->tag)) << "] \u21D2\"];\n";
     this->_dotFile << "\t" << (uintptr_t) form << " -- " << (uintptr_t) form->f1 << ";\n";
     this->_dotFile << "\t" << (uintptr_t) form << " -- " << (uintptr_t) form->f2 << ";\n";
 }
 
 void DotWalker::visit(ASTForm_Biimpl* form) {
-    this->_dotFile << "\t" << (uintptr_t) form << " [label=\"\u21D4\"];\n";
+    this->_dotFile << "\t" << (uintptr_t) form << " [label=\"[" << (std::to_string(form->tag)) << "] \u21D4\"];\n";
     this->_dotFile << "\t" << (uintptr_t) form << " -- " << (uintptr_t) form->f1 << ";\n";
     this->_dotFile << "\t" << (uintptr_t) form << " -- " << (uintptr_t) form->f2 << ";\n";
 }
 
 void DotWalker::visit(ASTForm_Not* form) {
-    this->_dotFile << "\t" << (uintptr_t) form << " [label=\"\u00AC\"];\n";
+    this->_dotFile << "\t" << (uintptr_t) form << " [label=\"[" << (std::to_string(form->tag)) << "] \u00AC\"];\n";
     this->_dotFile << "\t" << (uintptr_t) form << " -- " << (uintptr_t) form->f << ";\n";
 }
 
 template<class ExistClass>
 void DotWalker::_existsToDot(ExistClass* form) {
-    this->_dotFile << "\t" << (uintptr_t) form << " [label=\"\u2203";
+    this->_dotFile << "\t" << (uintptr_t) form << " [label=\"[" << (std::to_string(form->tag)) << "] \u2203";
     for(auto it = form->vl->begin(); it != form->vl->end(); ++it) {
         this->_dotFile << (*it) << ", ";
     }
@@ -69,7 +69,7 @@ void DotWalker::visit(ASTForm_Ex2* form) {
 
 template<class ForallClass>
 void DotWalker::_forallToDot(ForallClass* form) {
-    this->_dotFile << "\t" << (uintptr_t) form << " [label=\"\u2200";
+    this->_dotFile << "\t" << (uintptr_t) form << " [label=\"[" << (std::to_string(form->tag)) << "] \u2200";
     for(auto it = form->vl->begin(); it != form->vl->end(); ++it) {
         this->_dotFile << (*it) << ", ";
     }
@@ -86,7 +86,7 @@ void DotWalker::visit(ASTForm_All2* form) {
 }
 
 void DotWalker::_atomicToDot(ASTForm* form) {
-    this->_dotFile << "\t" << (uintptr_t) form << " [label=\"" << form->ToString() << "\"];\n";
+    this->_dotFile << "\t" << (uintptr_t) form << " [label=\"[" << (std::to_string(form->tag)) << "] " << form->ToString() << "\"];\n";
 }
 
 void DotWalker::visit(ASTForm_tT* form) {
