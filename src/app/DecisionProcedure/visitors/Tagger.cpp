@@ -8,13 +8,14 @@ void Tagger::_tagFormula(ASTForm *form) {
 	if(_tit != this->_tagList.end() && this->_lastTag == (*_tit)) {
 		form->tag = 0;
 		_tit = this->_tagList.erase(_tit);
+		++this->_lastTag;
 	} else {
 		form->tag = this->_lastTag++;
 	};
 }
 
 void Tagger::visit(ASTForm_And *form) {
-
+	this->_tagFormula(form);
 }
 
 void Tagger::visit(ASTForm_Or *form) {

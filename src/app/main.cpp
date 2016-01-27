@@ -454,6 +454,8 @@ int main(int argc, char *argv[]) {
 		#undef CALL_FILTER
 
 		std::list<size_t> tags;
+		tags.insert(tags.begin(), 5);
+		tags.insert(tags.begin(), 4);
 		Tagger tagger(tags);
 		(ast->formula)->accept(tagger);
 
