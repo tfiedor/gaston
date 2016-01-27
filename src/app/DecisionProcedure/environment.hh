@@ -217,7 +217,7 @@ public:
 
 /* >>> Anti-Prenexing Options <<< *
  **********************************/
-#define ANTIPRENEXING_FULL				true
+#define ANTIPRENEXING_FULL				false
 #define ANTIPRENEXING_DISTRIBUTIVE		false
 
 /*
@@ -273,7 +273,7 @@ public:
 	code(DistributiveAntiPrenexer)		\
 	code(QuantificationMerger)			\
 	code(SecondOrderRestricter)
-#else
+#elif (ANTI_ANTIPRENEXING_FULL == true)
 #define FILTER_LIST(code) \
 	code(ZeroOrderRemover)				/* Transform zero-order variables to second-order interpretation */ \
 	code(SyntaxRestricter)				/* Restrict unsupported formula constructs to supported subset*/ \
@@ -284,6 +284,15 @@ public:
 	code(NegationUnfolder)				/* Push negations deeply*/ \
 	code(QuantificationMerger)			/* Merge some quantifications */ \
 	code(BaseAutomataMerger)			/* Merge some base automata for more quantifier free subformulae*/ \
+	code(SecondOrderRestricter)			/* Restrict the formula to second order*/
+#else
+#define FILTER_LIST(code) \
+	code(ZeroOrderRemover)				/* Transform zero-order variables to second-order interpretation */ \
+	code(SyntaxRestricter)				/* Restrict unsupported formula constructs to supported subset*/ \
+	code(BooleanUnfolder)				/* Simplify formula through various boolean laws*/ \
+	code(UniversalQuantifierRemover)	/* Remove universal quantifier from formula*/ \
+	code(NegationUnfolder)				/* Push negations deeply*/ \
+	code(QuantificationMerger)			/* Merge some quantifications */ \
 	code(SecondOrderRestricter)			/* Restrict the formula to second order*/
 #endif
 
