@@ -587,6 +587,14 @@ int main(int argc, char *argv[]) {
 #endif
 	}
 
+	if(options.monaWalk) {
+		std::string monaDot(inputFileName);
+		monaDot += "-walk.dot";
+		MonaAutomataDotWalker monaWalker(monaDot);
+		(ast->formula)->accept(monaWalker);
+		return 0;
+	}
+
 	Automaton vataAutomaton;
 	SymbolicAutomaton* symAutomaton;
 	timer_automaton.start();
@@ -623,14 +631,6 @@ int main(int argc, char *argv[]) {
 		cout << "[*] Elapsed time: ";
 		timer_automaton.print();
 		cout << "\n";
-	}
-
-	if(options.monaWalk) {
-		std::string monaDot(inputFileName);
-		monaDot += "-walk.dot";
-		MonaAutomataDotWalker monaWalker(monaDot);
-		(ast->formula)->accept(monaWalker);
-		return 0;
 	}
 
 	if(options.construction != SYMBOLIC_AUT) {
