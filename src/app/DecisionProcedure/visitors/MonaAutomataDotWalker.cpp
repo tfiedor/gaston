@@ -9,16 +9,16 @@
 
 TimeType MonaAutomataDotWalker::_constructAutomaton(ASTForm* form) {
     DFA *monaAutomaton = nullptr;
-    toMonaAutomaton(form, monaAutomaton, false);
+    toMonaAutomaton(form, monaAutomaton, true);
     assert(monaAutomaton != nullptr);
     size_t monaStates = monaAutomaton->ns;
 
-    DFA *temp = dfaCopy(monaAutomaton);
+    /*DFA *temp = dfaCopy(monaAutomaton);
     dfaUnrestrict(temp);
     monaAutomaton = dfaMinimize(temp);
 
     // Clean up
-    dfaFree(temp);
+    dfaFree(temp);*/
     size_t minimizedStates = monaAutomaton->ns;
 
     dfaFree(monaAutomaton);
