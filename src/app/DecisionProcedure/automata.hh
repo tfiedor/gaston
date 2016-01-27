@@ -38,7 +38,7 @@ void addUniversalTransition(Automaton& automaton, unsigned int from, unsigned in
 void convertMonaToVataAutomaton(Automaton& v_aut, DFA* m_aut, IdentList* vars, int varNum, unsigned* offsets);
 void initializeOffsets(unsigned *offs, IdentList *vars);
 IdentList* initializeVars(ASTForm *form);
-void toMonaAutomaton(ASTForm *form, DFA*& dfa);
+void toMonaAutomaton(ASTForm *form, DFA*& dfa, bool);
 void constructAutomatonByMona(ASTForm *form, Automaton& v_aut);
 
 Automaton::SymbolType constructUniversalTrack();

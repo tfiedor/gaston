@@ -38,7 +38,8 @@ public:
     graphvizDFA(false), graphvizDAG(false),
     graphvizSatisfyingEx(false), graphvizCounterEx(false), 
     externalWhole(false), demo(false), 
-    inheritedAcceptance(false), unrestrict(false), 
+    inheritedAcceptance(false), unrestrict(false),
+    monaWalk(false),
     alternativeM2LStr(false), test(EVERYTHING), reorder(HEURISTIC), optimize(0),
     useMonaDFA(false) {}
 
@@ -68,6 +69,7 @@ public:
   bool inheritedAcceptance;
   bool unrestrict;
   bool alternativeM2LStr;
+    bool monaWalk;
     TestType test;
   ReorderMode reorder;
   unsigned optimize;

@@ -642,6 +642,30 @@ src/app/DecisionProcedure/visitors/Flattener.cpp.s:
 	$(MAKE) -f CMakeFiles/gaston.dir/build.make CMakeFiles/gaston.dir/src/app/DecisionProcedure/visitors/Flattener.cpp.s
 .PHONY : src/app/DecisionProcedure/visitors/Flattener.cpp.s
 
+src/app/DecisionProcedure/visitors/MonaAutomataDotWalker.o: src/app/DecisionProcedure/visitors/MonaAutomataDotWalker.cpp.o
+.PHONY : src/app/DecisionProcedure/visitors/MonaAutomataDotWalker.o
+
+# target to build an object file
+src/app/DecisionProcedure/visitors/MonaAutomataDotWalker.cpp.o:
+	$(MAKE) -f CMakeFiles/gaston.dir/build.make CMakeFiles/gaston.dir/src/app/DecisionProcedure/visitors/MonaAutomataDotWalker.cpp.o
+.PHONY : src/app/DecisionProcedure/visitors/MonaAutomataDotWalker.cpp.o
+
+src/app/DecisionProcedure/visitors/MonaAutomataDotWalker.i: src/app/DecisionProcedure/visitors/MonaAutomataDotWalker.cpp.i
+.PHONY : src/app/DecisionProcedure/visitors/MonaAutomataDotWalker.i
+
+# target to preprocess a source file
+src/app/DecisionProcedure/visitors/MonaAutomataDotWalker.cpp.i:
+	$(MAKE) -f CMakeFiles/gaston.dir/build.make CMakeFiles/gaston.dir/src/app/DecisionProcedure/visitors/MonaAutomataDotWalker.cpp.i
+.PHONY : src/app/DecisionProcedure/visitors/MonaAutomataDotWalker.cpp.i
+
+src/app/DecisionProcedure/visitors/MonaAutomataDotWalker.s: src/app/DecisionProcedure/visitors/MonaAutomataDotWalker.cpp.s
+.PHONY : src/app/DecisionProcedure/visitors/MonaAutomataDotWalker.s
+
+# target to generate assembly for a file
+src/app/DecisionProcedure/visitors/MonaAutomataDotWalker.cpp.s:
+	$(MAKE) -f CMakeFiles/gaston.dir/build.make CMakeFiles/gaston.dir/src/app/DecisionProcedure/visitors/MonaAutomataDotWalker.cpp.s
+.PHONY : src/app/DecisionProcedure/visitors/MonaAutomataDotWalker.cpp.s
+
 src/app/DecisionProcedure/visitors/NegationUnfolder.o: src/app/DecisionProcedure/visitors/NegationUnfolder.cpp.o
 .PHONY : src/app/DecisionProcedure/visitors/NegationUnfolder.o
 
@@ -1509,6 +1533,9 @@ help:
 	@echo "... src/app/DecisionProcedure/visitors/Flattener.o"
 	@echo "... src/app/DecisionProcedure/visitors/Flattener.i"
 	@echo "... src/app/DecisionProcedure/visitors/Flattener.s"
+	@echo "... src/app/DecisionProcedure/visitors/MonaAutomataDotWalker.o"
+	@echo "... src/app/DecisionProcedure/visitors/MonaAutomataDotWalker.i"
+	@echo "... src/app/DecisionProcedure/visitors/MonaAutomataDotWalker.s"
 	@echo "... src/app/DecisionProcedure/visitors/NegationUnfolder.o"
 	@echo "... src/app/DecisionProcedure/visitors/NegationUnfolder.i"
 	@echo "... src/app/DecisionProcedure/visitors/NegationUnfolder.s"

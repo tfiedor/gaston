@@ -86,7 +86,7 @@ void DotWalker::visit(ASTForm_All2* form) {
 }
 
 void DotWalker::_atomicToDot(ASTForm* form) {
-    this->_dotFile << "\t" << (uintptr_t) form << " [label=\"atomic\"];\n";
+    this->_dotFile << "\t" << (uintptr_t) form << " [label=\"" << form->ToString() << "\"];\n";
 }
 
 void DotWalker::visit(ASTForm_tT* form) {

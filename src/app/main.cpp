@@ -58,6 +58,7 @@
 #include "DecisionProcedure/visitors/BinaryReorderer.h"
 #include "DecisionProcedure/visitors/QuantificationMerger.h"
 #include "DecisionProcedure/visitors/DotWalker.h"
+#include "DecisionProcedure/visitors/MonaAutomataDotWalker.h"
 #include "DecisionProcedure/visitors/BaseAutomataMerger.h"
 #include "DecisionProcedure/visitors/ExistentialPrenexer.h"
 #include "DecisionProcedure/visitors/ZeroOrderRemover.h"
@@ -115,6 +116,7 @@ void PrintUsage()
 		<< "     --use-mona-dfa  Uses MONA for building base automaton\n"
 		<< "     --no-expnf      Implies --use-mona-dfa, does not convert formula to exPNF\n"
 		<< "     --test          Test specified problem [val, sat, unsat]\n"
+		<< "     --walk-aut      Does the experiment generating the special dot graph\n"
 		<< " -q, --quiet		 Quiet, don't print progress\n"
 		<< " -oX                 Optimization level [1 = safe optimizations [default], 2 = heuristic]\n"
 		<< " --method            Use either symbolic (novel), forward (EEICT'14) or backward method (TACAS'15) for deciding WSkS [symbolic, backward, forward]\n"
@@ -165,6 +167,8 @@ bool ParseArguments(int argc, char *argv[])
 				options.reorder = HEURISTIC;
 			else if(strcmp(argv[i], "-ga") == 0 || strcmp(argv[i], "--print-aut") == 0)
 				options.graphvizDAG = true;
+			else if(strcmp(argv[i], "--walk-aut") == 0)
+				options.monaWalk = true;
 			else if(strcmp(argv[i], "--no-automaton") == 0)
 				options.dontDumpAutomaton = true;
 			else if(strcmp(argv[i], "--use-mona-dfa") == 0) {
@@ -610,15 +614,24 @@ int main(int argc, char *argv[]) {
 		symAutomaton = (ast->formula)->toSymbolicAutomaton(false);
 		if(options.printProgress)
 			symAutomaton->DumpAutomaton();
+		std::cout << "\n";
 	}
 
 	timer_automaton.stop();
-	//if (options.dump) {
+	if (options.dump) {
 		std::cout << "\n[*] Formula translation to Automaton [DONE]\n";
 		cout << "[*] Elapsed time: ";
 		timer_automaton.print();
 		cout << "\n";
-	//}
+	}
+
+	if(options.monaWalk) {
+		std::string monaDot(inputFileName);
+		monaDot += "-walk.dot";
+		MonaAutomataDotWalker monaWalker(monaDot);
+		(ast->formula)->accept(monaWalker);
+		return 0;
+	}
 
 	if(options.construction != SYMBOLIC_AUT) {
 		std::cout << "[*] Reindexing states in VATA Automaton\n";

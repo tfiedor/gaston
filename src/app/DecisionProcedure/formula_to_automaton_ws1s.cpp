@@ -726,7 +726,7 @@ void constructAutomatonByMona(ASTForm *form, Automaton& v_aut) {
 	timer_mona.start();
 	vars = initializeVars(form);
 	initializeOffsets(offs, vars);
-	toMonaAutomaton(form, dfa);
+	toMonaAutomaton(form, dfa, true);
 	timer_mona.stop();
 	#if (DUMP_INTERMEDIATE_AUTOMATA == true)
 	if(options.dump) {
@@ -738,6 +738,7 @@ void constructAutomatonByMona(ASTForm *form, Automaton& v_aut) {
 	timer_conversion.stop();
     delete vars;
     delete[] offs;
+	// Fixme: delete dfa?
 
 	#if (DUMP_INTERMEDIATE_AUTOMATA == true)
 	if(options.dump) {
@@ -746,7 +747,7 @@ void constructAutomatonByMona(ASTForm *form, Automaton& v_aut) {
 	#endif
 }
 
-void toMonaAutomaton(ASTForm* form, DFA*& dfa) {
+void toMonaAutomaton(ASTForm* form, DFA*& dfa, bool minimize) {
 	assert(form != nullptr);
 
 	// Conversion of formula representation from AST to DAG
@@ -765,12 +766,14 @@ void toMonaAutomaton(ASTForm* form, DFA*& dfa) {
 
 	// Unrestriction of MONA automaton
 	// Note: This is optimization of MONA
-	DFA *temp = dfaCopy(dfa);
-	dfaUnrestrict(temp);
-	dfa = dfaMinimize(temp);
+	if(minimize) {
+		DFA *temp = dfaCopy(dfa);
+		dfaUnrestrict(temp);
+		dfa = dfaMinimize(temp);
 
-	// Clean up
-	dfaFree(temp);
+		// Clean up
+		dfaFree(temp);
+	}
 	delete codeTable;
 }
 

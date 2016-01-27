@@ -34,7 +34,7 @@ public:
     void visit(ASTForm_nt*);
     void visit(ASTForm_nT*);
 
-private:
+protected:
     std::ofstream _dotFile;
 
     void _atomicToDot(ASTForm*);
