@@ -10,10 +10,15 @@
 
 class Tagger : public VoidVisitor{
 private:
+    using TagList = std::list<size_t>;
+    using TagIterator = std::list<size_t>::iterator;
     size_t _lastTag = 1;
+    TagList& _tagList;
+    TagIterator _tit;
 
+    void _tagFormula(ASTForm*);
 public:
-    Tagger() : VoidVisitor(Traverse::PreOrder) {}
+    Tagger(TagList& tags) : VoidVisitor(Traverse::PreOrder), _tagList(tags), _tit(tags.begin()) {}
 
     void visit(ASTForm_And*);
     void visit(ASTForm_Or*);

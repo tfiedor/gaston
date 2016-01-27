@@ -4,38 +4,47 @@
 
 #include "Tagger.h"
 
+void Tagger::_tagFormula(ASTForm *form) {
+	if(_tit != this->_tagList.end() && this->_lastTag == (*_tit)) {
+		form->tag = 0;
+		_tit = this->_tagList.erase(_tit);
+	} else {
+		form->tag = this->_lastTag++;
+	};
+}
+
 void Tagger::visit(ASTForm_And *form) {
-	form->tag = this->_lastTag++;
+
 }
 
 void Tagger::visit(ASTForm_Or *form) {
-	form->tag = this->_lastTag++;
+	this->_tagFormula(form);
 }
 
 void Tagger::visit(ASTForm_Impl *form) {
-	form->tag = this->_lastTag++;
+	this->_tagFormula(form);
 }
 
 void Tagger::visit(ASTForm_Biimpl *form) {
-	form->tag = this->_lastTag++;
+	this->_tagFormula(form);
 }
 
 void Tagger::visit(ASTForm_Not *form) {
-	form->tag = this->_lastTag++;
+	this->_tagFormula(form);
 }
 
 void Tagger::visit(ASTForm_Ex1 *form) {
-	form->tag = this->_lastTag++;
+	this->_tagFormula(form);
 }
 
 void Tagger::visit(ASTForm_Ex2 *form) {
-	form->tag = this->_lastTag++;
+	this->_tagFormula(form);
 }
 
 void Tagger::visit(ASTForm_All1 *form) {
-	form->tag = this->_lastTag++;
+	this->_tagFormula(form);
 }
 
 void Tagger::visit(ASTForm_All2 *form) {
-	form->tag = this->_lastTag++;
+	this->_tagFormula(form);
 }

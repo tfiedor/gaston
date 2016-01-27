@@ -453,7 +453,8 @@ int main(int argc, char *argv[]) {
 		FILTER_LIST(CALL_FILTER)
 		#undef CALL_FILTER
 
-		Tagger tagger;
+		std::list<size_t> tags;
+		Tagger tagger(tags);
 		(ast->formula)->accept(tagger);
 
         if(options.graphvizDAG) {

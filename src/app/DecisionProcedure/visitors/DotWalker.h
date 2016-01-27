@@ -27,12 +27,21 @@ public:
     void visit(ASTForm_All1*);
     void visit(ASTForm_All2*);
 
-    void visit(ASTForm_tT*);
-    void visit(ASTForm_tt*);
-    void visit(ASTForm_TT*);
-    void visit(ASTForm_T*);
-    void visit(ASTForm_nt*);
-    void visit(ASTForm_nT*);
+    // < ASTForm Specific > //
+    void visit(ASTForm_True* form);
+    void visit(ASTForm_False* form);
+    void visit(ASTForm_In* form);
+    void visit(ASTForm_Notin* form);
+    void visit(ASTForm_RootPred* form);
+    void visit(ASTForm_EmptyPred* form);
+    void visit(ASTForm_FirstOrder* form);
+    void visit(ASTForm_Sub* form);
+    void visit(ASTForm_Equal1* form);
+    void visit(ASTForm_Equal2* form);
+    void visit(ASTForm_NotEqual1* form);
+    void visit(ASTForm_NotEqual2* form);
+    void visit(ASTForm_Less* form);
+    void visit(ASTForm_LessEq* form);
 
 protected:
     std::ofstream _dotFile;

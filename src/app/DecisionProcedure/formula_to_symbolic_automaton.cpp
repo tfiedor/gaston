@@ -12,37 +12,42 @@
 
 extern Timer timer_base;
 
-SymbolicAutomaton* ASTForm::toSymbolicAutomaton(bool doComplement) {
-    // If the sfa was already initialized (it is thus shared somehow,
-    // we return the pointer, otherwise we first create the symbolic
-    // automaton and return the thing.
-    if(this->sfa == nullptr) {
-        this->sfa = this->_toSymbolicAutomatonCore(doComplement);
-    }
-    return this->sfa;
-}
-
 template<class TemplatedAutomaton>
 SymbolicAutomaton* baseToSymbolicAutomaton(ASTForm* form, bool doComplement) {
     BaseAutomaton* baseAutomaton =  new TemplatedAutomaton(new Automaton(), form);
     Automaton& aut = baseAutomaton->GetAutomatonHandle();
     //Automaton aut;
-    #if (AUT_CONSTRUCT_BY_MONA == true)
+#if (AUT_CONSTRUCT_BY_MONA == true)
     constructAutomatonByMona(form, aut);
-    #else
+#else
     NegationUnfolder nu_visitor;
     ASTForm* nonNegatedAutomaton = reinterpret_cast<ASTForm*>(form->accept(nu_visitor));
     nonNegatedAutomaton->toUnaryAutomaton(aut, doComplement);
-    #endif
+#endif
 
-    #if (OPT_REDUCE_AUT_LAST == true)
+#if (OPT_REDUCE_AUT_LAST == true)
     auto aut1 = aut.RemoveUnreachableStates();
     aut = aut1.RemoveUselessStates();
-    #endif
+#endif
 
     // TODO: hopefully thsi will not fuck things up
     baseAutomaton->InitializeStates();
     return baseAutomaton;
+}
+
+SymbolicAutomaton* ASTForm::toSymbolicAutomaton(bool doComplement) {
+    // If the sfa was already initialized (it is thus shared somehow,
+    // we return the pointer, otherwise we first create the symbolic
+    // automaton and return the thing.
+    if(this->sfa == nullptr) {
+        if(this->tag) {
+            this->sfa = this->_toSymbolicAutomatonCore(doComplement);
+        } else {
+            // It was tagged to be constructed by MONA
+            return baseToSymbolicAutomaton<GenericBaseAutomaton>(this, doComplement);
+        }
+    }
+    return this->sfa;
 }
 
 SymbolicAutomaton* ASTForm_True::_toSymbolicAutomatonCore(bool doComplement) {

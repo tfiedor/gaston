@@ -89,26 +89,58 @@ void DotWalker::_atomicToDot(ASTForm* form) {
     this->_dotFile << "\t" << (uintptr_t) form << " [label=\"[" << (std::to_string(form->tag)) << "] " << form->ToString() << "\"];\n";
 }
 
-void DotWalker::visit(ASTForm_tT* form) {
+void DotWalker::visit(ASTForm_True* form) {
     this->_atomicToDot(form);
 }
 
-void DotWalker::visit(ASTForm_tt* form) {
+void DotWalker::visit(ASTForm_False* form) {
     this->_atomicToDot(form);
 }
 
-void DotWalker::visit(ASTForm_TT* form) {
+void DotWalker::visit(ASTForm_In* form) {
     this->_atomicToDot(form);
 }
 
-void DotWalker::visit(ASTForm_T* form) {
+void DotWalker::visit(ASTForm_Notin* form) {
     this->_atomicToDot(form);
 }
 
-void DotWalker::visit(ASTForm_nt* form) {
+void DotWalker::visit(ASTForm_RootPred* form) {
     this->_atomicToDot(form);
 }
 
-void DotWalker::visit(ASTForm_nT* form) {
+void DotWalker::visit(ASTForm_EmptyPred* form) {
+    this->_atomicToDot(form);
+}
+
+void DotWalker::visit(ASTForm_FirstOrder* form) {
+    this->_atomicToDot(form);
+}
+
+void DotWalker::visit(ASTForm_Sub* form) {
+    this->_atomicToDot(form);
+}
+
+void DotWalker::visit(ASTForm_Equal1* form) {
+    this->_atomicToDot(form);
+}
+
+void DotWalker::visit(ASTForm_Equal2* form) {
+    this->_atomicToDot(form);
+}
+
+void DotWalker::visit(ASTForm_NotEqual1* form) {
+    this->_atomicToDot(form);
+}
+
+void DotWalker::visit(ASTForm_NotEqual2* form) {
+    this->_atomicToDot(form);
+}
+
+void DotWalker::visit(ASTForm_Less* form) {
+    this->_atomicToDot(form);
+}
+
+void DotWalker::visit(ASTForm_LessEq* form) {
     this->_atomicToDot(form);
 }
