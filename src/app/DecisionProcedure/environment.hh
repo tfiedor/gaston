@@ -27,6 +27,7 @@
 #include <vata/bdd_bu_tree_aut.hh>
 #include <vata/parsing/timbuk_parser.hh>
 #include <vata/serialization/timbuk_serializer.hh>
+#include "../Frontend/dfa.h"
 #include "utils/cached_binary_op.hh"
 #include "mtbdd/ondriks_mtbdd.hh"
 
@@ -109,7 +110,7 @@ namespace Gaston {
 	using WorkListTerm_ptr       = Term_ptr;
 	using WorkListSet            = std::vector<std::shared_ptr<WorkListTerm>>;
 
-	using BaseAutomatonType      = VATA::BDDBottomUpTreeAut;
+	using BaseAutomatonType      = DFA;
 	using BaseAutomatonStateSet  = VATA::Util::OrdVector<StateType>;
 	using BaseAutomatonMTBDD	 = VATA::MTBDDPkg::OndriksMTBDD<BaseAutomatonStateSet>;
 
@@ -177,7 +178,7 @@ public:
 /* >>> Debugging Options <<< *
  *****************************/
 #define DEBUG_AUTOMATA_ADDRESSES		false
-#define DEBUG_BASE_AUTOMATA 			false
+#define DEBUG_BASE_AUTOMATA 			true
 #define DEBUG_FIXPOINT 					false
 #define DEBUG_FIXPOINT_SYMBOLS			false
 #define DEBUG_INITIAL_APPROX 			false
@@ -190,7 +191,7 @@ public:
 #define DEBUG_TERM_CACHE_COMPARISON		false
 #define DEBUG_CONTINUATIONS 			false
 #define DEBUG_NO_WORKSHOPS				false
-#define DEBUG_PRE						false
+#define DEBUG_PRE						true
 #define DEBUG_GENERATE_DOT_AUTOMATON	true
 #define DEBUG_COMPUTE_FULL_FIXPOINT 	false
 #define DEBUG_COMPARE_WORKLISTS			true
@@ -224,7 +225,7 @@ public:
 
 /* >>> Anti-Prenexing Options <<< *
  **********************************/
-#define ANTIPRENEXING_FULL				false
+#define ANTIPRENEXING_FULL				true
 #define ANTIPRENEXING_DISTRIBUTIVE		false
 
 /*

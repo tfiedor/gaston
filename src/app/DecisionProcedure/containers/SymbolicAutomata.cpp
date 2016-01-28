@@ -21,6 +21,7 @@
 #include "../containers/VarToTrackMap.hh"
 #include "../containers/Workshops.h"
 #include "../../Frontend/symboltable.h"
+#include "../../Frontend/dfa.h"
 #include <stdint.h>
 
 extern VarToTrackMap varMap;
@@ -82,15 +83,13 @@ ProjectionAutomaton::~ProjectionAutomaton() {
     delete this->_aut;
 }
 
-BaseAutomaton::BaseAutomaton(BaseAutomatonType* aut, Formula_ptr form, bool lateInit) : SymbolicAutomaton(form), _base_automaton(aut) {
+BaseAutomaton::BaseAutomaton(BaseAutomatonType* aut, size_t vars, Formula_ptr form) : SymbolicAutomaton(form), _autWrapper(dfaCopy(aut), vars) {
     type = AutType::BASE;
-    if(lateInit) {
-        this->_InitializeAutomaton();
-    }
+    this->_InitializeAutomaton();
 }
 
 BaseAutomaton::~BaseAutomaton() {
-    delete this->_base_automaton;
+
 }
 
 // Derive of BinaryOpAutomaton
@@ -306,7 +305,6 @@ void SymbolicAutomaton::InitializeStates() {
 void BaseAutomaton::_InitializeAutomaton() {
     // TODO: Maybe this could be done only, if we are dumping the automaton?
     this->_factory.InitializeWorkshop();
-    this->_RenameStates();
     this->_InitializeInitialStates();
     this->_InitializeFinalStates();
 }
@@ -360,9 +358,7 @@ void BaseAutomaton::_InitializeInitialStates() {
 
     // TODO: Yeah this sucks, could be better, but it is called only once
     BaseAutomatonStateSet initialStates;
-    for(auto state : this->_base_automaton->GetFinalStates()) {
-        initialStates.insert(state);
-    }
+    initialStates.insert(1);
 
     this->_initialStates = this->_factory.CreateBaseSet(initialStates, this->_stateOffset, this->_stateSpace);
 }
@@ -398,16 +394,10 @@ void BaseAutomaton::_InitializeFinalStates() {
 
     // Obtain the MTBDD for Initial states
     BaseAutomatonStateSet finalStates;
-    BaseAut_MTBDD* initBDD = getMTBDDForStateTuple(*this->_base_automaton, Automaton::StateTuple());
-
-    // Collect the states on leaves
-    StateCollectorFunctor collector(finalStates);
-    collector(*initBDD);
+    this->_autWrapper.GetFinalStates(finalStates);
 
     // Push states to new Base Set
     // #TERM_CREATION
-    // Fixme: fail for some optimization i guess?
-    //assert(this->_stateSpace != 0);
     this->_finalStates = reinterpret_cast<Term*>(this->_factory.CreateBaseSet(finalStates, this->_stateOffset, this->_stateSpace));
 }
 
@@ -442,7 +432,9 @@ Term* BaseAutomaton::Pre(Symbol* symbol, Term* finalApproximation, bool underCom
     BaseAutomatonStateSet preStates;
 
     #if (DEBUG_PRE == true)
-    std::cout << "Computing: ";
+    std::cout << "[!] ";
+    this->_form->dump();
+    std::cout << "\nComputing: ";
     finalApproximation->dump();
     std::cout << " \u2212\u222A ";
     std::cout << (*symbol) << "\n";
@@ -452,23 +444,19 @@ Term* BaseAutomaton::Pre(Symbol* symbol, Term* finalApproximation, bool underCom
     //for(int i = this->_stateOffset; i < this->_stateSpace; ++i) {
 
     for(auto state : baseSet->states) {
+        assert(state != 0);
         // Get MTBDD for Pre of states @p state
         auto key = std::make_pair(state, symbol);
         preStates.clear();
         if(!this->_preCache.retrieveFromCache(key, preStates)) {
             // TODO: there is probably useless copying --^
-            BaseAut_MTBDD *preState = getMTBDDForStateTuple(*this->_base_automaton, StateTuple({state}));
-
-            // Create the masker functor, that will mask the states away
-            PreFunctor pre(preStates);
-            pre(*preState, *(symbol->GetMTBDD()));
-
-            #if (DEBUG_PRE == true)
-            std::cout << "{" << state << "} \u2212 " << (*symbol) << " = " << states << "\n";
-            #endif
+            preStates = this->_autWrapper.Pre(state, symbol->GetTrackMask());
             this->_preCache.StoreIn(key, preStates);
         }
         states.insert(preStates);
+        #if (DEBUG_PRE == true)
+        std::cout << "{" << state << "} \u2212 " << (*symbol) << " = " << preStates << "\n";
+        #endif
     }
 
     #if (DEBUG_PRE == true)
@@ -909,23 +897,11 @@ void BaseAutomaton::DumpToDot(std::ofstream & os, bool inComplement) {
  * Renames the states according to the translation function so we get unique states.
  */
 void BaseAutomaton::_RenameStates() {
-    this->_stateOffset = SymbolicAutomaton::stateCnt;
-    StateToStateMap translMap;
-    StateToStateTranslator stateTransl(translMap,
-                                       [](const StateType &) { return SymbolicAutomaton::stateCnt++; });
-    auto temp = this->_base_automaton;
-    this->_base_automaton = new BaseAutomatonType(this->_base_automaton->ReindexStates(stateTransl));
-    delete temp;
-    this->_stateSpace = SymbolicAutomaton::stateCnt - this->_stateOffset;
+    assert(false && "Obsolete function called\n");
 }
 
 void BaseAutomaton::BaseAutDump() {
     std::cout << "\n[----------------------->]\n";
-    std::cout << "[!] Base VATA Automaton\n";
-    VATA::Serialization::AbstrSerializer *serializer = new VATA::Serialization::TimbukSerializer();
-    std::cout << this->_base_automaton->DumpToString(*serializer, "symbolic") << "\n";
-    delete serializer;
-
     std::cout << "[!] Initial states:\n";
     if(this->_initialStates != nullptr) {
         this->_initialStates->dump();
@@ -941,6 +917,7 @@ void BaseAutomaton::BaseAutDump() {
     } else {
         std::cout << "-> not initialized\n";
     }
+    this->_autWrapper.DumpDFA();
     std::cout << "[----------------------->]\n";
 }
 

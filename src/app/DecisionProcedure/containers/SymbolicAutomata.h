@@ -21,6 +21,7 @@
 #include "../mtbdd/apply2func.hh"
 #include "../mtbdd/void_apply1func.hh"
 #include "../mtbdd/ondriks_mtbdd.hh"
+#include "../mtbdd/monawrapper.hh"
 #include "../utils/Symbol.h"
 #include "../environment.hh"
 #include "../containers/SymbolicCache.hh"
@@ -224,7 +225,7 @@ public:
 class BaseAutomaton : public SymbolicAutomaton {
 protected:
     /// <<< PRIVATE MEMBERS >>>
-    BaseAutomatonType* _base_automaton;
+    MonaWrapper<size_t> _autWrapper;                // Wrapper of mona automaton
     unsigned int _stateSpace;               // Number of states in automaton
     unsigned int _stateOffset;              // Offset of states used for mask
     PreCache _preCache;
@@ -238,12 +239,11 @@ protected:
 
 public:
     // <<< CONSTRUCTORS >>>
-    BaseAutomaton(BaseAutomatonType* aut, Formula_ptr form, bool lateInit = false);
+    BaseAutomaton(BaseAutomatonType* aut, size_t vars, Formula_ptr form);
     ~BaseAutomaton();
 
     // <<< PUBLIC API >>>
     virtual Term* Pre(Symbol*, Term*, bool);
-    BaseAutomatonType& GetAutomatonHandle() {return (*this->_base_automaton);}
 
     // <<< DUMPING FUNCTIONS >>>
     virtual void DumpToDot(std::ofstream&, bool);
@@ -254,61 +254,61 @@ public:
 
 class GenericBaseAutomaton : public BaseAutomaton {
 public:
-    GenericBaseAutomaton(BaseAutomatonType* aut, Formula_ptr form) : BaseAutomaton(aut, form) { }
+    GenericBaseAutomaton(BaseAutomatonType* aut, size_t vars, Formula_ptr form) : BaseAutomaton(aut, vars, form) { }
     virtual void DumpAutomaton();
 };
 
 class SubAutomaton : public BaseAutomaton {
 public:
-    SubAutomaton(BaseAutomatonType* aut, Formula_ptr form) : BaseAutomaton(aut, form) { }
+    SubAutomaton(BaseAutomatonType* aut, size_t vars, Formula_ptr form) : BaseAutomaton(aut, vars, form) { }
     virtual void DumpAutomaton();
 };
 
 class TrueAutomaton : public BaseAutomaton {
 public:
-    TrueAutomaton(BaseAutomatonType* aut, Formula_ptr form) : BaseAutomaton(aut, form) {}
+    TrueAutomaton(BaseAutomatonType* aut, size_t vars, Formula_ptr form) : BaseAutomaton(aut, vars, form) { }
     virtual void DumpAutomaton();
 };
 
 class FalseAutomaton : public BaseAutomaton {
 public:
-    FalseAutomaton(BaseAutomatonType* aut, Formula_ptr form) : BaseAutomaton(aut, form) {}
+    FalseAutomaton(BaseAutomatonType* aut, size_t vars, Formula_ptr form) : BaseAutomaton(aut, vars, form) { }
     virtual void DumpAutomaton();
 };
 
 class InAutomaton : public BaseAutomaton {
 public:
-    InAutomaton(BaseAutomatonType* aut, Formula_ptr form) : BaseAutomaton(aut, form) {}
+    InAutomaton(BaseAutomatonType* aut, size_t vars, Formula_ptr form) : BaseAutomaton(aut, vars, form) { }
     virtual void DumpAutomaton();
 };
 
 class FirstOrderAutomaton : public BaseAutomaton {
 public:
-    FirstOrderAutomaton(BaseAutomatonType* aut, Formula_ptr form) : BaseAutomaton(aut, form) {}
+    FirstOrderAutomaton(BaseAutomatonType* aut, size_t vars, Formula_ptr form) : BaseAutomaton(aut, vars, form) { }
     virtual void DumpAutomaton();
 };
 
 class EqualFirstAutomaton : public BaseAutomaton {
 public:
-    EqualFirstAutomaton(BaseAutomatonType* aut, Formula_ptr form) : BaseAutomaton(aut, form) {}
+    EqualFirstAutomaton(BaseAutomatonType* aut, size_t vars, Formula_ptr form) : BaseAutomaton(aut, vars, form) { }
     virtual void DumpAutomaton();
 };
 
 class EqualSecondAutomaton : public BaseAutomaton {
 public:
-    EqualSecondAutomaton(BaseAutomatonType* aut, Formula_ptr form) : BaseAutomaton(aut, form) {}
+    EqualSecondAutomaton(BaseAutomatonType* aut, size_t vars, Formula_ptr form) : BaseAutomaton(aut, vars, form) { }
     virtual void DumpAutomaton();
 };
 
 class LessAutomaton : public BaseAutomaton {
 public:
-    LessAutomaton(BaseAutomatonType* aut, Formula_ptr form) : BaseAutomaton(aut, form) {}
+    LessAutomaton(BaseAutomatonType* aut, size_t vars, Formula_ptr form) : BaseAutomaton(aut, vars, form) { }
     virtual void DumpAutomaton();
 };
 
 class LessEqAutomaton : public BaseAutomaton {
 public:
-    LessEqAutomaton(BaseAutomatonType* aut, Formula_ptr form) : BaseAutomaton(aut, form) {}
+    LessEqAutomaton(BaseAutomatonType* aut, size_t vars, Formula_ptr form) : BaseAutomaton(aut, vars, form) { }
     virtual void DumpAutomaton();
 };
 

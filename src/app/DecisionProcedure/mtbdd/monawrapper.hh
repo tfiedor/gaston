@@ -1,11 +1,11 @@
 #ifndef MONAWRAPPER_H
 #define MONAWRAPPER_H
 
-#include "../Frontend/ast.h"
+#include "../../Frontend/ast.h"
 
 #include <vata/util/ord_vector.hh>
 
-#include "../DecisionProcedure/mtbdd/ondriks_mtbdd.hh"
+#include "ondriks_mtbdd.hh"
 
 #include <vector>
 #include <unordered_map>
@@ -38,7 +38,7 @@ private:
     using SetType = std::unordered_set<WrappedNode *>;
     using CacheType = std::unordered_map<size_t, VectorType>;
 
-private:
+protected:
     std::vector<WrappedNode *> roots_;
     std::vector<WrappedNode *> leafNodes_;
     InternalNodesType internalNodes_;
@@ -159,7 +159,7 @@ private:
             for(auto node: nodes)
             {
                 if(GetVar(node->var_) == var)
-                    res.insert(node->pred_[symbol_[(var << 1) + 1]].begin(), node->pred_[symbol_[(var << 1) + 1]].end());
+                    res.insert(node->pred_[symbol_[(var << 1) ]].begin(), node->pred_[symbol_[(var << 1)]].end());
                 else    // don't care na vytvorenem uzlu.
                     res.insert(node);
             }
@@ -172,9 +172,9 @@ public:
     MonaWrapper(DFA *dfa, unsigned numVars = 0): dfa_(dfa), numVars_(numVars)
     {
         roots_.resize(dfa->ns);
-        leafNodes_.resize(dfa->ns);
+        leafNodes_.resize(dfa->ns, nullptr);
 
-        for(size_t i = 0; i < dfa->ns; i++)
+        for(size_t i = 1; i < dfa->ns; i++)
             RecSetPointer(dfa->bddm, dfa->q[i], *spawnNode(dfa->bddm, dfa->q[i], i));
     }
 
@@ -185,11 +185,12 @@ public:
 
         for(auto leaf: leafNodes_)
             delete leaf;
+        dfaFree(this->dfa_);
     }
 
     void DumpToDot()
     {
-        std::ofstream ofs ("bu.gv", std::ofstream::out);
+        /*std::ofstream ofs ("bu.gv", std::ofstream::out);
 
         ofs << "digraph M {" << std::endl;
 
@@ -230,7 +231,38 @@ public:
             }
         }
 
-        ofs << "}" << std::endl;
+        ofs << "}" << std::endl;*/
+    }
+
+    void GetAllPathFromMona(const bdd_manager *bddm,
+                            unsigned p,
+                            std::string transition,
+                            size_t root,
+                            size_t varNum)
+    {
+        unsigned l, r, index;
+
+        LOAD_lri(&bddm->node_table[p], l, r, index);
+
+        if (index == BDD_LEAF_INDEX)
+        {
+            std::cout << root << " -(" << transition << ")-> " << l << std::endl;
+        }
+        else
+        {
+            transition[index] = '0';
+            GetAllPathFromMona(bddm, l, transition, root, varNum);
+
+            transition[index] = '1';
+            GetAllPathFromMona(bddm, r, transition, root, varNum);
+        }
+    }
+
+    void DumpDFA() {
+        std::string str(this->numVars_, 'X');
+        for(int i = 1; i < this->dfa_->ns; ++i) {
+            GetAllPathFromMona(this->dfa_->bddm, this->dfa_->q[i], str, i, this->numVars_);
+        }
     }
 
     VectorType Pre(size_t state, const boost::dynamic_bitset<> &symbol)
@@ -247,6 +279,14 @@ public:
         dfa_ = dfa;
         for(size_t i = 0; i < dfa->ns; i++)
             RecSetPointer(dfa->bddm, dfa->q[i], *spawnNode(dfa->bddm, dfa->q[i], i));
+    }
+
+    void GetFinalStates(VectorType& final) {
+        for (unsigned int i = 1; i < this->dfa_->ns; ++i) {
+            if (this->dfa_->f[i] == 1) {
+                final.insert(i);
+            }
+        }
     }
 };
 

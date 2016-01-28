@@ -11,28 +11,17 @@
 #include <memory>
 
 extern Timer timer_base;
+extern VarToTrackMap varMap;
 
 template<class TemplatedAutomaton>
 SymbolicAutomaton* baseToSymbolicAutomaton(ASTForm* form, bool doComplement) {
-    BaseAutomaton* baseAutomaton =  new TemplatedAutomaton(new Automaton(), form);
-    Automaton& aut = baseAutomaton->GetAutomatonHandle();
-    //Automaton aut;
 #if (AUT_CONSTRUCT_BY_MONA == true)
-    constructAutomatonByMona(form, aut);
+    DFA *dfa;
+    toMonaAutomaton(form, dfa, doComplement);
+    return new TemplatedAutomaton(dfa, varMap.TrackLength(), form);
 #else
-    NegationUnfolder nu_visitor;
-    ASTForm* nonNegatedAutomaton = reinterpret_cast<ASTForm*>(form->accept(nu_visitor));
-    nonNegatedAutomaton->toUnaryAutomaton(aut, doComplement);
+    assert(false);
 #endif
-
-#if (OPT_REDUCE_AUT_LAST == true)
-    auto aut1 = aut.RemoveUnreachableStates();
-    aut = aut1.RemoveUselessStates();
-#endif
-
-    // TODO: hopefully thsi will not fuck things up
-    baseAutomaton->InitializeStates();
-    return baseAutomaton;
 }
 
 SymbolicAutomaton* ASTForm::toSymbolicAutomaton(bool doComplement) {

@@ -122,7 +122,6 @@ TermBaseSet::TermBaseSet(VATA::Util::OrdVector<unsigned int>& s, unsigned int of
     type = TERM_BASE;
     for(auto state : s) {
         this->states.push_back(state);
-        this->stateMask.set(state-offset, true);
     }
 
     // Initialization of state space
