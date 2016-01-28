@@ -6,23 +6,34 @@
 #include "DotWalker.h"
 #include "../../Frontend/dfa.h"
 #include "../automata.hh"
+#include "../environment.hh"
 
 TimeType MonaAutomataDotWalker::_constructAutomaton(ASTForm* form) {
-    DFA *monaAutomaton = nullptr;
-    toMonaAutomaton(form, monaAutomaton, true);
-    assert(monaAutomaton != nullptr);
-    size_t monaStates = monaAutomaton->ns;
+    DFA *monaAutomaton = nullptr, *temp = nullptr;
+    size_t monaStates = 0, minimizedStates = 0;
+    try {
+        toMonaAutomaton(form, monaAutomaton, false);
+        assert(monaAutomaton != nullptr);
+        monaStates = monaAutomaton->ns;
 
-    /*DFA *temp = dfaCopy(monaAutomaton);
-    dfaUnrestrict(temp);
-    monaAutomaton = dfaMinimize(temp);
+        temp = dfaCopy(monaAutomaton);
+        dfaUnrestrict(temp);
+        monaAutomaton = dfaMinimize(temp);
 
-    // Clean up
-    dfaFree(temp);*/
-    size_t minimizedStates = monaAutomaton->ns;
+        minimizedStates = monaAutomaton->ns;
 
-    dfaFree(monaAutomaton);
-    return std::make_pair(minimizedStates, monaStates);
+        // Clean up
+        dfaFree(monaAutomaton);
+        monaAutomaton = nullptr;
+        /*dfaFree(temp);
+        temp = nullptr;*/
+        return std::make_pair(minimizedStates, monaStates);
+    } catch (std::exception &e) {
+        if(monaAutomaton != nullptr) {
+            dfaFree(monaAutomaton);
+        }
+        return std::make_pair(0, 0);
+    }
 }
 
 void MonaAutomataDotWalker::visit(ASTForm_And* form) {

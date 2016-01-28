@@ -24,6 +24,7 @@
 #include <vata/util/binary_relation.hh>
 
 // < MONA Frontend Headers >
+#include "Frontend/bdd.h"
 #include "Frontend/env.h"
 #include "Frontend/untyped.h"
 #include "Frontend/predlib.h"
@@ -97,6 +98,7 @@ MultiLevelMCache<MacroTransMTBDD> BDDCache;
 
 extern int yyparse(void);
 extern void loadFile(char *filename);
+extern void (*mona_callback)();
 extern Deque<FileSource *> source; 
 
 char *inputFileName = NULL;
@@ -348,11 +350,19 @@ void reorder(ReorderMode mode, ASTForm* formula) {
 	}
 }
 
+void bdd_callback() {
+	throw MonaFailureException();
+}
+
 int main(int argc, char *argv[]) {
 	/* Parse initial arguments */
 	if (!ParseArguments(argc, argv)) {
 		PrintUsage();
 		exit(-1);
+	}
+
+	if(options.monaWalk) {
+		mona_callback = bdd_callback;
 	}
 
 	/* Initialization of timer used for statistics */
@@ -454,8 +464,6 @@ int main(int argc, char *argv[]) {
 		#undef CALL_FILTER
 
 		std::list<size_t> tags;
-		tags.insert(tags.begin(), 5);
-		tags.insert(tags.begin(), 4);
 		Tagger tagger(tags);
 		(ast->formula)->accept(tagger);
 

@@ -128,6 +128,13 @@ public:
 	}
 };
 
+class MonaFailureException : public std::exception {
+public:
+	virtual const char* what() const throw() {
+		return "Mona Failed on BDDs\n";
+	}
+};
+
 /****************
  * DEBUG MACROS *
  ****************/

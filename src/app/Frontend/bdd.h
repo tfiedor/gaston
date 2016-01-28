@@ -35,6 +35,7 @@
 
 /*MISCELLANEOUS DEFINITIONS*/
 
+extern void (*mona_callback)();
 extern int memlimit;
 
 typedef unsigned boolean;
@@ -411,6 +412,6 @@ extern unsigned fn_identity(unsigned p);
   ((void) ((exp) ? 0 : \
   (printf("%s:%u: failed invariant - please inform amoeller@cs.au.dk\n",  \
 	  __FILE__, __LINE__), \
-  abort(), 0)))
+  mona_callback(), 0)))
 
 #endif
