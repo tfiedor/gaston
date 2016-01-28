@@ -11,10 +11,12 @@
 
 // < System Headers >
 #include <iostream>
+#include <fstream>
 #include <new>
 #include <sys/time.h>
 #include <sys/resource.h>
 #include <signal.h>
+#include <list>
 #include <map>
 
 // < VATA Headers >
@@ -120,6 +122,7 @@ void PrintUsage()
 		<< "     --no-expnf      Implies --use-mona-dfa, does not convert formula to exPNF\n"
 		<< "     --test          Test specified problem [val, sat, unsat]\n"
 		<< "     --walk-aut      Does the experiment generating the special dot graph\n"
+		<< " -e, --expand-tagged Expand automata with given tag on first line of formula\n"
 		<< " -q, --quiet		 Quiet, don't print progress\n"
 		<< " -oX                 Optimization level [1 = safe optimizations [default], 2 = heuristic]\n"
 		<< " --method            Use either symbolic (novel), forward (EEICT'14) or backward method (TACAS'15) for deciding WSkS [symbolic, backward, forward]\n"
@@ -172,6 +175,8 @@ bool ParseArguments(int argc, char *argv[])
 				options.graphvizDAG = true;
 			else if(strcmp(argv[i], "--walk-aut") == 0)
 				options.monaWalk = true;
+			else if(strcmp(argv[i], "--expand-tagged"))
+				options.expandTagged = true;
 			else if(strcmp(argv[i], "--no-automaton") == 0)
 				options.dontDumpAutomaton = true;
 			else if(strcmp(argv[i], "--use-mona-dfa") == 0) {
@@ -198,6 +203,9 @@ bool ParseArguments(int argc, char *argv[])
 				options.useMonaDFA = true;
 			} else {
 				switch (argv[i][1]) {
+					case 'e':
+						options.expandTagged = true;
+						break;
 					case 'd':
 						options.dump = true;
 						break;
@@ -354,6 +362,34 @@ void bdd_callback() {
 	throw MonaFailureException();
 }
 
+void readTags(char* filename, std::string& output) {
+	std::ifstream infile(filename);
+	std::getline(infile, output);
+	infile.close();
+}
+
+void parseTags(std::string&s, std::list<size_t>& tags) {
+	std::string delimiter = ";";
+	std::string beginDelimiter = ":";
+	// Fixme: better things
+
+	size_t pos = 0;
+
+	pos = s.find(beginDelimiter);
+	if(pos == std::string::npos) {
+
+		return;
+	}
+	s = s.substr(pos+1);
+	std::string token;
+	while ((pos = s.find(delimiter)) != std::string::npos) {
+		token = s.substr(0, pos);
+		tags.insert(tags.end(), std::stoi(token));
+		s.erase(0, pos + delimiter.length());
+	}
+	tags.insert(tags.end(), std::stoi(s));
+}
+
 int main(int argc, char *argv[]) {
 	/* Parse initial arguments */
 	if (!ParseArguments(argc, argv)) {
@@ -373,6 +409,11 @@ int main(int argc, char *argv[]) {
 	///////// PARSING ////////////////////////////////////////////////////////
 	Timer timer_parsing;
 	timer_parsing.start();
+
+	std::list<size_t> tags;
+	std::string stringTag("");
+	readTags(inputFileName, stringTag);
+	parseTags(stringTag, tags);
 
 	loadFile(inputFileName);
 	yyparse();
@@ -463,7 +504,6 @@ int main(int argc, char *argv[]) {
 		FILTER_LIST(CALL_FILTER)
 		#undef CALL_FILTER
 
-		std::list<size_t> tags;
 		Tagger tagger(tags);
 		(ast->formula)->accept(tagger);
 

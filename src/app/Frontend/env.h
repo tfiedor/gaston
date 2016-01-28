@@ -39,7 +39,7 @@ public:
     graphvizSatisfyingEx(false), graphvizCounterEx(false), 
     externalWhole(false), demo(false), 
     inheritedAcceptance(false), unrestrict(false),
-    monaWalk(false),
+    monaWalk(false),expandTagged(false),
     alternativeM2LStr(false), test(EVERYTHING), reorder(HEURISTIC), optimize(0),
     useMonaDFA(false) {}
 
@@ -70,6 +70,7 @@ public:
   bool unrestrict;
   bool alternativeM2LStr;
     bool monaWalk;
+    bool expandTagged;
     TestType test;
   ReorderMode reorder;
   unsigned optimize;
