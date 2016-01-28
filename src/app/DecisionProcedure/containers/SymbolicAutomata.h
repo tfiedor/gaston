@@ -226,8 +226,8 @@ class BaseAutomaton : public SymbolicAutomaton {
 protected:
     /// <<< PRIVATE MEMBERS >>>
     MonaWrapper<size_t> _autWrapper;                // Wrapper of mona automaton
-    unsigned int _stateSpace;               // Number of states in automaton
-    unsigned int _stateOffset;              // Offset of states used for mask
+    unsigned int _stateSpace = 0;               // Number of states in automaton
+    unsigned int _stateOffset = 0;              // Offset of states used for mask
     PreCache _preCache;
 
     /// <<< PRIVATE FUNCTIONS >>>

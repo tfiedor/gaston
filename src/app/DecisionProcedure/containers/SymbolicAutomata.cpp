@@ -86,6 +86,7 @@ ProjectionAutomaton::~ProjectionAutomaton() {
 BaseAutomaton::BaseAutomaton(BaseAutomatonType* aut, size_t vars, Formula_ptr form) : SymbolicAutomaton(form), _autWrapper(dfaCopy(aut), vars) {
     type = AutType::BASE;
     this->_InitializeAutomaton();
+    this->_stateSpace = vars;
 }
 
 BaseAutomaton::~BaseAutomaton() {
@@ -441,7 +442,6 @@ Term* BaseAutomaton::Pre(Symbol* symbol, Term* finalApproximation, bool underCom
     #endif
 
     BaseAutomatonStateSet null;
-    //for(int i = this->_stateOffset; i < this->_stateSpace; ++i) {
 
     for(auto state : baseSet->states) {
         assert(state != 0);
