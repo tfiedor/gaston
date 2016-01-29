@@ -44,6 +44,7 @@ protected:
     InternalNodesType internalNodes_;
     DFA *dfa_;
     unsigned numVars_;
+    size_t minVar_;
     boost::dynamic_bitset<> symbol_;
 
 private:
@@ -73,6 +74,7 @@ private:
         leafNodes_[state] = new WrappedNode(state, 0xfffffffe);
         LOAD_index(&bddm->node_table[addr], index);
 
+        index -= minVar_;
         if(index != BDD_LEAF_INDEX && index == 0)
             return leafNodes_[state];
 
@@ -114,7 +116,7 @@ private:
 
     inline int SetVar(unsigned index)
     {
-        return (index - 1);
+        return index - 1 - minVar_;
     }
 
     inline int SetFlag(unsigned var, bool edge)
@@ -158,9 +160,6 @@ private:
             // don't care.
             for(auto node: nodes)
             {
-                if(node == nullptr) {
-                    std::cout << var << "\n";
-                }
                 assert(node != nullptr);
                 if(UnequalVars(node->var_, var))
                 {
@@ -202,10 +201,12 @@ private:
     }
 
 public:
-    MonaWrapper(DFA *dfa, unsigned numVars = 0): dfa_(dfa), numVars_(numVars)
+    MonaWrapper(DFA *dfa, size_t minVar, unsigned numVars = 0): dfa_(dfa),
+                                                                numVars_(numVars + minVar),
+                                                                minVar_(minVar)
     {
-        roots_.resize(dfa->ns);
-        leafNodes_.resize(dfa->ns);
+        roots_.resize(dfa->ns, nullptr);
+        leafNodes_.resize(dfa->ns, nullptr);
 
         for(size_t i = 1; i < dfa->ns; i++)
             RecSetPointer(dfa->bddm, dfa->q[i], *spawnNode(dfa->bddm, dfa->q[i], i));

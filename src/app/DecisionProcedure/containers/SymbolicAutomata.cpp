@@ -83,7 +83,7 @@ ProjectionAutomaton::~ProjectionAutomaton() {
     delete this->_aut;
 }
 
-BaseAutomaton::BaseAutomaton(BaseAutomatonType* aut, size_t vars, Formula_ptr form) : SymbolicAutomaton(form), _autWrapper(dfaCopy(aut), vars) {
+BaseAutomaton::BaseAutomaton(BaseAutomatonType* aut, size_t vars, Formula_ptr form, size_t min) : SymbolicAutomaton(form), _autWrapper(dfaCopy(aut), min, vars) {
     type = AutType::BASE;
     this->_InitializeAutomaton();
     this->_stateSpace = vars;

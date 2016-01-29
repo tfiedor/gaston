@@ -4,6 +4,7 @@
 
 #include "../Frontend/ast.h"
 #include "../Frontend/timer.h"
+#include "../Frontend/offsets.h"
 #include "../DecisionProcedure/containers/SymbolicAutomata.h"
 #include "../DecisionProcedure/environment.hh"
 #include "../DecisionProcedure/automata.hh"
@@ -12,13 +13,32 @@
 
 extern Timer timer_base;
 extern VarToTrackMap varMap;
+extern Offsets offsets;
 
 template<class TemplatedAutomaton>
 SymbolicAutomaton* baseToSymbolicAutomaton(ASTForm* form, bool doComplement) {
 #if (AUT_CONSTRUCT_BY_MONA == true)
     DFA *dfa;
+    int numVars = varMap.TrackLength();
+
     toMonaAutomaton(form, dfa, doComplement);
-    return new TemplatedAutomaton(dfa, varMap.TrackLength(), form);
+    IdentList* vars = initializeVars(form);
+
+    IdentList::iterator id = vars->begin();
+    size_t ix = 0;
+    size_t min;
+    min = offsets.off(*id);
+    ++id;
+
+    // iterate through all variables
+    for (; id != vars->end(); ++id) {
+        ix = offsets.off(*id);
+        if(min > ix) {
+            min = ix;
+        }
+    }
+
+    return new TemplatedAutomaton(dfa, varMap.TrackLength(), form, min);
 #else
     assert(false);
 #endif

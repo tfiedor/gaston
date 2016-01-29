@@ -10,10 +10,12 @@
 
 #include "VarToTrackMap.hh"
 #include "../../Frontend/symboltable.h"
+#include "../../Frontend/offsets.h"
 
 #include <iostream>
 
 extern SymbolTable symbolTable;
+extern Offsets offsets;
 
 /**
  * Private Methods
@@ -29,14 +31,15 @@ void VarToTrackMap::addIdentifiers(IdentList* identifiers) {
 	uint val;
 	uint identSize = identifiers->size();
 
-	for(auto it = identifiers->begin(); it != identifiers->end(); ++it) {
-		std::cout << (*it) << ": " << symbolTable.lookupSymbol(*it) << ", ";
+	auto it = identifiers->begin();
+	size_t min = (*it);
+	for(; it != identifiers->end(); ++it) {
+		min = (min > (*it)) ? (*it) : min;
 	}
-	std::cout << "\n";
 
 	for (int i = 0; i < identSize; ++i) {
 		val = identifiers->pop_front();
-		(this->vttMap)[val] = index++;
+		(this->vttMap)[val] = val - min;
 	}
 }
 
@@ -58,12 +61,6 @@ uint VarToTrackMap::TrackLength() {
 uint VarToTrackMap::operator[](uint val) {
 	// Fixme: Refactor this
 	return this->vttMap[val];
-	#if (OPT_SMARTER_MONA_CONVERSION == true)
-	return this->vttMap[val];
-	#else
-	unsigned int mapSize = this->vttMap.size();
-	return mapSize - 1 - this->vttMap[val];
-	#endif
 }
 
 /**
@@ -72,7 +69,7 @@ uint VarToTrackMap::operator[](uint val) {
 void VarToTrackMap::dumpMap() {
 	unsigned int mapSize = this->vttMap.size();
 	for (auto it = this->vttMap.begin(); it != vttMap.end(); ++it) {
-		std::cout << it->first << " -> " << it->second << '\n';
+		std::cout << it->first << "(" << symbolTable.lookupSymbol(it->first) << ") -> " << it->second << '\n';
 	}
 }
 
@@ -91,6 +88,7 @@ void VarToTrackMap::initializeFromList(IdentList* usedVar) {
  * variables encountering in prefix and int matrix
  */
 void VarToTrackMap::initializeFromLists(IdentList* prefixVars, IdentList* matrixVars) {
+	assert(false);
 	this->addIdentifiers(prefixVars);
 	this->addIdentifiers(matrixVars);
 }
