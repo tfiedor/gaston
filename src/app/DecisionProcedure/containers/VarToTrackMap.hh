@@ -24,6 +24,7 @@ private:
 
 	// < Private Members >
 	varMap vttMap;
+	varMap ttvMap;
 
 	// < Private Methods >
 	void addIdentifiers(IdentList* );
@@ -32,6 +33,7 @@ public:
 	// < Public Methods >
 	uint TrackLength();
 	uint operator[](uint);
+	uint inverseGet(uint);
 	void dumpMap();
 
 	VarToTrackMap() : vttMap() {};

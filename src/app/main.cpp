@@ -175,7 +175,7 @@ bool ParseArguments(int argc, char *argv[])
 				options.graphvizDAG = true;
 			else if(strcmp(argv[i], "--walk-aut") == 0)
 				options.monaWalk = true;
-			else if(strcmp(argv[i], "--expand-tagged"))
+			else if(strcmp(argv[i], "--expand-tagged") == 0)
 				options.expandTagged = true;
 			else if(strcmp(argv[i], "--no-automaton") == 0)
 				options.dontDumpAutomaton = true;

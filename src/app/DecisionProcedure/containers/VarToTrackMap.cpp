@@ -31,15 +31,11 @@ void VarToTrackMap::addIdentifiers(IdentList* identifiers) {
 	uint val;
 	uint identSize = identifiers->size();
 
-	auto it = identifiers->begin();
-	size_t min = (*it);
-	for(; it != identifiers->end(); ++it) {
-		min = (min > (*it)) ? (*it) : min;
-	}
-
+	size_t idx = 0;
 	for (int i = 0; i < identSize; ++i) {
 		val = identifiers->pop_front();
-		(this->vttMap)[val] = val - min;
+		(this->vttMap)[val] = idx;
+		(this->ttvMap)[idx++] = val;
 	}
 }
 
@@ -61,6 +57,10 @@ uint VarToTrackMap::TrackLength() {
 uint VarToTrackMap::operator[](uint val) {
 	// Fixme: Refactor this
 	return this->vttMap[val];
+}
+
+uint VarToTrackMap::inverseGet(uint key) {
+	return this->ttvMap[key];
 }
 
 /**

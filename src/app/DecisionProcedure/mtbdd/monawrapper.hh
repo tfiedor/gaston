@@ -6,6 +6,7 @@
 #include <vata/util/ord_vector.hh>
 
 #include "ondriks_mtbdd.hh"
+#include "../containers/VarToTrackMap.hh"
 
 #include <vector>
 #include <unordered_map>
@@ -14,6 +15,8 @@
 #include <assert.h>
 #include <string>
 #include <boost/dynamic_bitset.hpp>
+
+extern VarToTrackMap varMap;
 
 template<class Data>
 class MonaWrapper
@@ -74,8 +77,7 @@ private:
         leafNodes_[state] = new WrappedNode(state, 0xfffffffe);
         LOAD_index(&bddm->node_table[addr], index);
 
-        index -= minVar_;
-        if(index != BDD_LEAF_INDEX && index == 0)
+        if(index != BDD_LEAF_INDEX && varMap[index] == 0)
             return leafNodes_[state];
 
         WrappedNode *result = spawnNode(addr, *leafNodes_[state], 1);
@@ -98,7 +100,7 @@ private:
         }
         else
         {
-            node.var_ = SetVar(index);
+            node.var_ = SetVar(varMap[index]);
             RecSetPointer(bddm, l, *spawnNode(l, node, 0));
             RecSetPointer(bddm, r, *spawnNode(r, node, 1));
         }
@@ -116,7 +118,7 @@ private:
 
     inline int SetVar(unsigned index)
     {
-        return index - 1 - minVar_;
+        return index - 1;
     }
 
     inline int SetFlag(unsigned var, bool edge)
@@ -134,13 +136,25 @@ private:
         return vec;
     }
 
+    inline void GetDontCareSucc(const SetType &nodes, SetType &succs, int var, bool edge)
+    {
+        for(auto node: nodes)
+        {
+            if(UnequalVars(node->var_, var))
+            {
+                succs.insert(node);
+                node->var_ = SetFlag(node->var_, edge);
+            }
+        }
+    }
+
     inline void GetSuccessors(const SetType &nodes, SetType &succs, int var, bool edge)
     {
         for(auto node: nodes)
         {
             assert(node != nullptr);
             succs.insert(node);
-            if(UnequalVars(node->node_, var))
+            if(UnequalVars(node->var_, var))
                 node->var_ = SetFlag(node->var_, edge);
         }
     }
@@ -180,6 +194,7 @@ private:
                 assert(node != nullptr);
                 if(GetVar(node->var_) == var)
                 {
+                    GetDontCareSucc(node->pred_[~symbol_[(var << 1)]], res, var - 1, ~symbol_[(var << 1)]);
                     GetSuccessors(node->pred_[symbol_[(var << 1)]], res, var - 1, symbol_[(var << 1)]);
                 }
                 else    // don't care na vytvorenem uzlu.
@@ -202,7 +217,7 @@ private:
 
 public:
     MonaWrapper(DFA *dfa, size_t minVar, unsigned numVars = 0): dfa_(dfa),
-                                                                numVars_(numVars + minVar),
+                                                                numVars_(numVars),
                                                                 minVar_(minVar)
     {
         roots_.resize(dfa->ns, nullptr);
@@ -284,10 +299,10 @@ public:
         }
         else
         {
-            transition[index] = '0';
+            transition[varMap[index]] = '0';
             GetAllPathFromMona(bddm, l, transition, root, varNum);
 
-            transition[index] = '1';
+            transition[varMap[index]] = '1';
             GetAllPathFromMona(bddm, r, transition, root, varNum);
         }
     }
