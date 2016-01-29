@@ -118,12 +118,27 @@ private:
 
     inline int SetVar(unsigned index)
     {
-        return index - 1;
+        return (index - 1) | 0x00060000;
     }
 
-    inline int SetFlag(unsigned var, bool edge)
+    inline void SetFlag(int &var, bool edge)
     {
-        return (var & 0xfffdffff) | (edge << 17);
+        var = var & (0xfffbffff >> edge);
+    }
+
+    inline bool IsPredecessorHigh(int var)
+    {
+        return (var & 0x00020000) ^ 0x00020000;
+    }
+
+    inline bool IsPredecessorLow(int var)
+    {
+        return (var & 0x00040000) ^ 0x00040000;
+    }
+
+    inline void ResetFlags(int &var)
+    {
+        var = var | 0x00060000;
     }
 
     inline VectorType CreateResultSet(const SetType &nodes)
@@ -143,7 +158,7 @@ private:
             if(UnequalVars(node->var_, var))
             {
                 succs.insert(node);
-                node->var_ = SetFlag(node->var_, edge);
+                SetFlag(node->var_, edge);
             }
         }
     }
@@ -155,7 +170,7 @@ private:
             assert(node != nullptr);
             succs.insert(node);
             if(UnequalVars(node->var_, var))
-                node->var_ = SetFlag(node->var_, edge);
+                SetFlag(node->var_, edge);
         }
     }
 
@@ -205,8 +220,11 @@ private:
                     }
                     else
                     {
-                        if(symbol_[(var << 1)] == ((node->var_ & 0x00020000) >> 17))
+                        if((symbol_[(var << 1)] && IsPredecessorHigh(node->var_)) ||
+                           (~symbol_[(var << 1)] && IsPredecessorLow(node->var_)))
                             res.insert(node);
+
+                        ResetFlags(node->var_);
                     }
                 }
             }

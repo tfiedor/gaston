@@ -178,7 +178,7 @@ public:
 /* >>> Debugging Options <<< *
  *****************************/
 #define DEBUG_AUTOMATA_ADDRESSES		false
-#define DEBUG_BASE_AUTOMATA 			true
+#define DEBUG_BASE_AUTOMATA 			false
 #define DEBUG_FIXPOINT 					false
 #define DEBUG_FIXPOINT_SYMBOLS			false
 #define DEBUG_INITIAL_APPROX 			false
@@ -191,7 +191,7 @@ public:
 #define DEBUG_TERM_CACHE_COMPARISON		false
 #define DEBUG_CONTINUATIONS 			false
 #define DEBUG_NO_WORKSHOPS				false
-#define DEBUG_PRE						true
+#define DEBUG_PRE						false
 #define DEBUG_GENERATE_DOT_AUTOMATON	true
 #define DEBUG_COMPUTE_FULL_FIXPOINT 	false
 #define DEBUG_COMPARE_WORKLISTS			true
@@ -256,7 +256,7 @@ public:
 #define OPT_CREATE_QF_AUTOMATON 		true	// < Transform quantifier-free automaton to formula
 #define OPT_REDUCE_AUT_EVERYTIME		false	// < Call reduce everytime VATA automaton is created (i.e. as intermediate result)
 #define OPT_REDUCE_AUT_LAST				true	// < Call reduce after the final VATA automaton is created
-#define OPT_EARLY_EVALUATION 			false	// < Evaluates early interesection of products
+#define OPT_EARLY_EVALUATION 			true	// < Evaluates early interesection of products
 #define OPT_EARLY_PARTIAL_SUB			true	// < Postpone the partially subsumed terms
 #define OPT_CONT_ONLY_WHILE_UNSAT		true	// < Generate continuation only if there wasn't found (un)satisfying (counter)example yet
 #define OPT_PRUNE_EMPTY					true	// < Prune terms by empty set

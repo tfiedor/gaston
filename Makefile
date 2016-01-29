@@ -618,6 +618,30 @@ src/app/DecisionProcedure/visitors/ExistentialPrenexer.cpp.s:
 	$(MAKE) -f CMakeFiles/gaston.dir/build.make CMakeFiles/gaston.dir/src/app/DecisionProcedure/visitors/ExistentialPrenexer.cpp.s
 .PHONY : src/app/DecisionProcedure/visitors/ExistentialPrenexer.cpp.s
 
+src/app/DecisionProcedure/visitors/FixpointDetagger.o: src/app/DecisionProcedure/visitors/FixpointDetagger.cpp.o
+.PHONY : src/app/DecisionProcedure/visitors/FixpointDetagger.o
+
+# target to build an object file
+src/app/DecisionProcedure/visitors/FixpointDetagger.cpp.o:
+	$(MAKE) -f CMakeFiles/gaston.dir/build.make CMakeFiles/gaston.dir/src/app/DecisionProcedure/visitors/FixpointDetagger.cpp.o
+.PHONY : src/app/DecisionProcedure/visitors/FixpointDetagger.cpp.o
+
+src/app/DecisionProcedure/visitors/FixpointDetagger.i: src/app/DecisionProcedure/visitors/FixpointDetagger.cpp.i
+.PHONY : src/app/DecisionProcedure/visitors/FixpointDetagger.i
+
+# target to preprocess a source file
+src/app/DecisionProcedure/visitors/FixpointDetagger.cpp.i:
+	$(MAKE) -f CMakeFiles/gaston.dir/build.make CMakeFiles/gaston.dir/src/app/DecisionProcedure/visitors/FixpointDetagger.cpp.i
+.PHONY : src/app/DecisionProcedure/visitors/FixpointDetagger.cpp.i
+
+src/app/DecisionProcedure/visitors/FixpointDetagger.s: src/app/DecisionProcedure/visitors/FixpointDetagger.cpp.s
+.PHONY : src/app/DecisionProcedure/visitors/FixpointDetagger.s
+
+# target to generate assembly for a file
+src/app/DecisionProcedure/visitors/FixpointDetagger.cpp.s:
+	$(MAKE) -f CMakeFiles/gaston.dir/build.make CMakeFiles/gaston.dir/src/app/DecisionProcedure/visitors/FixpointDetagger.cpp.s
+.PHONY : src/app/DecisionProcedure/visitors/FixpointDetagger.cpp.s
+
 src/app/DecisionProcedure/visitors/Flattener.o: src/app/DecisionProcedure/visitors/Flattener.cpp.o
 .PHONY : src/app/DecisionProcedure/visitors/Flattener.o
 
@@ -1554,6 +1578,9 @@ help:
 	@echo "... src/app/DecisionProcedure/visitors/ExistentialPrenexer.o"
 	@echo "... src/app/DecisionProcedure/visitors/ExistentialPrenexer.i"
 	@echo "... src/app/DecisionProcedure/visitors/ExistentialPrenexer.s"
+	@echo "... src/app/DecisionProcedure/visitors/FixpointDetagger.o"
+	@echo "... src/app/DecisionProcedure/visitors/FixpointDetagger.i"
+	@echo "... src/app/DecisionProcedure/visitors/FixpointDetagger.s"
 	@echo "... src/app/DecisionProcedure/visitors/Flattener.o"
 	@echo "... src/app/DecisionProcedure/visitors/Flattener.i"
 	@echo "... src/app/DecisionProcedure/visitors/Flattener.s"

@@ -110,6 +110,7 @@ public:
 	virtual std::string ToString() { return std::string("");}
 
 	size_t tag = 0;
+	size_t fixpoint_number = 0;
   ASTOrder order;
   ASTKind kind;
   Pos pos;
