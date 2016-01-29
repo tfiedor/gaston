@@ -9,8 +9,11 @@
  *****************************************************************************/
 
 #include "VarToTrackMap.hh"
+#include "../../Frontend/symboltable.h"
 
 #include <iostream>
+
+extern SymbolTable symbolTable;
 
 /**
  * Private Methods
@@ -25,6 +28,11 @@ void VarToTrackMap::addIdentifiers(IdentList* identifiers) {
 	uint index = this->vttMap.size();
 	uint val;
 	uint identSize = identifiers->size();
+
+	for(auto it = identifiers->begin(); it != identifiers->end(); ++it) {
+		std::cout << (*it) << ": " << symbolTable.lookupSymbol(*it) << ", ";
+	}
+	std::cout << "\n";
 
 	for (int i = 0; i < identSize; ++i) {
 		val = identifiers->pop_front();
@@ -64,7 +72,7 @@ uint VarToTrackMap::operator[](uint val) {
 void VarToTrackMap::dumpMap() {
 	unsigned int mapSize = this->vttMap.size();
 	for (auto it = this->vttMap.begin(); it != vttMap.end(); ++it) {
-		std::cout << it->first << " -> " << (mapSize - 1 - it->second) << '\n';
+		std::cout << it->first << " -> " << it->second << '\n';
 	}
 }
 

@@ -178,7 +178,7 @@ public:
 /* >>> Debugging Options <<< *
  *****************************/
 #define DEBUG_AUTOMATA_ADDRESSES		false
-#define DEBUG_BASE_AUTOMATA 			false
+#define DEBUG_BASE_AUTOMATA 			true
 #define DEBUG_FIXPOINT 					false
 #define DEBUG_FIXPOINT_SYMBOLS			false
 #define DEBUG_INITIAL_APPROX 			false

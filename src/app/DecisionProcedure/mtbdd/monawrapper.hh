@@ -21,7 +21,7 @@ class MonaWrapper
 private:
     struct WrappedNode
     {
-        std::vector<struct WrappedNode *> pred_[2];
+        std::unordered_set<struct WrappedNode *> pred_[2];
         unsigned node_;
         int var_;
 
@@ -62,7 +62,7 @@ private:
             internalNodes_.insert(std::make_pair(addr, node));
         }
 
-        node->pred_[edge].push_back(&pred);
+        node->pred_[edge].insert(&pred);
         return node;
     }
 
@@ -77,7 +77,7 @@ private:
             return leafNodes_[state];
 
         WrappedNode *result = spawnNode(addr, *leafNodes_[state], 1);
-        result->pred_[0].push_back(leafNodes_[state]);
+        result->pred_[0].insert(leafNodes_[state]);
         return result;
     }
 
@@ -102,9 +102,9 @@ private:
         }
     }
 
-    inline unsigned GetVar(int var)
+    inline int GetVar(int var)
     {
-        return var;
+        return var & 0x1ffff;
     }
 
     inline bool UnequalVars(int var1, int var2)
@@ -117,6 +117,11 @@ private:
         return (index - 1);
     }
 
+    inline int SetFlag(unsigned var, bool edge)
+    {
+        return (var & 0xfffdffff) | (edge << 17);
+    }
+
     inline VectorType CreateResultSet(const SetType &nodes)
     {
         VectorType vec;
@@ -125,6 +130,17 @@ private:
             vec.insert(node->node_);
 
         return vec;
+    }
+
+    inline void GetSuccessors(const SetType &nodes, SetType &succs, int var, bool edge)
+    {
+        for(auto node: nodes)
+        {
+            assert(node != nullptr);
+            succs.insert(node);
+            if(UnequalVars(node->node_, var))
+                node->var_ = SetFlag(node->var_, edge);
+        }
     }
 
     VectorType RecPre(const SetType &nodes, int var)
@@ -142,14 +158,18 @@ private:
             // don't care.
             for(auto node: nodes)
             {
+                if(node == nullptr) {
+                    std::cout << var << "\n";
+                }
+                assert(node != nullptr);
                 if(UnequalVars(node->var_, var))
                 {
                     res.insert(node);
                 }
                 else
                 {
-                    res.insert(node->pred_[0].begin(), node->pred_[0].end());
-                    res.insert(node->pred_[1].begin(), node->pred_[1].end());
+                    GetSuccessors(node->pred_[0], res, var - 1, 0);
+                    GetSuccessors(node->pred_[1], res, var - 1, 1);
                 }
             }
         }
@@ -158,10 +178,23 @@ private:
             // neni don't care.
             for(auto node: nodes)
             {
+                assert(node != nullptr);
                 if(GetVar(node->var_) == var)
-                    res.insert(node->pred_[symbol_[(var << 1) ]].begin(), node->pred_[symbol_[(var << 1)]].end());
+                {
+                    GetSuccessors(node->pred_[symbol_[(var << 1)]], res, var - 1, symbol_[(var << 1)]);
+                }
                 else    // don't care na vytvorenem uzlu.
-                    res.insert(node);
+                {
+                    if(UnequalVars(node->var_, var - 1))
+                    {
+                        res.insert(node);
+                    }
+                    else
+                    {
+                        if(symbol_[(var << 1)] == ((node->var_ & 0x00020000) >> 17))
+                            res.insert(node);
+                    }
+                }
             }
         }
 
@@ -172,7 +205,7 @@ public:
     MonaWrapper(DFA *dfa, unsigned numVars = 0): dfa_(dfa), numVars_(numVars)
     {
         roots_.resize(dfa->ns);
-        leafNodes_.resize(dfa->ns, nullptr);
+        leafNodes_.resize(dfa->ns);
 
         for(size_t i = 1; i < dfa->ns; i++)
             RecSetPointer(dfa->bddm, dfa->q[i], *spawnNode(dfa->bddm, dfa->q[i], i));
@@ -270,6 +303,9 @@ public:
         assert(dfa_ != nullptr);
         assert(roots_.size() > state);
 
+        if(roots_[state] == nullptr)
+            return VectorType();
+
         symbol_ = symbol;
         return RecPre({roots_[state]}, numVars_);
     }
@@ -277,7 +313,7 @@ public:
     void ProcessDFA(DFA *dfa)
     {
         dfa_ = dfa;
-        for(size_t i = 0; i < dfa->ns; i++)
+        for(size_t i = 1; i < dfa->ns; i++)
             RecSetPointer(dfa->bddm, dfa->q[i], *spawnNode(dfa->bddm, dfa->q[i], i));
     }
 

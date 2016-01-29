@@ -301,7 +301,10 @@ void heuristicReorder(IdentList *free, IdentList *bound) {
 	if(options.dump) {
 		cout << "[*] Variables reordered by heuristic approach" << std::endl;
 	}
-	varMap.initializeFromLists(free, bound);
+	IdentList *vars = ident_union(free, bound);
+	if (vars != 0) {
+		varMap.initializeFromList(vars);
+	}
 }
 
 /**
@@ -557,6 +560,7 @@ int main(int argc, char *argv[]) {
 
 	// Table or BDD tracks are reordered
 	reorder(options.reorder, ast->formula);
+	varMap.dumpMap();
 #if (DEBUG_VARIABLE_SETS == true)
 	varMap.dumpMap();
 	std::cout << "\n";
