@@ -68,7 +68,6 @@ AST* Flattener::visit(ASTTerm1_Plus* term) {
 AST* Flattener::visit(ASTForm_Equal1* form) {
     // TODO: This is still huge pile of shit that needs serious refactoring
     assert(form != nullptr);
-    return form;
 
     // No need to flatten
     if(form->t1->kind == aVar1 && form->t2->kind == aVar1) {
@@ -158,7 +157,6 @@ AST* Flattener::visit(ASTForm_Equal2* form) {
     assert(form != nullptr);
     assert(form->T1 != nullptr);
     assert(form->T2 != nullptr);
-    return form;
 
     // TODO: Flattening of +X
     if(form->T2->kind == aSet) {
@@ -198,7 +196,6 @@ AST* Flattener::visit(ASTForm_NotEqual1* form) {
     assert(form != nullptr);
     assert(form->t1 != nullptr);
     assert(form->t2 != nullptr);
-    return form;
 
     ASTTerm2_Var2* y;
     ASTTerm2_Var2* x;
@@ -291,7 +288,6 @@ AST* Flattener::visit(ASTForm_Less* form) {
     assert(form != nullptr);
     assert(form->t1 != nullptr);
     assert(form->t2 != nullptr);
-    return form;
 
 #if (SMART_FLATTEN == true)
     if (form->t1->kind != aVar1) {
@@ -349,7 +345,6 @@ ASTForm* substituteFreshLessEq(ASTTerm1* leftTerm, ASTTerm1* rightTerm, bool sub
     assert(form != nullptr);
     assert(form->t1 != nullptr);
     assert(form->t2 != nullptr);
-    return form;
 
     if (form->t1->kind != aVar1) {
         return substituteFreshLessEq(form->t1, form->t2, true, *this);
@@ -426,13 +421,11 @@ ASTForm* substituteFreshIn(ASTTerm1* leftTerm, ASTTerm2* rightTerm, TransformerV
  */
 AST* Flattener::visit(ASTForm_In* form) {
     // x in X + i => ex2 Z: x in Z & Z = X + i
-    return form;
     if(form->T2->kind != aVar2) {
         ASTForm_Equal2* zSub;
         ASTForm_In* inSub;
         ASTForm_And* conj;
         ASTTerm2_Var2* Z;
-        return form;
 
         Z = Flattener::generateFreshSecondOrder();
         zSub = new ASTForm_Equal2(Z, form->T2, form->pos);
@@ -473,7 +466,6 @@ AST* Flattener::visit(ASTForm_Notin* form) {
     assert(form != nullptr);
     assert(form->t1 != nullptr);
     assert(form->T2 != nullptr);
-    return form;
 
     if (form->t1->kind != aVar1) {
         ASTForm_Equal1* zSub;
@@ -512,7 +504,6 @@ AST* Flattener::visit(ASTForm_Sub* form) {
     assert(form != nullptr);
     assert(form->T1 != nullptr);
     assert(form->T2 != nullptr);
-    return form;
 
     // TODO: still needs more refactoring
     if(form->T1->kind == aPlus2) {
