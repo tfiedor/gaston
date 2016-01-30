@@ -307,6 +307,7 @@ void heuristicReorder(IdentList *free, IdentList *bound) {
 	if (vars != 0) {
 		varMap.initializeFromList(vars);
 	}
+	delete vars;
 }
 
 /**
@@ -331,7 +332,7 @@ void randomReorder(IdentList *free, IdentList *bound) {
 		cout << "[*] Variables reorder randomly" << std::endl;
 	}
 	IdentList *vars = ident_union(free, bound);
-	// TODO: Not implemented, not needed at all
+	// TODO: Notimplemented, not needed at all
 	if (vars != 0) {
 		vars = shuffle(vars);
 		varMap.initializeFromList(vars);
@@ -814,6 +815,11 @@ int main(int argc, char *argv[]) {
 		cout << "\n[*] Total elapsed time: ";
 		timer_total.print();
 	}
+
+	delete ast;
+	Deque<FileSource *>::iterator i;
+	for (i = source.begin(); i != source.end(); i++)
+		delete *i;
 
 	return 0;
 }

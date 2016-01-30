@@ -122,7 +122,7 @@ namespace Workshops {
     private:
         // <<< PRIVATE FUNCTIONS >>>
         template<class A, class B, class C, class D, void (*E)(const A&), void (*F)(B&)>
-        inline static BinaryCache<A, B, C, D, E, F>* _cleanCache(BinaryCache<A, B, C, D, E, F>*);
+        inline static BinaryCache<A, B, C, D, E, F>* _cleanCache(BinaryCache<A, B, C, D, E, F>*, bool noMemberDelete = false);
 
     public:
         // <<< CONSTRUCTORS >>>

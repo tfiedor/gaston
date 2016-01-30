@@ -59,7 +59,11 @@ size_t TermContinuation::continuationUnfolding = 0;
 size_t TermContinuation::unfoldInSubsumption = 0;
 size_t TermContinuation::unfoldInIsectNonempty = 0;
 
-// <<< TERM CONSTRUCTORS >>>
+// <<< TERM CONSTRUCTORS AND DESTRUCTORS >>>
+Term::~Term() {
+    this->_isSubsumedCache.clear();
+}
+
 TermEmpty::TermEmpty(bool inComplement) {
     #if (MEASURE_STATE_SPACE == true)
     ++TermEmpty::instances;
@@ -135,6 +139,10 @@ TermBaseSet::TermBaseSet(VATA::Util::OrdVector<unsigned int>& s, unsigned int of
     this->dump();
     std::cout << "\n";
     #endif
+}
+
+TermBaseSet::~TermBaseSet() {
+    this->states.clear();
 }
 
 TermContinuation::TermContinuation(SymbolicAutomaton* a, Term* t, SymbolType* s, bool b) : aut(a), term(t), symbol(s), underComplement(b) {
@@ -253,6 +261,12 @@ TermFixpoint::TermFixpoint(Aut_ptr aut, Term_ptr sourceTerm, Symbol* symbol, boo
     this->dump();
     std::cout << "\n";
     #endif
+}
+
+TermFixpoint::~TermFixpoint() {
+    this->_fixpoint.clear();
+    this->_postponed.clear();
+    this->_worklist.clear();
 }
 
 /*TermFixpoint::~TermFixpoint() {

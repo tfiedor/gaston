@@ -29,7 +29,16 @@ AST* SecondOrderRestricter::_firstOrderRestrict(FirstOrderQuantification* form) 
     }
 
     restrictedFormula = new BinaryFormula(restrictedFormula, form->f, form->pos);
-    return new SecondOrderQuantification(form->ul, form->vl, restrictedFormula, form->pos);
+
+    // Free the previous form
+    form->f = nullptr;
+    IdentList* ul = form->ul;
+    form->ul = nullptr;
+    IdentList* vl = form->vl;
+    form->vl = nullptr;
+    delete form;
+
+    return new SecondOrderQuantification(ul, vl, restrictedFormula, Pos());
 };
 
 /**

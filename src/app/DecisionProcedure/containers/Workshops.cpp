@@ -8,10 +8,12 @@ namespace Workshops {
     TermWorkshop::TermWorkshop(SymbolicAutomaton* aut) : _aut(aut) { }
 
     template<class A, class B, class C, class D, void (*E)(const A&), void (*F)(B&)>
-    BinaryCache<A, B, C, D, E, F>* TermWorkshop::_cleanCache(BinaryCache<A, B, C, D, E, F>* cache) {
+    BinaryCache<A, B, C, D, E, F>* TermWorkshop::_cleanCache(BinaryCache<A, B, C, D, E, F>* cache, bool noMemberDelete) {
         if(cache != nullptr) {
-            for(auto it = cache->begin(); it != cache->end(); ++it) {
-                delete it->second;
+            if(!noMemberDelete) {
+                for (auto it = cache->begin(); it != cache->end(); ++it) {
+                    delete it->second;
+                }
             }
             delete cache;
         }
@@ -26,7 +28,17 @@ namespace Workshops {
         this->_pCache = TermWorkshop::_cleanCache(this->_pCache);
         this->_lCache = TermWorkshop::_cleanCache(this->_lCache);
         this->_contCache = TermWorkshop::_cleanCache(this->_contCache);
-        // TODO: Computation cache needs to be here as well?
+        // Fixme: there should be a deletion of _compCache
+        this->_compCache = TermWorkshop::_cleanCache(this->_compCache, true);
+
+        if(TermWorkshop::_empty != nullptr) {
+            delete TermWorkshop::_empty;
+            TermWorkshop::_empty = nullptr;
+        }
+        if(TermWorkshop::_emptyComplement != nullptr) {
+            delete TermWorkshop::_emptyComplement;
+            TermWorkshop::_emptyComplement = nullptr;
+        }
     }
 
     // ComputationKey    = std::pair<FixpointType*, WorklistType*>;
@@ -346,6 +358,10 @@ namespace Workshops {
     }
 
     SymbolWorkshop::~SymbolWorkshop() {
+        if(_zeroSymbol != nullptr) {
+            delete SymbolWorkshop::_zeroSymbol;
+            SymbolWorkshop::_zeroSymbol = nullptr;
+        }
         for(auto it = this->_symbolCache->begin(); it != this->_symbolCache->end(); ++it) {
             // Delete the symbol
             delete it->second;

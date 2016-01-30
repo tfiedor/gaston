@@ -45,6 +45,8 @@ SymbolicAutomaton* baseToSymbolicAutomaton(ASTForm* form, bool doComplement) {
         }
     }
 
+    delete vars;
+
     return new TemplatedAutomaton(dfa, varMap.TrackLength(), form, min);
 #else
     assert(false);

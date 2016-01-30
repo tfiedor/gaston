@@ -18,20 +18,29 @@
  * @param[in] form:     traversed And node
  */
 AST* BooleanUnfolder::visit(ASTForm_And* form) {
+    ASTForm* result = form;
     // True and phi = phi
     if(form->f1->kind == aTrue) {
-        return form->f2;
+        result = form->f2;
+        form->f2 = nullptr;
     } else if(form->f2->kind == aTrue) {
-        return form->f1;
+        result = form->f1;
+        form->f1 = nullptr;
     // False and phi = False
     } else if(form->f1->kind == aFalse) {
-        return form->f1;
+        result = form->f1;
+        form->f1 = nullptr;
     } else if(form->f2->kind == aFalse) {
-        return form->f2;
+        result = form->f2;
+        form->f2 = nullptr;
     // Else do nothing
-    } else {
-        return form;
     }
+
+    if(form != result) {
+        delete form;
+    }
+
+    return result;
 }
 
 /**
@@ -44,13 +53,17 @@ AST* BooleanUnfolder::visit(ASTForm_And* form) {
 AST* BooleanUnfolder::visit(ASTForm_Or* form) {
     // True or phi = True
     if(form->f1->kind == aTrue) {
+        delete form->f2;
         return form->f1;
     } else if(form->f2->kind == aTrue) {
+        delete form->f1;
         return form->f2;
     // False or phi = phi
     } else if(form->f1->kind == aFalse) {
+        delete form->f1;
         return form->f2;
     } else if(form->f2->kind == aFalse) {
+        delete form->f2;
         return form->f1;
     // Else do nothing
     } else {

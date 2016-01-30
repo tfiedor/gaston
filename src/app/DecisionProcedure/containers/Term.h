@@ -59,7 +59,6 @@ using TermBaseSetStates = std::vector<BaseState>;
 using ResultType        = std::pair<Term_ptr, bool>;
 using SymbolType        = ZeroSymbol;
 
-//using FixpointMember = std::pair<Term_ptr, bool>;
 using FixpointMember = std::pair<Term_ptr, bool>;
 using FixpointType = std::list<FixpointMember>;
 using TermListType = std::list<std::pair<Term_ptr, Term_ptr>>;
@@ -77,6 +76,7 @@ public:
     size_t stateSpace = 0;         // << Exact size of the state space, 0 if unknown
     size_t stateSpaceApprox = 0;   // << Approximation of the state space, used for heuristics
     bool valid = true;
+    virtual ~Term();
 
     // See #L29
     TERM_MEASURELIST(DEFINE_STATIC_MEASURE)
@@ -181,6 +181,7 @@ public:
 
     // <<< CONSTRUCTORS >>>
     TermBaseSet(VATA::Util::OrdVector<unsigned int>&, unsigned int, unsigned int);
+    ~TermBaseSet();
 
     // <<< PUBLIC API >>>
     bool Intersects(TermBaseSet* rhs);
@@ -391,7 +392,7 @@ public:
     // <<< CONSTRUCTORS >>>
     TermFixpoint(Aut_ptr aut, Term_ptr startingTerm, Symbol* startingSymbol, bool inComplement, bool initbValue);
     TermFixpoint(Aut_ptr aut, Term_ptr sourceTerm, Symbol* startingSymbol, bool inComplement);
-    //~TermFixpoint();
+    ~TermFixpoint();
 
     // <<< PUBLIC API >>>
     FixpointTermSem GetSemantics() const;

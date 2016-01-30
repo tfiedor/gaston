@@ -77,6 +77,7 @@ ZeroSymbol::~ZeroSymbol() {
         delete this->_bdd;
         this->_bdd = nullptr;
     }
+    this->_trackMask.clear();
 }
 
 // <<< PRIVATE METHODS >>>
