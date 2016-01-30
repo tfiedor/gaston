@@ -109,8 +109,10 @@ public:
   virtual void dump() {};
 	virtual std::string ToString() { return std::string("");}
 
-	size_t tag = 0;
+	size_t tag = 1;
 	size_t fixpoint_number = 0;
+	size_t height = 1;
+	size_t size = 1;
   ASTOrder order;
   ASTKind kind;
   Pos pos;

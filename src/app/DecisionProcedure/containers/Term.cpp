@@ -306,12 +306,6 @@ SubsumptionResult Term::IsSubsumed(Term *t, bool unfoldAll) {
         Term* unfoldedContinuation = continuation->unfoldContinuation(UnfoldedInType::E_IN_SUBSUMPTION);
         return unfoldedContinuation->IsSubsumed(t, unfoldAll);
     }
-    if(this->_inComplement != t->_inComplement) {
-        this->dump();
-        std::cout << "\n";
-        t->dump();
-        std::cout << "\n";
-    }
     assert(this->_inComplement == t->_inComplement);
     assert(this->type != TERM_CONTINUATION && t->type != TERM_CONTINUATION);
 

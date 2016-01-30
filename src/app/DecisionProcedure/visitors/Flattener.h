@@ -34,8 +34,6 @@ public:
     AST* visit(ASTForm_In* form);
     AST* visit(ASTForm_Notin* form);
     AST* visit(ASTForm_Sub* form);
-    AST* visit(ASTForm_Ex1* form);
-    AST* visit(ASTForm_All1* form);
     AST* visit(ASTForm_Call* form);
 };
 

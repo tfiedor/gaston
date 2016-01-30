@@ -9,6 +9,28 @@
  *****************************************************************************/
 
 #include "SecondOrderRestricter.h"
+#include "../../Frontend/ast.h"
+#include "../../Frontend/ident.h"
+
+template<class FirstOrderQuantification, class SecondOrderQuantification, class BinaryFormula>
+AST* SecondOrderRestricter::_firstOrderRestrict(FirstOrderQuantification* form) {
+    assert(form != nullptr);
+    assert(form->f != nullptr);
+
+    Ident* it = form->vl->begin();
+    assert(it != form->vl->end());
+
+    BinaryFormula* binaryForm;
+    ASTForm* restrictedFormula = new ASTForm_FirstOrder(new ASTTerm1_Var1(*it, form->pos), form->pos);
+
+    while ((++it) != form->vl->end()) {
+        ASTForm_FirstOrder *singleton = new ASTForm_FirstOrder(new ASTTerm1_Var1(*it, form->pos), form->pos);
+        restrictedFormula = new BinaryFormula(restrictedFormula, singleton, form->pos);
+    }
+
+    restrictedFormula = new BinaryFormula(restrictedFormula, form->f, form->pos);
+    return new SecondOrderQuantification(form->ul, form->vl, restrictedFormula, form->pos);
+};
 
 /**
  * Restricts the first order quantifer to second order one
@@ -16,8 +38,7 @@
  * @param[in] form:     traversed Ex1 node
  */
 AST* SecondOrderRestricter::visit(ASTForm_Ex1* form) {
-    ASTForm_Ex2 *ex = new ASTForm_Ex2(form->ul, form->vl, form->f, form->pos);
-    return ex;
+    return this->_firstOrderRestrict<ASTForm_Ex1, ASTForm_Ex2, ASTForm_And>(form);
 }
 
 /**
@@ -26,6 +47,5 @@ AST* SecondOrderRestricter::visit(ASTForm_Ex1* form) {
  * @param[in] form:     traversed All1 node
  */
 AST* SecondOrderRestricter::visit(ASTForm_All1* form) {
-    ASTForm_All2 *all = new ASTForm_All2(form->ul, form->vl, form->f, form->pos);
-    return all;
+    return this->_firstOrderRestrict<ASTForm_All1, ASTForm_All2, ASTForm_Impl>(form);
 }

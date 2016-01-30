@@ -18,11 +18,18 @@ extern Offsets offsets;
 template<class TemplatedAutomaton>
 SymbolicAutomaton* baseToSymbolicAutomaton(ASTForm* form, bool doComplement) {
 #if (AUT_CONSTRUCT_BY_MONA == true)
-    DFA *dfa;
+    assert(form != nullptr);
+    DFA *dfa = nullptr;
     int numVars = varMap.TrackLength();
 
     toMonaAutomaton(form, dfa, doComplement);
+    assert(dfa != nullptr);
     IdentList* vars = initializeVars(form);
+    if(vars == nullptr) {
+        form->dump();
+    }
+    assert(vars != nullptr);
+    assert(vars->size() != 0);
 
     IdentList::iterator id = vars->begin();
     size_t ix = 0;

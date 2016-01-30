@@ -15,6 +15,10 @@
 #include "../Frontend/ast_visitor.h"
 
 class SecondOrderRestricter : public TransformerVisitor {
+private:
+    template<class FirstOrderQuantification, class SecondOrderQuantification, class BinaryFormula>
+    AST* _firstOrderRestrict(FirstOrderQuantification* form);
+
 public:
     SecondOrderRestricter() : TransformerVisitor(Traverse::PostOrder) {}
 

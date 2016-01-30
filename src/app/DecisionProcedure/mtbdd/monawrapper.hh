@@ -198,6 +198,7 @@ private:
                 {
                     GetSuccessors(node->pred_[0], res, var - 1, 0);
                     GetSuccessors(node->pred_[1], res, var - 1, 1);
+                    ResetFlags(node->var_);
                 }
             }
         }
@@ -211,6 +212,7 @@ private:
                 {
                     GetDontCareSucc(node->pred_[~symbol_[(var << 1)]], res, var - 1, ~symbol_[(var << 1)]);
                     GetSuccessors(node->pred_[symbol_[(var << 1)]], res, var - 1, symbol_[(var << 1)]);
+                    ResetFlags(node->var_);
                 }
                 else    // don't care na vytvorenem uzlu.
                 {

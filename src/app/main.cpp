@@ -56,6 +56,7 @@
 #include "DecisionProcedure/visitors/SecondOrderRestricter.h"
 #include "DecisionProcedure/visitors/PrenexNormalFormTransformer.h"
 #include "DecisionProcedure/visitors/Flattener.h"
+#include "DecisionProcedure/visitors/PredicateUnfolder.h"
 #include "DecisionProcedure/visitors/NegationUnfolder.h"
 #include "DecisionProcedure/visitors/Reorderer.h"
 #include "DecisionProcedure/visitors/BinaryReorderer.h"
@@ -66,6 +67,7 @@
 #include "DecisionProcedure/visitors/ExistentialPrenexer.h"
 #include "DecisionProcedure/visitors/ZeroOrderRemover.h"
 #include "DecisionProcedure/visitors/Tagger.h"
+#include "DecisionProcedure/visitors/FixpointDetagger.h"
 
 // < Typedefs and usings >
 using std::cout;
