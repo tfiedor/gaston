@@ -107,6 +107,7 @@ public:
   virtual AST* unfoldMacro(IdentList*, ASTList*) { return this;};
   virtual void freeVars(IdentList*, IdentList*) {};
   virtual void dump() {};
+	virtual void detach() {}
 	virtual std::string ToString() { return std::string("");}
 
 	size_t tag = 1;
@@ -928,7 +929,7 @@ public:
   VarCode makeCode(SubstCode *subst = NULL);
   void dump();
 	virtual std::string ToString();
-  ASTForm* clone() { return new ASTForm_In(this->t1, this->T2, this->pos); }
+  ASTForm* clone() { return new ASTForm_In(this->t1->clone(), this->T2->clone(), this->pos); }
   // Conversion of AST representation of formula to Automaton
   void toUnaryAutomaton(Automaton &aut, bool doComplement);
   SymbolicAutomaton* _toSymbolicAutomatonCore(bool doComplement);
@@ -946,7 +947,7 @@ public:
   void dump();
 	virtual std::string ToString();
 
-  ASTForm *clone() { return new ASTForm_Notin(this->t1, this->T2, this->pos); }
+  ASTForm *clone() { return new ASTForm_Notin(this->t1->clone(), this->T2->clone(), this->pos); }
 };
 
 class ASTForm_RootPred: public ASTForm {
@@ -960,7 +961,7 @@ public:
   void freeVars(IdentList*, IdentList*);
   VarCode makeCode(SubstCode *subst = NULL);
   void dump();
-  ASTForm* clone() { return new ASTForm_RootPred(this->t, this->ul, this->pos); }
+  ASTForm* clone() { return new ASTForm_RootPred(this->t->clone(), this->ul, this->pos); }
 
   IdentList *ul;
   ASTTerm1  *t;
@@ -975,7 +976,7 @@ public:
 
   VarCode makeCode(SubstCode *subst = NULL);
   void dump();
-  ASTForm* clone() { return new ASTForm_EmptyPred(this->T, this->pos); }
+  ASTForm* clone() { return new ASTForm_EmptyPred(this->T->clone(), this->pos); }
 };
 
 class ASTForm_FirstOrder: public ASTForm {
@@ -990,7 +991,7 @@ public:
   void freeVars(IdentList*, IdentList*);
   void dump();
 	virtual std::string ToString();
-  ASTForm* clone() { return new ASTForm_FirstOrder(this->t, this->pos); }
+  ASTForm* clone() { return new ASTForm_FirstOrder(this->t->clone(), this->pos); }
 
   // Conversion of AST representation of formula to Automaton
   void toUnaryAutomaton(Automaton &aut, bool doComplement);
@@ -1130,6 +1131,7 @@ public:
 
   VarCode makeCode(SubstCode *subst = NULL);
   void dump();
+	void detach() {this->f1 = nullptr; this->f2 = nullptr;}
 	virtual std::string ToString();
   ASTForm* clone() { return new ASTForm_Impl(this->f1->clone(), this->f2->clone(), this->pos); }
 };
@@ -1143,6 +1145,7 @@ public:
 
   VarCode makeCode(SubstCode *subst = NULL);
   void dump();
+	void detach() {this->f1 = nullptr; this->f2 = nullptr;}
 	virtual std::string ToString();
   ASTForm* clone() { return new ASTForm_Biimpl(this->f1->clone(), this->f2->clone(), this->pos); }
 };
@@ -1156,6 +1159,7 @@ public:
 
   VarCode makeCode(SubstCode *subst = NULL);
   void dump();
+	void detach() {this->f1 = nullptr; this->f2 = nullptr;}
 	virtual std::string ToString();
   ASTForm* clone() { return new ASTForm_And(this->f1->clone(), this->f2->clone(), this->pos); }
 
@@ -1185,6 +1189,7 @@ public:
 
   VarCode makeCode(SubstCode *subst = NULL);
   void dump();
+	void detach() {this->f1 = nullptr; this->f2 = nullptr;}
 	virtual std::string ToString();
   ASTForm* clone() { return new ASTForm_Or(this->f1->clone(), this->f2->clone(), this->pos); }
 
@@ -1356,6 +1361,7 @@ public:
   void freeVars(IdentList*, IdentList*);
   VarCode makeCode(SubstCode *subst = NULL);
   void dump();
+	void detach() {this->args = nullptr; }
   ASTForm* clone() { return new ASTForm_Call(this->n, this->args, this->pos); }
   ASTForm* unfoldMacro(IdentList*, ASTList*);
 

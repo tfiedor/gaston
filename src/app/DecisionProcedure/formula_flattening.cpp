@@ -23,6 +23,20 @@ extern SymbolTable symbolTable;
 extern Options options;
 extern PredicateLib predicateLib;
 
+
+template<class TermClass, ASTKind varKind>
+TermClass* unfoldOrderTerm(TermClass* term, IdentList* fParams, ASTList* rParams) {
+	if(term->kind == varKind) {
+		TermClass* temp = term->unfoldMacro(fParams, rParams);
+		if(temp != term) {
+			delete term;
+		}
+		return temp;
+	} else {
+		return term->unfoldMacro(fParams, rParams);
+	}
+}
+
 /**
  * Generates fresh first-order variable that can be used for quantification
  *
@@ -178,8 +192,8 @@ ASTForm* ASTForm_vf::unfoldMacro(IdentList* fParams, ASTList* rParams) {
  * @return: unfolded macro
  */
 ASTForm* ASTForm_tT::unfoldMacro(IdentList* fParams, ASTList* rParams) {
-	t1 = t1->unfoldMacro(fParams, rParams);
-	T2 = T2->unfoldMacro(fParams, rParams);
+	t1 = unfoldOrderTerm<ASTTerm1, aVar1>(t1, fParams, rParams);
+	T2 = unfoldOrderTerm<ASTTerm2, aVar2>(T2, fParams, rParams);
 	return this;
 }
 
@@ -191,8 +205,8 @@ ASTForm* ASTForm_tT::unfoldMacro(IdentList* fParams, ASTList* rParams) {
  * @return: unfolded macro
  */
 ASTForm* ASTForm_tt::unfoldMacro(IdentList* fParams, ASTList* rParams) {
-	t1 = t1->unfoldMacro(fParams, rParams);
-	t2 = t2->unfoldMacro(fParams, rParams);
+	t1 = unfoldOrderTerm<ASTTerm1, aVar1>(t1, fParams, rParams);
+	t2 = unfoldOrderTerm<ASTTerm1, aVar1>(t2, fParams, rParams);
 	return this;
 }
 
@@ -204,8 +218,8 @@ ASTForm* ASTForm_tt::unfoldMacro(IdentList* fParams, ASTList* rParams) {
  * @return: unfolded macro
  */
 ASTForm* ASTForm_TT::unfoldMacro(IdentList *fParams, ASTList* rParams) {
-	T1 = T1->unfoldMacro(fParams, rParams);
-	T2 = T2->unfoldMacro(fParams, rParams);
+	T1 = unfoldOrderTerm<ASTTerm2, aVar2>(T1, fParams, rParams);
+	T2 = unfoldOrderTerm<ASTTerm2, aVar2>(T2, fParams, rParams);
 	return this;
 }
 
@@ -217,8 +231,8 @@ ASTForm* ASTForm_TT::unfoldMacro(IdentList *fParams, ASTList* rParams) {
  * @return: unfolded macro
  */
 ASTTerm2* ASTTerm2_TT::unfoldMacro(IdentList* fParams, ASTList* rParams) {
-	T1 = T1->unfoldMacro(fParams, rParams);
-	T2 = T2->unfoldMacro(fParams, rParams);
+	T1 = unfoldOrderTerm<ASTTerm2, aVar2>(T1, fParams, rParams);
+	T2 = unfoldOrderTerm<ASTTerm2, aVar2>(T2, fParams, rParams);
 	return this;
 }
 
@@ -230,7 +244,7 @@ ASTTerm2* ASTTerm2_TT::unfoldMacro(IdentList* fParams, ASTList* rParams) {
  * @return: unfolded macro
  */
 ASTTerm2* ASTTerm2_Tn::unfoldMacro(IdentList *fParams, ASTList* rParams) {
-	T = T->unfoldMacro(fParams, rParams);
+	T = unfoldOrderTerm<ASTTerm2, aVar2>(T, fParams, rParams);
 	return this;
 }
 
@@ -242,7 +256,7 @@ ASTTerm2* ASTTerm2_Tn::unfoldMacro(IdentList *fParams, ASTList* rParams) {
  * @return: unfolded macro
  */
 ASTForm* ASTForm_T::unfoldMacro(IdentList *fParams, ASTList* rParams) {
-	T = T->unfoldMacro(fParams, rParams);
+	T = unfoldOrderTerm<ASTTerm2, aVar2>(T, fParams, rParams);
 	return this;
 }
 
@@ -254,7 +268,7 @@ ASTForm* ASTForm_T::unfoldMacro(IdentList *fParams, ASTList* rParams) {
  * @return: unfolded macro
  */
 ASTTerm1* ASTTerm1_tn::unfoldMacro(IdentList *fParams, ASTList* rParams) {
-	t = t->unfoldMacro(fParams, rParams);
+	t = unfoldOrderTerm<ASTTerm1, aVar1>(t, fParams, rParams);
 	return this;
 }
 

@@ -32,5 +32,9 @@ ASTForm* PredicateUnfolder::_unfoldFormula(PredLibEntry* called, ASTList* realPa
  * @param[in] form:     traversed Call node
  */
 AST* PredicateUnfolder::visit(ASTForm_Call* form) {
-    return _unfoldFormula(predicateLib.lookup(form->n), form->args);
+    ASTForm* unfoldedFormula = _unfoldFormula(predicateLib.lookup(form->n), form->args);
+
+    delete form;
+
+    return unfoldedFormula;
 }
