@@ -41,12 +41,13 @@ SymbolicAutomaton::SymbolicAutomaton(Formula_ptr form) :
     this->_form->freeVars(&free, &bound);
     IdentList* allVars;
     allVars = ident_union(&free, &bound);
+    if(allVars != nullptr) {
+        for(auto it = allVars->begin(); it != allVars->end(); ++it) {
+            _freeVars.insert(varMap[(*it)]);
+        }
 
-    for(auto it = allVars->begin(); it != allVars->end(); ++it) {
-        _freeVars.insert(varMap[(*it)]);
+        delete allVars;
     }
-
-    delete allVars;
 }
 
 SymbolicAutomaton::~SymbolicAutomaton() {
@@ -83,7 +84,7 @@ ProjectionAutomaton::~ProjectionAutomaton() {
     delete this->_aut;
 }
 
-BaseAutomaton::BaseAutomaton(BaseAutomatonType* aut, size_t vars, Formula_ptr form, size_t min) : SymbolicAutomaton(form), _autWrapper(dfaCopy(aut), min, vars) {
+BaseAutomaton::BaseAutomaton(BaseAutomatonType* aut, size_t vars, Formula_ptr form) : SymbolicAutomaton(form), _autWrapper(dfaCopy(aut), vars) {
     type = AutType::BASE;
     this->_InitializeAutomaton();
     this->_stateSpace = vars;

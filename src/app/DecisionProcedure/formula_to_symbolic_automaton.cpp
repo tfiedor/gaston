@@ -24,30 +24,8 @@ SymbolicAutomaton* baseToSymbolicAutomaton(ASTForm* form, bool doComplement) {
 
     toMonaAutomaton(form, dfa, doComplement);
     assert(dfa != nullptr);
-    IdentList* vars = initializeVars(form);
-    if(vars == nullptr) {
-        form->dump();
-    }
-    assert(vars != nullptr);
-    assert(vars->size() != 0);
 
-    IdentList::iterator id = vars->begin();
-    size_t ix = 0;
-    size_t min;
-    min = offsets.off(*id);
-    ++id;
-
-    // iterate through all variables
-    for (; id != vars->end(); ++id) {
-        ix = offsets.off(*id);
-        if(min > ix) {
-            min = ix;
-        }
-    }
-
-    delete vars;
-
-    return new TemplatedAutomaton(dfa, varMap.TrackLength(), form, min);
+    return new TemplatedAutomaton(dfa, varMap.TrackLength(), form);
 #else
     assert(false);
 #endif

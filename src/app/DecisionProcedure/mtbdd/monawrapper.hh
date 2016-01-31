@@ -47,7 +47,6 @@ protected:
     InternalNodesType internalNodes_;
     DFA *dfa_;
     unsigned numVars_;
-    size_t minVar_;
     boost::dynamic_bitset<> symbol_;
 
 private:
@@ -236,9 +235,7 @@ private:
     }
 
 public:
-    MonaWrapper(DFA *dfa, size_t minVar, unsigned numVars = 0): dfa_(dfa),
-                                                                numVars_(numVars),
-                                                                minVar_(minVar)
+    MonaWrapper(DFA *dfa, unsigned numVars = 0): dfa_(dfa), numVars_(numVars)
     {
         roots_.resize(dfa->ns, nullptr);
         leafNodes_.resize(dfa->ns, nullptr);
