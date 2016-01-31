@@ -13,6 +13,9 @@
 #include "../environment.hh"
 
 class PredicateUnfolder : public TransformerVisitor {
+private:
+    ASTForm* _unfoldFormula(PredLibEntry* called, ASTList* realParams);
+
 public:
     PredicateUnfolder() : TransformerVisitor(Traverse::PostOrder) {}
 

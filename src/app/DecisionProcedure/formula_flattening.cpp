@@ -22,7 +22,6 @@ using std::cout;
 extern SymbolTable symbolTable;
 extern Options options;
 extern PredicateLib predicateLib;
-extern IdentList inFirstOrder;
 
 /**
  * Generates fresh first-order variable that can be used for quantification
@@ -77,7 +76,7 @@ ASTForm* ASTForm::restrictFormula() {
 		Ident* it = allVars->begin();
 		while(it != allVars->end()) {
 			// only variables that are not already singletoned are appended to formula
-			if (symbolTable.lookupType(*it) == Varname1 && !inFirstOrder.exists(*it)) {
+			if (symbolTable.lookupType(*it) == Varname1) {
 				singleton = new ASTForm_FirstOrder(new ASTTerm1_Var1((*it), Pos()), Pos());
 				restrictedFormula = new ASTForm_And(singleton, restrictedFormula, Pos());
 			}
@@ -282,7 +281,7 @@ ASTTerm1* ASTTerm1_Var1::unfoldMacro(IdentList* fParams, ASTList* rParams) {
 	int index = fParams->index(this->n);
 
 	if (index != -1) {
-		return (ASTTerm1*) rParams->get(index);
+		return (ASTTerm1*) reinterpret_cast<ASTTerm1*>(rParams->get(index))->clone();
 	} else {
 		return (ASTTerm1*) this;
 	}
@@ -299,7 +298,7 @@ ASTTerm2* ASTTerm2_Var2::unfoldMacro(IdentList* fParams, ASTList* rParams) {
 	int index = fParams->index(this->n);
 
 	if (index != -1) {
-		return (ASTTerm2*) rParams->get(index);
+		return (ASTTerm2*) reinterpret_cast<ASTTerm2*>(rParams->get(index))->clone();
 	} else {
 		return (ASTTerm2*) this;
 	}

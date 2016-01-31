@@ -261,7 +261,8 @@ namespace Workshops {
     TermFixpoint* TermWorkshop::CreateFixpointPre(Term_ptr const& source, Symbol* symbol, bool inCompl) {
         #if (OPT_GENERATE_UNIQUE_TERMS == true && UNIQUE_FIXPOINTS == true)
             // Project the symbol as key
-            assert(this->_fpCache != nullptr);
+            assert(this->_fppCache != nullptr);
+            assert(source != nullptr);
 
             Term* termPtr = nullptr;
             auto fixpointKey = std::make_pair(source, symbol);

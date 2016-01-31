@@ -564,6 +564,7 @@ public:
   void freeVars(IdentList*, IdentList*) {}
   int value();
   ASTTermCode *makeCode(SubstCode *subst = NULL);
+	virtual ASTTerm1* clone() { return new ASTTerm1_Int(this->n, Pos()); }
   void dump();
 	virtual std::string ToString();
 };
@@ -576,6 +577,7 @@ public:
   VISITABLE();
 
   ASTTermCode *makeCode(SubstCode *subst = NULL);
+	virtual ASTTerm1* clone() { return new ASTTerm1_Plus(this->t->clone(), this->n, Pos()); }
   void dump();
 	virtual std::string ToString();
 };
@@ -588,6 +590,7 @@ public:
   VISITABLE();
 
   ASTTermCode *makeCode(SubstCode *subst = NULL);
+	virtual ASTTerm1* clone() { return new ASTTerm1_Minus(this->t->clone(), this->n, Pos()); }
   VarCode unfold(int v1, int v2, int n, SubstCode *subst, Pos pos);
   void dump();
 	virtual std::string ToString();
@@ -728,6 +731,7 @@ public:
   VISITABLE();
 
   ASTTermCode *makeCode(SubstCode *subst = NULL);
+	virtual ASTTerm2* clone() { return new ASTTerm2_Empty(Pos()); }
   void dump();
 	virtual std::string ToString();
 };
@@ -740,6 +744,7 @@ public:
   VISITABLE();
 
   ASTTermCode *makeCode(SubstCode *subst = NULL);
+	virtual ASTTerm2* clone() { return new ASTTerm2_Union(this->T1->clone(), this->T2->clone(), Pos()); }
   void dump();
 };
 
@@ -751,6 +756,7 @@ public:
   VISITABLE();
 
   ASTTermCode *makeCode(SubstCode *subst = NULL);
+	virtual ASTTerm2* clone() { return new ASTTerm2_Inter(this->T1->clone(), this->T2->clone(), Pos()); }
   void dump();
 };
 
@@ -762,6 +768,7 @@ public:
   VISITABLE();
 
   ASTTermCode *makeCode(SubstCode *subst = NULL);
+	virtual ASTTerm2* clone() { return new ASTTerm2_Setminus(this->T1->clone(), this->T2->clone(), Pos()); }
   void dump();
 };
 
@@ -789,6 +796,7 @@ public:
   VISITABLE();
 
   ASTTermCode *makeCode(SubstCode *subst = NULL);
+	virtual ASTTerm2* clone() { return new ASTTerm2_Plus(this->T->clone(), this->n, Pos()); }
   VarCode unfold(int v1, int v2, int n, SubstCode *subst, Pos pos);
   void dump();
 	virtual std::string ToString();
@@ -802,6 +810,7 @@ public:
   VISITABLE();
 
   ASTTermCode *makeCode(SubstCode *subst = NULL);
+	virtual ASTTerm2* clone() { return new ASTTerm2_Plus(this->T->clone(), this->n, Pos()); }
   VarCode unfold(int v1, int v2, int n, SubstCode *subst, Pos pos);
   void dump();
 	virtual std::string ToString();

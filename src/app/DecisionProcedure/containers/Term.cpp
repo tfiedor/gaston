@@ -60,9 +60,7 @@ size_t TermContinuation::unfoldInSubsumption = 0;
 size_t TermContinuation::unfoldInIsectNonempty = 0;
 
 // <<< TERM CONSTRUCTORS AND DESTRUCTORS >>>
-Term::~Term() {
-    this->_isSubsumedCache.clear();
-}
+Term::~Term() {}
 
 TermEmpty::TermEmpty(bool inComplement) {
     #if (MEASURE_STATE_SPACE == true)
@@ -268,12 +266,6 @@ TermFixpoint::~TermFixpoint() {
     this->_postponed.clear();
     this->_worklist.clear();
 }
-
-/*TermFixpoint::~TermFixpoint() {
-    this->_worklist.clear();
-    this->_postponed.clear();
-    this->_symList.clear();
-}*/
 
 void Term::Complement() {
     this->_inComplement = (this->_inComplement == false);

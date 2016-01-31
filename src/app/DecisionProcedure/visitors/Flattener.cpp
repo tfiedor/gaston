@@ -11,7 +11,6 @@
 
 extern SymbolTable symbolTable;
 extern PredicateLib predicateLib;
-extern IdentList inFirstOrder;
 extern Options options;
 
 /**
@@ -456,7 +455,6 @@ AST* Flattener::visit(ASTForm_In* form) {
 		ASTTerm2_Var2 *secondOrderX = new ASTTerm2_Var2(((ASTTerm1_Var1*)form->t1)->n, Pos());
 		ASTForm_Sub* subX = new ASTForm_Sub(secondOrderX, form->T2, Pos());
 		ASTForm_FirstOrder *singleton = new ASTForm_FirstOrder(new ASTTerm1_Var1(((ASTTerm1_Var1*)form->t1)->n, Pos()), Pos());
-		inFirstOrder.insert(((ASTTerm1_Var1*)form->t1)->n);
 		return new ASTForm_And(singleton, subX, Pos());
 #endif
     }

@@ -6,7 +6,6 @@
 
 extern SymbolTable symbolTable;
 extern PredicateLib predicateLib;
-extern IdentList inFirstOrder;
 extern Options options;
 
 /**
@@ -17,7 +16,7 @@ extern Options options;
  * @param realParams: real parameters
  * @return: unfolded formula
  */
-ASTForm* unfoldFormula(PredLibEntry* called, ASTList* realParams) {
+ASTForm* PredicateUnfolder::_unfoldFormula(PredLibEntry* called, ASTList* realParams) {
     IdentList* formalParams = called->formals;
 
     ASTForm* clonnedFormula = (called->ast)->clone();
@@ -32,6 +31,6 @@ ASTForm* unfoldFormula(PredLibEntry* called, ASTList* realParams) {
  *
  * @param[in] form:     traversed Call node
  */
-AST* Flattener::visit(ASTForm_Call* form) {
-    return unfoldFormula(predicateLib.lookup(form->n), form->args);
+AST* PredicateUnfolder::visit(ASTForm_Call* form) {
+    return _unfoldFormula(predicateLib.lookup(form->n), form->args);
 }

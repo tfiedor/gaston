@@ -161,7 +161,7 @@ public:
 #define USE_PRUNED_UNION_FUNCTOR 		false
 #define PRUNE_BY_RELATION 				false		// [TODO] What's the difference with BY_SUBSUMPTION?
 #define PRUNE_BY_SUBSUMPTION 			false
-#define USE_STATECACHE 					true
+#define USE_STATECACHE 					false
 #define USE_BDDCACHE 					false 		// BDD Cache is temporary disable due to the memory leaks
 #define SMART_BINARY 					true
 #define SMART_FLATTEN 					true

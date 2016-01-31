@@ -88,17 +88,9 @@ CodeTable *codeTable;
 Guide guide;
 AutLib lib;
 VarToTrackMap varMap;
-IdentList inFirstOrder;
 int numTypes = 0;
 bool regenerate = false;
 Timer timer_conversion, timer_mona, timer_base;
-
-#if (USE_STATECACHE == true)
-MultiLevelMCache<bool> StateCache;
-#endif
-#if (USE_BDDCACHE == true)
-MultiLevelMCache<MacroTransMTBDD> BDDCache;
-#endif
 
 extern int yyparse(void);
 extern void loadFile(char *filename);
@@ -128,8 +120,7 @@ void PrintUsage()
 		<< " -q, --quiet		 Quiet, don't print progress\n"
 		<< " -oX                 Optimization level [1 = safe optimizations [default], 2 = heuristic]\n"
 		<< " --method            Use either symbolic (novel), forward (EEICT'14) or backward method (TACAS'15) for deciding WSkS [symbolic, backward, forward]\n"
-		//<< " --reorder-bdd		 Disable BDD index reordering [no, random, heuristic]\n\n"
-		<< "Example: ./gaston -t -d --reorder-bdd=random foo.mona\n\n";
+		<< "Example: ./gaston -t -d foo.mona\n\n";
 }
 
 /**
@@ -145,7 +136,6 @@ bool ParseArguments(int argc, char *argv[])
 	options.analysis = true;
 	options.optimize = 1;
 	options.dontDumpAutomaton = false;
-	options.reorder = HEURISTIC; //true;
 
 	switch (argc) {
 	// missing file with formula
@@ -167,12 +157,6 @@ bool ParseArguments(int argc, char *argv[])
 				options.time = true;
 			else if(strcmp(argv[i], "--quiet") == 0)
 				options.printProgress = false;
-			else if(strcmp(argv[i], "--reorder-bdd=no") == 0)
-				options.reorder = NO;
-			else if(strcmp(argv[i], "--reorder-bdd=random") == 0)
-				options.reorder = RANDOM;
-			else if(strcmp(argv[i], "--reorder-bdd=heuristic") == 0)
-				options.reorder = HEURISTIC;
 			else if(strcmp(argv[i], "-ga") == 0 || strcmp(argv[i], "--print-aut") == 0)
 				options.graphvizDAG = true;
 			else if(strcmp(argv[i], "--walk-aut") == 0)
@@ -279,89 +263,22 @@ void splitMatrixAndPrefix(MonaAST* formula, ASTForm* &matrix, ASTForm* &prefix) 
 }
 
 /**
- * No reordering
- *
- * @param free: list of free variables
- * @param bound: list of bounded variables
- */
-void noReorder(IdentList *free, IdentList *bound) {
-	IdentList *vars = ident_union(free, bound);
-	if (vars != 0) {
-		varMap.initializeFromList(vars);
-	}
-}
-
-/**
- * Does reordering of variables so in output BDD tracks it is easier to remove
- * the track and reorder the BDD afterwards. This is done by the prefix of
- * given formula
- *
- * @param free: list of free variables
- * @param bound: list of bounded variables
- */
-void heuristicReorder(IdentList *free, IdentList *bound) {
-	if(options.dump) {
-		cout << "[*] Variables reordered by heuristic approach" << std::endl;
-	}
-	IdentList *vars = ident_union(free, bound);
-	if (vars != 0) {
-		varMap.initializeFromList(vars);
-	}
-	delete vars;
-}
-
-/**
- * Randomly shuffles list of vars
- *
- * @param[in] list: list to be shuffled
- * @return: shuffled list
- */
-IdentList* shuffle(IdentList* list) {
-	// TODO: not implemented yet
-	return list;
-}
-
-/**
- * Does random reordering of variables
- *
- * @param free: list of free variables
- * @param bound: list of bounded variables
- */
-void randomReorder(IdentList *free, IdentList *bound) {
-	if(options.dump) {
-		cout << "[*] Variables reorder randomly" << std::endl;
-	}
-	IdentList *vars = ident_union(free, bound);
-	// TODO: Notimplemented, not needed at all
-	if (vars != 0) {
-		vars = shuffle(vars);
-		varMap.initializeFromList(vars);
-	}
-}
-
-/**
  * Implementation is not sure at the moment, but should reorder the symbol
  * table or BDD track, so it is optimized for using of projection during
  * the decision procedure process. It should consider the structure of prefix
  * of given formula, so BDD used in transitions of automata can be better
  * reordered
- *
- * Several heuristics will be tried out:
- *  1) Random reorder
- *  2) No reorder
- *  3) Prefix-reorder
  */
-void reorder(ReorderMode mode, ASTForm* formula) {
+void initializeVarMap(ASTForm* formula) {
 	IdentList free, bound;
 	formula->freeVars(&free, &bound);
 
-	if (mode == NO)
-		noReorder(&free, &bound);
-	else if (mode == HEURISTIC) {
-		heuristicReorder(&free, &bound);
-	} else if (mode == RANDOM) {
-		randomReorder(&free, &bound);
+	IdentList *vars = ident_union(&free, &bound);
+	if (vars != 0) {
+		varMap.initializeFromList(vars);
 	}
+	delete vars;
+
 }
 
 void bdd_callback() {
@@ -474,15 +391,11 @@ int main(int argc, char *argv[]) {
 	}
 
 	// Flattening of the formula
-	try {
-		Flattener f_visitor;
-		ast->formula = static_cast<ASTForm *>((ast->formula)->accept(f_visitor));
-	} catch (NotImplementedException e) {
-		cout << "[!] Formula is 'UNSUPPORTED'\n";
-		return 0;
-	}
+	PredicateUnfolder predicateUnfolder;
+	ast->formula = static_cast<ASTForm *>((ast->formula)->accept(predicateUnfolder));
+
 	if (options.dump) {
-		G_DEBUG_FORMULA_AFTER_PHASE("flattening");
+		G_DEBUG_FORMULA_AFTER_PHASE("predicate unfolding");
 		(ast->formula)->dump();
 	}
 
@@ -562,8 +475,7 @@ int main(int argc, char *argv[]) {
 	///////// Conversion to Tree Automata ////////
 
 	// Table or BDD tracks are reordered
-	reorder(options.reorder, ast->formula);
-	varMap.dumpMap();
+	initializeVarMap(ast->formula);
 #if (DEBUG_VARIABLE_SETS == true)
 	varMap.dumpMap();
 	std::cout << "\n";
@@ -741,34 +653,29 @@ int main(int argc, char *argv[]) {
 	try {
 	// Deciding WS1S formula
 		timer_deciding.start();
-		//try {
-			if(options.method == Method::FORWARD) {
-				if(options.mode != TREE) {
-					decided = decideWS1S(vataAutomaton, plist, nplist);
-				} else {
-					throw NotImplementedException();
-				}
-			} else if(options.method == Method::BACKWARD) {
-				if(options.mode != TREE) {
-					decided = decideWS1S_backwards(vataAutomaton, plist, nplist, formulaIsGround, topmostIsNegation);
-				} else {
-					throw NotImplementedException();
-				}
-			// Deciding WS2S formula
-			} else if(options.method == Method::SYMBOLIC) {
-				if (options.mode != TREE) {
-					decided = ws1s_symbolic_decision_procedure(symAutomaton);
-					delete symAutomaton;
-				} else {
-					throw NotImplementedException();
-				}
+		if(options.method == Method::FORWARD) {
+			if(options.mode != TREE) {
+				decided = decideWS1S(vataAutomaton, plist, nplist);
 			} else {
-				std::cout << "[!] Unsupported mode for deciding\n";
+				throw NotImplementedException();
 			}
-		/*} catch (std::bad_alloc) {
-			std::cerr << "[!] Insufficient memory for deciding\n";
-			exit(EXIT_FAILURE);
-		}*/
+		} else if(options.method == Method::BACKWARD) {
+			if(options.mode != TREE) {
+				decided = decideWS1S_backwards(vataAutomaton, plist, nplist, formulaIsGround, topmostIsNegation);
+			} else {
+				throw NotImplementedException();
+			}
+		// Deciding WS2S formula
+		} else if(options.method == Method::SYMBOLIC) {
+			if (options.mode != TREE) {
+				decided = ws1s_symbolic_decision_procedure(symAutomaton);
+				delete symAutomaton;
+			} else {
+				throw NotImplementedException();
+			}
+		} else {
+			std::cout << "[!] Unsupported mode for deciding\n";
+		}
 		timer_deciding.stop();
 
 		// Outing the results of decision procedure
@@ -800,26 +707,25 @@ int main(int argc, char *argv[]) {
 	} catch (NotImplementedException& e) {
 		std::cerr << e.what() << std::endl;
 	}
-	if(options.dump) {
-		std::cout << "[*] State cache statistics:\n";
-		StateCache.dumpStats();
-	}
 
 	// Prints timing
-	if (options.time) {
+	if (options.time || options.printProgress) {
 		timer_total.stop();
 		cout << "\n[*] Total elapsed time:     ";
 		timer_total.print();
-	} else if (options.printProgress) {
-		timer_total.stop();
-		cout << "\n[*] Total elapsed time: ";
-		timer_total.print();
 	}
 
+	// Clean up
 	delete ast;
 	Deque<FileSource *>::iterator i;
 	for (i = source.begin(); i != source.end(); i++)
 		delete *i;
+
+	PredLibEntry *pred = predicateLib.first();
+	while(pred != nullptr) {
+		delete pred->ast;
+		pred = predicateLib.next();
+	}
 
 	return 0;
 }

@@ -714,6 +714,30 @@ src/app/DecisionProcedure/visitors/NegationUnfolder.cpp.s:
 	$(MAKE) -f CMakeFiles/gaston.dir/build.make CMakeFiles/gaston.dir/src/app/DecisionProcedure/visitors/NegationUnfolder.cpp.s
 .PHONY : src/app/DecisionProcedure/visitors/NegationUnfolder.cpp.s
 
+src/app/DecisionProcedure/visitors/PredicateUnfolder.o: src/app/DecisionProcedure/visitors/PredicateUnfolder.cpp.o
+.PHONY : src/app/DecisionProcedure/visitors/PredicateUnfolder.o
+
+# target to build an object file
+src/app/DecisionProcedure/visitors/PredicateUnfolder.cpp.o:
+	$(MAKE) -f CMakeFiles/gaston.dir/build.make CMakeFiles/gaston.dir/src/app/DecisionProcedure/visitors/PredicateUnfolder.cpp.o
+.PHONY : src/app/DecisionProcedure/visitors/PredicateUnfolder.cpp.o
+
+src/app/DecisionProcedure/visitors/PredicateUnfolder.i: src/app/DecisionProcedure/visitors/PredicateUnfolder.cpp.i
+.PHONY : src/app/DecisionProcedure/visitors/PredicateUnfolder.i
+
+# target to preprocess a source file
+src/app/DecisionProcedure/visitors/PredicateUnfolder.cpp.i:
+	$(MAKE) -f CMakeFiles/gaston.dir/build.make CMakeFiles/gaston.dir/src/app/DecisionProcedure/visitors/PredicateUnfolder.cpp.i
+.PHONY : src/app/DecisionProcedure/visitors/PredicateUnfolder.cpp.i
+
+src/app/DecisionProcedure/visitors/PredicateUnfolder.s: src/app/DecisionProcedure/visitors/PredicateUnfolder.cpp.s
+.PHONY : src/app/DecisionProcedure/visitors/PredicateUnfolder.s
+
+# target to generate assembly for a file
+src/app/DecisionProcedure/visitors/PredicateUnfolder.cpp.s:
+	$(MAKE) -f CMakeFiles/gaston.dir/build.make CMakeFiles/gaston.dir/src/app/DecisionProcedure/visitors/PredicateUnfolder.cpp.s
+.PHONY : src/app/DecisionProcedure/visitors/PredicateUnfolder.cpp.s
+
 src/app/DecisionProcedure/visitors/PrenexNormalFormTransformer.o: src/app/DecisionProcedure/visitors/PrenexNormalFormTransformer.cpp.o
 .PHONY : src/app/DecisionProcedure/visitors/PrenexNormalFormTransformer.o
 
@@ -1590,6 +1614,9 @@ help:
 	@echo "... src/app/DecisionProcedure/visitors/NegationUnfolder.o"
 	@echo "... src/app/DecisionProcedure/visitors/NegationUnfolder.i"
 	@echo "... src/app/DecisionProcedure/visitors/NegationUnfolder.s"
+	@echo "... src/app/DecisionProcedure/visitors/PredicateUnfolder.o"
+	@echo "... src/app/DecisionProcedure/visitors/PredicateUnfolder.i"
+	@echo "... src/app/DecisionProcedure/visitors/PredicateUnfolder.s"
 	@echo "... src/app/DecisionProcedure/visitors/PrenexNormalFormTransformer.o"
 	@echo "... src/app/DecisionProcedure/visitors/PrenexNormalFormTransformer.i"
 	@echo "... src/app/DecisionProcedure/visitors/PrenexNormalFormTransformer.s"

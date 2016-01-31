@@ -236,11 +236,11 @@ bool StateIsFinal(Automaton & aut, TStateSet* state, unsigned level, PrefixListT
 
 		// Look into Cache
 		bool isFinal;
-#ifdef USE_STATECACHE
+		#if (USE_STATECACHE == true)
 		if(StateCache.retrieveFromCache(macroState, isFinal, level)) {
 			return isFinal;
 		}
-#endif
+		#endif
 
 		// enqueue initial states
 		StateSetList states = macroState->getMacroStates();
@@ -254,9 +254,9 @@ bool StateIsFinal(Automaton & aut, TStateSet* state, unsigned level, PrefixListT
 			processed.push_back(q);
 
 			if (StateIsFinal(aut, q, level - 1, prefix)) {
-#ifdef USE_STATECACHE
+				#if (USE_STATECACHE == true)
 				StateCache.storeIn(macroState, false, level);
-#endif
+				#endif
 				return false;
 			} else {
 				// Enqueue all its successors
@@ -278,9 +278,9 @@ bool StateIsFinal(Automaton & aut, TStateSet* state, unsigned level, PrefixListT
 			}
 		}
 
-#ifdef USE_STATECACHE
+		#if (USE_STATECACHE == true)
 		StateCache.storeIn(macroState, true, level);
-#endif
+		#endif
 		return true;
 	}
 

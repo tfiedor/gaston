@@ -171,7 +171,6 @@ public:
 	 */
 	void clear() {
 		for(auto itPair = this->_cache.begin(); itPair != this->_cache.end(); ++itPair) {
-			delete itPair->first;
 			itPair = this->_cache.erase(itPair);
 		}
 	}
