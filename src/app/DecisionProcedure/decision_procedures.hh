@@ -94,5 +94,6 @@ bool initialStateIsInFinalStates(MacroStateSet *initial, MacroStateSet *finalSta
 
 // < Symbolic decision procedure functions >
 int ws1s_symbolic_decision_procedure(SymbolicAutomaton* aut);
+ASTForm* _unfoldCore(ASTForm* form, IdentList* fParams, ASTList* rParams);
 
 #endif

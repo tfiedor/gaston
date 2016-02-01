@@ -23,6 +23,40 @@ extern SymbolTable symbolTable;
 extern Options options;
 extern PredicateLib predicateLib;
 
+/**
+ * Unfolds formal parameters to real parameters in called function
+ *
+ * @param fParams: list of formal parameters
+ * @param rParams: list of real parameters
+ * @return: unfolded macro
+ */
+ASTForm* unfoldCall(ASTForm* form, IdentList* fParams, ASTList* rParams) {
+	assert(form->kind == aCall);
+	ASTForm_Call* callForm = static_cast<ASTForm_Call*>(form);
+
+	PredLibEntry* called = predicateLib.lookup(callForm->n);
+	ASTList* realParams = static_cast<ASTList*>(callForm->args->copy());
+
+	for(AST** ast = realParams->begin(); ast != realParams->end(); ++ast) {
+		(*ast) = (*ast)->unfoldMacro(fParams, rParams);
+	}
+
+	ASTForm* clonnedFormula = (called->ast)->clone();
+	ASTForm* unfoldedFormula = _unfoldCore(clonnedFormula, called->formals, realParams);
+	delete realParams;
+	callForm->detach();
+	delete callForm;
+
+	return unfoldedFormula;
+}
+
+ASTForm* _unfoldCore(ASTForm* form, IdentList* fParams, ASTList* rParams) {
+	if(form->kind == aCall) {
+		return unfoldCall(form, fParams, rParams);
+	} else {
+		return form->unfoldMacro(fParams, rParams);
+	}
+}
 
 template<class TermClass, ASTKind varKind>
 TermClass* unfoldOrderTerm(TermClass* term, IdentList* fParams, ASTList* rParams) {
@@ -108,7 +142,7 @@ ASTForm* ASTForm::restrictFormula() {
  * @return: unfolded macro
  */
 ASTForm* ASTForm_f::unfoldMacro(IdentList* fParams, ASTList* rParams) {
-	f = f->unfoldMacro(fParams, rParams);
+	f = _unfoldCore(f, fParams, rParams);
 	return this;
 }
 
@@ -120,8 +154,8 @@ ASTForm* ASTForm_f::unfoldMacro(IdentList* fParams, ASTList* rParams) {
  * @return: unfolded macro
  */
 ASTForm* ASTForm_ff::unfoldMacro(IdentList* fParams, ASTList* rParams) {
-	f1 = f1->unfoldMacro(fParams, rParams);
-	f2 = f2->unfoldMacro(fParams, rParams);
+	f1 = _unfoldCore(f1, fParams, rParams);
+	f2 = _unfoldCore(f2, fParams, rParams);
 	return this;
 }
 
@@ -150,7 +184,17 @@ ASTForm* ASTForm_uvf::unfoldMacro(IdentList* fParams, ASTList* rParams) {
 		}
 	}
 
-	f = f->unfoldMacro(ffParams, rrParams);
+	f = _unfoldCore(f, ffParams, rrParams);
+
+	// TODO: Refactor this maybe
+	for(Ident* iter = this->vl->begin(); iter != this->vl->end(); ++iter) {
+		AST* temp = rrParams->pop_back();
+		delete temp;
+	}
+	while(!rrParams->empty())
+		rrParams->pop_back();
+	delete rrParams;
+	delete ffParams;
 	return this;
 }
 
@@ -179,7 +223,15 @@ ASTForm* ASTForm_vf::unfoldMacro(IdentList* fParams, ASTList* rParams) {
 		}
 	}
 
-	f = f->unfoldMacro(ffParams, rrParams);
+	f = _unfoldCore(f, ffParams, rrParams);
+	for(Ident* iter = this->vl->begin(); iter != this->vl->end(); ++iter) {
+		AST* temp = rrParams->pop_back();
+		delete temp;
+	}
+	while(!rrParams->empty())
+		rrParams->pop_back();
+	delete rrParams;
+	delete ffParams;
 
 	return this;
 }
@@ -280,7 +332,7 @@ ASTTerm1* ASTTerm1_tn::unfoldMacro(IdentList *fParams, ASTList* rParams) {
  * @return: unfolded macro
  */
 ASTForm* ASTForm_Not::unfoldMacro(IdentList* fParams, ASTList* rParams) {
-	f = f->unfoldMacro(fParams, rParams);
+	f = _unfoldCore(f, fParams, rParams);
 	return this;
 }
 
@@ -318,23 +370,7 @@ ASTTerm2* ASTTerm2_Var2::unfoldMacro(IdentList* fParams, ASTList* rParams) {
 	}
 }
 
-/**
- * Unfolds formal parameters to real parameters in called function
- *
- * @param fParams: list of formal parameters
- * @param rParams: list of real parameters
- * @return: unfolded macro
- */
-ASTForm* ASTForm_Call::unfoldMacro(IdentList* fParams, ASTList* rParams) {
-	PredLibEntry* called = predicateLib.lookup(this->n);
-	ASTList* realParams = static_cast<ASTList*>(this->args->copy());
-
-	for(AST** ast = realParams->begin(); ast != realParams->end(); ++ast) {
-		(*ast) = (*ast)->unfoldMacro(fParams, rParams);
-	}
-
-	ASTForm* clonnedFormula = (called->ast)->clone();
-	ASTForm* unfoldedFormula = clonnedFormula->unfoldMacro(called->formals, realParams);
-
-	return unfoldedFormula;
+ASTForm* ASTForm_Call::unfoldMacro(IdentList *, ASTList *) {
+	assert(false);
+	return nullptr;
 }

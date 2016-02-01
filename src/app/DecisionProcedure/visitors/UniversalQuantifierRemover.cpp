@@ -8,6 +8,7 @@
  *
  *****************************************************************************/
 #include "UniversalQuantifierRemover.h"
+#include "../../Frontend/ast.h"
 
 /**
  * Removes the universal quantifier as follows:
@@ -31,8 +32,12 @@ AST* UniversalQuantifierRemover::visit(ASTForm_All0* form) {
 AST* UniversalQuantifierRemover::visit(ASTForm_All1* form) {
     ASTForm_Not* negPhi = new ASTForm_Not(form->f, form->f->pos);
     ASTForm_Ex1* exNegPhi = new ASTForm_Ex1(form->ul, form->vl, negPhi, form->pos);
-    ASTForm_Not* negExNegPhi = new ASTForm_Not(exNegPhi, form->pos);
-    return negExNegPhi;
+
+    // Delete the all
+    form->detach();
+    delete form;
+
+    return new ASTForm_Not(exNegPhi, Pos());
 }
 
 /**
@@ -44,6 +49,10 @@ AST* UniversalQuantifierRemover::visit(ASTForm_All1* form) {
 AST* UniversalQuantifierRemover::visit(ASTForm_All2* form) {
     ASTForm_Not* negPhi = new ASTForm_Not(form->f, form->f->pos);
     ASTForm_Ex2* exNegPhi = new ASTForm_Ex2(form->ul, form->vl, negPhi, form->pos);
-    ASTForm_Not* negExNegPhi = new ASTForm_Not(exNegPhi, form->pos);
-    return negExNegPhi;
+
+    // Delete the all2
+    form->detach();
+    delete form;
+
+    return new ASTForm_Not(exNegPhi, form->pos);
 }

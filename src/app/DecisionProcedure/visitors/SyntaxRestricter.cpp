@@ -8,6 +8,7 @@
  *
  *****************************************************************************/
 #include "SyntaxRestricter.h"
+#include "../../Frontend/ast.h"
 
 /**
  * Transforms implication to restricted syntax as follows:
@@ -22,6 +23,11 @@ AST* SyntaxRestricter::visit(ASTForm_Impl* form) {
     ASTForm_Not* notF = new ASTForm_Not(form->f1, form->f1->pos);
     // not f1 or f2
     ASTForm_Or* notForFF = new ASTForm_Or(notF, form->f2, form->pos);
+
+    // Delete the implication node
+    form->detach();
+    delete form;
+
     return notForFF;
 }
 
@@ -44,6 +50,10 @@ AST* SyntaxRestricter::visit(ASTForm_Biimpl* form) {
     ASTForm* impl2 = new ASTForm_Or(ff1, notFF, form->pos);
 
     ASTForm_And* biimpl = new ASTForm_And(impl1, impl2, form->pos);
+
+    // Delete the Biimpl node
+    form->detach();
+    delete form;
 
     return biimpl;
 }

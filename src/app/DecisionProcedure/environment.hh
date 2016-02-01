@@ -280,8 +280,8 @@ public:
 	code(SyntaxRestricter)				\
 	code(BinaryReorderer)				\
 	code(DistributiveAntiPrenexer)		\
-	code(QuantificationMerger)			\
-	code(SecondOrderRestricter)
+	code(SecondOrderRestricter)			/* Restrict the formula to second order*/\
+	code(QuantificationMerger)			/* Merge some quantifications */
 #elif (ANTIPRENEXING_FULL == true)
 #define FILTER_LIST(code) \
 	code(ZeroOrderRemover)				/* Transform zero-order variables to second-order interpretation */ \
@@ -292,8 +292,8 @@ public:
 	code(UniversalQuantifierRemover)	/* Remove universal quantifier from formula*/ \
 	code(NegationUnfolder)				/* Push negations deeply*/ \
 	code(QuantificationMerger)			/* Merge some quantifications */ \
-	code(BaseAutomataMerger)			/* Merge some base automata for more quantifier free subformulae*/ \
-	code(SecondOrderRestricter)			/* Restrict the formula to second order*/
+	code(SecondOrderRestricter)			/* Restrict the formula to second order*/\
+	code(QuantificationMerger)			/* Merge some quantifications */
 #else
 #define FILTER_LIST(code) \
 	code(ZeroOrderRemover)				/* Transform zero-order variables to second-order interpretation */ \
@@ -301,8 +301,8 @@ public:
 	code(BooleanUnfolder)				/* Simplify formula through various boolean laws*/ \
 	code(UniversalQuantifierRemover)	/* Remove universal quantifier from formula*/ \
 	code(NegationUnfolder)				/* Push negations deeply*/ \
-	code(QuantificationMerger)			/* Merge some quantifications */ \
-	code(SecondOrderRestricter)			/* Restrict the formula to second order*/
+	code(SecondOrderRestricter)			/* Restrict the formula to second order*/\
+	code(QuantificationMerger)			/* Merge some quantifications */
 #endif
 
 #endif

@@ -3,6 +3,7 @@
 //
 
 #include "PredicateUnfolder.h"
+#include "../decision_procedures.hh"
 
 extern SymbolTable symbolTable;
 extern PredicateLib predicateLib;
@@ -20,7 +21,7 @@ ASTForm* PredicateUnfolder::_unfoldFormula(PredLibEntry* called, ASTList* realPa
     IdentList* formalParams = called->formals;
 
     ASTForm* clonnedFormula = (called->ast)->clone();
-    ASTForm* unfoldedFormula = clonnedFormula->unfoldMacro(formalParams, realParams);
+    ASTForm* unfoldedFormula = _unfoldCore(clonnedFormula, formalParams, realParams);
 
     PredicateUnfolder predicateUnfolder;
     return static_cast<ASTForm*>(unfoldedFormula->accept(predicateUnfolder));
