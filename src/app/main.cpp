@@ -1,11 +1,20 @@
 /*****************************************************************************
- *  gaston - no real logic behind the name, we simply liked the poor seal gaston. R.I.P. brave soldier.
+ *  gaston - We pay homage to Gaston, an Africa-born brown fur seal who
+ *    escaped the Prague Zoo during the floods in 2002 and made a heroic
+ *    journey for freedom of over 300km all the way to Dresden. There he
+ *    was caught and subsequently died due to exhaustion and infection.
+ *    Rest In Piece, brave soldier.
  *
  *  Copyright (c) 2015  Tomas Fiedor <ifiedortom@fit.vutbr.cz>
- *      Notable mentions: Ondrej Lengal <ondra.lengal@gmail.com>
- *          			  Overeating Panda <if-his-simulation-reduction-works>
+ *      Notable mentions:   Ondrej Lengal <ondra.lengal@gmail.com>
+ *                              (author of VATA)
+ *                          Petr Janku <ijanku@fit.vutbr.cz>
+ *                              (MTBDD and automata optimizations)
  *
+ *  Description:
+ *      The main file of the Gaston tool
  *****************************************************************************/
+
 
 #define _LANGUAGE_C_PLUS_PLUS
 
@@ -95,7 +104,7 @@ Timer timer_conversion, timer_mona, timer_base;
 extern int yyparse(void);
 extern void loadFile(char *filename);
 extern void (*mona_callback)();
-extern Deque<FileSource *> source; 
+extern Deque<FileSource *> source;
 
 char *inputFileName = NULL;
 
@@ -112,13 +121,11 @@ void PrintUsage()
 		<< " -d, --dump-all		 Dump AST, symboltable, and code DAG\n"
 		<< " -ga, --print-aut	 Print automaton in graphviz\n"
 		<< "     --no-automaton  Don't dump Automaton\n"
-		<< "     --use-mona-dfa  Uses MONA for building base automaton\n"
 		<< "     --test          Test specified problem [val, sat, unsat]\n"
 		<< "     --walk-aut      Does the experiment generating the special dot graph\n"
 		<< " -e, --expand-tagged Expand automata with given tag on first line of formula\n"
 		<< " -q, --quiet		 Quiet, don't print progress\n"
 		<< " -oX                 Optimization level [1 = safe optimizations [default], 2 = heuristic]\n"
-		<< " --method            Use either symbolic (novel), forward (EEICT'14) or backward method (TACAS'15) for deciding WSkS [symbolic, backward, forward]\n"
 		<< "Example: ./gaston -t -d foo.mona\n\n";
 }
 
@@ -129,8 +136,7 @@ void PrintUsage()
  * @param argv: list of arguments
  * @return: false if arguments are wrong
  */
-bool ParseArguments(int argc, char *argv[])
-{
+bool ParseArguments(int argc, char *argv[]) {
 	options.printProgress = true;
 	options.analysis = true;
 	options.optimize = 1;
@@ -164,26 +170,13 @@ bool ParseArguments(int argc, char *argv[])
 				options.expandTagged = true;
 			else if(strcmp(argv[i], "--no-automaton") == 0)
 				options.dontDumpAutomaton = true;
-			else if(strcmp(argv[i], "--use-mona-dfa") == 0) {
-				options.useMonaDFA = true;
-				options.construction = AutomataConstruction::DETERMINISTIC_AUT;
-			} else if(strcmp(argv[i], "--test=val") == 0) {
+			else if(strcmp(argv[i], "--test=val") == 0) {
 				options.test = TestType::VALIDITY;
 			} else if(strcmp(argv[i], "--test=sat") == 0) {
 				options.test = TestType::SATISFIABILITY;
 			} else if(strcmp(argv[i], "--test=unsat") == 0) {
 				options.test = TestType::UNSATISFIABILITY;
-			} else if(strcmp(argv[i], "--method=forward") == 0) {
-				options.method = Method::FORWARD;
-			} else if(strcmp(argv[i], "--method=backward") == 0) {
-				options.method = Method::BACKWARD;
-			} else if(strcmp(argv[i], "--method=symbolic") == 0) {
-				options.method = Method::SYMBOLIC;
-				options.construction = AutomataConstruction::SYMBOLIC_AUT;
-				options.noExpnf = true;
-			} else if(strcmp(argv[i], "--to-expnf") == 0) {
-				options.noExpnf = false;
-			}  else {
+			} else {
 				switch (argv[i][1]) {
 					case 'e':
 						options.expandTagged = true;
@@ -209,53 +202,6 @@ bool ParseArguments(int argc, char *argv[])
 
 	inputFileName = argv[argc-1];
 	return true;
-}
-
-/**
- * Splits input formula into prefix and matrix, i.e. chain of quantifiers
- * followed by quantifier free formula. Matrix is used for conversion to
- * automaton and prefix is used for on-the-fly construction.
- *
- * @param formula: Input WSkS formula, that will be split
- * @param matrix: output part of the formula - matrix, i.e. quantifier free
- * 		formula
- * @param prefix: output part of the formula - prefix, i.e. chain of quantifiers
- */
-void splitMatrixAndPrefix(MonaAST* formula, ASTForm* &matrix, ASTForm* &prefix) {
-	ASTForm* formIter = formula->formula;
-	ASTForm* previous = 0;
-
-	matrix = formula->formula;
-	prefix = formula->formula;
-
-	/**
-	 * While we didn't encounter an atomic formula we iterate through quantifiers
-	 * and negations and construct the prefix
-	 */
-	while(true) {
-		if(formIter->kind == aEx2) {
-			previous = formIter;
-			formIter = ((ASTForm_Ex2*) formIter)->f;
-		} else if (formIter->kind == aNot && (((ASTForm_Not*)formIter)->f)->kind == aEx2) {
-			previous = formIter;
-			formIter = ((ASTForm_Not*) formIter)->f;
-		} else {
-			if (previous != 0) {
-				// use the True as the last formula
-				if (previous->kind == aEx2) {
-					ASTForm_Ex2* q = (ASTForm_Ex2*) previous;
-					q->f = new ASTForm_True(q->pos);
-				} else {
-					ASTForm_Not* q = (ASTForm_Not*) previous;
-					q->f = new ASTForm_True(q->pos);
-				}
-			} else {
-				prefix = new ASTForm_True(Pos());
-			}
-			matrix = formIter;
-			break;
-		}
-	}
 }
 
 /**
@@ -457,37 +403,6 @@ int main(int argc, char *argv[]) {
 	std::cout << "\n";
 #endif
 
-	// Definitions for compatibility between the methods
-	PrefixListType plist;
-	PrefixListType nplist;
-	ASTForm *matrix = nullptr, *prefix = nullptr;
-	bool topmostIsNegation;
-	if (options.method == Method::FORWARD || options.method == Method::BACKWARD) {
-		// First formula in AST representation is split into matrix and prefix part.
-		// Only for FORWARD and BACKWARD method
-		splitMatrixAndPrefix(ast, matrix, prefix);
-		topmostIsNegation = (prefix->kind == aNot);
-		matrix = matrix->restrictFormula();
-
-		if (options.dump) {
-			std::cout << "[*] Dumping restricted matrix\n";
-			matrix->dump();
-			std::cout << "\n";
-		}
-
-		// Transform prefix to set of sets of second-order variables
-		// TODO: This might be wrong
-		plist = convertPrefixFormulaToList(prefix);
-		nplist = plist;
-
-		// If formula is not ground, we close it
-		if (freeVars.size() != 0) {
-			closePrefix(plist, &freeVars, topmostIsNegation);
-			closePrefix(nplist, &freeVars, (prefix->kind != aNot));
-			topmostIsNegation = false;
-		}
-	}
-
 	if(options.monaWalk) {
 		std::string monaDot(inputFileName);
 		monaDot += "-walk.dot";
@@ -496,35 +411,14 @@ int main(int argc, char *argv[]) {
 		return 0;
 	}
 
-	Automaton vataAutomaton;
 	SymbolicAutomaton* symAutomaton;
 	timer_automaton.start();
-	if(options.construction != AutomataConstruction::SYMBOLIC_AUT) {
-		// Use mona for building automaton instead of VATA
-		// -> this may fail on insufficient memory
-		if (options.construction == AutomataConstruction::DETERMINISTIC_AUT) {
-			std::cout << "[*] Constructing 'Deterministic' Automaton using MONA\n";
-			constructAutomatonByMona(matrix, vataAutomaton);
-			std::cout << "[*] Converted 'Deterministic' Automaton to 'NonDeterministic' Automaton\n";
-			// Build automaton by ourselves, may build huge automata
-		} else {
-			// WS1S formula is transformed to unary NTA
-			if (options.mode != TREE) {
-				std::cout << "[*] Constructing 'NonDeterministic' Unary Automaton using VATA\n";
-				matrix->toUnaryAutomaton(vataAutomaton, false);
-				// WS2S formula is transformed to binary NTA
-			} else {
-				std::cout << "[*] Constructing 'NonDeterministic' Binary Automaton using VATA\n";
-				matrix->toBinaryAutomaton(vataAutomaton, false);
-			}
-		}
-	} else {
-		std::cout << "[*] Constructing 'Symbolic' Automaton using gaston\n";
-		symAutomaton = (ast->formula)->toSymbolicAutomaton(false);
-		if(options.printProgress)
-			symAutomaton->DumpAutomaton();
-		std::cout << "\n";
-	}
+
+    std::cout << "[*] Constructing 'Symbolic' Automaton using gaston\n";
+    symAutomaton = (ast->formula)->toSymbolicAutomaton(false);
+    if(options.printProgress)
+        symAutomaton->DumpAutomaton();
+    std::cout << "\n";
 
 	timer_automaton.stop();
 	if (options.dump) {
@@ -534,59 +428,17 @@ int main(int argc, char *argv[]) {
 		cout << "\n";
 	}
 
-	if(options.construction != SYMBOLIC_AUT) {
-		std::cout << "[*] Reindexing states in VATA Automaton\n";
-		// reindex the states, for space optimizations for bitsets
-		StateHT reachable;
-		vataAutomaton = vataAutomaton.RemoveUnreachableStates(&reachable);
-
-		StateType stateCnt = 0;
-		StateToStateMap translMap;
-		StateToStateTranslator stateTransl(translMap,
-										   [&stateCnt](const StateType &) { return stateCnt++; });
-
-		vataAutomaton = vataAutomaton.ReindexStates(stateTransl);
-		TStateSet::stateNo = reachable.size();
-
-		if (options.dump) {
-			std::cout << "[*] Number of states in resulting automaton: " << TStateSet::stateNo << "\n";
-		}
-
-		// Dump automaton
-		if (options.dump && !options.dontDumpAutomaton) {
-			VATA::Serialization::AbstrSerializer *serializer = new VATA::Serialization::TimbukSerializer();
-			std::cout << vataAutomaton.DumpToString(*serializer, "symbolic") << "\n";
-			delete serializer;
-		}
-	}
 	///////// DECISION PROCEDURE /////////////////////////////////////////////
 	int decided;
 	try {
 	// Deciding WS1S formula
 		timer_deciding.start();
-		if(options.method == Method::FORWARD) {
-			if(options.mode != TREE) {
-				decided = decideWS1S(vataAutomaton, plist, nplist);
-			} else {
-				throw NotImplementedException();
-			}
-		} else if(options.method == Method::BACKWARD) {
-			if(options.mode != TREE) {
-				decided = decideWS1S_backwards(vataAutomaton, plist, nplist, formulaIsGround, topmostIsNegation);
-			} else {
-				throw NotImplementedException();
-			}
-		// Deciding WS2S formula
-		} else if(options.method == Method::SYMBOLIC) {
-			if (options.mode != TREE) {
-				decided = ws1s_symbolic_decision_procedure(symAutomaton);
-				delete symAutomaton;
-			} else {
-				throw NotImplementedException();
-			}
-		} else {
-			std::cout << "[!] Unsupported mode for deciding\n";
-		}
+        if (options.mode != TREE) {
+            decided = ws1s_symbolic_decision_procedure(symAutomaton);
+            delete symAutomaton;
+        } else {
+            throw NotImplementedException();
+        }
 		timer_deciding.stop();
 
 		// Outing the results of decision procedure
