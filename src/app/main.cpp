@@ -113,7 +113,6 @@ void PrintUsage()
 		<< " -ga, --print-aut	 Print automaton in graphviz\n"
 		<< "     --no-automaton  Don't dump Automaton\n"
 		<< "     --use-mona-dfa  Uses MONA for building base automaton\n"
-		<< "     --no-expnf      Implies --use-mona-dfa, does not convert formula to exPNF\n"
 		<< "     --test          Test specified problem [val, sat, unsat]\n"
 		<< "     --walk-aut      Does the experiment generating the special dot graph\n"
 		<< " -e, --expand-tagged Expand automata with given tag on first line of formula\n"
@@ -184,10 +183,7 @@ bool ParseArguments(int argc, char *argv[])
 				options.noExpnf = true;
 			} else if(strcmp(argv[i], "--to-expnf") == 0) {
 				options.noExpnf = false;
-			} else if(strcmp(argv[i], "--no-expnf") == 0) {
-				options.noExpnf = true;
-				options.useMonaDFA = true;
-			} else {
+			}  else {
 				switch (argv[i][1]) {
 					case 'e':
 						options.expandTagged = true;
@@ -356,18 +352,7 @@ int main(int argc, char *argv[]) {
 	// Clean up untypedAST
 	delete untypedAST;
 
-	// Remove Trues and Falses from the formulae
-	BooleanUnfolder bu_visitor;
-	ast->formula = static_cast<ASTForm *>((ast->formula)->accept(bu_visitor));
-
-	if (options.dump) {
-		// Dump AST for main formula, verify formulas, and assertion
-		G_DEBUG_FORMULA_AFTER_PHASE("boolean unfolding");
-		(ast->formula)->dump();
-	}
-
 	timer_formula.start();
-
 	// First close the formula if we are testing something specific
 	IdentList freeVars, bound;
 	(ast->formula)->freeVars(&freeVars, &bound);
@@ -395,49 +380,41 @@ int main(int argc, char *argv[]) {
 	ast->formula = static_cast<ASTForm *>((ast->formula)->accept(predicateUnfolder));
 
 	if (options.dump) {
-		G_DEBUG_FORMULA_AFTER_PHASE("predicate unfolding");
+		G_DEBUG_FORMULA_AFTER_PHASE("Predicate Unfolding");
 		(ast->formula)->dump();
 	}
 
-	if (options.noExpnf == false) {
-		// Transform AST to existentional Prenex Normal Form
-		cerr << "[!] Called [deprecated] parameter '--no-expnf'";
-		return 0;
-	} else {
-
-
-		#define CALL_FILTER(filter) \
-            filter filter##_visitor;    \
-            ast->formula = static_cast<ASTForm *>(ast->formula->accept(filter##_visitor));    \
-            if(options.dump) {    \
-                G_DEBUG_FORMULA_AFTER_PHASE(#filter);    \
-                (ast->formula)->dump();    std::cout << "\n";    \
-            } \
-            if(options.graphvizDAG) {\
-                std::string filter##_dotName(""); \
-				filter##_dotName += #filter; \
-                filter##_dotName += ".dot"; \
-                DotWalker filter##_dw_visitor(filter##_dotName); \
-                (ast->formula)->accept(filter##_dw_visitor); \
-            }
-		FILTER_LIST(CALL_FILTER)
-		#undef CALL_FILTER
-
-		Tagger tagger(tags);
-		(ast->formula)->accept(tagger);
-
-        if(options.graphvizDAG) {
-			std::string dotFileName(inputFileName);
-			dotFileName += ".dot";
-			DotWalker dw_visitor(dotFileName);
-			(ast->formula)->accept(dw_visitor);
+    // Additional filter phases
+	#define CALL_FILTER(filter) \
+		filter filter##_visitor;    \
+		ast->formula = static_cast<ASTForm *>(ast->formula->accept(filter##_visitor));    \
+		if(options.dump) {    \
+			G_DEBUG_FORMULA_AFTER_PHASE(#filter);    \
+			(ast->formula)->dump();    std::cout << "\n";    \
+		} \
+		if(options.graphvizDAG) {\
+			std::string filter##_dotName(""); \
+			filter##_dotName += #filter; \
+			filter##_dotName += ".dot"; \
+			DotWalker filter##_dw_visitor(filter##_dotName); \
+			(ast->formula)->accept(filter##_dw_visitor); \
 		}
-	}
+	FILTER_LIST(CALL_FILTER)
+	#undef CALL_FILTER
 
+	Tagger tagger(tags);
+	(ast->formula)->accept(tagger);
+
+	if(options.graphvizDAG) {
+		std::string dotFileName(inputFileName);
+		dotFileName += ".dot";
+		DotWalker dw_visitor(dotFileName);
+		(ast->formula)->accept(dw_visitor);
+	}
 	timer_formula.stop();
 
 	if (options.dump) {
-		G_DEBUG_FORMULA_AFTER_PHASE("ex-PNF conversion");
+		G_DEBUG_FORMULA_AFTER_PHASE("All phases");
 		(ast->formula)->dump();
 
 		// dumping symbol table
@@ -460,14 +437,8 @@ int main(int argc, char *argv[]) {
 			cout << "\n";
 			pred = predicateLib.next();
 		}
-
-		cout << "[*] Input file transformed into formula in Existential Prenex Normal Form\n";
-		cout << "[*] Elapsed time: ";
-		timer_formula.print();
-		cout << "\n";
 	}
 
-	cout << "[*] Input file transformed into formula in Existential Prenex Normal Form\n";
 	cout << "[*] Elapsed time: ";
 	timer_formula.print();
 	cout << "\n";
@@ -479,9 +450,6 @@ int main(int argc, char *argv[]) {
 #if (DEBUG_VARIABLE_SETS == true)
 	varMap.dumpMap();
 	std::cout << "\n";
-#endif
-
-#if (DEBUG_VARIABLE_SETS == true)
 	std::cout << "Free Vars:\n";
 	freeVars.dump();
 	std::cout << "\nBound:\n";
@@ -499,9 +467,7 @@ int main(int argc, char *argv[]) {
 		// Only for FORWARD and BACKWARD method
 		splitMatrixAndPrefix(ast, matrix, prefix);
 		topmostIsNegation = (prefix->kind == aNot);
-		if (options.noExpnf == false) {
-			matrix = matrix->restrictFormula();
-		}
+		matrix = matrix->restrictFormula();
 
 		if (options.dump) {
 			std::cout << "[*] Dumping restricted matrix\n";
@@ -514,52 +480,12 @@ int main(int argc, char *argv[]) {
 		plist = convertPrefixFormulaToList(prefix);
 		nplist = plist;
 
-#if (DEBUG_FORMULA_PREFIX == true)
-	std::cout << "[?] Prefixes before closing\n";
-	for(auto it = plist.begin(); it != plist.end(); ++it) {
-		std::cout << "[";
-		for(auto itt = (*it).begin(); itt != (*it).end(); ++itt) {
-			std::cout << (*itt) << ", ";
-		}
-		std::cout << "] ";
-	}
-	std::cout << "\n";
-	for(auto it = nplist.begin(); it != nplist.end(); ++it) {
-		std::cout << "[";
-		for(auto itt = (*it).begin(); itt != (*it).end(); ++itt) {
-			std::cout << (*itt) << ", ";
-		}
-		std::cout << "] ";
-	}
-	std::cout << "\n";
-#endif
-
 		// If formula is not ground, we close it
 		if (freeVars.size() != 0) {
 			closePrefix(plist, &freeVars, topmostIsNegation);
 			closePrefix(nplist, &freeVars, (prefix->kind != aNot));
 			topmostIsNegation = false;
 		}
-
-#if (DEBUG_FORMULA_PREFIX == true)
-	std::cout << "[?] Prefixes after closing\n";
-	for(auto it = plist.begin(); it != plist.end(); ++it) {
-		std::cout << "[";
-		for(auto itt = (*it).begin(); itt != (*it).end(); ++itt) {
-			std::cout << (*itt) << ", ";
-		}
-		std::cout << "] ";
-	}
-	std::cout << "\n";
-	for(auto it = nplist.begin(); it != nplist.end(); ++it) {
-		std::cout << "[";
-		for(auto itt = (*it).begin(); itt != (*it).end(); ++itt) {
-			std::cout << (*itt) << ", ";
-		}
-		std::cout << "] ";
-	}
-	std::cout << "\n";
-#endif
 	}
 
 	if(options.monaWalk) {
@@ -632,21 +558,6 @@ int main(int argc, char *argv[]) {
 			std::cout << vataAutomaton.DumpToString(*serializer, "symbolic") << "\n";
 			delete serializer;
 		}
-
-		#if (DEBUG_BDDS == true)
-			StateHT allStates;
-			auto vataAut = vataAutomaton.RemoveUnreachableStates(&allStates);
-			vataAutomaton = vataAut.RemoveUselessStates();
-			TransMTBDD * tbdd = getMTBDDForStateTuple(vataAutomaton, Automaton::StateTuple({}));
-			std::cout << "Leaf : bdd\n";
-			//std::cout << TransMTBDD::DumpToDot({tbdd}) << "\n\n";
-			// Dump bdds
-			for (auto state : allStates) {
-				TransMTBDD* bdd = getMTBDDForStateTuple(vataAutomaton, Automaton::StateTuple({state}));
-				std::cout << state << " : bdd\n";
-        		//std::cout << TransMTBDD::DumpToDot({bdd}) << "\n\n";
-			}
-		#endif
 	}
 	///////// DECISION PROCEDURE /////////////////////////////////////////////
 	int decided;
