@@ -139,7 +139,7 @@ public:
 /****************
  * DEBUG MACROS *
  ****************/
-#define G_DEBUG_FORMULA_AFTER_PHASE(str) cout << "\n\n[*] Formula after '" << str << "' phase:\n"
+#define G_DEBUG_FORMULA_AFTER_PHASE(str) std::cout << "\n\n[*] Formula after '" << str << "' phase:\n"
 #define G_NOT_IMPLEMENTED_YET(str) assert(false && "TODO: '" str "' Not Supported yet")
 
 /*********************************
@@ -269,40 +269,5 @@ public:
 #define OPT_CACHE_SUBSUMED_BY			true	// < Cache the results of term subsumption by fixpoints
 #define OPT_SMARTER_MONA_CONVERSION		false	// < Use faster conversion from MONA to VATA (courtesy of PJ)
 #define OPT_CREATE_TAGGED_AUTOMATA		true	// < Use tags to create a specific subformula to automaton
-
-/*******************************
- * DEFINITION OF FILTER PHASES *
- *******************************/
-
-#if (ANTIPRENEXING_DISTRIBUTIVE == true)
-#define FILTER_LIST(code) \
-	code(ZeroOrderRemover)				\
-	code(SyntaxRestricter)				\
-	code(BinaryReorderer)				\
-	code(DistributiveAntiPrenexer)		\
-	code(SecondOrderRestricter)			/* Restrict the formula to second order*/\
-	code(QuantificationMerger)			/* Merge some quantifications */
-#elif (ANTIPRENEXING_FULL == true)
-#define FILTER_LIST(code) \
-	code(ZeroOrderRemover)				/* Transform zero-order variables to second-order interpretation */ \
-	code(SyntaxRestricter)				/* Restrict unsupported formula constructs to supported subset*/ \
-	code(BinaryReorderer)				/* Reorder the formula for better antiprenexing */ \
-	code(FullAntiPrenexer)				/* Push quantifiers as deep as possible */ \
-	code(BooleanUnfolder)				/* Simplify formula through various boolean laws*/ \
-	code(UniversalQuantifierRemover)	/* Remove universal quantifier from formula*/ \
-	code(NegationUnfolder)				/* Push negations deeply*/ \
-	code(QuantificationMerger)			/* Merge some quantifications */ \
-	code(SecondOrderRestricter)			/* Restrict the formula to second order*/\
-	code(QuantificationMerger)			/* Merge some quantifications */
-#else
-#define FILTER_LIST(code) \
-	code(ZeroOrderRemover)				/* Transform zero-order variables to second-order interpretation */ \
-	code(SyntaxRestricter)				/* Restrict unsupported formula constructs to supported subset*/ \
-	code(BooleanUnfolder)				/* Simplify formula through various boolean laws*/ \
-	code(UniversalQuantifierRemover)	/* Remove universal quantifier from formula*/ \
-	code(NegationUnfolder)				/* Push negations deeply*/ \
-	code(SecondOrderRestricter)			/* Restrict the formula to second order*/\
-	code(QuantificationMerger)			/* Merge some quantifications */
-#endif
 
 #endif

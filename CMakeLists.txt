@@ -47,6 +47,8 @@ add_executable(gaston
 	src/app/DecisionProcedure/decision_procedures.cpp
 	src/app/DecisionProcedure/backward_decision_procedure.cpp
 	src/app/DecisionProcedure/symbolic_decision_procedure.cpp
+	src/app/DecisionProcedure/checkers/Checker.cpp
+	src/app/DecisionProcedure/checkers/SymbolicChecker.cpp
 	src/app/DecisionProcedure/containers/VarToTrackMap.cpp
 	src/app/DecisionProcedure/containers/StateSet.cpp
 	src/app/DecisionProcedure/containers/SymbolicAutomata.cpp

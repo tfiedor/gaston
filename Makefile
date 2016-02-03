@@ -162,6 +162,54 @@ src/app/DecisionProcedure/backward_decision_procedure.cpp.s:
 	$(MAKE) -f CMakeFiles/gaston.dir/build.make CMakeFiles/gaston.dir/src/app/DecisionProcedure/backward_decision_procedure.cpp.s
 .PHONY : src/app/DecisionProcedure/backward_decision_procedure.cpp.s
 
+src/app/DecisionProcedure/checkers/Checker.o: src/app/DecisionProcedure/checkers/Checker.cpp.o
+.PHONY : src/app/DecisionProcedure/checkers/Checker.o
+
+# target to build an object file
+src/app/DecisionProcedure/checkers/Checker.cpp.o:
+	$(MAKE) -f CMakeFiles/gaston.dir/build.make CMakeFiles/gaston.dir/src/app/DecisionProcedure/checkers/Checker.cpp.o
+.PHONY : src/app/DecisionProcedure/checkers/Checker.cpp.o
+
+src/app/DecisionProcedure/checkers/Checker.i: src/app/DecisionProcedure/checkers/Checker.cpp.i
+.PHONY : src/app/DecisionProcedure/checkers/Checker.i
+
+# target to preprocess a source file
+src/app/DecisionProcedure/checkers/Checker.cpp.i:
+	$(MAKE) -f CMakeFiles/gaston.dir/build.make CMakeFiles/gaston.dir/src/app/DecisionProcedure/checkers/Checker.cpp.i
+.PHONY : src/app/DecisionProcedure/checkers/Checker.cpp.i
+
+src/app/DecisionProcedure/checkers/Checker.s: src/app/DecisionProcedure/checkers/Checker.cpp.s
+.PHONY : src/app/DecisionProcedure/checkers/Checker.s
+
+# target to generate assembly for a file
+src/app/DecisionProcedure/checkers/Checker.cpp.s:
+	$(MAKE) -f CMakeFiles/gaston.dir/build.make CMakeFiles/gaston.dir/src/app/DecisionProcedure/checkers/Checker.cpp.s
+.PHONY : src/app/DecisionProcedure/checkers/Checker.cpp.s
+
+src/app/DecisionProcedure/checkers/SymbolicChecker.o: src/app/DecisionProcedure/checkers/SymbolicChecker.cpp.o
+.PHONY : src/app/DecisionProcedure/checkers/SymbolicChecker.o
+
+# target to build an object file
+src/app/DecisionProcedure/checkers/SymbolicChecker.cpp.o:
+	$(MAKE) -f CMakeFiles/gaston.dir/build.make CMakeFiles/gaston.dir/src/app/DecisionProcedure/checkers/SymbolicChecker.cpp.o
+.PHONY : src/app/DecisionProcedure/checkers/SymbolicChecker.cpp.o
+
+src/app/DecisionProcedure/checkers/SymbolicChecker.i: src/app/DecisionProcedure/checkers/SymbolicChecker.cpp.i
+.PHONY : src/app/DecisionProcedure/checkers/SymbolicChecker.i
+
+# target to preprocess a source file
+src/app/DecisionProcedure/checkers/SymbolicChecker.cpp.i:
+	$(MAKE) -f CMakeFiles/gaston.dir/build.make CMakeFiles/gaston.dir/src/app/DecisionProcedure/checkers/SymbolicChecker.cpp.i
+.PHONY : src/app/DecisionProcedure/checkers/SymbolicChecker.cpp.i
+
+src/app/DecisionProcedure/checkers/SymbolicChecker.s: src/app/DecisionProcedure/checkers/SymbolicChecker.cpp.s
+.PHONY : src/app/DecisionProcedure/checkers/SymbolicChecker.s
+
+# target to generate assembly for a file
+src/app/DecisionProcedure/checkers/SymbolicChecker.cpp.s:
+	$(MAKE) -f CMakeFiles/gaston.dir/build.make CMakeFiles/gaston.dir/src/app/DecisionProcedure/checkers/SymbolicChecker.cpp.s
+.PHONY : src/app/DecisionProcedure/checkers/SymbolicChecker.cpp.s
+
 src/app/DecisionProcedure/containers/StateSet.o: src/app/DecisionProcedure/containers/StateSet.cpp.o
 .PHONY : src/app/DecisionProcedure/containers/StateSet.o
 
@@ -1545,6 +1593,12 @@ help:
 	@echo "... src/app/DecisionProcedure/backward_decision_procedure.o"
 	@echo "... src/app/DecisionProcedure/backward_decision_procedure.i"
 	@echo "... src/app/DecisionProcedure/backward_decision_procedure.s"
+	@echo "... src/app/DecisionProcedure/checkers/Checker.o"
+	@echo "... src/app/DecisionProcedure/checkers/Checker.i"
+	@echo "... src/app/DecisionProcedure/checkers/Checker.s"
+	@echo "... src/app/DecisionProcedure/checkers/SymbolicChecker.o"
+	@echo "... src/app/DecisionProcedure/checkers/SymbolicChecker.i"
+	@echo "... src/app/DecisionProcedure/checkers/SymbolicChecker.s"
 	@echo "... src/app/DecisionProcedure/containers/StateSet.o"
 	@echo "... src/app/DecisionProcedure/containers/StateSet.i"
 	@echo "... src/app/DecisionProcedure/containers/StateSet.s"
