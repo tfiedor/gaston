@@ -106,19 +106,26 @@ void parseTags(std::string&s, std::list<size_t>& tags) {
     tags.insert(tags.end(), std::stoi(s));
 }
 
+void Checker::_startTimer(Timer &t) {
+    t.start();
+}
+
+void Checker::_stopTimer(Timer &t, char* additionalMessage) {
+    t.stop();
+    if(this->_printProgress) {
+        std::cout << "[*] " << additionalMessage;
+        std::cout << "Elapsed time: ";
+        t.print();
+        std::cout << "\n";
+    }
+}
+
 void Checker::LoadFormulaFromFile() {
     loadFile(inputFileName);
     yyparse();
     this->_monaAST = untypedAST->typeCheck();
     lastPosVar = this->_monaAST->lastPosVar;
     allPosVar = this->_monaAST->allPosVar;
-
-    // Prints progress if dumping is set
-    if (options.printProgress) {
-        G_DEBUG_FORMULA_AFTER_PHASE("loading");
-        std::cout << "[*] Elapsed time: ";
-    }
-
     // Clean up untypedAST
     delete untypedAST;
 }
@@ -129,8 +136,8 @@ void Checker::CloseUngroundFormula() {
     // First close the formula if we are testing something specific
     IdentList freeVars, bound;
     (this->_monaAST->formula)->freeVars(&freeVars, &bound);
-    bool formulaIsGround = freeVars.empty();
-    if(!formulaIsGround) {
+
+    if(!freeVars.empty()) {
         switch(options.test) {
             case TestType::VALIDITY:
                 // Fixme: this is incorrect, we need to tell that the variable is in first order

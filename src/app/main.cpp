@@ -81,14 +81,10 @@ AutLib lib;
 VarToTrackMap varMap;
 int numTypes = 0;
 bool regenerate = false;
+char *inputFileName = NULL;
 Timer timer_conversion, timer_mona, timer_base, timer_automaton;
 
-extern int yyparse(void);
-extern void loadFile(char *filename);
 extern void (*mona_callback)();
-extern Deque<FileSource *> source;
-
-char *inputFileName = NULL;
 
 extern Ident lastPosVar, allPosVar;
 

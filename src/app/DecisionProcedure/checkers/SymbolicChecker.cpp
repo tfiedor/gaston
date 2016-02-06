@@ -39,13 +39,9 @@ void SymbolicChecker::Decide() {
     try {
         // Deciding WS1S formula
         timer_deciding.start();
-        if (options.mode != TREE) {
-            decided = ws1s_symbolic_decision_procedure(this->_automaton);
-            delete this->_automaton;
-            this->_automaton = nullptr;
-        } else {
-            throw NotImplementedException();
-        }
+        decided = ws1s_symbolic_decision_procedure(this->_automaton);
+        delete this->_automaton;
+        this->_automaton = nullptr;
         timer_deciding.stop();
 
         // Outing the results of decision procedure

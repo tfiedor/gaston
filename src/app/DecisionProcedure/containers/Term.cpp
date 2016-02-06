@@ -275,6 +275,7 @@ void Term::Complement() {
  * Returns true if the term is not computed, i.e. it is continuation somehow
  */
 bool Term::IsNotComputed() {
+#if (OPT_EARLY_EVALUATION == true)
     if(this->type == TERM_CONTINUATION) {
         return !reinterpret_cast<TermContinuation *>(this)->IsUnfolded();
     } else if(this->type == TERM_PRODUCT) {
@@ -283,6 +284,9 @@ bool Term::IsNotComputed() {
     } else {
         return false;
     }
+#else
+    return false;
+#endif
 }
 
 /**
@@ -1335,10 +1339,6 @@ bool TermList::_eqCore(const Term &t) {
 bool TermFixpoint::_eqCore(const Term &t) {
     assert(t.type == TERM_FIXPOINT && "Testing equality of different term types");
 
-    #if (OPT_EQ_THROUGH_POINTERS == true)
-    assert(this != &t);
-    return false;
-    #else
     const TermFixpoint &tFix = static_cast<const TermFixpoint&>(t);
     if(this->_bValue != tFix._bValue) {
         // If the values are different, we can automatically assume that there is some difference
@@ -1379,5 +1379,4 @@ bool TermFixpoint::_eqCore(const Term &t) {
         #endif
         return true;
     }
-    #endif
 }

@@ -9,6 +9,7 @@
  *****************************************************************************/
 
 #include "SecondOrderRestricter.h"
+#include "AntiPrenexer.h"
 #include "../../Frontend/ast.h"
 #include "../../Frontend/ident.h"
 
@@ -17,26 +18,21 @@ AST* SecondOrderRestricter::_firstOrderRestrict(FirstOrderQuantification* form) 
     assert(form != nullptr);
     assert(form->f != nullptr);
 
-    Ident* it = form->vl->begin();
-    assert(it != form->vl->end());
+    ASTForm* restrictedFormula = form->f;
 
-    BinaryFormula* binaryForm;
-    ASTForm* restrictedFormula = new ASTForm_FirstOrder(new ASTTerm1_Var1(*it, form->pos), form->pos);
-
-    while ((++it) != form->vl->end()) {
-        ASTForm_FirstOrder *singleton = new ASTForm_FirstOrder(new ASTTerm1_Var1(*it, form->pos), form->pos);
-        restrictedFormula = new BinaryFormula(restrictedFormula, singleton, form->pos);
+    while(form->vl->size() != 0) {
+        auto it = form->vl->pop_back();
+        ASTForm_FirstOrder *singleton = new ASTForm_FirstOrder(new ASTTerm1_Var1(it, form->pos), form->pos);
+        BinaryFormula* binopForm = new BinaryFormula(singleton, restrictedFormula, form->pos);
+        restrictedFormula = new SecondOrderQuantification(nullptr, new IdentList(it), binopForm, Pos());
     }
 
-    restrictedFormula = new BinaryFormula(restrictedFormula, form->f, form->pos);
-
     // Free the previous form
-    IdentList* ul = form->ul;
-    IdentList* vl = form->vl;
     form->detach();
     delete form;
 
-    return new SecondOrderQuantification(ul, vl, restrictedFormula, Pos());
+
+    return restrictedFormula;
 };
 
 /**

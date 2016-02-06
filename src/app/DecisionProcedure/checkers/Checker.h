@@ -6,9 +6,10 @@
 #define WSKS_CHECKER_H_H
 
 #include "../../Frontend/ast.h"
+#include "../../Frontend/timer.h"
+#include "../environment.hh"
 
-#endif //WSKS_CHECKER_H_H
-
+using TimerType = Timer;
 
 /*******************************
  * DEFINITION OF FILTER PHASES *
@@ -31,8 +32,8 @@
 	code(BooleanUnfolder)				/* Simplify formula through various boolean laws*/ \
 	code(UniversalQuantifierRemover)	/* Remove universal quantifier from formula*/ \
 	code(NegationUnfolder)				/* Push negations deeply*/ \
-	code(QuantificationMerger)			/* Merge some quantifications */ \
 	code(SecondOrderRestricter)			/* Restrict the formula to second order*/\
+	code(BaseAutomataMerger)			/* Merge some of the base automata on path*/\
 	code(QuantificationMerger)			/* Merge some quantifications */
 #else
 #define FILTER_LIST(code) \
@@ -61,4 +62,10 @@ public:
 protected:
     // <<< PRIVATE MEMBERS >>>
     MonaAST* _monaAST;
+	bool _printProgress;
+
+	// <<< PRIVATE METHODS >>>
+	void _startTimer(Timer& t);
+	void _stopTimer(Timer& t, char* s);
 };
+#endif //WSKS_CHECKER_H_H

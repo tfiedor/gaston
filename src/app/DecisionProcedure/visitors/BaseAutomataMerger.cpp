@@ -17,7 +17,7 @@ AST* BaseAutomataMerger::_mergeBaseOnPath(BinopClass* binopForm) {
         AST *mergePoint = this->_findMergePoint<BinopClass, k>(leftBinop);
         if(mergePoint == nullptr) {
             return binopForm;
-        } else if(mergePoint != binopForm->f2) {
+        } else if(mergePoint != binopForm) {
             ASTForm* temp;
             BinopClass* binMergePoint = reinterpret_cast<BinopClass*>(mergePoint);
             temp = binopForm->f1;
