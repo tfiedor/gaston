@@ -29,7 +29,7 @@ void FixpointDetagger::visit(ASTForm_Biimpl *form) {
 }
 
 void FixpointDetagger::visit(ASTForm_Not *form) {
-    form->fixpoint_number = form->fixpoint_number;
+    form->fixpoint_number = form->f->fixpoint_number;
     form->height = form->height + 1;
     form->size = form->f->size + 1;
 }
@@ -39,6 +39,7 @@ void FixpointDetagger::_visitFixpointComputation(FixpointFormula *form) {
     form->fixpoint_number = form->f->fixpoint_number + 1;
     form->height = form->height + 1;
     form->size = form->f->size + 1;
+
     if(form->fixpoint_number <= this->_cFixpointThreshold) {
         form->tag = 0;
     }
