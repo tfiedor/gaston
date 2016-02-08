@@ -133,7 +133,7 @@ namespace Workshops {
         // <<< PUBLIC API >>>
         static TermEmpty* CreateEmpty();
         static TermEmpty* CreateComplementedEmpty();
-        TermBaseSet* CreateBaseSet(BaseKey &states, unsigned int offset, unsigned int stateno);
+        Term* CreateBaseSet(BaseKey &states, unsigned int offset, unsigned int stateno);
         TermProduct* CreateProduct(Term_ptr const&, Term_ptr const&, ProductType);
         TermFixpoint* CreateFixpoint(Term_ptr const&, Symbol*, bool, bool);
         TermFixpoint* CreateFixpointPre(Term_ptr const&, Symbol*, bool);

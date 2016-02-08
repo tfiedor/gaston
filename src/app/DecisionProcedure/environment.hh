@@ -212,7 +212,7 @@ public:
 /* >>> Measuring Options <<< *
  *****************************/
 #define MEASURE_STATE_SPACE 			true	// < Measures how many instances of terms were created
-#define MEASURE_CACHE_HITS 				false	// < Prints the statistics for each cache on each node
+#define MEASURE_CACHE_HITS 				true	// < Prints the statistics for each cache on each node
 #define MEASURE_CONTINUATION_CREATION	true	// < Measures how many continuations are created
 #define MEASURE_CONTINUATION_EVALUATION	true	// < Measures how many continuations are actually unfolded
 #define MEASURE_RESULT_HITS				true	// < Measure how many times the result hits in cache

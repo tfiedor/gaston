@@ -121,6 +121,10 @@ ASTForm* FullAntiPrenexer::distributiveRule(QuantifierClass *qForm) {
         binopForm->f2 = static_cast<ASTForm*>(tempResult->accept(*this));
     }
 
+    // Cleanup
+    qForm->f = nullptr;
+    delete qForm;
+
     return binopForm;
 }
 
@@ -156,6 +160,9 @@ ASTForm* FullAntiPrenexer::nonDistributiveRule(QuantifierClass *qForm) {
             right.push_back(*var);
         } // f1 op f2           | var notin f1 && var notin f2
     }
+
+    qForm->f = nullptr;
+    delete qForm;
 
     if(!left.empty()) {
         tempResult = new QuantifierClass(nullptr, new IdentList(left), binopForm->f1, binopForm->f1->pos);

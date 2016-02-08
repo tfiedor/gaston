@@ -498,7 +498,7 @@ SubsumptionResult TermFixpoint::_IsSubsumedCore(Term* t, bool unfoldAll) {
  */
 SubsumptionResult TermEmpty::IsSubsumedBy(FixpointType& fixpoint, Term*& biggerTerm) {
     // Empty term is subsumed by everything
-    return E_TRUE;
+    return ( (fixpoint.size() == 1 && fixpoint.front().first == nullptr) ? E_FALSE : E_TRUE);
 }
 
 SubsumptionResult TermProduct::IsSubsumedBy(FixpointType& fixpoint, Term*& biggerTerm) {

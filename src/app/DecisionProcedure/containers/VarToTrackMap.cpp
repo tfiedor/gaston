@@ -30,6 +30,7 @@ void VarToTrackMap::addIdentifiers(IdentList* identifiers) {
 	uint index = this->vttMap.size();
 	uint val;
 	uint identSize = identifiers->size();
+	identifiers->sort();
 
 	size_t idx = 0;
 	for (int i = 0; i < identSize; ++i) {
@@ -37,6 +38,8 @@ void VarToTrackMap::addIdentifiers(IdentList* identifiers) {
 		(this->vttMap)[val] = idx;
 		(this->ttvMap)[idx++] = val;
 	}
+
+	this->dumpMap();
 }
 
 /**
@@ -60,6 +63,7 @@ uint VarToTrackMap::operator[](uint val) {
 }
 
 uint VarToTrackMap::inverseGet(uint key) {
+	assert(false && "Currently disabled functionality");
 	return this->ttvMap[key];
 }
 

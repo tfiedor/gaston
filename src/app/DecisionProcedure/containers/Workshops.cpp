@@ -155,9 +155,13 @@ namespace Workshops {
      * @param[in] stateno:      state number for bitmask
      * @return:                 unique pointer for TermBaseSet
      */
-    TermBaseSet* TermWorkshop::CreateBaseSet(VATA::Util::OrdVector<unsigned int>& states, unsigned int offset, unsigned int stateno) {
+    Term* TermWorkshop::CreateBaseSet(VATA::Util::OrdVector<unsigned int>& states, unsigned int offset, unsigned int stateno) {
         #if (OPT_GENERATE_UNIQUE_TERMS == true && UNIQUE_BASE == true)
             assert(this->_bCache != nullptr);
+
+            if(states.size() == 0) {
+                return this->CreateEmpty();
+            }
 
             Term* termPtr = nullptr;
             if(!this->_bCache->retrieveFromCache(states, termPtr)) {
