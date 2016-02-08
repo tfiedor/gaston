@@ -64,12 +64,15 @@ protected:
     ResultCache _resCache;          // Caches (states, symbol) = (fixpoint, bool)
     SubsumptionCache _subCache;     // Caches (term, term) = bool
     VarList _freeVars;
+    Term_ptr _satExample = nullptr;
+    Term_ptr _unsatExample = nullptr;
 
     // <<< PRIVATE FUNCTIONS >>>
     virtual void _InitializeAutomaton() = 0;
     virtual void _InitializeInitialStates() = 0;
     virtual void _InitializeFinalStates() = 0;
     virtual ResultType _IntersectNonEmptyCore(Symbol*, Term*, bool) = 0;
+    virtual void _DumpExampleCore(ExampleType) = 0;
 
     // <<< MEASURES >>>
     unsigned int _falseCounter = 0;
@@ -90,6 +93,8 @@ public:
     virtual Term_ptr GetFinalStates();
     virtual Term* Pre(Symbol*, Term*, bool) = 0;
     ResultType IntersectNonEmpty(Symbol*, Term*, bool);
+    void SetSatisfiableExample(Term*);
+    void SetUnsatisfiableExample(Term*);
 
     // <<< DUMPING FUNCTIONS >>>
     virtual void DumpAutomaton() = 0;
@@ -97,6 +102,7 @@ public:
     virtual void DumpStats() = 0;
     virtual void DumpToDot(std::ofstream&, bool) = 0;
     static void AutomatonToDot(std::string, SymbolicAutomaton*, bool);
+    virtual void DumpExample(ExampleType);
 };
 
 /**
@@ -119,6 +125,7 @@ protected:
     virtual void _InitializeInitialStates();
     virtual void _InitializeFinalStates();
     virtual ResultType _IntersectNonEmptyCore(Symbol*, Term*, bool);
+    virtual void _DumpExampleCore(ExampleType);
 
 public:
     BinaryOpAutomaton(SymbolicAutomaton_raw lhs, SymbolicAutomaton_raw rhs, Formula_ptr form);
@@ -163,6 +170,7 @@ protected:
     virtual void _InitializeInitialStates();
     virtual void _InitializeFinalStates();
     virtual ResultType _IntersectNonEmptyCore(Symbol*, Term*, bool);
+    virtual void _DumpExampleCore(ExampleType);
 
 public:
     // <<< CONSTRUCTORS >>>
@@ -202,6 +210,7 @@ protected:
     virtual void _InitializeInitialStates();
     virtual void _InitializeFinalStates();
     virtual ResultType _IntersectNonEmptyCore(Symbol*, Term*, bool);
+    virtual void _DumpExampleCore(ExampleType);
 
 public:
     /// <<< CONSTRUCTORS >>>
@@ -236,7 +245,7 @@ protected:
     virtual void _InitializeFinalStates();
     virtual ResultType _IntersectNonEmptyCore(Symbol*, Term*, bool);
     void _RenameStates();
-
+    virtual void _DumpExampleCore(ExampleType) {}
 public:
     // <<< CONSTRUCTORS >>>
     BaseAutomaton(BaseAutomatonType* aut, size_t vars, Formula_ptr form);

@@ -257,8 +257,15 @@ ResultType SymbolicAutomaton::IntersectNonEmpty(Symbol* symbol, Term* stateAppro
     std::cout << ") = <" << (result.second ? "True" : "False") << ","; result.first->dump(); std::cout << ">\n";
     #endif
 
+    // Set examples and successors
     if(symbol != nullptr) {
-        //delete symbol;
+        result.first->SetSuccessor(stateApproximation, symbol);
+    }
+
+    if(result.second) {
+        this->SetSatisfiableExample(result.first);
+    } else {
+        this->SetUnsatisfiableExample(result.first);
     }
 
     // Return results
@@ -290,6 +297,18 @@ Term_ptr SymbolicAutomaton::GetInitialStates() {
     }
 
     return this->_initialStates;
+}
+
+void SymbolicAutomaton::SetSatisfiableExample(Term* satExample) {
+    if(this->_satExample == nullptr) {
+        this->_satExample = satExample;
+    }
+}
+
+void SymbolicAutomaton::SetUnsatisfiableExample(Term* unsatExample) {
+    if(this->_unsatExample == nullptr) {
+        this->_unsatExample = unsatExample;
+    }
 }
 
 /**
@@ -672,6 +691,54 @@ ResultType BaseAutomaton::_IntersectNonEmptyCore(Symbol* symbol, Term* approxima
             return std::make_pair(preFinal, initial->Intersects(preFinal) != underComplement);
         }
     }
+}
+
+void SymbolicAutomaton::DumpExample(ExampleType e) {
+    switch(e) {
+        case ExampleType::SATISFYING:
+            if(this->_satExample != nullptr) {
+                this->_DumpExampleCore(e);
+            }
+            break;
+        case ExampleType::UNSATISFYING:
+            if(this->_unsatExample != nullptr) {
+                this->_DumpExampleCore(e);
+            }
+            break;
+        default:
+            assert(false && "Something impossible has happened");
+    }
+}
+
+// Fixme: some variables could be bounded twice
+void BinaryOpAutomaton::_DumpExampleCore(ExampleType e) {
+    this->_lhs_aut->DumpExample(e);
+    this->_rhs_aut->DumpExample(e);
+}
+
+void ComplementAutomaton::_DumpExampleCore(ExampleType e) {
+    this->_aut->DumpExample(e);
+}
+
+void ProjectionAutomaton::_DumpExampleCore(ExampleType e) {
+    Term* example = (e == ExampleType::SATISFYING ? this->_satExample : this->_unsatExample);
+
+    // Print the bounded part
+    auto varNo = this->projectedVars->size();
+    std::string* examples = new std::string[varNo];
+
+    while(example != nullptr && example->link.succ != nullptr) {
+        for(size_t i = 0; i < varNo; ++i) {
+            examples[i] += example->link.symbol->GetSymbolAt(varMap[this->projectedVars->get(i)]);
+        }
+        example = example->link.succ;
+    }
+
+    for(size_t i = 0; i < varNo; ++i) {
+        std::cout << (symbolTable.lookupSymbol(this->projectedVars->get(i))) << ": " << examples[i] << "\n";
+    }
+
+    this->_aut->DumpExample(e);
 }
 
 void BinaryOpAutomaton::DumpAutomaton() {

@@ -44,6 +44,17 @@ int ws1s_symbolic_decision_procedure(SymbolicAutomaton* symbolicAutomaton) {
     Term_ptr fixpoint = result.first;
     bool isValid = result.second;
 
+    #if (DUMP_EXAMPLES == true)
+    // TODO: Better output
+    std::cout << "[*] Printing satisfying example of least length\n";
+    symbolicAutomaton->DumpExample(ExampleType::SATISFYING);
+    std::cout << "\n";
+
+    std::cout << "[*] Printing unsatisfying example of least length\n";
+    symbolicAutomaton->DumpExample(ExampleType::UNSATISFYING);
+    std::cout << "\n";
+    #endif
+
     #if (DEBUG_FIXPOINT == true)
     std::cout << "[!] Finished deciding WS1S formula with following fixpoint:\n";
     fixpoint->dump();

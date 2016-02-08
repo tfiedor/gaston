@@ -38,6 +38,8 @@ void VarToTrackMap::addIdentifiers(IdentList* identifiers) {
 		(this->vttMap)[val] = idx;
 		(this->ttvMap)[idx++] = val;
 	}
+
+	this->dumpMap();
 }
 
 /**

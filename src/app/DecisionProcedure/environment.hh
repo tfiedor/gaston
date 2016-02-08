@@ -60,6 +60,7 @@ enum FixpointTermSem {E_FIXTERM_FIXPOINT, E_FIXTERM_PRE};
 enum ComparisonType {E_BY_SAME_PTR, E_BY_DIFFERENT_TYPE, E_BY_STRUCTURE};
 enum UnfoldedInType {E_IN_SUBSUMPTION, E_IN_ISECT_NONEMPTY, E_IN_COMPARISON, E_IN_NOWHERE};
 enum SubsumptionResult {E_FALSE, E_TRUE, E_PARTIALLY};
+enum ExampleType {SATISFYING, UNSATISFYING};
 
 namespace Gaston {
 	void dumpResultKey(std::pair<Term*, ZeroSymbol*> const& s);
@@ -208,11 +209,12 @@ public:
  ***************************/
 #define DUMP_NO_SYMBOL_TABLE			true
 #define DUMP_INTERMEDIATE_AUTOMATA		true
+#define DUMP_EXAMPLES					false
 
 /* >>> Measuring Options <<< *
  *****************************/
 #define MEASURE_STATE_SPACE 			true	// < Measures how many instances of terms were created
-#define MEASURE_CACHE_HITS 				true	// < Prints the statistics for each cache on each node
+#define MEASURE_CACHE_HITS 				false	// < Prints the statistics for each cache on each node
 #define MEASURE_CONTINUATION_CREATION	true	// < Measures how many continuations are created
 #define MEASURE_CONTINUATION_EVALUATION	true	// < Measures how many continuations are actually unfolded
 #define MEASURE_RESULT_HITS				true	// < Measure how many times the result hits in cache
@@ -269,6 +271,6 @@ public:
 #define OPT_CACHE_SUBSUMED_BY			true	// < Cache the results of term subsumption by fixpoints
 #define OPT_SMARTER_MONA_CONVERSION		false	// < Use faster conversion from MONA to VATA (courtesy of PJ)
 #define OPT_CREATE_TAGGED_AUTOMATA		true	// < Use tags to create a specific subformula to automaton
-#define OPT_EXTRACT_MORE_AUTOMATA		true	// < Calls detagger to heuristically convert some subformulae to automata
+#define OPT_EXTRACT_MORE_AUTOMATA		false	// < Calls detagger to heuristically convert some subformulae to automata
 
 #endif

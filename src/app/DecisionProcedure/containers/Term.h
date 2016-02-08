@@ -76,6 +76,13 @@ public:
     size_t stateSpace = 0;         // << Exact size of the state space, 0 if unknown
     size_t stateSpaceApprox = 0;   // << Approximation of the state space, used for heuristics
     bool valid = true;
+
+    struct {
+        Term* succ;
+        Symbol* symbol;
+    } link;
+
+    Term() : link{ nullptr, nullptr} {}
     virtual ~Term();
 
     // See #L29
@@ -97,6 +104,7 @@ public:
     virtual bool InComplement() {return this->_inComplement;}
     bool operator==(const Term &t);
     bool IsNotComputed();
+    void SetSuccessor(Term*, Symbol*);
 
     // <<< MEASURING FUNCTIONS >>>
     virtual unsigned int MeasureStateSpace();

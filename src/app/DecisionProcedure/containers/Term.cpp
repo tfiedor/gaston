@@ -271,6 +271,13 @@ void Term::Complement() {
     this->_inComplement = (this->_inComplement == false);
 }
 
+void Term::SetSuccessor(Term* succ, Symbol* symb) {
+    if(this->link.succ == nullptr) {
+        this->link.succ = succ;
+        this->link.symbol = symb;
+    }
+}
+
 /**
  * Returns true if the term is not computed, i.e. it is continuation somehow
  */

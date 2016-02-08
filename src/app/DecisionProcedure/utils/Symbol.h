@@ -55,6 +55,7 @@ public:
     bool IsDontCareAt(VarType);
     BaseAutomatonMTBDD* GetMTBDD();
     std::string ToString() const;
+    char GetSymbolAt(size_t) const;
 
     // <<< STATIC METHODS >>>
     static TrackType constructUniversalTrack();

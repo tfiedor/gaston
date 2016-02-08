@@ -119,19 +119,26 @@ void ZeroSymbol::_SetValueAt(VarType var, VarValue val) {
 
 std::string ZeroSymbol::ToString() const {
     std::string s("");
-    for(int i = 0; i < this->_trackMask.size(); i = i + 2) {
-        bool lTest = this->_trackMask.test(i);
-        bool rTest = this->_trackMask.test(i+1);
-        if(lTest && !rTest) {
-            s += "1";
-        } else if(!lTest && !rTest) {
-            s += "0";
-        } else {
-            s += "X";
-        }
+    for(int i = 0; i < this->_trackMask.size()/2; ++i) {
+        s += this->GetSymbolAt(i);
     }
 
     return s;
+}
+
+char ZeroSymbol::GetSymbolAt(size_t pos) const {
+    assert(pos < this->_trackMask.size()+1);
+
+    bool lTest = this->_trackMask.test(2*pos);
+    bool rTest = this->_trackMask.test(2*pos+1);
+
+    if(lTest && !rTest) {
+        return '1';
+    } else if(!lTest && !rTest) {
+        return '0';
+    } else {
+        return 'X';
+    }
 }
 
 // <<< STATIC FUNCTIONS >>>
