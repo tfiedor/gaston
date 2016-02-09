@@ -150,7 +150,13 @@ void Checker::CloseUngroundFormula() {
                 this->_monaAST->formula = new ASTForm_Ex1(nullptr, &freeVars, new ASTForm_Not(this->_monaAST->formula, Pos()), Pos());
                 break;
             default:
-                assert(false && "Cannot handle the unground formulae right now.");
+                // We will test everything
+                for(auto it = freeVars.begin(); it != freeVars.end(); ++it) {
+                    if(symbolTable.lookupType(*it) == MonaTypeTag::Varname1) {
+                        ASTForm_FirstOrder* fo = new ASTForm_FirstOrder(new ASTTerm1_Var1(*it, Pos()), Pos());
+                        this->_monaAST->formula = new ASTForm_And(fo, this->_monaAST->formula, Pos());
+                    }
+                }
                 break;
         }
     }

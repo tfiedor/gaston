@@ -978,6 +978,7 @@ void TermFixpoint::ComputeNextFixpoint() {
     _fixpoint.push_back(std::make_pair(result.first, true));
     // Aggregate the result of the fixpoint computation
     _bValue = this->_aggregate_result(_bValue,result.second);
+    _lastResult = result.second;
     // Push new symbols from _symList
     for(auto& symbol : _symList) {
         _worklist.insert(_worklist.cbegin(), std::make_pair(result.first, symbol));
@@ -1006,6 +1007,7 @@ void TermFixpoint::ComputeNextPre() {
     // Push the computed thing and aggregate the result
     _fixpoint.push_back(std::make_pair(result.first, true));
     _bValue = this->_aggregate_result(_bValue,result.second);
+    _lastResult = result.second;
 }
 
 /**
@@ -1054,6 +1056,10 @@ void TermFixpoint::_InitializeSymbols(Workshops::SymbolWorkshop* workshop, Ident
  */
 bool TermFixpoint::GetResult() {
     return this->_bValue;
+}
+
+bool TermFixpoint::GetLastResult() {
+    return this->_lastResult;
 }
 
 bool TermFixpoint::IsFullyComputed() const {

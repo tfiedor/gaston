@@ -92,17 +92,17 @@ public:
     virtual Term_ptr GetInitialStates();
     virtual Term_ptr GetFinalStates();
     virtual Term* Pre(Symbol*, Term*, bool) = 0;
-    ResultType IntersectNonEmpty(Symbol*, Term*, bool);
+    virtual ResultType IntersectNonEmpty(Symbol*, Term*, bool);
     void SetSatisfiableExample(Term*);
     void SetUnsatisfiableExample(Term*);
 
     // <<< DUMPING FUNCTIONS >>>
     virtual void DumpAutomaton() = 0;
     virtual void DumpCacheStats() = 0;
+    virtual void DumpExample(ExampleType);
     virtual void DumpStats() = 0;
     virtual void DumpToDot(std::ofstream&, bool) = 0;
     static void AutomatonToDot(std::string, SymbolicAutomaton*, bool);
-    virtual void DumpExample(ExampleType);
 };
 
 /**
@@ -188,7 +188,7 @@ public:
 };
 
 /**
- * Automaotn corresponding to the formulae: Exists X. phi
+ * Automaton corresponding to the formulae: Exists X. phi
  */
 class ProjectionAutomaton : public SymbolicAutomaton {
 public:
@@ -226,6 +226,21 @@ public:
     virtual void DumpToDot(std::ofstream&, bool);
     virtual void DumpStats();
     virtual void DumpCacheStats();
+};
+
+/**
+ * Automaton for the topmost fixpoint computation for unground formulae.
+ *
+ * Note this is optimization in order to omit the double computation of the
+ * fixpoints, by testing the satisfiability and unsatisfiability.
+ */
+class RootProjectionAutomaton : public ProjectionAutomaton {
+public:
+    // <<< CONSTRUCTORS >>>
+    RootProjectionAutomaton(SymbolicAutomaton*, Formula_ptr);
+
+    // <<< PUBLIC API >>>
+    virtual ResultType IntersectNonEmpty(Symbol*, Term*, bool);
 };
 
 /**

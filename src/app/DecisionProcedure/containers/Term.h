@@ -394,6 +394,7 @@ protected:
     WorklistType _worklist;
     Symbols _symList;
     bool _bValue;
+    bool _lastResult;
     bool (*_aggregate_result)(bool, bool);
 
 public:
@@ -407,6 +408,7 @@ public:
     bool IsEmpty();
     SubsumptionResult IsSubsumedBy(FixpointType& fixpoint, Term*&);
     bool GetResult();
+    bool GetLastResult();
     bool IsFullyComputed() const;
     bool IsShared();
     void RemoveSubsumed();

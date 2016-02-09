@@ -84,6 +84,9 @@ ProjectionAutomaton::~ProjectionAutomaton() {
     delete this->_aut;
 }
 
+RootProjectionAutomaton::RootProjectionAutomaton(SymbolicAutomaton* aut, Formula_ptr form)
+        : ProjectionAutomaton(aut, form) {}
+
 BaseAutomaton::BaseAutomaton(BaseAutomatonType* aut, size_t vars, Formula_ptr form) : SymbolicAutomaton(form), _autWrapper(dfaCopy(aut), vars) {
     type = AutType::BASE;
     this->_InitializeAutomaton();
@@ -257,20 +260,41 @@ ResultType SymbolicAutomaton::IntersectNonEmpty(Symbol* symbol, Term* stateAppro
     std::cout << ") = <" << (result.second ? "True" : "False") << ","; result.first->dump(); std::cout << ">\n";
     #endif
 
-    // Set examples and successors
     if(symbol != nullptr) {
         result.first->SetSuccessor(stateApproximation, symbol);
-    }
-
-    if(result.second) {
-        this->SetSatisfiableExample(result.first);
-    } else {
-        this->SetUnsatisfiableExample(result.first);
     }
 
     // Return results
     assert(result.first != nullptr);
     return result;
+}
+
+ResultType RootProjectionAutomaton::IntersectNonEmpty(Symbol* symbol, Term* finalApproximation, bool underComplement) {
+    // We are doing the initial step by evaluating the epsilon
+    TermList* projectionApproximation = reinterpret_cast<TermList*>(finalApproximation);
+    assert(projectionApproximation->list.size() == 1);
+
+    // Evaluate the initial unfolding of epsilon
+    ResultType result = this->_aut->IntersectNonEmpty(symbol, projectionApproximation->list[0], underComplement);
+
+    // Create a new fixpoint term and iterator on it
+    TermFixpoint* fixpoint = this->_factory.CreateFixpoint(result.first, SymbolWorkshop::CreateZeroSymbol(), underComplement, result.second);
+    TermFixpoint::iterator it = fixpoint->GetIterator();
+    Term_ptr fixpointTerm;
+
+    // While the fixpoint is not fully unfolded and while we cannot evaluate early
+    while((this->_satExample == nullptr || this->_unsatExample == nullptr) && ((fixpointTerm = it.GetNext()) != nullptr)) {
+        if(fixpoint->GetLastResult() && this->_satExample == nullptr && fixpointTerm != nullptr && fixpointTerm->link.symbol != nullptr) {
+            std::cout << "[*] Found satisfying example\n";
+            this->_satExample = fixpointTerm;
+        }
+        if(!fixpoint->GetLastResult() && this->_unsatExample == nullptr && fixpointTerm != nullptr && fixpointTerm->link.symbol != nullptr) {
+            std::cout << "[*] Found unsatisfying counter-example\n";
+            this->_unsatExample = fixpointTerm;
+        }
+    }
+
+    return std::make_pair(fixpoint, fixpoint->GetResult());
 }
 
 /**
@@ -720,6 +744,36 @@ void ComplementAutomaton::_DumpExampleCore(ExampleType e) {
     this->_aut->DumpExample(e);
 }
 
+std::string interpretModel(std::string& str, bool isFirstOrder) {
+    size_t idx = 0;
+    if(isFirstOrder) {
+        // Interpret the first one
+        while(str[idx] != '1') {++idx;}
+        return std::string(std::to_string(idx));
+    } else {
+        if(str.empty()) {
+            return std::string("{}");
+        }
+
+        std::string result;
+        bool isFirst = true;
+        result += "{";
+        while(idx != str.size()) {
+            if(str[idx] == '1') {
+                if(!isFirst) {
+                    result += ", ";
+                } else {
+                    isFirst = false;
+                }
+                result += std::to_string(idx);
+            }
+            ++idx;
+        }
+        result += "}";
+        return result;
+    }
+}
+
 void ProjectionAutomaton::_DumpExampleCore(ExampleType e) {
     Term* example = (e == ExampleType::SATISFYING ? this->_satExample : this->_unsatExample);
 
@@ -738,7 +792,10 @@ void ProjectionAutomaton::_DumpExampleCore(ExampleType e) {
         std::cout << (symbolTable.lookupSymbol(this->projectedVars->get(i))) << ": " << examples[i] << "\n";
     }
 
-    this->_aut->DumpExample(e);
+    for(size_t i = 0; i < varNo; ++i) {
+        bool isFirstOrder = (symbolTable.lookupType(this->projectedVars->get(i)) == MonaTypeTag::Varname1 ? true : false);
+        std::cout << (symbolTable.lookupSymbol(this->projectedVars->get(i))) << " = " << interpretModel(examples[i], isFirstOrder) << "\n";
+    }
 }
 
 void BinaryOpAutomaton::DumpAutomaton() {

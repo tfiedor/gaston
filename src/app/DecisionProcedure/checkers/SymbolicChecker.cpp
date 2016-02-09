@@ -22,6 +22,13 @@ void SymbolicChecker::ConstructAutomaton() {
         this->_automaton->DumpAutomaton();
     std::cout << "\n";
 
+    IdentList free, bound;
+    this->_monaAST->formula->freeVars(&free, &bound);
+    if(!free.empty()) {
+        this->_monaAST->formula = new ASTForm_Ex1(nullptr, free.copy(), this->_monaAST->formula, Pos());
+        this->_automaton = new RootProjectionAutomaton(this->_automaton, this->_monaAST->formula);
+    }
+
     timer_automaton.stop();
     if (options.dump) {
         std::cout << "\n[*] Formula translation to Automaton [DONE]\n";
