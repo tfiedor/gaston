@@ -16,9 +16,12 @@ public:
 
     void ConstructAutomaton();
     void Decide();
-
+    bool Run();
 protected:
     SymbolicAutomaton* _automaton;
+
+    // <<< PRIVATE METHODS >>>
+    int _DecideCore(bool);
 };
 
 

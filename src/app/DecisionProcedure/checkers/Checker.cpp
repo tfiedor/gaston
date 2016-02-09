@@ -137,7 +137,9 @@ void Checker::CloseUngroundFormula() {
     IdentList freeVars, bound;
     (this->_monaAST->formula)->freeVars(&freeVars, &bound);
 
-    if(!freeVars.empty()) {
+    this->_isGround = freeVars.empty();
+
+    if(!this->_isGround) {
         switch(options.test) {
             case TestType::VALIDITY:
                 // Fixme: this is incorrect, we need to tell that the variable is in first order

@@ -42,6 +42,8 @@ extern VarToTrackMap varMap;
 using namespace Gaston;
 using SymbolWorkshop    = Workshops::SymbolWorkshop;
 
+class SymbolicChecker;
+
 /**
  * Base class for Symbolic Automata. Each symbolic automaton contains the
  * pointer to the formula it corresponds to (for further informations),
@@ -49,6 +51,8 @@ using SymbolWorkshop    = Workshops::SymbolWorkshop;
  */
 class SymbolicAutomaton {
 public:
+    friend class SymbolicChecker;
+
     // <<< PUBLIC MEMBERS >>>
     static StateType stateCnt;
     AutType type;

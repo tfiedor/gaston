@@ -59,10 +59,12 @@ public:
     void CreateAutomataSizeEstimations();
     virtual void ConstructAutomaton() = 0;
     virtual void Decide() = 0;
+	virtual bool Run() = 0;
 protected:
     // <<< PRIVATE MEMBERS >>>
     MonaAST* _monaAST;
 	bool _printProgress;
+	bool _isGround;
 
 	// <<< PRIVATE METHODS >>>
 	void _startTimer(Timer& t);
