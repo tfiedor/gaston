@@ -546,8 +546,8 @@ ResultType BinaryOpAutomaton::_IntersectNonEmptyCore(Symbol* symbol, Term* final
     // was true.
     #if (OPT_CONT_ONLY_WHILE_UNSAT == true)
     bool canGenerateContinuations = (this->_productType == ProductType::E_INTERSECTION ?
-                                     (this->_trueCounter == 0 && this->_falseCounter > 0) :
-                                     (this->_falseCounter == 0 && this->_trueCounter > 0) );
+                                     (this->_trueCounter == 0 && this->_falseCounter >= 0) :
+                                     (this->_falseCounter == 0 && this->_trueCounter >= 0) );
     if(canGenerateContinuations && this->_eval_early(lhs_result.second, underComplement)) {
     #else
     if(this->_eval_early(lhs_result.second, underComplement)) {
