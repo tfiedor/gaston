@@ -43,9 +43,10 @@ ASTForm* unfoldCall(ASTForm* form, IdentList* fParams, ASTList* rParams) {
 
 	ASTForm* clonnedFormula = (called->ast)->clone();
 	ASTForm* unfoldedFormula = _unfoldCore(clonnedFormula, called->formals, realParams);
-	delete realParams;
+	// Fixme: this is segfaulting something i guess? 
+	//delete realParams;
 	callForm->detach();
-	delete callForm;
+	//delete callForm;
 
 	return unfoldedFormula;
 }

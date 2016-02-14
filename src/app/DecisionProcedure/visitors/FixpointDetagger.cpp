@@ -32,6 +32,11 @@ void FixpointDetagger::visit(ASTForm_Not *form) {
     form->fixpoint_number = form->f->fixpoint_number;
     form->height = form->height + 1;
     form->size = form->f->size + 1;
+
+    if( (form->f->kind == aEx1 || form->f->kind == aEx2 || form->f->kind == aAll1 || form->f->kind == aAll2) && form->f->tag == 0)  {
+        // Pull the negation in
+        form->tag = 0;
+    }
 }
 
 template<class FixpointFormula>
