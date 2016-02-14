@@ -271,6 +271,6 @@ public:
 #define OPT_CACHE_SUBSUMED_BY			true	// < Cache the results of term subsumption by fixpoints
 #define OPT_SMARTER_MONA_CONVERSION		false	// < Use faster conversion from MONA to VATA (courtesy of PJ)
 #define OPT_CREATE_TAGGED_AUTOMATA		true	// < Use tags to create a specific subformula to automaton
-#define OPT_EXTRACT_MORE_AUTOMATA		true	// < Calls detagger to heuristically convert some subformulae to automata
+#define OPT_EXTRACT_MORE_AUTOMATA		false	// < Calls detagger to heuristically convert some subformulae to automata
 
 #endif

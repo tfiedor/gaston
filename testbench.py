@@ -17,6 +17,7 @@ from threading import Timer
 from termcolor import colored
 
 dwina_error = (-1, -1, -1, -1, -1, -1, -1)
+timeout_error = (-2, -2, -2, -2, -2, -2, -2)
 mona_error = (-1, -1)
 mona_expnf_error = (-1, -1, -1)
 # test_dir="./tests/one"
@@ -74,7 +75,10 @@ def run_gaston(test, timeout, checkonly=False):
 
     # Fixme: This should be the issue of segfault
     if (retcode != 0):
-        return dwina_error, ""
+        if(retcode == 124):
+            return timeout_error, ""
+        else:
+            return dwina_error, ""
     return parsedWiNAOutput(output, "", checkonly)
 
 
