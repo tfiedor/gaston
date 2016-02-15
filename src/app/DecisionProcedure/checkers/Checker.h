@@ -69,5 +69,7 @@ protected:
 	// <<< PRIVATE METHODS >>>
 	void _startTimer(Timer& t);
 	void _stopTimer(Timer& t, char* s);
+	template<class ZeroOrderQuantifier, class FirstOrderQuantifier, class SecondOrderQuantifier>
+	ASTForm* _ClosePrefix(IdentList* freeVars, ASTForm* formula);
 };
 #endif //WSKS_CHECKER_H_H

@@ -484,7 +484,12 @@ public:
   ASTForm_uvf(ASTKind kind, IdentList *ull, IdentList *vll,
 			  ASTForm *ff, Pos p) :
 		  ASTForm_q(kind, ff, p), ul(ull), vl(vll) {}
-  ~ASTForm_uvf() {delete ul; delete vl;}
+  ~ASTForm_uvf() {
+	  if(ul != nullptr)
+		  delete ul;
+	  if(vl != nullptr)
+		  delete vl;
+  }
 
   VISITABLE();
 

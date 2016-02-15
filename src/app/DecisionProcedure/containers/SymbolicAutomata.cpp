@@ -739,12 +739,11 @@ void SymbolicAutomaton::DumpExample(ExampleType e) {
 
 // Fixme: some variables could be bounded twice
 void BinaryOpAutomaton::_DumpExampleCore(ExampleType e) {
-    this->_lhs_aut->DumpExample(e);
-    this->_rhs_aut->DumpExample(e);
+
 }
 
 void ComplementAutomaton::_DumpExampleCore(ExampleType e) {
-    this->_aut->DumpExample(e);
+
 }
 
 std::string interpretModel(std::string& str, bool isFirstOrder) {

@@ -130,6 +130,40 @@ void Checker::LoadFormulaFromFile() {
     delete untypedAST;
 }
 
+template<class ZeroOrderQuantifier, class FirstOrderQuantifier, class SecondOrderQuantifier>
+ASTForm* Checker::_ClosePrefix(IdentList* freeVars, ASTForm* formula) {
+    IdentList zeroOrders, firstOrders, secondOrders;
+    for(auto it = freeVars->begin(); it != freeVars->end(); ++it) {
+        // Distribute the first order and second order variables
+        switch(symbolTable.lookupType(*it)) {
+            case MonaTypeTag::Varname0:
+                zeroOrders.push_back(*it);
+                break;
+            case MonaTypeTag::Varname1:
+                firstOrders.push_back(*it);
+                break;
+            case MonaTypeTag::Varname2:
+                secondOrders.push_back(*it);
+                break;
+            default:
+                assert(false && "Impossible happened!");
+        }
+    }
+
+    if(!zeroOrders.empty()) {
+        formula = new ZeroOrderQuantifier(zeroOrders.copy(), formula, Pos());
+    }
+    if(!secondOrders.empty()) {
+        formula = new SecondOrderQuantifier(nullptr, secondOrders.copy(), formula, Pos());
+    }
+    if(!firstOrders.empty()) {
+        formula = new FirstOrderQuantifier(nullptr, firstOrders.copy(), formula, Pos());
+    }
+
+    this->_isGround = true;
+    return formula;
+};
+
 void Checker::CloseUngroundFormula() {
     assert(this->_monaAST != nullptr);
 
@@ -142,18 +176,18 @@ void Checker::CloseUngroundFormula() {
     if(!this->_isGround) {
         switch(options.test) {
             case TestType::VALIDITY:
-                // Fixme: this is incorrect, we need to tell that the variable is in first order
-                this->_monaAST->formula = new ASTForm_All1(nullptr, &freeVars, this->_monaAST->formula, Pos());
+                this->_monaAST->formula = this->_ClosePrefix<ASTForm_All0, ASTForm_All1, ASTForm_All2>(&freeVars, this->_monaAST->formula);
                 break;
             case TestType::SATISFIABILITY:
-                this->_monaAST->formula = new ASTForm_Ex1(nullptr, &freeVars, this->_monaAST->formula, Pos());
+                this->_monaAST->formula = this->_ClosePrefix<ASTForm_Ex0, ASTForm_Ex1, ASTForm_Ex2>(&freeVars, this->_monaAST->formula);
                 break;
             case TestType::UNSATISFIABILITY:
-                this->_monaAST->formula = new ASTForm_Ex1(nullptr, &freeVars, new ASTForm_Not(this->_monaAST->formula, Pos()), Pos());
+                this->_monaAST->formula = this->_ClosePrefix<ASTForm_Ex0, ASTForm_Ex1, ASTForm_Ex2>(&freeVars, new ASTForm_Not(this->_monaAST->formula, Pos()));
                 break;
             default:
                 // We will test everything
                 for(auto it = freeVars.begin(); it != freeVars.end(); ++it) {
+                    // Fixme: what about zeroorder variables
                     if(symbolTable.lookupType(*it) == MonaTypeTag::Varname1) {
                         ASTForm_FirstOrder* fo = new ASTForm_FirstOrder(new ASTTerm1_Var1(*it, Pos()), Pos());
                         this->_monaAST->formula = new ASTForm_And(fo, this->_monaAST->formula, Pos());
