@@ -277,6 +277,7 @@ def parsedWiNAOutput(output, unprunedOutput, checkonly=False):
         return (-1, -1, -1, -1, -1), ret
 
     # get total time
+    # Fixme: this is currently not supported
     times = [line for line in strippedLines if line.startswith('[*] Total elapsed time:')]
     if (len(times) != 1):
         return

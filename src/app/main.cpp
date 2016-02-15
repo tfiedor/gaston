@@ -83,6 +83,7 @@ int numTypes = 0;
 bool regenerate = false;
 char *inputFileName = NULL;
 Timer timer_conversion, timer_mona, timer_base, timer_automaton;
+Timer timer_gaston;
 
 extern void (*mona_callback)();
 
@@ -194,6 +195,7 @@ int main(int argc, char *argv[]) {
 	}
 	initTimer();
 
+	timer_gaston.start();
     Checker *checker = new SymbolicChecker();
     checker->LoadFormulaFromFile();
     checker->CloseUngroundFormula();
@@ -207,6 +209,9 @@ int main(int argc, char *argv[]) {
         checker->ConstructAutomaton();
         checker->Decide();
     }
+	timer_gaston.stop();
+	std::cout << "\n[*] Total elapsed time: ";
+	timer_gaston.print();
 
     delete checker;
 
