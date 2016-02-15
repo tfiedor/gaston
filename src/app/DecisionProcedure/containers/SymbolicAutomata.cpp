@@ -33,7 +33,8 @@ using namespace Gaston;
 
 // <<< CONSTRUCTORS >>>
 SymbolicAutomaton::SymbolicAutomaton(Formula_ptr form) :
-        _form(form), _factory(this), _initialStates(nullptr), _finalStates(nullptr) {
+        _form(form), _factory(this), _initialStates(nullptr), _finalStates(nullptr), _satExample(nullptr),
+        _unsatExample(nullptr) {
     type = AutType::SYMBOLIC_BASE;
 
     this->symbolFactory = new Workshops::SymbolWorkshop();
@@ -270,6 +271,8 @@ ResultType SymbolicAutomaton::IntersectNonEmpty(Symbol* symbol, Term* stateAppro
 }
 
 ResultType RootProjectionAutomaton::IntersectNonEmpty(Symbol* symbol, Term* finalApproximation, bool underComplement) {
+    assert(this->_unsatExample == nullptr && this->_satExample == nullptr);
+
     // We are doing the initial step by evaluating the epsilon
     TermList* projectionApproximation = reinterpret_cast<TermList*>(finalApproximation);
     assert(projectionApproximation->list.size() == 1);
@@ -280,15 +283,15 @@ ResultType RootProjectionAutomaton::IntersectNonEmpty(Symbol* symbol, Term* fina
     // Create a new fixpoint term and iterator on it
     TermFixpoint* fixpoint = this->_factory.CreateFixpoint(result.first, SymbolWorkshop::CreateZeroSymbol(), underComplement, result.second);
     TermFixpoint::iterator it = fixpoint->GetIterator();
-    Term_ptr fixpointTerm;
+    Term_ptr fixpointTerm = nullptr;
 
     // While the fixpoint is not fully unfolded and while we cannot evaluate early
     while((this->_satExample == nullptr || this->_unsatExample == nullptr) && ((fixpointTerm = it.GetNext()) != nullptr)) {
-        if(fixpoint->GetLastResult() && this->_satExample == nullptr && fixpointTerm != nullptr && fixpointTerm->link.symbol != nullptr) {
+        if(fixpointTerm != nullptr && fixpoint->GetLastResult() && this->_satExample == nullptr && fixpointTerm->link.symbol != nullptr) {
             std::cout << "[*] Found satisfying example\n";
             this->_satExample = fixpointTerm;
         }
-        if(!fixpoint->GetLastResult() && this->_unsatExample == nullptr && fixpointTerm != nullptr && fixpointTerm->link.symbol != nullptr) {
+        if(fixpointTerm != nullptr && !fixpoint->GetLastResult() && this->_unsatExample == nullptr && fixpointTerm->link.symbol != nullptr) {
             std::cout << "[*] Found unsatisfying counter-example\n";
             this->_unsatExample = fixpointTerm;
         }
@@ -796,6 +799,8 @@ void ProjectionAutomaton::_DumpExampleCore(ExampleType e) {
         bool isFirstOrder = (symbolTable.lookupType(this->projectedVars->get(i)) == MonaTypeTag::Varname1 ? true : false);
         std::cout << (symbolTable.lookupSymbol(this->projectedVars->get(i))) << " = " << interpretModel(examples[i], isFirstOrder) << "\n";
     }
+
+    delete[] examples;
 }
 
 void BinaryOpAutomaton::DumpAutomaton() {

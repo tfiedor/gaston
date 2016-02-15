@@ -394,7 +394,7 @@ protected:
     WorklistType _worklist;
     Symbols _symList;
     bool _bValue;
-    bool _lastResult;
+    bool _lastResult = false;
     bool (*_aggregate_result)(bool, bool);
 
 public:
