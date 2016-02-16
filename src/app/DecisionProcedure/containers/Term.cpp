@@ -216,7 +216,7 @@ TermFixpoint::TermFixpoint(Aut_ptr aut, Term_ptr startingTerm, Symbol* symbol, b
     this->_fixpoint.push_front(std::make_pair(nullptr, true));
 
     // Push symbols to worklist
-    this->_InitializeSymbols(aut->symbolFactory, reinterpret_cast<ProjectionAutomaton*>(aut)->projectedVars, symbol);
+    this->_InitializeSymbols(aut->symbolFactory, aut->GetFreeVars(), reinterpret_cast<ProjectionAutomaton*>(aut)->projectedVars, symbol);
     for(auto symbol : this->_symList) {
         this->_worklist.insert(this->_worklist.cbegin(), std::make_pair(startingTerm, symbol));
     }
@@ -251,7 +251,7 @@ TermFixpoint::TermFixpoint(Aut_ptr aut, Term_ptr sourceTerm, Symbol* symbol, boo
     // Initialize the fixpoint
     this->_fixpoint.push_front(std::make_pair(nullptr, true));
     // Push things into worklist
-    this->_InitializeSymbols(aut->symbolFactory, reinterpret_cast<ProjectionAutomaton*>(aut)->projectedVars, symbol);
+    this->_InitializeSymbols(aut->symbolFactory, aut->GetFreeVars(), reinterpret_cast<ProjectionAutomaton*>(aut)->projectedVars, symbol);
 
     #if (DEBUG_TERM_CREATION == true)
     std::cout << "[" << this << "]";
@@ -275,6 +275,7 @@ void Term::SetSuccessor(Term* succ, Symbol* symb) {
     if(this->link.succ == nullptr) {
         this->link.succ = succ;
         this->link.symbol = symb;
+        this->link.len = succ->link.len + 1;
     }
 }
 
@@ -1033,8 +1034,8 @@ void TermFixpoint::_InitializeAggregateFunction(bool inComplement) {
  * @param[in,out] symbols:  list of symbols, that will be transformed
  * @param[in] vars:         list of used vars, that are projected
  */
-void TermFixpoint::_InitializeSymbols(Workshops::SymbolWorkshop* workshop, IdentList* vars, Symbol *startingSymbol) {
-    this->_symList.push_back(startingSymbol);
+void TermFixpoint::_InitializeSymbols(Workshops::SymbolWorkshop* workshop, Gaston::VarList* freeVars, IdentList* vars, Symbol *startingSymbol) {
+    this->_symList.push_back(workshop->CreateTrimmedSymbol(startingSymbol, freeVars));
     // TODO: Optimize, this sucks
     unsigned int symNum = 1;
     for(auto var = vars->begin(); var != vars->end(); ++var) {

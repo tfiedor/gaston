@@ -285,8 +285,6 @@ namespace Workshops {
         #endif
     }
 
-
-
     /**
      * Tries to look into the cache, if there is already created fixpoint,
      * with the same parameters. Otherwise it stores it in the cache
@@ -384,6 +382,32 @@ namespace Workshops {
     }
 
     Symbol* SymbolWorkshop::CreateTrimmedSymbol(Symbol* src, Gaston::VarList* varList) {
+        // Fixme: Refactor
+        // There are no symbols to trim, so we avoid the useless copy
+        if(varList->size() == varMap.TrackLength()) {
+            return src;
+        // Check if maybe everything was trimmed?
+        } else {
+            bool allTrimmed = true;
+            auto it = varList->begin();
+            auto end = varList->end();
+            auto varNum = varMap.TrackLength();
+            // For each var, if it is not present in the free vars, we project it away
+            for (size_t var = 0; var < varNum; ++var) {
+                if (it != end && var == *it) {
+                    ++it;
+                } else {
+                    if(!src->IsDontCareAt(var)) {
+                        allTrimmed = false;
+                        break;
+                    }
+                }
+            }
+            if(allTrimmed) {
+                return src;
+            }
+        }
+
         auto symbolKey = std::make_tuple(src, 0u, 'T');
         Symbol* sPtr;
         if(!this->_symbolCache->retrieveFromCache(symbolKey, sPtr)) {
@@ -391,6 +415,7 @@ namespace Workshops {
             auto it = varList->begin();
             auto end = varList->end();
             auto varNum = varMap.TrackLength();
+            // For each var, if it is not present in the free vars, we project it away
             for (size_t var = 0; var < varNum; ++var) {
                 if (it != end && var == *it) {
                     ++it;
@@ -404,6 +429,7 @@ namespace Workshops {
     }
 
     Symbol* SymbolWorkshop::_CreateProjectedSymbol(Symbol* src, VarType var, ValType val) {
+        assert(val != '0');
         auto symbolKey = std::make_tuple(src, var, val);
         Symbol* symPtr;
         if(!this->_symbolCache->retrieveFromCache(symbolKey, symPtr)) {
@@ -433,12 +459,16 @@ namespace Workshops {
         }
     }
 
+    void SymbolWorkshop::Dump() {
+        this->_symbolCache->dumpStats();
+    }
+
     void dumpSymbolKey(SymbolKey const&s) {
-        std::cout << "<" << (*std::get<0>(s)) << ", " << std::get<1>(s) << ", " << std::get<2>(s) << ">";
+        std::cout << "<[" <<  (std::get<0>(s)) << "]" << (*std::get<0>(s)) << ", " << std::get<1>(s) << ", " << std::get<2>(s) << ">";
     }
 
     void dumpSymbolData(Symbol*&s) {
-        std::cout << s;
+        std::cout  << "<[" <<  (s) << "]" << (*s);
     }
 
     void dumpBaseKey(BaseKey const&s) {

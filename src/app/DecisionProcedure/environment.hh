@@ -179,6 +179,7 @@ public:
 /* >>> Debugging Options <<< *
  *****************************/
 #define DEBUG_AUTOMATA_ADDRESSES		false
+#define DEBUG_EXAMPLE_PATHS				false
 #define DEBUG_BASE_AUTOMATA 			false
 #define DEBUG_FIXPOINT 					false
 #define DEBUG_FIXPOINT_SYMBOLS			false
@@ -186,7 +187,8 @@ public:
 #define DEBUG_INTERSECT_NON_EMPTY 		false
 #define DEBUG_TERM_UNIQUENESS			false
 #define DEBUG_TERM_CREATION				false
-#define DEBUG_CACHE_MEMBERS				false
+#define DEBUG_SYMBOL_CREATION			true
+#define DEBUG_CACHE_MEMBERS				true
 #define DEBUG_WORKSHOPS					false
 #define DEBUG_TERM_SUBSUMPTION 			false
 #define DEBUG_TERM_CACHE_COMPARISON		false
@@ -204,6 +206,7 @@ public:
 #define PRINT_STATS_PRODUCT				true
 #define PRINT_STATS_NEGATION			true
 #define PRINT_STATS_BASE				true
+#define PRINT_STATS						false
 
 /* >>> Dumping Options <<< *
  ***************************/
@@ -258,7 +261,7 @@ public:
 #define OPT_CREATE_QF_AUTOMATON 		true	// < Transform quantifier-free automaton to formula
 #define OPT_REDUCE_AUT_EVERYTIME		false	// < Call reduce everytime VATA automaton is created (i.e. as intermediate result)
 #define OPT_REDUCE_AUT_LAST				true	// < Call reduce after the final VATA automaton is created
-#define OPT_EARLY_EVALUATION 			false	// < Evaluates early interesection of products
+#define OPT_EARLY_EVALUATION 			true	// < Evaluates early interesection of products
 #define OPT_EARLY_PARTIAL_SUB			true	// < Postpone the partially subsumed terms
 #define OPT_CONT_ONLY_WHILE_UNSAT		true	// < Generate continuation only if there wasn't found (un)satisfying (counter)example yet
 #define OPT_PRUNE_EMPTY					true	// < Prune terms by empty set
@@ -271,6 +274,6 @@ public:
 #define OPT_CACHE_SUBSUMED_BY			true	// < Cache the results of term subsumption by fixpoints
 #define OPT_SMARTER_MONA_CONVERSION		false	// < Use faster conversion from MONA to VATA (courtesy of PJ)
 #define OPT_CREATE_TAGGED_AUTOMATA		true	// < Use tags to create a specific subformula to automaton
-#define OPT_EXTRACT_MORE_AUTOMATA		false	// < Calls detagger to heuristically convert some subformulae to automata
+#define OPT_EXTRACT_MORE_AUTOMATA		true	// < Calls detagger to heuristically convert some subformulae to automata
 
 #endif

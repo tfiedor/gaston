@@ -80,9 +80,10 @@ public:
     struct {
         Term* succ;
         Symbol* symbol;
+        size_t len;
     } link;
 
-    Term() : link{ nullptr, nullptr} {}
+    Term() : link{ nullptr, nullptr, 0} {}
     virtual ~Term();
 
     // See #L29
@@ -426,7 +427,7 @@ protected:
     void ComputeNextPre();
     bool _processOnePostponed();
     void _InitializeAggregateFunction(bool inComplement);
-    void _InitializeSymbols(Workshops::SymbolWorkshop* workshop, IdentList*, Symbol*);
+    void _InitializeSymbols(Workshops::SymbolWorkshop* form, Gaston::VarList*, IdentList*, Symbol*);
     SubsumptionResult _IsSubsumedCore(Term* t, bool b = false);
     SubsumptionResult _testIfSubsumes(Term_ptr const& term);
     bool _eqCore(const Term&);

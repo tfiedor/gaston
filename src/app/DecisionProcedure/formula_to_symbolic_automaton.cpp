@@ -22,10 +22,14 @@ SymbolicAutomaton* baseToSymbolicAutomaton(ASTForm* form, bool doComplement) {
     DFA *dfa = nullptr;
     int numVars = varMap.TrackLength();
 
+    IdentList free, bound;
+    form->freeVars(&free, &bound);
+
     toMonaAutomaton(form, dfa, doComplement);
     assert(dfa != nullptr);
 
-    return new TemplatedAutomaton(dfa, varMap.TrackLength(), form);
+    auto hasEmptyTracks = free.empty() && form->kind != aTrue && form->kind != aFalse;
+    return new TemplatedAutomaton(dfa, varMap.TrackLength(), form, hasEmptyTracks);
 #else
     assert(false);
 #endif

@@ -14,15 +14,16 @@
  *****************************************************************************/
 
 #include <list>
+#include <stdint.h>
 #include "SymbolicAutomata.h"
 #include "Term.h"
-#include "../environment.hh"
 #include "../decision_procedures.hh"
+#include "../environment.hh"
 #include "../containers/VarToTrackMap.hh"
 #include "../containers/Workshops.h"
-#include "../../Frontend/symboltable.h"
 #include "../../Frontend/dfa.h"
-#include <stdint.h>
+#include "../../Frontend/symboltable.h"
+#include "../../Frontend/timer.h"
 
 extern VarToTrackMap varMap;
 extern SymbolTable symbolTable;
@@ -88,7 +89,7 @@ ProjectionAutomaton::~ProjectionAutomaton() {
 RootProjectionAutomaton::RootProjectionAutomaton(SymbolicAutomaton* aut, Formula_ptr form)
         : ProjectionAutomaton(aut, form) {}
 
-BaseAutomaton::BaseAutomaton(BaseAutomatonType* aut, size_t vars, Formula_ptr form) : SymbolicAutomaton(form), _autWrapper(dfaCopy(aut), vars) {
+BaseAutomaton::BaseAutomaton(BaseAutomatonType* aut, size_t vars, Formula_ptr form, bool emptyTracks) : SymbolicAutomaton(form), _autWrapper(dfaCopy(aut), emptyTracks, vars) {
     type = AutType::BASE;
     this->_InitializeAutomaton();
     this->_stateSpace = vars;
@@ -285,8 +286,24 @@ ResultType RootProjectionAutomaton::IntersectNonEmpty(Symbol* symbol, Term* fina
     TermFixpoint::iterator it = fixpoint->GetIterator();
     Term_ptr fixpointTerm = nullptr;
 
+    #if (DEBUG_EXAMPLE_PATHS == true)
+    size_t maxPath = 0;
+    Timer timer_paths;
+    timer_paths.start();
+    #endif
     // While the fixpoint is not fully unfolded and while we cannot evaluate early
     while((this->_satExample == nullptr || this->_unsatExample == nullptr) && ((fixpointTerm = it.GetNext()) != nullptr)) {
+        #if (DEBUG_EXAMPLE_PATHS == true)
+        if(fixpointTerm != nullptr && fixpointTerm->link.len > maxPath) {
+            std::cout << "[*] Finished exploring examples of length '" << maxPath << "': ";
+            timer_paths.stop();
+            timer_paths.print();
+            timer_paths.start();
+            std::cout << "\n";
+            maxPath = fixpointTerm->link.len;
+        }
+        #endif
+
         if(fixpointTerm != nullptr && fixpoint->GetLastResult() && this->_satExample == nullptr && fixpointTerm->link.symbol != nullptr) {
             std::cout << "[*] Found satisfying example\n";
             this->_satExample = fixpointTerm;
@@ -296,6 +313,9 @@ ResultType RootProjectionAutomaton::IntersectNonEmpty(Symbol* symbol, Term* fina
             this->_unsatExample = fixpointTerm;
         }
     }
+    #if (DEBUG_EXAMPLE_PATHS == true)
+    timer_paths.stop();
+    #endif
 
     return std::make_pair(fixpoint, fixpoint->GetResult());
 }
@@ -406,7 +426,7 @@ void BaseAutomaton::_InitializeInitialStates() {
 
     // TODO: Yeah this sucks, could be better, but it is called only once
     BaseAutomatonStateSet initialStates;
-    initialStates.insert(1);
+    initialStates.insert(this->_autWrapper.GetInitialState());
 
     this->_initialStates = this->_factory.CreateBaseSet(initialStates, this->_stateOffset, this->_stateSpace);
 }
@@ -491,7 +511,6 @@ Term* BaseAutomaton::Pre(Symbol* symbol, Term* finalApproximation, bool underCom
     BaseAutomatonStateSet null;
 
     for(auto state : baseSet->states) {
-        assert(state != 0);
         // Get MTBDD for Pre of states @p state
         auto key = std::make_pair(state, symbol);
         preStates.clear();
@@ -1102,9 +1121,14 @@ void BinaryOpAutomaton::DumpStats() {
         this->_form->dump();
         std::cout << "\n";
         std::cout << "  \u2218 Cache stats -> ";
+        #if (MEASURE_CACHE_HITS == true)
         this->_resCache.dumpStats();
+        #endif
         #if (DEBUG_WORKSHOPS)
         this->_factory.Dump();
+        #endif
+        #if (DEBUG_SYMBOL_CREATION == true)
+        this->symbolFactory->Dump();
         #endif
         print_stat("True Hits", this->_trueCounter);
         print_stat("False Hits", this->_falseCounter);
@@ -1120,9 +1144,14 @@ void ProjectionAutomaton::DumpStats() {
         this->_form->dump();
         std::cout << "\n";
         std::cout << "  \u2218 Cache stats -> ";
+        #if (MEASURE_CACHE_HITS == true)
         this->_resCache.dumpStats();
+        #endif
         #if (DEBUG_WORKSHOPS)
         this->_factory.Dump();
+        #endif
+        #if (DEBUG_SYMBOL_CREATION == true)
+        this->symbolFactory->Dump();
         #endif
         #if (MEASURE_PROJECTION == true)
         print_stat("Fixpoint Nexts", this->fixpointNext);
@@ -1142,9 +1171,14 @@ void ComplementAutomaton::DumpStats() {
         this->_form->dump();
         std::cout << "\n";
         std::cout << "  \u2218 Cache stats -> ";
+        #if (MEASURE_CACHE_HITS == true)
         this->_resCache.dumpStats();
+        #endif
         #if (DEBUG_WORKSHOPS)
         this->_factory.Dump();
+        #endif
+        #if (DEBUG_SYMBOL_CREATION == true)
+        this->symbolFactory->Dump();
         #endif
         print_stat("True Hits", this->_trueCounter);
         print_stat("False Hits", this->_falseCounter);
@@ -1159,9 +1193,14 @@ void BaseAutomaton::DumpStats() {
         this->_form->dump();
         std::cout << "\n";
         std::cout << "  \u2218 Cache stats -> ";
+        #if (MEASURE_CACHE_HITS == true)
         this->_resCache.dumpStats();
+        #endif
         #if (DEBUG_WORKSHOPS)
         this->_factory.Dump();
+        #endif
+        #if (DEBUG_SYMBOL_CREATION == true)
+        this->symbolFactory->Dump();
         #endif
         print_stat("True Hits", this->_trueCounter);
         print_stat("False Hits", this->_falseCounter);

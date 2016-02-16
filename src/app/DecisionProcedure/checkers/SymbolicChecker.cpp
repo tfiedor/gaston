@@ -43,16 +43,21 @@ int SymbolicChecker::_DecideCore(bool isValid) {
     assert(this->_automaton != nullptr);
 
     if(this->_isGround) {
+        // Ground formula is valid if epsilon is in its language
         if(isValid) {
             return Decision::VALID;
+        // Else it is unsatisfiable
         } else {
             return Decision::UNSATISFIABLE;
         }
     } else {
+        // Formula is unsatisfiable if there is no satisfying example
         if(this->_automaton->_satExample == nullptr) {
             return Decision::UNSATISFIABLE;
+        // Formula is valid if there is satisfying example and no unsatisfying example
         } else if(this->_automaton->_unsatExample == nullptr) {
             return Decision::VALID;
+        // Formula is satisfiable if there exists satisfying example
         } else {
             return Decision::SATISFIABLE;
         }
@@ -191,7 +196,7 @@ bool SymbolicChecker::Run() {
     std::cout << "[*] Explored Fixpoint Space: " << fixpoint->MeasureStateSpace() << "\n";
 #endif
 
-#if (MEASURE_CACHE_HITS == true)
+#if (PRINT_STATS == true)
     std::cout << "[*] Printing Statistics\n";
     this->_automaton->DumpStats();
     std::cout << "\n";

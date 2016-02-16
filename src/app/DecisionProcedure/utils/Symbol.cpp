@@ -136,8 +136,11 @@ char ZeroSymbol::GetSymbolAt(size_t pos) const {
         return '1';
     } else if(!lTest && !rTest) {
         return '0';
-    } else {
+    } else if(lTest && rTest) {
         return 'X';
+    } else {
+        std::cerr << "[!] Warning strange character in symbol occured\n";
+        return '?';
     }
 }
 

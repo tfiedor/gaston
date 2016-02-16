@@ -47,6 +47,7 @@ protected:
     InternalNodesType internalNodes_;
     DFA *dfa_;
     unsigned numVars_;
+    size_t initialState_;
     boost::dynamic_bitset<> symbol_;
 
 private:
@@ -235,12 +236,12 @@ private:
     }
 
 public:
-    MonaWrapper(DFA *dfa, unsigned numVars = 0): dfa_(dfa), numVars_(numVars)
+    MonaWrapper(DFA *dfa, bool emptyTracks, unsigned numVars = 0): dfa_(dfa), numVars_(numVars), initialState_(emptyTracks ? 0 : 1)
     {
         roots_.resize(dfa->ns, nullptr);
         leafNodes_.resize(dfa->ns, nullptr);
 
-        for(size_t i = 1; i < dfa->ns; i++)
+        for(size_t i = this->initialState_; i < dfa->ns; i++)
             RecSetPointer(dfa->bddm, dfa->q[i], *spawnNode(dfa->bddm, dfa->q[i], i));
     }
 
@@ -326,7 +327,7 @@ public:
 
     void DumpDFA() {
         std::string str(this->numVars_, 'X');
-        for(int i = 1; i < this->dfa_->ns; ++i) {
+        for(size_t i = this->initialState_; i < this->dfa_->ns; ++i) {
             GetAllPathFromMona(this->dfa_->bddm, this->dfa_->q[i], str, i, this->numVars_);
         }
     }
@@ -346,16 +347,20 @@ public:
     void ProcessDFA(DFA *dfa)
     {
         dfa_ = dfa;
-        for(size_t i = 1; i < dfa->ns; i++)
+        for(size_t i = this->initialState_; i < dfa->ns; i++)
             RecSetPointer(dfa->bddm, dfa->q[i], *spawnNode(dfa->bddm, dfa->q[i], i));
     }
 
     void GetFinalStates(VectorType& final) {
-        for (unsigned int i = 1; i < this->dfa_->ns; ++i) {
+        for (size_t i = this->initialState_; i < this->dfa_->ns; ++i) {
             if (this->dfa_->f[i] == 1) {
                 final.insert(i);
             }
         }
+    }
+
+    size_t GetInitialState() {
+        return this->initialState_;
     }
 };
 
