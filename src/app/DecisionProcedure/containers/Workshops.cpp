@@ -423,6 +423,18 @@ namespace Workshops {
                     sPtr->ProjectVar(var);
                 }
             }
+            #if (OPT_UNIQUE_TRIMMED_SYMBOLS == true)
+            for(auto item = this->_symbolCache->begin(); item != this->_symbolCache->end(); ++item) {
+                if(std::get<2>((*item).first) == 'T') {
+                    if(*(*item).second == *sPtr) {
+                        Symbol* uniqPtr = (*item).second;
+                        this->_symbolCache->StoreIn(symbolKey, uniqPtr);
+                        delete sPtr;
+                        return uniqPtr;
+                    }
+                }
+            }
+            #endif
             this->_symbolCache->StoreIn(symbolKey, sPtr);
         }
         return sPtr;

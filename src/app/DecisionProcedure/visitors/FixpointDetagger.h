@@ -10,7 +10,7 @@
 
 class FixpointDetagger : public VoidVisitor {
 private:
-    const size_t _cFixpointThreshold = 1;      // < Everything with less than _cFixpointThreshold fixpoint computations will be converted to automaton
+    const size_t _cFixpointThreshold = 3;      // < Everything with less than _cFixpointThreshold fixpoint computations will be converted to automaton
 
     template<class FixpointFormula>
     void _visitFixpointComputation(FixpointFormula*);

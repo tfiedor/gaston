@@ -23,7 +23,8 @@ AST* BaseAutomataMerger::_mergeBaseOnPath(BinopClass* binopForm) {
             temp = binopForm->f1;
             binopForm->f1 = binopForm->f2;
             binopForm->f2 = binMergePoint->f2;
-            binMergePoint->f2 = temp;
+            binMergePoint->f2 = binMergePoint->f1;
+            binMergePoint->f1 = temp;
         }
     }
 
