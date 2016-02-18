@@ -188,7 +188,7 @@ public:
   virtual void toUnaryAutomaton(Automaton &aut, bool doComplement) { std::cerr << "Missing automaton for this formula\n"; this->dump();}
   virtual void toBinaryAutomaton(Automaton &aut, bool doComplement) { std::cerr << "Missing automaton for this formula\n"; this->dump(); }
 	virtual SymbolicAutomaton* toSymbolicAutomaton(bool doComplement);
-	virtual SymbolicAutomaton* _toSymbolicAutomatonCore(bool doComplement) { std::cerr << "Missing automaton for this formula\n"; this->dump(); return nullptr;}
+	virtual SymbolicAutomaton* _toSymbolicAutomatonCore(bool doComplement);
 };
 
 class FormList: public DequeGC<ASTForm*> {};

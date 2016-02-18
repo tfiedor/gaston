@@ -50,6 +50,15 @@ SymbolicAutomaton* ASTForm::toSymbolicAutomaton(bool doComplement) {
     return this->sfa;
 }
 
+SymbolicAutomaton* ASTForm::_toSymbolicAutomatonCore(bool doComplement) {
+#   if (AUT_CONSTRUCT_BY_MONA == true)
+    return baseToSymbolicAutomaton<GenericBaseAutomaton>(this, doComplement);
+#   else
+    this->dump();
+    assert(false && "Missing automaton for this automaton");
+#   endif
+}
+
 SymbolicAutomaton* ASTForm_True::_toSymbolicAutomatonCore(bool doComplement) {
     return baseToSymbolicAutomaton<TrueAutomaton>(this, doComplement);
 }

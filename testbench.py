@@ -51,7 +51,7 @@ def run_mona(test, timeout, checkonly=False):
     args = ('./mona', '-s', '"{}"'.format(test))
     output, retcode = runProcess(args, timeout)
     if(retcode != 0):
-        return mona_error, ""
+        return mona_error, output
     return parseMonaOutput(output, False, checkonly)
 
 
@@ -280,7 +280,7 @@ def parsedWiNAOutput(output, unprunedOutput, checkonly=False):
     # Fixme: this is currently not supported
     times = [line for line in strippedLines if line.startswith('[*] Total elapsed time:')]
     if (len(times) != 1):
-        return
+        return (-1, -1, -1, -1, -1), ret
     time = parseTotalTime(times[0])
 
     # get size of state

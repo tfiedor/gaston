@@ -206,7 +206,7 @@ public:
 #define PRINT_STATS_PRODUCT				true
 #define PRINT_STATS_NEGATION			true
 #define PRINT_STATS_BASE				true
-#define PRINT_STATS						true
+#define PRINT_STATS						false
 
 /* >>> Dumping Options <<< *
  ***************************/
@@ -230,7 +230,7 @@ public:
 
 /* >>> Anti-Prenexing Options <<< *
  **********************************/
-#define ANTIPRENEXING_FULL				true
+#define ANTIPRENEXING_FULL				false
 #define ANTIPRENEXING_DISTRIBUTIVE		false
 
 /*
@@ -258,10 +258,10 @@ public:
 #define OPT_TERM_HASH_BY_APPROX			true	// < Include stateSpaceApprox into hash (i.e. better distribution of cache)
 #define OPT_ANTIPRENEXING				true	// < Transform formula to anti-prenex form (i.e. all of the quantifiers are deepest on leaves)
 #define OPT_DRAW_NEGATION_IN_BASE 		true	// < Negation is handled on formula level and not on computation level on base automata
-#define OPT_CREATE_QF_AUTOMATON 		true	// < Transform quantifier-free automaton to formula
+#define OPT_CREATE_QF_AUTOMATON 		false	// < Transform quantifier-free automaton to formula
 #define OPT_REDUCE_AUT_EVERYTIME		false	// < Call reduce everytime VATA automaton is created (i.e. as intermediate result)
 #define OPT_REDUCE_AUT_LAST				true	// < Call reduce after the final VATA automaton is created
-#define OPT_EARLY_EVALUATION 			true	// < Evaluates early interesection of products
+#define OPT_EARLY_EVALUATION 			false	// < Evaluates early interesection of products
 #define OPT_EARLY_PARTIAL_SUB			true	// < Postpone the partially subsumed terms
 #define OPT_CONT_ONLY_WHILE_UNSAT		true	// < Generate continuation only if there wasn't found (un)satisfying (counter)example yet
 #define OPT_PRUNE_EMPTY					true	// < Prune terms by empty set
