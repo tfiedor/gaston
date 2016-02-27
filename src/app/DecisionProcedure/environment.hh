@@ -198,6 +198,7 @@ public:
 #define DEBUG_GENERATE_DOT_AUTOMATON	true
 #define DEBUG_COMPUTE_FULL_FIXPOINT 	false
 #define DEBUG_COMPARE_WORKLISTS			true
+#define DEBUG_VARMAP					false
 
 /*
  * >>> Automata stats options
@@ -212,7 +213,7 @@ public:
  ***************************/
 #define DUMP_NO_SYMBOL_TABLE			true
 #define DUMP_INTERMEDIATE_AUTOMATA		true
-#define DUMP_EXAMPLES					false
+#define DUMP_EXAMPLES					true
 
 /* >>> Measuring Options <<< *
  *****************************/
@@ -258,10 +259,10 @@ public:
 #define OPT_TERM_HASH_BY_APPROX			true	// < Include stateSpaceApprox into hash (i.e. better distribution of cache)
 #define OPT_ANTIPRENEXING				true	// < Transform formula to anti-prenex form (i.e. all of the quantifiers are deepest on leaves)
 #define OPT_DRAW_NEGATION_IN_BASE 		true	// < Negation is handled on formula level and not on computation level on base automata
-#define OPT_CREATE_QF_AUTOMATON 		false	// < Transform quantifier-free automaton to formula
+#define OPT_CREATE_QF_AUTOMATON 		true	// < Transform quantifier-free automaton to formula
 #define OPT_REDUCE_AUT_EVERYTIME		false	// < Call reduce everytime VATA automaton is created (i.e. as intermediate result)
 #define OPT_REDUCE_AUT_LAST				true	// < Call reduce after the final VATA automaton is created
-#define OPT_EARLY_EVALUATION 			false	// < Evaluates early interesection of products
+#define OPT_EARLY_EVALUATION 			true	// < Evaluates early interesection of products
 #define OPT_EARLY_PARTIAL_SUB			true	// < Postpone the partially subsumed terms
 #define OPT_CONT_ONLY_WHILE_UNSAT		true	// < Generate continuation only if there wasn't found (un)satisfying (counter)example yet
 #define OPT_PRUNE_EMPTY					true	// < Prune terms by empty set
@@ -273,8 +274,8 @@ public:
 #define OPT_CACHE_SUBSUMES				true	// < Cache the results of subsumption testing between terms
 #define OPT_CACHE_SUBSUMED_BY			true	// < Cache the results of term subsumption by fixpoints
 #define OPT_SMARTER_MONA_CONVERSION		false	// < Use faster conversion from MONA to VATA (courtesy of PJ)
-#define OPT_CREATE_TAGGED_AUTOMATA		true	// < Use tags to create a specific subformula to automaton
-#define OPT_EXTRACT_MORE_AUTOMATA		false	// < Calls detagger to heuristically convert some subformulae to automata
+#define OPT_CREATE_TAGGED_AUTOMATA		false	// < Use tags to create a specific subformula to automaton
+#define OPT_EXTRACT_MORE_AUTOMATA		true	// < Calls detagger to heuristically convert some subformulae to automata
 #define OPT_UNIQUE_TRIMMED_SYMBOLS		false	// < Will guarantee that there will not be a collisions between symbols after trimming
 
 #endif

@@ -1,0 +1,8 @@
+# Gaston WS1S Benchmark
+# Tests: where
+# Field: syntax
+# Ground: true
+# Long Description: Tests basic functionality of 'where' syntax expression
+
+ws1s;
+all2 X: ex2 Y where X sub Y: X ~= Y;

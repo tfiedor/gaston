@@ -286,36 +286,42 @@ ResultType RootProjectionAutomaton::IntersectNonEmpty(Symbol* symbol, Term* fina
     TermFixpoint::iterator it = fixpoint->GetIterator();
     Term_ptr fixpointTerm = nullptr;
 
-    #if (DEBUG_EXAMPLE_PATHS == true)
+#   if (DEBUG_EXAMPLE_PATHS == true)
     size_t maxPath = 0;
     Timer timer_paths;
     timer_paths.start();
-    #endif
+#   endif
     // While the fixpoint is not fully unfolded and while we cannot evaluate early
     while((this->_satExample == nullptr || this->_unsatExample == nullptr) && ((fixpointTerm = it.GetNext()) != nullptr)) {
-        #if (DEBUG_EXAMPLE_PATHS == true)
+#       if (DEBUG_EXAMPLE_PATHS == true)
         if(fixpointTerm != nullptr && fixpointTerm->link.len > maxPath) {
             std::cout << "[*] Finished exploring examples of length '" << maxPath << "': ";
             timer_paths.stop();
             timer_paths.print();
             timer_paths.start();
-            std::cout << "\n";
             maxPath = fixpointTerm->link.len;
+            // Fixme: Remove this assert
+            if(maxPath > 10) {
+                std::cout << "[!] Maximal search depth reached!\n";
+                break;
+            }
         }
-        #endif
+#       endif
 
         if(fixpointTerm != nullptr && fixpoint->GetLastResult() && this->_satExample == nullptr && fixpointTerm->link.symbol != nullptr) {
             std::cout << "[*] Found satisfying example\n";
             this->_satExample = fixpointTerm;
+            continue;
         }
         if(fixpointTerm != nullptr && !fixpoint->GetLastResult() && this->_unsatExample == nullptr && fixpointTerm->link.symbol != nullptr) {
             std::cout << "[*] Found unsatisfying counter-example\n";
             this->_unsatExample = fixpointTerm;
+            continue;
         }
     }
-    #if (DEBUG_EXAMPLE_PATHS == true)
+#   if (DEBUG_EXAMPLE_PATHS == true)
     timer_paths.stop();
-    #endif
+#   endif
 
     return std::make_pair(fixpoint, fixpoint->GetResult());
 }

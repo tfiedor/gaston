@@ -9,6 +9,7 @@
 #include "../environment.hh"
 
 extern Timer timer_conversion, timer_mona, timer_base, timer_automaton;
+extern Ident lastPosVar, allPosVar;
 
 SymbolicChecker::~SymbolicChecker() {
 
@@ -23,9 +24,19 @@ void SymbolicChecker::ConstructAutomaton() {
         this->_automaton->DumpAutomaton();
     std::cout << "\n";
 
+    // M2L-str()
+    if(allPosVar != -1) {
+        std::cout << "[*] AllPosVar predicate detected\n";
+        DFA* dfa = dfaAllPos(varMap[allPosVar]);
+        assert(dfa != nullptr);
+        SymbolicAutomaton* allPosAutomaton = new GenericBaseAutomaton(dfa, varMap.TrackLength(), this->_monaAST->formula, false);
+        this->_automaton = new IntersectionAutomaton(allPosAutomaton, this->_automaton, this->_monaAST->formula);
+    }
+
     IdentList free, bound;
     this->_monaAST->formula->freeVars(&free, &bound);
     if(!free.empty()) {
+        // Fixme: This is WRONG
         this->_monaAST->formula = new ASTForm_Ex1(nullptr, free.copy(), this->_monaAST->formula, Pos());
         this->_automaton = new RootProjectionAutomaton(this->_automaton, this->_monaAST->formula);
     }
@@ -117,17 +128,17 @@ bool SymbolicChecker::Run() {
     //      states of base automata on leaves
 
     Term_ptr finalStatesApproximation = this->_automaton->GetFinalStates();
-#if (DEBUG_INITIAL_APPROX == true)
+#   if (DEBUG_INITIAL_APPROX == true)
     finalStatesApproximation->dump();
     std::cout << "\n";
-#endif
+#   endif
 
     // Checks if Initial States intersect Final states
     std::pair<Term_ptr, bool> result = this->_automaton->IntersectNonEmpty(nullptr, finalStatesApproximation, false);
     Term_ptr fixpoint = result.first;
     bool isValid = result.second;
 
-    //#if (DUMP_EXAMPLES == true)
+#   if (DUMP_EXAMPLES == true)
     // TODO: Better output
     std::cout << "[*] Printing satisfying example of least length\n";
     this->_automaton->DumpExample(ExampleType::SATISFYING);
@@ -136,16 +147,16 @@ bool SymbolicChecker::Run() {
     std::cout << "[*] Printing unsatisfying example of least length\n";
     this->_automaton->DumpExample(ExampleType::UNSATISFYING);
     std::cout << "\n";
-    //#endif
+#   endif
 
-#if (DEBUG_FIXPOINT == true)
+#   if (DEBUG_FIXPOINT == true)
     std::cout << "[!] Finished deciding WS1S formula with following fixpoint:\n";
     fixpoint->dump();
     std::cout << "\n";
-#endif
+#   endif
 
-#if (MEASURE_STATE_SPACE == true)
-#define OUTPUT_MEASURES(TermType) \
+#   if (MEASURE_STATE_SPACE == true)
+#   define OUTPUT_MEASURES(TermType) \
         std::cout << "\t\t\u2218 prunnable: " << TermType::prunable << "\n"; \
         std::cout << "\t\t\u2218 (==) by same ptr: " << TermType::comparisonsBySamePtr << "/" << Term::comparisonsBySamePtr; \
         std::cout << " (" << std::fixed << std::setprecision(2) << (TermType::comparisonsBySamePtr/(double)Term::comparisonsBySamePtr)*100 <<"%)\n"; \
@@ -157,54 +168,54 @@ bool SymbolicChecker::Run() {
     std::cout << "\t\u2218 Symbols: " << ZeroSymbol::instances << "\n";
     std::cout << "\t\u2218 Term Empty: " << TermEmpty::instances << "\n";
     std::cout << "\t\u2218 Term Products: " << TermProduct::instances << "\n";
-#if (MEASURE_COMPARISONS == true)
+#   if (MEASURE_COMPARISONS == true)
     OUTPUT_MEASURES(TermProduct)
-#endif
+#   endif
     std::cout << "\t\u2218 Term Bases: " << TermBaseSet::instances << "\n";
-#if (MEASURE_COMPARISONS == true)
+#   if (MEASURE_COMPARISONS == true)
     OUTPUT_MEASURES(TermBaseSet)
-#endif
+#   endif
     std::cout << "\t\u2218 Term Fixpoints: " << TermFixpoint::instances << " (" << (TermFixpoint::instances - TermFixpoint::preInstances) << " + " << TermFixpoint::preInstances <<")\n";
-#if (MEASURE_PROJECTION == true)
+#   if (MEASURE_PROJECTION == true)
     std::cout << "\t\t\u2218 is not shared: " << TermFixpoint::isNotShared << "\n";
-#endif
-#if (MEASURE_SUBSUMEDBY_HITS == true)
+#   endif
+#   if (MEASURE_SUBSUMEDBY_HITS == true)
     std::cout << "\t\t\u2218 subsumedBy hits: " << TermFixpoint::subsumedByHits << "\n";
-#endif
-#if (MEASURE_POSTPONED == true)
+#   endif
+#   if (MEASURE_POSTPONED == true)
     std::cout << "\t\t\u2218 postponed terms: " << TermFixpoint::postponedTerms << " (" << TermFixpoint::postponedProcessed << " evaluated)\n";
-#endif
-#if (MEASURE_COMPARISONS == true)
+#   endif
+#   if (MEASURE_COMPARISONS == true)
     OUTPUT_MEASURES(TermFixpoint)
-#endif
+#   endif
     std::cout << "\t\u2218 Term Lists: " << TermList::instances << "\n";
-#if (MEASURE_COMPARISONS == true)
+#   if (MEASURE_COMPARISONS == true)
     OUTPUT_MEASURES(TermList)
-#endif
+#   endif
     std::cout << "\t\u2218 Term Continuations: " << (TermContinuation::instances) << "\n";
-#if (MEASURE_CONTINUATION_EVALUATION == true)
+#   if (MEASURE_CONTINUATION_EVALUATION == true)
     std::cout << "\t\t\u2218 evaluated: " << TermContinuation::continuationUnfolding << "\n";
     std::cout << "\t\t\t\u2218 in subsumption: " << TermContinuation::unfoldInSubsumption << "\n";
     std::cout << "\t\t\t\u2218 in isect nonempty: " << TermContinuation::unfoldInIsectNonempty << "\n";
-#endif
-#if (MEASURE_COMPARISONS == true)
+#   endif
+#   if (MEASURE_COMPARISONS == true)
     OUTPUT_MEASURES(TermContinuation)
-#endif
-#undef OUTPUT_MEASURES
+#   endif
+#   undef OUTPUT_MEASURES
     std::cout << "[*] Overall State Space: " << (TermProduct::instances + TermBaseSet::instances + TermFixpoint::instances
                                                  + TermList::instances + TermContinuation::instances) << "\n";
     std::cout << "[*] Explored Fixpoint Space: " << fixpoint->MeasureStateSpace() << "\n";
-#endif
+#   endif
 
-#if (PRINT_STATS == true)
+#   if (PRINT_STATS == true)
     std::cout << "[*] Printing Statistics\n";
     this->_automaton->DumpStats();
     std::cout << "\n";
-#endif
+#   endif
 
-#if (DEBUG_GENERATE_DOT_AUTOMATON == true)
+#   if (DEBUG_GENERATE_DOT_AUTOMATON == true)
     SymbolicAutomaton::AutomatonToDot("automaton.dot", this->_automaton, false);
-#endif
+#   endif
 
     // If Initial States does intersect final ones, the formula is valid, else it is unsatisfiable
     return isValid;

@@ -33,6 +33,7 @@ using TimerType = Timer;
 	code(UniversalQuantifierRemover)	/* Remove universal quantifier from formula*/ \
 	code(NegationUnfolder)				/* Push negations deeply*/ \
 	code(SecondOrderRestricter)			/* Restrict the formula to second order*/\
+	code(BaseAutomataMerger)			/* Merge some of the base automata*/\
 	code(QuantificationMerger)			/* Merge some quantifications */
 #else
 #define FILTER_LIST(code) \

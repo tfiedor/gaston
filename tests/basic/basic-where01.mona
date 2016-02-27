@@ -1,0 +1,8 @@
+# Gaston WS1S Benchmark
+# Tests: where
+# Field: syntax
+# Ground: true
+# Long Description: Tests basic functionality of 'where' syntax expression
+
+ws1s;
+ex2 X, Y: ex1 x where x notin Y: x in X & X sub Y;

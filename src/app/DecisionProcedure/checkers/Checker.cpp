@@ -70,6 +70,10 @@ Checker::~Checker() {
 void initializeVarMap(ASTForm* formula) {
     IdentList free, bound;
     formula->freeVars(&free, &bound);
+#   if (DEBUG_VARMAP == true)
+    std::cout << "Free Variables: "; free.dump(); std::cout << "\n";
+    std::cout << "Bound Variables: "; bound.dump(); std::cout << "\n";
+#   endif
 
     IdentList *vars = ident_union(&free, &bound);
     if (vars != 0) {
@@ -190,7 +194,24 @@ void Checker::CloseUngroundFormula() {
                     // Fixme: what about zeroorder variables
                     if(symbolTable.lookupType(*it) == MonaTypeTag::Varname1) {
                         ASTForm_FirstOrder* fo = new ASTForm_FirstOrder(new ASTTerm1_Var1(*it, Pos()), Pos());
+                        ASTForm* restriction = symbolTable.lookupRestriction(*it);
+                        if(restriction == nullptr) {
+                            Ident formal;
+                            restriction = symbolTable.getDefault1Restriction(&formal);
+                            ASTList* list = new ASTList();
+                            list->push_back(new ASTTerm1_Var1(*it, Pos()));
+                            restriction = restriction->clone()->unfoldMacro(new IdentList(formal), list);
+                        }
                         this->_monaAST->formula = new ASTForm_And(fo, this->_monaAST->formula, Pos());
+                        this->_monaAST->formula = new ASTForm_And(restriction, this->_monaAST->formula, Pos());
+                    }
+                }
+                if(allPosVar != -1) {
+                    ASTForm* restr = symbolTable.lookupRestriction(allPosVar);
+                    if(restr == nullptr) {
+                        assert(false);
+                    } else {
+                        this->_monaAST->formula = new ASTForm_And(restr->clone(), this->_monaAST->formula, Pos());
                     }
                 }
                 break;

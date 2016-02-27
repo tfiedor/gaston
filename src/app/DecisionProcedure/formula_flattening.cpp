@@ -80,6 +80,7 @@ TermClass* unfoldOrderTerm(TermClass* term, IdentList* fParams, ASTList* rParams
 ASTTerm1_Var1* generateFreshFirstOrder() {
 	unsigned int z;
 	z = symbolTable.insertFresh(Varname1);
+
 	return new ASTTerm1_Var1(z, Pos());
 }
 
@@ -91,6 +92,7 @@ ASTTerm1_Var1* generateFreshFirstOrder() {
 ASTTerm2_Var2* generateFreshSecondOrder() {
 	unsigned int Z;
 	Z = symbolTable.insertFresh(Varname2);
+
 	return new ASTTerm2_Var2(Z, Pos());
 }
 
@@ -172,15 +174,32 @@ ASTForm* ASTForm_uvf::unfoldMacro(IdentList* fParams, ASTList* rParams) {
 	ASTList *rrParams = (ASTList*) rParams->copy();
 
 	for(Ident* iter = this->vl->begin(); iter != this->vl->end(); ++iter) {
+		assert(iter != nullptr);
 		if(this->kind == aAll1 | this->kind == aEx1) {
 			ASTTerm1_Var1* newVar = generateFreshFirstOrder();
 			ffParams->push_back(*iter);
 			rrParams->push_back(newVar);
+
+			// Insert restrictions
+			ASTForm* restriction = symbolTable.lookupRestriction(*iter);
+			if(restriction != nullptr) {
+				restriction = restriction->clone()->unfoldMacro(ffParams, rrParams);
+				symbolTable.updateRestriction(newVar->n, restriction);
+			}
+
 			*iter = newVar->n;
 		} else {
 			ASTTerm2_Var2* newVar = generateFreshSecondOrder();
 			ffParams->push_back(*iter);
 			rrParams->push_back(newVar);
+
+			// Insert restrictions
+			ASTForm* restriction = symbolTable.lookupRestriction(*iter);
+			if(restriction != nullptr) {
+				restriction = restriction->clone()->unfoldMacro(ffParams, rrParams);
+				symbolTable.updateRestriction(newVar->n, restriction);
+			}
+
 			*iter = newVar->n;
 		}
 	}
@@ -215,11 +234,27 @@ ASTForm* ASTForm_vf::unfoldMacro(IdentList* fParams, ASTList* rParams) {
 			ASTTerm1_Var1* newVar = generateFreshFirstOrder();
 			ffParams->push_back(*iter);
 			rrParams->push_back(newVar);
+
+			// Insert restrictions
+			ASTForm* restriction = symbolTable.lookupRestriction(*iter);
+			if(restriction != nullptr) {
+				restriction = restriction->clone()->unfoldMacro(ffParams, rrParams);
+				symbolTable.updateRestriction(newVar->n, restriction);
+			}
+
 			*iter = newVar->n;
 		} else {
 			ASTTerm2_Var2* newVar = generateFreshSecondOrder();
 			ffParams->push_back(*iter);
 			rrParams->push_back(newVar);
+
+			// Insert restrictions
+			ASTForm* restriction = symbolTable.lookupRestriction(*iter);
+			if(restriction != nullptr) {
+				restriction = restriction->clone()->unfoldMacro(ffParams, rrParams);
+				symbolTable.updateRestriction(newVar->n, restriction);
+			}
+
 			*iter = newVar->n;
 		}
 	}

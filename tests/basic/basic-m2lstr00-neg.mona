@@ -1,0 +1,8 @@
+# Gaston WS1S Benchmark
+# Tests: m2l(str)
+# Field: semantics
+# Ground: false
+# Long Description: Tests the basic semantics of M2L(str) logic that can be emulated by WS1S
+
+m2l-str;
+~all1 x: ex1 y: y = x + 1;

@@ -1,0 +1,9 @@
+# Gaston WS1S Benchmark
+# Tests: defaultwhere
+# Field: syntax
+# Ground: true
+# Long Description: Tests basic functionality of 'defaultwhere' syntax expression
+
+ws1s;
+defaultwhere2(X) = X ~= empty;
+ex2 Y: all2 Z: Y sub Z;

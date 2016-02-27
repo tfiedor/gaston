@@ -487,9 +487,21 @@ def generate_horn_sub_even_alts(n, alt):
     return string
 
 
+def generate_veanes(n, alt):
+    if n < alt:
+        print("[*] Skipping n = {}".format(n))
+        return None
+    string = "ws1s;\n"
+    string += "".join("ex1 x{}: ".format(str(i)) for i in range(1, n - alt + 1))
+    string += "".join("~ex1 x{}: ".format(str(i)) for i in range(n-alt+1, n+1))
+    string += " & ".join(["x{0} < x{1}".format(i, i + 1) for i in range(1, n)])
+    string += ";"
+    return string
+
+
 def generate_formulae(options, benchmark_name, up_to, alts, generator, zeroFill):
     for i in range(1, up_to + 1):
-        if alts == 0:
+        if alts == 0 and benchmark_name != "veanes":
             formula = generator(i)
         else:
             formula = generator(i, alts)
@@ -517,7 +529,7 @@ if __name__ == '__main__':
         alts = 0 if not generate_alternating else int(options.generate_alt[2])
 
         try:
-            if generate_alternating:
+            if generate_alternating and benchmark_name != "veanes":
                 method_name = "generate_" + benchmark_name + "_"
                 if alts % 2 == 0:
                     method_name += "even_alts"

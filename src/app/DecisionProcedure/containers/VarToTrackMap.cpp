@@ -33,11 +33,27 @@ void VarToTrackMap::addIdentifiers(IdentList* identifiers) {
 	identifiers->sort();
 
 	size_t idx = 0;
+	Ident formal;
+	ASTForm* restriction = nullptr;
 	for (int i = 0; i < identSize; ++i) {
 		val = identifiers->pop_front();
+		if(symbolTable.lookupType(val) == MonaTypeTag::Varname1) {
+			restriction = symbolTable.getDefault1Restriction(&formal);
+		} else {
+			restriction = symbolTable.getDefault2Restriction(&formal);
+		}
+
+		if(restriction != nullptr && formal == val) {
+			continue;
+		}
+
 		(this->vttMap)[val] = idx;
 		(this->ttvMap)[idx++] = val;
 	}
+
+#   if(DEBUG_VARMAP == true)
+    this->dumpMap();
+#   endif
 }
 
 /**

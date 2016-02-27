@@ -18,12 +18,16 @@ class SecondOrderRestricter : public TransformerVisitor {
 private:
     template<class FirstOrderQuantification, class SecondOrderQuantification, class BinaryFormula>
     AST* _firstOrderRestrict(FirstOrderQuantification* form);
+    template<class SecondOrderQuantification, class BinaryFormula>
+    AST* _secondOrderRestrict(SecondOrderQuantification* form);
 
 public:
     SecondOrderRestricter() : TransformerVisitor(Traverse::PostOrder) {}
 
     AST* visit(ASTForm_Ex1* form);
+    AST* visit(ASTForm_Ex2* form);
     AST* visit(ASTForm_All1* form);
+    AST* visit(ASTForm_All2* form);
 };
 
 
