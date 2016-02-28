@@ -103,7 +103,7 @@ void
 ASTTerm1_Var1::dump()
 {
   #if (PRINT_PRETTY == true)
-  cout << symbolTable.lookupSymbol(n) << "\u00B9";
+  cout <<  n << ":" << symbolTable.lookupSymbol(n) << "\u00B9";
   #else
   cout << "Var1 " << symbolTable.lookupSymbol(n);
   #endif
@@ -219,7 +219,7 @@ void
 ASTTerm2_Var2::dump()
 {
   #if (PRINT_PRETTY == true)
-  cout << symbolTable.lookupSymbol(n) << "\u00B2";
+  cout << n << ":" << symbolTable.lookupSymbol(n) << "\u00B2";
   #else
   cout << "Var2 " << symbolTable.lookupSymbol(n);
   #endif

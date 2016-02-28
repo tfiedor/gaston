@@ -290,9 +290,9 @@ public:
         Term_ptr _Invalidate() {
             ++_it;
             --_termFixpoint._iteratorNumber;
-            #if (OPT_REDUCE_FIXPOINT_EVERYTIME == true)
-                _termFixpoint.RemoveSubsumed();
-            #endif
+#           if (OPT_REDUCE_FIXPOINT_EVERYTIME == true)
+            _termFixpoint.RemoveSubsumed();
+#           endif
             return nullptr;
         }
 
@@ -399,7 +399,7 @@ protected:
     WorklistType _worklist;
     Symbols _symList;
     bool _bValue;
-    bool _lastResult = false;
+    ResultType _lastResult;
     bool (*_aggregate_result)(bool, bool);
 
 public:
@@ -413,7 +413,7 @@ public:
     bool IsEmpty();
     SubsumptionResult IsSubsumedBy(FixpointType& fixpoint, Term*&);
     bool GetResult();
-    bool GetLastResult();
+    ResultType GetLastResult();
     bool IsFullyComputed() const;
     bool IsShared();
     void RemoveSubsumed();

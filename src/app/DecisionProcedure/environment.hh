@@ -178,10 +178,11 @@ public:
 
 /* >>> Debugging Options <<< *
  *****************************/
+#define DEBUG_ROOT_AUTOMATON			true
 #define DEBUG_AUTOMATA_ADDRESSES		false
 #define DEBUG_EXAMPLE_PATHS				true
 #define DEBUG_BASE_AUTOMATA 			false
-#define DEBUG_FIXPOINT 					false
+#define DEBUG_FIXPOINT 					true
 #define DEBUG_FIXPOINT_SYMBOLS			false
 #define DEBUG_INITIAL_APPROX 			false
 #define DEBUG_INTERSECT_NON_EMPTY 		false

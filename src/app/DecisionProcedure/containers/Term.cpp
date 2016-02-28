@@ -206,6 +206,7 @@ TermFixpoint::TermFixpoint(Aut_ptr aut, Term_ptr startingTerm, Symbol* symbol, b
     this->_nonMembershipTesting = inComplement;
     this->_inComplement = false;
     this->type = TERM_FIXPOINT;
+    this->_lastResult = std::make_pair(startingTerm, initbValue);
 
     // Initialize the state space
     this->stateSpace = 0;
@@ -968,24 +969,24 @@ void TermFixpoint::ComputeNextFixpoint() {
     _worklist.pop_front();
 
     // Compute the results
-    ResultType result = _aut->IntersectNonEmpty(item.second, item.first, this->_nonMembershipTesting);
+    this->_lastResult = _aut->IntersectNonEmpty(item.second, item.first, this->_nonMembershipTesting);
+    assert(this->_lastResult.first != nullptr);
 
     // If it is subsumed by fixpoint, we don't add it
-    if(this->_testIfSubsumes(result.first) != E_FALSE) {
+    if(this->_testIfSubsumes(this->_lastResult.first) != E_FALSE) {
         return;
     }
 
     // Push new term to fixpoint
-    _fixpoint.push_back(std::make_pair(result.first, true));
+    _fixpoint.push_back(std::make_pair(this->_lastResult.first, true));
     // Aggregate the result of the fixpoint computation
-    _bValue = this->_aggregate_result(_bValue,result.second);
-    _lastResult = result.second;
+    _bValue = this->_aggregate_result(_bValue,this->_lastResult.second);
     // Push new symbols from _symList
     for(auto& symbol : _symList) {
 #       if (OPT_FIXPOINT_BFS_SEARCH == true)
-        _worklist.push_back(std::make_pair(result.first, symbol));
+        _worklist.push_back(std::make_pair(this->_lastResult.first, symbol));
 #       else
-        _worklist.insert(_worklist.cbegin(), std::make_pair(result.first, symbol));
+        _worklist.insert(_worklist.cbegin(), std::make_pair(this->_lastResult.first, symbol));
 #       endif
     }
 }
@@ -1002,17 +1003,17 @@ void TermFixpoint::ComputeNextPre() {
     _worklist.pop_front();
 
     // Compute the results
-    ResultType result = _aut->IntersectNonEmpty(item.second, item.first, this->_nonMembershipTesting);
+    this->_lastResult = _aut->IntersectNonEmpty(item.second, item.first, this->_nonMembershipTesting);
+    assert(this->_lastResult.first != nullptr);
 
     // If it is subsumed we return
-    if(this->_testIfSubsumes(result.first)) {
+    if(this->_testIfSubsumes(this->_lastResult.first)) {
         return;
     }
 
     // Push the computed thing and aggregate the result
-    _fixpoint.push_back(std::make_pair(result.first, true));
-    _bValue = this->_aggregate_result(_bValue,result.second);
-    _lastResult = result.second;
+    _fixpoint.push_back(std::make_pair(this->_lastResult.first, true));
+    _bValue = this->_aggregate_result(_bValue,this->_lastResult.second);
 }
 
 /**
@@ -1063,7 +1064,8 @@ bool TermFixpoint::GetResult() {
     return this->_bValue;
 }
 
-bool TermFixpoint::GetLastResult() {
+ResultType TermFixpoint::GetLastResult() {
+    assert(this->_lastResult.first != nullptr);
     return this->_lastResult;
 }
 

@@ -52,6 +52,7 @@ void VarToTrackMap::addIdentifiers(IdentList* identifiers) {
 	}
 
 #   if(DEBUG_VARMAP == true)
+	std::cout << "[*] Initialized VarMap\n";
     this->dumpMap();
 #   endif
 }
@@ -72,8 +73,12 @@ uint VarToTrackMap::TrackLength() {
  * @return: track number associanted to variable val
  */
 uint VarToTrackMap::operator[](uint val) {
-	// Fixme: Refactor this
+	assert(this->IsIn(val));
 	return this->vttMap[val];
+}
+
+bool VarToTrackMap::IsIn(uint val) {
+	return this->vttMap.find(val) != this->vttMap.end();
 }
 
 uint VarToTrackMap::inverseGet(uint key) {

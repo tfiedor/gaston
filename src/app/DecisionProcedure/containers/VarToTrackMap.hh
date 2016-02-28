@@ -35,6 +35,7 @@ public:
 	uint operator[](uint);
 	uint inverseGet(uint);
 	void dumpMap();
+	bool IsIn(uint);
 
 	VarToTrackMap() : vttMap() {};
 

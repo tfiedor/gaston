@@ -45,7 +45,8 @@ SymbolicAutomaton::SymbolicAutomaton(Formula_ptr form) :
     allVars = ident_union(&free, &bound);
     if(allVars != nullptr) {
         for(auto it = allVars->begin(); it != allVars->end(); ++it) {
-            _freeVars.insert(varMap[(*it)]);
+            if(varMap.IsIn(*it))
+                _freeVars.insert(varMap[(*it)]);
         }
 
         delete allVars;
@@ -291,6 +292,7 @@ ResultType RootProjectionAutomaton::IntersectNonEmpty(Symbol* symbol, Term* fina
     Timer timer_paths;
     timer_paths.start();
 #   endif
+    varMap.dumpMap();
     // While the fixpoint is not fully unfolded and while we cannot evaluate early
     while((this->_satExample == nullptr || this->_unsatExample == nullptr) && ((fixpointTerm = it.GetNext()) != nullptr)) {
 #       if (DEBUG_EXAMPLE_PATHS == true)
@@ -307,15 +309,25 @@ ResultType RootProjectionAutomaton::IntersectNonEmpty(Symbol* symbol, Term* fina
             }
         }
 #       endif
-
-        if(fixpointTerm != nullptr && fixpoint->GetLastResult() && this->_satExample == nullptr && fixpointTerm->link.symbol != nullptr) {
+#       if (DEBUG_ROOT_AUTOMATON == true)
+        if(fixpointTerm != nullptr && fixpointTerm->link.symbol != nullptr) {
+            std::cout << "[*] Explored pre with symbol: " << (*fixpointTerm->link.symbol);
+        } else {
+            std::cout << "[*] Explored with epsilon: ";
+            if(fixpointTerm != nullptr)
+                fixpointTerm->dump();
+        }
+#       endif
+        result = fixpoint->GetLastResult();
+        std::cout << " -> " <<(result.second ? "true" : "false") << "\n";
+        if(result.second && this->_satExample == nullptr && result.first->link.symbol != nullptr) {
             std::cout << "[*] Found satisfying example\n";
-            this->_satExample = fixpointTerm;
+            this->_satExample = result.first;
             continue;
         }
-        if(fixpointTerm != nullptr && !fixpoint->GetLastResult() && this->_unsatExample == nullptr && fixpointTerm->link.symbol != nullptr) {
+        if(!result.second && this->_unsatExample == nullptr && result.first->link.symbol != nullptr) {
             std::cout << "[*] Found unsatisfying counter-example\n";
-            this->_unsatExample = fixpointTerm;
+            this->_unsatExample = result.first;
             continue;
         }
     }
