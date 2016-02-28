@@ -255,10 +255,8 @@ void Checker::PreprocessFormula() {
     Tagger tagger(tags);
     (this->_monaAST->formula)->accept(tagger);
 
-    #if (OPT_EXTRACT_MORE_AUTOMATA == true)
     FixpointDetagger detagger;
     (this->_monaAST->formula)->accept(detagger);
-    #endif
 
     if(options.graphvizDAG) {
         std::string dotFileName(inputFileName);

@@ -775,7 +775,10 @@ std::string interpretModel(std::string& str, bool isFirstOrder) {
     size_t idx = 0;
     if(isFirstOrder) {
         // Interpret the first one
-        while(str[idx] != '1') {++idx;}
+        while(idx < str.length() && str[idx] != '1') {++idx;}
+        if(idx == str.length()) {
+            return std::string("");
+        }
         return std::string(std::to_string(idx));
     } else {
         if(str.empty()) {

@@ -277,5 +277,6 @@ public:
 #define OPT_CREATE_TAGGED_AUTOMATA		false	// < Use tags to create a specific subformula to automaton
 #define OPT_EXTRACT_MORE_AUTOMATA		true	// < Calls detagger to heuristically convert some subformulae to automata
 #define OPT_UNIQUE_TRIMMED_SYMBOLS		false	// < Will guarantee that there will not be a collisions between symbols after trimming
+#define OPT_FIXPOINT_BFS_SEARCH			false	// < Will add new things to the back of the worklist in fixpoint
 
 #endif

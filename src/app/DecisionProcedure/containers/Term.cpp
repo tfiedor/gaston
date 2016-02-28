@@ -982,7 +982,11 @@ void TermFixpoint::ComputeNextFixpoint() {
     _lastResult = result.second;
     // Push new symbols from _symList
     for(auto& symbol : _symList) {
+#       if (OPT_FIXPOINT_BFS_SEARCH == true)
+        _worklist.push_back(std::make_pair(result.first, symbol));
+#       else
         _worklist.insert(_worklist.cbegin(), std::make_pair(result.first, symbol));
+#       endif
     }
 }
 

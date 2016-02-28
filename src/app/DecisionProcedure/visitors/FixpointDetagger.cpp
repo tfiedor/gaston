@@ -3,6 +3,7 @@
 //
 
 #include "FixpointDetagger.h"
+#include "../environment.hh"
 
 void FixpointDetagger::visit(ASTForm_And *form) {
     form->fixpoint_number = std::max(form->f1->fixpoint_number, form->f2->fixpoint_number);
@@ -45,9 +46,11 @@ void FixpointDetagger::_visitFixpointComputation(FixpointFormula *form) {
     form->height = form->height + 1;
     form->size = form->f->size + 1;
 
+#   if(OPT_EXTRACT_MORE_AUTOMATA == true)
     if(form->fixpoint_number <= this->_cFixpointThreshold) {
         form->tag = 0;
     }
+#   endif
 }
 
 void FixpointDetagger::visit(ASTForm_Ex1 *form) {

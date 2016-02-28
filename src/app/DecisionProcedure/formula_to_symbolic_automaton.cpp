@@ -40,11 +40,11 @@ SymbolicAutomaton* ASTForm::toSymbolicAutomaton(bool doComplement) {
     // we return the pointer, otherwise we first create the symbolic
     // automaton and return the thing.
     if(this->sfa == nullptr) {
-        if(this->tag) {
-            this->sfa = this->_toSymbolicAutomatonCore(doComplement);
-        } else {
+        if(this->tag == 0 || this->fixpoint_number == 0) {
             // It was tagged to be constructed by MONA
             return baseToSymbolicAutomaton<GenericBaseAutomaton>(this, doComplement);
+        } else {
+            this->sfa = this->_toSymbolicAutomatonCore(doComplement);
         }
     }
     return this->sfa;
