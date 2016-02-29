@@ -206,15 +206,16 @@ void Checker::CloseUngroundFormula() {
                         this->_monaAST->formula = new ASTForm_And(restriction, this->_monaAST->formula, Pos());
                     }
                 }
-                if(allPosVar != -1) {
-                    ASTForm* restr = symbolTable.lookupRestriction(allPosVar);
-                    if(restr == nullptr) {
-                        assert(false);
-                    } else {
-                        this->_monaAST->formula = new ASTForm_And(restr->clone(), this->_monaAST->formula, Pos());
-                    }
-                }
                 break;
+        }
+    }
+
+    if(allPosVar != -1) {
+        ASTForm* restr = symbolTable.lookupRestriction(allPosVar);
+        if(restr == nullptr) {
+            assert(false);
+        } else {
+            this->_monaAST->formula = new ASTForm_And(restr->clone(), this->_monaAST->formula, Pos());
         }
     }
 }
