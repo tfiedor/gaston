@@ -61,6 +61,7 @@ enum ComparisonType {E_BY_SAME_PTR, E_BY_DIFFERENT_TYPE, E_BY_STRUCTURE};
 enum UnfoldedInType {E_IN_SUBSUMPTION, E_IN_ISECT_NONEMPTY, E_IN_COMPARISON, E_IN_NOWHERE};
 enum SubsumptionResult {E_FALSE, E_TRUE, E_PARTIALLY};
 enum ExampleType {SATISFYING, UNSATISFYING};
+enum WorklistSearchType {E_BFS, E_DFS};
 
 namespace Gaston {
 	void dumpResultKey(std::pair<Term*, ZeroSymbol*> const& s);
@@ -178,11 +179,11 @@ public:
 
 /* >>> Debugging Options <<< *
  *****************************/
-#define DEBUG_ROOT_AUTOMATON			true
+#define DEBUG_ROOT_AUTOMATON			false
 #define DEBUG_AUTOMATA_ADDRESSES		false
 #define DEBUG_EXAMPLE_PATHS				true
 #define DEBUG_BASE_AUTOMATA 			false
-#define DEBUG_FIXPOINT 					true
+#define DEBUG_FIXPOINT 					false
 #define DEBUG_FIXPOINT_SYMBOLS			false
 #define DEBUG_INITIAL_APPROX 			false
 #define DEBUG_INTERSECT_NON_EMPTY 		false
@@ -199,7 +200,7 @@ public:
 #define DEBUG_GENERATE_DOT_AUTOMATON	true
 #define DEBUG_COMPUTE_FULL_FIXPOINT 	false
 #define DEBUG_COMPARE_WORKLISTS			true
-#define DEBUG_VARMAP					false
+#define DEBUG_VARMAP					true
 
 /*
  * >>> Automata stats options

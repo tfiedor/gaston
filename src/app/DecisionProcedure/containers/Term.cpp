@@ -195,7 +195,7 @@ TermList::TermList(Term_ptr first, bool isCompl) {
     #endif
 }
 
-TermFixpoint::TermFixpoint(Aut_ptr aut, Term_ptr startingTerm, Symbol* symbol, bool inComplement, bool initbValue)
+TermFixpoint::TermFixpoint(Aut_ptr aut, Term_ptr startingTerm, Symbol* symbol, bool inComplement, bool initbValue, WorklistSearchType search = WorklistSearchType::E_DFS)
         : _sourceTerm(nullptr), _sourceIt(nullptr), _aut(reinterpret_cast<ProjectionAutomaton*>(aut)->GetBase()), _bValue(initbValue) {
     #if (MEASURE_STATE_SPACE == true)
     ++TermFixpoint::instances;
@@ -206,7 +206,7 @@ TermFixpoint::TermFixpoint(Aut_ptr aut, Term_ptr startingTerm, Symbol* symbol, b
     this->_nonMembershipTesting = inComplement;
     this->_inComplement = false;
     this->type = TERM_FIXPOINT;
-    this->_lastResult = std::make_pair(startingTerm, initbValue);
+    this->_searchType = search;
 
     // Initialize the state space
     this->stateSpace = 0;
@@ -246,6 +246,7 @@ TermFixpoint::TermFixpoint(Aut_ptr aut, Term_ptr sourceTerm, Symbol* symbol, boo
     // Initialize the aggregate function
     this->_InitializeAggregateFunction(inComplement);
     this->type = TERM_FIXPOINT;
+    this->_searchType = WorklistSearchType::E_DFS;
     this->_nonMembershipTesting = inComplement;
     this->_inComplement = false;
 
@@ -958,6 +959,18 @@ SubsumptionResult TermFixpoint::_testIfSubsumes(Term_ptr const& term) {
     #endif
 }
 
+WorklistItemType TermFixpoint::_popFromWorklist() {
+    if(this->_searchType == WorklistSearchType::E_DFS) {
+        WorklistItemType item = _worklist.front();
+        _worklist.pop_front();
+        return item;
+    } else {
+        WorklistItemType item = _worklist.back();
+        _worklist.pop_back();
+        return item;
+    }
+}
+
 /**
  * Does the computation of the next fixpoint, i.e. the next iteration.
  */
@@ -965,28 +978,27 @@ void TermFixpoint::ComputeNextFixpoint() {
     assert(!_worklist.empty());
 
     // Pop the front item from worklist
-    WorklistItemType item = _worklist.front();
-    _worklist.pop_front();
+    WorklistItemType item = this->_popFromWorklist();
 
     // Compute the results
-    this->_lastResult = _aut->IntersectNonEmpty(item.second, item.first, this->_nonMembershipTesting);
-    assert(this->_lastResult.first != nullptr);
+    ResultType result = _aut->IntersectNonEmpty(item.second, item.first, this->_nonMembershipTesting);
+    this->_updateExamples(result);
 
     // If it is subsumed by fixpoint, we don't add it
-    if(this->_testIfSubsumes(this->_lastResult.first) != E_FALSE) {
+    if(this->_testIfSubsumes(result.first) != E_FALSE) {
         return;
     }
 
     // Push new term to fixpoint
-    _fixpoint.push_back(std::make_pair(this->_lastResult.first, true));
+    _fixpoint.push_back(std::make_pair(result.first, true));
     // Aggregate the result of the fixpoint computation
-    _bValue = this->_aggregate_result(_bValue,this->_lastResult.second);
+    _bValue = this->_aggregate_result(_bValue,result.second);
     // Push new symbols from _symList
     for(auto& symbol : _symList) {
 #       if (OPT_FIXPOINT_BFS_SEARCH == true)
-        _worklist.push_back(std::make_pair(this->_lastResult.first, symbol));
+        _worklist.push_back(std::make_pair(result.first, symbol));
 #       else
-        _worklist.insert(_worklist.cbegin(), std::make_pair(this->_lastResult.first, symbol));
+        _worklist.insert(_worklist.cbegin(), std::make_pair(result.first, symbol));
 #       endif
     }
 }
@@ -999,21 +1011,20 @@ void TermFixpoint::ComputeNextPre() {
     assert(!_worklist.empty());
 
     // Pop item from worklist
-    WorklistItemType item = _worklist.front();
-    _worklist.pop_front();
+    WorklistItemType item = this->_popFromWorklist();
 
     // Compute the results
-    this->_lastResult = _aut->IntersectNonEmpty(item.second, item.first, this->_nonMembershipTesting);
-    assert(this->_lastResult.first != nullptr);
+    ResultType result = _aut->IntersectNonEmpty(item.second, item.first, this->_nonMembershipTesting);
+    this->_updateExamples(result);
 
     // If it is subsumed we return
-    if(this->_testIfSubsumes(this->_lastResult.first)) {
+    if(this->_testIfSubsumes(result.first)) {
         return;
     }
 
     // Push the computed thing and aggregate the result
-    _fixpoint.push_back(std::make_pair(this->_lastResult.first, true));
-    _bValue = this->_aggregate_result(_bValue,this->_lastResult.second);
+    _fixpoint.push_back(std::make_pair(result.first, true));
+    _bValue = this->_aggregate_result(_bValue,result.second);
 }
 
 /**
@@ -1043,6 +1054,9 @@ void TermFixpoint::_InitializeSymbols(Workshops::SymbolWorkshop* workshop, Gasto
     this->_symList.push_back(workshop->CreateTrimmedSymbol(startingSymbol, freeVars));
     // TODO: Optimize, this sucks
     unsigned int symNum = 1;
+#   if (DEBUG_FIXPOINT_SYMBOLS == true)
+    std::cout << "[F] Initializing symbols of '"; this->dump(); std::cout << "\n";
+#   endif
     for(auto var = vars->begin(); var != vars->end(); ++var) {
         // Pop symbol;
         for(auto i = symNum; i != 0; --i) {
@@ -1055,6 +1069,11 @@ void TermFixpoint::_InitializeSymbols(Workshops::SymbolWorkshop* workshop, Gasto
 
         symNum <<= 1;// times 2
     }
+#   if (DEBUG_FIXPOINT_SYMBOLS == true)
+    for(auto sym : this->_symList) {
+        std::cout << "[*] " << (*sym) << "\n";
+    }
+#   endif
 }
 
 /**
@@ -1064,9 +1083,20 @@ bool TermFixpoint::GetResult() {
     return this->_bValue;
 }
 
-ResultType TermFixpoint::GetLastResult() {
-    assert(this->_lastResult.first != nullptr);
-    return this->_lastResult;
+void TermFixpoint::_updateExamples(ResultType& result) {
+    if(result.second) {
+        if(this->_satTerm == nullptr) {
+            this->_satTerm = result.first;
+        }
+    } else {
+        if(this->_unsatTerm == nullptr) {
+            this->_unsatTerm = result.first;
+        }
+    }
+}
+
+ExamplePair TermFixpoint::GetFixpointExamples() {
+    return std::make_pair(this->_satTerm, this->_unsatTerm);
 }
 
 bool TermFixpoint::IsFullyComputed() const {

@@ -283,7 +283,7 @@ ResultType RootProjectionAutomaton::IntersectNonEmpty(Symbol* symbol, Term* fina
     ResultType result = this->_aut->IntersectNonEmpty(symbol, projectionApproximation->list[0], underComplement);
 
     // Create a new fixpoint term and iterator on it
-    TermFixpoint* fixpoint = this->_factory.CreateFixpoint(result.first, SymbolWorkshop::CreateZeroSymbol(), underComplement, result.second);
+    TermFixpoint* fixpoint = this->_factory.CreateFixpoint(result.first, SymbolWorkshop::CreateZeroSymbol(), underComplement, result.second, WorklistSearchType::E_BFS);
     TermFixpoint::iterator it = fixpoint->GetIterator();
     Term_ptr fixpointTerm = nullptr;
 
@@ -292,7 +292,6 @@ ResultType RootProjectionAutomaton::IntersectNonEmpty(Symbol* symbol, Term* fina
     Timer timer_paths;
     timer_paths.start();
 #   endif
-    varMap.dumpMap();
     // While the fixpoint is not fully unfolded and while we cannot evaluate early
     while((this->_satExample == nullptr || this->_unsatExample == nullptr) && ((fixpointTerm = it.GetNext()) != nullptr)) {
 #       if (DEBUG_EXAMPLE_PATHS == true)
@@ -317,18 +316,19 @@ ResultType RootProjectionAutomaton::IntersectNonEmpty(Symbol* symbol, Term* fina
             if(fixpointTerm != nullptr)
                 fixpointTerm->dump();
         }
+        std::cout << "\n";
 #       endif
-        result = fixpoint->GetLastResult();
-        std::cout << " -> " <<(result.second ? "true" : "false") << "\n";
-        if(result.second && this->_satExample == nullptr && result.first->link.symbol != nullptr) {
+        ExamplePair examples = fixpoint->GetFixpointExamples();
+#       if (DEBUG_ROOT_AUTOMATON == true)
+        std::cout << "[*] <"; result.first->dump(); std::cout << ", " << (result.second ? "true" : "false") << ">\n";
+#       endif
+        if(this->_satExample == nullptr && examples.first != nullptr && examples.first->link.symbol != nullptr) {
             std::cout << "[*] Found satisfying example\n";
-            this->_satExample = result.first;
-            continue;
+            this->_satExample = examples.first;
         }
-        if(!result.second && this->_unsatExample == nullptr && result.first->link.symbol != nullptr) {
+        if(this->_unsatExample == nullptr && examples.second != nullptr && examples.second->link.symbol != nullptr) {
             std::cout << "[*] Found unsatisfying counter-example\n";
-            this->_unsatExample = result.first;
-            continue;
+            this->_unsatExample = examples.second;
         }
     }
 #   if (DEBUG_EXAMPLE_PATHS == true)
@@ -823,7 +823,9 @@ void ProjectionAutomaton::_DumpExampleCore(ExampleType e) {
     auto varNo = this->projectedVars->size();
     std::string* examples = new std::string[varNo];
 
-    while(example != nullptr && example->link.succ != nullptr) {
+    while(example != nullptr && example->link.succ != nullptr && example != example->link.succ) {
+    //                                                           ^--- not sure this is right
+        std::cout << "Parsing symbol: " << (*example) << "\n";
         for(size_t i = 0; i < varNo; ++i) {
             examples[i] += example->link.symbol->GetSymbolAt(varMap[this->projectedVars->get(i)]);
         }

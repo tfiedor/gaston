@@ -135,7 +135,7 @@ namespace Workshops {
         static TermEmpty* CreateComplementedEmpty();
         Term* CreateBaseSet(BaseKey &states, unsigned int offset, unsigned int stateno);
         TermProduct* CreateProduct(Term_ptr const&, Term_ptr const&, ProductType);
-        TermFixpoint* CreateFixpoint(Term_ptr const&, Symbol*, bool, bool);
+        TermFixpoint* CreateFixpoint(Term_ptr const&, Symbol*, bool, bool, WorklistSearchType search = WorklistSearchType::E_DFS);
         TermFixpoint* CreateFixpointPre(Term_ptr const&, Symbol*, bool);
         TermFixpoint* GetUniqueFixpoint(TermFixpoint*&);
         TermList* CreateList(Term_ptr const&, bool);

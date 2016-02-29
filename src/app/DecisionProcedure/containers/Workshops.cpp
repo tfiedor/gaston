@@ -241,7 +241,7 @@ namespace Workshops {
         #endif
     }
 
-    TermFixpoint* TermWorkshop::CreateFixpoint(Term_ptr const& source, Symbol* symbol, bool inCompl, bool initValue) {
+    TermFixpoint* TermWorkshop::CreateFixpoint(Term_ptr const& source, Symbol* symbol, bool inCompl, bool initValue, WorklistSearchType search) {
         #if (OPT_GENERATE_UNIQUE_TERMS == true && UNIQUE_FIXPOINTS == true)
             assert(this->_fpCache != nullptr);
 
@@ -252,7 +252,7 @@ namespace Workshops {
                 std::cout << "[*] Creating Fixpoint: ";
                 std::cout << "from [" << source << "] to ";
                 #endif
-                termPtr = new TermFixpoint(this->_aut, source, symbol, inCompl, initValue);
+                termPtr = new TermFixpoint(this->_aut, source, symbol, inCompl, initValue, search);
                 this->_fpCache->StoreIn(fixpointKey, termPtr);
             }
             assert(termPtr != nullptr);

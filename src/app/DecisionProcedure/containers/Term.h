@@ -57,6 +57,7 @@ using TermListStates    = std::vector<Term_ptr>;
 using BaseState         = size_t;
 using TermBaseSetStates = std::vector<BaseState>;
 using ResultType        = std::pair<Term_ptr, bool>;
+using ExamplePair       = std::pair<Term_ptr, Term_ptr>;
 using SymbolType        = ZeroSymbol;
 
 using FixpointMember = std::pair<Term_ptr, bool>;
@@ -90,6 +91,7 @@ public:
     TERM_MEASURELIST(DEFINE_STATIC_MEASURE)
 protected:
     // <<< PRIVATE MEMBERS >>>
+    WorklistSearchType _searchType;
     bool _nonMembershipTesting;
     bool _inComplement;
     TermCache _isSubsumedCache;
@@ -399,12 +401,13 @@ protected:
     WorklistType _worklist;
     Symbols _symList;
     bool _bValue;
-    ResultType _lastResult;
+    Term_ptr _satTerm = nullptr;
+    Term_ptr _unsatTerm = nullptr;
     bool (*_aggregate_result)(bool, bool);
 
 public:
     // <<< CONSTRUCTORS >>>
-    TermFixpoint(Aut_ptr aut, Term_ptr startingTerm, Symbol* startingSymbol, bool inComplement, bool initbValue);
+    TermFixpoint(Aut_ptr aut, Term_ptr startingTerm, Symbol* startingSymbol, bool inComplement, bool initbValue, WorklistSearchType search);
     TermFixpoint(Aut_ptr aut, Term_ptr sourceTerm, Symbol* startingSymbol, bool inComplement);
     ~TermFixpoint();
 
@@ -413,9 +416,10 @@ public:
     bool IsEmpty();
     SubsumptionResult IsSubsumedBy(FixpointType& fixpoint, Term*&);
     bool GetResult();
-    ResultType GetLastResult();
+    ExamplePair GetFixpointExamples();
     bool IsFullyComputed() const;
     bool IsShared();
+    bool HasEmptyWorklist() { return this->_worklist.empty();}
     void RemoveSubsumed();
 
     iterator GetIterator() { return iterator(*this); }
@@ -430,12 +434,14 @@ protected:
     void ComputeNextFixpoint();
     void ComputeNextPre();
     bool _processOnePostponed();
+    void _updateExamples(ResultType&);
     void _InitializeAggregateFunction(bool inComplement);
     void _InitializeSymbols(Workshops::SymbolWorkshop* form, Gaston::VarList*, IdentList*, Symbol*);
     SubsumptionResult _IsSubsumedCore(Term* t, bool b = false);
     SubsumptionResult _testIfSubsumes(Term_ptr const& term);
     bool _eqCore(const Term&);
     unsigned int _MeasureStateSpaceCore();
+    WorklistItemType _popFromWorklist();
 };
 
 #undef DEFINE_STATIC_MEASURE
