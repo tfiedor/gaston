@@ -26,11 +26,11 @@ namespace Gaston {
             } else {
                 return boost::hash_value(s);
             }
-        } else if(s->type == TERM_FIXPOINT || s->type == TERM_LIST) {
+        } /*else if(s->type == TERM_FIXPOINT || s->type == TERM_LIST) {
             size_t seed = boost::hash_value(s->stateSpaceApprox);
             boost::hash_combine(seed, boost::hash_value(s->MeasureStateSpace()));
             return seed;
-        } else {
+        }*/ else {
             return boost::hash_value(s);
         }
         #else
@@ -58,6 +58,8 @@ size_t TermFixpoint::postponedProcessed = 0;
 size_t TermContinuation::continuationUnfolding = 0;
 size_t TermContinuation::unfoldInSubsumption = 0;
 size_t TermContinuation::unfoldInIsectNonempty = 0;
+
+extern Ident lastPosVar, allPosVar;
 
 // <<< TERM CONSTRUCTORS AND DESTRUCTORS >>>
 Term::~Term() {}

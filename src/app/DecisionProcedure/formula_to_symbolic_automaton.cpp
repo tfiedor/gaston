@@ -195,8 +195,13 @@ SymbolicAutomaton* ASTForm_Ex2::_toSymbolicAutomatonCore(bool doComplement) {
         IdentList free, bound;
         this->f->freeVars(&free, &bound);
         if(bound.empty()) {
-            SymbolicAutomaton* baseAut = baseToSymbolicAutomaton<GenericBaseAutomaton>(this->f, false);
-            return new ProjectionAutomaton(baseAut, this);
+            if(this->f->kind == aAnd || this->f->kind == aOr) {
+                ASTForm_ff* binary = reinterpret_cast<ASTForm_ff*>(this->f);
+                if(binary->f1->kind != aFirstOrder && binary->f2->kind != aFirstOrder) {
+                    SymbolicAutomaton* baseAut = baseToSymbolicAutomaton<GenericBaseAutomaton>(this->f, false);
+                    return new ProjectionAutomaton(baseAut, this);
+                }
+            }
         }
 #   endif
 

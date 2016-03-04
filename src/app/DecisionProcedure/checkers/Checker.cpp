@@ -138,6 +138,8 @@ template<class ZeroOrderQuantifier, class FirstOrderQuantifier, class SecondOrde
 ASTForm* Checker::_ClosePrefix(IdentList* freeVars, ASTForm* formula) {
     IdentList zeroOrders, firstOrders, secondOrders;
     for(auto it = freeVars->begin(); it != freeVars->end(); ++it) {
+        if(*it == allPosVar)
+            continue;
         // Distribute the first order and second order variables
         switch(symbolTable.lookupType(*it)) {
             case MonaTypeTag::Varname0:
@@ -175,8 +177,7 @@ void Checker::CloseUngroundFormula() {
     IdentList freeVars, bound;
     (this->_monaAST->formula)->freeVars(&freeVars, &bound);
 
-    this->_isGround = freeVars.empty();
-
+    this->_isGround = freeVars.empty() || (freeVars.size() == 1 && *freeVars.begin() == allPosVar);
     if(!this->_isGround) {
         switch(options.test) {
             case TestType::VALIDITY:
@@ -200,10 +201,12 @@ void Checker::CloseUngroundFormula() {
                             restriction = symbolTable.getDefault1Restriction(&formal);
                             ASTList* list = new ASTList();
                             list->push_back(new ASTTerm1_Var1(*it, Pos()));
-                            restriction = restriction->clone()->unfoldMacro(new IdentList(formal), list);
+                            if(restriction != nullptr)
+                                restriction = restriction->clone()->unfoldMacro(new IdentList(formal), list);
                         }
                         this->_monaAST->formula = new ASTForm_And(fo, this->_monaAST->formula, Pos());
-                        this->_monaAST->formula = new ASTForm_And(restriction, this->_monaAST->formula, Pos());
+                        if(restriction != nullptr)
+                            this->_monaAST->formula = new ASTForm_And(restriction, this->_monaAST->formula, Pos());
                     }
                 }
                 break;

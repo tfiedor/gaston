@@ -90,7 +90,7 @@ public:   // Public methods
 		vec_()
 	{
 		// Assertions
-		assert(vectorIsSorted());
+		//assert(vectorIsSorted());
 	}
 
 	explicit OrdVector(const VectorType& vec) :
@@ -104,7 +104,7 @@ public:   // Public methods
 		vec_.resize(it - vec_.begin());
 
 		// Assertions
-		assert(vectorIsSorted());
+		//assert(vectorIsSorted());
 	}
 
 	OrdVector(std::initializer_list<Key> list) :
@@ -118,14 +118,14 @@ public:   // Public methods
 		vec_.resize(it - vec_.begin());
 
 		// Assertions
-		assert(vectorIsSorted());
+		//assert(vectorIsSorted());
 	}
 
 	explicit OrdVector(const Key& key) :
 		vec_(1, key)
 	{
 		// Assertions
-		assert(vectorIsSorted());
+		//assert(vectorIsSorted());
 	}
 
 	template <class InputIterator>
@@ -140,13 +140,13 @@ public:   // Public methods
 		vec_.resize(it - vec_.begin());
 
 		// Assertions
-		assert(vectorIsSorted());
+		//assert(vectorIsSorted());
 	}
 
 	OrdVector& operator=(const OrdVector& rhs)
 	{
 		// Assertions
-		assert(rhs.vectorIsSorted());
+		//assert(rhs.vectorIsSorted());
 
 		if (&rhs != this)
 		{
@@ -154,7 +154,7 @@ public:   // Public methods
 		}
 
 		// Assertions
-		assert(vectorIsSorted());
+		//assert(vectorIsSorted());
 
 		return *this;
 	}
@@ -163,7 +163,7 @@ public:   // Public methods
 	void insert(const Key& x)
 	{
 		// Assertions
-		assert(vectorIsSorted());
+		//assert(vectorIsSorted());
 
 		// perform binary search (cannot use std::binary_search because it is
 		// ineffective due to not returning the iterator to the position of the
@@ -202,28 +202,28 @@ public:   // Public methods
 		vec_[first] = x;
 
 		// Assertions
-		assert(vectorIsSorted());
+		//assert(vectorIsSorted());
 	}
 
 
 	void insert(const OrdVector& vec)
 	{
 		// Assertions
-		assert(vectorIsSorted());
-		assert(vec.vectorIsSorted());
+		//assert(vectorIsSorted());
+		//assert(vec.vectorIsSorted());
 
 		OrdVector result = this->Union(vec);
 		vec_ = result.vec_;
 
 		// Assertions
-		assert(vectorIsSorted());
+		//assert(vectorIsSorted());
 	}
 
 
 	inline void clear()
 	{
 		// Assertions
-		assert(vectorIsSorted());
+		//assert(vectorIsSorted());
 
 		vec_.clear();
 	}
@@ -232,7 +232,7 @@ public:   // Public methods
 	inline size_t size() const
 	{
 		// Assertions
-		assert(vectorIsSorted());
+		//assert(vectorIsSorted());
 
 		return vec_.size();
 	}
@@ -241,8 +241,8 @@ public:   // Public methods
 	OrdVector Union(const OrdVector& rhs) const
 	{
 		// Assertions
-		assert(vectorIsSorted());
-		assert(rhs.vectorIsSorted());
+		//assert(vectorIsSorted());
+		//assert(rhs.vectorIsSorted());
 
 		VectorType newVector;
 
@@ -285,7 +285,7 @@ public:   // Public methods
 		OrdVector result(newVector);
 
 		// Assertions
-		assert(result.vectorIsSorted());
+		//assert(result.vectorIsSorted());
 
 		return result;
 	}
@@ -293,7 +293,7 @@ public:   // Public methods
 	const_iterator find(const Key& key) const
 	{
 		// Assertions
-		assert(vectorIsSorted());
+		//assert(vectorIsSorted());
 
 		size_t first = 0;
 		size_t last = vec_.size();
@@ -322,7 +322,7 @@ public:   // Public methods
 	inline bool empty() const
 	{
 		// Assertions
-		assert(vectorIsSorted());
+		//assert(vectorIsSorted());
 
 		return vec_.empty();
 	}
@@ -330,7 +330,7 @@ public:   // Public methods
 	inline const_iterator begin() const
 	{
 		// Assertions
-		assert(vectorIsSorted());
+		//assert(vectorIsSorted());
 
 		return vec_.begin();
 	}
@@ -338,7 +338,7 @@ public:   // Public methods
 	inline const_iterator end() const
 	{
 		// Assertions
-		assert(vectorIsSorted());
+		//assert(vectorIsSorted());
 
 		return vec_.end();
 	}
@@ -347,7 +347,7 @@ public:   // Public methods
 	inline const_iterator cbegin() const
 	{
 		// Assertions
-		assert(vectorIsSorted());
+		//assert(vectorIsSorted());
 
 		return begin();
 	}
@@ -355,7 +355,7 @@ public:   // Public methods
 	inline const_iterator cend() const
 	{
 		// Assertions
-		assert(vectorIsSorted());
+		//assert(vectorIsSorted());
 
 		return end();
 	}
@@ -375,7 +375,7 @@ public:   // Public methods
 	friend std::ostream& operator<<(std::ostream& os, const OrdVector& vec)
 	{
 		// Assertions
-		assert(vec.vectorIsSorted());
+		//assert(vec.vectorIsSorted());
 
 		std::string result = "{";
 
@@ -390,8 +390,8 @@ public:   // Public methods
 	bool operator==(const OrdVector& rhs) const
 	{
 		// Assertions
-		assert(vectorIsSorted());
-		assert(rhs.vectorIsSorted());
+		//assert(vectorIsSorted());
+		//assert(rhs.vectorIsSorted());
 
 		return (vec_ == rhs.vec_);
 	}
@@ -399,8 +399,8 @@ public:   // Public methods
 	bool operator<(const OrdVector& rhs) const
 	{
 		// Assertions
-		assert(vectorIsSorted());
-		assert(rhs.vectorIsSorted());
+		//assert(vectorIsSorted());
+		//assert(rhs.vectorIsSorted());
 
 		return std::lexicographical_compare(vec_.begin(), vec_.end(),
 			rhs.vec_.begin(), rhs.vec_.end());
@@ -420,8 +420,8 @@ public:   // Public methods
 	bool HaveEmptyIntersection(const OrdVector& rhs) const
 	{
 		// Assertions
-		assert(vectorIsSorted());
-		assert(rhs.vectorIsSorted());
+		//assert(vectorIsSorted());
+		//assert(rhs.vectorIsSorted());
 
 		const_iterator itLhs = begin();
 		const_iterator itRhs = rhs.begin();

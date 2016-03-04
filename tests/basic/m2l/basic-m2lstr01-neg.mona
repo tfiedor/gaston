@@ -1,0 +1,8 @@
+# Gaston WS1S Benchmark
+# Tests: m2l(str)
+# Field: semantics
+# Ground: false
+# Long Description: Test the formula valid in m2l(str), but unsat in ws1s
+
+ws1s;
+~ex2 X: all1 p: p in X;

@@ -226,28 +226,28 @@ ResultType SymbolicAutomaton::IntersectNonEmpty(Symbol* symbol, Term* stateAppro
     #endif
 
     // Cache Results
-    #if (OPT_CACHE_RESULTS == true)
-        #if (OPT_DONT_CACHE_CONT == true)
-            if(stateApproximation->type == TERM_PRODUCT) {
-                // If either side is not fully computed, we do not cache it
-                TermProduct* tProduct = reinterpret_cast<TermProduct*>(stateApproximation);
-                inCache = tProduct->left->IsNotComputed() || tProduct->right->IsNotComputed();
-            }
-        #endif
-        #if (OPT_DONT_CACHE_UNFULL_FIXPOINTS == true)
-            if(result.first->type == TERM_FIXPOINT) {
-                // If it is not fully computed, we do not cache it
-                TermFixpoint* tFix = reinterpret_cast<TermFixpoint*>(stateApproximation);
-                inCache |= !tFix->IsFullyComputed();
-            }
-        #endif
+#   if (OPT_CACHE_RESULTS == true)
+#       if (OPT_DONT_CACHE_CONT == true)
+        if(stateApproximation->type == TERM_PRODUCT) {
+            // If either side is not fully computed, we do not cache it
+            TermProduct* tProduct = reinterpret_cast<TermProduct*>(stateApproximation);
+            inCache = tProduct->left->IsNotComputed() || tProduct->right->IsNotComputed();
+        }
+#       endif
+#       if (OPT_DONT_CACHE_UNFULL_FIXPOINTS == true)
+        if(result.first->type == TERM_FIXPOINT) {
+            // If it is not fully computed, we do not cache it
+            TermFixpoint* tFix = reinterpret_cast<TermFixpoint*>(stateApproximation);
+            inCache |= !tFix->IsFullyComputed();
+        }
+#       endif
     if(!inCache) {
         auto key = std::make_pair(stateApproximation, symbol);
         this->_resCache.StoreIn(key, result);
     }
-    #endif
+#   endif
 
-    #if (DEBUG_INTERSECT_NON_EMPTY == true)
+#   if (DEBUG_INTERSECT_NON_EMPTY == true)
     std::cout << "Computed for (";
     if(symbol != nullptr) {
         std::cout << (*symbol);
@@ -261,7 +261,7 @@ ResultType SymbolicAutomaton::IntersectNonEmpty(Symbol* symbol, Term* stateAppro
         stateApproximation->dump();
     }
     std::cout << ") = <" << (result.second ? "True" : "False") << ","; result.first->dump(); std::cout << ">\n";
-    #endif
+#   endif
 
     if(symbol != nullptr) {
         result.first->SetSuccessor(stateApproximation, symbol);
@@ -283,7 +283,7 @@ ResultType RootProjectionAutomaton::IntersectNonEmpty(Symbol* symbol, Term* fina
     ResultType result = this->_aut->IntersectNonEmpty(symbol, projectionApproximation->list[0], underComplement);
 
     // Create a new fixpoint term and iterator on it
-    TermFixpoint* fixpoint = this->_factory.CreateFixpoint(result.first, SymbolWorkshop::CreateZeroSymbol(), underComplement, result.second, WorklistSearchType::E_BFS);
+    TermFixpoint* fixpoint = this->_factory.CreateFixpoint(result.first, SymbolWorkshop::CreateZeroSymbol(), underComplement, result.second, WorklistSearchType::E_DFS);
     TermFixpoint::iterator it = fixpoint->GetIterator();
     Term_ptr fixpointTerm = nullptr;
 

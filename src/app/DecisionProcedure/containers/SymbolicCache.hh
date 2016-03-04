@@ -32,7 +32,7 @@ namespace Gaston {
 }
 
 struct ResultHashType {
-	size_t operator()(std::pair<Term*, ZeroSymbol*> set) const {
+	size_t operator()(std::pair<Term*, ZeroSymbol*> const& set) const {
 		size_t seed = Gaston::hash_value(set.first);
 		boost::hash_combine(seed, Gaston::hash_value(set.second));
 		return seed;
@@ -40,7 +40,7 @@ struct ResultHashType {
 };
 
 struct SubsumptionHashType {
-	size_t operator()(std::pair<Term*, Term*> set) const {
+	size_t operator()(std::pair<Term*, Term*> const& set) const {
 		size_t seed = Gaston::hash_value(set.first);
 		boost::hash_combine(seed, Gaston::hash_value(set.second));
 		return seed;
@@ -48,7 +48,7 @@ struct SubsumptionHashType {
 };
 
 struct PreHashType {
-	size_t operator()(std::pair<size_t, ZeroSymbol*> set) const {
+	size_t operator()(std::pair<size_t, ZeroSymbol*> const& set) const {
 		size_t seed = boost::hash_value(set.first);
 		boost::hash_combine(seed, Gaston::hash_value(set.second));
 		return seed;
@@ -145,8 +145,9 @@ public:
 	 * @param key: key we are storing to
 	 * @param data: data we are storing
 	 */
-	void StoreIn(Key & key, const CacheData & data){
-		auto itBoolPair = _cache.insert(std::make_pair(std::move(key), std::move(data)));
+	void StoreIn(Key& key, const CacheData& data){
+		//auto itBoolPair = _cache.insert(std::make_pair(std::move(key), std::move(data)));
+		this->_cache.emplace(key, data);
 	}
 
 	/**
@@ -154,7 +155,7 @@ public:
 	 * @param data: reference to the data
 	 * @return true if found;
 	 */
-	bool retrieveFromCache(Key& key, CacheData & data) {
+	bool retrieveFromCache(Key& key, CacheData& data) {
 		auto search = this->_cache.find(key);
 		if (search == this->_cache.end()) {
 			++cacheMisses;

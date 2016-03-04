@@ -181,7 +181,7 @@ public:
  *****************************/
 #define DEBUG_ROOT_AUTOMATON			false
 #define DEBUG_AUTOMATA_ADDRESSES		false
-#define DEBUG_EXAMPLE_PATHS				true
+#define DEBUG_EXAMPLE_PATHS				false
 #define DEBUG_BASE_AUTOMATA 			false
 #define DEBUG_FIXPOINT 					false
 #define DEBUG_FIXPOINT_SYMBOLS			false
@@ -189,8 +189,8 @@ public:
 #define DEBUG_INTERSECT_NON_EMPTY 		false
 #define DEBUG_TERM_UNIQUENESS			false
 #define DEBUG_TERM_CREATION				false
-#define DEBUG_SYMBOL_CREATION			true
-#define DEBUG_CACHE_MEMBERS				true
+#define DEBUG_SYMBOL_CREATION			false
+#define DEBUG_CACHE_MEMBERS				false
 #define DEBUG_WORKSHOPS					false
 #define DEBUG_TERM_SUBSUMPTION 			false
 #define DEBUG_TERM_CACHE_COMPARISON		false
@@ -200,7 +200,7 @@ public:
 #define DEBUG_GENERATE_DOT_AUTOMATON	true
 #define DEBUG_COMPUTE_FULL_FIXPOINT 	false
 #define DEBUG_COMPARE_WORKLISTS			true
-#define DEBUG_VARMAP					true
+#define DEBUG_VARMAP					false
 
 /*
  * >>> Automata stats options
@@ -209,7 +209,7 @@ public:
 #define PRINT_STATS_PRODUCT				true
 #define PRINT_STATS_NEGATION			true
 #define PRINT_STATS_BASE				true
-#define PRINT_STATS						false
+#define PRINT_STATS						true
 
 /* >>> Dumping Options <<< *
  ***************************/
@@ -253,7 +253,7 @@ public:
 
 /* >>> Optimizations <<< *
  *************************/
-#define OPT_DONT_CACHE_CONT				false	// < Do not cache terms containing continuations
+#define OPT_DONT_CACHE_CONT				true	// < Do not cache terms containing continuations
 #define OPT_DONT_CACHE_UNFULL_FIXPOINTS false	// < Do not cache fixpoints that were not fully computed
 #define OPT_EQ_THROUGH_POINTERS			true	// < Test equality through pointers, not by structure
 #define OPT_GENERATE_UNIQUE_TERMS		true	// < Use Workshops to generate unique pointers

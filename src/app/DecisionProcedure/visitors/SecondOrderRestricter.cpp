@@ -36,7 +36,10 @@ AST* SecondOrderRestricter::_firstOrderRestrict(FirstOrderQuantification* form) 
             restriction = symbolTable.getDefault1Restriction(&formal);
             if(restriction != nullptr)
                 restriction = restriction->clone()->unfoldMacro(new IdentList(formal), list);
+        } else {
+            restriction = restriction->clone();
         }
+
         if(restriction != nullptr && restriction->kind != aTrue) {
             binopForm = new BinaryFormula(restriction, binopForm, form->pos);
         }
@@ -69,6 +72,8 @@ AST* SecondOrderRestricter::_secondOrderRestrict(SecondOrderQuantification *form
             restriction = symbolTable.getDefault2Restriction(&formal);
             if(restriction != nullptr)
                 restriction = restriction->clone()->unfoldMacro(new IdentList(formal), list);
+        } else {
+            restriction = restriction->clone();
         }
 
         if(restriction != nullptr && restriction->kind != aTrue) {

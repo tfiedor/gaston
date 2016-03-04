@@ -30,7 +30,7 @@ void SymbolicChecker::ConstructAutomaton() {
         DFA* dfa = dfaAllPos(varMap[allPosVar]);
         assert(dfa != nullptr);
         SymbolicAutomaton* allPosAutomaton = new GenericBaseAutomaton(dfa, varMap.TrackLength(), this->_monaAST->formula, false);
-        this->_automaton = new IntersectionAutomaton(allPosAutomaton, this->_automaton, this->_monaAST->formula);
+        this->_automaton = new UnionAutomaton(new ComplementAutomaton(allPosAutomaton, this->_monaAST->formula), this->_automaton, this->_monaAST->formula);
     }
 
     IdentList free, bound;
