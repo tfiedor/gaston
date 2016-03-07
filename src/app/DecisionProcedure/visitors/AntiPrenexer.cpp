@@ -240,7 +240,6 @@ ASTForm* FullAntiPrenexer::universalAntiPrenex(ASTForm *form) {
         default:
             return allForm;
     }
-    return form;
 }
 
 AST* FullAntiPrenexer::visit(ASTForm_All1 *form) {

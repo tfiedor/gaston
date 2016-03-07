@@ -627,9 +627,5 @@ AST* Flattener::visit(ASTForm_Call* form) {
     PredLibEntry* called = predicateLib.lookup(calledNumber);
 
     /* So far, we will treat predicate and macro the same */
-    if (!called->isMacro) {
-        return unfoldFormula(called, form->args);
-    } else {
-        return unfoldFormula(called, form->args);
-    }
+    return unfoldFormula(called, form->args);
 }

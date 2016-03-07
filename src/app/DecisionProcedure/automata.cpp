@@ -24,13 +24,10 @@ char charToAsgn(char c) {
 	switch(c) {
 	case '0':
 		return 0x01;
-		break;
 	case '1':
 		return 0x02;
-		break;
 	case 'X':
 		return 0x03;
-		break;
 	default:
 		assert(false);
 	}

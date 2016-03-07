@@ -272,7 +272,7 @@ TermFixpoint::~TermFixpoint() {
 }
 
 void Term::Complement() {
-    this->_inComplement = (this->_inComplement == false);
+    this->_inComplement = !this->_inComplement;
 }
 
 void Term::SetSuccessor(Term* succ, Symbol* symb) {
