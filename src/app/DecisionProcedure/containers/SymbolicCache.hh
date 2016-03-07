@@ -20,7 +20,10 @@
 #include <iomanip>
 #include <map>
 #include <vector>
+#include <sparsehash/dense_hash_map>
+#include <sparsehash/sparse_hash_map>
 #include <unordered_map>
+#include <typeinfo>
 #include "StateSet.hh"
 #include "../environment.hh"
 
@@ -64,33 +67,41 @@ struct PairCompare : public std::binary_function<Key, Key, bool>
      * @return true if lhs = rhs
      */
 	bool operator()(Key const& lhs, Key const& rhs) const {
-		#if (DEBUG_TERM_CACHE_COMPARISON == true)
-			auto keyFirst = lhs.first;
-			auto keySecond = lhs.second;
-			if(keySecond == nullptr) {
-				std::cout << "(" << (*keyFirst) << ", \u03B5) vs";
+#       if (DEBUG_TERM_CACHE_COMPARISON == true)
+		auto keyFirst = lhs.first;
+		auto keySecond = lhs.second;
+		if(keySecond == nullptr) {
+			std::cout << "(" << (*keyFirst) << ", \u03B5) vs";
+		} else {
+			std::cout << "(" << (*keyFirst) << ", " << (*keySecond) << ") vs";
+		}
+		auto dkeyFirst = rhs.first;
+		auto dkeySecond = rhs.second;
+		if(dkeySecond == nullptr) {
+			std::cout << "(" << (*dkeyFirst) << ", \u03B5)";
+		} else {
+			std::cout << "(" << (*dkeyFirst) << ", " << (*dkeySecond) << ")";
+		}
+		bool lhsresult = (*lhs.first == *rhs.first);
+		bool rhsresult = (lhs.second == rhs.second);
+		bool result = lhsresult && rhsresult;
+			std::cout << " = (" << lhsresult << " + " << rhsresult << ") =  " << result << "\n";
+		return  result;
+#       else
+		if(lhs.second == nullptr || rhs.second == nullptr) {
+			if(lhs.first == nullptr || rhs.first == nullptr) {
+				return lhs.first == rhs.first && lhs.second == rhs.second;
 			} else {
-				std::cout << "(" << (*keyFirst) << ", " << (*keySecond) << ") vs";
-			}
-			auto dkeyFirst = rhs.first;
-			auto dkeySecond = rhs.second;
-			if(dkeySecond == nullptr) {
-				std::cout << "(" << (*dkeyFirst) << ", \u03B5)";
-			} else {
-				std::cout << "(" << (*dkeyFirst) << ", " << (*dkeySecond) << ")";
-			}
-			bool lhsresult = (*lhs.first == *rhs.first);
-			bool rhsresult = (lhs.second == rhs.second);
-			bool result = lhsresult && rhsresult;
-				std::cout << " = (" << lhsresult << " + " << rhsresult << ") =  " << result << "\n";
-			return  result;
-        #else
-			if(lhs.second == nullptr || rhs.second == nullptr) {
 				return (*lhs.first == *rhs.first) && lhs.second == rhs.second;
+			}
+		} else {
+			if(lhs.first == nullptr || rhs.first == nullptr) {
+				return lhs.first == rhs.first && (*lhs.second == *rhs.second);
 			} else {
 				return (*lhs.second == *rhs.second) && (*lhs.first == *rhs.first);
 			}
-		#endif
+		}
+#       endif
 	}
 };
 
@@ -119,7 +130,11 @@ class BinaryCache {
 //	                                     this could be done better ---^----------------------------^
 private:
 	// < Typedefs >
+#   if (OPT_USE_DENSE_HASHMAP == true)
+	typedef google::dense_hash_map<Key, CacheData, KeyHash, KeyCompare> KeyToValueMap;
+#   else
 	typedef std::unordered_map<Key, CacheData, KeyHash, KeyCompare> KeyToValueMap;
+#   endif
 	typedef typename KeyToValueMap::iterator iterator;
 	typedef typename KeyToValueMap::const_iterator const_iterator;
 
@@ -129,6 +144,11 @@ private:
 	unsigned int cacheMisses = 0;
 
 public:
+	BinaryCache() {
+#       if (OPT_USE_DENSE_HASHMAP == true)
+		this->_cache.set_empty_key(Key());
+#       endif
+	}
 	// < Public Methods >
 	/**
 	 * @param key: key of the looked up macro state
@@ -146,8 +166,11 @@ public:
 	 * @param data: data we are storing
 	 */
 	void StoreIn(Key& key, const CacheData& data){
-		//auto itBoolPair = _cache.insert(std::make_pair(std::move(key), std::move(data)));
+#       if (OPT_USE_DENSE_HASHMAP == true)
+		this->_cache.insert(std::make_pair(key, data));
+#       else
 		this->_cache.emplace(key, data);
+#       endif
 	}
 
 	/**
@@ -188,9 +211,63 @@ public:
 			std::cout << ", Hit:Miss (" << this->cacheHits << ":" << this->cacheMisses << ")	->	"<< std::fixed << std::setprecision(2) << (this->cacheHits/(double)(this->cacheHits+this->cacheMisses))*100 <<"%\n";
 		else
 			std::cout << "\n";
+#       if (MEASURE_CACHE_BUCKETS == true)
+        size_t bucketNo = this->_cache.bucket_count();
+		std::cout << "\t\t-> Buckets: " << bucketNo;
+		if(bucketNo < 50) {
+			std::cout << "{";
+			for(int i = 0; i < bucketNo; ++i) {
+				std::cout << this->_cache.bucket_size(i);
+				if(i != bucketNo - 1) {
+					std::cout << ", ";
+				}
+			}
+			std::cout << "}";
+		}
+		size_t sum = 0;
+		size_t usedCount = 0;
+		size_t usedSum = 0;
+		size_t max = 0;
+		for(int i = 0; i < bucketNo; ++i) {
+			sum += this->_cache.bucket_size(i);
+			if(max == 0 || this->_cache.bucket_size(i) > max) {
+				max = this->_cache.bucket_size(i);
+			}
+			if(this->_cache.bucket_size(i) != 0) {
+				usedSum += this->_cache.bucket_size(i);
+				++usedCount;
+			}
+		}
+		std::cout << " avg: " << std::fixed << std::setprecision(2) << (sum / (double) bucketNo) << " ("
+		          << (usedCount == 0 ? 0 : (usedSum / (double) usedCount)) << "), max: "
+		          << max << ", " << usedCount << " buckets used";
+		std::cout << "\n";
 
-		#if (DEBUG_CACHE_MEMBERS == true)
+#       endif
+
+#       if (DEBUG_CACHE_MEMBERS == true)
         if(size) {
+#           if (DEBUG_CACHE_BUCKETS == true)
+			std::cout << "{\n";
+			for(int i = 0; i < this->_cache.bucket_count(); ++i) {
+				if(this->_cache.bucket_size(i)) {
+					std::cout << "\tbucket " << i << "{\n";
+					for(auto it = this->_cache.begin(i); it != this->_cache.end(i); ++it) {
+						std::cout << "\t\t";
+#                       if (DEBUG_CACHE_MEMBERS_HASH == true)
+                        auto hasher = this->_cache.hash_function();
+						std::cout << "[#" << hasher(it->first) << "] ";
+#                       endif
+						KeyDump(it->first);
+						std::cout << " : ";
+						DataDump(it->second);
+						std::cout << "\n";
+					}
+					std::cout << "\t}\n";
+				};
+			}
+			std::cout << "}\n";
+#           else
 			std::cout << "{\n";
 			for (auto it = this->_cache.begin(); it != this->_cache.end(); ++it) {
 				std::cout << "\t";
@@ -200,8 +277,9 @@ public:
 				std::cout << "\n";
 			}
 			std::cout << "}\n";
+#           endif
 		}
-		#endif
+#       endif
 
 		return size;
 	}

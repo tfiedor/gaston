@@ -191,6 +191,8 @@ public:
 #define DEBUG_TERM_CREATION				false
 #define DEBUG_SYMBOL_CREATION			false
 #define DEBUG_CACHE_MEMBERS				false
+#define DEBUG_CACHE_BUCKETS				true
+#define DEBUG_CACHE_MEMBERS_HASH		true
 #define DEBUG_WORKSHOPS					false
 #define DEBUG_TERM_SUBSUMPTION 			false
 #define DEBUG_TERM_CACHE_COMPARISON		false
@@ -220,7 +222,8 @@ public:
 /* >>> Measuring Options <<< *
  *****************************/
 #define MEASURE_STATE_SPACE 			true	// < Measures how many instances of terms were created
-#define MEASURE_CACHE_HITS 				false	// < Prints the statistics for each cache on each node
+#define MEASURE_CACHE_HITS 				true	// < Prints the statistics for each cache on each node
+#define MEASURE_CACHE_BUCKETS			true	// < Prints the statistics for cache buckets
 #define MEASURE_CONTINUATION_CREATION	true	// < Measures how many continuations are created
 #define MEASURE_CONTINUATION_EVALUATION	true	// < Measures how many continuations are actually unfolded
 #define MEASURE_RESULT_HITS				true	// < Measure how many times the result hits in cache
@@ -280,5 +283,6 @@ public:
 #define OPT_EXTRACT_MORE_AUTOMATA		true	// < Calls detagger to heuristically convert some subformulae to automata
 #define OPT_UNIQUE_TRIMMED_SYMBOLS		false	// < Will guarantee that there will not be a collisions between symbols after trimming
 #define OPT_FIXPOINT_BFS_SEARCH			false	// < Will add new things to the back of the worklist in fixpoint
+#define OPT_USE_DENSE_HASHMAP			false	// < Will use the google::dense_hash_map as cache
 
 #endif

@@ -52,6 +52,10 @@ namespace Workshops {
         bool operator()(ComputationKey const& lhs, ComputationKey const& rhs) const {
             bool result;
 
+            if(lhs.first == nullptr || rhs.first == nullptr) {
+                return lhs.first == rhs.first;
+            }
+
             // Compare fixpoints
             for(auto item : (*lhs.first)) {
                 result = false;
@@ -87,8 +91,10 @@ namespace Workshops {
     struct ComputationHash {
         size_t operator()(ComputationKey const& set) const {
             size_t seed = 0;
-            for(auto item : (*set.first)) {
-                boost::hash_combine(seed, boost::hash_value(item));
+            if(set.first) {
+                for (auto item : (*set.first)) {
+                    boost::hash_combine(seed, boost::hash_value(item));
+                }
             }
             return seed;
         }
