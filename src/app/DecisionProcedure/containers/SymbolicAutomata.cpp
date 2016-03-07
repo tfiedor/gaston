@@ -154,6 +154,7 @@ UnionAutomaton::UnionAutomaton(SymbolicAutomaton_raw lhs, SymbolicAutomaton_raw 
  */
 ResultType SymbolicAutomaton::IntersectNonEmpty(Symbol* symbol, Term* stateApproximation, bool underComplement) {
     assert(this->type != AutType::SYMBOLIC_BASE);
+    assert(stateApproximation != nullptr);
     ResultType result;
 
     // Empty set needs not to be computed
@@ -161,7 +162,7 @@ ResultType SymbolicAutomaton::IntersectNonEmpty(Symbol* symbol, Term* stateAppro
         return std::make_pair(stateApproximation, underComplement);
     }
 
-    #if (DEBUG_INTERSECT_NON_EMPTY == true)
+#   if (DEBUG_INTERSECT_NON_EMPTY == true)
     std::cout << "\nIntersectNonEm3pty(";
     if(symbol != nullptr) {
         std::cout << (*symbol);
@@ -176,7 +177,7 @@ ResultType SymbolicAutomaton::IntersectNonEmpty(Symbol* symbol, Term* stateAppro
     }
     std::cout << ", " << (underComplement ? "True" : "False");
     std::cout << ")\n";
-    #endif
+#   endif
 
     // Trim the variables that are not occuring in the formula away
     if(symbol != nullptr) {
@@ -184,10 +185,10 @@ ResultType SymbolicAutomaton::IntersectNonEmpty(Symbol* symbol, Term* stateAppro
     }
 
     // If we have continuation, we have to unwind it
-    if(stateApproximation != nullptr && stateApproximation->type == TERM_CONTINUATION) {
-        #if (MEASURE_CONTINUATION_EVALUATION == true || MEASURE_ALL == true)
+    if(stateApproximation->type == TERM_CONTINUATION) {
+#       if (MEASURE_CONTINUATION_EVALUATION == true || MEASURE_ALL == true)
         ++this->_contUnfoldingCounter;
-        #endif
+#       endif
         TermContinuation* continuation = reinterpret_cast<TermContinuation*>(stateApproximation);
         stateApproximation = continuation->unfoldContinuation(UnfoldedInType::E_IN_ISECT_NONEMPTY);
     }
@@ -199,31 +200,27 @@ ResultType SymbolicAutomaton::IntersectNonEmpty(Symbol* symbol, Term* stateAppro
         return std::make_pair(stateApproximation, underComplement);
     }
 
-    #if (OPT_CACHE_RESULTS == true)
+#   if (OPT_CACHE_RESULTS == true)
     // Look up in cache, if in cache, return the result
     bool inCache = true;
     auto key = std::make_pair(stateApproximation, symbol);
-    #if (OPT_DONT_CACHE_CONT == true)
-    bool dontSearchTheCache = (stateApproximation->type == TERM_PRODUCT && stateApproximation->IsNotComputed());
-    if (!dontSearchTheCache && (inCache = this->_resCache.retrieveFromCache(key, result))) {
-    #else
-    if (inCache = this->_resCache.retrieveFromCache(key, result)) {
-    #endif
+#       if (OPT_DONT_CACHE_CONT == true)
+        bool dontSearchTheCache = (stateApproximation->type == TERM_PRODUCT && stateApproximation->IsNotComputed());
+        if (!dontSearchTheCache && (inCache = this->_resCache.retrieveFromCache(key, result))) {
+#       else
+        if (inCache = this->_resCache.retrieveFromCache(key, result)) {
+#       endif
         assert(result.first != nullptr);
         return result;
     }
     //}
-    #endif
+#   endif
 
     // Call the core function
     result = this->_IntersectNonEmptyCore(symbol, stateApproximation, underComplement); // TODO: Memory consumption
-    #if (MEASURE_RESULT_HITS == true || MEASURE_ALL == true)
-    if(result.second) {
-        ++this->_trueCounter;
-    } else {
-        ++this->_falseCounter;
-    }
-    #endif
+#   if (MEASURE_RESULT_HITS == true || MEASURE_ALL == true)
+    (result.second ? ++this->_trueCounter : ++this->_falseCounter);
+#   endif
 
     // Cache Results
 #   if (OPT_CACHE_RESULTS == true)
@@ -242,7 +239,6 @@ ResultType SymbolicAutomaton::IntersectNonEmpty(Symbol* symbol, Term* stateAppro
         }
 #       endif
     if(!inCache) {
-        auto key = std::make_pair(stateApproximation, symbol);
         this->_resCache.StoreIn(key, result);
     }
 #   endif
@@ -301,7 +297,6 @@ ResultType RootProjectionAutomaton::IntersectNonEmpty(Symbol* symbol, Term* fina
             timer_paths.print();
             timer_paths.start();
             maxPath = fixpointTerm->link.len;
-            // Fixme: Remove this assert
             if(maxPath > 10) {
                 std::cout << "[!] Maximal search depth reached!\n";
                 break;
@@ -774,13 +769,12 @@ void SymbolicAutomaton::DumpExample(ExampleType e) {
     }
 }
 
-// Fixme: some variables could be bounded twice
 void BinaryOpAutomaton::_DumpExampleCore(ExampleType e) {
-
+    assert(false && "BinaryOpAutomata cannot have examples yet!");
 }
 
 void ComplementAutomaton::_DumpExampleCore(ExampleType e) {
-
+    assert(false && "ComplementAutomata cannot have examples yet!");
 }
 
 std::string interpretModel(std::string& str, bool isFirstOrder) {
@@ -837,7 +831,7 @@ void ProjectionAutomaton::_DumpExampleCore(ExampleType e) {
     }
 
     for(size_t i = 0; i < varNo; ++i) {
-        bool isFirstOrder = (symbolTable.lookupType(this->projectedVars->get(i)) == MonaTypeTag::Varname1 ? true : false);
+        bool isFirstOrder = (symbolTable.lookupType(this->projectedVars->get(i)) == MonaTypeTag::Varname1);
         std::cout << (symbolTable.lookupSymbol(this->projectedVars->get(i))) << " = " << interpretModel(examples[i], isFirstOrder) << "\n";
     }
 

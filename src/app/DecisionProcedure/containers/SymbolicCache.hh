@@ -34,11 +34,30 @@ namespace Gaston {
 	extern size_t hash_value(ZeroSymbol *);
 }
 
+template<class T>
+inline size_t HashPointer(T* Ptr)
+{
+	size_t Value = (size_t)(Ptr);
+	Value = ~Value + (Value << 15);
+	Value = Value ^ (Value >> 12);
+	Value = Value + (Value << 2);
+	Value = Value ^ (Value >> 4);
+	Value = Value * 2057;
+	Value = Value ^ (Value >> 16);
+	return Value;
+}
+
 struct ResultHashType {
 	size_t operator()(std::pair<Term*, ZeroSymbol*> const& set) const {
+#       if (OPT_USE_CUSTOM_PTR_HASH == true)
+        size_t seed = HashPointer<Term>(set.first);
+		boost::hash_combine(seed, HashPointer<ZeroSymbol>(set.second));
+		return seed;
+#       else
 		size_t seed = Gaston::hash_value(set.first);
 		boost::hash_combine(seed, Gaston::hash_value(set.second));
 		return seed;
+#       endif
 	}
 };
 

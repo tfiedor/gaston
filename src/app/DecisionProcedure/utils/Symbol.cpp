@@ -22,10 +22,14 @@ extern VarToTrackMap varMap;
 
 namespace Gaston {
     size_t hash_value(ZeroSymbol* s) {
+#       if (OPT_TERM_HASH_BY_APPROX == true)
+        return boost::hash_value(s);
+#       else
         if(s == nullptr) return 0;
         size_t seed = boost::hash_value(s->_trackMask.count());
         boost::hash_combine(seed, boost::hash_value(s->_trackMask.find_first()));
         return seed;
+#       endif
     }
 }
 
@@ -36,9 +40,9 @@ size_t ZeroSymbol::instances = 0;
  * Constructor that creates a new zero symbol
  */
 ZeroSymbol::ZeroSymbol() : _trackMask(varMap.TrackLength() << 1) {
-    #if (MEASURE_SYMBOLS == true)
+#   if (MEASURE_SYMBOLS == true)
     ++ZeroSymbol::instances;
-    #endif
+#   endif
     this->_bdd = nullptr;
 }
 
@@ -48,9 +52,9 @@ ZeroSymbol::ZeroSymbol() : _trackMask(varMap.TrackLength() << 1) {
  * @param[in] track:    track of the constructed symbol
  */
 ZeroSymbol::ZeroSymbol(BitMask const& track) {
-    #if (MEASURE_SYMBOLS == true)
+#   if (MEASURE_SYMBOLS == true)
     ++ZeroSymbol::instances;
-    #endif
+#   endif
     this->_trackMask = track;
     this->_bdd = nullptr;
 }
@@ -64,9 +68,9 @@ ZeroSymbol::ZeroSymbol(BitMask const& track) {
  * @param[in] val:      value of @p var
  */
 ZeroSymbol::ZeroSymbol(BitMask const& track, VarType var, VarValue val) {
-    #if (MEASURE_SYMBOLS == true)
+#   if (MEASURE_SYMBOLS == true)
     ++ZeroSymbol::instances;
-    #endif
+#   endif
     this->_trackMask = track;
     this->_SetValueAt(var, ZeroSymbol::charToAsgn(val));
     this->_bdd = nullptr;

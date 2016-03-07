@@ -261,6 +261,7 @@ public:
 #define OPT_EQ_THROUGH_POINTERS			true	// < Test equality through pointers, not by structure
 #define OPT_GENERATE_UNIQUE_TERMS		true	// < Use Workshops to generate unique pointers
 // ^- NOTE! From v1.0 onwards, disable this will introduce not only leaks, but will fuck everything up!
+#define OPT_USE_CUSTOM_PTR_HASH			false	// < Will use the custom implementation of hash function instead of boost::hash
 #define OPT_TERM_HASH_BY_APPROX			true	// < Include stateSpaceApprox into hash (i.e. better distribution of cache)
 #define OPT_ANTIPRENEXING				true	// < Transform formula to anti-prenex form (i.e. all of the quantifiers are deepest on leaves)
 #define OPT_DRAW_NEGATION_IN_BASE 		true	// < Negation is handled on formula level and not on computation level on base automata
