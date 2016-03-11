@@ -134,8 +134,7 @@ ASTForm* negateQuantifier(ASTForm_Not* node, TransformerVisitor &visitor) {
     assert(node != nullptr);
     assert(node->f != nullptr);
 
-    ASTForm* formula, *q;
-    q = node->f;
+    ASTForm* q = node->f;
     switch(q->kind) {
         case aEx0:
             return createZeroOrderNegatedQuantifier<ASTForm_Ex0, ASTForm_All0>(q, visitor);

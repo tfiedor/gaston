@@ -134,14 +134,6 @@ namespace Workshops {
     };
 
     void TermWorkshop::InitializeWorkshop() {
-        this->_bCache = nullptr;
-        this->_fpCache = nullptr;
-        this->_fppCache = nullptr;
-        this->_pCache = nullptr;
-        this->_lCache = nullptr;
-        this->_contCache = nullptr;
-        this->_compCache = nullptr;
-
         switch(this->_aut->type) {
             case AutType::BASE:
                 this->_bCache = new BaseCache();

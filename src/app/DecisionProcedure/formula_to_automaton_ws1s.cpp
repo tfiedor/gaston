@@ -220,9 +220,9 @@ void ASTForm_Equal2::toUnaryAutomaton(Automaton &aut, bool doComplement) {
 	// 1) X = Y1
 	// TODO: This is not right
 	if(this->T1->kind == aVar2 && this->T2->kind == aPlus2) {
-		ASTTerm2_Var2* XTerm = (ASTTerm2_Var2*) this->T1;
+		ASTTerm2_Var2* XTerm = reinterpret_cast<ASTTerm2_Var2*>(this->T1);
 		unsigned int X = XTerm->n;
-		ASTTerm2_Var2* YTerm = (ASTTerm2_Var2*) ((ASTTerm2_Plus*) this->T2)->T;
+		ASTTerm2_Var2* YTerm = (ASTTerm2_Var2*) (reinterpret_cast<ASTTerm2_Plus*> (this->T2))->T;
 		unsigned int Y = YTerm->n;
 		// (xxxx) -> q0
 		setInitialState(aut, 0);
@@ -262,9 +262,9 @@ void ASTForm_Equal2::toUnaryAutomaton(Automaton &aut, bool doComplement) {
 
 	// 2) T1 = T2
 	} else if (this->T1->kind == aVar2 && this->T2->kind == aVar2) {
-		ASTTerm2_Var2* T1Term = (ASTTerm2_Var2*) this->T1;
+		ASTTerm2_Var2* T1Term = reinterpret_cast<ASTTerm2_Var2*>(this->T1);
 		unsigned int T1 = T1Term->n;
-		ASTTerm2_Var2* T2Term = (ASTTerm2_Var2*) this->T2;
+		ASTTerm2_Var2* T2Term = reinterpret_cast<ASTTerm2_Var2*>(this->T2);
 		unsigned int T2 = T2Term->n;
 
 		// (xxxx) -> q0
@@ -296,13 +296,13 @@ void ASTForm_Equal2::toUnaryAutomaton(Automaton &aut, bool doComplement) {
 		}
 #endif
 	} else if(this->T2->kind == aSet) {
-		ASTTerm2_Var2 *T1Term = (ASTTerm2_Var2*) this->T1;
+		ASTTerm2_Var2 *T1Term = reinterpret_cast<ASTTerm2_Var2*>(this->T1);
 		unsigned int X = T1Term->n;
-		ASTList* vars = ((ASTTerm2_Set*)this->T2)->elements;
+		ASTList* vars = reinterpret_cast<ASTTerm2_Set*>(this->T2)->elements;
 		std::list<unsigned int> l;
 
 		for (auto var = vars->begin(); var != vars->end(); ++var) {
-			l.push_back((unsigned int)((ASTTerm1_Int*)*var)->value());
+			l.push_back(static_cast<unsigned int>((reinterpret_cast<ASTTerm1_Int*>(*var))->value()));
 		}
 		l.sort([](unsigned int a, unsigned int b) {return a < b;});
 
@@ -351,7 +351,7 @@ void ASTForm_Equal2::toUnaryAutomaton(Automaton &aut, bool doComplement) {
 	// 3) X = e
 	// this should be X = {0} hopefully
 	} else {
-		ASTTerm2_Var2 *XTerm = (ASTTerm2_Var2*) this->T1;
+		ASTTerm2_Var2 *XTerm = reinterpret_cast<ASTTerm2_Var2*>(this->T1);
 		unsigned int X = XTerm->n;
 
 		// (xxx)-> q0
@@ -389,10 +389,10 @@ void ASTForm_Equal2::toUnaryAutomaton(Automaton &aut, bool doComplement) {
  * @return Automaton corresponding to the formula T1 sub T2
  */
 void ASTForm_Sub::toUnaryAutomaton(Automaton &aut, bool doComplement) {
-	ASTTerm2_Var2* T1Var = (ASTTerm2_Var2*) this->T1;
+	ASTTerm2_Var2* T1Var = reinterpret_cast<ASTTerm2_Var2*>(this->T1);
 	unsigned int T1 = (unsigned int) T1Var->n;
 
-	ASTTerm2_Var2* T2Var = (ASTTerm2_Var2*) this->T2;
+	ASTTerm2_Var2* T2Var = reinterpret_cast<ASTTerm2_Var2*>(this->T2);
 	unsigned int T2 = (unsigned int) T2Var->n;
 	//  -(xxxx)-> q0
 	setInitialState(aut, 0);
@@ -425,7 +425,7 @@ void ASTForm_Sub::toUnaryAutomaton(Automaton &aut, bool doComplement) {
  * @return Automaton corresponding to the formula Singleton(X)
  */
 void ASTForm_FirstOrder::toUnaryAutomaton(Automaton &aut, bool doComplement) {
-	ASTTerm2_Var2 *XVar = (ASTTerm2_Var2*) this->t;
+	ASTTerm2_Var2 *XVar = reinterpret_cast<ASTTerm2_Var2*>(this->t);
 	unsigned int X = (unsigned int) XVar->n;
 
 	// -(xxx)-> q0
@@ -467,9 +467,9 @@ void ASTForm_FirstOrder::toUnaryAutomaton(Automaton &aut, bool doComplement) {
 void ASTForm_LessEq::toUnaryAutomaton(Automaton &aut, bool doComplement) {
 	assert(this->t1->kind == aVar1 && this->t2->kind == aVar1);
 
-	ASTTerm1_Var1 *xVar = (ASTTerm1_Var1*) this->t1;
+	ASTTerm1_Var1 *xVar = reinterpret_cast<ASTTerm1_Var1*>(this->t1);
 	unsigned int x = (unsigned int) xVar->n;
-	ASTTerm1_Var1 *yVar = (ASTTerm1_Var1*) this->t2;
+	ASTTerm1_Var1 *yVar = reinterpret_cast<ASTTerm1_Var1*>(this->t2);
 	unsigned int y = (unsigned int) yVar->n;
 
 	// -(xxx)-> q0
@@ -520,10 +520,10 @@ void ASTForm_LessEq::toUnaryAutomaton(Automaton &aut, bool doComplement) {
 void ASTForm_Less::toUnaryAutomaton(Automaton &aut, bool doComplement) {
 	assert(this->t1->kind == aVar1 && this->t2->kind == aVar1);
 
-	ASTTerm1_Var1 *xVar = (ASTTerm1_Var1*) this->t1;
-	unsigned int x = (unsigned int) xVar->n;
-	ASTTerm1_Var1 *yVar = (ASTTerm1_Var1*) this->t2;
-	unsigned int y = (unsigned int) yVar->n;
+	ASTTerm1_Var1 *xVar = reinterpret_cast<ASTTerm1_Var1*>(this->t1);
+	unsigned int x = xVar->n;
+	ASTTerm1_Var1 *yVar = reinterpret_cast<ASTTerm1_Var1*>(this->t2);
+	unsigned int y = yVar->n;
 
 	// -(xxx)-> q0
 	setInitialState(aut, 0);
@@ -570,9 +570,9 @@ void ASTForm_Less::toUnaryAutomaton(Automaton &aut, bool doComplement) {
  */
 void ASTForm_Equal1::toUnaryAutomaton(Automaton &aut, bool doComplement) {
 	if(this->t1->kind == aVar1 && this->t2->kind == aPlus1) {
-		ASTTerm1_Var1 *xVar = (ASTTerm1_Var1 *) this->t1;
-		unsigned int x = (unsigned int) xVar->n;
-		ASTTerm1_Var1 *yTerm = (ASTTerm1_Var1 *) ((ASTTerm1_Plus *) this->t2)->t;
+		ASTTerm1_Var1 *xVar = reinterpret_cast<ASTTerm1_Var1*>(this->t1);
+		unsigned int x = xVar->n;
+		ASTTerm1_Var1 *yTerm = reinterpret_cast<ASTTerm1_Var1*>((reinterpret_cast<ASTTerm1_Plus*>(this->t2))->t);
 		unsigned int y = yTerm->n;
 
 		// -(xxx)-> q0
@@ -604,10 +604,10 @@ void ASTForm_Equal1::toUnaryAutomaton(Automaton &aut, bool doComplement) {
 		setFinalState(aut, doComplement, 2);
 		setNonFinalState(aut, doComplement, 3); // < SINK >
 	} else if(this->t1->kind == aVar1 && this->t2->kind == aVar1) {
-		ASTTerm1_Var1 *xVar = (ASTTerm1_Var1 *) this->t1;
-		unsigned int x = (unsigned int) xVar->n;
-		ASTTerm1_Var1 *yVar = (ASTTerm1_Var1 *) this->t2;
-		unsigned int y = (unsigned int) yVar->n;
+		ASTTerm1_Var1 *xVar = reinterpret_cast<ASTTerm1_Var1*>(this->t1);
+		unsigned int x = xVar->n;
+		ASTTerm1_Var1 *yVar = reinterpret_cast<ASTTerm1_Var1*>(this->t2);
+		unsigned int y = yVar->n;
 
 		setInitialState(aut, 0);
 
@@ -656,10 +656,10 @@ void ASTForm_Equal1::toUnaryAutomaton(Automaton &aut, bool doComplement) {
 void ASTForm_In::toUnaryAutomaton(Automaton &aut, bool doComplement) {
 	// int in X
 	if(this->t1->kind == aInt) {
-		ASTTerm2_Var2 *XVar = (ASTTerm2_Var2*) this->T2;
-		unsigned int X = (unsigned int) XVar->n;
-		ASTTerm1_Int *iVar = (ASTTerm1_Int*) this->t1;
-		unsigned int i = (unsigned int) iVar->n;
+		ASTTerm2_Var2 *XVar = reinterpret_cast<ASTTerm2_Var2*>(this->T2);
+		unsigned int X = XVar->n;
+		ASTTerm1_Int *iVar = reinterpret_cast<ASTTerm1_Int*>(this->t1);
+		unsigned int i = iVar->n;
 
 		// -(xxx)-> q0
 		setInitialState(aut, 0);
@@ -695,10 +695,10 @@ void ASTForm_In::toUnaryAutomaton(Automaton &aut, bool doComplement) {
 
 	// x in X
 	} else {
-		ASTTerm2_Var2 *XVar = (ASTTerm2_Var2*) this->T2;
-		unsigned int X = (unsigned int) XVar->n;
-		ASTTerm1_Var1 *xVar = (ASTTerm1_Var1*) this->t1;
-		unsigned int x = (unsigned int) xVar->n;
+		ASTTerm2_Var2 *XVar = reinterpret_cast<ASTTerm2_Var2*>(this->T2);
+		unsigned int X = XVar->n;
+		ASTTerm1_Var1 *xVar = reinterpret_cast<ASTTerm1_Var1*>(this->t1);
+		unsigned int x = xVar->n;
 
 		// -(xxx)-> q0
 		setInitialState(aut, 0);

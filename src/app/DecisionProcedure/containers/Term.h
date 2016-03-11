@@ -137,7 +137,7 @@ public:
     TERM_MEASURELIST(DEFINE_STATIC_MEASURE)
 
     // <<< CONSTRUCTORS >>>
-    TermEmpty(bool inComplement=false);
+    explicit TermEmpty(bool inComplement=false);
 
     // <<< PUBLIC API >>>
     SubsumptionResult IsSubsumedBy(FixpointType& fixpoint, Term*&);
@@ -380,7 +380,7 @@ public:
             }
         }
 
-        iterator(TermFixpoint &termFixpoint) : _termFixpoint(termFixpoint), _it(_termFixpoint._fixpoint.begin()) {
+        explicit iterator(TermFixpoint &termFixpoint) : _termFixpoint(termFixpoint), _it(_termFixpoint._fixpoint.begin()) {
             assert(nullptr != &termFixpoint);
             assert(!_termFixpoint._fixpoint.empty());
 

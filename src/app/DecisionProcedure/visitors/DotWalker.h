@@ -13,7 +13,7 @@
 
 class DotWalker : public VoidVisitor {
 public:
-    DotWalker(std::string filename);
+    explicit DotWalker(std::string filename);
     ~DotWalker();
 
     void visit(ASTForm_And*);

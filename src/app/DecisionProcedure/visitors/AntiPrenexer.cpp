@@ -257,7 +257,6 @@ AST* FullAntiPrenexer::visit(ASTForm_All2 *form) {
  *----------------------------------------------------------------------*/
 ASTForm* DistributiveAntiPrenexer::findConjunctiveDistributivePoint(ASTForm *form) {
     // First look to the left
-    ASTForm* point;
     if(form->kind == aAnd) {
         ASTForm_And *andForm = reinterpret_cast<ASTForm_And *>(form);
         if(andForm->f1->kind == aOr) {
@@ -362,7 +361,6 @@ AST* DistributiveAntiPrenexer::visit(ASTForm_Ex2 *form) {
  |                            -> (All X. f1 \/ f2) /\ (All X. f2 \/ f3) |
  *----------------------------------------------------------------------*/
 ASTForm* DistributiveAntiPrenexer::findDisjunctiveDistributivePoint(ASTForm *form) {
-    ASTForm* point;
     if(form->kind == aOr) {
         ASTForm_Or* orForm = reinterpret_cast<ASTForm_Or*>(form);
         if(orForm->f1->kind == aAnd) {

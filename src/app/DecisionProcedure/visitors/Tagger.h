@@ -18,7 +18,7 @@ private:
 
     void _tagFormula(ASTForm*);
 public:
-    Tagger(TagList& tags) : VoidVisitor(Traverse::PreOrder), _tagList(tags), _tit(tags.begin()) {
+    explicit Tagger(TagList& tags) : VoidVisitor(Traverse::PreOrder), _tagList(tags), _tit(tags.begin()) {
         std::cout << "[*] Loaded tags: {";
         for(auto tag : _tagList) {
             std::cout << tag << ", ";

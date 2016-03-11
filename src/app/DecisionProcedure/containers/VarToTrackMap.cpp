@@ -27,8 +27,6 @@ extern Offsets offsets;
  * @param identifiers: list of variables
  */
 void VarToTrackMap::addIdentifiers(IdentList* identifiers) {
-	uint index = this->vttMap.size();
-	uint val;
 	uint identSize = identifiers->size();
 	identifiers->sort();
 
@@ -36,7 +34,7 @@ void VarToTrackMap::addIdentifiers(IdentList* identifiers) {
 	Ident formal;
 	ASTForm* restriction = nullptr;
 	for (int i = 0; i < identSize; ++i) {
-		val = identifiers->pop_front();
+		uint val = identifiers->pop_front();
 		if(symbolTable.lookupType(val) == MonaTypeTag::Varname1) {
 			restriction = symbolTable.getDefault1Restriction(&formal);
 		} else {
@@ -90,7 +88,6 @@ uint VarToTrackMap::inverseGet(uint key) {
  * Prints var -> trackNo map
  */
 void VarToTrackMap::dumpMap() {
-	unsigned int mapSize = this->vttMap.size();
 	for (auto it = this->vttMap.begin(); it != vttMap.end(); ++it) {
 		std::cout << it->first << "(" << symbolTable.lookupSymbol(it->first) << ") -> " << it->second << '\n';
 	}

@@ -12,7 +12,7 @@ using TimeType = std::pair<size_t, size_t>;
 
 class MonaAutomataDotWalker : public DotWalker {
 public:
-    MonaAutomataDotWalker(std::string filename) : DotWalker(filename) {}
+    explicit MonaAutomataDotWalker(std::string filename) : DotWalker(filename) {}
 
     void visit(ASTForm_And*);
     void visit(ASTForm_Or*);

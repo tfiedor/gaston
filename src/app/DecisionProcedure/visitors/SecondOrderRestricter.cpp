@@ -59,10 +59,9 @@ AST* SecondOrderRestricter::_secondOrderRestrict(SecondOrderQuantification *form
     assert(form->f != nullptr);
 
     ASTForm* restrictedFormula = form->f;
-    ASTForm* binopForm;
 
     while(form->vl->size() != 0) {
-        binopForm = restrictedFormula;
+        ASTForm* binopForm = restrictedFormula;
         auto it = form->vl->pop_back();
         ASTForm* restriction = symbolTable.lookupRestriction(it);
         if(restriction == nullptr) {

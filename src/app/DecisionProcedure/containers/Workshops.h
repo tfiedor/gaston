@@ -126,7 +126,7 @@ namespace Workshops {
 
     public:
         // <<< CONSTRUCTORS >>>
-        TermWorkshop(SymbolicAutomaton*);
+        explicit TermWorkshop(SymbolicAutomaton*);
         ~TermWorkshop();
         void InitializeWorkshop();
 

@@ -45,7 +45,7 @@ public:
 
     // <<< CONSTRUCTORS >>>
     ZeroSymbol();
-    ZeroSymbol(BitMask const&);
+    explicit ZeroSymbol(BitMask const&);
     ZeroSymbol(BitMask const&, VarType, VarValue);
     ~ZeroSymbol();
 

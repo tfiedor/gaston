@@ -88,7 +88,7 @@ protected:
 
 public:
     // <<< CONSTRUCTORS >>>
-    SymbolicAutomaton(Formula_ptr form);
+    explicit SymbolicAutomaton(Formula_ptr form);
     virtual ~SymbolicAutomaton();
 
     // <<< PUBLIC API >>>
