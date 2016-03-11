@@ -36,7 +36,13 @@
 /*MISCELLANEOUS DEFINITIONS*/
 
 extern void (*mona_callback)();
-extern int memlimit;
+#ifdef __cplusplus
+extern "C" {
+#endif
+	extern int memlimit;
+#ifdef __cplusplus
+}
+#endif
 
 typedef unsigned boolean;
 #define TRUE 1

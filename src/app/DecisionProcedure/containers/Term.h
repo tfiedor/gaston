@@ -401,6 +401,7 @@ protected:
     WorklistType _worklist;
     Symbols _symList;
     bool _bValue;
+    bool _updated = false;
     Term_ptr _satTerm = nullptr;
     Term_ptr _unsatTerm = nullptr;
     bool (*_aggregate_result)(bool, bool);
@@ -421,6 +422,11 @@ public:
     bool IsShared();
     bool HasEmptyWorklist() { return this->_worklist.empty();}
     void RemoveSubsumed();
+    bool TestAndSetUpdate() {
+        bool updated = this->_updated;
+        this->_updated = false;
+        return updated;
+    }
 
     iterator GetIterator() { return iterator(*this); }
     iterator* GetIteratorDynamic() { return new iterator(*this); }

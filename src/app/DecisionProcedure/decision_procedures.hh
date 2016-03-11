@@ -55,7 +55,9 @@ using StateTuple = std::vector<StateType>;
 using BaseAut_States = VATA::Util::OrdVector<StateType>;
 using BaseAut_MTBDD = VATA::MTBDDPkg::OndriksMTBDD<BaseAut_States>;
 // Compiler complaining fucker
-using FixPoint_MTBDD = VATA::MTBDDPkg::OndriksMTBDD<std::pair<MacroStateSet*, bool> >;
+using Fixpoint_Leaf = MacroStateSet*;
+using Fixpoint_LeafType = std::pair<Fixpoint_Leaf, bool>;
+using FixPoint_MTBDD = VATA::MTBDDPkg::OndriksMTBDD<Fixpoint_LeafType>;
 using FixPoint_MTBDD_T = VATA::MTBDDPkg::OndriksMTBDD<MacroStateSet*>;
 using FixPoint_MTBDD_B = VATA::MTBDDPkg::OndriksMTBDD<bool>;
 using StateSet = MacroStateSet*;

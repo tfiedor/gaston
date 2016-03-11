@@ -9,9 +9,10 @@
 #include "../environment.hh"
 
 TimeType MonaAutomataDotWalker::_constructAutomaton(ASTForm* form) {
-    DFA *monaAutomaton = nullptr, *temp = nullptr;
-    size_t monaStates = 0, minimizedStates = 0;
+    DFA *monaAutomaton = nullptr;
     try {
+        DFA *temp = nullptr;
+        size_t monaStates = 0, minimizedStates = 0;
         toMonaAutomaton(form, monaAutomaton, false);
         assert(monaAutomaton != nullptr);
         monaStates = monaAutomaton->ns;

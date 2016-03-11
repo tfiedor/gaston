@@ -78,9 +78,9 @@ int SymbolicChecker::_DecideCore(bool isValid) {
 void SymbolicChecker::Decide() {
     assert(this->_automaton != nullptr);
 
-    Timer timer_deciding;
-    bool decided;
     try {
+        Timer timer_deciding;
+        bool decided;
         // Deciding WS1S formula
         timer_deciding.start();
         decided = this->Run();

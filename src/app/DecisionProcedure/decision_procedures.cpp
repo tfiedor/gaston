@@ -199,11 +199,8 @@ int decideWS1S(Automaton & aut, PrefixListType formulaPrefixSet, PrefixListType 
 	} else if (!hasCounterExample) {
 		answer = VALID;
 	// else there only exists a satisfiable solution
-	} else if (hasExample) {
-		answer = SATISFIABLE;
-	// THIS SHOULD NOT HAPPEN
 	} else {
-		assert(false && "Some mysterious answer has emerged!");
+		answer = SATISFIABLE;
 	}
 
 	delete initialState;

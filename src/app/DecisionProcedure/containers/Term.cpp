@@ -701,7 +701,7 @@ std::ostream& operator <<(std::ostream& osObject, Term& z) {
 }
 
 namespace Gaston {
-    void dumpResultKey(std::pair<Term*, Symbol*> const& s) {
+    void dumpResultKey(std::pair<Term_ptr, Symbol_ptr> const& s) {
         assert(s.first != nullptr);
 
         if(s.second == nullptr) {
@@ -711,11 +711,11 @@ namespace Gaston {
         }
     }
 
-    void dumpResultData(std::pair<Term*, bool> &s) {
+    void dumpResultData(std::pair<Term_ptr, bool> &s) {
         std::cout << "<" << (*s.first) << ", " << (s.second ? "True" : "False") << ">";
     }
 
-    void dumpSubsumptionKey(std::pair<Term*, Term*> const& s) {
+    void dumpSubsumptionKey(std::pair<Term_ptr, Term_ptr> const& s) {
         assert(s.first != nullptr);
         assert(s.second != nullptr);
 
@@ -726,7 +726,7 @@ namespace Gaston {
         std::cout << (s != E_FALSE ? "True" : "False");
     }
 
-    void dumpPreKey(std::pair<size_t, ZeroSymbol*> const& s) {
+    void dumpPreKey(std::pair<size_t, Symbol_ptr> const& s) {
         std::cout << "(" << s.first << ", " << (*s.second) << ")";
     }
 
@@ -862,7 +862,7 @@ bool TermFixpoint::_processOnePostponed() {
     assert(!this->_postponed.empty());
 
     std::pair<Term_ptr, Term_ptr> postponedPair;
-    TermProduct* temp = nullptr, *temp2 = nullptr;
+    TermProduct* temp, *temp2;
 
     // Get the front of the postponed (must be TermProduct with continuation)
     #if (OPT_FIND_POSTPONED_CANDIDATE == true)
@@ -993,6 +993,7 @@ void TermFixpoint::ComputeNextFixpoint() {
 
     // Push new term to fixpoint
     _fixpoint.push_back(std::make_pair(result.first, true));
+    _updated = true;
     // Aggregate the result of the fixpoint computation
     _bValue = this->_aggregate_result(_bValue,result.second);
     // Push new symbols from _symList
@@ -1026,6 +1027,7 @@ void TermFixpoint::ComputeNextPre() {
 
     // Push the computed thing and aggregate the result
     _fixpoint.push_back(std::make_pair(result.first, true));
+    _updated = true;
     _bValue = this->_aggregate_result(_bValue,result.second);
 }
 

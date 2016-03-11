@@ -1,3 +1,6 @@
+set (CMAKE_MODULE_PATH "${CMAKE_SOURCE_DIR}/CMake")
+include(cotire)
+
 cmake_minimum_required(VERSION 2.8)
 project(gaston2015)
 
@@ -82,6 +85,7 @@ target_link_libraries(gaston ${CMAKE_SOURCE_DIR}/src/libs/libmonadfa.so)
 target_link_libraries(gaston ${CMAKE_SOURCE_DIR}/src/libs/libmonagta.so)
 target_link_libraries(gaston ${CMAKE_SOURCE_DIR}/src/libs/libmonamem.so)
 target_link_libraries(gaston ${CMAKE_SOURCE_DIR}/src/libs/libvata.a)
+#cotire(gaston)
 
 if (UNIX)
 	message(STATUS "Setting G++ flags")

@@ -21,6 +21,7 @@
 #include <iostream>
 
 #include "st_dfa.h"
+#include "bdd.h"
 #include "printline.h"
 #include "env.h"
 #include "offsets.h"

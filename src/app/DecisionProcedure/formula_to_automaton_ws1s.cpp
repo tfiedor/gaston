@@ -794,7 +794,7 @@ void initializeOffsets(unsigned *offs, IdentList *vars) {
 	int ix = 0;
 
 	// iterate through all variables
-	for (id = vars->begin(); id != vars->end(); id++, ix++) {
+	for (id = vars->begin(); id != vars->end(); ++id, ++ix) {
 		offs[ix] = offsets.off(*id);
 	}
 }

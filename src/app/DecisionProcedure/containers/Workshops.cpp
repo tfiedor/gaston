@@ -5,7 +5,10 @@
 extern VarToTrackMap varMap;
 
 namespace Workshops {
-    TermWorkshop::TermWorkshop(SymbolicAutomaton* aut) : _aut(aut) { }
+    TermWorkshop::TermWorkshop(SymbolicAutomaton* aut) :
+            _bCache(nullptr), _pCache(nullptr), _lCache(nullptr), _fpCache(nullptr), _fppCache(nullptr),
+            _contCache(nullptr),
+            _compCache(nullptr), _aut(aut) { }
 
     template<class A, class B, class C, class D, void (*E)(const A&), void (*F)(B&)>
     BinaryCache<A, B, C, D, E, F>* TermWorkshop::_cleanCache(BinaryCache<A, B, C, D, E, F>* cache, bool noMemberDelete) {
@@ -28,7 +31,6 @@ namespace Workshops {
         this->_pCache = TermWorkshop::_cleanCache(this->_pCache);
         this->_lCache = TermWorkshop::_cleanCache(this->_lCache);
         this->_contCache = TermWorkshop::_cleanCache(this->_contCache);
-        // Fixme: there should be a deletion of _compCache
         this->_compCache = TermWorkshop::_cleanCache(this->_compCache, true);
 
         if(TermWorkshop::_empty != nullptr) {
@@ -57,10 +59,38 @@ namespace Workshops {
             }
 
             // Compare fixpoints
-            for(auto item : (*lhs.first)) {
+            // Fixme: The fuck is this, this is not correct...
+            for(auto& item : (*lhs.first)) {
+                if(!item.second) {
+                    continue;
+                }
+
                 result = false;
-                for(auto titem : (*rhs.first)) {
-                    if(item == titem) {
+                for(auto& titem : (*rhs.first)) {
+                    if(!titem.second) {
+                        continue;
+                    }
+                    if(item.first == titem.first) {
+                        result = true;
+                        break;
+                    }
+                }
+                if(!result) {
+                    return false;
+                }
+            }
+
+            for(auto& item : (*rhs.first)) {
+                if(!item.second) {
+                    continue;
+                }
+
+                result = false;
+                for(auto& titem : (*lhs.first)) {
+                    if(!titem.second) {
+                        continue;
+                    }
+                    if(item.first == titem.first) {
                         result = true;
                         break;
                     }
@@ -92,8 +122,11 @@ namespace Workshops {
         size_t operator()(ComputationKey const& set) const {
             size_t seed = 0;
             if(set.first) {
-                for (auto item : (*set.first)) {
-                    boost::hash_combine(seed, boost::hash_value(item));
+                for (auto& item : (*set.first)) {
+                    if(!item.second) {
+                        continue;
+                    }
+                    boost::hash_combine(seed, boost::hash_value(item.first));
                 }
             }
             return seed;
@@ -197,25 +230,25 @@ namespace Workshops {
         // TODO: Can there be sets that have same lhs rhs, but different product type??
         // TODO: I don't think so actually, because this is on the node, so it cannot generate different things
         // TODO: And same thing goes for complements
-        #if (OPT_GENERATE_UNIQUE_TERMS == true && UNIQUE_PRODUCTS == true)
-            assert(this->_pCache != nullptr);
+#       if (OPT_GENERATE_UNIQUE_TERMS == true && UNIQUE_PRODUCTS == true)
+        assert(this->_pCache != nullptr);
 
-            Term* termPtr = nullptr;
-            auto productKey = std::make_pair(lptr, rptr);
-            if(!this->_pCache->retrieveFromCache(productKey, termPtr)) {
-                #if (DEBUG_WORKSHOPS == true && DEBUG_TERM_CREATION == true)
-                std::cout << "[*] Creating Product: ";
-                std::cout << "from ["<< lptr << "] + [" << rptr << "] to ";
-                #endif
-                // The object was not created yet, so we create it and store it in cache
-                termPtr = new TermProduct(lptr, rptr, type);
-                this->_pCache->StoreIn(productKey, termPtr);
-            }
-            assert(termPtr != nullptr);
-            return reinterpret_cast<TermProduct*>(termPtr);
-        #else
-            return new TermProduct(lptr, rptr, type);
-        #endif
+        Term* termPtr = nullptr;
+        auto productKey = std::make_pair(lptr, rptr);
+        if(!this->_pCache->retrieveFromCache(productKey, termPtr)) {
+#           if (DEBUG_WORKSHOPS == true && DEBUG_TERM_CREATION == true)
+            std::cout << "[*] Creating Product: ";
+            std::cout << "from ["<< lptr << "] + [" << rptr << "] to ";
+#           endif
+            // The object was not created yet, so we create it and store it in cache
+            termPtr = new TermProduct(lptr, rptr, type);
+            this->_pCache->StoreIn(productKey, termPtr);
+        }
+        assert(termPtr != nullptr);
+        return reinterpret_cast<TermProduct*>(termPtr);
+#       else
+        return new TermProduct(lptr, rptr, type);
+#       endif
     }
 
     /**
@@ -302,6 +335,11 @@ namespace Workshops {
     TermFixpoint* TermWorkshop::GetUniqueFixpoint(TermFixpoint* &fixpoint) {
         assert(this->_compCache != nullptr);
         Term* termPtr = nullptr;
+
+        if(!fixpoint->TestAndSetUpdate()) {
+            return fixpoint;
+        }
+
         auto compKey = std::make_pair(&fixpoint->_fixpoint, &fixpoint->_worklist);
         if(!this->_compCache->retrieveFromCache(compKey, termPtr)) {
             termPtr = fixpoint;
@@ -429,7 +467,7 @@ namespace Workshops {
                     sPtr->ProjectVar(var);
                 }
             }
-            #if (OPT_UNIQUE_TRIMMED_SYMBOLS == true)
+#           if (OPT_UNIQUE_TRIMMED_SYMBOLS == true)
             for(auto item = this->_symbolCache->begin(); item != this->_symbolCache->end(); ++item) {
                 if(std::get<2>((*item).first) == 'T') {
                     if(*(*item).second == *sPtr) {
@@ -440,7 +478,7 @@ namespace Workshops {
                     }
                 }
             }
-            #endif
+#           endif
             this->_symbolCache->StoreIn(symbolKey, sPtr);
         }
         return sPtr;

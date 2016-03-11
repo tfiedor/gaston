@@ -64,14 +64,6 @@ enum ExampleType {SATISFYING, UNSATISFYING};
 enum WorklistSearchType {E_BFS, E_DFS};
 
 namespace Gaston {
-	void dumpResultKey(std::pair<Term*, ZeroSymbol*> const& s);
-	void dumpResultData(std::pair<Term*, bool>& s);
-	void dumpTermKey(Term* const& s);
-	void dumpSubsumptionKey(std::pair<Term*, Term*> const& s);
-	void dumpSubsumptionData(SubsumptionResult& s);
-	void dumpPreKey(std::pair<size_t, ZeroSymbol*> const& s);
-	void dumpPreData(VATA::Util::OrdVector<size_t>& s);
-
 /***************************
  * GLOBAL USING DIRECTIVES *
  ***************************/
@@ -98,6 +90,15 @@ namespace Gaston {
 	using VarList                = VATA::Util::OrdVector<StateType>;
 	using VarValue			     = char;
 	using TrackType				 = Automaton::SymbolType;
+
+	void dumpResultKey(std::pair<Term_ptr, Symbol_ptr> const& s);
+	void dumpResultData(std::pair<Term_ptr, bool>& s);
+	void dumpTermKey(Term_ptr const& s);
+	void dumpSubsumptionKey(std::pair<Term_ptr, Term_ptr> const& s);
+	void dumpSubsumptionData(SubsumptionResult& s);
+	void dumpPreKey(std::pair<size_t, Symbol_ptr> const& s);
+	void dumpPreData(VATA::Util::OrdVector<size_t>& s);
+
 
 	using TermHash 				 = boost::hash<Term_raw>;
 	using TermCompare			 = std::equal_to<Term_raw>;
@@ -181,7 +182,7 @@ public:
  *****************************/
 #define DEBUG_ROOT_AUTOMATON			false
 #define DEBUG_AUTOMATA_ADDRESSES		false
-#define DEBUG_EXAMPLE_PATHS				false
+#define DEBUG_EXAMPLE_PATHS				true
 #define DEBUG_BASE_AUTOMATA 			false
 #define DEBUG_FIXPOINT 					false
 #define DEBUG_FIXPOINT_SYMBOLS			false
@@ -236,7 +237,7 @@ public:
 
 /* >>> Anti-Prenexing Options <<< *
  **********************************/
-#define ANTIPRENEXING_FULL				false
+#define ANTIPRENEXING_FULL				true
 #define ANTIPRENEXING_DISTRIBUTIVE		false
 
 /*
@@ -256,7 +257,7 @@ public:
 
 /* >>> Optimizations <<< *
  *************************/
-#define OPT_DONT_CACHE_CONT				true	// < Do not cache terms containing continuations
+#define OPT_DONT_CACHE_CONT				false	// < Do not cache terms containing continuations
 #define OPT_DONT_CACHE_UNFULL_FIXPOINTS false	// < Do not cache fixpoints that were not fully computed
 #define OPT_EQ_THROUGH_POINTERS			true	// < Test equality through pointers, not by structure
 #define OPT_GENERATE_UNIQUE_TERMS		true	// < Use Workshops to generate unique pointers
@@ -282,7 +283,7 @@ public:
 #define OPT_SMARTER_MONA_CONVERSION		false	// < Use faster conversion from MONA to VATA (courtesy of PJ)
 #define OPT_CREATE_TAGGED_AUTOMATA		false	// < Use tags to create a specific subformula to automaton
 #define OPT_EXTRACT_MORE_AUTOMATA		true	// < Calls detagger to heuristically convert some subformulae to automata
-#define OPT_UNIQUE_TRIMMED_SYMBOLS		false	// < Will guarantee that there will not be a collisions between symbols after trimming
+#define OPT_UNIQUE_TRIMMED_SYMBOLS		true	// < Will guarantee that there will not be a collisions between symbols after trimming
 #define OPT_FIXPOINT_BFS_SEARCH			false	// < Will add new things to the back of the worklist in fixpoint
 #define OPT_USE_DENSE_HASHMAP			false	// < Will use the google::dense_hash_map as cache
 

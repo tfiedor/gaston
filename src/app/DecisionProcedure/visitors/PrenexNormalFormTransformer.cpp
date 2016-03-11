@@ -139,22 +139,16 @@ ASTForm* negateQuantifier(ASTForm_Not* node, TransformerVisitor &visitor) {
     switch(q->kind) {
         case aEx0:
             return createZeroOrderNegatedQuantifier<ASTForm_Ex0, ASTForm_All0>(q, visitor);
-            break;
         case aEx1:
             return createNegatedQuantifier<ASTForm_Ex1, ASTForm_All1>(q, visitor);
-            break;
         case aEx2:
             return createNegatedQuantifier<ASTForm_Ex2, ASTForm_All2>(q, visitor);
-            break;
         case aAll0:
             return createZeroOrderNegatedQuantifier<ASTForm_All0, ASTForm_All0>(q, visitor);
-            break;
         case aAll1:
             return createNegatedQuantifier<ASTForm_All1, ASTForm_Ex1>(q, visitor);
-            break;
         case aAll2:
             return createNegatedQuantifier<ASTForm_All2, ASTForm_Ex2>(q, visitor);
-            break;
         default:
             return node;
     }

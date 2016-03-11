@@ -50,7 +50,7 @@ Checker::~Checker() {
     // Clean up
     delete _monaAST;
     Deque<FileSource *>::iterator i;
-    for (i = source.begin(); i != source.end(); i++)
+    for (i = source.begin(); i != source.end(); ++i)
         delete *i;
 
     PredLibEntry *pred = predicateLib.first();

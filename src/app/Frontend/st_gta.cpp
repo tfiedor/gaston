@@ -20,6 +20,7 @@
 
 #include <iostream>
 #include "st_gta.h"
+#include "bdd.h"
 #include "printline.h"
 #include "env.h"
 #include "offsets.h"
