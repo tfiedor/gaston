@@ -91,7 +91,7 @@ protected:
     bool _inComplement;             // [1B] << Term is complemented
 public:
 
-    Term() : link{ nullptr, nullptr, 0} {}
+    Term();
     virtual ~Term();
 
     // See #L29

@@ -170,13 +170,13 @@ bool is_base_automaton(ASTForm* f) {
 
 SymbolicAutomaton* ASTForm_Not::_toSymbolicAutomatonCore(bool doComplement) {
 #   if (OPT_CREATE_QF_AUTOMATON == true)
-        // TODO: WE ARE MISSING COMPLEMENTATION
-        IdentList free, bound;
-        this->f->freeVars(&free, &bound);
-        if(bound.empty()) {
-            SymbolicAutomaton* baseAut = baseToSymbolicAutomaton<GenericBaseAutomaton>(this->f, false);
-            return new ComplementAutomaton(baseAut, this);
-        }
+    // TODO: WE ARE MISSING COMPLEMENTATION
+    IdentList free, bound;
+    this->f->freeVars(&free, &bound);
+    if(bound.empty()) {
+        SymbolicAutomaton* baseAut = baseToSymbolicAutomaton<GenericBaseAutomaton>(this->f, false);
+        return new ComplementAutomaton(baseAut, this);
+    }
 #   endif
 
 #   if (OPT_DRAW_NEGATION_IN_BASE == true)
@@ -201,6 +201,8 @@ SymbolicAutomaton* ASTForm_Ex2::_toSymbolicAutomatonCore(bool doComplement) {
                     SymbolicAutomaton* baseAut = baseToSymbolicAutomaton<GenericBaseAutomaton>(this->f, false);
                     return new ProjectionAutomaton(baseAut, this);
                 }
+            } else {
+                return new ProjectionAutomaton(baseToSymbolicAutomaton<GenericBaseAutomaton>(this->f, false), this);
             }
         }
 #   endif

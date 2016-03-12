@@ -158,7 +158,7 @@ ResultType SymbolicAutomaton::IntersectNonEmpty(Symbol* symbol, Term* stateAppro
     ResultType result;
 
     // Empty set needs not to be computed
-    if(stateApproximation->type == TERM_EMPTY) {
+    if(stateApproximation->type == TERM_EMPTY && !stateApproximation->InComplement()) {
         return std::make_pair(stateApproximation, underComplement);
     }
 
@@ -196,7 +196,7 @@ ResultType SymbolicAutomaton::IntersectNonEmpty(Symbol* symbol, Term* stateAppro
     assert(stateApproximation->type != TERM_CONTINUATION);
 
     // Empty set needs not to be computed
-    if(stateApproximation->type == TERM_EMPTY) {
+    if(stateApproximation->type == TERM_EMPTY && !stateApproximation->InComplement()) {
         return std::make_pair(stateApproximation, underComplement);
     }
 
@@ -458,6 +458,7 @@ void BinaryOpAutomaton::_InitializeFinalStates() {
 
 void ComplementAutomaton::_InitializeFinalStates() {
     this->_finalStates = this->_aut->GetFinalStates();
+    assert(this->_finalStates->type != TERM_EMPTY);
     this->_finalStates->Complement();
 }
 
@@ -569,7 +570,7 @@ ResultType BinaryOpAutomaton::_IntersectNonEmptyCore(Symbol* symbol, Term* final
     // We can prune the state if left side was evaluated as Empty term
     // TODO: This is different for Unionmat!
     #if (OPT_PRUNE_EMPTY == true)
-    if(lhs_result.first->type == TERM_EMPTY && this->_productType == ProductType::E_INTERSECTION) {
+    if(lhs_result.first->type == TERM_EMPTY && !lhs_result.first->InComplement() && this->_productType == ProductType::E_INTERSECTION) {
         return std::make_pair(lhs_result.first, underComplement);
     }
     #endif
@@ -607,7 +608,7 @@ ResultType BinaryOpAutomaton::_IntersectNonEmptyCore(Symbol* symbol, Term* final
     // We can prune the state if right side was evaluated as Empty term
     // TODO: This is different for Unionmat!
     #if (OPT_PRUNE_EMPTY == true)
-    if(rhs_result.first->type == TERM_EMPTY && this->_productType == ProductType::E_INTERSECTION) {
+    if(rhs_result.first->type == TERM_EMPTY && !lhs_result.first->InComplement() && this->_productType == ProductType::E_INTERSECTION) {
         return std::make_pair(rhs_result.first, underComplement);
     }
     #endif
@@ -626,8 +627,8 @@ ResultType ComplementAutomaton::_IntersectNonEmptyCore(Symbol* symbol, Term* fin
     ResultType result = this->_aut->IntersectNonEmpty(symbol, finalApproximaton, !underComplement);
     // TODO: fix, because there may be falsely complemented things
     if(finalApproximaton->InComplement() != result.first->InComplement()) {
-        if(finalApproximaton->type == TERM_EMPTY) {
-            if(finalApproximaton->InComplement()) {
+        if(result.first->type == TERM_EMPTY) {
+            if(result.first->InComplement()) {
                 result.first = Workshops::TermWorkshop::CreateEmpty();
             } else {
                 result.first = Workshops::TermWorkshop::CreateComplementedEmpty();

@@ -62,6 +62,7 @@ size_t TermContinuation::unfoldInIsectNonempty = 0;
 extern Ident lastPosVar, allPosVar;
 
 // <<< TERM CONSTRUCTORS AND DESTRUCTORS >>>
+Term::Term(): link{ nullptr, nullptr, 0} {}
 Term::~Term() {}
 
 TermEmpty::TermEmpty(bool inComplement) {
@@ -327,6 +328,9 @@ SubsumptionResult Term::IsSubsumed(Term *t, bool unfoldAll) {
         TermContinuation *continuation = reinterpret_cast<TermContinuation *>(this);
         Term* unfoldedContinuation = continuation->unfoldContinuation(UnfoldedInType::E_IN_SUBSUMPTION);
         return unfoldedContinuation->IsSubsumed(t, unfoldAll);
+    }
+    if(this->_inComplement != t->_inComplement) {
+        this->dump(); std::cout << " and ";t->dump(); std::cout << "\n";
     }
     assert(this->_inComplement == t->_inComplement);
     assert(this->type != TERM_CONTINUATION && t->type != TERM_CONTINUATION);
