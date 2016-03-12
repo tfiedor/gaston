@@ -119,7 +119,7 @@ TermProduct::TermProduct(Term_ptr lhs, Term_ptr rhs, ProductType pt) : left(lhs)
     #endif
 }
 
-TermBaseSet::TermBaseSet(VATA::Util::OrdVector<unsigned int>& s, unsigned int offset, unsigned int stateNo) : states(), stateMask(stateNo)  {
+TermBaseSet::TermBaseSet(VATA::Util::OrdVector<unsigned int>& s, unsigned int offset, unsigned int stateNo) : states() {
     #if (MEASURE_STATE_SPACE == true)
     ++TermBaseSet::instances;
     #endif

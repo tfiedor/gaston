@@ -72,33 +72,32 @@ using Symbols = std::list<SymbolType*>;
 
 class Term {
     friend class Workshops::TermWorkshop;
-public:
-    TermType type;
-    size_t stateSpace = 0;         // << Exact size of the state space, 0 if unknown
-    size_t stateSpaceApprox = 0;   // << Approximation of the state space, used for heuristics
-    bool valid = true;
 
-    struct {
+    // <<< MEMBERS >>>
+protected:
+    TermCache _isSubsumedCache;     // [36B] << Cache for results of subsumption
+public:
+    struct {                        // [12B] << Link for counterexamplse
         Term* succ;
         Symbol* symbol;
         size_t len;
     } link;
+public:
+    size_t stateSpace = 0;          // [4-8B] << Exact size of the state space, 0 if unknown
+    size_t stateSpaceApprox = 0;    // [4-8B] << Approximation of the state space, used for heuristics
+    TermType type;                  // [4B] << Type of the term
+protected:
+    bool _nonMembershipTesting;     // [1B] << We are testing the nonmembership for this term
+    bool _inComplement;             // [1B] << Term is complemented
+public:
 
     Term() : link{ nullptr, nullptr, 0} {}
     virtual ~Term();
 
     // See #L29
     TERM_MEASURELIST(DEFINE_STATIC_MEASURE)
-protected:
-    // <<< PRIVATE MEMBERS >>>
-    WorklistSearchType _searchType;
-    bool _nonMembershipTesting;
-    bool _inComplement;
-    TermCache _isSubsumedCache;
 
 public:
-    //virtual ~Term();
-
     // <<< PUBLIC API >>>
     virtual SubsumptionResult IsSubsumedBy(FixpointType& fixpoint, Term*&) = 0;
     virtual SubsumptionResult IsSubsumed(Term* t, bool b = false);
@@ -131,6 +130,9 @@ protected:
     friend std::ostream& operator <<(std::ostream& osObject, Term& z);
 };
 
+/**
+ * Class that represents the empty term. Should be unique through the computation
+ */
 class TermEmpty : public Term {
 public:
     // See #L29
@@ -153,14 +155,17 @@ private:
     SubsumptionResult _IsSubsumedCore(Term* t, bool b = false);
 };
 
+/**
+ * Class that represents the product of two terms, product can be either Intersection or Union. For example
+ * {1, 2} x {4, 5}, which can also be implemented as set of pairs
+ */
 class TermProduct : public Term {
 public:
     // <<< PUBLIC MEMBERS >>>
-    Term_ptr left;
-    size_t leftSubFalse = 0;
-    Term_ptr right;
-    size_t rightSubFalse = 0;
-    ProductType subtype;
+    Term_ptr left;          // [4B] << Left member of the product
+    Term_ptr right;         // [4B] << Right member of the product
+    ProductType subtype;    // [4B] << Product type (Union, Intersection)
+
     // See #L29
     TERM_MEASURELIST(DEFINE_STATIC_MEASURE)
 
@@ -182,11 +187,13 @@ private:
     SubsumptionResult _IsSubsumedCore(Term* t, bool b = false);
 };
 
+/**
+ * Class that represents the base states that occurs on the leaf level of the computation
+ */
 class TermBaseSet : public Term {
 public:
     // <<< PUBLIC MEMBERS >>>
-    TermBaseSetStates states;
-    BitMask stateMask;
+    TermBaseSetStates states;       // [12B] << Linear Structure with Atomic States
     // See #L29
     TERM_MEASURELIST(DEFINE_STATIC_MEASURE)
 
@@ -210,16 +217,20 @@ private:
     SubsumptionResult _IsSubsumedCore(Term* t, bool b = false);
 };
 
+/**
+ * Class that represents the postponed computation of the (non)membership testing
+ */
 class TermContinuation : public Term {
 protected:
-    Term* _unfoldedTerm = nullptr;
-
+    Term* _unfoldedTerm = nullptr;      // [4B] << Unfolded term for optimizations
 public:
     // <<< PUBLIC MEMBERS >>>
-    SymbolicAutomaton* aut;
-    Term* term;
-    SymbolType* symbol;
-    bool underComplement;
+    SymbolicAutomaton* aut;             // [4B] << Link to the automaton for computation
+    Term* term;                         // [4B] << Term we postponed the evaluation on
+    SymbolType* symbol;                 // [4B] << Symbol we were subtracting from the term
+    bool underComplement;               // [1B] << Whether we were doing the membership or nonmembership
+    // TODO: ^-- This is maybe redundant with _nonmembershipTesting??
+
     // See #L29
     TERM_MEASURELIST(DEFINE_STATIC_MEASURE)
     static size_t continuationUnfolding;
@@ -246,6 +257,9 @@ protected:
     SubsumptionResult _IsSubsumedCore(Term* t, bool b = false);
 };
 
+/**
+ * Class that represents the list
+ */
 class TermList : public Term {
 public:
     // <<< PUBLIC MEMBERS >>>
@@ -272,18 +286,13 @@ private:
     bool _eqCore(const Term&);
 };
 
+/**
+ * Class representing the fixpoint computation (either classic or pre fixpoint computation)
+ */
 class TermFixpoint : public Term {
     friend class Workshops::TermWorkshop;
+    // <<< MEMBERS >>>
 public:
-    // <<< PUBLIC MEMBERS >>>
-    // See #L29
-    TERM_MEASURELIST(DEFINE_STATIC_MEASURE)
-    static size_t subsumedByHits;
-    static size_t preInstances;
-    static size_t isNotShared;
-    static size_t postponedTerms;
-    static size_t postponedProcessed;
-
     struct iterator {
     private:
         TermFixpoint &_termFixpoint;
@@ -390,23 +399,32 @@ public:
 
     // Only for the pre-semantics to link into the source of the pre
 protected:
-    Term_ptr _sourceTerm;
-    std::shared_ptr<iterator> _sourceIt;
-    TermCache _subsumedByCache;
-
-    size_t _iteratorNumber = 0;
-    Aut_ptr _aut;
-    FixpointType _fixpoint;
-    TermListType _postponed;
-    WorklistType _worklist;
-    Symbols _symList;
-    bool _bValue;
-    bool _updated = false;
-    Term_ptr _satTerm = nullptr;
-    Term_ptr _unsatTerm = nullptr;
-    bool (*_aggregate_result)(bool, bool);
+    TermCache _subsumedByCache;             // [36B] << Caching of the subsumption testing
+    std::shared_ptr<iterator> _sourceIt;    // [8B] << Source iterator of the pre fixpoint
+    FixpointType _fixpoint;                 // [8B] << Fixpoint structure of terms
+    TermListType _postponed;                // [8B] << Worklist with postponed terms
+    WorklistType _worklist;                 // [8B] << Worklist of the fixpoint
+    Symbols _symList;                       // [8B] << List of symbols
+    size_t _iteratorNumber = 0;             // [4-8B] << How many iterators are pointing to fixpoint
+    Aut_ptr _aut;                           // [4B] << Source automaton
+    Term_ptr _sourceTerm;                   // [4B] << Source term of the fixpoint
+    Term_ptr _satTerm = nullptr;            // [4B] << Satisfiable term of the fixpoint computation
+    Term_ptr _unsatTerm = nullptr;          // [4B] << Unsatisfiable term of the fixpoint computation
+    bool (*_aggregate_result)(bool, bool);  // [4B] << Agregation function for fixpoint boolean results
+    WorklistSearchType _searchType;         // [4B] << Search type for Worklist
+    bool _bValue;                           // [1B] << Boolean value of the fixpoint testing
+    bool _updated = false;                  // [1B] << Flag if the fixpoint was updated during the last unique check
 
 public:
+    // << STATIC MEASURES >>
+    // See #L29
+    TERM_MEASURELIST(DEFINE_STATIC_MEASURE)
+    static size_t subsumedByHits;
+    static size_t preInstances;
+    static size_t isNotShared;
+    static size_t postponedTerms;
+    static size_t postponedProcessed;
+
     // <<< CONSTRUCTORS >>>
     TermFixpoint(Aut_ptr aut, Term_ptr startingTerm, Symbol* startingSymbol, bool inComplement, bool initbValue, WorklistSearchType search);
     TermFixpoint(Aut_ptr aut, Term_ptr sourceTerm, Symbol* startingSymbol, bool inComplement);
