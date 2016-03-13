@@ -88,8 +88,8 @@ protected:
 
 public:
     // <<< CONSTRUCTORS >>>
-    explicit SymbolicAutomaton(Formula_ptr form);
-    virtual ~SymbolicAutomaton();
+    NEVER_INLINE explicit SymbolicAutomaton(Formula_ptr form);
+    NEVER_INLINE virtual ~SymbolicAutomaton();
 
     // <<< PUBLIC API >>>
     void InitializeStates();
@@ -133,8 +133,8 @@ protected:
     virtual void _DumpExampleCore(ExampleType);
 
 public:
-    BinaryOpAutomaton(SymbolicAutomaton_raw lhs, SymbolicAutomaton_raw rhs, Formula_ptr form);
-    virtual ~BinaryOpAutomaton();
+    NEVER_INLINE BinaryOpAutomaton(SymbolicAutomaton_raw lhs, SymbolicAutomaton_raw rhs, Formula_ptr form);
+    NEVER_INLINE virtual ~BinaryOpAutomaton();
 
     // <<< PUBLIC API >>>
     virtual Term* Pre(Symbol*, Term*, bool);
@@ -151,7 +151,7 @@ public:
  */
 class IntersectionAutomaton : public BinaryOpAutomaton {
 public:
-    IntersectionAutomaton(SymbolicAutomaton* lhs, SymbolicAutomaton* rhs, Formula_ptr form);
+    NEVER_INLINE IntersectionAutomaton(SymbolicAutomaton* lhs, SymbolicAutomaton* rhs, Formula_ptr form);
 };
 
 /**
@@ -159,7 +159,7 @@ public:
  */
 class UnionAutomaton : public BinaryOpAutomaton {
 public:
-    UnionAutomaton(SymbolicAutomaton* lhs, SymbolicAutomaton* rhs, Formula_ptr form);
+    NEVER_INLINE UnionAutomaton(SymbolicAutomaton* lhs, SymbolicAutomaton* rhs, Formula_ptr form);
 };
 
 /**
@@ -179,8 +179,8 @@ protected:
 
 public:
     // <<< CONSTRUCTORS >>>
-    ComplementAutomaton(SymbolicAutomaton *aut, Formula_ptr form);
-    virtual ~ComplementAutomaton();
+    NEVER_INLINE ComplementAutomaton(SymbolicAutomaton *aut, Formula_ptr form);
+    NEVER_INLINE virtual ~ComplementAutomaton();
 
     // <<< PUBLIC API >>>
     virtual Term* Pre(Symbol*, Term*, bool);
@@ -219,8 +219,8 @@ protected:
 
 public:
     /// <<< CONSTRUCTORS >>>
-    ProjectionAutomaton(SymbolicAutomaton* aut, Formula_ptr form);
-    virtual ~ProjectionAutomaton();
+    NEVER_INLINE ProjectionAutomaton(SymbolicAutomaton* aut, Formula_ptr form);
+    NEVER_INLINE virtual ~ProjectionAutomaton();
 
     // <<< PUBLIC API >>>
     virtual Term* Pre(Symbol*, Term*, bool);
@@ -242,7 +242,7 @@ public:
 class RootProjectionAutomaton : public ProjectionAutomaton {
 public:
     // <<< CONSTRUCTORS >>>
-    RootProjectionAutomaton(SymbolicAutomaton*, Formula_ptr);
+    NEVER_INLINE RootProjectionAutomaton(SymbolicAutomaton*, Formula_ptr);
 
     // <<< PUBLIC API >>>
     virtual ResultType IntersectNonEmpty(Symbol*, Term*, bool);
@@ -268,8 +268,8 @@ protected:
     virtual void _DumpExampleCore(ExampleType) {}
 public:
     // <<< CONSTRUCTORS >>>
-    BaseAutomaton(BaseAutomatonType* aut, size_t vars, Formula_ptr form, bool emptyTracks);
-    ~BaseAutomaton();
+    NEVER_INLINE BaseAutomaton(BaseAutomatonType* aut, size_t vars, Formula_ptr form, bool emptyTracks);
+    NEVER_INLINE ~BaseAutomaton();
 
     // <<< PUBLIC API >>>
     virtual Term* Pre(Symbol*, Term*, bool);
@@ -283,7 +283,7 @@ public:
 
 class GenericBaseAutomaton : public BaseAutomaton {
 public:
-    GenericBaseAutomaton(BaseAutomatonType* aut, size_t vars, Formula_ptr form, bool emptyTracks) : BaseAutomaton(aut, vars, form, emptyTracks) { }
+    NEVER_INLINE GenericBaseAutomaton(BaseAutomatonType* aut, size_t vars, Formula_ptr form, bool emptyTracks) : BaseAutomaton(aut, vars, form, emptyTracks) { }
     virtual void DumpAutomaton();
 };
 

@@ -178,6 +178,12 @@ public:
  ****************************/
 #define PRINT_PRETTY					true
 
+/**
+ * >>> Inlining Options <<< *
+ ****************************/
+#define ALWAYS_INLINE inline __attribute__((__always_inline__))
+#define NEVER_INLINE __attribute__((__noinline__))
+
 /* >>> Debugging Options <<< *
  *****************************/
 #define DEBUG_ROOT_AUTOMATON			false
@@ -212,7 +218,7 @@ public:
 #define PRINT_STATS_PRODUCT				true
 #define PRINT_STATS_NEGATION			true
 #define PRINT_STATS_BASE				true
-#define PRINT_STATS						true
+#define PRINT_STATS						false
 
 /* >>> Dumping Options <<< *
  ***************************/
@@ -237,7 +243,7 @@ public:
 
 /* >>> Anti-Prenexing Options <<< *
  **********************************/
-#define ANTIPRENEXING_FULL				true
+#define ANTIPRENEXING_FULL				false
 #define ANTIPRENEXING_DISTRIBUTIVE		false
 
 /*
@@ -257,7 +263,7 @@ public:
 
 /* >>> Optimizations <<< *
  *************************/
-#define OPT_DONT_CACHE_CONT				false	// < Do not cache terms containing continuations
+#define OPT_DONT_CACHE_CONT				true	// < Do not cache terms containing continuations
 #define OPT_DONT_CACHE_UNFULL_FIXPOINTS false	// < Do not cache fixpoints that were not fully computed
 #define OPT_EQ_THROUGH_POINTERS			true	// < Test equality through pointers, not by structure
 #define OPT_GENERATE_UNIQUE_TERMS		true	// < Use Workshops to generate unique pointers
@@ -283,7 +289,7 @@ public:
 #define OPT_SMARTER_MONA_CONVERSION		false	// < Use faster conversion from MONA to VATA (courtesy of PJ)
 #define OPT_CREATE_TAGGED_AUTOMATA		false	// < Use tags to create a specific subformula to automaton
 #define OPT_EXTRACT_MORE_AUTOMATA		true	// < Calls detagger to heuristically convert some subformulae to automata
-#define OPT_UNIQUE_TRIMMED_SYMBOLS		true	// < Will guarantee that there will not be a collisions between symbols after trimming
+#define OPT_UNIQUE_TRIMMED_SYMBOLS		false	// < Will guarantee that there will not be a collisions between symbols after trimming
 #define OPT_FIXPOINT_BFS_SEARCH			false	// < Will add new things to the back of the worklist in fixpoint
 #define OPT_USE_DENSE_HASHMAP			false	// < Will use the google::dense_hash_map as cache
 

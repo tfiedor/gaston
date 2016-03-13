@@ -91,8 +91,8 @@ protected:
     bool _inComplement;             // [1B] << Term is complemented
 public:
 
-    Term();
-    virtual ~Term();
+    NEVER_INLINE Term();
+    virtual NEVER_INLINE ~Term();
 
     // See #L29
     TERM_MEASURELIST(DEFINE_STATIC_MEASURE)
@@ -139,7 +139,8 @@ public:
     TERM_MEASURELIST(DEFINE_STATIC_MEASURE)
 
     // <<< CONSTRUCTORS >>>
-    explicit TermEmpty(bool inComplement=false);
+    explicit NEVER_INLINE TermEmpty(bool inComplement=false);
+    NEVER_INLINE ~TermEmpty() {}
 
     // <<< PUBLIC API >>>
     SubsumptionResult IsSubsumedBy(FixpointType& fixpoint, Term*&);
@@ -170,7 +171,8 @@ public:
     TERM_MEASURELIST(DEFINE_STATIC_MEASURE)
 
     // <<< CONSTRUCTORS >>>
-    TermProduct(Term_ptr lhs, Term_ptr rhs, ProductType subtype);
+    NEVER_INLINE TermProduct(Term_ptr lhs, Term_ptr rhs, ProductType subtype);
+    NEVER_INLINE ~TermProduct() {}
 
     // <<< PUBLIC API >>>
     SubsumptionResult IsSubsumedBy(FixpointType& fixpoint, Term*&);
@@ -198,8 +200,8 @@ public:
     TERM_MEASURELIST(DEFINE_STATIC_MEASURE)
 
     // <<< CONSTRUCTORS >>>
-    TermBaseSet(VATA::Util::OrdVector<unsigned int>&, unsigned int, unsigned int);
-    ~TermBaseSet();
+    NEVER_INLINE TermBaseSet(VATA::Util::OrdVector<unsigned int>&, unsigned int, unsigned int);
+    NEVER_INLINE ~TermBaseSet();
 
     // <<< PUBLIC API >>>
     bool Intersects(TermBaseSet* rhs);
@@ -238,7 +240,7 @@ public:
     static size_t unfoldInIsectNonempty;
 
     // <<< CONSTRUCTORS >>>
-    TermContinuation(SymbolicAutomaton*, Term*, SymbolType*, bool);
+    NEVER_INLINE TermContinuation(SymbolicAutomaton*, Term*, SymbolType*, bool);
 
     // <<< PUBLIC API >>>
     SubsumptionResult IsSubsumedBy(FixpointType& fixpoint, Term*&);
@@ -269,7 +271,7 @@ public:
     TermListStates list;
 
     // <<< CONSTRUCTORS >>>
-    TermList(Term_ptr first, bool isCompl);
+    NEVER_INLINE TermList(Term_ptr first, bool isCompl);
 
     // <<< PUBLIC API >>>
     SubsumptionResult IsSubsumedBy(FixpointType& fixpoint, Term*&);
@@ -426,9 +428,9 @@ public:
     static size_t postponedProcessed;
 
     // <<< CONSTRUCTORS >>>
-    TermFixpoint(Aut_ptr aut, Term_ptr startingTerm, Symbol* startingSymbol, bool inComplement, bool initbValue, WorklistSearchType search);
-    TermFixpoint(Aut_ptr aut, Term_ptr sourceTerm, Symbol* startingSymbol, bool inComplement);
-    ~TermFixpoint();
+    NEVER_INLINE TermFixpoint(Aut_ptr aut, Term_ptr startingTerm, Symbol* startingSymbol, bool inComplement, bool initbValue, WorklistSearchType search);
+    NEVER_INLINE TermFixpoint(Aut_ptr aut, Term_ptr sourceTerm, Symbol* startingSymbol, bool inComplement);
+    NEVER_INLINE ~TermFixpoint();
 
     // <<< PUBLIC API >>>
     FixpointTermSem GetSemantics() const;

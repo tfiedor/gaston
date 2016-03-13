@@ -26,7 +26,8 @@ namespace Gaston {
             } else {
                 return boost::hash_value(s);
             }
-        } /*else if(s->type == TERM_FIXPOINT || s->type == TERM_LIST) {
+        }/* else if(s->type == TERM_FIXPOINT || s->type == TERM_LIST) {
+            // Fixme: Commenting this causes the shitty loop somehow T_T
             size_t seed = boost::hash_value(s->stateSpaceApprox);
             boost::hash_combine(seed, boost::hash_value(s->MeasureStateSpace()));
             return seed;

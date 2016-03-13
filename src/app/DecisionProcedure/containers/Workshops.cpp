@@ -5,7 +5,7 @@
 extern VarToTrackMap varMap;
 
 namespace Workshops {
-    TermWorkshop::TermWorkshop(SymbolicAutomaton* aut) :
+    NEVER_INLINE TermWorkshop::TermWorkshop(SymbolicAutomaton* aut) :
             _bCache(nullptr), _pCache(nullptr), _lCache(nullptr), _fpCache(nullptr), _fppCache(nullptr),
             _contCache(nullptr),
             _compCache(nullptr), _aut(aut) { }
@@ -24,7 +24,7 @@ namespace Workshops {
         return nullptr;
     }
 
-    TermWorkshop::~TermWorkshop() {
+    NEVER_INLINE TermWorkshop::~TermWorkshop() {
         this->_bCache = TermWorkshop::_cleanCache(this->_bCache);
         this->_fpCache = TermWorkshop::_cleanCache(this->_fpCache);
         this->_fppCache = TermWorkshop::_cleanCache(this->_fppCache);
@@ -392,11 +392,11 @@ namespace Workshops {
         }
     }
 
-    SymbolWorkshop::SymbolWorkshop() {
+    NEVER_INLINE SymbolWorkshop::SymbolWorkshop() {
         this->_symbolCache = new SymbolCache();
     }
 
-    SymbolWorkshop::~SymbolWorkshop() {
+    NEVER_INLINE SymbolWorkshop::~SymbolWorkshop() {
         if(_zeroSymbol != nullptr) {
             delete SymbolWorkshop::_zeroSymbol;
             SymbolWorkshop::_zeroSymbol = nullptr;

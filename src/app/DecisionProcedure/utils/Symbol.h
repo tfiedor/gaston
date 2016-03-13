@@ -44,10 +44,10 @@ public:
     static size_t instances;
 
     // <<< CONSTRUCTORS >>>
-    ZeroSymbol();
-    explicit ZeroSymbol(BitMask const&);
-    ZeroSymbol(BitMask const&, VarType, VarValue);
-    ~ZeroSymbol();
+    NEVER_INLINE ZeroSymbol();
+    NEVER_INLINE explicit ZeroSymbol(BitMask const&);
+    NEVER_INLINE ZeroSymbol(BitMask const&, VarType, VarValue);
+    NEVER_INLINE ~ZeroSymbol();
 
     // <<< PUBLIC API >>>
     void ProjectVar(VarType);
