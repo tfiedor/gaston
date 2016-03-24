@@ -20,10 +20,10 @@ dwina_error = (-1, -1, -1, -1, -1, -1, -1)
 timeout_error = (-2, -2, -2, -2, -2, -2, -2)
 mona_error = (-1, -1)
 mona_expnf_error = (-1, -1, -1)
-# test_dir="./tests/one"
+#test_dir="./tests/one"
 test_dir = "./tests/basic"
 #test_dir = "./tests/current"
-# test_dir="./tests/problematic"
+#test_dir="./tests/problematic"
 #test_dir="./tests/basic/strand"
 
 

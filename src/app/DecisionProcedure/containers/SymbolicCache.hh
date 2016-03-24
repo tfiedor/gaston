@@ -167,6 +167,7 @@ public:
 #       if (OPT_USE_DENSE_HASHMAP == true)
 		this->_cache.set_empty_key(Key());
 #       endif
+        this->_cache.max_load_factor(0.25);
 	}
 	// < Public Methods >
 	/**
@@ -224,6 +225,7 @@ public:
 	 */
 	unsigned int dumpStats() {
 		unsigned int size = this->_cache.size();
+
 
 		std::cout << "Size: " << size;
 		if(this->cacheHits+this->cacheMisses != 0)

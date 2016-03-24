@@ -26,12 +26,12 @@ namespace Gaston {
             } else {
                 return boost::hash_value(s);
             }
-        }/* else if(s->type == TERM_FIXPOINT || s->type == TERM_LIST) {
+        } else if(s->type == TERM_FIXPOINT || s->type == TERM_LIST) {
             // Fixme: Commenting this causes the shitty loop somehow T_T
             size_t seed = boost::hash_value(s->stateSpaceApprox);
             boost::hash_combine(seed, boost::hash_value(s->MeasureStateSpace()));
             return seed;
-        }*/ else {
+        }  else {
             return boost::hash_value(s);
         }
         #else
@@ -710,9 +710,22 @@ namespace Gaston {
         assert(s.first != nullptr);
 
         if(s.second == nullptr) {
-            std::cout << "<" << (*s.first) << ", \u0437>";
+            //std::cout << "<" << (*s.first) << ", \u0437>";
+            size_t seed = Gaston::hash_value(s.first);
+            size_t seed2 = Gaston::hash_value(s.second);
+            std::cout << "<" << "[" << s.first << "] {" << seed << "}";
+            std::cout << (*s.first) << ", " << "[" << s.second << "] {" << seed2 << "} ";
+            std::cout << "\u0437" << ">";
+            boost::hash_combine(seed, seed2);
+            std::cout << " {" << seed << "}";
         } else {
-            std::cout << "<" << (*s.first) << ", " << (*s.second) << ">";
+            size_t seed = Gaston::hash_value(s.first);
+            size_t seed2 = Gaston::hash_value(s.second);
+            std::cout << "<" << "[" << s.first << "] {" << seed << "}";
+            std::cout << (*s.first) << ", " << "[" << s.second << "] {" << seed2 << "} ";
+            std::cout << (*s.second) << ">";
+            boost::hash_combine(seed, seed2);
+            std::cout << " {" << seed << "}";
         }
     }
 
@@ -1060,7 +1073,13 @@ void TermFixpoint::_InitializeAggregateFunction(bool inComplement) {
  * @param[in] vars:         list of used vars, that are projected
  */
 void TermFixpoint::_InitializeSymbols(Workshops::SymbolWorkshop* workshop, Gaston::VarList* freeVars, IdentList* vars, Symbol *startingSymbol) {
-    this->_symList.push_back(workshop->CreateTrimmedSymbol(startingSymbol, freeVars));
+    // Fixme: Is this correct?
+    //this->_symList.push_back(workshop->CreateTrimmedSymbol(startingSymbol, freeVars));
+    Symbol* trimmed = workshop->CreateTrimmedSymbol(startingSymbol, freeVars);
+    if (allPosVar != -1) {
+        trimmed = workshop->CreateSymbol(trimmed, varMap[allPosVar], '1');
+    }
+    this->_symList.push_back(trimmed);
     // TODO: Optimize, this sucks
     unsigned int symNum = 1;
 #   if (DEBUG_FIXPOINT_SYMBOLS == true)

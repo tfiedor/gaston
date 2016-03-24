@@ -297,10 +297,12 @@ ResultType RootProjectionAutomaton::IntersectNonEmpty(Symbol* symbol, Term* fina
             timer_paths.print();
             timer_paths.start();
             maxPath = fixpointTerm->link.len;
-            if(maxPath > 10) {
+#           if (DEBUG_MAX_SEARCH_PATH > 0)
+            if(maxPath > DEBUG_MAX_SEARCH_PATH) {
                 std::cout << "[!] Maximal search depth reached!\n";
                 break;
             }
+#           endif
         }
 #       endif
 #       if (DEBUG_ROOT_AUTOMATON == true)
@@ -463,11 +465,11 @@ void ComplementAutomaton::_InitializeFinalStates() {
 }
 
 void ProjectionAutomaton::_InitializeFinalStates() {
-    #if (DEBUG_NO_WORKSHOPS == true)
+#   if (DEBUG_NO_WORKSHOPS == true)
     this->_finalStates = new TermList(this->_aut->GetFinalStates(), false);
-    #else
+#   else
     this->_finalStates = this->_factory.CreateList(this->_aut->GetFinalStates(), false);
-    #endif
+#   endif
 }
 
 void BaseAutomaton::_InitializeFinalStates() {
@@ -569,56 +571,56 @@ ResultType BinaryOpAutomaton::_IntersectNonEmptyCore(Symbol* symbol, Term* final
 
     // We can prune the state if left side was evaluated as Empty term
     // TODO: This is different for Unionmat!
-    #if (OPT_PRUNE_EMPTY == true)
+#   if (OPT_PRUNE_EMPTY == true)
     if(lhs_result.first->type == TERM_EMPTY && !lhs_result.first->InComplement() && this->_productType == ProductType::E_INTERSECTION) {
         return std::make_pair(lhs_result.first, underComplement);
     }
-    #endif
+#   endif
 
-    #if (OPT_EARLY_EVALUATION == true)
+#   if (OPT_EARLY_EVALUATION == true)
     // Sometimes we can evaluate the experession early and return the continuation.
     // For intersection of automata we can return early, if left term was evaluated
     // as false, whereas for union of automata we can return early if left term
     // was true.
-    #if (OPT_CONT_ONLY_WHILE_UNSAT == true)
+#   if (OPT_CONT_ONLY_WHILE_UNSAT == true)
     bool canGenerateContinuations = (this->_productType == ProductType::E_INTERSECTION ?
                                      (this->_trueCounter == 0 && this->_falseCounter >= 0) :
                                      (this->_falseCounter == 0 && this->_trueCounter >= 0) );
     if(canGenerateContinuations && this->_eval_early(lhs_result.second, underComplement)) {
-    #else
+#   else
     if(this->_eval_early(lhs_result.second, underComplement)) {
-    #endif
+#   endif
         // Construct the pointer for symbol (either symbol or epsilon---nullptr)
-        #if (MEASURE_CONTINUATION_CREATION == true || MEASURE_ALL == true)
+#       if (MEASURE_CONTINUATION_CREATION == true || MEASURE_ALL == true)
         ++this->_contCreationCounter;
-        #endif
-        #if (DEBUG_NO_WORKSHOPS == true)
+#       endif
+#       if (DEBUG_NO_WORKSHOPS == true)
         TermContinuation *continuation = new TermContinuation(this->_rhs_aut, productStateApproximation->right, symbol, underComplement);
         Term_ptr leftCombined = new TermProduct(lhs_result.first, continuation, this->_productType);
-        #else
+#       else
         Term* continuation = this->_factory.CreateContinuation(this->_rhs_aut, productStateApproximation->right, symbol, underComplement);
         Term_ptr leftCombined = this->_factory.CreateProduct(lhs_result.first, continuation, this->_productType);
-        #endif
+#       endif
         return std::make_pair(leftCombined, this->_early_val(underComplement));
     }
-    #endif
+#   endif
 
     // Otherwise compute the right side and return full fixpoint
     ResultType rhs_result = this->_rhs_aut->IntersectNonEmpty(symbol, productStateApproximation->right, underComplement);
     // We can prune the state if right side was evaluated as Empty term
     // TODO: This is different for Unionmat!
-    #if (OPT_PRUNE_EMPTY == true)
+#   if (OPT_PRUNE_EMPTY == true)
     if(rhs_result.first->type == TERM_EMPTY && !lhs_result.first->InComplement() && this->_productType == ProductType::E_INTERSECTION) {
         return std::make_pair(rhs_result.first, underComplement);
     }
-    #endif
+#   endif
 
     // TODO: #TERM_CREATION
-    #if (DEBUG_NO_WORKSHOPS == true)
+#   if (DEBUG_NO_WORKSHOPS == true)
     Term_ptr combined = new TermProduct(lhs_result.first, rhs_result.first, this->_productType);
-    #else
+#   else
     Term_ptr combined = this->_factory.CreateProduct(lhs_result.first, rhs_result.first, this->_productType);
-    #endif
+#   endif
     return std::make_pair(combined, this->_eval_result(lhs_result.second, rhs_result.second, underComplement));
 }
 
@@ -820,7 +822,6 @@ void ProjectionAutomaton::_DumpExampleCore(ExampleType e) {
 
     while(example != nullptr && example->link.succ != nullptr && example != example->link.succ) {
     //                                                           ^--- not sure this is right
-        std::cout << "Parsing symbol: " << (*example) << "\n";
         for(size_t i = 0; i < varNo; ++i) {
             examples[i] += example->link.symbol->GetSymbolAt(varMap[this->projectedVars->get(i)]);
         }

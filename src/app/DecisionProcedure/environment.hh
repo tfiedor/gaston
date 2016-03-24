@@ -54,7 +54,7 @@ struct PreHashType;
  ***********************/
 enum Decision {SATISFIABLE, UNSATISFIABLE, VALID, INVALID};
 enum AutType {SYMBOLIC_BASE, BINARY, INTERSECTION, UNION, PROJECTION, BASE, COMPLEMENT};
-enum TermType {TERM, TERM_EMPTY, TERM_FIXPOINT, TERM_PRODUCT, TERM_BASE, TERM_LIST, TERM_CONTINUATION};
+enum TermType {TERM_PRODUCT, TERM, TERM_EMPTY, TERM_BASE, TERM_FIXPOINT, TERM_LIST, TERM_CONTINUATION};
 enum ProductType {E_INTERSECTION, E_UNION};
 enum FixpointTermSem {E_FIXTERM_FIXPOINT, E_FIXTERM_PRE};
 enum ComparisonType {E_BY_SAME_PTR, E_BY_DIFFERENT_TYPE, E_BY_STRUCTURE};
@@ -188,7 +188,7 @@ public:
  *****************************/
 #define DEBUG_ROOT_AUTOMATON			false
 #define DEBUG_AUTOMATA_ADDRESSES		false
-#define DEBUG_EXAMPLE_PATHS				true
+#define DEBUG_EXAMPLE_PATHS				false
 #define DEBUG_BASE_AUTOMATA 			false
 #define DEBUG_FIXPOINT 					false
 #define DEBUG_FIXPOINT_SYMBOLS			false
@@ -197,7 +197,7 @@ public:
 #define DEBUG_TERM_UNIQUENESS			false
 #define DEBUG_TERM_CREATION				false
 #define DEBUG_SYMBOL_CREATION			false
-#define DEBUG_CACHE_MEMBERS				false
+#define DEBUG_CACHE_MEMBERS				true
 #define DEBUG_CACHE_BUCKETS				true
 #define DEBUG_CACHE_MEMBERS_HASH		true
 #define DEBUG_WORKSHOPS					false
@@ -209,7 +209,8 @@ public:
 #define DEBUG_GENERATE_DOT_AUTOMATON	true
 #define DEBUG_COMPUTE_FULL_FIXPOINT 	false
 #define DEBUG_COMPARE_WORKLISTS			true
-#define DEBUG_VARMAP					false
+#define DEBUG_VARMAP					true
+#define DEBUG_MAX_SEARCH_PATH			0
 
 /*
  * >>> Automata stats options
@@ -243,7 +244,7 @@ public:
 
 /* >>> Anti-Prenexing Options <<< *
  **********************************/
-#define ANTIPRENEXING_FULL				false
+#define ANTIPRENEXING_FULL			    false
 #define ANTIPRENEXING_DISTRIBUTIVE		false
 
 /*
@@ -275,7 +276,7 @@ public:
 #define OPT_CREATE_QF_AUTOMATON 		true	// < Transform quantifier-free automaton to formula
 #define OPT_REDUCE_AUT_EVERYTIME		false	// < Call reduce everytime VATA automaton is created (i.e. as intermediate result)
 #define OPT_REDUCE_AUT_LAST				true	// < Call reduce after the final VATA automaton is created
-#define OPT_EARLY_EVALUATION 			true	// < Evaluates early interesection of products
+#define OPT_EARLY_EVALUATION 			true    // < Evaluates early interesection of products
 #define OPT_EARLY_PARTIAL_SUB			true	// < Postpone the partially subsumed terms
 #define OPT_CONT_ONLY_WHILE_UNSAT		true	// < Generate continuation only if there wasn't found (un)satisfying (counter)example yet
 #define OPT_PRUNE_EMPTY					true	// < Prune terms by empty set
