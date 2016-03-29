@@ -1,0 +1,12 @@
+# Gaston WS1S Benchmark
+# Tests: visitor
+# Field: syntax
+# Ground: true
+# Long Description: Tests the unfolding of zero order variables within macros.
+
+ws1s;
+
+pred and(var0 z) =
+    ex0 x, y: x & y | z;
+
+ex0 w, z: and(z) & and(w);

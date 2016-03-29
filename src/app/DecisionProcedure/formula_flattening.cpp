@@ -84,6 +84,13 @@ ASTTerm1_Var1* generateFreshFirstOrder() {
 	return new ASTTerm1_Var1(z, Pos());
 }
 
+ASTForm_Var0* generateFreshZeroOrder() {
+	unsigned int z;
+	z = symbolTable.insertFresh(Varname0);
+
+	return new ASTForm_Var0(z, Pos());
+}
+
 /**
  * Generates fresh second-order variable that can be used for quantification
  *
@@ -189,6 +196,7 @@ ASTForm* ASTForm_uvf::unfoldMacro(IdentList* fParams, ASTList* rParams) {
 
 			*iter = newVar->n;
 		} else {
+			assert(this->kind != aAll0 && this->kind != aEx0);
 			ASTTerm2_Var2* newVar = generateFreshSecondOrder();
 			ffParams->push_back(*iter);
 			rrParams->push_back(newVar);
@@ -230,7 +238,20 @@ ASTForm* ASTForm_vf::unfoldMacro(IdentList* fParams, ASTList* rParams) {
 	ASTList *rrParams = (ASTList*) rParams->copy();
 
 	for(Ident* iter = this->vl->begin(); iter != this->vl->end(); ++iter) {
-		if(this->kind == aAll1 | this->kind == aEx1) {
+		if (this->kind == aAll0 | this->kind == aEx0) {
+			ASTForm_Var0* newVar = generateFreshZeroOrder();
+			ffParams->push_back(*iter);
+			rrParams->push_back(newVar);
+
+			// Insert restrictions
+			ASTForm* restriction = symbolTable.lookupRestriction(*iter);
+			if(restriction != nullptr) {
+				restriction = restriction->clone()->unfoldMacro(ffParams, rrParams);
+				symbolTable.updateRestriction(newVar->GetVar(), restriction);
+			}
+
+			*iter = newVar->GetVar();
+		} else if(this->kind == aAll1 | this->kind == aEx1) {
 			ASTTerm1_Var1* newVar = generateFreshFirstOrder();
 			ffParams->push_back(*iter);
 			rrParams->push_back(newVar);
@@ -383,7 +404,7 @@ ASTTerm1* ASTTerm1_Var1::unfoldMacro(IdentList* fParams, ASTList* rParams) {
 	int index = fParams->index(this->n);
 
 	if (index != -1) {
-		return (ASTTerm1*) reinterpret_cast<ASTTerm1*>(rParams->get(index))->clone();
+		return reinterpret_cast<ASTTerm1*>(rParams->get(index))->clone();
 	} else {
 		return (ASTTerm1*) this;
 	}
@@ -400,9 +421,19 @@ ASTTerm2* ASTTerm2_Var2::unfoldMacro(IdentList* fParams, ASTList* rParams) {
 	int index = fParams->index(this->n);
 
 	if (index != -1) {
-		return (ASTTerm2*) reinterpret_cast<ASTTerm2*>(rParams->get(index))->clone();
+		return reinterpret_cast<ASTTerm2*>(rParams->get(index))->clone();
 	} else {
 		return (ASTTerm2*) this;
+	}
+}
+
+ASTForm* ASTForm_Var0::unfoldMacro(IdentList* fParams, ASTList* rParams) {
+	int index = fParams->index(this->n);
+
+	if(index != -1) {
+		return reinterpret_cast<ASTForm*>(rParams->get(index))->clone();
+	} else {
+		return reinterpret_cast<ASTForm*>(this);
 	}
 }
 

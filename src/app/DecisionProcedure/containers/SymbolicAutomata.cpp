@@ -27,6 +27,7 @@
 
 extern VarToTrackMap varMap;
 extern SymbolTable symbolTable;
+extern Ident lastPosVar, allPosVar;
 
 StateType SymbolicAutomaton::stateCnt = 0;
 
@@ -673,6 +674,16 @@ ResultType ProjectionAutomaton::_IntersectNonEmptyCore(Symbol* symbol, Term* fin
             #endif
         }
         #else
+#       if (OPT_NO_SATURATION_FOR_M2L == true)
+        // We will not saturate the fixpoint computation when computing the M2L(str) logic
+        if(allPosVar != -1) {
+#           if (OPT_REDUCE_FULL_FIXPOINT == true)
+            fixpoint->RemoveSubsumed();
+#           endif
+            return std::make_pair(fixpoint, result.second);
+        }
+#       endif
+
         // Early evaluation of fixpoint
         if(result.second == !underComplement) {
             #if (OPT_REDUCE_FULL_FIXPOINT == true)

@@ -883,7 +883,7 @@ public:
   VarCode makeCode(SubstCode *subst = NULL);
   void dump();
   ASTForm* clone() { return new ASTForm_Var0(this->n, this->pos); }
-  //ASTForm* unfoldMacro(IdentList*, ASTList*);
+  ASTForm* unfoldMacro(IdentList*, ASTList*);
 	int GetVar() { return n;}
 
 protected:

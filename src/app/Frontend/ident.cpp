@@ -88,7 +88,7 @@ void
 IdentList::dump()
 {
   for (iterator i = begin(); i != end();) {
-    cout << symbolTable.lookupSymbol(*i);
+    cout << (*i) << ":" << symbolTable.lookupSymbol(*i);
     if (++i != end())
       cout << ",";
   }
