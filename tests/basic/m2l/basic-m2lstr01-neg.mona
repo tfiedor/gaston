@@ -2,7 +2,7 @@
 # Tests: m2l(str)
 # Field: semantics
 # Ground: false
-# Long Description: Test the formula valid in m2l(str), but unsat in ws1s
+# Long Description: Tests the formula valid in m2l(str), but unsat in ws1s
 
-ws1s;
+m2l-str;
 ~ex2 X: all1 p: p in X;

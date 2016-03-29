@@ -1,0 +1,8 @@
+# Gaston WS1S Benchmark
+# Tests: m2l(str)
+# Field: semantics
+# Ground: true
+# Long Description: Tests the basic semantics of M2l(str) logic
+
+ws1s;
+~ex2 X: ex1 p: p in X;

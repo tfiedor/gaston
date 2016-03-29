@@ -4,5 +4,5 @@
 # Ground: false
 # Long Description: Tests the formula valid in m2l(str), but unsat in ws1s
 
-m2l-str;
-ex2 X: all1 p: p in X;
+ws1s;
+~ex2 X: all1 p: p in X;
