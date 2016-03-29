@@ -31,7 +31,7 @@ namespace Gaston {
             size_t seed = boost::hash_value(s->stateSpaceApprox);
             boost::hash_combine(seed, boost::hash_value(s->MeasureStateSpace()));
             return seed;
-        }  else {
+        } else {
             return boost::hash_value(s);
         }
         #else
@@ -121,7 +121,7 @@ TermProduct::TermProduct(Term_ptr lhs, Term_ptr rhs, ProductType pt) : left(lhs)
     #endif
 }
 
-TermBaseSet::TermBaseSet(VATA::Util::OrdVector<unsigned int>& s, unsigned int offset, unsigned int stateNo) : states() {
+TermBaseSet::TermBaseSet(VATA::Util::OrdVector<size_t>& s, unsigned int offset, unsigned int stateNo) : states() {
     #if (MEASURE_STATE_SPACE == true)
     ++TermBaseSet::instances;
     #endif

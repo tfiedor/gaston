@@ -85,7 +85,7 @@ char *inputFileName = NULL;
 Timer timer_conversion, timer_mona, timer_base, timer_automaton;
 Timer timer_gaston;
 
-extern void (*mona_callback)();
+//extern void (*mona_callback)();
 
 extern Ident lastPosVar, allPosVar;
 
@@ -148,7 +148,7 @@ bool ParseArguments(int argc, char *argv[]) {
 				options.graphvizDAG = true;
 			else if(strcmp(argv[i], "--walk-aut") == 0) {
                 options.monaWalk = true;
-                mona_callback = bdd_callback;
+                //mona_callback = bdd_callback;
             } else if(strcmp(argv[i], "--expand-tagged") == 0)
 				options.expandTagged = true;
 			else if(strcmp(argv[i], "--no-automaton") == 0)

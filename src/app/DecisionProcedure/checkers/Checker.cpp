@@ -38,7 +38,7 @@ extern VarToTrackMap varMap;
 
 extern int yyparse(void);
 extern void loadFile(char *filename);
-extern void (*mona_callback)();
+//extern void (*mona_callback)();
 extern Deque<FileSource *> source;
 
 // Fixme: remove maybe?

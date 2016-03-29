@@ -200,7 +200,7 @@ public:
     TERM_MEASURELIST(DEFINE_STATIC_MEASURE)
 
     // <<< CONSTRUCTORS >>>
-    NEVER_INLINE TermBaseSet(VATA::Util::OrdVector<unsigned int>&, unsigned int, unsigned int);
+    NEVER_INLINE TermBaseSet(VATA::Util::OrdVector<size_t>&, unsigned int, unsigned int);
     NEVER_INLINE ~TermBaseSet();
 
     // <<< PUBLIC API >>>

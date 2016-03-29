@@ -70,7 +70,7 @@ namespace Workshops {
     using SymbolKey         = std::tuple<Symbol*, VarType, ValType>;
     using SymbolHash        = boost::hash<SymbolKey>;
     using SymbolCompare     = std::equal_to<SymbolKey>;
-    using BaseKey           = VATA::Util::OrdVector<unsigned int>;
+    using BaseKey           = VATA::Util::OrdVector<size_t>;
     using BaseHash          = boost::hash<BaseKey>;
     using BaseCompare       = std::equal_to<BaseKey>;
     using ProductKey        = std::pair<Term*, Term*>;

@@ -186,7 +186,7 @@ namespace Workshops {
      * @param[in] stateno:      state number for bitmask
      * @return:                 unique pointer for TermBaseSet
      */
-    Term* TermWorkshop::CreateBaseSet(VATA::Util::OrdVector<unsigned int>& states, unsigned int offset, unsigned int stateno) {
+    Term* TermWorkshop::CreateBaseSet(VATA::Util::OrdVector<size_t>& states, unsigned int offset, unsigned int stateno) {
         #if (OPT_GENERATE_UNIQUE_TERMS == true && UNIQUE_BASE == true)
             assert(this->_bCache != nullptr);
 
@@ -444,7 +444,7 @@ namespace Workshops {
             }
         }
 
-        auto symbolKey = std::make_tuple(src, 0u, 'T');
+        auto symbolKey = std::make_tuple(src, static_cast<VarType>(0u), 'T');
         Symbol* sPtr;
         if(!this->_symbolCache->retrieveFromCache(symbolKey, sPtr)) {
             sPtr = new ZeroSymbol(src->GetTrackMask());

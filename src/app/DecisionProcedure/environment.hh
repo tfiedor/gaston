@@ -99,7 +99,6 @@ namespace Gaston {
 	void dumpPreKey(std::pair<size_t, Symbol_ptr> const& s);
 	void dumpPreData(VATA::Util::OrdVector<size_t>& s);
 
-
 	using TermHash 				 = boost::hash<Term_raw>;
 	using TermCompare			 = std::equal_to<Term_raw>;
 	using TermCache				 = BinaryCache<Term_raw, SubsumptionResult, TermHash, TermCompare, dumpTermKey, dumpSubsumptionData>;
@@ -276,7 +275,7 @@ public:
 #define OPT_CREATE_QF_AUTOMATON 		true	// < Transform quantifier-free automaton to formula
 #define OPT_REDUCE_AUT_EVERYTIME		false	// < Call reduce everytime VATA automaton is created (i.e. as intermediate result)
 #define OPT_REDUCE_AUT_LAST				true	// < Call reduce after the final VATA automaton is created
-#define OPT_EARLY_EVALUATION 			true    // < Evaluates early interesection of products
+#define OPT_EARLY_EVALUATION 			false   // < Evaluates early interesection of products
 #define OPT_EARLY_PARTIAL_SUB			true	// < Postpone the partially subsumed terms
 #define OPT_CONT_ONLY_WHILE_UNSAT		true	// < Generate continuation only if there wasn't found (un)satisfying (counter)example yet
 #define OPT_PRUNE_EMPTY					true	// < Prune terms by empty set
