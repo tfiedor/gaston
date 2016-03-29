@@ -21,7 +21,8 @@ timeout_error = (-2, -2, -2, -2, -2, -2, -2)
 mona_error = (-1, -1)
 mona_expnf_error = (-1, -1, -1)
 #test_dir="./tests/one"
-test_dir = "./tests/basic/m2l"
+#test_dir = "./tests/basic/m2l"
+test_dir = "./tests/basic/"
 #test_dir = "./tests/current"
 #test_dir="./tests/problematic"
 #test_dir="./tests/basic/strand"
@@ -49,7 +50,7 @@ def run_mona(test, timeout, checkonly=False):
     '''
     Runs MONA with following arguments:
     '''
-    args = ('./mona', '-s', '"{}"'.format(test))
+    args = ('mona', '-s', '"{}"'.format(test))
     output, retcode = runProcess(args, timeout)
     if(retcode != 0):
         return mona_error, output
