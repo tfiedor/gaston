@@ -402,8 +402,13 @@ namespace Workshops {
             SymbolWorkshop::_zeroSymbol = nullptr;
         }
         for(auto it = this->_symbolCache->begin(); it != this->_symbolCache->end(); ++it) {
-            // Delete the symbol
-            delete it->second;
+            // Delete the symbol, unless it is trimmed -> it is in different structure
+            if(std::get<2>(it->first) != 'T')
+                delete it->second;
+        }
+
+        for(auto symb : this->_trimmedSymbols) {
+            delete symb;
         }
         delete this->_symbolCache;
     }
@@ -471,6 +476,7 @@ namespace Workshops {
                 }
             }
 #           endif
+            this->_trimmedSymbols.push_back(sPtr);
             this->_symbolCache->StoreIn(symbolKey, sPtr);
         }
         return sPtr;

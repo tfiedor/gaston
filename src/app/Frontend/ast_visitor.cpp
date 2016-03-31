@@ -399,6 +399,10 @@ AST* ASTForm_Var0::accept(TransformerVisitor &v) {
     return v.visit(this);
 }
 
+AST* ASTForm_AllPosVar::accept(TransformerVisitor &v) {
+    return v.visit(this);
+}
+
 AST* ASTForm_True::accept(TransformerVisitor &v) {
     return v.visit(this);
 }
@@ -924,6 +928,10 @@ void ASTTerm2_Formula::accept(VoidVisitor &v) {
 }
 
 void ASTForm_Var0::accept(VoidVisitor &v) {
+    v.visit(this);
+}
+
+void ASTForm_AllPosVar::accept(VoidVisitor &v) {
     v.visit(this);
 }
 

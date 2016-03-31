@@ -9,7 +9,7 @@
 template<class BinopClass>
 AST* ExistentialPrenexer::moveExistUp(AST* form) {
     BinopClass *bForm = reinterpret_cast<BinopClass*>(form);
-    if(bForm->f1->kind == ASTKind::aEx1 || bForm->f2->kind == ASTKind::aEx2) {
+    if(bForm->f1->kind == ASTKind::aEx1 || bForm->f1->kind == ASTKind::aEx2) {
         ASTForm_uvf* exForm = reinterpret_cast<ASTForm_uvf*>(bForm->f1);
         bForm->f1 = exForm->f;
         exForm->f = bForm;
@@ -25,9 +25,21 @@ AST* ExistentialPrenexer::moveExistUp(AST* form) {
 }
 
 AST* ExistentialPrenexer::visit(ASTForm_And* form) {
-    return reinterpret_cast<ASTForm*>((moveExistUp<ASTForm_And>(form)))->accept(*this);
+    //return reinterpret_cast<ASTForm*>((moveExistUp<ASTForm_And>(form)))->accept(*this);
+    AST* prenexed = moveExistUp<ASTForm_And>(form);
+    if(prenexed != form) {
+        return reinterpret_cast<ASTForm*>(prenexed)->accept(*this);
+    } else {
+        return prenexed;
+    }
 }
 
 AST* ExistentialPrenexer::visit(ASTForm_Or* form) {
-    return reinterpret_cast<ASTForm*>((moveExistUp<ASTForm_Or>(form)))->accept(*this);
+    //return reinterpret_cast<ASTForm*>((moveExistUp<ASTForm_Or>(form)))->accept(*this);
+    AST* prenexed = moveExistUp<ASTForm_Or>(form);
+    if(prenexed != form) {
+        return reinterpret_cast<ASTForm*>(prenexed)->accept(*this);
+    } else {
+        return prenexed;
+    }
 }

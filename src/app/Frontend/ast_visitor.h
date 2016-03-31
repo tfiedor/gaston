@@ -83,6 +83,7 @@ public:
 
     // < ASTForm Specific > //
     virtual AST* visit(ASTForm_Var0* form) { return form; }
+    virtual AST* visit(ASTForm_AllPosVar* form) { return form; }
     virtual AST* visit(ASTForm_True* form) { return form; }
     virtual AST* visit(ASTForm_False* form) { return form; }
     virtual AST* visit(ASTForm_In* form) { return form; }
@@ -192,6 +193,7 @@ public:
 
     // < ASTForm Specific > //
     virtual void visit(ASTForm_Var0* form) {}
+    virtual void visit(ASTForm_AllPosVar* form) {}
     virtual void visit(ASTForm_True* form) {}
     virtual void visit(ASTForm_False* form) {}
     virtual void visit(ASTForm_In* form) {}

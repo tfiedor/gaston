@@ -88,7 +88,7 @@ enum ASTKind {
   aEx2, aAll0, aAll1, aAll2, aLet0, aLet1, aLet2, aCall,
   aUniv, aImport, aExport, aPrefix, aDot2, aUp2, aRootPred, aInStateSpace1,
   aInStateSpace2, aTreeRoot, aWellFormedTree, aTree, aTerm2Formula,
-  aSomeType, aRestrict
+  aSomeType, aRestrict, aAllPos
 };
 
 enum ASTOrder {oTerm1, oTerm2, oForm, oUniv};
@@ -888,6 +888,23 @@ public:
 
 protected:
   int n;
+};
+
+class ASTForm_AllPosVar: public ASTForm {
+public:
+	ASTForm_AllPosVar(Pos p) : ASTForm(aAllPos, p) {}
+
+	VISITABLE();
+
+	ASTForm* clone() { return new ASTForm_AllPosVar(this->pos);}
+	VarCode makeCode(SubstCode *subst = NULL) {assert(false);}
+	void freeVars(IdentList*, IdentList*) {}
+	void dump();
+
+	// Conversion of AST representation of formula to Automaton
+	void toUnaryAutomaton(Automaton &aut, bool doComplement) {assert(false);}
+	void toBinaryAutomaton(Automaton &aut, bool doComplement){assert(false);}
+	SymbolicAutomaton* _toSymbolicAutomatonCore(bool doComplement){assert(false);}
 };
 
 class ASTForm_True: public ASTForm {

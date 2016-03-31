@@ -347,7 +347,12 @@ ASTForm_Var0::dump()
 {
   cout << "Var0 " << symbolTable.lookupSymbol(n);
 }
-    
+
+void
+ASTForm_AllPosVar::dump() {
+  cout << "AllPos($)";
+}
+
 void 
 ASTForm_True::dump()
 {

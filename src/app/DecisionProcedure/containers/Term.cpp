@@ -114,7 +114,6 @@ TermProduct::TermProduct(Term_ptr lhs, Term_ptr rhs, ProductType pt) : left(lhs)
     this->stateSpaceApprox = this->left->stateSpaceApprox + this->right->stateSpaceApprox + 1;
 
     #if (DEBUG_TERM_CREATION == true)
-    //std::cout << "[" << this << "]";
     std::cout << "TermProduct::";
     this->dump();
     std::cout << "\n";
@@ -136,7 +135,6 @@ TermBaseSet::TermBaseSet(VATA::Util::OrdVector<size_t>& s, unsigned int offset, 
     this->stateSpaceApprox = this->stateSpace;
 
     #if (DEBUG_TERM_CREATION == true)
-    //std::cout << "[" << this << "]";
     std::cout << "TermBaseSet::";
     this->dump();
     std::cout << "\n";
@@ -830,7 +828,6 @@ void TermList::_dumpCore() {
 }
 
 void TermFixpoint::_dumpCore() {
-    std::cout << "[" << this << "]";
     std::cout << "\033[1;34m{\033[0m";
     for(auto& item : this->_fixpoint) {
         if(item.first == nullptr || !(item.second)) {
@@ -839,18 +836,20 @@ void TermFixpoint::_dumpCore() {
         item.first->dump();
         std::cout << "\033[1;34m,\033[0m";
     }
-    #if (DEBUG_FIXPOINT_SYMBOLS == true)
-        std::cout << "[";
-        for(auto& item : this->_worklist) {
-            std::cout << "(" << item.first << "+" << item.second << ") , ";
-        }
-        std::cout << "]";
-    #endif
+#   if (DEBUG_FIXPOINT_SYMBOLS == true)
+    std::cout << "[";
+    for(auto& item : this->_worklist) {
+        std::cout << "(" << item.first << "+" << item.second << ") , ";
+    }
+    std::cout << "]";
+#   endif
+#   if (DEBUG_FIXPOINT_WORKLIST == true)
     std::cout << "\033[1;37m[";
     for(auto& workItem : this->_worklist) {
         std::cout << (workItem.first) << " + " << (workItem.second) << ", ";
     }
     std::cout << "]\033[0m";
+#   endif
     std::cout << "\033[1;34m}\033[0m";
     if(this->_bValue) {
         std::cout << "\033[1;34m\u22A8\033[0m";

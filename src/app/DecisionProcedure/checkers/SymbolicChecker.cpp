@@ -20,18 +20,23 @@ void SymbolicChecker::ConstructAutomaton() {
 
     timer_automaton.start();
     this->_automaton = (this->_monaAST->formula)->toSymbolicAutomaton(false);
-    if(options.printProgress)
-        this->_automaton->DumpAutomaton();
-    std::cout << "\n";
 
     // M2L-str()
     if(allPosVar != -1) {
         std::cout << "[*] AllPosVar predicate detected\n";
         DFA* dfa = dfaAllPos(varMap[allPosVar]);
         assert(dfa != nullptr);
-        SymbolicAutomaton* allPosAutomaton = new GenericBaseAutomaton(dfa, varMap.TrackLength(), this->_monaAST->formula, false);
-        this->_automaton = new UnionAutomaton(new ComplementAutomaton(allPosAutomaton, this->_monaAST->formula), this->_automaton, this->_monaAST->formula);
+        ASTForm_AllPosVar* allPosFormula = new ASTForm_AllPosVar(Pos());
+        SymbolicAutomaton* allPosAutomaton = new GenericBaseAutomaton(dfa, varMap.TrackLength(), allPosFormula, false);
+        //this->_automaton = new IntersectionAutomaton(allPosAutomaton, this->_automaton, this->_monaAST->formula);
+        ASTForm_Not* negatedFormula = new ASTForm_Not(this->_monaAST->formula, Pos());
+        ASTForm_Or* finalFormula = new ASTForm_Or(negatedFormula, this->_monaAST->formula, Pos());
+        this->_automaton = new UnionAutomaton(new ComplementAutomaton(allPosAutomaton, negatedFormula), this->_automaton, finalFormula);
     }
+
+    if(options.printProgress)
+        this->_automaton->DumpAutomaton();
+    std::cout << "\n";
 
     IdentList free, bound;
     this->_monaAST->formula->freeVars(&free, &bound);

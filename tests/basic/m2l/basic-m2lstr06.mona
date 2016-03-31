@@ -1,0 +1,8 @@
+# Gaston WS1S Benchmark
+# Tests: m2l(str)
+# Field: semantics
+# Ground: false
+# Long Description: Tests the basic semantics of M2L(str) logic on second order variables
+
+m2l-str;
+all2 X: ex2 Y: X sub Y & X ~= Y;

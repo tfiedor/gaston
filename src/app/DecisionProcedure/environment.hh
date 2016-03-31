@@ -191,13 +191,14 @@ public:
 #define DEBUG_BASE_AUTOMATA 			false
 #define DEBUG_FIXPOINT 					false
 #define DEBUG_FIXPOINT_SYMBOLS			false
+#define DEBUG_FIXPOINT_WORKLIST			false
 #define DEBUG_INITIAL_APPROX 			false
 #define DEBUG_INTERSECT_NON_EMPTY 		false
 #define DEBUG_TERM_UNIQUENESS			false
 #define DEBUG_TERM_CREATION				false
-#define DEBUG_SYMBOL_CREATION			false
+#define DEBUG_SYMBOL_CREATION			true
 #define DEBUG_CACHE_MEMBERS				true
-#define DEBUG_CACHE_BUCKETS				true
+#define DEBUG_CACHE_BUCKETS				false
 #define DEBUG_CACHE_MEMBERS_HASH		true
 #define DEBUG_WORKSHOPS					false
 #define DEBUG_TERM_SUBSUMPTION 			false
@@ -243,7 +244,7 @@ public:
 
 /* >>> Anti-Prenexing Options <<< *
  **********************************/
-#define ANTIPRENEXING_FULL			    false
+#define ANTIPRENEXING_FULL			    true
 #define ANTIPRENEXING_DISTRIBUTIVE		false
 
 /*
@@ -289,9 +290,9 @@ public:
 #define OPT_SMARTER_MONA_CONVERSION		false	// < Use faster conversion from MONA to VATA (courtesy of PJ)
 #define OPT_CREATE_TAGGED_AUTOMATA		false	// < Use tags to create a specific subformula to automaton
 #define OPT_EXTRACT_MORE_AUTOMATA		true	// < Calls detagger to heuristically convert some subformulae to automata
-#define OPT_UNIQUE_TRIMMED_SYMBOLS		false	// < Will guarantee that there will not be a collisions between symbols after trimming
-#define OPT_FIXPOINT_BFS_SEARCH			false	// < Will add new things to the back of the worklist in fixpoint
+#define OPT_UNIQUE_TRIMMED_SYMBOLS		true    // < Will guarantee that there will not be a collisions between symbols after trimming
+#define OPT_FIXPOINT_BFS_SEARCH	        false   // < Will add new things to the back of the worklist in fixpoint
 #define OPT_USE_DENSE_HASHMAP			false	// < Will use the google::dense_hash_map as cache
-#define OPT_NO_SATURATION_FOR_M2L		true	// < Will not saturate the final states for M2L(str) logic
+#define OPT_NO_SATURATION_FOR_M2L		false   // < Will not saturate the final states for M2L(str) logic
 
 #endif
