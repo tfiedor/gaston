@@ -240,6 +240,8 @@ public:
  * fixpoints, by testing the satisfiability and unsatisfiability.
  */
 class RootProjectionAutomaton : public ProjectionAutomaton {
+protected:
+    // <<< PRIVATE MEMBERS >>>
 public:
     // <<< CONSTRUCTORS >>>
     NEVER_INLINE RootProjectionAutomaton(SymbolicAutomaton*, Formula_ptr);

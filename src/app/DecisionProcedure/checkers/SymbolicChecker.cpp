@@ -24,14 +24,15 @@ void SymbolicChecker::ConstructAutomaton() {
     // M2L-str()
     if(allPosVar != -1) {
         std::cout << "[*] AllPosVar predicate detected\n";
+
         DFA* dfa = dfaAllPos(varMap[allPosVar]);
         assert(dfa != nullptr);
         ASTForm_AllPosVar* allPosFormula = new ASTForm_AllPosVar(Pos());
         SymbolicAutomaton* allPosAutomaton = new GenericBaseAutomaton(dfa, varMap.TrackLength(), allPosFormula, false);
-        //this->_automaton = new IntersectionAutomaton(allPosAutomaton, this->_automaton, this->_monaAST->formula);
-        ASTForm_Not* negatedFormula = new ASTForm_Not(this->_monaAST->formula, Pos());
+        this->_automaton = new IntersectionAutomaton(allPosAutomaton, this->_automaton, this->_monaAST->formula);
+        /*ASTForm_Not* negatedFormula = new ASTForm_Not(allPosFormula, Pos());
         ASTForm_Or* finalFormula = new ASTForm_Or(negatedFormula, this->_monaAST->formula, Pos());
-        this->_automaton = new UnionAutomaton(new ComplementAutomaton(allPosAutomaton, negatedFormula), this->_automaton, finalFormula);
+        this->_automaton = new UnionAutomaton(new ComplementAutomaton(allPosAutomaton, negatedFormula), this->_automaton, finalFormula);*/
     }
 
     if(options.printProgress)

@@ -320,11 +320,11 @@ ResultType RootProjectionAutomaton::IntersectNonEmpty(Symbol* symbol, Term* fina
 #       if (DEBUG_ROOT_AUTOMATON == true)
         std::cout << "[*] <"; result.first->dump(); std::cout << ", " << (result.second ? "true" : "false") << ">\n";
 #       endif
-        if(this->_satExample == nullptr && examples.first != nullptr && examples.first->link.symbol != nullptr) {
+        if(this->_satExample == nullptr && examples.first != nullptr) {
             std::cout << "[*] Found satisfying example\n";
             this->_satExample = examples.first;
         }
-        if(this->_unsatExample == nullptr && examples.second != nullptr && examples.second->link.symbol != nullptr) {
+        if(this->_unsatExample == nullptr && examples.second != nullptr) {
             std::cout << "[*] Found unsatisfying counter-example\n";
             this->_unsatExample = examples.second;
         }

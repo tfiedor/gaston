@@ -203,6 +203,13 @@ TermFixpoint::TermFixpoint(Aut_ptr aut, Term_ptr startingTerm, Symbol* symbol, b
     ++TermFixpoint::instances;
     #endif
 
+    // Initialize the (counter)examples
+    if(initbValue) {
+        this->_satTerm = startingTerm;
+    } else {
+        this->_unsatTerm = startingTerm;
+    }
+
     // Initialize the aggregate function
     this->_InitializeAggregateFunction(inComplement);
     this->_nonMembershipTesting = inComplement;
@@ -1073,7 +1080,7 @@ void TermFixpoint::_InitializeAggregateFunction(bool inComplement) {
  */
 void TermFixpoint::_InitializeSymbols(Workshops::SymbolWorkshop* workshop, Gaston::VarList* freeVars, IdentList* vars, Symbol *startingSymbol) {
     // Fixme: Is this correct?
-    //this->_symList.push_back(workshop->CreateTrimmedSymbol(startingSymbol, freeVars));
+    // this->_symList.push_back(workshop->CreateTrimmedSymbol(startingSymbol, freeVars));
     Symbol* trimmed = workshop->CreateTrimmedSymbol(startingSymbol, freeVars);
     if (allPosVar != -1) {
         trimmed = workshop->CreateSymbol(trimmed, varMap[allPosVar], '1');

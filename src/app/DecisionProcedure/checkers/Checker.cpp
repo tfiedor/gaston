@@ -177,8 +177,9 @@ void Checker::CloseUngroundFormula() {
     IdentList freeVars, bound;
     (this->_monaAST->formula)->freeVars(&freeVars, &bound);
 
-    this->_isGround = freeVars.empty() || (freeVars.size() == 1 && *freeVars.begin() == allPosVar);
-    if(!this->_isGround) {
+    //this->_isGround = freeVars.empty() || (freeVars.size() == 1 && *freeVars.begin() == allPosVar);
+    this->_isGround = freeVars.empty();
+    if(!this->_isGround && !(freeVars.size() == 1 && *freeVars.begin() == allPosVar)) {
         switch(options.test) {
             case TestType::VALIDITY:
                 this->_monaAST->formula = this->_ClosePrefix<ASTForm_All0, ASTForm_All1, ASTForm_All2>(&freeVars, this->_monaAST->formula);
@@ -205,6 +206,18 @@ void Checker::CloseUngroundFormula() {
                                 restriction = restriction->clone()->unfoldMacro(new IdentList(formal), list);
                         }
                         this->_monaAST->formula = new ASTForm_And(fo, this->_monaAST->formula, Pos());
+                        if(restriction != nullptr)
+                            this->_monaAST->formula = new ASTForm_And(restriction, this->_monaAST->formula, Pos());
+                    } else if(symbolTable.lookupType(*it) == MonaTypeTag::Varname2 && *it != allPosVar) {
+                        ASTForm* restriction = symbolTable.lookupRestriction(*it);
+                        if(restriction == nullptr) {
+                            Ident formal;
+                            restriction = symbolTable.getDefault2Restriction(&formal);
+                            ASTList* list = new ASTList();
+                            list->push_back(new ASTTerm2_Var2(*it, Pos()));
+                            if(restriction != nullptr)
+                                restriction = restriction->clone()->unfoldMacro(new IdentList(formal), list);
+                        }
                         if(restriction != nullptr)
                             this->_monaAST->formula = new ASTForm_And(restriction, this->_monaAST->formula, Pos());
                     }
