@@ -197,42 +197,15 @@ void Checker::CloseUngroundFormula() {
                     // Fixme: what about zeroorder variables
                     if(symbolTable.lookupType(*it) == MonaTypeTag::Varname1) {
                         ASTForm_FirstOrder* fo = new ASTForm_FirstOrder(new ASTTerm1_Var1(*it, Pos()), Pos());
-                        ASTForm* restriction = symbolTable.lookupRestriction(*it);
-                        if(restriction == nullptr) {
-                            Ident formal;
-                            restriction = symbolTable.getDefault1Restriction(&formal);
-                            ASTList* list = new ASTList();
-                            list->push_back(new ASTTerm1_Var1(*it, Pos()));
-                            if(restriction != nullptr)
-                                restriction = restriction->clone()->unfoldMacro(new IdentList(formal), list);
-                        }
                         this->_monaAST->formula = new ASTForm_And(fo, this->_monaAST->formula, Pos());
-                        if(restriction != nullptr)
-                            this->_monaAST->formula = new ASTForm_And(restriction, this->_monaAST->formula, Pos());
+                        this->_monaAST->formula
+                                = SecondOrderRestricter::RestrictFormula<ASTForm_And, ASTTerm1_Var1>(*it, this->_monaAST->formula);
                     } else if(symbolTable.lookupType(*it) == MonaTypeTag::Varname2 && *it != allPosVar) {
-                        ASTForm* restriction = symbolTable.lookupRestriction(*it);
-                        if(restriction == nullptr) {
-                            Ident formal;
-                            restriction = symbolTable.getDefault2Restriction(&formal);
-                            ASTList* list = new ASTList();
-                            list->push_back(new ASTTerm2_Var2(*it, Pos()));
-                            if(restriction != nullptr)
-                                restriction = restriction->clone()->unfoldMacro(new IdentList(formal), list);
-                        }
-                        if(restriction != nullptr)
-                            this->_monaAST->formula = new ASTForm_And(restriction, this->_monaAST->formula, Pos());
+                        this->_monaAST->formula
+                                = SecondOrderRestricter::RestrictFormula<ASTForm_And, ASTTerm2_Var2>(*it, this->_monaAST->formula);
                     }
                 }
                 break;
-        }
-    }
-
-    if(allPosVar != -1) {
-        ASTForm* restr = symbolTable.lookupRestriction(allPosVar);
-        if(restr == nullptr) {
-            assert(false);
-        } else {
-            //this->_monaAST->formula = new ASTForm_And(restr->clone(), this->_monaAST->formula, Pos());
         }
     }
 }
