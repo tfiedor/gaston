@@ -16,6 +16,33 @@
 
 extern SymbolTable symbolTable;
 
+template<class BinaryFormula, class VarType>
+ASTForm* SecondOrderRestricter::RestrictFormula(Ident var, ASTForm* form) {
+    ASTForm* restriction = symbolTable.lookupRestriction(var);
+    if((restriction = symbolTable.lookupRestriction(var)) == nullptr) {
+        // Get default restriction instead
+        Ident formal;
+        ASTList* list = new ASTList();
+        list->push_back(new VarType(var, Pos()));
+
+        if(symbolTable.lookupType(var) == MonaTypeTag::Varname1) {
+            restriction = symbolTable.getDefault1Restriction(&formal);
+        } else {
+            restriction = symbolTable.getDefault2Restriction(&formal);
+        }
+        if(restriction != nullptr)
+            restriction = restriction->clone()->unfoldMacro(new IdentList(formal), list);
+    } else {
+        restriction = restriction->clone();
+    }
+
+    if(restriction != nullptr && restriction->kind != aTrue) {
+        return new BinaryFormula(restriction, form, form->pos);
+    } else {
+        return form;
+    }
+}
+
 template<class FirstOrderQuantification, class SecondOrderQuantification, class BinaryFormula>
 AST* SecondOrderRestricter::_firstOrderRestrict(FirstOrderQuantification* form) {
     assert(form != nullptr);
@@ -27,22 +54,7 @@ AST* SecondOrderRestricter::_firstOrderRestrict(FirstOrderQuantification* form) 
         auto it = form->vl->pop_back();
         ASTForm_FirstOrder *singleton = new ASTForm_FirstOrder(new ASTTerm1_Var1(it, form->pos), form->pos);
         BinaryFormula* binopForm = new BinaryFormula(singleton, restrictedFormula, form->pos);
-        // #RESTRICTION#
-        ASTForm* restriction = symbolTable.lookupRestriction(it);
-        if(restriction == nullptr) {
-            Ident formal;
-            ASTList* list = new ASTList();
-            list->push_back(new ASTTerm1_Var1(it, Pos()));
-            restriction = symbolTable.getDefault1Restriction(&formal);
-            if(restriction != nullptr)
-                restriction = restriction->clone()->unfoldMacro(new IdentList(formal), list);
-        } else {
-            restriction = restriction->clone();
-        }
-
-        if(restriction != nullptr && restriction->kind != aTrue) {
-            binopForm = new BinaryFormula(restriction, binopForm, form->pos);
-        }
+        binopForm = reinterpret_cast<BinaryFormula*>(SecondOrderRestricter::RestrictFormula<BinaryFormula, ASTTerm1_Var1>(it, binopForm));
         restrictedFormula = new SecondOrderQuantification(nullptr, new IdentList(it), binopForm, Pos());
     }
 
@@ -61,23 +73,9 @@ AST* SecondOrderRestricter::_secondOrderRestrict(SecondOrderQuantification *form
     ASTForm* restrictedFormula = form->f;
 
     while(form->vl->size() != 0) {
-        ASTForm* binopForm = restrictedFormula;
         auto it = form->vl->pop_back();
-        ASTForm* restriction = symbolTable.lookupRestriction(it);
-        if(restriction == nullptr) {
-            Ident formal;
-            ASTList* list = new ASTList();
-            list->push_back(new ASTTerm2_Var2(it, Pos()));
-            restriction = symbolTable.getDefault2Restriction(&formal);
-            if(restriction != nullptr)
-                restriction = restriction->clone()->unfoldMacro(new IdentList(formal), list);
-        } else {
-            restriction = restriction->clone();
-        }
-
-        if(restriction != nullptr && restriction->kind != aTrue) {
-            binopForm = new BinaryFormula(restriction, binopForm, form->pos);
-        }
+        ASTForm* binopForm = restrictedFormula;
+        binopForm = reinterpret_cast<BinaryFormula*>(SecondOrderRestricter::RestrictFormula<BinaryFormula, ASTTerm2_Var2>(it, binopForm));
         restrictedFormula = new SecondOrderQuantification(nullptr, new IdentList(it), binopForm, form->pos);
     }
 

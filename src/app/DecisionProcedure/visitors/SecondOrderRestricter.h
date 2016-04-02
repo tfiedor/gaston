@@ -11,8 +11,9 @@
 #ifndef WSKS_SECONDORDERRESTRICTER_H
 #define WSKS_SECONDORDERRESTRICTER_H
 
-#include "../Frontend/ast.h"
-#include "../Frontend/ast_visitor.h"
+#include "../../Frontend/ast.h"
+#include "../../Frontend/ast_visitor.h"
+#include "../../Frontend/ident.h"
 
 class SecondOrderRestricter : public TransformerVisitor {
 private:
@@ -28,6 +29,9 @@ public:
     AST* visit(ASTForm_Ex2* form);
     AST* visit(ASTForm_All1* form);
     AST* visit(ASTForm_All2* form);
+
+    template<class BinaryFormula, class VarType>
+    static ASTForm* RestrictFormula(Ident var, ASTForm* form);
 };
 
 
