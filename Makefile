@@ -138,30 +138,6 @@ src/app/DecisionProcedure/automata.cpp.s:
 	$(MAKE) -f CMakeFiles/gaston.dir/build.make CMakeFiles/gaston.dir/src/app/DecisionProcedure/automata.cpp.s
 .PHONY : src/app/DecisionProcedure/automata.cpp.s
 
-src/app/DecisionProcedure/backward_decision_procedure.o: src/app/DecisionProcedure/backward_decision_procedure.cpp.o
-.PHONY : src/app/DecisionProcedure/backward_decision_procedure.o
-
-# target to build an object file
-src/app/DecisionProcedure/backward_decision_procedure.cpp.o:
-	$(MAKE) -f CMakeFiles/gaston.dir/build.make CMakeFiles/gaston.dir/src/app/DecisionProcedure/backward_decision_procedure.cpp.o
-.PHONY : src/app/DecisionProcedure/backward_decision_procedure.cpp.o
-
-src/app/DecisionProcedure/backward_decision_procedure.i: src/app/DecisionProcedure/backward_decision_procedure.cpp.i
-.PHONY : src/app/DecisionProcedure/backward_decision_procedure.i
-
-# target to preprocess a source file
-src/app/DecisionProcedure/backward_decision_procedure.cpp.i:
-	$(MAKE) -f CMakeFiles/gaston.dir/build.make CMakeFiles/gaston.dir/src/app/DecisionProcedure/backward_decision_procedure.cpp.i
-.PHONY : src/app/DecisionProcedure/backward_decision_procedure.cpp.i
-
-src/app/DecisionProcedure/backward_decision_procedure.s: src/app/DecisionProcedure/backward_decision_procedure.cpp.s
-.PHONY : src/app/DecisionProcedure/backward_decision_procedure.s
-
-# target to generate assembly for a file
-src/app/DecisionProcedure/backward_decision_procedure.cpp.s:
-	$(MAKE) -f CMakeFiles/gaston.dir/build.make CMakeFiles/gaston.dir/src/app/DecisionProcedure/backward_decision_procedure.cpp.s
-.PHONY : src/app/DecisionProcedure/backward_decision_procedure.cpp.s
-
 src/app/DecisionProcedure/checkers/Checker.o: src/app/DecisionProcedure/checkers/Checker.cpp.o
 .PHONY : src/app/DecisionProcedure/checkers/Checker.o
 
@@ -209,30 +185,6 @@ src/app/DecisionProcedure/checkers/SymbolicChecker.s: src/app/DecisionProcedure/
 src/app/DecisionProcedure/checkers/SymbolicChecker.cpp.s:
 	$(MAKE) -f CMakeFiles/gaston.dir/build.make CMakeFiles/gaston.dir/src/app/DecisionProcedure/checkers/SymbolicChecker.cpp.s
 .PHONY : src/app/DecisionProcedure/checkers/SymbolicChecker.cpp.s
-
-src/app/DecisionProcedure/containers/StateSet.o: src/app/DecisionProcedure/containers/StateSet.cpp.o
-.PHONY : src/app/DecisionProcedure/containers/StateSet.o
-
-# target to build an object file
-src/app/DecisionProcedure/containers/StateSet.cpp.o:
-	$(MAKE) -f CMakeFiles/gaston.dir/build.make CMakeFiles/gaston.dir/src/app/DecisionProcedure/containers/StateSet.cpp.o
-.PHONY : src/app/DecisionProcedure/containers/StateSet.cpp.o
-
-src/app/DecisionProcedure/containers/StateSet.i: src/app/DecisionProcedure/containers/StateSet.cpp.i
-.PHONY : src/app/DecisionProcedure/containers/StateSet.i
-
-# target to preprocess a source file
-src/app/DecisionProcedure/containers/StateSet.cpp.i:
-	$(MAKE) -f CMakeFiles/gaston.dir/build.make CMakeFiles/gaston.dir/src/app/DecisionProcedure/containers/StateSet.cpp.i
-.PHONY : src/app/DecisionProcedure/containers/StateSet.cpp.i
-
-src/app/DecisionProcedure/containers/StateSet.s: src/app/DecisionProcedure/containers/StateSet.cpp.s
-.PHONY : src/app/DecisionProcedure/containers/StateSet.s
-
-# target to generate assembly for a file
-src/app/DecisionProcedure/containers/StateSet.cpp.s:
-	$(MAKE) -f CMakeFiles/gaston.dir/build.make CMakeFiles/gaston.dir/src/app/DecisionProcedure/containers/StateSet.cpp.s
-.PHONY : src/app/DecisionProcedure/containers/StateSet.cpp.s
 
 src/app/DecisionProcedure/containers/SymbolicAutomata.o: src/app/DecisionProcedure/containers/SymbolicAutomata.cpp.o
 .PHONY : src/app/DecisionProcedure/containers/SymbolicAutomata.o
@@ -329,30 +281,6 @@ src/app/DecisionProcedure/containers/Workshops.s: src/app/DecisionProcedure/cont
 src/app/DecisionProcedure/containers/Workshops.cpp.s:
 	$(MAKE) -f CMakeFiles/gaston.dir/build.make CMakeFiles/gaston.dir/src/app/DecisionProcedure/containers/Workshops.cpp.s
 .PHONY : src/app/DecisionProcedure/containers/Workshops.cpp.s
-
-src/app/DecisionProcedure/decision_procedures.o: src/app/DecisionProcedure/decision_procedures.cpp.o
-.PHONY : src/app/DecisionProcedure/decision_procedures.o
-
-# target to build an object file
-src/app/DecisionProcedure/decision_procedures.cpp.o:
-	$(MAKE) -f CMakeFiles/gaston.dir/build.make CMakeFiles/gaston.dir/src/app/DecisionProcedure/decision_procedures.cpp.o
-.PHONY : src/app/DecisionProcedure/decision_procedures.cpp.o
-
-src/app/DecisionProcedure/decision_procedures.i: src/app/DecisionProcedure/decision_procedures.cpp.i
-.PHONY : src/app/DecisionProcedure/decision_procedures.i
-
-# target to preprocess a source file
-src/app/DecisionProcedure/decision_procedures.cpp.i:
-	$(MAKE) -f CMakeFiles/gaston.dir/build.make CMakeFiles/gaston.dir/src/app/DecisionProcedure/decision_procedures.cpp.i
-.PHONY : src/app/DecisionProcedure/decision_procedures.cpp.i
-
-src/app/DecisionProcedure/decision_procedures.s: src/app/DecisionProcedure/decision_procedures.cpp.s
-.PHONY : src/app/DecisionProcedure/decision_procedures.s
-
-# target to generate assembly for a file
-src/app/DecisionProcedure/decision_procedures.cpp.s:
-	$(MAKE) -f CMakeFiles/gaston.dir/build.make CMakeFiles/gaston.dir/src/app/DecisionProcedure/decision_procedures.cpp.s
-.PHONY : src/app/DecisionProcedure/decision_procedures.cpp.s
 
 src/app/DecisionProcedure/formula_existential_form_conversion.o: src/app/DecisionProcedure/formula_existential_form_conversion.cpp.o
 .PHONY : src/app/DecisionProcedure/formula_existential_form_conversion.o
@@ -473,30 +401,6 @@ src/app/DecisionProcedure/formula_to_symbolic_automaton.s: src/app/DecisionProce
 src/app/DecisionProcedure/formula_to_symbolic_automaton.cpp.s:
 	$(MAKE) -f CMakeFiles/gaston.dir/build.make CMakeFiles/gaston.dir/src/app/DecisionProcedure/formula_to_symbolic_automaton.cpp.s
 .PHONY : src/app/DecisionProcedure/formula_to_symbolic_automaton.cpp.s
-
-src/app/DecisionProcedure/symbolic_decision_procedure.o: src/app/DecisionProcedure/symbolic_decision_procedure.cpp.o
-.PHONY : src/app/DecisionProcedure/symbolic_decision_procedure.o
-
-# target to build an object file
-src/app/DecisionProcedure/symbolic_decision_procedure.cpp.o:
-	$(MAKE) -f CMakeFiles/gaston.dir/build.make CMakeFiles/gaston.dir/src/app/DecisionProcedure/symbolic_decision_procedure.cpp.o
-.PHONY : src/app/DecisionProcedure/symbolic_decision_procedure.cpp.o
-
-src/app/DecisionProcedure/symbolic_decision_procedure.i: src/app/DecisionProcedure/symbolic_decision_procedure.cpp.i
-.PHONY : src/app/DecisionProcedure/symbolic_decision_procedure.i
-
-# target to preprocess a source file
-src/app/DecisionProcedure/symbolic_decision_procedure.cpp.i:
-	$(MAKE) -f CMakeFiles/gaston.dir/build.make CMakeFiles/gaston.dir/src/app/DecisionProcedure/symbolic_decision_procedure.cpp.i
-.PHONY : src/app/DecisionProcedure/symbolic_decision_procedure.cpp.i
-
-src/app/DecisionProcedure/symbolic_decision_procedure.s: src/app/DecisionProcedure/symbolic_decision_procedure.cpp.s
-.PHONY : src/app/DecisionProcedure/symbolic_decision_procedure.s
-
-# target to generate assembly for a file
-src/app/DecisionProcedure/symbolic_decision_procedure.cpp.s:
-	$(MAKE) -f CMakeFiles/gaston.dir/build.make CMakeFiles/gaston.dir/src/app/DecisionProcedure/symbolic_decision_procedure.cpp.s
-.PHONY : src/app/DecisionProcedure/symbolic_decision_procedure.cpp.s
 
 src/app/DecisionProcedure/utils/Symbol.o: src/app/DecisionProcedure/utils/Symbol.cpp.o
 .PHONY : src/app/DecisionProcedure/utils/Symbol.o
@@ -1590,18 +1494,12 @@ help:
 	@echo "... src/app/DecisionProcedure/automata.o"
 	@echo "... src/app/DecisionProcedure/automata.i"
 	@echo "... src/app/DecisionProcedure/automata.s"
-	@echo "... src/app/DecisionProcedure/backward_decision_procedure.o"
-	@echo "... src/app/DecisionProcedure/backward_decision_procedure.i"
-	@echo "... src/app/DecisionProcedure/backward_decision_procedure.s"
 	@echo "... src/app/DecisionProcedure/checkers/Checker.o"
 	@echo "... src/app/DecisionProcedure/checkers/Checker.i"
 	@echo "... src/app/DecisionProcedure/checkers/Checker.s"
 	@echo "... src/app/DecisionProcedure/checkers/SymbolicChecker.o"
 	@echo "... src/app/DecisionProcedure/checkers/SymbolicChecker.i"
 	@echo "... src/app/DecisionProcedure/checkers/SymbolicChecker.s"
-	@echo "... src/app/DecisionProcedure/containers/StateSet.o"
-	@echo "... src/app/DecisionProcedure/containers/StateSet.i"
-	@echo "... src/app/DecisionProcedure/containers/StateSet.s"
 	@echo "... src/app/DecisionProcedure/containers/SymbolicAutomata.o"
 	@echo "... src/app/DecisionProcedure/containers/SymbolicAutomata.i"
 	@echo "... src/app/DecisionProcedure/containers/SymbolicAutomata.s"
@@ -1614,9 +1512,6 @@ help:
 	@echo "... src/app/DecisionProcedure/containers/Workshops.o"
 	@echo "... src/app/DecisionProcedure/containers/Workshops.i"
 	@echo "... src/app/DecisionProcedure/containers/Workshops.s"
-	@echo "... src/app/DecisionProcedure/decision_procedures.o"
-	@echo "... src/app/DecisionProcedure/decision_procedures.i"
-	@echo "... src/app/DecisionProcedure/decision_procedures.s"
 	@echo "... src/app/DecisionProcedure/formula_existential_form_conversion.o"
 	@echo "... src/app/DecisionProcedure/formula_existential_form_conversion.i"
 	@echo "... src/app/DecisionProcedure/formula_existential_form_conversion.s"
@@ -1632,9 +1527,6 @@ help:
 	@echo "... src/app/DecisionProcedure/formula_to_symbolic_automaton.o"
 	@echo "... src/app/DecisionProcedure/formula_to_symbolic_automaton.i"
 	@echo "... src/app/DecisionProcedure/formula_to_symbolic_automaton.s"
-	@echo "... src/app/DecisionProcedure/symbolic_decision_procedure.o"
-	@echo "... src/app/DecisionProcedure/symbolic_decision_procedure.i"
-	@echo "... src/app/DecisionProcedure/symbolic_decision_procedure.s"
 	@echo "... src/app/DecisionProcedure/utils/Symbol.o"
 	@echo "... src/app/DecisionProcedure/utils/Symbol.i"
 	@echo "... src/app/DecisionProcedure/utils/Symbol.s"

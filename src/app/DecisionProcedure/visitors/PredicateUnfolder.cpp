@@ -3,7 +3,6 @@
 //
 
 #include "PredicateUnfolder.h"
-#include "../decision_procedures.hh"
 
 extern SymbolTable symbolTable;
 extern PredicateLib predicateLib;

@@ -53,9 +53,7 @@
 
 // < dWiNA Headers >
 #include <DecisionProcedure/environment.hh>
-#include <DecisionProcedure/decision_procedures.hh>
 #include <DecisionProcedure/containers/VarToTrackMap.hh>
-#include "DecisionProcedure/containers/Cache.hh"
 #include "DecisionProcedure/containers/SymbolicAutomata.h"
 #include "DecisionProcedure/containers/Term.h"
 #include "DecisionProcedure/checkers/SymbolicChecker.h"

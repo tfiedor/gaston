@@ -27,7 +27,6 @@
  *        4) TermList - with caching ?
  *          vector<Term*> -> TermList*
  *        5) TermFixpoint - no caching ?
- *        TODO: how this should be handled?
  *      Note: Workshop additionaly generates unique Empty symbol (but is it needed)
  *      Note#2: Workshops should be created on the node level, so we do not have
  *      one global workshop, but lots of smaller workshops with lesser items. While
@@ -60,7 +59,6 @@ namespace Workshops {
     struct ComputationHash;
     struct ComputationCompare;
 
-    // TODO: Maybe I forgot to take measure of the complement?
     using SymbolList        = Gaston::SymbolList;
     using Symbol            = Gaston::Symbol;
     using VarType           = Gaston::VarType;

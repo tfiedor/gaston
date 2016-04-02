@@ -25,7 +25,6 @@
 #include <vata/util/binary_relation.hh>
 
 #include "automata.hh"
-#include "decision_procedures.hh"
 #include "environment.hh"
 #include "../Frontend/timer.h"
 

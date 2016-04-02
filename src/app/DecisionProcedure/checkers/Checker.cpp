@@ -138,6 +138,7 @@ template<class ZeroOrderQuantifier, class FirstOrderQuantifier, class SecondOrde
 ASTForm* Checker::_ClosePrefix(IdentList* freeVars, ASTForm* formula) {
     IdentList zeroOrders, firstOrders, secondOrders;
     for(auto it = freeVars->begin(); it != freeVars->end(); ++it) {
+        // AllPos var is skipped
         if(*it == allPosVar)
             continue;
         // Distribute the first order and second order variables
@@ -231,7 +232,7 @@ void Checker::CloseUngroundFormula() {
         if(restr == nullptr) {
             assert(false);
         } else {
-            this->_monaAST->formula = new ASTForm_And(restr->clone(), this->_monaAST->formula, Pos());
+            //this->_monaAST->formula = new ASTForm_And(restr->clone(), this->_monaAST->formula, Pos());
         }
     }
 }

@@ -118,12 +118,12 @@ public:
     #endif
 
     // <<< DUMPING FUNCTIONS >>>
-    virtual void dump();
+    virtual void dump(unsigned indent = 0);
 protected:
     // <<< PRIVATE FUNCTIONS >>>
     virtual unsigned int _MeasureStateSpaceCore() = 0;
     virtual SubsumptionResult _IsSubsumedCore(Term* t, bool b = false) = 0;
-    virtual void _dumpCore() = 0;
+    virtual void _dumpCore(unsigned indent = 0) = 0;
     virtual bool _eqCore(const Term&) = 0;
 
     friend size_t hash_value(Term* s);
@@ -148,7 +148,7 @@ public:
 
     // <<< DUMPING FUNCTIONS >>>
 private:
-    void _dumpCore();
+    void _dumpCore(unsigned indent = 0);
     bool _eqCore(const Term&);
 
     // <<< PRIVATE FUNCTIONS >>>
@@ -180,7 +180,7 @@ public:
 
     // <<< DUMPING FUNCTIONS >>>
 private:
-    void _dumpCore();
+    void _dumpCore(unsigned indent = 0);
     bool _eqCore(const Term&);
 
 private:
@@ -210,7 +210,7 @@ public:
 
     // <<< DUMPING FUNCTIONS >>>
 private:
-    void _dumpCore();
+    void _dumpCore(unsigned indent = 0);
     bool _eqCore(const Term&);
 
 private:
@@ -251,7 +251,7 @@ public:
 
 protected:
     // <<< DUMPING FUNCTIONS >>>
-    void _dumpCore();
+    void _dumpCore(unsigned indent = 0);
 
     // <<< PRIVATE FUNCTIONS >>>
     unsigned int _MeasureStateSpaceCore();
@@ -279,7 +279,7 @@ public:
 
     // <<< DUMPING FUNCTIONS >>>
 private:
-    void _dumpCore();
+    void _dumpCore(unsigned indent = 0);
 
 private:
     // <<< PRIVATE FUNCTIONS >>>
@@ -372,7 +372,6 @@ public:
                             return this->GetNext();
                         } else {
                             // we are complete?
-                            // TODO: Add taking things from postponed
                             if(_termFixpoint._postponed.empty()) {
                                 return this->_Invalidate();
                             } else {
@@ -453,7 +452,7 @@ public:
 
     // <<< DUMPING FUNCTIONS >>>
 protected:
-    void _dumpCore();
+    void _dumpCore(unsigned indent = 0);
 
 protected:
     // <<< PRIVATE FUNCTIONS >>>

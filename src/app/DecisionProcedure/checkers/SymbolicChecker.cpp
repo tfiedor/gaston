@@ -5,11 +5,12 @@
 #include "SymbolicChecker.h"
 #include "../containers/Term.h"
 #include "../../Frontend/timer.h"
-#include "../../DecisionProcedure/decision_procedures.hh"
+#include "../../Frontend/env.h"
 #include "../environment.hh"
 
 extern Timer timer_conversion, timer_mona, timer_base, timer_automaton;
 extern Ident lastPosVar, allPosVar;
+extern Options options;
 
 SymbolicChecker::~SymbolicChecker() {
 
@@ -24,28 +25,34 @@ void SymbolicChecker::ConstructAutomaton() {
     // M2L-str()
     if(allPosVar != -1) {
         std::cout << "[*] AllPosVar predicate detected\n";
+    }
+
+    IdentList free, bound;
+    this->_monaAST->formula->freeVars(&free, &bound);
+#   if (DEBUG_M2L_AS_GROUND == true)
+    if(allPosVar != -1 && free.size() == 1) {
+        this->_isGround = true;
 
         DFA* dfa = dfaAllPos(varMap[allPosVar]);
         assert(dfa != nullptr);
         ASTForm_AllPosVar* allPosFormula = new ASTForm_AllPosVar(Pos());
         SymbolicAutomaton* allPosAutomaton = new GenericBaseAutomaton(dfa, varMap.TrackLength(), allPosFormula, false);
-        this->_automaton = new IntersectionAutomaton(allPosAutomaton, this->_automaton, this->_monaAST->formula);
-        /*ASTForm_Not* negatedFormula = new ASTForm_Not(allPosFormula, Pos());
+        //this->_automaton = new IntersectionAutomaton(allPosAutomaton, this->_automaton, this->_monaAST->formula);
+        ASTForm_Not* negatedFormula = new ASTForm_Not(allPosFormula, Pos());
         ASTForm_Or* finalFormula = new ASTForm_Or(negatedFormula, this->_monaAST->formula, Pos());
-        this->_automaton = new UnionAutomaton(new ComplementAutomaton(allPosAutomaton, negatedFormula), this->_automaton, finalFormula);*/
+        this->_automaton = new UnionAutomaton(new ComplementAutomaton(allPosAutomaton, negatedFormula), this->_automaton, finalFormula);
+    } else if( !free.empty()) {
+#   else
+    if (!free.empty()) {
+#   endif
+        // Fixme: This is WRONG
+        this->_monaAST->formula = new ASTForm_Ex1(nullptr, free.copy(), this->_monaAST->formula, Pos());
+        this->_automaton = new RootProjectionAutomaton(this->_automaton, this->_monaAST->formula);
     }
 
     if(options.printProgress)
         this->_automaton->DumpAutomaton();
     std::cout << "\n";
-
-    IdentList free, bound;
-    this->_monaAST->formula->freeVars(&free, &bound);
-    if(!free.empty()) {
-        // Fixme: This is WRONG
-        this->_monaAST->formula = new ASTForm_Ex1(nullptr, free.copy(), this->_monaAST->formula, Pos());
-        this->_automaton = new RootProjectionAutomaton(this->_automaton, this->_monaAST->formula);
-    }
 
     timer_automaton.stop();
     if (options.dump) {

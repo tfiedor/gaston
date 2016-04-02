@@ -24,7 +24,6 @@
 #include <sparsehash/sparse_hash_map>
 #include <unordered_map>
 #include <typeinfo>
-#include "StateSet.hh"
 #include "../environment.hh"
 
 #include <boost/functional/hash.hpp>

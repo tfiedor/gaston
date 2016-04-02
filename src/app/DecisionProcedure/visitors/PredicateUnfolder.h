@@ -12,6 +12,9 @@
 #include "../Frontend/symboltable.h"
 #include "../environment.hh"
 
+// < Symbolic decision procedure functions >
+ASTForm* _unfoldCore(ASTForm* form, IdentList* fParams, ASTList* rParams);
+
 class PredicateUnfolder : public TransformerVisitor {
 private:
     ASTForm* _unfoldFormula(PredLibEntry* called, ASTList* realParams);

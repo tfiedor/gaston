@@ -13,9 +13,9 @@
 #include "../Frontend/env.h"
 #include "../Frontend/predlib.h"
 #include "visitors/Flattener.h"
+#include "visitors/PredicateUnfolder.h"
 #include "environment.hh"
 #include <vector>
-#include "decision_procedures.hh"
 
 using std::cout;
 

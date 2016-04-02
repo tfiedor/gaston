@@ -17,7 +17,6 @@
 #include <stdint.h>
 #include "SymbolicAutomata.h"
 #include "Term.h"
-#include "../decision_procedures.hh"
 #include "../environment.hh"
 #include "../containers/VarToTrackMap.hh"
 #include "../containers/Workshops.h"
@@ -307,18 +306,30 @@ ResultType RootProjectionAutomaton::IntersectNonEmpty(Symbol* symbol, Term* fina
         }
 #       endif
 #       if (DEBUG_ROOT_AUTOMATON == true)
+        std::cout << "[!] Fixpoint = "; fixpoint->dump(); std::cout << "\n";
+        std::cout << "[!] Explored: ";
+        if(fixpointTerm != nullptr)
+            fixpointTerm->dump();
+        else
+            std::cout << "nullptr";
+        std::cout << " + ";
         if(fixpointTerm != nullptr && fixpointTerm->link.symbol != nullptr) {
-            std::cout << "[*] Explored pre with symbol: " << (*fixpointTerm->link.symbol);
+            std::cout << (*fixpointTerm->link.symbol);
         } else {
-            std::cout << "[*] Explored with epsilon: ";
-            if(fixpointTerm != nullptr)
-                fixpointTerm->dump();
+            std::cout << "''";
         }
         std::cout << "\n";
 #       endif
         ExamplePair examples = fixpoint->GetFixpointExamples();
 #       if (DEBUG_ROOT_AUTOMATON == true)
-        std::cout << "[*] <"; result.first->dump(); std::cout << ", " << (result.second ? "true" : "false") << ">\n";
+        std::cout << "[!] Satisfiable example: ";
+        if(examples.first != nullptr)
+            examples.first->dump();
+        std::cout << "\n";
+        std::cout << "[!] Unsatisfiable example: ";
+        if(examples.second != nullptr)
+            examples.second->dump();
+        std::cout << "\n";
 #       endif
         if(this->_satExample == nullptr && examples.first != nullptr) {
             std::cout << "[*] Found satisfying example\n";
@@ -440,7 +451,6 @@ void BaseAutomaton::_InitializeInitialStates() {
     // NOTE: The automaton is constructed backwards, so final states are initial
     assert(this->_initialStates == nullptr);
 
-    // TODO: Yeah this sucks, could be better, but it is called only once
     BaseAutomatonStateSet initialStates;
     initialStates.insert(this->_autWrapper.GetInitialState());
 
@@ -611,7 +621,7 @@ ResultType BinaryOpAutomaton::_IntersectNonEmptyCore(Symbol* symbol, Term* final
     // We can prune the state if right side was evaluated as Empty term
     // TODO: This is different for Unionmat!
 #   if (OPT_PRUNE_EMPTY == true)
-    if(rhs_result.first->type == TERM_EMPTY && !lhs_result.first->InComplement() && this->_productType == ProductType::E_INTERSECTION) {
+    if(rhs_result.first->type == TERM_EMPTY && !rhs_result.first->InComplement() && this->_productType == ProductType::E_INTERSECTION) {
         return std::make_pair(rhs_result.first, underComplement);
     }
 #   endif

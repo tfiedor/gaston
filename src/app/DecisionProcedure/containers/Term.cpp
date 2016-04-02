@@ -203,12 +203,14 @@ TermFixpoint::TermFixpoint(Aut_ptr aut, Term_ptr startingTerm, Symbol* symbol, b
     ++TermFixpoint::instances;
     #endif
 
+#   if (ALT_SKIP_EMPTY_UNIVERSE == false)
     // Initialize the (counter)examples
     if(initbValue) {
         this->_satTerm = startingTerm;
     } else {
         this->_unsatTerm = startingTerm;
     }
+#   endif
 
     // Initialize the aggregate function
     this->_InitializeAggregateFunction(inComplement);
@@ -499,7 +501,8 @@ SubsumptionResult TermFixpoint::_IsSubsumedCore(Term* t, bool unfoldAll) {
     for(auto it = this->_worklist.begin(); it != this->_worklist.end(); ++it) {
         bool found = false;
         for(auto tit = tt->_worklist.begin(); tit != tt->_worklist.end(); ++tit) {
-            if(*(it->first) == *(tit->first) && (it->second == tit->second)) {
+            //if(*(it->first) == *(tit->first) && (it->second == tit->second)) {
+            if((it->first)->IsSubsumed(tit->first, unfoldAll) && (it->second == tit->second)) {
                 found = true;
                 break;
             }
@@ -554,7 +557,6 @@ SubsumptionResult TermBaseSet::IsSubsumedBy(FixpointType& fixpoint, Term*& bigge
         return E_TRUE;
     }
     // For each item in fixpoint
-    // TODO: Maybe during this shit we could remove some of the things from fixpoint?
     for(auto& item : fixpoint) {
         // Nullptr is skipped
         if(item.first == nullptr || !item.second) continue;
@@ -759,38 +761,38 @@ namespace Gaston {
 
 }
 
-void Term::dump() {
+void Term::dump(unsigned indent) {
     #if (DEBUG_TERM_UNIQUENESS == true)
     std::cout << "[" << this << "]";
     #endif
     if(this->_inComplement) {
         std::cout << "\033[1;31m{\033[0m";
     }
-    this->_dumpCore();
+    this->_dumpCore(indent);
     if(this->_inComplement) {
         std::cout << "\033[1;31m}\033[0m";
     }
 }
 
-void TermEmpty::_dumpCore() {
+void TermEmpty::_dumpCore(unsigned indent) {
     std::cout << "\u2205";
 }
 
-void TermProduct::_dumpCore() {
+void TermProduct::_dumpCore(unsigned indent) {
     if(this->subtype == ProductType::E_INTERSECTION) {
         std::cout << "\033[1;32m";
     } else {
         std::cout << "\033[1;33m";
     }
     std::cout << "{\033[0m";
-    left->dump();
+    left->dump(indent);
     if(this->subtype == ProductType::E_INTERSECTION) {
         std::cout << "\033[1;32m \u2293 \033[0m";
     } else {
         //std::cout << " \u22C3 ";
         std::cout << "\033[1;33m \u2294 \033[0m";
     };
-    right->dump();
+    right->dump(indent);
     if(this->subtype == ProductType::E_INTERSECTION) {
         std::cout << "\033[1;32m";
     } else {
@@ -799,7 +801,7 @@ void TermProduct::_dumpCore() {
     std::cout << "}\033[0m";
 }
 
-void TermBaseSet::_dumpCore() {
+void TermBaseSet::_dumpCore(unsigned indent) {
     std::cout << "\033[1;35m{";
     for (auto state : this->states) {
         std::cout << (state) << ",";
@@ -807,10 +809,10 @@ void TermBaseSet::_dumpCore() {
     std::cout << "}\033[0m";
 }
 
-void TermContinuation::_dumpCore() {
+void TermContinuation::_dumpCore(unsigned indent) {
     if(this->_unfoldedTerm == nullptr) {
         std::cout << "?";
-        term->dump();
+        term->dump(indent);
         std::cout << "?";
         std::cout << "'";
         if (symbol != nullptr) {
@@ -820,28 +822,30 @@ void TermContinuation::_dumpCore() {
         std::cout << "?";
     } else {
         std::cout << "*";
-        this->_unfoldedTerm->dump();
+        this->_unfoldedTerm->dump(indent);
         std::cout << "*";
     }
 }
 
-void TermList::_dumpCore() {
+void TermList::_dumpCore(unsigned indent) {
     std::cout << "\033[1;36m{\033[0m";
     for(auto& state : this->list) {
-        state->dump();
+        state->dump(indent);
         std::cout  << ",";
     }
     std::cout << "\033[1;36m}\033[0m";
 }
 
-void TermFixpoint::_dumpCore() {
-    std::cout << "\033[1;34m{\033[0m";
+void TermFixpoint::_dumpCore(unsigned indent) {
+    std::cout << "\033[1;34m{\033[0m" << "\n";
     for(auto& item : this->_fixpoint) {
         if(item.first == nullptr || !(item.second)) {
             continue;
         }
-        item.first->dump();
+        std::cout << std::string(indent+2, ' ');
+        item.first->dump(indent + 2);
         std::cout << "\033[1;34m,\033[0m";
+        std::cout << "\n";
     }
 #   if (DEBUG_FIXPOINT_SYMBOLS == true)
     std::cout << "[";
@@ -853,10 +857,11 @@ void TermFixpoint::_dumpCore() {
 #   if (DEBUG_FIXPOINT_WORKLIST == true)
     std::cout << "\033[1;37m[";
     for(auto& workItem : this->_worklist) {
-        std::cout << (workItem.first) << " + " << (workItem.second) << ", ";
+        std::cout << (workItem.first) << " + " << (*workItem.second) << ", ";
     }
-    std::cout << "]\033[0m";
+    std::cout << "\033[1;37m]\033[0m";
 #   endif
+    std::cout << std::string(indent, ' ');
     std::cout << "\033[1;34m}\033[0m";
     if(this->_bValue) {
         std::cout << "\033[1;34m\u22A8\033[0m";
@@ -886,16 +891,16 @@ bool TermFixpoint::_processOnePostponed() {
     assert(!this->_postponed.empty());
 
     std::pair<Term_ptr, Term_ptr> postponedPair;
-    TermProduct* temp, *temp2;
 
     // Get the front of the postponed (must be TermProduct with continuation)
     #if (OPT_FIND_POSTPONED_CANDIDATE == true)
     bool found = false;
+    TermProduct* first_product, *second_product;
     // first is the postponed term, second is the thing from fixpoint!!!
     for(auto it = this->_postponed.begin(); it != this->_postponed.end(); ++it) {
-        temp = reinterpret_cast<TermProduct*>((*it).first);
-        temp2 = reinterpret_cast<TermProduct*>((*it).second);
-        if(!temp->right->IsNotComputed() && !temp2->right->IsNotComputed()) {
+        first_product = reinterpret_cast<TermProduct*>((*it).first);
+        second_product = reinterpret_cast<TermProduct*>((*it).second);
+        if(!first_product->right->IsNotComputed() && !second_product->right->IsNotComputed()) {
             // If left thing was not unfolded it means we don't need to compute more stuff
             postponedPair = (*it);
             it = this->_postponed.erase(it);
@@ -1079,8 +1084,8 @@ void TermFixpoint::_InitializeAggregateFunction(bool inComplement) {
  * @param[in] vars:         list of used vars, that are projected
  */
 void TermFixpoint::_InitializeSymbols(Workshops::SymbolWorkshop* workshop, Gaston::VarList* freeVars, IdentList* vars, Symbol *startingSymbol) {
-    // Fixme: Is this correct?
-    // this->_symList.push_back(workshop->CreateTrimmedSymbol(startingSymbol, freeVars));
+    // The input symbol is first trimmed, then if the AllPosition Variable exist, we generate only the trimmed stuff
+    // TODO: Maybe for Fixpoint Pre this should be done? But nevertheless this will happen at topmost
     Symbol* trimmed = workshop->CreateTrimmedSymbol(startingSymbol, freeVars);
     if (allPosVar != -1) {
         trimmed = workshop->CreateSymbol(trimmed, varMap[allPosVar], '1');
@@ -1093,6 +1098,8 @@ void TermFixpoint::_InitializeSymbols(Workshops::SymbolWorkshop* workshop, Gasto
 #   endif
     for(auto var = vars->begin(); var != vars->end(); ++var) {
         // Pop symbol;
+        if(*var == allPosVar)
+            continue;
         for(auto i = symNum; i != 0; --i) {
             Symbol* symF = this->_symList.front();
             this->_symList.pop_front();
@@ -1118,6 +1125,10 @@ bool TermFixpoint::GetResult() {
 }
 
 void TermFixpoint::_updateExamples(ResultType& result) {
+#   if (ALT_SKIP_EMPTY_UNIVERSE == true)
+    if(result.first->link.symbol == nullptr)
+        return;
+#   endif
     if(result.second) {
         if(this->_satTerm == nullptr) {
             this->_satTerm = result.first;
@@ -1417,8 +1428,6 @@ bool TermContinuation::_eqCore(const Term &t) {
 
 bool TermList::_eqCore(const Term &t) {
     assert(t.type == TERM_LIST && "Testing equality of different term types");
-
-    const TermList &tList = static_cast<const TermList&>(t);
     G_NOT_IMPLEMENTED_YET("TermList::_eqCore");
 }
 
