@@ -23,6 +23,23 @@ extern SymbolTable symbolTable;
 extern Options options;
 extern PredicateLib predicateLib;
 
+void update_restriction(unsigned int oldVar, unsigned int newVar, IdentList* ffParams, ASTList* rrParams) {
+	ASTForm *restriction = symbolTable.lookupRestriction(oldVar);
+	if (restriction != nullptr) {
+		restriction = restriction->clone()->unfoldMacro(ffParams, rrParams);
+		symbolTable.updateRestriction(newVar, restriction);
+	}
+}
+
+template<class Var, Var* (*Generator)(void)>
+size_t generate_variable(Ident* iter, IdentList* ffParams, ASTList* rrParams) {
+	Var* newVar = Generator();
+	ffParams->push_back(*iter);
+	rrParams->push_back(newVar);
+
+	update_restriction(*iter, newVar->n, ffParams, rrParams);
+	return newVar->n;
+}
 /**
  * Unfolds formal parameters to real parameters in called function
  *
@@ -182,33 +199,11 @@ ASTForm* ASTForm_uvf::unfoldMacro(IdentList* fParams, ASTList* rParams) {
 
 	for(Ident* iter = this->vl->begin(); iter != this->vl->end(); ++iter) {
 		assert(iter != nullptr);
-		if(this->kind == aAll1 | this->kind == aEx1) {
-			ASTTerm1_Var1* newVar = generateFreshFirstOrder();
-			ffParams->push_back(*iter);
-			rrParams->push_back(newVar);
-
-			// Insert restrictions
-			ASTForm* restriction = symbolTable.lookupRestriction(*iter);
-			if(restriction != nullptr) {
-				restriction = restriction->clone()->unfoldMacro(ffParams, rrParams);
-				symbolTable.updateRestriction(newVar->n, restriction);
-			}
-
-			*iter = newVar->n;
+		if(this->kind == aAll1 || this->kind == aEx1) {
+			*iter = generate_variable<ASTTerm1_Var1, generateFreshFirstOrder>(iter, ffParams, rrParams);
 		} else {
 			assert(this->kind != aAll0 && this->kind != aEx0);
-			ASTTerm2_Var2* newVar = generateFreshSecondOrder();
-			ffParams->push_back(*iter);
-			rrParams->push_back(newVar);
-
-			// Insert restrictions
-			ASTForm* restriction = symbolTable.lookupRestriction(*iter);
-			if(restriction != nullptr) {
-				restriction = restriction->clone()->unfoldMacro(ffParams, rrParams);
-				symbolTable.updateRestriction(newVar->n, restriction);
-			}
-
-			*iter = newVar->n;
+			*iter = generate_variable<ASTTerm2_Var2, generateFreshSecondOrder>(iter, ffParams, rrParams);
 		}
 	}
 
@@ -238,45 +233,13 @@ ASTForm* ASTForm_vf::unfoldMacro(IdentList* fParams, ASTList* rParams) {
 	ASTList *rrParams = (ASTList*) rParams->copy();
 
 	for(Ident* iter = this->vl->begin(); iter != this->vl->end(); ++iter) {
-		if (this->kind == aAll0 | this->kind == aEx0) {
-			ASTForm_Var0* newVar = generateFreshZeroOrder();
-			ffParams->push_back(*iter);
-			rrParams->push_back(newVar);
-
-			// Insert restrictions
-			ASTForm* restriction = symbolTable.lookupRestriction(*iter);
-			if(restriction != nullptr) {
-				restriction = restriction->clone()->unfoldMacro(ffParams, rrParams);
-				symbolTable.updateRestriction(newVar->GetVar(), restriction);
-			}
-
-			*iter = newVar->GetVar();
-		} else if(this->kind == aAll1 | this->kind == aEx1) {
-			ASTTerm1_Var1* newVar = generateFreshFirstOrder();
-			ffParams->push_back(*iter);
-			rrParams->push_back(newVar);
-
-			// Insert restrictions
-			ASTForm* restriction = symbolTable.lookupRestriction(*iter);
-			if(restriction != nullptr) {
-				restriction = restriction->clone()->unfoldMacro(ffParams, rrParams);
-				symbolTable.updateRestriction(newVar->n, restriction);
-			}
-
-			*iter = newVar->n;
+		if (this->kind == aAll0 || this->kind == aEx0) {
+			*iter = generate_variable<ASTForm_Var0, generateFreshZeroOrder>(iter, ffParams, rrParams);
+		} else if(this->kind == aAll1 || this->kind == aEx1) {
+			*iter = generate_variable<ASTTerm1_Var1, generateFreshFirstOrder>(iter, ffParams, rrParams);
 		} else {
-			ASTTerm2_Var2* newVar = generateFreshSecondOrder();
-			ffParams->push_back(*iter);
-			rrParams->push_back(newVar);
-
-			// Insert restrictions
-			ASTForm* restriction = symbolTable.lookupRestriction(*iter);
-			if(restriction != nullptr) {
-				restriction = restriction->clone()->unfoldMacro(ffParams, rrParams);
-				symbolTable.updateRestriction(newVar->n, restriction);
-			}
-
-			*iter = newVar->n;
+			assert(this->kind == aAll2 || this->kind == aEx2);
+			*iter = generate_variable<ASTTerm2_Var2, generateFreshSecondOrder>(iter, ffParams, rrParams);
 		}
 	}
 

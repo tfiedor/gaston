@@ -886,7 +886,6 @@ public:
   ASTForm* unfoldMacro(IdentList*, ASTList*);
 	int GetVar() { return n;}
 
-protected:
   int n;
 };
 
