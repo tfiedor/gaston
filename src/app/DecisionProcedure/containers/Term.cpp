@@ -317,12 +317,6 @@ bool Term::IsNotComputed() {
  * @return:         true if this is subsumed by @p t
  */
 SubsumptionResult Term::IsSubsumed(Term *t, bool unfoldAll) {
-    #if (DEBUG_TERM_SUBSUMPTION == true)
-    this->dump();
-    std::cout << " <?= ";
-    t->dump();
-    std::cout << "\n";
-    #endif
     // unfold the continuation
     if(this == t) {
         return E_TRUE;
@@ -349,17 +343,13 @@ SubsumptionResult Term::IsSubsumed(Term *t, bool unfoldAll) {
     if(this->type != TERM_FIXPOINT || !this->_isSubsumedCache.retrieveFromCache(t, result)) {
     #endif
         if (this->_inComplement) {
-            if (this->type == TERM_EMPTY) {
-                result = (t->type == TERM_EMPTY) ? E_TRUE : E_FALSE;
+            if(this->type == TERM_EMPTY) {
+                result = (t->type == TERM_EMPTY ? E_TRUE : E_FALSE);
             } else {
                 result = t->_IsSubsumedCore(this, unfoldAll);
             }
         } else {
-            if (t->type == TERM_EMPTY) {
-                result = (this->type == TERM_EMPTY) ? E_TRUE : E_FALSE;
-            } else {
-                result = this->_IsSubsumedCore(t, unfoldAll);
-            }
+            result = this->_IsSubsumedCore(t, unfoldAll);
         }
     #if (OPT_CACHE_SUBSUMES == true)
         if(result != E_PARTIALLY && this->type == TERM_FIXPOINT)
@@ -367,12 +357,18 @@ SubsumptionResult Term::IsSubsumed(Term *t, bool unfoldAll) {
     }
     #endif
     assert(!unfoldAll || result != E_PARTIALLY);
+#   if (DEBUG_TERM_SUBSUMPTION == true)
+    this->dump();
+    std::cout << " <?= ";
+    t->dump();
+    std::cout << " = " << (result == E_TRUE ? "true" : "false") << "\n";
+#   endif
     return result;
 }
 
 SubsumptionResult TermEmpty::_IsSubsumedCore(Term *t, bool unfoldAll) {
     // Empty term is subsumed by everything (probably)
-    return E_TRUE;
+    return (this->_inComplement) ? (t->type == TERM_EMPTY ? E_TRUE : E_FALSE) : E_TRUE;
 }
 
 SubsumptionResult TermProduct::_IsSubsumedCore(Term* t, bool unfoldAll) {
@@ -523,7 +519,8 @@ SubsumptionResult TermFixpoint::_IsSubsumedCore(Term* t, bool unfoldAll) {
  */
 SubsumptionResult TermEmpty::IsSubsumedBy(FixpointType& fixpoint, Term*& biggerTerm) {
     // Empty term is subsumed by everything
-    return ( (fixpoint.size() == 1 && fixpoint.front().first == nullptr) ? E_FALSE : E_TRUE);
+    // Fixme: Complemented fixpoint should subsume everything right?
+    return ( ( (fixpoint.size() == 1 && fixpoint.front().first == nullptr) || this->_inComplement) ? E_FALSE : E_TRUE);
 }
 
 SubsumptionResult TermProduct::IsSubsumedBy(FixpointType& fixpoint, Term*& biggerTerm) {
@@ -601,8 +598,8 @@ SubsumptionResult TermFixpoint::IsSubsumedBy(FixpointType& fixpoint, Term*& bigg
     std::cout << " <?= ";
     std::cout << "{";
     for(auto& item : fixpoint) {
-        if(item == nullptr) continue;
-        item->dump();
+        if(item.first == nullptr || !item.second) continue;
+        item.first->dump();
         std::cout << ",";
     }
     std::cout << "}";
@@ -611,7 +608,7 @@ SubsumptionResult TermFixpoint::IsSubsumedBy(FixpointType& fixpoint, Term*& bigg
 
     // Component-wise comparison
     for(auto& item : fixpoint) {
-        if(item.first == nullptr) continue;
+        if(item.first == nullptr || !item.second) continue;
         if (this->IsSubsumed(item.first)) {
             return E_TRUE ;
         }
@@ -857,7 +854,7 @@ void TermFixpoint::_dumpCore(unsigned indent) {
 #   if (DEBUG_FIXPOINT_WORKLIST == true)
     std::cout << "\033[1;37m[";
     for(auto& workItem : this->_worklist) {
-        std::cout << (workItem.first) << " + " << (*workItem.second) << ", ";
+        std::cout << (*workItem.first) << " + " << (*workItem.second) << ", ";
     }
     std::cout << "\033[1;37m]\033[0m";
 #   endif

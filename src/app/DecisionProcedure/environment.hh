@@ -188,12 +188,12 @@ public:
 #define DEBUG_ROOT_AUTOMATON		    false
 #define DEBUG_AUTOMATA_ADDRESSES		false
 #define DEBUG_EXAMPLE_PATHS				false
-#define DEBUG_BASE_AUTOMATA 			false
+#define DEBUG_BASE_AUTOMATA 			true
 #define DEBUG_FIXPOINT 				    false
 #define DEBUG_FIXPOINT_SYMBOLS		    false
 #define DEBUG_FIXPOINT_WORKLIST			false
 #define DEBUG_INITIAL_APPROX 			false
-#define DEBUG_INTERSECT_NON_EMPTY 		false
+#define DEBUG_INTERSECT_NON_EMPTY 	    false
 #define DEBUG_TERM_UNIQUENESS			false
 #define DEBUG_TERM_CREATION				false
 #define DEBUG_SYMBOL_CREATION			true
@@ -275,8 +275,8 @@ public:
 #define OPT_USE_CUSTOM_PTR_HASH			false	// < Will use the custom implementation of hash function instead of boost::hash
 #define OPT_TERM_HASH_BY_APPROX			true	// < Include stateSpaceApprox into hash (i.e. better distribution of cache)
 #define OPT_ANTIPRENEXING				true	// < Transform formula to anti-prenex form (i.e. all of the quantifiers are deepest on leaves)
-#define OPT_DRAW_NEGATION_IN_BASE 		true	// < Negation is handled on formula level and not on computation level on base automata
-#define OPT_CREATE_QF_AUTOMATON 		true	// < Transform quantifier-free automaton to formula
+#define OPT_DRAW_NEGATION_IN_BASE 		true    // < Negation is handled on formula level and not on computation level on base automata
+#define OPT_CREATE_QF_AUTOMATON 		true    // < Transform quantifier-free automaton to formula
 #define OPT_REDUCE_AUT_EVERYTIME		false	// < Call reduce everytime VATA automaton is created (i.e. as intermediate result)
 #define OPT_REDUCE_AUT_LAST				true	// < Call reduce after the final VATA automaton is created
 #define OPT_EARLY_EVALUATION 			false   // < Evaluates early interesection of products

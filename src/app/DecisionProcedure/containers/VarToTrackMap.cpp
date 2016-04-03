@@ -16,6 +16,7 @@
 
 extern SymbolTable symbolTable;
 extern Offsets offsets;
+extern Ident allPosVar;
 
 /**
  * Private Methods
@@ -34,15 +35,32 @@ void VarToTrackMap::addIdentifiers(IdentList* identifiers) {
 	Ident formal;
 	ASTForm* restriction = nullptr;
 	for (int i = 0; i < identSize; ++i) {
+		// Fixme: there should be some shit with restrictions
 		uint val = identifiers->pop_front();
 		if(symbolTable.lookupType(val) == MonaTypeTag::Varname1) {
 			restriction = symbolTable.getDefault1Restriction(&formal);
-		} else {
+		} else if (symbolTable.lookupType(val) == MonaTypeTag::Varname2) {
 			restriction = symbolTable.getDefault2Restriction(&formal);
+		} else {
+			restriction = nullptr;
 		}
 
+		// Fixme: Refactor this later
 		if(restriction != nullptr && formal == val) {
 			continue;
+		} else if(allPosVar != -1)  {
+			restriction = symbolTable.getRestriction(allPosVar, &formal);
+			IdentList free, bound;
+			restriction->freeVars(&free, &bound);
+			bool skip = false;
+			for(auto it = bound.begin(); it != bound.end(); ++it) {
+				if(*it == val) {
+					skip = true;
+					break;
+				}
+			}
+			if(skip)
+				continue;
 		}
 
 		(this->vttMap)[val] = idx;
