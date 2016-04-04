@@ -242,7 +242,7 @@ void ASTForm_Equal2::toUnaryAutomaton(Automaton &aut, bool doComplement) {
 		setNonFinalState(aut, doComplement, 1);
 
 
-#if CONSTRUCT_ALWAYS_DTA
+#if ALT_ALWAYS_DETERMINISTIC
 		if(doComplement) {
 #endif
 			// q0 -(x1Xx)-> q2
@@ -255,7 +255,7 @@ void ASTForm_Equal2::toUnaryAutomaton(Automaton &aut, bool doComplement) {
 			addUniversalTransition(aut, 2, 2);
 
 			setNonFinalState(aut, doComplement, 2);
-#if CONSTRUCT_ALWAYS_DTA
+#if ALT_ALWAYS_DETERMINISTIC
 		}
 #endif
 
@@ -278,7 +278,7 @@ void ASTForm_Equal2::toUnaryAutomaton(Automaton &aut, bool doComplement) {
 		// set q0 final
 		setFinalState(aut, doComplement, 0);
 
-#if CONSTRUCT_ALWAYS_DTA
+#if ALT_ALWAYS_DETERMINISTIC
 		if(doComplement) {
 #endif
 			// q0 -(x01x)-> q1
@@ -291,7 +291,7 @@ void ASTForm_Equal2::toUnaryAutomaton(Automaton &aut, bool doComplement) {
 			addUniversalTransition(aut, 1, 1);
 
 			setNonFinalState(aut, doComplement, 1);
-#if CONSTRUCT_ALWAYS_DTA
+#if ALT_ALWAYS_DETERMINISTIC
 		}
 #endif
 	} else if(this->T2->kind == aSet) {
@@ -316,21 +316,21 @@ void ASTForm_Equal2::toUnaryAutomaton(Automaton &aut, bool doComplement) {
 			l.pop_front();
 			while(current != (front+1)) {
 				addTransition(aut, current, X, '0', current+1);
-#if CONSTRUCT_ALWAYS_DTA
+#if ALT_ALWAYS_DETERMINISTIC
 				if(doComplement) {
 #endif
 					addTransition(aut, current, X, '1', sink);
-#if CONSTRUCT_ALWAYS_DTA
+#if ALT_ALWAYS_DETERMINISTIC
 				}
 #endif
 				setNonFinalState(aut, doComplement, current++);
 			}
 			addTransition(aut, current, X, '1', current+1);
-#if CONSTRUCT_ALWAYS_DTA
+#if ALT_ALWAYS_DETERMINISTIC
 			if(doComplement) {
 #endif
 				addTransition(aut, current, X, '0', sink);
-#if CONSTRUCT_ALWAYS_DTA
+#if ALT_ALWAYS_DETERMINISTIC
 			}
 #endif
 			setNonFinalState(aut, doComplement, current++);
@@ -338,12 +338,12 @@ void ASTForm_Equal2::toUnaryAutomaton(Automaton &aut, bool doComplement) {
 
 		setFinalState(aut, doComplement, current);
 		addTransition(aut, current, X, '0', current);
-#if CONSTRUCT_ALWAYS_DTA
+#if ALT_ALWAYS_DETERMINISTIC
 		if(doComplement) {
 #endif
 			addTransition(aut, current, X, '1', sink);
 			setNonFinalState(aut, doComplement, sink);
-#if CONSTRUCT_ALWAYS_DTA
+#if ALT_ALWAYS_DETERMINISTIC
 		}
 #endif
 
@@ -363,7 +363,7 @@ void ASTForm_Equal2::toUnaryAutomaton(Automaton &aut, bool doComplement) {
 		setNonFinalState(aut, doComplement, 0);
 		setFinalState(aut, doComplement, 1);
 
-#if CONSTRUCT_ALWAYS_DTA
+#if ALT_ALWAYS_DETERMINISTIC
 		if(doComplement) {
 #endif
 			// q0 -(x0x)-> q2
@@ -376,7 +376,7 @@ void ASTForm_Equal2::toUnaryAutomaton(Automaton &aut, bool doComplement) {
 			addUniversalTransition(aut, 2, 2);
 
 			setNonFinalState(aut, doComplement, 2);
-#if CONSTRUCT_ALWAYS_DTA
+#if ALT_ALWAYS_DETERMINISTIC
 		}
 #endif
 	}
@@ -443,7 +443,7 @@ void ASTForm_FirstOrder::toUnaryAutomaton(Automaton &aut, bool doComplement) {
 	setNonFinalState(aut, doComplement, 0);
 	setFinalState(aut, doComplement, 1);
 
-#if CONSTRUCT_ALWAYS_DTA
+#if ALT_ALWAYS_DETERMINISTIC
 	if(doComplement) {
 #endif
 		// q1 -(x1x)-> q2
@@ -453,7 +453,7 @@ void ASTForm_FirstOrder::toUnaryAutomaton(Automaton &aut, bool doComplement) {
 		addUniversalTransition(aut, 2, 2);
 
 		setNonFinalState(aut, doComplement, 2);
-#if CONSTRUCT_ALWAYS_DTA
+#if ALT_ALWAYS_DETERMINISTIC
 	}
 #endif
 }
@@ -496,7 +496,7 @@ void ASTForm_LessEq::toUnaryAutomaton(Automaton &aut, bool doComplement) {
 	setNonFinalState(aut, doComplement, 1);
 	setFinalState(aut, doComplement, 2);
 
-#if CONSTRUCT_ALWAYS_DTA
+#if ALT_ALWAYS_DETERMINISTIC
 	if(doComplement){
 #endif
 		// q0 -(xX1x)-> q3
@@ -505,7 +505,7 @@ void ASTForm_LessEq::toUnaryAutomaton(Automaton &aut, bool doComplement) {
 		// q3 -(xxx)-> q3
 		addUniversalTransition(aut, 3, 3);
 		setNonFinalState(aut, doComplement, 3);
-#if CONSTRUCT_ALWAYS_DTA
+#if ALT_ALWAYS_DETERMINISTIC
 	}
 #endif
 
@@ -546,7 +546,7 @@ void ASTForm_Less::toUnaryAutomaton(Automaton &aut, bool doComplement) {
 	setNonFinalState(aut, doComplement, 1);
 	setFinalState(aut, doComplement, 2);
 
-#if CONSTRUCT_ALWAYS_DTA
+#if ALT_ALWAYS_DETERMINISTIC
 	if(doComplement){
 #endif
 		// q0 -(xX1x)-> q3
@@ -555,7 +555,7 @@ void ASTForm_Less::toUnaryAutomaton(Automaton &aut, bool doComplement) {
 		// q3 -(xxx)-> q3
 		addUniversalTransition(aut, 3, 3);
 		setNonFinalState(aut, doComplement, 3);
-#if CONSTRUCT_ALWAYS_DTA
+#if ALT_ALWAYS_DETERMINISTIC
 	}
 #endif
 }
@@ -670,7 +670,7 @@ void ASTForm_In::toUnaryAutomaton(Automaton &aut, bool doComplement) {
 			setNonFinalState(aut, doComplement, j++);
 		}
 
-#if CONSTRUCT_ALWAYS_DTA
+#if ALT_ALWAYS_DETERMINISTIC
 		//i -(x0x)-> i+2
 		if(doComplement) {
 			addTransition(aut, i, X, '0', i+2);
@@ -685,7 +685,7 @@ void ASTForm_In::toUnaryAutomaton(Automaton &aut, bool doComplement) {
 		//i+1 -(xxx)-> i+1
 		addUniversalTransition(aut, i+1, i+1);
 
-#if CONSTRUCT_ALWAYS_DTA
+#if ALT_ALWAYS_DETERMINISTIC
 		//i+2 -(xxx)-> i+2
 		if(doComplement) {
 			addUniversalTransition(aut, i+2, i+2);

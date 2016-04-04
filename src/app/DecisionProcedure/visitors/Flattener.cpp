@@ -112,7 +112,7 @@ AST* Flattener::visit(ASTForm_Equal1* form) {
         return (new ASTForm_Ex1(0, new IdentList(z), conjuction, form->pos))->accept(*this);
         // x = e ???
     } else if(form->t1->kind == aVar1 && form->t2->kind == aInt) {
-#if (SMART_FLATTEN == true)
+#if (OPT_SMARTER_FLATTENING == true)
 		// smart flattening will deal with form during construction of automaton
 		return form;
 #else
@@ -292,7 +292,7 @@ AST* Flattener::visit(ASTForm_Less* form) {
     assert(form->t2 != nullptr);
     return form;
 
-#if (SMART_FLATTEN == true)
+#if (OPT_SMARTER_FLATTENING == true)
     if (form->t1->kind != aVar1) {
         return substituteFreshLess(form->t1, form->t2, true, *this);
     } else if (form->t2->kind != aVar1) {
@@ -355,7 +355,7 @@ ASTForm* substituteFreshLessEq(ASTTerm1* leftTerm, ASTTerm1* rightTerm, bool sub
     } else if (form->t2->kind != aVar1) {
         return substituteFreshLessEq(form->t1, form->t2, false, *this);
     } else {
-#if (SMART_FLATTEN == true)
+#if (OPT_SMARTER_FLATTENING == true)
         return form;
 #else
 		ASTTerm2_Var2* X = Flattener::generateFreshSecondOrder();
@@ -439,7 +439,7 @@ AST* Flattener::visit(ASTForm_In* form) {
         conj = new ASTForm_And(static_cast<ASTForm*>(inSub->accept(*this)), static_cast<ASTForm*>(zSub->accept(*this)), form->pos);
         return new ASTForm_Ex2(0, new IdentList(Z->getVar()), conj, form->pos);
     } else if (form->t1->kind != aVar1) {
-#if (SMART_FLATTEN == true)
+#if (OPT_SMARTER_FLATTENING == true)
         if(form->t1->kind == aInt) {
             return form;
         } else {
@@ -449,7 +449,7 @@ AST* Flattener::visit(ASTForm_In* form) {
 		return substituteFreshIn(form->t1, form->T2, *this);
 #endif
     } else {
-#if (SMART_FLATTEN == true)
+#if (OPT_SMARTER_FLATTENING == true)
         return form;
 #else
 		ASTTerm2_Var2 *secondOrderX = new ASTTerm2_Var2(((ASTTerm1_Var1*)form->t1)->n, Pos());

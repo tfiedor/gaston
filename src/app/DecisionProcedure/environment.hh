@@ -144,35 +144,6 @@ public:
 #define G_DEBUG_FORMULA_AFTER_PHASE(str) std::cout << "\n\n[*] Formula after '" << str << "' phase:\n"
 #define G_NOT_IMPLEMENTED_YET(str) assert(false && "TODO: '" str "' Not Supported yet")
 
-/*********************************
- * OTHER METHODS RELATED DEFINES *
- *********************************/
-
-/* >>> Debugging Options <<< *
- *****************************/
-#define DEBUG_FORMULA_PREFIX 			false
-#define DEBUG_VALIDITY_TEST 			false
-#define DEBUG_GROUDNESS 				false
-#define DEBUG_FINAL_STATES 				false
-#define DEBUG_PRUNING_OF_FINAL_STATES 	false
-#define DEBUG_VARIABLE_SETS 			false
-#define DEBUG_BDDS 						true
-
-/* >>> Optimizations <<< *
- *************************/
-#define USE_PRUNED_UNION_FUNCTOR 		false
-#define PRUNE_BY_RELATION 				false		// [TODO] What's the difference with BY_SUBSUMPTION?
-#define PRUNE_BY_SUBSUMPTION 			false
-#define USE_STATECACHE 					false
-#define USE_BDDCACHE 					false 		// BDD Cache is temporary disable due to the memory leaks
-#define SMART_BINARY 					true
-#define SMART_FLATTEN 					true
-#define CONSTRUCT_ALWAYS_DTA 			true
-
-/***********************************
- * SYMBOLIC METHOD RELATED DEFINES *
- ***********************************/
-
 /* >>> Printing Options <<< *
  ****************************/
 #define PRINT_PRETTY					true
@@ -214,6 +185,7 @@ public:
 #define DEBUG_M2L_AS_GROUND				false
 
 #define ALT_SKIP_EMPTY_UNIVERSE			true // < Skip empty example
+#define ALT_ALWAYS_DETERMINISTIC	    true
 
 /*
  * >>> Automata stats options
@@ -291,6 +263,7 @@ public:
 #define OPT_CACHE_SUBSUMES				true	// < Cache the results of subsumption testing between terms
 #define OPT_CACHE_SUBSUMED_BY			true	// < Cache the results of term subsumption by fixpoints
 #define OPT_SMARTER_MONA_CONVERSION		false	// < Use faster conversion from MONA to VATA (courtesy of PJ)
+#define OPT_SMARTER_FLATTENING          true
 #define OPT_CREATE_TAGGED_AUTOMATA		false	// < Use tags to create a specific subformula to automaton
 #define OPT_EXTRACT_MORE_AUTOMATA		true	// < Calls detagger to heuristically convert some subformulae to automata
 #define OPT_UNIQUE_TRIMMED_SYMBOLS		true    // < Will guarantee that there will not be a collisions between symbols after trimming
