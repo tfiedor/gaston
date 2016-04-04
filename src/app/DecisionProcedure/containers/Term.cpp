@@ -15,6 +15,8 @@
 #include "Term.h"
 #include <boost/functional/hash.hpp>
 
+extern Ident allPosVar;
+
 namespace Gaston {
     size_t hash_value(Term* s) {
         #if (OPT_TERM_HASH_BY_APPROX == true)
@@ -227,11 +229,18 @@ TermFixpoint::TermFixpoint(Aut_ptr aut, Term_ptr startingTerm, Symbol* symbol, b
     this->_fixpoint.push_front(std::make_pair(startingTerm, true));
     this->_fixpoint.push_front(std::make_pair(nullptr, true));
 
+#   if (OPT_NO_SATURATION_FOR_M2L == true)
     // Push symbols to worklist
-    this->_InitializeSymbols(aut->symbolFactory, aut->GetFreeVars(), reinterpret_cast<ProjectionAutomaton*>(aut)->projectedVars, symbol);
-    for(auto symbol : this->_symList) {
-        this->_worklist.insert(this->_worklist.cbegin(), std::make_pair(startingTerm, symbol));
+    if (reinterpret_cast<ProjectionAutomaton*>(aut)->IsRoot() || allPosVar == -1) {
+#   endif
+        this->_InitializeSymbols(aut->symbolFactory, aut->GetFreeVars(),
+                                     reinterpret_cast<ProjectionAutomaton *>(aut)->projectedVars, symbol);
+            for (auto symbol : this->_symList) {
+                this->_worklist.insert(this->_worklist.cbegin(), std::make_pair(startingTerm, symbol));
+            }
+#   if (OPT_NO_SATURATION_FOR_M2L == true)
     }
+#   endif
 
     #if (DEBUG_TERM_CREATION == true)
     std::cout << "[" << this << "]";
@@ -349,7 +358,11 @@ SubsumptionResult Term::IsSubsumed(Term *t, bool unfoldAll) {
                 result = t->_IsSubsumedCore(this, unfoldAll);
             }
         } else {
-            result = this->_IsSubsumedCore(t, unfoldAll);
+            if(t->type == TERM_EMPTY) {
+                result = (this->type == TERM_EMPTY ? E_TRUE : E_FALSE);
+            } else {
+                result = this->_IsSubsumedCore(t, unfoldAll);
+            }
         }
     #if (OPT_CACHE_SUBSUMES == true)
         if(result != E_PARTIALLY && this->type == TERM_FIXPOINT)
@@ -493,7 +506,7 @@ SubsumptionResult TermFixpoint::_IsSubsumedCore(Term* t, bool unfoldAll) {
         if(!subsumes) return E_FALSE;
     }
 
-    #if (DEBUG_COMPARE_WORKLISTS == true)
+#   if (DEBUG_COMPARE_WORKLISTS == true)
     for(auto it = this->_worklist.begin(); it != this->_worklist.end(); ++it) {
         bool found = false;
         for(auto tit = tt->_worklist.begin(); tit != tt->_worklist.end(); ++tit) {
@@ -504,10 +517,14 @@ SubsumptionResult TermFixpoint::_IsSubsumedCore(Term* t, bool unfoldAll) {
             }
         }
         if(!found) {
+#           if (OPT_MERGE_SUBSUMED_WORKLISTS == true)
+            tt->_worklist.insert(tt->_worklist.begin(), *it);
+#           else
             return E_FALSE;
+#           endif
         }
     }
-    #endif
+#   endif
 
     return E_TRUE;
 }
@@ -852,11 +869,12 @@ void TermFixpoint::_dumpCore(unsigned indent) {
     std::cout << "]";
 #   endif
 #   if (DEBUG_FIXPOINT_WORKLIST == true)
+    std::cout << std::string(indent, ' ');
     std::cout << "\033[1;37m[";
     for(auto& workItem : this->_worklist) {
         std::cout << (*workItem.first) << " + " << (*workItem.second) << ", ";
     }
-    std::cout << "\033[1;37m]\033[0m";
+    std::cout << "\033[1;37m]\033[0m\n";
 #   endif
     std::cout << std::string(indent, ' ');
     std::cout << "\033[1;34m}\033[0m";

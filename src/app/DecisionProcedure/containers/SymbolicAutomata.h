@@ -209,6 +209,7 @@ public:
 protected:
     // <<< PRIVATE MEMBERS >>>
     SymbolicAutomaton* _aut;
+    bool _isRoot;
 
     // <<< PRIVATE FUNCTIONS >>>
     virtual void _InitializeAutomaton();
@@ -219,12 +220,13 @@ protected:
 
 public:
     /// <<< CONSTRUCTORS >>>
-    NEVER_INLINE ProjectionAutomaton(SymbolicAutomaton* aut, Formula_ptr form);
+    NEVER_INLINE ProjectionAutomaton(SymbolicAutomaton* aut, Formula_ptr form, bool isRoot = false);
     NEVER_INLINE virtual ~ProjectionAutomaton();
 
     // <<< PUBLIC API >>>
     virtual Term* Pre(Symbol*, Term*, bool);
     SymbolicAutomaton* GetBase() { return this->_aut;}
+    bool IsRoot() { return this-> _isRoot; }
 
     // <<< DUMPING FUNCTIONS >>>
     virtual void DumpAutomaton();

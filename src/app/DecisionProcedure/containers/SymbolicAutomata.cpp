@@ -77,9 +77,10 @@ ComplementAutomaton::~ComplementAutomaton() {
     delete this->_aut;
 }
 
-ProjectionAutomaton::ProjectionAutomaton(SymbolicAutomaton_raw aut, Formula_ptr form)
+ProjectionAutomaton::ProjectionAutomaton(SymbolicAutomaton_raw aut, Formula_ptr form, bool isRoot)
         : SymbolicAutomaton(form), _aut(aut) {
     type = AutType::PROJECTION;
+    this->_isRoot = isRoot;
     this->_InitializeAutomaton();
 }
 
@@ -88,7 +89,7 @@ ProjectionAutomaton::~ProjectionAutomaton() {
 }
 
 RootProjectionAutomaton::RootProjectionAutomaton(SymbolicAutomaton* aut, Formula_ptr form)
-        : ProjectionAutomaton(aut, form) {}
+        : ProjectionAutomaton(aut, form, true) {}
 
 BaseAutomaton::BaseAutomaton(BaseAutomatonType* aut, size_t vars, Formula_ptr form, bool emptyTracks) : SymbolicAutomaton(form), _autWrapper(dfaCopy(aut), emptyTracks, vars) {
     type = AutType::BASE;
@@ -163,18 +164,14 @@ ResultType SymbolicAutomaton::IntersectNonEmpty(Symbol* symbol, Term* stateAppro
     }
 
 #   if (DEBUG_INTERSECT_NON_EMPTY == true)
-    std::cout << "\nIntersectNonEm3pty(";
+    std::cout << "\nIntersectNonEmpty(";
     if(symbol != nullptr) {
         std::cout << (*symbol);
     } else {
         std::cout << "''";
     }
     std::cout << ",";
-    if(stateApproximation == nullptr) {
-        std::cout << "nullptr";
-    } else {
-        stateApproximation->dump();
-    }
+    stateApproximation->dump();
     std::cout << ", " << (underComplement ? "True" : "False");
     std::cout << ")\n";
 #   endif
@@ -309,7 +306,7 @@ ResultType RootProjectionAutomaton::IntersectNonEmpty(Symbol* symbol, Term* fina
         std::cout << "[!] Fixpoint = "; fixpoint->dump(); std::cout << "\n";
         std::cout << "[!] Explored: ";
         if(fixpointTerm != nullptr)
-            fixpointTerm->dump();
+            std::cout << fixpointTerm;
         else
             std::cout << "nullptr";
         std::cout << " + ";

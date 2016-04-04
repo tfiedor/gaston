@@ -59,7 +59,7 @@ enum ProductType {E_INTERSECTION, E_UNION};
 enum FixpointTermSem {E_FIXTERM_FIXPOINT, E_FIXTERM_PRE};
 enum ComparisonType {E_BY_SAME_PTR, E_BY_DIFFERENT_TYPE, E_BY_STRUCTURE};
 enum UnfoldedInType {E_IN_SUBSUMPTION, E_IN_ISECT_NONEMPTY, E_IN_COMPARISON, E_IN_NOWHERE};
-enum SubsumptionResult {E_FALSE, E_TRUE, E_PARTIALLY};
+enum SubsumptionResult {E_FALSE, E_TRUE, E_PARTIALLY, E_TRUE_BUT_WORKLIST};
 enum ExampleType {SATISFYING, UNSATISFYING};
 enum WorklistSearchType {E_BFS, E_DFS};
 
@@ -188,7 +188,7 @@ public:
 #define DEBUG_ROOT_AUTOMATON		    false
 #define DEBUG_AUTOMATA_ADDRESSES		false
 #define DEBUG_EXAMPLE_PATHS				false
-#define DEBUG_BASE_AUTOMATA 			true
+#define DEBUG_BASE_AUTOMATA 			false
 #define DEBUG_FIXPOINT 				    false
 #define DEBUG_FIXPOINT_SYMBOLS		    false
 #define DEBUG_FIXPOINT_WORKLIST			false
@@ -209,7 +209,7 @@ public:
 #define DEBUG_GENERATE_DOT_AUTOMATON	true
 #define DEBUG_COMPUTE_FULL_FIXPOINT 	false
 #define DEBUG_COMPARE_WORKLISTS		    true
-#define DEBUG_VARMAP					true
+#define DEBUG_VARMAP					false
 #define DEBUG_MAX_SEARCH_PATH			0
 #define DEBUG_M2L_AS_GROUND				false
 
@@ -297,5 +297,6 @@ public:
 #define OPT_FIXPOINT_BFS_SEARCH	        false   // < Will add new things to the back of the worklist in fixpoint
 #define OPT_USE_DENSE_HASHMAP			false	// < Will use the google::dense_hash_map as cache
 #define OPT_NO_SATURATION_FOR_M2L		true    // < Will not saturate the final states for M2L(str) logic
+#define OPT_MERGE_SUBSUMED_WORKLISTS	true	// < If the parts of the fixpoint are subsumed, but worklist aren't, merge them instead
 
 #endif
