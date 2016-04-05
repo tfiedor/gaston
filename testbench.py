@@ -18,9 +18,9 @@ from termcolor import colored
 from collections import namedtuple
 
 dwina_error = (-1, -1, -1, -1, -1, -1, -1)
-timeout_error = (-2, -2, -2, -2, -2, -2, -2)
-mona_error = (-1, -1)
-mona_expnf_error = (-1, -1, -1)
+unknown_error = -3
+timeout_error = -2
+mona_error = -1                     # BDD Too Large for MONA
 
 Measure = namedtuple('Measure', 'regex default post_process')
 time_default = "00:00:00"
@@ -43,21 +43,26 @@ def identity(line):
 
 measures = {
     'gaston': {
+            'symbols': Measure("symbols" + whatever_regex + space_regex, space_default, int),
             'time': Measure("total elapsed time" + whatever_regex + time_regex, time_default, parse_total_time),
-            'space': Measure("overall state space" + whatever_regex + space_regex, space_default, int),
-            'space-all': Measure("explored fixpoint space" + whatever_regex + space_regex, space_default, int),
+            'space': Measure("explored fixpoint space" + whatever_regex + space_regex, space_default, int),
+            'space-all': Measure("overall state space" + whatever_regex + space_regex, space_default, int),
+            'space-fix': Measure("fixpoints" + whatever_regex + space_regex, space_default, int),
+            'space-bases': Measure("bases" + whatever_regex + space_regex, space_default, int),
+            'space-continuations': Measure("continuations" + whatever_regex + space_regex, space_default, int),
+            'space-products': Measure("products" + whatever_regex + space_regex, space_default, int),
             'time-dp': Measure("decision procedure" + whatever_regex + time_regex, time_default, parse_total_time),
             'time-base': Measure("dfa creation" + whatever_regex + time_regex, time_default, parse_total_time),
             'time-conv': Measure("mona <-> vata" + whatever_regex + time_regex, time_default, parse_total_time),
         },
     'mona': {
-
+            'time': 0,
+            'space': 0
     }
 }
 
 def parse_measure(tool, measure_name, input):
     measure = measures[tool][measure_name]
-    print(measure)
     match = re.search(measure.regex, "\n".join(input).lower())
     if match is None:
         return measure.default
@@ -86,7 +91,12 @@ def run_mona(test, timeout):
     args = ('mona', '-s', '"{}"'.format(test))
     output, retcode = runProcess(args, timeout)
     if(retcode != 0):
-        return mona_error, output
+        if(retcode == 124):
+            return timeout_error, ""
+        elif(re.search("BDD too large", "\n".join(output)) is not None):
+            return mona_error, ""
+        else:
+            return unknown_error, ""
     return parseMonaOutput(output)
 
 
@@ -152,20 +162,38 @@ def exportToCSV(data, bins):
 
     '''
     saveTo = generateCSVname()
+    keys = []
     with open(saveTo, 'w') as csvFile:
         # header of the file
         csvFile.write('benchmark, ')
+        first = True
         if 'mona' in bins:
-            csvFile.write('mona-time, mona-space, ')
+            for (key, timing) in measures['mona'].items():
+                keys.append(('mona', key))
+                if first:
+                    first = False
+                else:
+                    csvFile.write(", ")
+                csvFile.write(key)
+        csvFile.write(", ")
+        first = True
         if 'gaston' in bins:
-            csvFile.write('gaston-time-overall, gaston-time-dp-only, gaston-time-dfa, gaston-time-conversion, base-aut, gaston-space, gaston-space-pruned, ')
+            for (key, timing) in measures['gaston'].items():
+                keys.append(('gaston', key))
+                if first:
+                    first = False
+                else:
+                    csvFile.write(", ")
+                csvFile.write(key)
         csvFile.write('\n')
 
         for benchmark in sorted(data.keys()):
             bench_list = [os.path.split(benchmark)[1]]
-            for bin in bins:
-                for i in range(0, len(data[benchmark][bin])):
-                    bench_list = bench_list + [str(data[benchmark][bin][i])]
+            for (bin, key) in keys:
+                if not hasattr(data[benchmark][bin], "__getitem__"):
+                    bench_list = bench_list + [str(data[benchmark][bin])]
+                else:
+                    bench_list = bench_list + [str(data[benchmark][bin][key])]
             csvFile.write(", ".join(bench_list))
             csvFile.write('\n')
 
@@ -193,14 +221,11 @@ def parsedWiNAOutput(output, unprunedOutput):
             ret = match.group(1)
             break
 
-    time = parse_measure('gaston', 'time', strippedLines)
-    size = parse_measure('gaston', 'space', strippedLines)
-    size_unpruned = parse_measure('gaston', 'space-all', strippedLines)
-    time_dp = parse_measure('gaston', 'time-dp', strippedLines)
-    time_dfa = parse_measure('gaston', 'time-base', strippedLines)
-    time_conv = parse_measure('gaston', 'time-conv', strippedLines)
+    data = {}
+    for (name, measure) in measures['gaston'].items():
+        data[name] = parse_measure('gaston', name, strippedLines)
 
-    return (time, time_dp, time_dfa, time_conv, 0, size, size_unpruned), ret
+    return data, ret
 
 
 def parseMonaOutput(output):
@@ -238,7 +263,7 @@ def parseMonaOutput(output):
     automata_sizes = [int((re.search('\(([0-9]+),[0-9]+\)', min)).group(1)) for min in minimizations]
     output_size = sum(automata_sizes)
 
-    return (time, output_size), ret
+    return {'time': time, 'space': output_size}, ret
 
 
 def parse_arguments():
