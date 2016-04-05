@@ -251,7 +251,7 @@ public:
 #define OPT_CREATE_QF_AUTOMATON 		true    // < Transform quantifier-free automaton to formula
 #define OPT_REDUCE_AUT_EVERYTIME		false	// < Call reduce everytime VATA automaton is created (i.e. as intermediate result)
 #define OPT_REDUCE_AUT_LAST				true	// < Call reduce after the final VATA automaton is created
-#define OPT_EARLY_EVALUATION 			false   // < Evaluates early interesection of products
+#define OPT_EARLY_EVALUATION 			true    // < Evaluates early interesection of products
 #define OPT_EARLY_PARTIAL_SUB			true	// < Postpone the partially subsumed terms
 #define OPT_CONT_ONLY_WHILE_UNSAT		true	// < Generate continuation only if there wasn't found (un)satisfying (counter)example yet
 #define OPT_PRUNE_EMPTY					true	// < Prune terms by empty set
@@ -270,6 +270,6 @@ public:
 #define OPT_FIXPOINT_BFS_SEARCH	        false   // < Will add new things to the back of the worklist in fixpoint
 #define OPT_USE_DENSE_HASHMAP			false	// < Will use the google::dense_hash_map as cache
 #define OPT_NO_SATURATION_FOR_M2L		true    // < Will not saturate the final states for M2L(str) logic
-#define OPT_MERGE_SUBSUMED_WORKLISTS	true	// < If the parts of the fixpoint are subsumed, but worklist aren't, merge them instead
+#define OPT_MERGE_SUBSUMED_WORKLISTS	true    // < If the parts of the fixpoint are subsumed, but worklist aren't, merge them instead
 
 #endif
