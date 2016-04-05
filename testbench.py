@@ -15,11 +15,54 @@ import subprocess
 import sys
 from threading import Timer
 from termcolor import colored
+from collections import namedtuple
 
 dwina_error = (-1, -1, -1, -1, -1, -1, -1)
 timeout_error = (-2, -2, -2, -2, -2, -2, -2)
 mona_error = (-1, -1)
 mona_expnf_error = (-1, -1, -1)
+
+Measure = namedtuple('Measure', 'regex default post_process')
+time_default = "00:00:00"
+time_regex = "([0-9][0-9]:[0-9][0-9]:[0-9][0-9].[0-9][0-9])"
+space_default = "0"
+space_regex = "([0-9]+)"
+whatever_regex = ".*?"
+
+def parse_total_time(line):
+    '''
+    @param line: time line in format 'Total time: 00:00:00.00'
+    @return: time in seconds, in float
+    '''
+    match = re.search("([0-9][0-9]):([0-9][0-9]):([0-9][0-9].[0-9][0-9])", line)
+    time = 3600*float(match.group(1)) + 60*float(match.group(2)) + float(match.group(3))
+    return time if time != 0 else 0.01
+
+def identity(line):
+    return line
+
+measures = {
+    'gaston': {
+            'time': Measure("total elapsed time" + whatever_regex + time_regex, time_default, parse_total_time),
+            'space': Measure("overall state space" + whatever_regex + space_regex, space_default, int),
+            'space-all': Measure("explored fixpoint space" + whatever_regex + space_regex, space_default, int),
+            'time-dp': Measure("decision procedure" + whatever_regex + time_regex, time_default, parse_total_time),
+            'time-base': Measure("dfa creation" + whatever_regex + time_regex, time_default, parse_total_time),
+            'time-conv': Measure("mona <-> vata" + whatever_regex + time_regex, time_default, parse_total_time),
+        },
+    'mona': {
+
+    }
+}
+
+def parse_measure(tool, measure_name, input):
+    measure = measures[tool][measure_name]
+    print(measure)
+    match = re.search(measure.regex, "\n".join(input).lower())
+    if match is None:
+        return measure.default
+    else:
+        return measure.post_process(match.group(1))
 
 
 def createArgumentParser():
@@ -137,16 +180,6 @@ def generateCSVname():
     return "{0:02}.{1:02}.{2:02}-{3:02}.{4:02}-timing.csv".format(today.year, today.month, today.day, today.hour, today.minute)
 
 
-def parseTotalTime(line):
-    '''
-    @param line: time line in format 'Total time: 00:00:00.00'
-    @return: time in seconds, in float
-    '''
-    match = re.search("([0-9][0-9]):([0-9][0-9]):([0-9][0-9].[0-9][0-9])", line)
-    time = 3600*float(match.group(1)) + 60*float(match.group(2)) + float(match.group(3))
-    return time if time != 0 else 0.01
-
-
 def parsedWiNAOutput(output, unprunedOutput):
     '''
 
@@ -160,30 +193,12 @@ def parsedWiNAOutput(output, unprunedOutput):
             ret = match.group(1)
             break
 
-    # get total time
-    times = [line for line in strippedLines if line.startswith('[*] Total elapsed time:')]
-    if (len(times) != 1):
-        return (-1, -1, -1, -1, -1), ret
-    time = parseTotalTime(times[0])
-
-    # get size of state
-    sizes = [line for line in strippedLines if line.startswith('[*] Overall State Space:')]
-    size = int(re.search('[0-9]+', sizes[0]).group(0))
-
-    sizes = [line for line in strippedLines if line.startswith('[*] Explored Fixpoint Space:')]
-    size_unpruned = int(re.search('[0-9]+', sizes[0]).group(0))
-
-    # get dp time
-    times = [line for line in strippedLines if line.startswith('[*] Decision procedure:')]
-    time_dp = parseTotalTime(times[0])
-
-    # get dp time
-    times = [line for line in strippedLines if line.startswith('[*] DFA creation:')]
-    time_dfa = parseTotalTime(times[0])
-
-    # get dp time
-    times = [line for line in strippedLines if line.startswith('[*] MONA <-> VATA:')]
-    time_conv = parseTotalTime(times[0])
+    time = parse_measure('gaston', 'time', strippedLines)
+    size = parse_measure('gaston', 'space', strippedLines)
+    size_unpruned = parse_measure('gaston', 'space-all', strippedLines)
+    time_dp = parse_measure('gaston', 'time-dp', strippedLines)
+    time_dfa = parse_measure('gaston', 'time-base', strippedLines)
+    time_conv = parse_measure('gaston', 'time-conv', strippedLines)
 
     return (time, time_dp, time_dfa, time_conv, 0, size, size_unpruned), ret
 
@@ -216,7 +231,7 @@ def parseMonaOutput(output):
 
     if len(times) != 1:
         return mona_error
-    time = parseTotalTime(times[0])
+    time = parse_total_time(times[0])
 
     # get all minimizings
     minimizations = [line for line in strippedLines if line.startswith('Minimizing')]
