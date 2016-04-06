@@ -749,9 +749,25 @@ void constructAutomatonByMona(ASTForm *form, Automaton& v_aut) {
 void toMonaAutomaton(ASTForm* form, DFA*& dfa, bool minimize) {
 	assert(form != nullptr);
 
+#   if (DEBUG_MONA_DFA == true)
+    int numVars = varMap.TrackLength();
+	unsigned *offs = new unsigned[numVars];
+	char** varnames = new char*[numVars];
+	for(int i = 0; i < numVars; i++) {
+		varnames[i] = "";
+	}
+	IdentList *vars = nullptr;
+
+	vars = initializeVars(form);
+	initializeOffsets(offs, vars);
+#   endif
+
 	// Conversion of formula representation from AST to DAG
 	codeTable = new CodeTable;
 	VarCode formulaCode = form->makeCode();
+	std::cout << "\n";
+	formulaCode.dump();
+	std::cout << "\n";
 
 	dfa = nullptr;
 
@@ -773,6 +789,12 @@ void toMonaAutomaton(ASTForm* form, DFA*& dfa, bool minimize) {
 		// Clean up
 		dfaFree(temp);
 	}
+
+#   if (DEBUG_MONA_DFA == true)
+    dfaPrint(dfa, numVars, varnames, offs);
+    delete varnames;
+    delete[] offs;
+#   endif
 	delete codeTable;
 }
 
