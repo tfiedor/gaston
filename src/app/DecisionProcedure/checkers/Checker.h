@@ -20,9 +20,7 @@ using TimerType = Timer;
 	code(ZeroOrderRemover)				\
 	code(SyntaxRestricter)				\
 	code(BinaryReorderer)				\
-	code(DistributiveAntiPrenexer)		\
-	/*code(SecondOrderRestricter)			/* Restrict the formula to second order*/\
-	code(QuantificationMerger)			/* Merge some quantifications */
+	code(DistributiveAntiPrenexer)
 #elif (ANTIPRENEXING_FULL == true)
 #define FILTER_LIST(code) \
 	code(ZeroOrderRemover)				/* Transform zero-order variables to second-order interpretation */ \
@@ -32,18 +30,14 @@ using TimerType = Timer;
 	code(BooleanUnfolder)				/* Simplify formula through various boolean laws*/ \
 	code(UniversalQuantifierRemover)	/* Remove universal quantifier from formula*/ \
 	code(NegationUnfolder)				/* Push negations deeply*/ \
-	/*code(SecondOrderRestricter)			/* Restrict the formula to second order*/\
-	/*code(BaseAutomataMerger)			/* Merge some of the base automata*/\
-	/*code(QuantificationMerger)			/* Merge some quantifications */
+	code(BaseAutomataMerger)			/* Merge some of the base automata*/
 #else
 #define FILTER_LIST(code) \
 	code(ZeroOrderRemover)				/* Transform zero-order variables to second-order interpretation */ \
 	code(SyntaxRestricter)				/* Restrict unsupported formula constructs to supported subset*/ \
 	code(BooleanUnfolder)				/* Simplify formula through various boolean laws*/ \
 	code(UniversalQuantifierRemover)	/* Remove universal quantifier from formula*/ \
-	code(NegationUnfolder)				/* Push negations deeply*/ \
-	/*code(SecondOrderRestricter)			/* Restrict the formula to second order*/\
-	code(QuantificationMerger)			/* Merge some quantifications */
+	code(NegationUnfolder)				/* Push negations deeply*/
 #endif
 
 class Checker {

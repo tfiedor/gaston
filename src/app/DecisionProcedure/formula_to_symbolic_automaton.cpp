@@ -27,15 +27,11 @@ SymbolicAutomaton* baseToSymbolicAutomaton(ASTForm* form, bool doComplement) {
     IdentList free, bound;
     form->freeVars(&free, &bound);
 
-    std::cout << "Transforming formula to automaton\n";
-    form->dump();
-
     toMonaAutomaton(form, dfa, true);
     assert(dfa != nullptr);
 
     // Fixme: free.empty() should be composed here somehow
     bool hasEmptyTracks = (free.empty() && form->kind != aTrue && form->kind != aFalse) || dfa->ns == 1;
-    std::cout << "Has empty tracks? " << (hasEmptyTracks ? "true" : "false") << "\n";
     return new TemplatedAutomaton(dfa, varMap.TrackLength(), form, hasEmptyTracks);
 #   else
     assert(false);

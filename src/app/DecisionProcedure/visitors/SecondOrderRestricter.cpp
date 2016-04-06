@@ -63,6 +63,7 @@ AST* SecondOrderRestricter::_firstOrderRestrict(FirstOrderQuantification* form) 
 
     while(form->vl->size() != 0) {
         auto it = form->vl->pop_back();
+        assert(symbolTable.lookupType(it) == MonaTypeTag::Varname1);
         ASTForm_FirstOrder *singleton = new ASTForm_FirstOrder(new ASTTerm1_Var1(it, form->pos), form->pos);
         BinaryFormula* binopForm = new BinaryFormula(singleton, restrictedFormula, form->pos);
         binopForm = reinterpret_cast<BinaryFormula*>(SecondOrderRestricter::RestrictFormula<BinaryFormula, ASTTerm1_Var1>(it, binopForm));
@@ -87,6 +88,7 @@ AST* SecondOrderRestricter::_secondOrderRestrict(SecondOrderQuantification *form
 
     while(form->vl->size() != 0) {
         auto it = form->vl->pop_back();
+        assert(symbolTable.lookupType(it) != MonaTypeTag::Varname1);
         ASTForm* binopForm = restrictedFormula;
         binopForm = reinterpret_cast<BinaryFormula*>(SecondOrderRestricter::RestrictFormula<BinaryFormula, ASTTerm2_Var2>(it, binopForm));
         restrictedFormula = new SecondOrderQuantification(nullptr, new IdentList(it), binopForm, form->pos);
@@ -113,7 +115,11 @@ AST* SecondOrderRestricter::visit(ASTForm_Ex1* form) {
 }
 
 AST* SecondOrderRestricter::visit(ASTForm_Ex2* form) {
-    return this->_secondOrderRestrict<ASTForm_Ex2, ASTForm_And>(form);
+    if(form->tag == 0) {
+        return form;
+    } else {
+        return this->_secondOrderRestrict<ASTForm_Ex2, ASTForm_And>(form);
+    }
 }
 
 /**
@@ -132,5 +138,9 @@ AST* SecondOrderRestricter::visit(ASTForm_All1* form) {
 }
 
 AST* SecondOrderRestricter::visit(ASTForm_All2* form) {
-    return this->_secondOrderRestrict<ASTForm_All2, ASTForm_Impl>(form);
+    if(form->tag == 0) {
+        return form;
+    } else {
+        return this->_secondOrderRestrict<ASTForm_All2, ASTForm_Impl>(form);
+    }
 }

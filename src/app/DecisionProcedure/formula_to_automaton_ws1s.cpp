@@ -765,9 +765,11 @@ void toMonaAutomaton(ASTForm* form, DFA*& dfa, bool minimize) {
 	// Conversion of formula representation from AST to DAG
 	codeTable = new CodeTable;
 	VarCode formulaCode = form->makeCode();
-	std::cout << "\n";
+#   if (DEBUG_MONA_CODE_FORMULA == true)
+	std::cout << "[!] Transformed formula to DAG\n";
 	formulaCode.dump();
 	std::cout << "\n";
+#   endif
 
 	dfa = nullptr;
 
