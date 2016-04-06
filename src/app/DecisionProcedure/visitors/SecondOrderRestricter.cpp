@@ -10,6 +10,7 @@
 
 #include "SecondOrderRestricter.h"
 #include "AntiPrenexer.h"
+#include "../environment.hh"
 #include "../../Frontend/ast.h"
 #include "../../Frontend/ident.h"
 #include "../../Frontend/symboltable.h"
@@ -19,6 +20,16 @@ extern SymbolTable symbolTable;
 template<class BinaryFormula, class VarType>
 ASTForm* SecondOrderRestricter::RestrictFormula(Ident var, ASTForm* form) {
     ASTForm* restriction = symbolTable.lookupRestriction(var);
+#   if (DEBUG_RESTRICTIONS == true)
+    std::cout << "Restricting '" << symbolTable.lookupSymbol(var) << "' of type " << symbolTable.lookupType(var) << " by ";
+    if(restriction == nullptr) {
+        std::cout << "True";
+    } else {
+        restriction->dump();
+    }
+    std::cout << "\n";
+#   endif
+    // Fixme: Default restrictions should be handled as well
     if((restriction = symbolTable.lookupRestriction(var)) == nullptr) {
         // Get default restriction instead
         Ident formal;
@@ -37,7 +48,7 @@ ASTForm* SecondOrderRestricter::RestrictFormula(Ident var, ASTForm* form) {
     }
 
     if(restriction != nullptr && restriction->kind != aTrue) {
-        return new BinaryFormula(restriction, form, form->pos);
+        return reinterpret_cast<ASTForm*>(new BinaryFormula(restriction, form, form->pos));
     } else {
         return form;
     }
@@ -56,6 +67,8 @@ AST* SecondOrderRestricter::_firstOrderRestrict(FirstOrderQuantification* form) 
         BinaryFormula* binopForm = new BinaryFormula(singleton, restrictedFormula, form->pos);
         binopForm = reinterpret_cast<BinaryFormula*>(SecondOrderRestricter::RestrictFormula<BinaryFormula, ASTTerm1_Var1>(it, binopForm));
         restrictedFormula = new SecondOrderQuantification(nullptr, new IdentList(it), binopForm, Pos());
+        //restrictedFormula = new FirstOrderQuantification(nullptr, new IdentList(it), binopForm, Pos());
+        // ^-- FIXME: DO NOT EVER TRY TO PUSH SUCH FUCKING NONSENSE CRAP YOU STUPID SEA LION
     }
 
     // Free the previous form
@@ -91,7 +104,12 @@ AST* SecondOrderRestricter::_secondOrderRestrict(SecondOrderQuantification *form
  * @param[in] form:     traversed Ex1 node
  */
 AST* SecondOrderRestricter::visit(ASTForm_Ex1* form) {
-    return this->_firstOrderRestrict<ASTForm_Ex1, ASTForm_Ex2, ASTForm_And>(form);
+    // This will be further constructed by MONA, do not fucking touch it
+    if(form->tag == 0) {
+        return form;
+    } else {
+        return this->_firstOrderRestrict<ASTForm_Ex1, ASTForm_Ex2, ASTForm_And>(form);
+    }
 }
 
 AST* SecondOrderRestricter::visit(ASTForm_Ex2* form) {
@@ -104,7 +122,13 @@ AST* SecondOrderRestricter::visit(ASTForm_Ex2* form) {
  * @param[in] form:     traversed All1 node
  */
 AST* SecondOrderRestricter::visit(ASTForm_All1* form) {
-    return this->_firstOrderRestrict<ASTForm_All1, ASTForm_All2, ASTForm_Impl>(form);
+    // This will be further constructed by MONA, do not fucking touch it
+    if(form->tag == 0) {
+        return form;
+    } else {
+        return this->_firstOrderRestrict<ASTForm_All1, ASTForm_All2, ASTForm_Impl>(form);
+
+    }
 }
 
 AST* SecondOrderRestricter::visit(ASTForm_All2* form) {

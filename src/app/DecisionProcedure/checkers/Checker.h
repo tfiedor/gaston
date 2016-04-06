@@ -21,7 +21,7 @@ using TimerType = Timer;
 	code(SyntaxRestricter)				\
 	code(BinaryReorderer)				\
 	code(DistributiveAntiPrenexer)		\
-	code(SecondOrderRestricter)			/* Restrict the formula to second order*/\
+	/*code(SecondOrderRestricter)			/* Restrict the formula to second order*/\
 	code(QuantificationMerger)			/* Merge some quantifications */
 #elif (ANTIPRENEXING_FULL == true)
 #define FILTER_LIST(code) \
@@ -32,9 +32,9 @@ using TimerType = Timer;
 	code(BooleanUnfolder)				/* Simplify formula through various boolean laws*/ \
 	code(UniversalQuantifierRemover)	/* Remove universal quantifier from formula*/ \
 	code(NegationUnfolder)				/* Push negations deeply*/ \
-	code(SecondOrderRestricter)			/* Restrict the formula to second order*/\
-	code(BaseAutomataMerger)			/* Merge some of the base automata*/\
-	code(QuantificationMerger)			/* Merge some quantifications */
+	/*code(SecondOrderRestricter)			/* Restrict the formula to second order*/\
+	/*code(BaseAutomataMerger)			/* Merge some of the base automata*/\
+	/*code(QuantificationMerger)			/* Merge some quantifications */
 #else
 #define FILTER_LIST(code) \
 	code(ZeroOrderRemover)				/* Transform zero-order variables to second-order interpretation */ \
@@ -42,7 +42,7 @@ using TimerType = Timer;
 	code(BooleanUnfolder)				/* Simplify formula through various boolean laws*/ \
 	code(UniversalQuantifierRemover)	/* Remove universal quantifier from formula*/ \
 	code(NegationUnfolder)				/* Push negations deeply*/ \
-	code(SecondOrderRestricter)			/* Restrict the formula to second order*/\
+	/*code(SecondOrderRestricter)			/* Restrict the formula to second order*/\
 	code(QuantificationMerger)			/* Merge some quantifications */
 #endif
 

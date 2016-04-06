@@ -160,7 +160,8 @@ public:
 #define DEBUG_AUTOMATA_ADDRESSES		false
 #define DEBUG_EXAMPLE_PATHS				false
 #define DEBUG_BASE_AUTOMATA 			true
-#define DEBUG_MONA_DFA					true
+#define DEBUG_MONA_DFA					false
+#define DEBUG_RESTRICTIONS				false
 #define DEBUG_FIXPOINT 				    false
 #define DEBUG_FIXPOINT_SYMBOLS		    false
 #define DEBUG_FIXPOINT_WORKLIST			false

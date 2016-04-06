@@ -249,6 +249,9 @@ void Checker::PreprocessFormula() {
     FixpointDetagger detagger;
     (this->_monaAST->formula)->accept(detagger);
 
+    SecondOrderRestricter restricter;
+    this->_monaAST->formula = static_cast<ASTForm*>((this->_monaAST->formula)->accept(restricter));
+
     if(options.graphvizDAG) {
         std::string dotFileName(inputFileName);
         dotFileName += ".dot";
