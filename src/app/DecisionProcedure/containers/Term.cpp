@@ -372,9 +372,9 @@ SubsumptionResult Term::IsSubsumed(Term *t, bool unfoldAll) {
     assert(!unfoldAll || result != E_PARTIALLY);
 #   if (DEBUG_TERM_SUBSUMPTION == true)
     this->dump();
-    std::cout << " <?= ";
+    std::cout << (result == E_TRUE ? " \u2291 " : " \u22E2 ");
     t->dump();
-    std::cout << " = " << (result == E_TRUE ? "true" : "false") << "\n";
+    std::cout << " = " << (result == E_TRUE ? "true" : "false") << "\n\n";
 #   endif
     return result;
 }
@@ -486,10 +486,6 @@ SubsumptionResult TermFixpoint::_IsSubsumedCore(Term* t, bool unfoldAll) {
 
     // Reinterpret
     TermFixpoint* tt = reinterpret_cast<TermFixpoint*>(t);
-    if(this->_bValue != tt->_bValue) {
-        // we can automatically assume that these two are different
-        return E_FALSE;
-    }
 
     // Do the piece-wise comparison
     for(auto& item : this->_fixpoint) {
@@ -603,6 +599,10 @@ SubsumptionResult TermList::IsSubsumedBy(FixpointType& fixpoint, Term*& biggerTe
         if (this->IsSubsumed(item.first)) {
             return E_TRUE;
         }
+
+        if(item.first->IsSubsumed(this)) {
+            item.second = false;
+        }
     }
 
     return E_FALSE;
@@ -610,9 +610,25 @@ SubsumptionResult TermList::IsSubsumedBy(FixpointType& fixpoint, Term*& biggerTe
 
 SubsumptionResult TermFixpoint::IsSubsumedBy(FixpointType& fixpoint, Term*& biggerTerm) {
     // TODO: There should be unfolding of fixpoint probably
-    #if (DEBUG_TERM_SUBSUMPTION == true)
+
+    auto result = E_FALSE;
+    // Component-wise comparison
+    for(auto& item : fixpoint) {
+        if(item.first == nullptr || !item.second) continue;
+        if (this->IsSubsumed(item.first)) {
+            result = E_TRUE ;
+            break;
+        }
+
+        if(item.first->IsSubsumed(this)) {
+            item.second = false;
+        }
+
+    }
+    // Fixme: Here in subsumption testing is the core of the problem...
+#if (DEBUG_TERM_SUBSUMED_BY == true)
     this->dump();
-    std::cout << " <?= ";
+    std::cout << (result == E_TRUE ? " \u2286 " : " \u2288 ");
     std::cout << "{";
     for(auto& item : fixpoint) {
         if(item.first == nullptr || !item.second) continue;
@@ -621,17 +637,8 @@ SubsumptionResult TermFixpoint::IsSubsumedBy(FixpointType& fixpoint, Term*& bigg
     }
     std::cout << "}";
     std::cout << "\n";
-    #endif
-
-    // Component-wise comparison
-    for(auto& item : fixpoint) {
-        if(item.first == nullptr || !item.second) continue;
-        if (this->IsSubsumed(item.first)) {
-            return E_TRUE ;
-        }
-
-    }
-    return E_FALSE;
+#endif
+    return result;
 }
 
 /**
@@ -982,7 +989,7 @@ SubsumptionResult TermFixpoint::_testIfSubsumes(Term_ptr const& term) {
     Term* key = term, *subsumedByTerm;
     if(!this->_subsumedByCache.retrieveFromCache(key, result)) {
         // True/Partial results are stored in cache
-        if((result = term->IsSubsumedBy(this->_fixpoint, subsumedByTerm))!= E_FALSE) {
+        if((result = term->IsSubsumedBy(this->_fixpoint, subsumedByTerm)) != E_FALSE) {
             this->_subsumedByCache.StoreIn(key, result);
         }
 

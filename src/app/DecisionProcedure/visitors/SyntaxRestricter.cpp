@@ -57,3 +57,9 @@ AST* SyntaxRestricter::visit(ASTForm_Biimpl* form) {
 
     return biimpl;
 }
+
+AST* SyntaxRestricter::visit(ASTForm_Export* form) {
+    assert(form != nullptr);
+    std::cout << "[!] \033[1;31mWarning\033[0m: Export skipped (not supported)\n";
+    return form->f;
+}

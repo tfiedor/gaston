@@ -158,25 +158,26 @@ public:
  *****************************/
 #define DEBUG_ROOT_AUTOMATON		    false
 #define DEBUG_AUTOMATA_ADDRESSES		false
-#define DEBUG_EXAMPLE_PATHS				false
+#define DEBUG_EXAMPLE_PATHS				true
 #define DEBUG_BASE_AUTOMATA 			true
 #define DEBUG_MONA_DFA					false
 #define DEBUG_MONA_CODE_FORMULA			false
 #define DEBUG_RESTRICTIONS				true
 #define DEBUG_FIXPOINT 				    false
 #define DEBUG_FIXPOINT_SYMBOLS		    false
-#define DEBUG_FIXPOINT_WORKLIST			false
+#define DEBUG_FIXPOINT_WORKLIST			true
 #define DEBUG_INITIAL_APPROX 			false
 #define DEBUG_INTERSECT_NON_EMPTY 	    false
 #define DEBUG_TERM_UNIQUENESS			false
 #define DEBUG_TERM_CREATION				false
+#define DEBUG_TERM_SUBSUMPTION 			false
+#define DEBUG_TERM_SUBSUMED_BY 			true
+#define DEBUG_TERM_CACHE_COMPARISON		false
 #define DEBUG_SYMBOL_CREATION			true
 #define DEBUG_CACHE_MEMBERS				true
 #define DEBUG_CACHE_BUCKETS				false
 #define DEBUG_CACHE_MEMBERS_HASH		true
 #define DEBUG_WORKSHOPS					false
-#define DEBUG_TERM_SUBSUMPTION 			false
-#define DEBUG_TERM_CACHE_COMPARISON		false
 #define DEBUG_CONTINUATIONS 			false
 #define DEBUG_NO_WORKSHOPS				false
 #define DEBUG_PRE					    false
@@ -254,7 +255,7 @@ public:
 #define OPT_CREATE_QF_AUTOMATON 		true    // < Transform quantifier-free automaton to formula
 #define OPT_REDUCE_AUT_EVERYTIME		false	// < Call reduce everytime VATA automaton is created (i.e. as intermediate result)
 #define OPT_REDUCE_AUT_LAST				true	// < Call reduce after the final VATA automaton is created
-#define OPT_EARLY_EVALUATION 			true    // < Evaluates early interesection of products
+#define OPT_EARLY_EVALUATION 			false   // < Evaluates early interesection of products
 #define OPT_EARLY_PARTIAL_SUB			true	// < Postpone the partially subsumed terms
 #define OPT_CONT_ONLY_WHILE_UNSAT		true	// < Generate continuation only if there wasn't found (un)satisfying (counter)example yet
 #define OPT_PRUNE_EMPTY					true	// < Prune terms by empty set
@@ -262,8 +263,8 @@ public:
 #define OPT_REDUCE_PREFIXPOINT			true	// < Prune the fixpoint when returning pre (i.e. fixpoint - symbol)
 #define OPT_FIND_POSTPONED_CANDIDATE	true	// < Chose better candidate from list of postponed subsumption testing pairs
 #define OPT_REDUCE_FULL_FIXPOINT		true	// < Prune the fixpoint by subsumption
-#define OPT_CACHE_RESULTS 				true	// < Cache results of intersectnonempty(term, symbol)
-#define OPT_CACHE_SUBSUMES				true	// < Cache the results of subsumption testing between terms
+#define OPT_CACHE_RESULTS 				false   // < Cache results of intersectnonempty(term, symbol)
+#define OPT_CACHE_SUBSUMES				false   // < Cache the results of subsumption testing between terms
 #define OPT_CACHE_SUBSUMED_BY			true	// < Cache the results of term subsumption by fixpoints
 #define OPT_SMARTER_MONA_CONVERSION		false	// < Use faster conversion from MONA to VATA (courtesy of PJ)
 #define OPT_SMARTER_FLATTENING          true

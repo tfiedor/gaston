@@ -20,6 +20,7 @@ public:
     SyntaxRestricter() : TransformerVisitor(Traverse::PostOrder) {}
     AST* visit(ASTForm_Impl* form);
     AST* visit(ASTForm_Biimpl* form);
+    AST* visit(ASTForm_Export* form);
 };
 
 
