@@ -102,12 +102,16 @@ void parseTags(std::string&s, std::list<size_t>& tags) {
     }
     s = s.substr(pos+1);
     std::string token;
-    while ((pos = s.find(delimiter)) != std::string::npos) {
-        token = s.substr(0, pos);
-        tags.insert(tags.end(), std::stoi(token));
-        s.erase(0, pos + delimiter.length());
+    try {
+        while ((pos = s.find(delimiter)) != std::string::npos) {
+            token = s.substr(0, pos);
+            tags.insert(tags.end(), std::stoi(token));
+            s.erase(0, pos + delimiter.length());
+        }
+        tags.insert(tags.end(), std::stoi(s));
+    } catch (std::invalid_argument e) {
+        std::cout << "[!] \033[1;31mWarning\033[0m: Invalid tag rest were skipped\n";
     }
-    tags.insert(tags.end(), std::stoi(s));
 }
 
 void Checker::_startTimer(Timer &t) {

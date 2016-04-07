@@ -19,11 +19,13 @@ private:
     void _tagFormula(ASTForm*);
 public:
     explicit Tagger(TagList& tags) : VoidVisitor(Traverse::PreOrder), _tagList(tags), _tit(tags.begin()) {
-        std::cout << "[*] Loaded tags: {";
-        for(auto tag : _tagList) {
-            std::cout << tag << ", ";
+        if(tags.size()) {
+            std::cout << "[*] Loaded tags: {";
+            for (auto tag : _tagList) {
+                std::cout << tag << ", ";
+            }
+            std::cout << "}\n";
         }
-        std::cout << "\n";
     };
 
     void visit(ASTForm_And*);
