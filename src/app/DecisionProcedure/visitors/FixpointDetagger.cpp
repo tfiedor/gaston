@@ -9,24 +9,48 @@ void FixpointDetagger::visit(ASTForm_And *form) {
     form->fixpoint_number = std::max(form->f1->fixpoint_number, form->f2->fixpoint_number);
     form->height = std::max(form->f1->height, form->f2->height) + 1;
     form->size = form->f1->size + form->f2->size + 1;
+
+#   if(OPT_EXTRACT_MORE_AUTOMATA == true)
+    if(form->fixpoint_number <= this->_cFixpointThreshold) {
+        form->tag = 0;
+    }
+#   endif
 }
 
 void FixpointDetagger::visit(ASTForm_Or *form) {
     form->fixpoint_number = std::max(form->f1->fixpoint_number, form->f2->fixpoint_number);
     form->height = std::max(form->f1->height, form->f2->height) + 1;
     form->size = form->f1->size + form->f2->size + 1;
+
+#   if(OPT_EXTRACT_MORE_AUTOMATA == true)
+    if(form->fixpoint_number <= this->_cFixpointThreshold) {
+        form->tag = 0;
+    }
+#   endif
 }
 
 void FixpointDetagger::visit(ASTForm_Impl *form) {
     form->fixpoint_number = std::max(form->f1->fixpoint_number, form->f2->fixpoint_number);
     form->height = std::max(form->f1->height, form->f2->height) + 1;
     form->size = form->f1->size + form->f2->size + 1;
+
+#   if(OPT_EXTRACT_MORE_AUTOMATA == true)
+    if(form->fixpoint_number <= this->_cFixpointThreshold) {
+        form->tag = 0;
+    }
+#   endif
 }
 
 void FixpointDetagger::visit(ASTForm_Biimpl *form) {
     form->fixpoint_number = std::max(form->f1->fixpoint_number, form->f2->fixpoint_number);
     form->height = std::max(form->f1->height, form->f2->height) + 1;
     form->size = form->f1->size + form->f2->size + 1;
+
+#   if(OPT_EXTRACT_MORE_AUTOMATA == true)
+    if(form->fixpoint_number <= this->_cFixpointThreshold) {
+        form->tag = 0;
+    }
+#   endif
 }
 
 void FixpointDetagger::visit(ASTForm_Not *form) {
