@@ -61,13 +61,13 @@ Checker::~Checker() {
 }
 
 /**
- * Implementation is not sure at the moment, but should reorder the symbol
- * table or BDD track, so it is optimized for using of projection during
- * the decision procedure process. It should consider the structure of prefix
- * of given formula, so BDD used in transitions of automata can be better
- * reordered
+ * Initialize the Map of variables between MONA and the decision procedure
+ *
+ * @param[in] formula:  input formulae
  */
 void initializeVarMap(ASTForm* formula) {
+    assert(formula != nullptr);
+
     IdentList free, bound;
     formula->freeVars(&free, &bound);
 #   if (DEBUG_VARMAP == true)
@@ -76,28 +76,37 @@ void initializeVarMap(ASTForm* formula) {
 #   endif
 
     IdentList *vars = ident_union(&free, &bound);
-    if (vars != 0) {
+    if (vars != nullptr) {
         varMap.initializeFromList(vars);
     }
     delete vars;
 }
 
+/**
+ * Reads the Tags from the @p filename and outputs them into the stream @p output. Tags are further used for some
+ * optimizations, mostly for transforming subformulae to the automaton
+ *
+ * @param[in] filename: input filename we are reading from
+ * @param[out] output:  string stream we are outing to
+ */
 void readTags(char* filename, std::string& output) {
     std::ifstream infile(filename);
     std::getline(infile, output);
     infile.close();
 }
 
+/**
+ * Parse the input strings to the tags.
+ *
+ * @param[in] s:     input string with tags
+ * @param[out] tags: list of parsed tags
+ */
 void parseTags(std::string&s, std::list<size_t>& tags) {
     std::string delimiter = ";";
     std::string beginDelimiter = ":";
-    // Fixme: better things
-
     size_t pos = 0;
 
-    pos = s.find(beginDelimiter);
-    if(pos == std::string::npos) {
-
+    if((pos = s.find(beginDelimiter)) == std::string::npos) {
         return;
     }
     s = s.substr(pos+1);
@@ -110,14 +119,26 @@ void parseTags(std::string&s, std::list<size_t>& tags) {
         }
         tags.insert(tags.end(), std::stoi(s));
     } catch (std::invalid_argument e) {
+        // We'll skip the rest of the tags that were malformed
         std::cout << "[!] \033[1;31mWarning\033[0m: Invalid tag rest were skipped\n";
     }
 }
 
+/**
+ * Starts the timer @p t
+ *
+ * @param[in] t: timer we are starting
+ */
 void Checker::_startTimer(Timer &t) {
     t.start();
 }
 
+/**
+ * Stops the timer and outputs the measured time
+ *
+ * @param[in] t:                    timer we are stopping
+ * @param[in] additionalMessage:    additional stuff we are outing
+ */
 void Checker::_stopTimer(Timer &t, char* additionalMessage) {
     t.stop();
     if(this->_printProgress) {
@@ -128,6 +149,9 @@ void Checker::_stopTimer(Timer &t, char* additionalMessage) {
     }
 }
 
+/**
+ * Reads the formulae from file and parses it into the AST representation
+ */
 void Checker::LoadFormulaFromFile() {
     loadFile(inputFileName);
     yyparse();
@@ -138,6 +162,12 @@ void Checker::LoadFormulaFromFile() {
     delete untypedAST;
 }
 
+/**
+ * Closes the prefix of the unground @p formula according tot he list of @p freeVars
+ *
+ * @param[in] freeVars:     list of free variables
+ * @param[in] formula:      formula we are closing
+ */
 template<class ZeroOrderQuantifier, class FirstOrderQuantifier, class SecondOrderQuantifier>
 ASTForm* Checker::_ClosePrefix(IdentList* freeVars, ASTForm* formula) {
     IdentList zeroOrders, firstOrders, secondOrders;
@@ -214,6 +244,11 @@ void Checker::CloseUngroundFormula() {
     }
 }
 
+/**
+ * Calls the preprocessing filters according to the list defined in Checker.h. Then calls some additional phases
+ * that are common for all of the options of prenexing: tags the nodes by unique ids, then run the detagger to remove
+ * some of the tags in order to transform them into the subautomata. Finally everything is restricted to second order.
+ */
 void Checker::PreprocessFormula() {
     // Flattening of the formula
     PredicateUnfolder predicateUnfolder;
@@ -267,6 +302,9 @@ void Checker::PreprocessFormula() {
     initializeVarMap(this->_monaAST->formula);
 }
 
+/**
+ * Special experiment, that tries to conver every possible subformula into corresponding automaton.
+ */
 void Checker::CreateAutomataSizeEstimations() {
     std::string monaDot(inputFileName);
     monaDot += "-walk.dot";

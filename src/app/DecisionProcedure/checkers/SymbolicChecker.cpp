@@ -16,37 +16,25 @@ SymbolicChecker::~SymbolicChecker() {
 
 }
 
+/**
+ * Construction of Automaton for Symbolic Decision procedure
+ */
 void SymbolicChecker::ConstructAutomaton() {
     assert(this->_monaAST != nullptr);
 
     timer_automaton.start();
     this->_automaton = (this->_monaAST->formula)->toSymbolicAutomaton(false);
 
-    // M2L-str()
     if(allPosVar != -1) {
-        std::cout << "[*] AllPosVar predicate detected\n";
+        std::cout << "[*] AllPosVar predicate detected. Will use the M2L(str) decision procedure.\n";
     }
 
+    // Formulae with free variable will be decided using the backward search, that is implemented in the RootProjection
     IdentList free, bound;
     this->_monaAST->formula->freeVars(&free, &bound);
-#   if (DEBUG_M2L_AS_GROUND == true)
-    if(allPosVar != -1 && free.size() == 1) {
-        this->_isGround = true;
-
-        DFA* dfa = dfaAllPos(varMap[allPosVar]);
-        assert(dfa != nullptr);
-        ASTForm_AllPosVar* allPosFormula = new ASTForm_AllPosVar(Pos());
-        SymbolicAutomaton* allPosAutomaton = new GenericBaseAutomaton(dfa, varMap.TrackLength(), allPosFormula, false);
-        //this->_automaton = new IntersectionAutomaton(allPosAutomaton, this->_automaton, this->_monaAST->formula);
-        ASTForm_Not* negatedFormula = new ASTForm_Not(allPosFormula, Pos());
-        ASTForm_Or* finalFormula = new ASTForm_Or(negatedFormula, this->_monaAST->formula, Pos());
-        this->_automaton = new UnionAutomaton(new ComplementAutomaton(allPosAutomaton, negatedFormula), this->_automaton, finalFormula);
-    } else if( !free.empty()) {
-#   else
     if (!free.empty()) {
-#   endif
-        // Fixme: This is WRONG
         this->_monaAST->formula = new ASTForm_Ex1(nullptr, free.copy(), this->_monaAST->formula, Pos());
+        //                        ^---- this is just a placeholding Ex1, semantically it is not First Order
         this->_automaton = new RootProjectionAutomaton(this->_automaton, this->_monaAST->formula);
     }
 
@@ -63,6 +51,12 @@ void SymbolicChecker::ConstructAutomaton() {
     }
 }
 
+/**
+ * Core evaluation of decision procedure according to the membership testing of epsilon and/or the found (counter)
+ * examples during the backward search
+ *
+ * @param[in] isValid:  true if the epsilon is in the language of the automaton
+ */
 int SymbolicChecker::_DecideCore(bool isValid) {
     assert(this->_automaton != nullptr);
 
@@ -88,6 +82,10 @@ int SymbolicChecker::_DecideCore(bool isValid) {
     }
 }
 
+/**
+ * Core of the Symbolic Decision procedure, Runs the procedure and prints the result according to the call of the
+ * core function. Moreover prints various timings.
+ */
 void SymbolicChecker::Decide() {
     assert(this->_automaton != nullptr);
 
@@ -133,7 +131,11 @@ void SymbolicChecker::Decide() {
     }
 }
 
+/**
+ * Runs the decision procedure on the constructed automaton
+ */
 bool SymbolicChecker::Run() {
+    assert(this->_automaton != nullptr);
     std::cout << "\n[*] Deciding WS1S Symbolically\n";
 
     // Construct the initial approximation for final states
@@ -153,13 +155,17 @@ bool SymbolicChecker::Run() {
 
 #   if (DUMP_EXAMPLES == true)
     // TODO: Better output
-    std::cout << "[*] Printing satisfying example of least length\n";
-    this->_automaton->DumpExample(ExampleType::SATISFYING);
-    std::cout << "\n";
+    if(this->_automaton->_satExample) {
+        std::cout << "[*] Printing satisfying example of least length\n";
+        this->_automaton->DumpExample(ExampleType::SATISFYING);
+        std::cout << "\n";
+    }
 
-    std::cout << "[*] Printing unsatisfying example of least length\n";
-    this->_automaton->DumpExample(ExampleType::UNSATISFYING);
-    std::cout << "\n";
+    if(this->_automaton->_unsatExample) {
+        std::cout << "[*] Printing unsatisfying example of least length\n";
+        this->_automaton->DumpExample(ExampleType::UNSATISFYING);
+        std::cout << "\n";
+    }
 #   endif
 
 #   if (DEBUG_FIXPOINT == true)
