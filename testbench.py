@@ -7,15 +7,24 @@
 '''
 
 import argparse
-from datetime import datetime
 import itertools
 import os
 import re
 import subprocess
 import sys
+import smtplib
+from email.mime.text import MIMEText
+from email.mime.base import MIMEBase
+from email.mime.multipart import MIMEMultipart
+from email import Encoders
+from datetime import datetime
 from threading import Timer
 from termcolor import colored
 from collections import namedtuple
+from cStringIO import StringIO
+
+sender = 'ifiedortom@fit.vutbr.cz'
+receiver = 'ifiedortom@fit.vutbr.cz'
 
 dwina_error = (-1, -1, -1, -1, -1, -1, -1)
 unknown_error = -3
@@ -38,8 +47,6 @@ def parse_total_time(line):
     time = 3600*float(match.group(1)) + 60*float(match.group(2)) + float(match.group(3))
     return time if time != 0 else 0.01
 
-def identity(line):
-    return line
 
 measures = {
     'gaston': {
@@ -55,7 +62,7 @@ measures = {
             'time-base': Measure("dfa creation" + whatever_regex + time_regex, time_default, parse_total_time),
             'time-conv': Measure("mona <-> vata" + whatever_regex + time_regex, time_default, parse_total_time),
         },
-    'mona': {
+    'mona': { # Just place holder, so far this is not automatized
             'time': 0,
             'space': 0
     }
@@ -81,6 +88,7 @@ def createArgumentParser():
     parser.add_argument('--bin', '-b', action='append', default=None, help='binary that will be used for executing script')
     parser.add_argument('--no-export-to-csv', '-x', action='store_true', help='will not export to csv')
     parser.add_argument('--timeout', '-t', default=None, help='timeouts in minutes')
+    parser.add_argument('--notify', '-n', action='store_true', help="sends email notification to email")
     return parser
 
 
@@ -196,7 +204,33 @@ def exportToCSV(data, bins):
                     bench_list = bench_list + [str(data[benchmark][bin][key])]
             csvFile.write(", ".join(bench_list))
             csvFile.write('\n')
+    return saveTo
 
+
+def notify(results, contents):
+    '''
+    Sends the email notification together with results after the testbench terminates
+
+    @:param result: contents of the generated csv, fil.
+    '''
+    msg = MIMEMultipart()
+
+    msg['Subject'] = '[Testbench.py] Results of ' + results
+    msg['From'] = sender
+    msg['To'] = receiver
+
+    msg.attach(MIMEText(contents))
+
+    attachment = MIMEBase('application', 'octet-stream')
+    attachment.set_payload(open(results, 'rb').read())
+    Encoders.encode_base64(attachment)
+    attachment.add_header('Content-Disposition', 'attachment; filename="{}"'.format(results))
+
+    msg.attach(attachment)
+
+    s = smtplib.SMTP('localhost')
+    s.sendmail(sender, [receiver], msg.as_string())
+    s.quit()
 
 def generateCSVname():
     '''
@@ -280,9 +314,6 @@ def parse_arguments():
 # methods for generating
 
 if __name__ == '__main__':
-    print("[*] WSkS Test Bench")
-    print("[c] Tomas Fiedor, ifiedortom@fit.vutbr.cz")
-
     options = parse_arguments()
 
     # we will generate stuff
@@ -300,6 +331,14 @@ if __name__ == '__main__':
     all_cases = []
     fails = 0
     failed_cases = []
+    saveout = sys.stdout
+    if options.notify:
+        colored = lambda text, *params, **keywords: text
+        sys.stdout = notified_out = StringIO()
+
+    print("[*] WSkS Test Bench")
+    print("[c] Tomas Fiedor, ifiedortom@fit.vutbr.cz")
+
     for root, dirs, filenames in os.walk(wdir):
         for f in filenames:
             benchmark = os.path.join(root, f)
@@ -343,4 +382,7 @@ if __name__ == '__main__':
                 print("; Formula is"),
                 print(colored("'{}'".format(rets['mona']), "white"))
     if not options.no_export_to_csv:
-        exportToCSV(data, bins)
+        csv = exportToCSV(data, bins)
+        if options.notify:
+            notify(csv, notified_out.getvalue())
+            sys.stdout = saveout
