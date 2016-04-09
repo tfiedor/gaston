@@ -1,13 +1,13 @@
  **
- * dWiNA - Deciding WSkS using non-deterministic automata 
- * 
- * Copyright (c) 2014  Tomas Fiedor <ifiedortom@fit.vutbr.cz>
+ * Gaston - Novel Decision Procedure for WS1S Logic
+ *
+ * Copyright (c) 2015  Tomas Fiedor <ifiedortom@fit.vutbr.cz>
  **************************************************************
  
  * About *
  *********
   
-  dWiNA is an implementation of backward decision procedure for WSkS logic 
+  Gaston is an implementation of backward decision procedure for WSkS logic
   (weak second-order theory of k successors). The tool is using libvata a 
   highly optimised non-deterministic finite tree automata library that supports 
   semi-symbolic encoding using multi-terminal binary decision diagrams (MTBDDs) for
@@ -20,7 +20,7 @@
  * Prerequisities *
  ******************
  
- Following packages are needed in order to compile and run dWiNA on your system:
+ Following packages are needed in order to compile and run Gaston on your system:
 
  	git (>= 1.6.0.0)
  	cmake (>= 2.8.2)
@@ -36,7 +36,7 @@
  
  To download the library, run
  
-   $ git clone https://github.com/Raph-Stash/dWiNA.git
+   $ git clone https://github.com/tfiedor/Gaston.git
  	
  * Compilation *
  ***************
@@ -105,7 +105,8 @@ second-order-term ::= varname | (second-order-term)
  
  If you have any questions, do not hesitate to contact the tool/method authors:
  
-   * Tomas Fiedor <ifiedortom@fit.vutbr.cz> (corresponding author of dWiNA)
-   * Ondrej Lengal <ilengal@fit.vutbr.cz> (corresponding author of VATA)
+   * Tomas Fiedor <ifiedortom@fit.vutbr.cz> (corresponding author of Gaston)
    * Lukas Holik <holik@fit.vutbr.cz>
-   * Tomas Vojnar <vojnar@fit.vutbr.cz> 
+   * Petr Janku <ijanku@fit.vutbr.cz> (optimizations of MONA wrapper)
+   * Ondrej Lengal <ilengal@fit.vutbr.cz> (corresponding author of VATA)
+   * Tomas Vojnar <vojnar@fit.vutbr.cz>
