@@ -463,7 +463,9 @@ protected:
     void _InitializeAggregateFunction(bool inComplement);
     void _InitializeSymbols(Workshops::SymbolWorkshop* form, Gaston::VarList*, IdentList*, Symbol*);
     SubsumptionResult _IsSubsumedCore(Term* t, bool b = false);
+    SubsumptionResult _fixpointTest(Term_ptr const& term);
     SubsumptionResult _testIfSubsumes(Term_ptr const& term);
+    SubsumptionResult _testIfIn(Term_ptr const& term);
     bool _eqCore(const Term&);
     unsigned int _MeasureStateSpaceCore();
     WorklistItemType _popFromWorklist();

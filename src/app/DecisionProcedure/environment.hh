@@ -61,7 +61,7 @@ enum ComparisonType {E_BY_SAME_PTR, E_BY_DIFFERENT_TYPE, E_BY_STRUCTURE};
 enum UnfoldedInType {E_IN_SUBSUMPTION, E_IN_ISECT_NONEMPTY, E_IN_COMPARISON, E_IN_NOWHERE};
 enum SubsumptionResult {E_FALSE, E_TRUE, E_PARTIALLY, E_TRUE_BUT_WORKLIST};
 enum ExampleType {SATISFYING, UNSATISFYING};
-enum WorklistSearchType {E_BFS, E_DFS};
+enum WorklistSearchType {E_BFS, E_DFS, E_UNGROUND_ROOT};
 
 namespace Gaston {
 /***************************

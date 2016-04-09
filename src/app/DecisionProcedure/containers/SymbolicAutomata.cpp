@@ -276,7 +276,7 @@ ResultType RootProjectionAutomaton::IntersectNonEmpty(Symbol* symbol, Term* fina
     ResultType result = this->_aut->IntersectNonEmpty(symbol, projectionApproximation->list[0], underComplement);
 
     // Create a new fixpoint term and iterator on it
-    TermFixpoint* fixpoint = this->_factory.CreateFixpoint(result.first, SymbolWorkshop::CreateZeroSymbol(), underComplement, result.second, WorklistSearchType::E_DFS);
+    TermFixpoint* fixpoint = this->_factory.CreateFixpoint(result.first, SymbolWorkshop::CreateZeroSymbol(), underComplement, result.second, WorklistSearchType::E_UNGROUND_ROOT);
     TermFixpoint::iterator it = fixpoint->GetIterator();
     Term_ptr fixpointTerm = nullptr;
 

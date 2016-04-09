@@ -975,6 +975,26 @@ bool TermFixpoint::_processOnePostponed() {
     }
 }
 
+SubsumptionResult TermFixpoint::_fixpointTest(Term_ptr const &term) {
+    if(this->_searchType == WorklistSearchType::E_UNGROUND_ROOT) {
+        // Fixme: Not sure if this is really correct, but somehow I still feel that the Root search is special and
+        //   subsumption is maybe not enough? But maybe this simply does not work for fixpoints of negated thing.
+        return this->_testIfIn(term);
+    } else {
+        return this->_testIfSubsumes(term);
+    }
+}
+
+SubsumptionResult TermFixpoint::_testIfIn(Term_ptr const &term) {
+    return (std::find_if(this->_fixpoint.begin(), this->_fixpoint.end(), [&term](FixpointMember const& member){
+        if(member.second) {
+            return member.first == term;
+        } else {
+            return false;
+        }
+    }) == this->_fixpoint.end() ? E_FALSE : E_TRUE);
+}
+
 /**
  * Tests if term is subsumed by fixpoint, either it is already computed in cache
  * or we have to compute the subsumption testing for each of the fixpoint members
@@ -1038,7 +1058,7 @@ void TermFixpoint::ComputeNextFixpoint() {
     this->_updateExamples(result);
 
     // If it is subsumed by fixpoint, we don't add it
-    if(this->_testIfSubsumes(result.first) != E_FALSE) {
+    if(this->_fixpointTest(result.first) != E_FALSE) {
         return;
     }
 
@@ -1072,7 +1092,7 @@ void TermFixpoint::ComputeNextPre() {
     this->_updateExamples(result);
 
     // If it is subsumed we return
-    if(this->_testIfSubsumes(result.first)) {
+    if(this->_fixpointTest(result.first) != E_FALSE) {
         return;
     }
 
