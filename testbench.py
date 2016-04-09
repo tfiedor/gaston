@@ -30,11 +30,12 @@ unknown_error = -3
 timeout_error = -2
 mona_error = -1                     # BDD Too Large for MONA
 
-Measure = namedtuple('Measure', 'regex default post_process')
+Measure = namedtuple('Measure', 'regex default post_process is_cummulative')
 time_default = "00:00:00"
 time_regex = "([0-9][0-9]:[0-9][0-9]:[0-9][0-9].[0-9][0-9])"
 space_default = "0"
 space_regex = "([0-9]+)"
+pair_regex = "\(([0-9]+),([0-9]+)\)"
 whatever_regex = ".*?"
 
 def parse_total_time(line):
@@ -46,33 +47,45 @@ def parse_total_time(line):
     time = 3600*float(match.group(1)) + 60*float(match.group(2)) + float(match.group(3))
     return time if time != 0 else 0.01
 
-
 measures = {
     'gaston': {
-            'symbols': Measure("symbols" + whatever_regex + space_regex, space_default, int),
-            'time': Measure("total elapsed time" + whatever_regex + time_regex, time_default, parse_total_time),
-            'space': Measure("explored fixpoint space" + whatever_regex + space_regex, space_default, int),
-            'space-all': Measure("overall state space" + whatever_regex + space_regex, space_default, int),
-            'space-fix': Measure("fixpoints" + whatever_regex + space_regex, space_default, int),
-            'space-bases': Measure("bases" + whatever_regex + space_regex, space_default, int),
-            'space-continuations': Measure("continuations" + whatever_regex + space_regex, space_default, int),
-            'space-products': Measure("products" + whatever_regex + space_regex, space_default, int),
-            'time-dp': Measure("decision procedure" + whatever_regex + time_regex, time_default, parse_total_time),
-            'time-base': Measure("dfa creation" + whatever_regex + time_regex, time_default, parse_total_time),
-            'time-conv': Measure("mona <-> vata" + whatever_regex + time_regex, time_default, parse_total_time),
+            'symbols': Measure("symbols" + whatever_regex + space_regex, space_default, int, False),
+            'time': Measure("total elapsed time" + whatever_regex + time_regex, time_default, parse_total_time, False),
+            'space': Measure("explored fixpoint space" + whatever_regex + space_regex, space_default, int, False),
+            'space-all': Measure("overall state space" + whatever_regex + space_regex, space_default, int, False),
+            'space-fix': Measure("fixpoints" + whatever_regex + space_regex, space_default, int, False),
+            'space-bases': Measure("bases" + whatever_regex + space_regex, space_default, int, False),
+            'space-continuations': Measure("continuations" + whatever_regex + space_regex, space_default, int, False),
+            'space-products': Measure("products" + whatever_regex + space_regex, space_default, int, False),
+            'time-dp': Measure("decision procedure" + whatever_regex + time_regex, time_default, parse_total_time, False),
+            'time-base': Measure("dfa creation" + whatever_regex + time_regex, time_default, parse_total_time, False),
+            'time-conv': Measure("mona <-> vata" + whatever_regex + time_regex, time_default, parse_total_time, False),
         },
-    'mona': { # Just place holder, so far this is not automatized
-            'time': 0,
-            'space': 0
+    'mona': {
+            'time': Measure("total time" + whatever_regex + time_regex, time_default, parse_total_time, False),
+            'space': Measure("minimizing" + whatever_regex + pair_regex + whatever_regex + pair_regex, space_default,
+                lambda parsed: sum([int(item[0]) for item in parsed]), True),
+            'space-min': Measure(whatever_regex + "minimizing" + whatever_regex + pair_regex + whatever_regex + pair_regex, space_default,
+                lambda parsed: sum([int(item[2]) for item in parsed]), True),
+            'bdd': Measure("minimizing" + whatever_regex + pair_regex + whatever_regex + pair_regex, space_default,
+                lambda parsed: sum([int(item[1]) for item in parsed]), True),
+            'bdd-min': Measure("minimizing" + whatever_regex + pair_regex + whatever_regex + pair_regex, space_default,
+                lambda parsed: sum([int(item[3]) for item in parsed]), True)
     }
 }
 dwina_error = {key: -1 for key in measures['gaston'].keys()}
 
+
 def parse_measure(tool, measure_name, input):
     measure = measures[tool][measure_name]
-    match = re.search(measure.regex, "\n".join(input).lower())
-    if match is None:
+    if measure.is_cummulative:
+        match = re.findall(measure.regex, "\n".join(input).lower())
+    else:
+        match = re.search(measure.regex, "\n".join(input).lower())
+    if match is None or (isinstance(match, list) and len(match) == 0):
         return measure.default
+    elif measure.is_cummulative:
+        return measure.post_process(match)
     else:
         return measure.post_process(match.group(1))
 
@@ -96,7 +109,7 @@ def run_mona(test, timeout):
     '''
     Runs MONA with following arguments:
     '''
-    args = ('mona', '-s', '"{}"'.format(test))
+    args = ('mona', '-s', '-q', '"{}"'.format(test))
     output, retcode = runProcess(args, timeout)
     if(retcode != 0):
         if(retcode == 124):
@@ -289,18 +302,11 @@ def parseMonaOutput(output):
             break
 
     # get total time
-    times = [line for line in strippedLines if line.startswith('Total time:')]
+    data = {}
+    for (name, measure) in measures['mona'].items():
+        data[name] = parse_measure('mona', name, strippedLines)
 
-    if len(times) != 1:
-        return mona_error
-    time = parse_total_time(times[0])
-
-    # get all minimizings
-    minimizations = [line for line in strippedLines if line.startswith('Minimizing')]
-    automata_sizes = [int((re.search('\(([0-9]+),[0-9]+\)', min)).group(1)) for min in minimizations]
-    output_size = sum(automata_sizes)
-
-    return {'time': time, 'space': output_size}, ret
+    return data, ret
 
 
 def parse_arguments():
