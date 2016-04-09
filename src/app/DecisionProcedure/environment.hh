@@ -159,7 +159,7 @@ public:
 #define DEBUG_ROOT_AUTOMATON		    false
 #define DEBUG_AUTOMATA_ADDRESSES		false
 #define DEBUG_EXAMPLE_PATHS				true
-#define DEBUG_BASE_AUTOMATA 			true
+#define DEBUG_BASE_AUTOMATA 			false
 #define DEBUG_MONA_DFA					false
 #define DEBUG_MONA_CODE_FORMULA			false
 #define DEBUG_RESTRICTIONS				true

@@ -192,6 +192,9 @@ template<class ExistClass>
 ASTForm* FullAntiPrenexer::existentialAntiPrenex(ASTForm *form) {
     static_assert(std::is_base_of<ASTForm_q, ExistClass>::value, "ExistClass is not derived from 'ASTForm_q' class");
 
+    NegationUnfolder negationUnfolder;
+    form = reinterpret_cast<ASTForm*>(form->accept(negationUnfolder));
+
     ExistClass* exForm = static_cast<ExistClass*>(form);
     switch(exForm->f->kind) {
         case aOr:
@@ -225,6 +228,9 @@ AST* FullAntiPrenexer::visit(ASTForm_Ex2 *form) {
 template<class ForallClass>
 ASTForm* FullAntiPrenexer::universalAntiPrenex(ASTForm *form) {
     static_assert(std::is_base_of<ASTForm_q, ForallClass>::value, "ForallClass is not derived from 'ASTForm_q' class");
+
+    NegationUnfolder negationUnfolder;
+    form = reinterpret_cast<ASTForm*>(form->accept(negationUnfolder));
 
     ForallClass* allForm = static_cast<ForallClass*>(form);
     switch(allForm->f->kind) {

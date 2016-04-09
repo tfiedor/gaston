@@ -26,7 +26,6 @@ from cStringIO import StringIO
 sender = 'ifiedortom@fit.vutbr.cz'
 receiver = 'ifiedortom@fit.vutbr.cz'
 
-dwina_error = (-1, -1, -1, -1, -1, -1, -1)
 unknown_error = -3
 timeout_error = -2
 mona_error = -1                     # BDD Too Large for MONA
@@ -67,6 +66,7 @@ measures = {
             'space': 0
     }
 }
+dwina_error = {key: -1 for key in measures['gaston'].keys()}
 
 def parse_measure(tool, measure_name, input):
     measure = measures[tool][measure_name]
@@ -201,7 +201,10 @@ def exportToCSV(data, bins):
                 if not hasattr(data[benchmark][bin], "__getitem__"):
                     bench_list = bench_list + [str(data[benchmark][bin])]
                 else:
-                    bench_list = bench_list + [str(data[benchmark][bin][key])]
+                    try:
+                        bench_list = bench_list + [str(data[benchmark][bin][key])]
+                    except Exception:
+                        print(bin, key, data[benchmark][bin])
             csvFile.write(", ".join(bench_list))
             csvFile.write('\n')
     return saveTo

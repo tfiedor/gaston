@@ -118,7 +118,7 @@ void parseTags(std::string&s, std::list<size_t>& tags) {
             s.erase(0, pos + delimiter.length());
         }
         tags.insert(tags.end(), std::stoi(s));
-    } catch (std::invalid_argument e) {
+    } catch (const std::invalid_argument& e) {
         // We'll skip the rest of the tags that were malformed
         std::cout << "[!] \033[1;31mWarning\033[0m: Invalid tag rest were skipped\n";
     }
