@@ -73,6 +73,7 @@ add_executable(gaston
 	src/app/DecisionProcedure/visitors/BaseAutomataMerger.cpp
 	src/app/DecisionProcedure/visitors/ExistentialPrenexer.cpp
 	src/app/DecisionProcedure/visitors/ZeroOrderRemover.cpp
+	src/app/DecisionProcedure/visitors/MonaSerializer.cpp
 )
 
 link_directories(${CMAKE_SOURCE_DIR}/src/libs/)

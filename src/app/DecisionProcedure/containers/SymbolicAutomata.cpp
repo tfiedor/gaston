@@ -1162,7 +1162,7 @@ void BinaryOpAutomaton::DumpStats() {
         #if (MEASURE_CACHE_HITS == true)
         this->_resCache.dumpStats();
         #endif
-        #if (DEBUG_WORKSHOPS)
+        #if (DEBUG_WORKSHOPS == true)
         this->_factory.Dump();
         #endif
         #if (DEBUG_SYMBOL_CREATION == true)

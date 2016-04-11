@@ -174,10 +174,10 @@ public:
 #define DEBUG_TERM_SUBSUMED_BY 			true
 #define DEBUG_TERM_CACHE_COMPARISON		false
 #define DEBUG_SYMBOL_CREATION			true
-#define DEBUG_CACHE_MEMBERS				true
+#define DEBUG_CACHE_MEMBERS				false
 #define DEBUG_CACHE_BUCKETS				false
 #define DEBUG_CACHE_MEMBERS_HASH		true
-#define DEBUG_WORKSHOPS					false
+#define DEBUG_WORKSHOPS					true
 #define DEBUG_CONTINUATIONS 			false
 #define DEBUG_NO_WORKSHOPS				false
 #define DEBUG_PRE					    false
@@ -194,11 +194,11 @@ public:
 /*
  * >>> Automata stats options
  *****************************/
-#define PRINT_STATS_PROJECTION			true
+#define PRINT_STATS_PROJECTION			false
 #define PRINT_STATS_PRODUCT				true
-#define PRINT_STATS_NEGATION			true
-#define PRINT_STATS_BASE				true
-#define PRINT_STATS						false
+#define PRINT_STATS_NEGATION			false
+#define PRINT_STATS_BASE				false
+#define PRINT_STATS						true
 
 /* >>> Dumping Options <<< *
  ***************************/
@@ -210,7 +210,7 @@ public:
  *****************************/
 #define MEASURE_STATE_SPACE 			true	// < Measures how many instances of terms were created
 #define MEASURE_CACHE_HITS 				true	// < Prints the statistics for each cache on each node
-#define MEASURE_CACHE_BUCKETS			true	// < Prints the statistics for cache buckets
+#define MEASURE_CACHE_BUCKETS			false   // < Prints the statistics for cache buckets
 #define MEASURE_CONTINUATION_CREATION	true	// < Measures how many continuations are created
 #define MEASURE_CONTINUATION_EVALUATION	true	// < Measures how many continuations are actually unfolded
 #define MEASURE_RESULT_HITS				true	// < Measure how many times the result hits in cache
@@ -252,7 +252,7 @@ public:
 #define OPT_TERM_HASH_BY_APPROX			true	// < Include stateSpaceApprox into hash (i.e. better distribution of cache)
 #define OPT_ANTIPRENEXING				true	// < Transform formula to anti-prenex form (i.e. all of the quantifiers are deepest on leaves)
 #define OPT_DRAW_NEGATION_IN_BASE 		true    // < Negation is handled on formula level and not on computation level on base automata
-#define OPT_CREATE_QF_AUTOMATON 		false    // < Transform quantifier-free automaton to formula
+#define OPT_CREATE_QF_AUTOMATON 		true    // < Transform quantifier-free automaton to formula
 #define OPT_REDUCE_AUT_EVERYTIME		false	// < Call reduce everytime VATA automaton is created (i.e. as intermediate result)
 #define OPT_REDUCE_AUT_LAST				true	// < Call reduce after the final VATA automaton is created
 #define OPT_EARLY_EVALUATION 			false   // < Evaluates early interesection of products
