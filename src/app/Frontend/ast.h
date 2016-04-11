@@ -108,7 +108,7 @@ public:
   virtual void freeVars(IdentList*, IdentList*) {};
   virtual void dump() {};
 	virtual void detach() {}
-	virtual std::string ToString() { return std::string("");}
+	virtual std::string ToString(bool no_utf = false) { return std::string("");}
 
 	size_t tag = 1;
 	size_t fixpoint_number = 0;
@@ -513,7 +513,7 @@ public:
   ASTTermCode *makeCode(SubstCode *subst = NULL);
   Ident getVar() {return n;};
   void dump();
-	virtual std::string ToString();
+	virtual std::string ToString(bool no_utf = false);
 
   ASTTerm1* clone() { return new ASTTerm1_Var1(this->n, this->pos);}
 
@@ -572,7 +572,7 @@ public:
   ASTTermCode *makeCode(SubstCode *subst = NULL);
 	virtual ASTTerm1* clone() { return new ASTTerm1_Int(this->n, Pos()); }
   void dump();
-	virtual std::string ToString();
+	virtual std::string ToString(bool no_utf = false);
 };
 
 class ASTTerm1_Plus: public ASTTerm1_tn {
@@ -585,7 +585,7 @@ public:
   ASTTermCode *makeCode(SubstCode *subst = NULL);
 	virtual ASTTerm1* clone() { return new ASTTerm1_Plus(this->t->clone(), this->n, Pos()); }
   void dump();
-	virtual std::string ToString();
+	virtual std::string ToString(bool no_utf = false);
 };
 
 class ASTTerm1_Minus: public ASTTerm1_tn {
@@ -599,7 +599,7 @@ public:
 	virtual ASTTerm1* clone() { return new ASTTerm1_Minus(this->t->clone(), this->n, Pos()); }
   VarCode unfold(int v1, int v2, int n, SubstCode *subst, Pos pos);
   void dump();
-	virtual std::string ToString();
+	virtual std::string ToString(bool no_utf = false);
 };
 
 class ASTTerm1_PlusModulo: public ASTTerm1_tnt {
@@ -672,7 +672,7 @@ public:
   ASTTermCode *makeCode(SubstCode *subst = NULL);
   Ident getVar() {return n;};
   void dump();
-	virtual std::string ToString();
+	virtual std::string ToString(bool no_utf = false);
 
   ASTTerm2* unfoldMacro(IdentList*, ASTList*);
   ASTTerm2* clone() { return new ASTTerm2_Var2(this->n, this->pos);}
@@ -739,7 +739,7 @@ public:
   ASTTermCode *makeCode(SubstCode *subst = NULL);
 	virtual ASTTerm2* clone() { return new ASTTerm2_Empty(Pos()); }
   void dump();
-	virtual std::string ToString();
+	virtual std::string ToString(bool no_utf = false);
 };
 
 class ASTTerm2_Union: public ASTTerm2_TT {
@@ -805,7 +805,7 @@ public:
 	virtual ASTTerm2* clone() { return new ASTTerm2_Plus(this->T->clone(), this->n, Pos()); }
   VarCode unfold(int v1, int v2, int n, SubstCode *subst, Pos pos);
   void dump();
-	virtual std::string ToString();
+	virtual std::string ToString(bool no_utf = false);
 };
 
 class ASTTerm2_Minus: public ASTTerm2_Tn {
@@ -819,7 +819,7 @@ public:
 	virtual ASTTerm2* clone() { return new ASTTerm2_Plus(this->T->clone(), this->n, Pos()); }
   VarCode unfold(int v1, int v2, int n, SubstCode *subst, Pos pos);
   void dump();
-	virtual std::string ToString();
+	virtual std::string ToString(bool no_utf = false);
 };
 
 class ASTTerm2_Interval: public ASTTerm2 {
@@ -949,7 +949,7 @@ public:
 
   VarCode makeCode(SubstCode *subst = NULL);
   void dump();
-	virtual std::string ToString();
+	virtual std::string ToString(bool no_utf = false);
   ASTForm* clone() { return new ASTForm_In(this->t1->clone(), this->T2->clone(), this->pos); }
   // Conversion of AST representation of formula to Automaton
   void toUnaryAutomaton(Automaton &aut, bool doComplement);
@@ -966,7 +966,7 @@ public:
   VarCode makeCode(SubstCode *subst = NULL);
 
   void dump();
-	virtual std::string ToString();
+	virtual std::string ToString(bool no_utf = false);
 
   ASTForm *clone() { return new ASTForm_Notin(this->t1->clone(), this->T2->clone(), this->pos); }
 };
@@ -1011,7 +1011,7 @@ public:
   VarCode makeCode(SubstCode *subst = NULL);
   void freeVars(IdentList*, IdentList*);
   void dump();
-	virtual std::string ToString();
+	virtual std::string ToString(bool no_utf = false);
   ASTForm* clone() { return new ASTForm_FirstOrder(this->t->clone(), this->pos); }
 
   // Conversion of AST representation of formula to Automaton
@@ -1031,7 +1031,7 @@ public:
 
   VarCode makeCode(SubstCode *subst = NULL);
   void dump();
-	virtual std::string ToString();
+	virtual std::string ToString(bool no_utf = false);
   ASTForm* clone() { return new ASTForm_Sub(this->T1->clone(), this->T2->clone(), this->pos); }
 
   // Conversion of AST representation of formula to Automaton
@@ -1049,7 +1049,7 @@ public:
 
   VarCode makeCode(SubstCode *subst = NULL);
   void dump();
-	virtual std::string ToString();
+	virtual std::string ToString(bool no_utf = false);
   ASTForm* clone() { return new ASTForm_Equal1(this->t1->clone(), this->t2->clone(), this->pos); }
 
   // Conversion of AST representation of formula to Automaton
@@ -1066,7 +1066,7 @@ public:
 
   VarCode makeCode(SubstCode *subst = NULL);
   void dump();
-	virtual std::string ToString();
+	virtual std::string ToString(bool no_utf = false);
   ASTForm* clone() { return new ASTForm_Equal2(this->T1->clone(), this->T2->clone(), this->pos); }
 
   // Conversion of AST representation of formula to Automaton
@@ -1084,7 +1084,7 @@ public:
 
   VarCode makeCode(SubstCode *subst = NULL);
   void dump();
-	virtual std::string ToString();
+	virtual std::string ToString(bool no_utf = false);
   ASTForm* clone() { return new ASTForm_NotEqual1(this->t1->clone(), this->t2->clone(), this->pos); }
 };
 
@@ -1097,7 +1097,7 @@ public:
 
   VarCode makeCode(SubstCode *subst = NULL);
   void dump();
-	virtual std::string ToString();
+	virtual std::string ToString(bool no_utf = false);
   ASTForm* clone() { return new ASTForm_NotEqual2(this->T1->clone(), this->T2->clone(), this->pos); }
 };
 
@@ -1110,7 +1110,7 @@ public:
 
   VarCode makeCode(SubstCode *subst = NULL);
   void dump();
-	virtual std::string ToString();
+	virtual std::string ToString(bool no_utf = false);
   void toUnaryAutomaton(Automaton &aut, bool doComplement);
   SymbolicAutomaton* _toSymbolicAutomatonCore(bool doComplement);
   ASTForm* clone() { return new ASTForm_Less(this->t1->clone(), this->t2->clone(), this->pos); }
@@ -1125,7 +1125,7 @@ public:
 
   VarCode makeCode(SubstCode *subst = NULL);
   void dump();
-	virtual std::string ToString();
+	virtual std::string ToString(bool no_utf = false);
   void toUnaryAutomaton(Automaton &aut, bool doComplement);
   SymbolicAutomaton* _toSymbolicAutomatonCore(bool doComplement);
   ASTForm* clone() { return new ASTForm_LessEq(this->t1->clone(), this->t2->clone(), this->pos); }
@@ -1153,7 +1153,7 @@ public:
   VarCode makeCode(SubstCode *subst = NULL);
   void dump();
 	void detach() {this->f1 = nullptr; this->f2 = nullptr;}
-	virtual std::string ToString();
+	virtual std::string ToString(bool no_utf = false);
   ASTForm* clone() { return new ASTForm_Impl(this->f1->clone(), this->f2->clone(), this->pos); }
 };
 
@@ -1167,7 +1167,7 @@ public:
   VarCode makeCode(SubstCode *subst = NULL);
   void dump();
 	void detach() {this->f1 = nullptr; this->f2 = nullptr;}
-	virtual std::string ToString();
+	virtual std::string ToString(bool no_utf = false);
   ASTForm* clone() { return new ASTForm_Biimpl(this->f1->clone(), this->f2->clone(), this->pos); }
 };
 
@@ -1181,7 +1181,7 @@ public:
   VarCode makeCode(SubstCode *subst = NULL);
   void dump();
 	void detach() {this->f1 = nullptr; this->f2 = nullptr;}
-	virtual std::string ToString();
+	virtual std::string ToString(bool no_utf = false);
   ASTForm* clone() { return new ASTForm_And(this->f1->clone(), this->f2->clone(), this->pos); }
 
   void toUnaryAutomaton(Automaton &aut, bool doComplement);
@@ -1211,7 +1211,7 @@ public:
   VarCode makeCode(SubstCode *subst = NULL);
   void dump();
 	void detach() {this->f1 = nullptr; this->f2 = nullptr;}
-	virtual std::string ToString();
+	virtual std::string ToString(bool no_utf = false);
   ASTForm* clone() { return new ASTForm_Or(this->f1->clone(), this->f2->clone(), this->pos); }
 
   void toUnaryAutomaton(Automaton &aut, bool doComplement);
@@ -1231,7 +1231,7 @@ public:
   VarCode makeCode(SubstCode *subst = NULL);
   void dump();
 	void detach() {this->f = nullptr; }
-	virtual std::string ToString();
+	virtual std::string ToString(bool no_utf = false);
   ASTForm* clone() { return new ASTForm_Not(this->f->clone(), this->pos); }
   ASTForm* unfoldMacro(IdentList*, ASTList*);
 
@@ -1265,6 +1265,7 @@ public:
   VarCode makeCode(SubstCode *subst = NULL);
   void dump();
 	void detach() {this->ul = nullptr; this->vl = nullptr; this->f = nullptr; }
+	virtual std::string ToString(bool no_utf = false);
   ASTForm* clone() { return new ASTForm_Ex1(this->ul, this->vl->copy(), this->f->clone(), this->pos); }
 };
 
@@ -1279,6 +1280,7 @@ public:
   void dump();
 	void detach() {this->ul = nullptr; this->vl = nullptr; this->f = nullptr; }
   ASTForm* clone() { return new ASTForm_Ex2(this->ul, this->vl->copy(), this->f->clone(), this->pos); }
+	virtual std::string ToString(bool no_utf = false);
   SymbolicAutomaton* _toSymbolicAutomatonCore(bool doComplement);
 };
 
@@ -1305,6 +1307,7 @@ public:
   VarCode makeCode(SubstCode *subst = NULL);
   void dump();
 	void detach() {this->ul = nullptr; this->vl = nullptr; this->f = nullptr;}
+	virtual std::string ToString(bool no_utf = false);
   ASTForm* clone() { return new ASTForm_All1(this->ul, this->vl->copy(), this->f->clone(), this->pos); }
 };
 
@@ -1318,6 +1321,7 @@ public:
   VarCode makeCode(SubstCode *subst = NULL);
   void dump();
 	void detach() {this->ul = nullptr; this->vl = nullptr; this->f = nullptr;}
+	virtual std::string ToString(bool no_utf = false);
   ASTForm* clone() { return new ASTForm_All2(this->ul, this->vl->copy(), this->f->clone(), this->pos); }
 };
 

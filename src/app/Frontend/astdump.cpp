@@ -109,8 +109,12 @@ ASTTerm1_Var1::dump()
   #endif
 }
 
-std::string ASTTerm1_Var1::ToString() {
-  return (std::string(symbolTable.lookupSymbol(n)) + "\u00B9");
+std::string ASTTerm1_Var1::ToString(bool no_utf) {
+  if(no_utf) {
+    return std::string(symbolTable.lookupSymbol(n));
+  } else {
+    return (std::string(symbolTable.lookupSymbol(n)) + "\u00B9");
+  }
 }
   
 void 
@@ -151,7 +155,7 @@ ASTTerm1_Int::dump()
   #endif
 }
 
-std::string ASTTerm1_Int::ToString() {
+std::string ASTTerm1_Int::ToString(bool no_utf) {
   return std::to_string(n);
 }
     
@@ -165,8 +169,12 @@ ASTTerm1_Plus::dump()
   #endif
 }
 
-std::string ASTTerm1_Plus::ToString() {
-  return ("(" + t->ToString() + " +\u00B9 " + std::to_string(n) + ")");
+std::string ASTTerm1_Plus::ToString(bool no_utf) {
+  if(no_utf) {
+    return "(" + t->ToString(no_utf) + " + " + std::to_string(n) + ")";
+  } else {
+    return ("(" + t->ToString(no_utf) + " +\u00B9 " + std::to_string(n) + ")");
+  }
 }
     
 void 
@@ -179,8 +187,12 @@ ASTTerm1_Minus::dump()
   #endif
 }
 
-std::string ASTTerm1_Minus::ToString() {
-  return ("(" + t->ToString() + " -\u00B9 " + std::to_string(n) + ")");
+std::string ASTTerm1_Minus::ToString(bool no_utf) {
+  if(no_utf) {
+    return "(" + t->ToString(no_utf) + " - " + std::to_string(n) + ")";
+  } else {
+    return ("(" + t->ToString(no_utf) + " -\u00B9 " + std::to_string(n) + ")");
+  }
 }
     
 void 
@@ -225,8 +237,12 @@ ASTTerm2_Var2::dump()
   #endif
 }
 
-std::string ASTTerm2_Var2::ToString() {
-  return (std::string(symbolTable.lookupSymbol(n)) + "\u00B2");
+std::string ASTTerm2_Var2::ToString(bool no_utf) {
+  if(no_utf) {
+    return std::string(symbolTable.lookupSymbol(n));
+  } else {
+    return (std::string(symbolTable.lookupSymbol(n)) + "\u00B2");
+  }
 }
     
 void 
@@ -260,8 +276,12 @@ ASTTerm2_Empty::dump()
   cout << "Empty";
 }
 
-std::string ASTTerm2_Empty::ToString() {
-  return std::string("\u2205");
+std::string ASTTerm2_Empty::ToString(bool no_utf) {
+  if(no_utf) {
+    return "Empty";
+  } else {
+    return std::string("\u2205");
+  }
 }
     
 void 
@@ -305,8 +325,12 @@ ASTTerm2_Plus::dump()
   #endif
 }
 
-std::string ASTTerm2_Plus::ToString() {
-  return ("(" + T->ToString() + " +\u00B2 " + std::to_string(n) + ")");
+std::string ASTTerm2_Plus::ToString(bool no_utf) {
+  if(no_utf) {
+    return ("(" + T->ToString(no_utf) + " + " + std::to_string(n) + ")");
+  } else {
+    return ("(" + T->ToString(no_utf) + " +\u00B2 " + std::to_string(n) + ")");
+  }
 }
     
 void 
@@ -319,8 +343,13 @@ ASTTerm2_Minus::dump()
   #endif
 }
 
-std::string ASTTerm2_Minus::ToString() {
-  return ("(" + T->ToString() + " -\u00B2 " + std::to_string(n) + ")");
+std::string ASTTerm2_Minus::ToString(bool no_utf) {
+  if(no_utf) {
+    return ("(" + T->ToString(no_utf) + " - " + std::to_string(n) + ")");
+  } else {
+    return ("(" + T->ToString(no_utf) + " -\u00B2 " + std::to_string(n) + ")");
+  }
+
 }
     
 void 
@@ -376,8 +405,12 @@ ASTForm_In::dump()
   #endif
 }
 
-std::string ASTForm_In::ToString() {
-  return ("(" + t1->ToString() + " \u2208 " + T2->ToString() + ")");
+std::string ASTForm_In::ToString(bool no_utf) {
+  if(no_utf) {
+    return ("(" + t1->ToString(no_utf) + " in " + T2->ToString(no_utf) + ")");
+  } else {
+    return ("(" + t1->ToString(no_utf) + " \u2208 " + T2->ToString(no_utf) + ")");
+  }
 }
     
 void 
@@ -390,8 +423,12 @@ ASTForm_Notin::dump()
   #endif
 }
 
-std::string ASTForm_Notin::ToString() {
-  return ("(" + t1->ToString() + " \u2209 " + T2->ToString() + ")");
+std::string ASTForm_Notin::ToString(bool no_utf) {
+  if(no_utf) {
+    return ("(" + t1->ToString(no_utf) + " notin " + T2->ToString(no_utf) + ")");
+  } else {
+    return ("(" + t1->ToString(no_utf) + " \u2209 " + T2->ToString(no_utf) + ")");
+  }
 }
     
 void
@@ -412,8 +449,12 @@ ASTForm_FirstOrder::dump()
   cout << "FirstOrder("; t->dump(); cout << ")";
 }
 
-std::string ASTForm_FirstOrder::ToString() {
-  return ("(FO (" + t->ToString() + "))");
+std::string ASTForm_FirstOrder::ToString(bool no_utf) {
+  if(no_utf) {
+    return "FirstOrder(" + t->ToString(no_utf) + ")";
+  } else {
+    return ("(FO (" + t->ToString(no_utf) + "))");
+  }
 }
     
 void 
@@ -426,8 +467,12 @@ ASTForm_Sub::dump()
   #endif
 }
 
-std::string ASTForm_Sub::ToString() {
-  return ("(" + T1->ToString() + " \u2286 " + T2->ToString() + ")");
+std::string ASTForm_Sub::ToString(bool no_utf) {
+  if(no_utf) {
+    return "(" + T1->ToString(no_utf) + " sub " + T2->ToString(no_utf) + ")";
+  } else {
+    return ("(" + T1->ToString(no_utf) + " \u2286 " + T2->ToString(no_utf) + ")");
+  }
 }
     
 void 
@@ -440,8 +485,12 @@ ASTForm_Equal1::dump()
   #endif
 }
 
-std::string ASTForm_Equal1::ToString() {
-  return ("(" + t1->ToString() + " \u003D\u00B9 " + t2->ToString() + ")");
+std::string ASTForm_Equal1::ToString(bool no_utf) {
+  if(no_utf) {
+    return ("(" + t1->ToString(no_utf) + " = " + t2->ToString(no_utf) + ")");
+  } else {
+    return ("(" + t1->ToString(no_utf) + " \u003D\u00B9 " + t2->ToString(no_utf) + ")");
+  }
 }
 
 void 
@@ -454,8 +503,12 @@ ASTForm_Equal2::dump()
   #endif
 }
 
-std::string ASTForm_Equal2::ToString() {
-  return ("(" + T1->ToString() + " \u003D\u00B2 " + T2->ToString() + ")");
+std::string ASTForm_Equal2::ToString(bool no_utf) {
+  if(no_utf) {
+    return ("(" + T1->ToString(no_utf) + " = " + T2->ToString(no_utf) + ")");
+  } else {
+    return ("(" + T1->ToString(no_utf) + " \u003D\u00B2 " + T2->ToString(no_utf) + ")");
+  }
 }
     
 void 
@@ -468,8 +521,12 @@ ASTForm_NotEqual1::dump()
   #endif
 }
 
-std::string ASTForm_NotEqual1::ToString() {
-  return ("(" + t1->ToString() + " \u2260\u00B9 " + t2->ToString() + ")");
+std::string ASTForm_NotEqual1::ToString(bool no_utf) {
+  if(no_utf) {
+    return ("(" + t1->ToString(no_utf) + " ~= " + t2->ToString(no_utf) + ")");
+  } else {
+    return ("(" + t1->ToString(no_utf) + " \u2260\u00B9 " + t2->ToString(no_utf) + ")");
+  }
 }
     
 void 
@@ -482,8 +539,12 @@ ASTForm_NotEqual2::dump()
   #endif
 }
 
-std::string ASTForm_NotEqual2::ToString() {
-  return ("(" + T1->ToString() + " \u2260\u00B2 " + T2->ToString() + ")");
+std::string ASTForm_NotEqual2::ToString(bool no_utf) {
+  if(no_utf) {
+    return ("(" + T1->ToString(no_utf) + " ~= " + T2->ToString(no_utf) + ")");
+  } else {
+    return ("(" + T1->ToString(no_utf) + " \u2260\u00B2 " + T2->ToString(no_utf) + ")");
+  }
 }
     
 void 
@@ -496,8 +557,12 @@ ASTForm_Less::dump()
   #endif
 }
 
-std::string ASTForm_Less::ToString() {
-  return ("(" + t1->ToString() + " \u003C\u00B9 " + t2->ToString() + ")");
+std::string ASTForm_Less::ToString(bool no_utf) {
+  if(no_utf) {
+    return ("(" + t1->ToString(no_utf) + " < " + t2->ToString(no_utf) + ")");
+  } else {
+    return ("(" + t1->ToString(no_utf) + " \u003C\u00B9 " + t2->ToString(no_utf) + ")");
+  }
 }
     
 void 
@@ -510,8 +575,12 @@ ASTForm_LessEq::dump()
   #endif
 }
 
-std::string ASTForm_LessEq::ToString() {
-  return ("(" + t1->ToString() + " \u2264\u00B9 " + t2->ToString() + ")");
+std::string ASTForm_LessEq::ToString(bool no_utf) {
+  if(no_utf) {
+    return ("(" + t1->ToString(no_utf) + " <= " + t2->ToString(no_utf) + ")");
+  } else {
+    return ("(" + t1->ToString(no_utf) + " \u2264\u00B9 " + t2->ToString(no_utf) + ")");
+  }
 }
     
 void 
@@ -526,8 +595,8 @@ ASTForm_Impl::dump()
   cout << "("; f1->dump(); cout << " => "; f2->dump(); cout << ")";
 }
 
-std::string ASTForm_Impl::ToString() {
-  return ("(" + f1->ToString() + " => " + f2->ToString() + ")");
+std::string ASTForm_Impl::ToString(bool no_utf) {
+  return ("(" + f1->ToString(no_utf) + " => " + f2->ToString(no_utf) + ")");
 }
     
 void 
@@ -536,8 +605,8 @@ ASTForm_Biimpl::dump()
   cout << "("; f1->dump(); cout << " <=> "; f2->dump(); cout << ")";
 }
 
-std::string ASTForm_Biimpl::ToString() {
-  return ("(" + f1->ToString() + " <=> " + f2->ToString() + ")");
+std::string ASTForm_Biimpl::ToString(bool no_utf) {
+  return ("(" + f1->ToString(no_utf) + " <=> " + f2->ToString(no_utf) + ")");
 }
     
 void 
@@ -550,8 +619,12 @@ ASTForm_And::dump()
   #endif
 }
 
-std::string ASTForm_And::ToString() {
-  return ("(" + f1->ToString() + " \u2227 " + f2->ToString() + ")");
+std::string ASTForm_And::ToString(bool no_utf) {
+  if(no_utf) {
+    return "(" + f1->ToString(no_utf) + " & " + f2->ToString(no_utf) + ")";
+  } else {
+    return ("(" + f1->ToString(no_utf) + " \u2227 " + f2->ToString(no_utf) + ")");
+  }
 }
     
 void 
@@ -570,8 +643,12 @@ ASTForm_Or::dump()
   #endif
 }
 
-std::string ASTForm_Or::ToString() {
-  return ("(" + f1->ToString() + " \u2228 " + f2->ToString() + ")");
+std::string ASTForm_Or::ToString(bool no_utf) {
+  if(no_utf) {
+    return ("(" + f1->ToString(no_utf) + " | " + f2->ToString(no_utf) + ")");
+  } else {
+    return ("(" + f1->ToString(no_utf) + " \u2228 " + f2->ToString(no_utf) + ")");
+  }
 }
     
 void 
@@ -584,8 +661,12 @@ ASTForm_Not::dump()
   #endif
 }
 
-std::string ASTForm_Not::ToString() {
-  return ("(\u00AC " + f->ToString() + ")");
+std::string ASTForm_Not::ToString(bool no_utf) {
+  if(no_utf) {
+    return "~" + f->ToString(no_utf);
+  } else {
+    return ("(\u00AC " + f->ToString(no_utf) + ")");
+  }
 }
     
 void 
@@ -607,6 +688,25 @@ ASTForm_Ex1::dump()
   cout << "Ex1("; vl->dump(); cout << ","; f->dump(); cout << ")";
   #endif
 }
+
+std::string quantifier_to_string(IdentList* free, std::string quantifier) {
+  std::string s(quantifier);
+  s += " ";
+  bool first = true;
+  for (auto it = free->begin(); it != free->end(); ++it) {
+    if (first) {
+      first = false;
+    } else {
+      s += ", ";
+    }
+    s += std::string(symbolTable.lookupSymbol(*it));
+  }
+  s += ": ";
+  return s;
+}
+std::string ASTForm_Ex1::ToString(bool no_utf) {
+  return "(" +  quantifier_to_string(this->vl, "ex1") + this->f->ToString(no_utf) + ")";
+}
     
 void 
 ASTForm_Ex2::dump()
@@ -616,6 +716,10 @@ ASTForm_Ex2::dump()
   #else
   cout << "Ex2("; vl->dump(); cout << ","; f->dump(); cout << ")";
   #endif
+}
+
+std::string ASTForm_Ex2::ToString(bool no_utf) {
+  return "(" +  quantifier_to_string(this->vl, "ex2") + this->f->ToString(no_utf) + ")";
 }
     
 void 
@@ -637,6 +741,10 @@ ASTForm_All1::dump()
   cout << "All1("; vl->dump(); cout << ","; f->dump(); cout << ")";
   #endif
 }
+
+std::string ASTForm_All1::ToString(bool no_utf) {
+  return "(" + quantifier_to_string(this->vl, "all1") + this->f->ToString(no_utf) + ")";
+}
     
 void 
 ASTForm_All2::dump()
@@ -646,6 +754,10 @@ ASTForm_All2::dump()
   #else
   cout << "All2("; vl->dump(); cout << ","; f->dump(); cout << ")";
   #endif
+}
+
+std::string ASTForm_All2::ToString(bool no_utf) {
+  return "(" + quantifier_to_string(this->vl, "all2") + this->f->ToString(no_utf) + ")";
 }
     
 void 

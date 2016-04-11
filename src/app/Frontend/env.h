@@ -41,7 +41,7 @@ public:
     inheritedAcceptance(false), unrestrict(false),
     monaWalk(false),expandTagged(false),
     alternativeM2LStr(false), test(EVERYTHING), reorder(HEURISTIC), optimize(0),
-    useMonaDFA(false) {}
+    useMonaDFA(false), serializeMona(false) {}
 
   bool useMonaDFA;
   bool noExpnf;
@@ -74,6 +74,7 @@ public:
     TestType test;
   ReorderMode reorder;
   unsigned optimize;
+    bool serializeMona;
 };
 
 #endif

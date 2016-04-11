@@ -145,8 +145,10 @@ bool ParseArguments(int argc, char *argv[]) {
 			else if(strcmp(argv[i], "-ga") == 0 || strcmp(argv[i], "--print-aut") == 0)
 				options.graphvizDAG = true;
 			else if(strcmp(argv[i], "--walk-aut") == 0) {
-                options.monaWalk = true;
-                //mona_callback = bdd_callback;
+				options.monaWalk = true;
+				//mona_callback = bdd_callback;
+			} else if(strcmp(argv[i], "--serialize") == 0) {
+				options.serializeMona = true;
             } else if(strcmp(argv[i], "--expand-tagged") == 0)
 				options.expandTagged = true;
 			else if(strcmp(argv[i], "--no-automaton") == 0)

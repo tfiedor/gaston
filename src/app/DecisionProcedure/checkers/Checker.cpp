@@ -28,6 +28,7 @@
 #include "../visitors/ZeroOrderRemover.h"
 #include "../visitors/Tagger.h"
 #include "../visitors/FixpointDetagger.h"
+#include "../visitors/MonaSerializer.h"
 
 extern PredicateLib predicateLib;
 
@@ -43,7 +44,6 @@ extern Deque<FileSource *> source;
 
 // Fixme: remove maybe?
 extern char *inputFileName;
-
 extern Ident lastPosVar, allPosVar;
 
 Checker::~Checker() {
@@ -276,6 +276,11 @@ void Checker::PreprocessFormula() {
 		}
     FILTER_LIST(CALL_FILTER)
     #undef CALL_FILTER
+
+    if(options.serializeMona) {
+        std::string path(inputFileName);
+        MonaSerializer serializer(path.substr(0, path.find_last_of(".")) + "_serialized.mona", this->_monaAST->formula);
+    }
 
     std::list<size_t> tags;
     std::string stringTag("");
