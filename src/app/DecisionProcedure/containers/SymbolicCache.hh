@@ -20,11 +20,13 @@
 #include <iomanip>
 #include <map>
 #include <vector>
-#include <sparsehash/dense_hash_map>
-#include <sparsehash/sparse_hash_map>
 #include <unordered_map>
 #include <typeinfo>
 #include "../environment.hh"
+#if (OPT_USE_DENSE_HASHMAP == true)
+#include <sparsehash/dense_hash_map>
+#include <sparsehash/sparse_hash_map>
+#endif
 
 #include <boost/functional/hash.hpp>
 
