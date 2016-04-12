@@ -32,7 +32,7 @@ timeout_error = -2
 mona_error = -1                     # BDD Too Large for MONA
 
 Measure = namedtuple('Measure', 'regex default post_process is_cummulative')
-time_default = "00:00:00"
+time_default = "0"
 time_regex = "([0-9][0-9]:[0-9][0-9]:[0-9][0-9].[0-9][0-9])"
 space_default = "0"
 space_regex = "([0-9]+)"
@@ -64,6 +64,13 @@ measures = {
         },
     'mona': {
             'time': Measure("total time" + whatever_regex + time_regex, time_default, parse_total_time, False),
+            'time-min': Measure("minimize" + whatever_regex + time_regex, time_default, parse_total_time, False),
+            'time-project': Measure("project" + whatever_regex + time_regex, time_default, parse_total_time, False),
+            'time-product': Measure("product" + whatever_regex + time_regex, time_default, parse_total_time, False),
+            'time-copy': Measure("copy" + whatever_regex + time_regex, time_default, parse_total_time, False),
+            'time-replace': Measure("replace" + whatever_regex + time_regex, time_default, parse_total_time, False),
+            'time-saturate': Measure("right-quotient" + whatever_regex + time_regex, time_default, parse_total_time, False),
+            'time-negate': Measure("negate" + whatever_regex + time_regex, time_default, parse_total_time, False),
             'space': Measure("minimizing" + whatever_regex + pair_regex + whatever_regex + pair_regex, space_default,
                 lambda parsed: sum([int(item[0]) for item in parsed]), True),
             'space-min': Measure(whatever_regex + "minimizing" + whatever_regex + pair_regex + whatever_regex + pair_regex, space_default,
@@ -110,7 +117,7 @@ def run_mona(test, timeout):
     '''
     Runs MONA with following arguments:
     '''
-    args = ('mona', '-s', '-q', '"{}"'.format(test))
+    args = ('mona', '-s', '-i', '-q', '"{}"'.format(test))
     output, retcode = runProcess(args, timeout)
     if(retcode != 0):
         if(retcode == 124):
@@ -126,6 +133,7 @@ def run_gaston(test, timeout):
     '''
     Runs dWiNA with following arguments: --method=backward
     '''
+    # Fixme: There is --test=val...
     args = ('./gaston', '--test=val', '"{}"'.format(test))
     output, retcode = runProcess(args, timeout)
 

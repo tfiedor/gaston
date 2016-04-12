@@ -1151,97 +1151,102 @@ void print_stat(std::string statName, unsigned int stat) {
 }
 
 void print_stat(std::string statName, std::string stat) {
-    std::cout << "  \u2218 " << statName << " -> " << stat << "\n";
+    if(stat != "") {
+        std::cout << "  \u2218 " << statName << " -> " << stat << "\n";
+    }
 }
 
 void BinaryOpAutomaton::DumpStats() {
-    #if (PRINT_STATS_PRODUCT == true)
-        this->_form->dump();
-        std::cout << "\n";
-        std::cout << "  \u2218 Cache stats -> ";
-        #if (MEASURE_CACHE_HITS == true)
+#   if (PRINT_STATS_PRODUCT == true)
+    this->_form->dump();
+    std::cout << "\n";
+    std::cout << "  \u2218 Cache stats -> ";
+#       if (MEASURE_CACHE_HITS == true)
         this->_resCache.dumpStats();
-        #endif
-        #if (DEBUG_WORKSHOPS == true)
+#       endif
+#       if (DEBUG_WORKSHOPS == true)
         this->_factory.Dump();
-        #endif
-        #if (DEBUG_SYMBOL_CREATION == true)
+#       endif
+#       if (DEBUG_SYMBOL_CREATION == true)
         this->symbolFactory->Dump();
-        #endif
+#       endif
         print_stat("True Hits", this->_trueCounter);
         print_stat("False Hits", this->_falseCounter);
         print_stat("Continuation Generation", this->_contCreationCounter);
         print_stat("Continuation Evaluation", this->_contUnfoldingCounter);
-    #endif
+#   endif
+    std::cout << "\n";
     this->_lhs_aut->DumpStats();
     this->_rhs_aut->DumpStats();
 }
 
 void ProjectionAutomaton::DumpStats() {
-    #if (PRINT_STATS_PROJECTION == true)
-        this->_form->dump();
-        std::cout << "\n";
-        std::cout << "  \u2218 Cache stats -> ";
-        #if (MEASURE_CACHE_HITS == true)
+#   if (PRINT_STATS_PROJECTION == true)
+    this->_form->dump();
+    std::cout << "\n";
+    std::cout << "  \u2218 Cache stats -> ";
+#       if (MEASURE_CACHE_HITS == true)
         this->_resCache.dumpStats();
-        #endif
-        #if (DEBUG_WORKSHOPS)
+#       endif
+#       if (DEBUG_WORKSHOPS)
         this->_factory.Dump();
-        #endif
-        #if (DEBUG_SYMBOL_CREATION == true)
+#       endif
+#       if (DEBUG_SYMBOL_CREATION == true)
         this->symbolFactory->Dump();
-        #endif
-        #if (MEASURE_PROJECTION == true)
+#       endif
+#       if (MEASURE_PROJECTION == true)
         print_stat("Fixpoint Nexts", this->fixpointNext);
         print_stat("Fixpoint Results", this->fixpointRes);
         print_stat("FixpointPre Nexts", this->fixpointPreNext);
         print_stat("FixpointPre Results", this->fixpointPreRes);
-        #endif
+#       endif
         print_stat("True Hits", this->_trueCounter);
         print_stat("False Hits", this->_falseCounter);
         print_stat("Continuation Evaluation", this->_contUnfoldingCounter);
-    #endif
+#   endif
+    std::cout << "\n";
     this->_aut->DumpStats();
 }
 
 void ComplementAutomaton::DumpStats() {
-    #if (PRINT_STATS_NEGATION == true)
-        this->_form->dump();
-        std::cout << "\n";
-        std::cout << "  \u2218 Cache stats -> ";
-        #if (MEASURE_CACHE_HITS == true)
+#   if (PRINT_STATS_NEGATION == true)
+    this->_form->dump();
+    std::cout << "\n";
+    std::cout << "  \u2218 Cache stats -> ";
+#       if (MEASURE_CACHE_HITS == true)
         this->_resCache.dumpStats();
-        #endif
-        #if (DEBUG_WORKSHOPS)
+#       endif
+#       if (DEBUG_WORKSHOPS)
         this->_factory.Dump();
-        #endif
-        #if (DEBUG_SYMBOL_CREATION == true)
+#       endif
+#       if (DEBUG_SYMBOL_CREATION == true)
         this->symbolFactory->Dump();
-        #endif
+#       endif
         print_stat("True Hits", this->_trueCounter);
         print_stat("False Hits", this->_falseCounter);
         print_stat("Continuation Evaluation", this->_contUnfoldingCounter);
-    #endif
-
+#   endif
+    std::cout << "\n";
     this->_aut->DumpStats();
 }
 
 void BaseAutomaton::DumpStats() {
-    #if (PRINT_STATS_BASE == true)
-        this->_form->dump();
-        std::cout << "\n";
-        std::cout << "  \u2218 Cache stats -> ";
-        #if (MEASURE_CACHE_HITS == true)
+#   if (PRINT_STATS_BASE == true)
+    this->_form->dump();
+    std::cout << "\n";
+    std::cout << "  \u2218 Cache stats -> ";
+#       if (MEASURE_CACHE_HITS == true)
         this->_resCache.dumpStats();
-        #endif
-        #if (DEBUG_WORKSHOPS)
+#       endif
+#       if (DEBUG_WORKSHOPS)
         this->_factory.Dump();
-        #endif
-        #if (DEBUG_SYMBOL_CREATION == true)
+#       endif
+#       if (DEBUG_SYMBOL_CREATION == true)
         this->symbolFactory->Dump();
-        #endif
+#       endif
         print_stat("True Hits", this->_trueCounter);
         print_stat("False Hits", this->_falseCounter);
         print_stat("Continuation Evaluation", this->_contUnfoldingCounter);
-    #endif
+#   endif
+    std::cout << "\n";
 }

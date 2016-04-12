@@ -177,7 +177,6 @@ public:
 #define DEBUG_CACHE_MEMBERS				false
 #define DEBUG_CACHE_BUCKETS				false
 #define DEBUG_CACHE_MEMBERS_HASH		true
-#define DEBUG_WORKSHOPS					true
 #define DEBUG_CONTINUATIONS 			false
 #define DEBUG_NO_WORKSHOPS				false
 #define DEBUG_PRE					    false
@@ -187,6 +186,7 @@ public:
 #define DEBUG_VARMAP					false
 #define DEBUG_MAX_SEARCH_PATH			0
 #define DEBUG_M2L_AS_GROUND				false
+#define DEBUG_WORKSHOPS					true	// Fixme: This should not be DEBUG, but measure
 
 #define ALT_SKIP_EMPTY_UNIVERSE			true // < Skip empty example
 #define ALT_ALWAYS_DETERMINISTIC	    true
@@ -194,10 +194,10 @@ public:
 /*
  * >>> Automata stats options
  *****************************/
-#define PRINT_STATS_PROJECTION			false
+#define PRINT_STATS_PROJECTION			true
 #define PRINT_STATS_PRODUCT				true
-#define PRINT_STATS_NEGATION			false
-#define PRINT_STATS_BASE				false
+#define PRINT_STATS_NEGATION			true
+#define PRINT_STATS_BASE				true
 #define PRINT_STATS						true
 
 /* >>> Dumping Options <<< *
@@ -213,17 +213,17 @@ public:
 #define MEASURE_CACHE_BUCKETS			false   // < Prints the statistics for cache buckets
 #define MEASURE_CONTINUATION_CREATION	true	// < Measures how many continuations are created
 #define MEASURE_CONTINUATION_EVALUATION	true	// < Measures how many continuations are actually unfolded
-#define MEASURE_RESULT_HITS				true	// < Measure how many times the result hits in cache
+#define MEASURE_RESULT_HITS				false   // < Measure how many times the result hits in cache
 #define MEASURE_SYMBOLS					true	// < Measure how many symbols are created
 #define MEASURE_PROJECTION				true	// < Measures several things about projection (how many steps, how big, etc.)
 #define MEASURE_POSTPONED				true	// < Measures how many terms are postponed and how many are processed
-#define MEASURE_ALL						true	// < Measure everything, not really useful
+#define MEASURE_ALL						false   // < Measure everything, not really useful
 #define MEASURE_COMPARISONS				false	// < Measure how many times we sucessfully compared and how
 #define MEASURE_SUBSUMEDBY_HITS			true	// < Measure how many times subsumedBy cache worked
 
 /* >>> Anti-Prenexing Options <<< *
  **********************************/
-#define ANTIPRENEXING_FULL			    true
+#define ANTIPRENEXING_FULL			    false
 #define ANTIPRENEXING_DISTRIBUTIVE		false
 
 /*
@@ -241,6 +241,9 @@ public:
 #define AUT_ALWAYS_CONSTRAINT_FO		true
 #define AUT_CONSTRUCT_BY_MONA			true
 
+#define MONA_FAIR_MODE					true 	// < No Continuations, No Early termination fo fixpoints, No QF automata
+#define MIGHTY_GASTON					false   // < Collectively switch all good optimizations to achieve best performance
+
 /* >>> Optimizations <<< *
  *************************/
 #define OPT_DONT_CACHE_CONT				true	// < Do not cache terms containing continuations
@@ -252,7 +255,7 @@ public:
 #define OPT_TERM_HASH_BY_APPROX			true	// < Include stateSpaceApprox into hash (i.e. better distribution of cache)
 #define OPT_ANTIPRENEXING				true	// < Transform formula to anti-prenex form (i.e. all of the quantifiers are deepest on leaves)
 #define OPT_DRAW_NEGATION_IN_BASE 		true    // < Negation is handled on formula level and not on computation level on base automata
-#define OPT_CREATE_QF_AUTOMATON 		true    // < Transform quantifier-free automaton to formula
+#define OPT_CREATE_QF_AUTOMATON 		false   // < Transform quantifier-free automaton to formula
 #define OPT_REDUCE_AUT_EVERYTIME		false	// < Call reduce everytime VATA automaton is created (i.e. as intermediate result)
 #define OPT_REDUCE_AUT_LAST				true	// < Call reduce after the final VATA automaton is created
 #define OPT_EARLY_EVALUATION 			false   // < Evaluates early interesection of products
@@ -263,7 +266,7 @@ public:
 #define OPT_REDUCE_PREFIXPOINT			true	// < Prune the fixpoint when returning pre (i.e. fixpoint - symbol)
 #define OPT_FIND_POSTPONED_CANDIDATE	true	// < Chose better candidate from list of postponed subsumption testing pairs
 #define OPT_REDUCE_FULL_FIXPOINT		true	// < Prune the fixpoint by subsumption
-#define OPT_CACHE_RESULTS 				false   // < Cache results of intersectnonempty(term, symbol)
+#define OPT_CACHE_RESULTS 				true    // < Cache results of intersectnonempty(term, symbol)
 #define OPT_CACHE_SUBSUMES				false   // < Cache the results of subsumption testing between terms
 #define OPT_CACHE_SUBSUMED_BY			true	// < Cache the results of term subsumption by fixpoints
 #define OPT_SMARTER_MONA_CONVERSION		false	// < Use faster conversion from MONA to VATA (courtesy of PJ)

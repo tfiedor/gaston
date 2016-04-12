@@ -142,7 +142,9 @@ namespace Workshops {
             case AutType::INTERSECTION:
             case AutType::UNION:
                 this->_pCache = new ProductCache();
+#               if (OPT_EARLY_EVALUATION == true)
                 this->_contCache = new FixpointCache();
+#               endif
                 break;
             case AutType::COMPLEMENT:
                 break;
@@ -514,6 +516,7 @@ namespace Workshops {
     }
 
     void SymbolWorkshop::Dump() {
+        std::cout << "  \u2218 SymbolWorkshop stats -> ";
         this->_symbolCache->dumpStats();
     }
 
