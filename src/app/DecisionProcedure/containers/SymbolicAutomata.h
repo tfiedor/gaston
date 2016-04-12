@@ -114,6 +114,20 @@ protected:
     NEVER_INLINE virtual ~SymbolicAutomaton();
 };
 
+struct SymLink {
+    SymbolicAutomaton* aut;
+    ZeroSymbol* (*mapping)(ZeroSymbol*);
+
+    static ZeroSymbol* identity(ZeroSymbol* s) { return s;}
+
+    SymLink() : aut(nullptr) {
+        mapping = &identity;
+    }
+    explicit SymLink(SymbolicAutomaton* s) : aut(s) {
+        mapping = &identity;
+    }
+};
+
 /**
  * BinaryOpAutomaton corresponds to Binary Operations of Intersection and
  * Union of subautomata. It further contains the links to left and right
@@ -122,8 +136,8 @@ protected:
 class BinaryOpAutomaton : public SymbolicAutomaton {
 protected:
     // <<< PRIVATE MEMBERS >>>
-    SymbolicAutomaton* _lhs_aut;
-    SymbolicAutomaton* _rhs_aut;
+    SymLink _lhs_aut;
+    SymLink _rhs_aut;
     ProductType _productType;
     bool (*_eval_result)(bool, bool, bool);     // Boolean function for evaluation of left and right results
     bool (*_eval_early)(bool, bool);            // Boolean function for evaluating early evaluation
@@ -173,7 +187,7 @@ public:
 class ComplementAutomaton : public SymbolicAutomaton {
 protected:
     // <<< PRIVATE MEMBERS >>>
-    SymbolicAutomaton* _aut;
+    SymLink _aut;
 
     // <<< PRIVATE FUNCTIONS >>>
     virtual void _InitializeAutomaton();
@@ -214,7 +228,7 @@ public:
 
 protected:
     // <<< PRIVATE MEMBERS >>>
-    SymbolicAutomaton* _aut;
+    SymLink _aut;
     bool _isRoot;
 
     // <<< PRIVATE FUNCTIONS >>>
@@ -230,7 +244,7 @@ public:
 
     // <<< PUBLIC API >>>
     virtual Term* Pre(Symbol*, Term*, bool);
-    SymbolicAutomaton* GetBase() { return this->_aut;}
+    SymbolicAutomaton* GetBase() { return this->_aut.aut;}
     bool IsRoot() { return this-> _isRoot; }
 
     // <<< DUMPING FUNCTIONS >>>

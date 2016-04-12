@@ -241,7 +241,7 @@ public:
 #define AUT_ALWAYS_CONSTRAINT_FO		true
 #define AUT_CONSTRUCT_BY_MONA			true
 
-#define MONA_FAIR_MODE					true    // < No Continuations, No Early termination fo fixpoints, No QF automata
+#define MONA_FAIR_MODE					false   // < No Continuations, No Early termination fo fixpoints, No QF automata
 #define MIGHTY_GASTON					false   // < Collectively switch all good optimizations to achieve best performance
 
 /* >>> Optimizations <<< *

@@ -65,8 +65,8 @@ BinaryOpAutomaton::BinaryOpAutomaton(SymbolicAutomaton_raw lhs, SymbolicAutomato
 }
 
 BinaryOpAutomaton::~BinaryOpAutomaton() {
-    this->_lhs_aut->DecReferences();
-    this->_rhs_aut->DecReferences();
+    this->_lhs_aut.aut->DecReferences();
+    this->_rhs_aut.aut->DecReferences();
 }
 
 ComplementAutomaton::ComplementAutomaton(SymbolicAutomaton *aut, Formula_ptr form)
@@ -77,7 +77,7 @@ ComplementAutomaton::ComplementAutomaton(SymbolicAutomaton *aut, Formula_ptr for
 }
 
 ComplementAutomaton::~ComplementAutomaton() {
-    this->_aut->DecReferences();
+    this->_aut.aut->DecReferences();
 }
 
 ProjectionAutomaton::ProjectionAutomaton(SymbolicAutomaton_raw aut, Formula_ptr form, bool isRoot)
@@ -89,7 +89,7 @@ ProjectionAutomaton::ProjectionAutomaton(SymbolicAutomaton_raw aut, Formula_ptr 
 }
 
 ProjectionAutomaton::~ProjectionAutomaton() {
-    this->_aut->DecReferences();
+    this->_aut.aut->DecReferences();
 }
 
 RootProjectionAutomaton::RootProjectionAutomaton(SymbolicAutomaton* aut, Formula_ptr form)
@@ -277,7 +277,7 @@ ResultType RootProjectionAutomaton::IntersectNonEmpty(Symbol* symbol, Term* fina
     assert(projectionApproximation->list.size() == 1);
 
     // Evaluate the initial unfolding of epsilon
-    ResultType result = this->_aut->IntersectNonEmpty(symbol, projectionApproximation->list[0], underComplement);
+    ResultType result = this->_aut.aut->IntersectNonEmpty(symbol, projectionApproximation->list[0], underComplement);
 
     // Create a new fixpoint term and iterator on it
     TermFixpoint* fixpoint = this->_factory.CreateFixpoint(result.first, SymbolWorkshop::CreateZeroSymbol(), underComplement, result.second, WorklistSearchType::E_UNGROUND_ROOT);
@@ -431,21 +431,21 @@ void ProjectionAutomaton::_InitializeAutomaton() {
 void BinaryOpAutomaton::_InitializeInitialStates() {
     // #TERM_CREATION
     #if (DEBUG_NO_WORKSHOPS)
-    this->_initialStates = new TermProduct(this->_lhs_aut->GetInitialStates(), this->_rhs_aut->GetInitialStates(), this->_productType);
+    this->_initialStates = new TermProduct(this->_lhs_aut.aut->GetInitialStates(), this->_rhs_aut.aut->GetInitialStates(), this->_productType);
     #else
-    this->_initialStates = this->_factory.CreateProduct(this->_lhs_aut->GetInitialStates(), this->_rhs_aut->GetInitialStates(), this->_productType);
+    this->_initialStates = this->_factory.CreateProduct(this->_lhs_aut.aut->GetInitialStates(), this->_rhs_aut.aut->GetInitialStates(), this->_productType);
     #endif
 }
 
 void ComplementAutomaton::_InitializeInitialStates() {
-    this->_initialStates = this->_aut->GetInitialStates();
+    this->_initialStates = this->_aut.aut->GetInitialStates();
 }
 
 void ProjectionAutomaton::_InitializeInitialStates() {
     #if (DEBUG_NO_WORKSHOPS == true)
-    this->_initialStates = new TermList(this->_aut->GetInitialStates(), false);
+    this->_initialStates = new TermList(this->_aut.aut->GetInitialStates(), false);
     #else
-    this->_initialStates = this->_factory.CreateList(this->_aut->GetInitialStates(), false);
+    this->_initialStates = this->_factory.CreateList(this->_aut.aut->GetInitialStates(), false);
     #endif
 }
 
@@ -465,23 +465,23 @@ void BaseAutomaton::_InitializeInitialStates() {
 void BinaryOpAutomaton::_InitializeFinalStates() {
     // #TERM_CREATION
     #if (DEBUG_NO_WORKSHOPS == true)
-    this->_finalStates = new TermProduct(this->_lhs_aut->GetFinalStates(), this->_rhs_aut->GetFinalStates(), this->_productType);
+    this->_finalStates = new TermProduct(this->_lhs_aut.aut->GetFinalStates(), this->_rhs_aut.aut->GetFinalStates(), this->_productType);
     #else
-    this->_finalStates = this->_factory.CreateProduct(this->_lhs_aut->GetFinalStates(), this->_rhs_aut->GetFinalStates(), this->_productType);
+    this->_finalStates = this->_factory.CreateProduct(this->_lhs_aut.aut->GetFinalStates(), this->_rhs_aut.aut->GetFinalStates(), this->_productType);
     #endif
 }
 
 void ComplementAutomaton::_InitializeFinalStates() {
-    this->_finalStates = this->_aut->GetFinalStates();
+    this->_finalStates = this->_aut.aut->GetFinalStates();
     assert(this->_finalStates->type != TERM_EMPTY);
     this->_finalStates->Complement();
 }
 
 void ProjectionAutomaton::_InitializeFinalStates() {
 #   if (DEBUG_NO_WORKSHOPS == true)
-    this->_finalStates = new TermList(this->_aut->GetFinalStates(), false);
+    this->_finalStates = new TermList(this->_aut.aut->GetFinalStates(), false);
 #   else
-    this->_finalStates = this->_factory.CreateList(this->_aut->GetFinalStates(), false);
+    this->_finalStates = this->_factory.CreateList(this->_aut.aut->GetFinalStates(), false);
 #   endif
 }
 
@@ -580,7 +580,7 @@ ResultType BinaryOpAutomaton::_IntersectNonEmptyCore(Symbol* symbol, Term* final
     TermProduct* productStateApproximation = reinterpret_cast<TermProduct*>(finalApproximation);
 
     // Checks if left automaton's initial states intersects the final states
-    ResultType lhs_result = this->_lhs_aut->IntersectNonEmpty(symbol, productStateApproximation->left, underComplement); // TODO: another memory consumption
+    ResultType lhs_result = this->_lhs_aut.aut->IntersectNonEmpty(symbol, productStateApproximation->left, underComplement); // TODO: another memory consumption
 
     // We can prune the state if left side was evaluated as Empty term
     // TODO: This is different for Unionmat!
@@ -608,10 +608,10 @@ ResultType BinaryOpAutomaton::_IntersectNonEmptyCore(Symbol* symbol, Term* final
         ++this->_contCreationCounter;
 #       endif
 #       if (DEBUG_NO_WORKSHOPS == true)
-        TermContinuation *continuation = new TermContinuation(this->_rhs_aut, productStateApproximation->right, symbol, underComplement);
+        TermContinuation *continuation = new TermContinuation(this->_rhs_aut.aut, productStateApproximation->right, symbol, underComplement);
         Term_ptr leftCombined = new TermProduct(lhs_result.first, continuation, this->_productType);
 #       else
-        Term* continuation = this->_factory.CreateContinuation(this->_rhs_aut, productStateApproximation->right, symbol, underComplement);
+        Term* continuation = this->_factory.CreateContinuation(this->_rhs_aut.aut, productStateApproximation->right, symbol, underComplement);
         Term_ptr leftCombined = this->_factory.CreateProduct(lhs_result.first, continuation, this->_productType);
 #       endif
         return std::make_pair(leftCombined, this->_early_val(underComplement));
@@ -619,7 +619,7 @@ ResultType BinaryOpAutomaton::_IntersectNonEmptyCore(Symbol* symbol, Term* final
 #   endif
 
     // Otherwise compute the right side and return full fixpoint
-    ResultType rhs_result = this->_rhs_aut->IntersectNonEmpty(symbol, productStateApproximation->right, underComplement);
+    ResultType rhs_result = this->_rhs_aut.aut->IntersectNonEmpty(symbol, productStateApproximation->right, underComplement);
     // We can prune the state if right side was evaluated as Empty term
     // TODO: This is different for Unionmat!
 #   if (OPT_PRUNE_EMPTY == true)
@@ -639,7 +639,7 @@ ResultType BinaryOpAutomaton::_IntersectNonEmptyCore(Symbol* symbol, Term* final
 
 ResultType ComplementAutomaton::_IntersectNonEmptyCore(Symbol* symbol, Term* finalApproximaton, bool underComplement) {
     // Compute the result of nested automaton with switched complement
-    ResultType result = this->_aut->IntersectNonEmpty(symbol, finalApproximaton, !underComplement);
+    ResultType result = this->_aut.aut->IntersectNonEmpty(symbol, finalApproximaton, !underComplement);
     // TODO: fix, because there may be falsely complemented things
     if(finalApproximaton->InComplement() != result.first->InComplement()) {
         if(result.first->type == TERM_EMPTY) {
@@ -667,7 +667,7 @@ ResultType ProjectionAutomaton::_IntersectNonEmptyCore(Symbol* symbol, Term* fin
         assert(projectionApproximation->list.size() == 1);
 
         // Evaluate the initial unfolding of epsilon
-        ResultType result = this->_aut->IntersectNonEmpty(symbol, projectionApproximation->list[0], underComplement);
+        ResultType result = this->_aut.aut->IntersectNonEmpty(symbol, projectionApproximation->list[0], underComplement);
 
         // Create a new fixpoint term and iterator on it
         #if (DEBUG_NO_WORKSHOPS == true)
@@ -873,13 +873,13 @@ void BinaryOpAutomaton::DumpAutomaton() {
         std::cout << "\033[1;33m";
     }
     std::cout << "(\033[0m";
-    _lhs_aut->DumpAutomaton();
+    this->_lhs_aut.aut->DumpAutomaton();
     if(this->type == AutType::INTERSECTION) {
         std::cout << "\033[1;32m \u2229 \033[0m";
     } else {
         std::cout << "\033[1;33m \u222A \033[0m";
     };
-    _rhs_aut->DumpAutomaton();
+    this->_rhs_aut.aut->DumpAutomaton();
     if(this->type == AutType::INTERSECTION) {
         std::cout << "\033[1;32m";
     } else {
@@ -893,7 +893,7 @@ void ComplementAutomaton::DumpAutomaton() {
         std::cout << "[" << this << "]";
     #endif
     std::cout << "\033[1;31m\u2201(\033[0m";
-    this->_aut->DumpAutomaton();
+    this->_aut.aut->DumpAutomaton();
     std::cout << "\033[1;31m)\033[0m";
 }
 
@@ -910,7 +910,7 @@ void ProjectionAutomaton::DumpAutomaton() {
         }
     }
     std::cout << "(\033[0m";
-    this->_aut->DumpAutomaton();
+    this->_aut.aut->DumpAutomaton();
     std::cout << "\033[1;34m)\033[0m";
 }
 
@@ -1038,10 +1038,10 @@ void BinaryOpAutomaton::DumpToDot(std::ofstream & os, bool inComplement) {
         os << ",style=filled, fillcolor=red";
     }
     os << "];\n";
-    os << "\t" << (uintptr_t) &*this << " -- " << (uintptr_t) (this->_lhs_aut) << ";\n";
-    os << "\t" << (uintptr_t) &*this << " -- " << (uintptr_t) (this->_rhs_aut) << ";\n";
-    this->_lhs_aut->DumpToDot(os, inComplement);
-    this->_rhs_aut->DumpToDot(os, inComplement);
+    os << "\t" << (uintptr_t) &*this << " -- " << (uintptr_t) (this->_lhs_aut.aut) << ";\n";
+    os << "\t" << (uintptr_t) &*this << " -- " << (uintptr_t) (this->_rhs_aut.aut) << ";\n";
+    this->_lhs_aut.aut->DumpToDot(os, inComplement);
+    this->_rhs_aut.aut->DumpToDot(os, inComplement);
 }
 
 void ComplementAutomaton::DumpToDot(std::ofstream & os, bool inComplement) {
@@ -1052,8 +1052,8 @@ void ComplementAutomaton::DumpToDot(std::ofstream & os, bool inComplement) {
         os << ",style=filled, fillcolor=red";
     }
     os << "];\n";
-    os << "\t" << (uintptr_t) &*this << " -- " << (uintptr_t) (this->_aut) << ";\n";
-    this->_aut->DumpToDot(os, !inComplement);
+    os << "\t" << (uintptr_t) &*this << " -- " << (uintptr_t) (this->_aut.aut) << ";\n";
+    this->_aut.aut->DumpToDot(os, !inComplement);
 }
 
 void ProjectionAutomaton::DumpToDot(std::ofstream & os, bool inComplement) {
@@ -1068,8 +1068,8 @@ void ProjectionAutomaton::DumpToDot(std::ofstream & os, bool inComplement) {
         os << ",style=filled, fillcolor=red";
     }
     os << "];\n";
-    os << "\t" << (uintptr_t) &*this << " -- " << (uintptr_t) (this->_aut) << ";\n";
-    this->_aut->DumpToDot(os, inComplement);
+    os << "\t" << (uintptr_t) &*this << " -- " << (uintptr_t) (this->_aut.aut) << ";\n";
+    this->_aut.aut->DumpToDot(os, inComplement);
 }
 
 void BaseAutomaton::DumpToDot(std::ofstream & os, bool inComplement) {
@@ -1117,20 +1117,20 @@ void BaseAutomaton::BaseAutDump() {
 void BinaryOpAutomaton::DumpCacheStats() {
     this->_form->dump();
     this->_resCache.dumpStats();
-    this->_lhs_aut->DumpCacheStats();
-    this->_rhs_aut->DumpCacheStats();
+    this->_lhs_aut.aut->DumpCacheStats();
+    this->_rhs_aut.aut->DumpCacheStats();
 }
 
 void ComplementAutomaton::DumpCacheStats() {
     this->_form->dump();
     this->_resCache.dumpStats();
-    this->_aut->DumpCacheStats();
+    this->_aut.aut->DumpCacheStats();
 }
 
 void ProjectionAutomaton::DumpCacheStats() {
     this->_form->dump();
     this->_resCache.dumpStats();
-    this->_aut->DumpCacheStats();
+    this->_aut.aut->DumpCacheStats();
 }
 
 void BaseAutomaton::DumpCacheStats() {
@@ -1180,8 +1180,8 @@ void BinaryOpAutomaton::DumpStats() {
         print_stat("Continuation Evaluation", this->_contUnfoldingCounter);
 #   endif
     std::cout << "\n";
-    this->_lhs_aut->DumpStats();
-    this->_rhs_aut->DumpStats();
+    this->_lhs_aut.aut->DumpStats();
+    this->_rhs_aut.aut->DumpStats();
 }
 
 void ProjectionAutomaton::DumpStats() {
@@ -1209,7 +1209,7 @@ void ProjectionAutomaton::DumpStats() {
         print_stat("Continuation Evaluation", this->_contUnfoldingCounter);
 #   endif
     std::cout << "\n";
-    this->_aut->DumpStats();
+    this->_aut.aut->DumpStats();
 }
 
 void ComplementAutomaton::DumpStats() {
@@ -1231,7 +1231,7 @@ void ComplementAutomaton::DumpStats() {
         print_stat("Continuation Evaluation", this->_contUnfoldingCounter);
 #   endif
     std::cout << "\n";
-    this->_aut->DumpStats();
+    this->_aut.aut->DumpStats();
 }
 
 void BaseAutomaton::DumpStats() {

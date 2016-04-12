@@ -642,6 +642,30 @@ src/app/DecisionProcedure/visitors/MonaAutomataDotWalker.cpp.s:
 	$(MAKE) -f CMakeFiles/gaston.dir/build.make CMakeFiles/gaston.dir/src/app/DecisionProcedure/visitors/MonaAutomataDotWalker.cpp.s
 .PHONY : src/app/DecisionProcedure/visitors/MonaAutomataDotWalker.cpp.s
 
+src/app/DecisionProcedure/visitors/MonaSerializer.o: src/app/DecisionProcedure/visitors/MonaSerializer.cpp.o
+.PHONY : src/app/DecisionProcedure/visitors/MonaSerializer.o
+
+# target to build an object file
+src/app/DecisionProcedure/visitors/MonaSerializer.cpp.o:
+	$(MAKE) -f CMakeFiles/gaston.dir/build.make CMakeFiles/gaston.dir/src/app/DecisionProcedure/visitors/MonaSerializer.cpp.o
+.PHONY : src/app/DecisionProcedure/visitors/MonaSerializer.cpp.o
+
+src/app/DecisionProcedure/visitors/MonaSerializer.i: src/app/DecisionProcedure/visitors/MonaSerializer.cpp.i
+.PHONY : src/app/DecisionProcedure/visitors/MonaSerializer.i
+
+# target to preprocess a source file
+src/app/DecisionProcedure/visitors/MonaSerializer.cpp.i:
+	$(MAKE) -f CMakeFiles/gaston.dir/build.make CMakeFiles/gaston.dir/src/app/DecisionProcedure/visitors/MonaSerializer.cpp.i
+.PHONY : src/app/DecisionProcedure/visitors/MonaSerializer.cpp.i
+
+src/app/DecisionProcedure/visitors/MonaSerializer.s: src/app/DecisionProcedure/visitors/MonaSerializer.cpp.s
+.PHONY : src/app/DecisionProcedure/visitors/MonaSerializer.s
+
+# target to generate assembly for a file
+src/app/DecisionProcedure/visitors/MonaSerializer.cpp.s:
+	$(MAKE) -f CMakeFiles/gaston.dir/build.make CMakeFiles/gaston.dir/src/app/DecisionProcedure/visitors/MonaSerializer.cpp.s
+.PHONY : src/app/DecisionProcedure/visitors/MonaSerializer.cpp.s
+
 src/app/DecisionProcedure/visitors/NegationUnfolder.o: src/app/DecisionProcedure/visitors/NegationUnfolder.cpp.o
 .PHONY : src/app/DecisionProcedure/visitors/NegationUnfolder.o
 
@@ -1557,6 +1581,9 @@ help:
 	@echo "... src/app/DecisionProcedure/visitors/MonaAutomataDotWalker.o"
 	@echo "... src/app/DecisionProcedure/visitors/MonaAutomataDotWalker.i"
 	@echo "... src/app/DecisionProcedure/visitors/MonaAutomataDotWalker.s"
+	@echo "... src/app/DecisionProcedure/visitors/MonaSerializer.o"
+	@echo "... src/app/DecisionProcedure/visitors/MonaSerializer.i"
+	@echo "... src/app/DecisionProcedure/visitors/MonaSerializer.s"
 	@echo "... src/app/DecisionProcedure/visitors/NegationUnfolder.o"
 	@echo "... src/app/DecisionProcedure/visitors/NegationUnfolder.i"
 	@echo "... src/app/DecisionProcedure/visitors/NegationUnfolder.s"
