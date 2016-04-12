@@ -70,6 +70,7 @@ protected:
     VarList _freeVars;
     Term_ptr _satExample = nullptr;
     Term_ptr _unsatExample = nullptr;
+    size_t _refs;
 
     // <<< PRIVATE FUNCTIONS >>>
     virtual void _InitializeAutomaton() = 0;
@@ -89,9 +90,10 @@ protected:
 public:
     // <<< CONSTRUCTORS >>>
     NEVER_INLINE explicit SymbolicAutomaton(Formula_ptr form);
-    NEVER_INLINE virtual ~SymbolicAutomaton();
 
     // <<< PUBLIC API >>>
+    void IncReferences() {++this->_refs;}
+    void DecReferences() {assert(this->_refs > 0); --this->_refs; if(this->_refs < 1) delete this;}
     void InitializeStates();
     virtual Term_ptr GetInitialStates();
     virtual Term_ptr GetFinalStates();
@@ -108,6 +110,8 @@ public:
     virtual void DumpStats() = 0;
     virtual void DumpToDot(std::ofstream&, bool) = 0;
     static void AutomatonToDot(std::string, SymbolicAutomaton*, bool);
+protected:
+    NEVER_INLINE virtual ~SymbolicAutomaton();
 };
 
 /**
@@ -134,7 +138,6 @@ protected:
 
 public:
     NEVER_INLINE BinaryOpAutomaton(SymbolicAutomaton_raw lhs, SymbolicAutomaton_raw rhs, Formula_ptr form);
-    NEVER_INLINE virtual ~BinaryOpAutomaton();
 
     // <<< PUBLIC API >>>
     virtual Term* Pre(Symbol*, Term*, bool);
@@ -144,6 +147,8 @@ public:
     virtual void DumpToDot(std::ofstream&, bool);
     virtual void DumpStats();
     virtual void DumpCacheStats();
+protected:
+    NEVER_INLINE virtual ~BinaryOpAutomaton();
 };
 
 /**
@@ -180,7 +185,6 @@ protected:
 public:
     // <<< CONSTRUCTORS >>>
     NEVER_INLINE ComplementAutomaton(SymbolicAutomaton *aut, Formula_ptr form);
-    NEVER_INLINE virtual ~ComplementAutomaton();
 
     // <<< PUBLIC API >>>
     virtual Term* Pre(Symbol*, Term*, bool);
@@ -190,6 +194,8 @@ public:
     virtual void DumpToDot(std::ofstream&, bool);
     virtual void DumpStats();
     virtual void DumpCacheStats();
+protected:
+    NEVER_INLINE virtual ~ComplementAutomaton();
 };
 
 /**
@@ -221,7 +227,6 @@ protected:
 public:
     /// <<< CONSTRUCTORS >>>
     NEVER_INLINE ProjectionAutomaton(SymbolicAutomaton* aut, Formula_ptr form, bool isRoot = false);
-    NEVER_INLINE virtual ~ProjectionAutomaton();
 
     // <<< PUBLIC API >>>
     virtual Term* Pre(Symbol*, Term*, bool);
@@ -233,6 +238,8 @@ public:
     virtual void DumpToDot(std::ofstream&, bool);
     virtual void DumpStats();
     virtual void DumpCacheStats();
+protected:
+    NEVER_INLINE virtual ~ProjectionAutomaton();
 };
 
 /**
@@ -273,7 +280,6 @@ protected:
 public:
     // <<< CONSTRUCTORS >>>
     NEVER_INLINE BaseAutomaton(BaseAutomatonType* aut, size_t vars, Formula_ptr form, bool emptyTracks);
-    NEVER_INLINE ~BaseAutomaton();
 
     // <<< PUBLIC API >>>
     virtual Term* Pre(Symbol*, Term*, bool);
@@ -283,6 +289,9 @@ public:
     virtual void BaseAutDump();
     virtual void DumpStats();
     virtual void DumpCacheStats();
+
+protected:
+    NEVER_INLINE ~BaseAutomaton();
 };
 
 class GenericBaseAutomaton : public BaseAutomaton {

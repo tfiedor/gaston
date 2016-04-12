@@ -35,7 +35,7 @@ using namespace Gaston;
 // <<< CONSTRUCTORS >>>
 SymbolicAutomaton::SymbolicAutomaton(Formula_ptr form) :
         _form(form), _factory(this), _initialStates(nullptr), _finalStates(nullptr), _satExample(nullptr),
-        _unsatExample(nullptr) {
+        _unsatExample(nullptr), _refs(0) {
     type = AutType::SYMBOLIC_BASE;
 
     this->symbolFactory = new Workshops::SymbolWorkshop();
@@ -60,21 +60,24 @@ SymbolicAutomaton::~SymbolicAutomaton() {
 BinaryOpAutomaton::BinaryOpAutomaton(SymbolicAutomaton_raw lhs, SymbolicAutomaton_raw rhs, Formula_ptr form)
         : SymbolicAutomaton(form), _lhs_aut(lhs), _rhs_aut(rhs) {
     type = AutType::BINARY;
+    lhs->IncReferences();
+    rhs->IncReferences();
 }
 
 BinaryOpAutomaton::~BinaryOpAutomaton() {
-    delete this->_lhs_aut;
-    delete this->_rhs_aut;
+    this->_lhs_aut->DecReferences();
+    this->_rhs_aut->DecReferences();
 }
 
 ComplementAutomaton::ComplementAutomaton(SymbolicAutomaton *aut, Formula_ptr form)
         : SymbolicAutomaton(form), _aut(aut) {
     type = AutType::COMPLEMENT;
     this->_InitializeAutomaton();
+    aut->IncReferences();
 }
 
 ComplementAutomaton::~ComplementAutomaton() {
-    delete this->_aut;
+    this->_aut->DecReferences();
 }
 
 ProjectionAutomaton::ProjectionAutomaton(SymbolicAutomaton_raw aut, Formula_ptr form, bool isRoot)
@@ -82,10 +85,11 @@ ProjectionAutomaton::ProjectionAutomaton(SymbolicAutomaton_raw aut, Formula_ptr 
     type = AutType::PROJECTION;
     this->_isRoot = isRoot;
     this->_InitializeAutomaton();
+    aut->IncReferences();
 }
 
 ProjectionAutomaton::~ProjectionAutomaton() {
-    delete this->_aut;
+    this->_aut->DecReferences();
 }
 
 RootProjectionAutomaton::RootProjectionAutomaton(SymbolicAutomaton* aut, Formula_ptr form)
