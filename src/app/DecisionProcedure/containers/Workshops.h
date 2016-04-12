@@ -145,6 +145,7 @@ namespace Workshops {
     class SymbolWorkshop {
     private:
         SymbolCache* _symbolCache = nullptr;
+        SymbolCache* _trimmedSymbolCache = nullptr;
         std::vector<Symbol*> _trimmedSymbols;
         Symbol* _CreateProjectedSymbol(Symbol*, VarType, ValType);
 

@@ -117,7 +117,7 @@ def run_mona(test, timeout):
     '''
     Runs MONA with following arguments:
     '''
-    args = ('mona', '-s', '-i', '-q', '"{}"'.format(test))
+    args = ('mona', '-s', '-t', '-q', '"{}"'.format(test))
     output, retcode = runProcess(args, timeout)
     if(retcode != 0):
         if(retcode == 124):

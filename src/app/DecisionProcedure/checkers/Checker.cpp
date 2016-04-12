@@ -36,6 +36,7 @@ extern Options options;
 extern MonaUntypedAST *untypedAST;
 extern SymbolTable symbolTable;
 extern VarToTrackMap varMap;
+extern CodeTable *codeTable;
 
 extern int yyparse(void);
 extern void loadFile(char *filename);

@@ -105,7 +105,7 @@ SymbolicAutomaton* ASTForm_Sub::_toSymbolicAutomatonCore(bool doComplement) {
  */
 SymbolicAutomaton* ASTForm_And::_toSymbolicAutomatonCore(bool doComplement) {
     SymbolicAutomaton* lhs_aut;
-#   if (OPT_CREATE_QF_AUTOMATON == true)
+#   if (OPT_CREATE_QF_AUTOMATON == true && MONA_FAIR_MODE == false)
     // TODO: WE ARE MISSING COMPLEMENTATION
     IdentList free, bound;
     this->f1->freeVars(&free, &bound);
@@ -118,7 +118,7 @@ SymbolicAutomaton* ASTForm_And::_toSymbolicAutomatonCore(bool doComplement) {
     lhs_aut = this->f1->toSymbolicAutomaton(doComplement);
 #   endif
     SymbolicAutomaton* rhs_aut;
-#   if (OPT_CREATE_QF_AUTOMATON == true)
+#   if (OPT_CREATE_QF_AUTOMATON == true && MONA_FAIR_MODE == false)
     // TODO: WE ARE MISSING COMPLEMENTATION
     free.reset();
     bound.reset();
@@ -136,7 +136,7 @@ SymbolicAutomaton* ASTForm_And::_toSymbolicAutomatonCore(bool doComplement) {
 
 SymbolicAutomaton* ASTForm_Or::_toSymbolicAutomatonCore(bool doComplement) {
     SymbolicAutomaton* lhs_aut;
-#   if (OPT_CREATE_QF_AUTOMATON == true)
+#   if (OPT_CREATE_QF_AUTOMATON == true && MONA_FAIR_MODE == false)
     // TODO: WE ARE MISSING COMPLEMENTATION
     IdentList free, bound;
     this->f1->freeVars(&free, &bound);
@@ -149,7 +149,7 @@ SymbolicAutomaton* ASTForm_Or::_toSymbolicAutomatonCore(bool doComplement) {
     lhs_aut = this->f1->toSymbolicAutomaton(doComplement);
 #   endif
     SymbolicAutomaton* rhs_aut;
-#   if (OPT_CREATE_QF_AUTOMATON == true)
+#   if (OPT_CREATE_QF_AUTOMATON == true && MONA_FAIR_MODE == false)
     // TODO: WE ARE MISSING COMPLEMENTATION
     free.reset();
     bound.reset();
@@ -172,7 +172,7 @@ bool is_base_automaton(ASTForm* f) {
 }
 
 SymbolicAutomaton* ASTForm_Not::_toSymbolicAutomatonCore(bool doComplement) {
-#   if (OPT_CREATE_QF_AUTOMATON == true)
+#   if (OPT_CREATE_QF_AUTOMATON == true && MONA_FAIR_MODE == false)
     // TODO: WE ARE MISSING COMPLEMENTATION
     IdentList free, bound;
     this->f->freeVars(&free, &bound);
@@ -193,7 +193,7 @@ SymbolicAutomaton* ASTForm_Not::_toSymbolicAutomatonCore(bool doComplement) {
 }
 
 SymbolicAutomaton* ASTForm_Ex2::_toSymbolicAutomatonCore(bool doComplement) {
-#   if (OPT_CREATE_QF_AUTOMATON == true)
+#   if (OPT_CREATE_QF_AUTOMATON == true && MONA_FAIR_MODE == false)
         // TODO: WE ARE MISSING COMPLEMENTATION
         IdentList free, bound;
         this->f->freeVars(&free, &bound);

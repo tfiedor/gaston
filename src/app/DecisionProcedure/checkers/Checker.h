@@ -15,7 +15,13 @@ using TimerType = Timer;
  * DEFINITION OF FILTER PHASES *
  *******************************/
 
-#if (ANTIPRENEXING_DISTRIBUTIVE == true)
+#if (MONA_FAIR_MODE == true)
+#define FILTER_LIST(code) \
+	code(ZeroOrderRemover)				/* Transform zero-order variables to second-order interpretation */ \
+	code(SyntaxRestricter)				/* Restrict unsupported formula constructs to supported subset*/ \
+	code(BooleanUnfolder)				/* Simplify formula through various boolean laws*/ \
+	code(UniversalQuantifierRemover)	/* Remove universal quantifier from formula*/ 
+#elif (ANTIPRENEXING_DISTRIBUTIVE == true)
 #define FILTER_LIST(code) \
 	code(ZeroOrderRemover)				\
 	code(SyntaxRestricter)				\

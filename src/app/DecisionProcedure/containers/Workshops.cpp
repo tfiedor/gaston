@@ -142,7 +142,7 @@ namespace Workshops {
             case AutType::INTERSECTION:
             case AutType::UNION:
                 this->_pCache = new ProductCache();
-#               if (OPT_EARLY_EVALUATION == true)
+#               if (OPT_EARLY_EVALUATION == true && MONA_FAIR_MODE == false)
                 this->_contCache = new FixpointCache();
 #               endif
                 break;
@@ -396,6 +396,7 @@ namespace Workshops {
 
     NEVER_INLINE SymbolWorkshop::SymbolWorkshop() {
         this->_symbolCache = new SymbolCache();
+        this->_trimmedSymbolCache = new SymbolCache();
     }
 
     NEVER_INLINE SymbolWorkshop::~SymbolWorkshop() {
@@ -412,6 +413,7 @@ namespace Workshops {
         for(auto symb : this->_trimmedSymbols) {
             delete symb;
         }
+        delete this->_trimmedSymbolCache;
         delete this->_symbolCache;
     }
 
@@ -453,7 +455,7 @@ namespace Workshops {
 
         auto symbolKey = std::make_tuple(src, static_cast<VarType>(0u), 'T');
         Symbol* sPtr;
-        if(!this->_symbolCache->retrieveFromCache(symbolKey, sPtr)) {
+        if(!this->_trimmedSymbolCache->retrieveFromCache(symbolKey, sPtr)) {
             sPtr = new ZeroSymbol(src->GetTrackMask());
             auto it = varList->begin();
             auto end = varList->end();
@@ -467,19 +469,17 @@ namespace Workshops {
                 }
             }
 #           if (OPT_UNIQUE_TRIMMED_SYMBOLS == true)
-            for(auto item = this->_symbolCache->begin(); item != this->_symbolCache->end(); ++item) {
-                if(std::get<2>((*item).first) == 'T') {
-                    if(*(*item).second == *sPtr) {
-                        Symbol* uniqPtr = (*item).second;
-                        this->_symbolCache->StoreIn(symbolKey, uniqPtr);
-                        delete sPtr;
-                        return uniqPtr;
-                    }
+            for(auto item = this->_trimmedSymbols.begin(); item != this->_trimmedSymbols.end(); ++item) {
+                if(*(*item) == *sPtr) {
+                    Symbol* uniqPtr = (*item);
+                    this->_trimmedSymbolCache->StoreIn(symbolKey, uniqPtr);
+                    delete sPtr;
+                    return uniqPtr;
                 }
             }
 #           endif
             this->_trimmedSymbols.push_back(sPtr);
-            this->_symbolCache->StoreIn(symbolKey, sPtr);
+            this->_trimmedSymbolCache->StoreIn(symbolKey, sPtr);
         }
         return sPtr;
     }

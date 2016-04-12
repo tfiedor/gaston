@@ -586,7 +586,7 @@ ResultType BinaryOpAutomaton::_IntersectNonEmptyCore(Symbol* symbol, Term* final
     }
 #   endif
 
-#   if (OPT_EARLY_EVALUATION == true)
+#   if (OPT_EARLY_EVALUATION == true && MONA_FAIR_MODE == false)
     // Sometimes we can evaluate the experession early and return the continuation.
     // For intersection of automata we can return early, if left term was evaluated
     // as false, whereas for union of automata we can return early if left term
@@ -674,7 +674,7 @@ ResultType ProjectionAutomaton::_IntersectNonEmptyCore(Symbol* symbol, Term* fin
         TermFixpoint::iterator it = fixpoint->GetIterator();
         Term_ptr fixpointTerm;
 
-        #if (DEBUG_COMPUTE_FULL_FIXPOINT == true)
+        #if (DEBUG_COMPUTE_FULL_FIXPOINT == true || MONA_FAIR_MODE == true)
         // Computes the whole fixpoint, withouth early evaluation
         while((fixpointTerm = it.GetNext()) != nullptr) {
             #if (MEASURE_PROJECTION == true)
@@ -725,7 +725,7 @@ ResultType ProjectionAutomaton::_IntersectNonEmptyCore(Symbol* symbol, Term* fin
         Term_ptr fixpointTerm;
 
         // Compute the Pre of the fixpoint
-        #if (DEBUG_COMPUTE_FULL_FIXPOINT == true)
+        #if (DEBUG_COMPUTE_FULL_FIXPOINT == true || MONA_FAIR_MODE == true)
             while((fixpointTerm = it.GetNext()) != nullptr) {
                 #if (MEASURE_PROJECTION == true)
                 ++this->fixpointPreNext;

@@ -305,7 +305,7 @@ void Term::SetSuccessor(Term* succ, Symbol* symb) {
  * Returns true if the term is not computed, i.e. it is continuation somehow
  */
 bool Term::IsNotComputed() {
-#if (OPT_EARLY_EVALUATION == true)
+#if (OPT_EARLY_EVALUATION == true && MONA_FAIR_MODE == false)
     if(this->type == TERM_CONTINUATION) {
         return !reinterpret_cast<TermContinuation *>(this)->IsUnfolded();
     } else if(this->type == TERM_PRODUCT) {

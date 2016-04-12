@@ -223,7 +223,7 @@ public:
 
 /* >>> Anti-Prenexing Options <<< *
  **********************************/
-#define ANTIPRENEXING_FULL			    false
+#define ANTIPRENEXING_FULL			    true
 #define ANTIPRENEXING_DISTRIBUTIVE		false
 
 /*
@@ -241,7 +241,7 @@ public:
 #define AUT_ALWAYS_CONSTRAINT_FO		true
 #define AUT_CONSTRUCT_BY_MONA			true
 
-#define MONA_FAIR_MODE					true 	// < No Continuations, No Early termination fo fixpoints, No QF automata
+#define MONA_FAIR_MODE					true    // < No Continuations, No Early termination fo fixpoints, No QF automata
 #define MIGHTY_GASTON					false   // < Collectively switch all good optimizations to achieve best performance
 
 /* >>> Optimizations <<< *
@@ -255,7 +255,7 @@ public:
 #define OPT_TERM_HASH_BY_APPROX			true	// < Include stateSpaceApprox into hash (i.e. better distribution of cache)
 #define OPT_ANTIPRENEXING				true	// < Transform formula to anti-prenex form (i.e. all of the quantifiers are deepest on leaves)
 #define OPT_DRAW_NEGATION_IN_BASE 		true    // < Negation is handled on formula level and not on computation level on base automata
-#define OPT_CREATE_QF_AUTOMATON 		false   // < Transform quantifier-free automaton to formula
+#define OPT_CREATE_QF_AUTOMATON 		true    // < Transform quantifier-free automaton to formula
 #define OPT_REDUCE_AUT_EVERYTIME		false	// < Call reduce everytime VATA automaton is created (i.e. as intermediate result)
 #define OPT_REDUCE_AUT_LAST				true	// < Call reduce after the final VATA automaton is created
 #define OPT_EARLY_EVALUATION 			false   // < Evaluates early interesection of products
