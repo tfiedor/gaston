@@ -26,6 +26,7 @@ from cStringIO import StringIO
 sender = 'ifiedortom@fit.vutbr.cz'
 receiver = 'ifiedortom@fit.vutbr.cz'
 
+subprocess_error = -4
 unknown_error = -3
 timeout_error = -2
 mona_error = -1                     # BDD Too Large for MONA
@@ -367,8 +368,11 @@ if __name__ == '__main__':
             rets = {'gaston': ""}
             for bin in bins:
                 method_name = "_".join(["run"] + bin.split('-'))
-                method_call = getattr(sys.modules[__name__], method_name)
-                data[benchmark][bin], rets[bin] = method_call(benchmark, options.timeout)
+                try:
+                    method_call = getattr(sys.modules[__name__], method_name)
+                    data[benchmark][bin], rets[bin] = method_call(benchmark, options.timeout)
+                except Exception:
+                    data[benchmark][bin], rets[bin] = subprocess_error, ""
 
             cases += 1
             if rets['mona'] == -1 or rets['mona'] == "":
