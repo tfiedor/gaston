@@ -31,6 +31,13 @@ unknown_error = -3
 timeout_error = -2
 mona_error = -1                     # BDD Too Large for MONA
 
+errors = {
+    -4: 'subprocess_error',
+    -3: 'unknown error',
+    -2: 'timeout',
+    -1: 'BDD too large'
+}
+
 Measure = namedtuple('Measure', 'regex default post_process is_cummulative')
 time_default = "0"
 time_regex = "([0-9][0-9]:[0-9][0-9]:[0-9][0-9].[0-9][0-9])"
@@ -220,7 +227,8 @@ def exportToCSV(data, bins):
             bench_list = [os.path.split(benchmark)[1]]
             for (bin, key) in keys:
                 if not hasattr(data[benchmark][bin], "__getitem__"):
-                    bench_list = bench_list + [str(data[benchmark][bin])]
+                    bench_list = bench_list + [errors[data[benchmakr][bin]]]
+                    #bench_list = bench_list + [str(data[benchmark][bin])]
                 else:
                     try:
                         bench_list = bench_list + [str(data[benchmark][bin][key])]
