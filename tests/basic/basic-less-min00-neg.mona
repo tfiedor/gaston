@@ -1,0 +1,6 @@
+# WSkS Benchmarks
+# Batch: Atomic
+# Validity: valid
+# Long: testing functionality of minus
+
+~ex1 x, y: x < y-1 => x ~= y;

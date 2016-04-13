@@ -1,0 +1,6 @@
+# WSkS Benchmarks
+# Batch: Atomic
+# Validity: valid
+# Long: testing functionality of minus
+
+~all2 X: 0 in X => ex1 x: x = 0 & x in X;

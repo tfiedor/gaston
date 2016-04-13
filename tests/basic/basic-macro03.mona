@@ -1,0 +1,9 @@
+ws1s;
+
+macro first(var1 x, var2 M) =
+	ex1 y: y in M;
+  
+macro second(var1 x, var2 M) =
+  first(x, M);
+
+ex1 head: ex2 M: second(head, M);

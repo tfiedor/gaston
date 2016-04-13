@@ -1,0 +1,6 @@
+ws1s;
+
+macro reach(var1 head, var1 x, var1 y) =
+	head<=x & x <= y;
+
+ex1 head, x, y: reach(head, x, y);

@@ -1,0 +1,9 @@
+ws1s;
+
+macro leq(var1 x) =
+  ex1 y: x <= y;
+
+macro reach(var1 head, var1 x) =
+	head ~= x & leq(head);
+
+ex1 head, x: ~reach(head, x);

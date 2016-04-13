@@ -1,0 +1,13 @@
+ws1s;
+
+macro reach(var1 head, var1 x, var1 y, var1 end) =
+	head<=x & x<=y & y<end ;
+  
+macro sll(var1 head, var1 h, var1 t, var1 end) =
+	(reach(head, h, t, end)) &
+	(all1 x: (~reach(head, x, h, end) | x=h)) &
+	(all1 x: (~reach(head, t, x, end) | x=t)) &
+	(all1 x,y: (reach(head, h, x, end) & reach(head, h, y, end) & reach(head, x, t, end) & reach(head, y, t, end))
+			=> (reach(head, x, y, end) | reach(head, y, x, end)));
+
+~ex1 head, x, y, end: sll(head, x, y, end);

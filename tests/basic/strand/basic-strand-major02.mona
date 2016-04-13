@@ -1,0 +1,12 @@
+ws1s;
+
+macro first(var1 x, var2 M) =
+	x in M & ~ex1 y: (y in M & y<x) ;
+macro second(var1 x, var2 M) =
+	x in M & ex1 y: (x~=y & first(y, M) & all1 z: (z notin M | z=y | x<=z)) ;
+
+all1 end: all1 head: all2 M:
+	((0 in M & head in M & (end-1) in M & end in M) &
+	second(head, M) &
+	head < end-1 &
+	~ex1 x: x in M & (end<x));
