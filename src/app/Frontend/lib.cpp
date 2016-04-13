@@ -283,5 +283,5 @@ AutLib::fileExists(char *filename)
 {
   // check file exists
   std::ifstream s(filename);
-  return s != 0;
+  return static_cast<bool>(s);
 }
