@@ -252,7 +252,7 @@ def notify(results, contents):
 
     msg.attach(attachment)
 
-    s = smtplib.SMTP('localhost')
+    s = smtplib.SMTP('kazi.fit.vutbr.cz')
     s.sendmail(sender, [receiver], msg.as_string())
     s.quit()
 

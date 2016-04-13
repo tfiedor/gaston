@@ -164,14 +164,14 @@ public:
 
 /* >>> Debugging Options <<< *
  *****************************/
-#define DEBUG_DAG_REMAPPING				true
+#define DEBUG_DAG_REMAPPING				false
 #define DEBUG_ROOT_AUTOMATON		    false
 #define DEBUG_AUTOMATA_ADDRESSES		false
 #define DEBUG_EXAMPLE_PATHS				true
 #define DEBUG_BASE_AUTOMATA 			false
 #define DEBUG_MONA_DFA					false
 #define DEBUG_MONA_CODE_FORMULA			false
-#define DEBUG_RESTRICTIONS				true
+#define DEBUG_RESTRICTIONS				false
 #define DEBUG_FIXPOINT 				    false
 #define DEBUG_FIXPOINT_SYMBOLS		    false
 #define DEBUG_FIXPOINT_WORKLIST			true
@@ -207,7 +207,7 @@ public:
 #define PRINT_STATS_PRODUCT				true
 #define PRINT_STATS_NEGATION			true
 #define PRINT_STATS_BASE				true
-#define PRINT_STATS						true
+#define PRINT_STATS					    false
 
 /* >>> Dumping Options <<< *
  ***************************/
@@ -255,7 +255,7 @@ public:
 
 /* >>> Optimizations <<< *
  *************************/
-#define OPT_USE_DAG						true    // < Instead of using the symbolic automata, whill use the DAGified SA
+#define OPT_USE_DAG						false   // < Instead of using the symbolic automata, whill use the DAGified SA
 #define OPT_DONT_CACHE_CONT				true	// < Do not cache terms containing continuations
 #define OPT_DONT_CACHE_UNFULL_FIXPOINTS false	// < Do not cache fixpoints that were not fully computed
 #define OPT_EQ_THROUGH_POINTERS			true	// < Test equality through pointers, not by structure
