@@ -227,7 +227,7 @@ def exportToCSV(data, bins):
             bench_list = [os.path.split(benchmark)[1]]
             for (bin, key) in keys:
                 if not hasattr(data[benchmark][bin], "__getitem__"):
-                    bench_list = bench_list + [errors[data[benchmakr][bin]]]
+                    bench_list = bench_list + [errors[data[benchmark][bin]]]
                     #bench_list = bench_list + [str(data[benchmark][bin])]
                 else:
                     try:
