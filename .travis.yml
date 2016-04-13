@@ -21,6 +21,7 @@ compiler:
 #   - wget "http://cz.archive.ubuntu.com/ubuntu/pool/main/b/boost1.54/libboost-filesystem1.54-dev_1.54.0-4ubuntu3_amd64.deb" && sudo dpkg --install "libboost-filesystem1.54-dev_1.54.0-4ubuntu3_amd64.deb"
 #   - wget "http://cz.archive.ubuntu.com/ubuntu/pool/main/b/boost1.54/libboost-test1.54.0_1.54.0-4ubuntu3_amd64.deb" && sudo dpkg --install "libboost-test1.54.0_1.54.0-4ubuntu3_amd64.deb"
 #   - wget "http://cz.archive.ubuntu.com/ubuntu/pool/main/b/boost1.54/libboost-test1.54-dev_1.54.0-4ubuntu3_amd64.deb" && sudo dpkg --install "libboost-test1.54-dev_1.54.0-4ubuntu3_amd64.deb"
+#
 
 script:
   - make debug
