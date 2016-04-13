@@ -179,6 +179,7 @@ public:
 
   // AST Transformations
   virtual ASTForm* unfoldMacro(IdentList* i, ASTList* a) { return this; }
+  virtual bool StructuralCompare(ASTForm* f) {return f->kind == this->kind;}
 
   ASTForm* toExistentionalPNF();
   ASTForm* toSecondOrder();
@@ -1183,6 +1184,7 @@ public:
 	void detach() {this->f1 = nullptr; this->f2 = nullptr;}
 	virtual std::string ToString(bool no_utf = false);
   ASTForm* clone() { return new ASTForm_And(this->f1->clone(), this->f2->clone(), this->pos); }
+	virtual bool StructuralCompare(ASTForm* f);
 
   void toUnaryAutomaton(Automaton &aut, bool doComplement);
   void toBinaryAutomaton(Automaton &aut, bool doComplement);
@@ -1213,6 +1215,7 @@ public:
 	void detach() {this->f1 = nullptr; this->f2 = nullptr;}
 	virtual std::string ToString(bool no_utf = false);
   ASTForm* clone() { return new ASTForm_Or(this->f1->clone(), this->f2->clone(), this->pos); }
+	virtual bool StructuralCompare(ASTForm* f);
 
   void toUnaryAutomaton(Automaton &aut, bool doComplement);
   void toBinaryAutomaton(Automaton &aut, bool doComplement);
@@ -1234,6 +1237,7 @@ public:
 	virtual std::string ToString(bool no_utf = false);
   ASTForm* clone() { return new ASTForm_Not(this->f->clone(), this->pos); }
   ASTForm* unfoldMacro(IdentList*, ASTList*);
+	virtual bool StructuralCompare(ASTForm* f);
 
   void toUnaryAutomaton(Automaton &aut, bool doComplement);
   void toBinaryAutomaton(Automaton &aut, bool doComplement);
@@ -1253,6 +1257,7 @@ public:
   void dump();
 	void detach() {this->vl = nullptr; this->f = nullptr;}
   ASTForm* clone() { return new ASTForm_Ex0(this->vl->copy(), this->f->clone(), this->pos); }
+	virtual bool StructuralCompare(ASTForm* f);
 };
 
 class ASTForm_Ex1: public ASTForm_uvf {
@@ -1267,6 +1272,7 @@ public:
 	void detach() {this->ul = nullptr; this->vl = nullptr; this->f = nullptr; }
 	virtual std::string ToString(bool no_utf = false);
   ASTForm* clone() { return new ASTForm_Ex1(this->ul, this->vl->copy(), this->f->clone(), this->pos); }
+	virtual bool StructuralCompare(ASTForm* f);
 };
 
 class ASTForm_Ex2: public ASTForm_uvf {
@@ -1282,6 +1288,7 @@ public:
   ASTForm* clone() { return new ASTForm_Ex2(this->ul, this->vl->copy(), this->f->clone(), this->pos); }
 	virtual std::string ToString(bool no_utf = false);
   SymbolicAutomaton* _toSymbolicAutomatonCore(bool doComplement);
+	virtual bool StructuralCompare(ASTForm* f);
 };
 
 class ASTForm_All0: public ASTForm_vf {

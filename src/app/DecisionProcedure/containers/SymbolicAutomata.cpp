@@ -29,6 +29,7 @@ extern SymbolTable symbolTable;
 extern Ident lastPosVar, allPosVar;
 
 StateType SymbolicAutomaton::stateCnt = 0;
+DagNodeCache* SymbolicAutomaton::dagNodeCache = new DagNodeCache();
 
 using namespace Gaston;
 

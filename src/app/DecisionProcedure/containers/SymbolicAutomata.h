@@ -58,7 +58,7 @@ public:
     AutType type;
     using TermWorkshop  = Workshops::TermWorkshop;
     SymbolWorkshop* symbolFactory;
-
+    static DagNodeCache* dagNodeCache;
 protected:
     // <<< PRIVATE MEMBERS >>>
     Formula_ptr _form;

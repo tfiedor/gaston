@@ -23,6 +23,7 @@
 #include <unordered_map>
 #include <typeinfo>
 #include "../environment.hh"
+#include "../../Frontend/ast.h"
 #if (OPT_USE_DENSE_HASHMAP == true)
 #include <sparsehash/dense_hash_map>
 #include <sparsehash/sparse_hash_map>
@@ -75,6 +76,12 @@ struct PreHashType {
 		size_t seed = boost::hash_value(set.first);
 		boost::hash_combine(seed, Gaston::hash_value(set.second));
 		return seed;
+	}
+};
+
+struct DagHashType {
+	size_t operator()(ASTForm* const& f) const {
+		return boost::hash_value(f->kind);
 	}
 };
 
@@ -138,6 +145,14 @@ struct PrePairCompare : public std::binary_function<Key, Key, bool>
 	}
 };
 
+template<class Key>
+struct DagCompare : public std::binary_function<Key, Key, bool> {
+	bool operator()(Key const& lhs, Key const& rhs) const {
+		bool result = lhs->StructuralCompare(rhs);
+		return result;
+	}
+};
+
 /**
  * Class representing cache for storing @p CacheData according to the
  * @p CacheKey
@@ -186,7 +201,7 @@ public:
 	 * @param key: key we are storing to
 	 * @param data: data we are storing
 	 */
-	void StoreIn(Key& key, const CacheData& data){
+	void StoreIn(const Key& key, const CacheData& data){
 #       if (OPT_USE_DENSE_HASHMAP == true)
 		this->_cache.insert(std::make_pair(key, data));
 #       else
@@ -199,7 +214,7 @@ public:
 	 * @param data: reference to the data
 	 * @return true if found;
 	 */
-	bool retrieveFromCache(Key& key, CacheData& data) {
+	bool retrieveFromCache(const Key& key, CacheData& data) {
 		auto search = this->_cache.find(key);
 		if (search == this->_cache.end()) {
 			++cacheMisses;

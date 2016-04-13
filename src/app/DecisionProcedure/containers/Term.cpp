@@ -780,6 +780,13 @@ namespace Gaston {
         std::cout << s;
     }
 
+    void dumpDagKey(ASTForm* const& form) {
+        form->dump();
+    }
+
+    void dumpDagData(SymbolicAutomaton*& aut) {
+        aut->DumpAutomaton();
+    }
 }
 
 void Term::dump(unsigned indent) {

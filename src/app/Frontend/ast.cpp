@@ -1954,3 +1954,50 @@ project(VarCode vc, ASTTermCode *t, Pos p)
   else
     return vc;
 }
+
+template<class Binop>
+bool binary_structural_compare(ASTForm* lhs, ASTForm* rhs) {
+    if(lhs->kind != rhs->kind) {
+        return false;
+    } else {
+        Binop* lhs_binop = reinterpret_cast<Binop*>(lhs);
+        Binop* rhs_binop = reinterpret_cast<Binop*>(rhs);
+        return lhs_binop->f1->StructuralCompare(rhs_binop->f1) && lhs_binop->f2->StructuralCompare(rhs_binop->f2);
+    }
+}
+
+// Gaston stuff
+bool ASTForm_And::StructuralCompare(ASTForm *f) {
+    return binary_structural_compare<ASTForm_And>(this, f);
+}
+
+bool ASTForm_Or::StructuralCompare(ASTForm *f) {
+    return binary_structural_compare<ASTForm_Or>(this, f);
+}
+
+template<class Unop>
+bool unary_structural_compare(ASTForm* lhs, ASTForm* rhs) {
+    if(rhs->kind != lhs->kind) {
+        return false;
+    } else {
+        Unop* lhs_un = reinterpret_cast<Unop*>(lhs);
+        Unop* rhs_un = reinterpret_cast<Unop*>(rhs);
+        return lhs_un->f->StructuralCompare(rhs_un->f);
+    }
+}
+
+bool ASTForm_Not::StructuralCompare(ASTForm *f) {
+    return unary_structural_compare<ASTForm_Not>(this, f);
+}
+
+bool ASTForm_Ex0::StructuralCompare(ASTForm *f) {
+    return unary_structural_compare<ASTForm_Ex0>(this, f);
+}
+
+bool ASTForm_Ex1::StructuralCompare(ASTForm *f) {
+    return unary_structural_compare<ASTForm_Ex1>(this, f);
+}
+
+bool ASTForm_Ex2::StructuralCompare(ASTForm *f) {
+    return unary_structural_compare<ASTForm_Ex2>(this, f);
+}

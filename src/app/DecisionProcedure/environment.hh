@@ -48,6 +48,9 @@ class PrePairCompare;
 struct ResultHashType;
 struct SubsumptionHashType;
 struct PreHashType;
+struct DagHashType;
+template<class Key>
+class DagCompare;
 
 /***********************
  * GLOBAL ENUMERATIONS *
@@ -98,6 +101,8 @@ namespace Gaston {
 	void dumpSubsumptionData(SubsumptionResult& s);
 	void dumpPreKey(std::pair<size_t, Symbol_ptr> const& s);
 	void dumpPreData(VATA::Util::OrdVector<size_t>& s);
+	void dumpDagKey(ASTForm* const& s);
+	void dumpDagData(SymbolicAutomaton*& s);
 
 	using TermHash 				 = boost::hash<Term_raw>;
 	using TermCompare			 = std::equal_to<Term_raw>;
@@ -106,6 +111,9 @@ namespace Gaston {
 	using ResultCache            = BinaryCache<ResultKey, ResultType, ResultHashType, PairCompare<ResultKey>, dumpResultKey, dumpResultData>;
 	using SubsumptionKey		 = std::pair<Term_raw, Term_raw>;
 	using SubsumptionCache       = BinaryCache<SubsumptionKey, SubsumptionResult, SubsumptionHashType, PairCompare<SubsumptionKey>, dumpSubsumptionKey, dumpSubsumptionData>;
+	using DagKey				 = ASTForm*;
+	using DagData				 = SymbolicAutomaton*;
+	using DagNodeCache			 = BinaryCache<DagKey, DagData, DagHashType, DagCompare<DagKey>, dumpDagKey, dumpDagData>;
 
 	using WorkListTerm           = Term;
 	using WorkListTerm_raw       = Term*;
@@ -223,7 +231,7 @@ public:
 
 /* >>> Anti-Prenexing Options <<< *
  **********************************/
-#define ANTIPRENEXING_FULL			    true
+#define ANTIPRENEXING_FULL			    false
 #define ANTIPRENEXING_DISTRIBUTIVE		false
 
 /*
@@ -246,6 +254,7 @@ public:
 
 /* >>> Optimizations <<< *
  *************************/
+#define OPT_USE_DAG						true 	// < Instead of using the symbolic automata, whill use the DAGified SA
 #define OPT_DONT_CACHE_CONT				true	// < Do not cache terms containing continuations
 #define OPT_DONT_CACHE_UNFULL_FIXPOINTS false	// < Do not cache fixpoints that were not fully computed
 #define OPT_EQ_THROUGH_POINTERS			true	// < Test equality through pointers, not by structure
@@ -255,7 +264,7 @@ public:
 #define OPT_TERM_HASH_BY_APPROX			true	// < Include stateSpaceApprox into hash (i.e. better distribution of cache)
 #define OPT_ANTIPRENEXING				true	// < Transform formula to anti-prenex form (i.e. all of the quantifiers are deepest on leaves)
 #define OPT_DRAW_NEGATION_IN_BASE 		true    // < Negation is handled on formula level and not on computation level on base automata
-#define OPT_CREATE_QF_AUTOMATON 		true    // < Transform quantifier-free automaton to formula
+#define OPT_CREATE_QF_AUTOMATON 		false   // < Transform quantifier-free automaton to formula
 #define OPT_REDUCE_AUT_EVERYTIME		false	// < Call reduce everytime VATA automaton is created (i.e. as intermediate result)
 #define OPT_REDUCE_AUT_LAST				true	// < Call reduce after the final VATA automaton is created
 #define OPT_EARLY_EVALUATION 			false   // < Evaluates early interesection of products

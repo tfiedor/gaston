@@ -15,8 +15,6 @@ extern Timer timer_base;
 extern VarToTrackMap varMap;
 extern Offsets offsets;
 
-
-
 template<class TemplatedAutomaton>
 SymbolicAutomaton* baseToSymbolicAutomaton(ASTForm* form, bool doComplement) {
 #   if (AUT_CONSTRUCT_BY_MONA == true)
@@ -39,17 +37,36 @@ SymbolicAutomaton* baseToSymbolicAutomaton(ASTForm* form, bool doComplement) {
 }
 
 SymbolicAutomaton* ASTForm::toSymbolicAutomaton(bool doComplement) {
-    // If the sfa was already initialized (it is thus shared somehow,
+    // If the sfa was already initialized (it is thus shared somehow),
     // we return the pointer, otherwise we first create the symbolic
     // automaton and return the thing.
     if(this->sfa == nullptr) {
+#       if (OPT_USE_DAG == true)
+        // First look into the dag, if there is already something structurally similar
+        bool inCache;
+        if(inCache = SymbolicAutomaton::dagNodeCache->retrieveFromCache(this, this->sfa)) {
+            std::cout << "[!] Retrieved similar automaton: ";
+            this->sfa->DumpAutomaton();
+            std::cout << " -> ";
+            this->dump();
+            std::cout << "\n";
+        }
+            // If yes, return the automaton (the mapping will be constructed internally)
+#       endif
         if(this->tag == 0) {
             // It was tagged to be constructed by MONA
-            return baseToSymbolicAutomaton<GenericBaseAutomaton>(this, doComplement);
+            this->sfa = baseToSymbolicAutomaton<GenericBaseAutomaton>(this, doComplement);
         } else {
             this->sfa = this->_toSymbolicAutomatonCore(doComplement);
         }
+#       if (OPT_USE_DAG == true)
+        if(!inCache)
+            SymbolicAutomaton::dagNodeCache->StoreIn(this, this->sfa);
+#       endif
     }
+#   if (OPT_USE_DAG == true)
+    // Add the node into the list of dags
+#   endif
     return this->sfa;
 }
 
@@ -105,63 +122,17 @@ SymbolicAutomaton* ASTForm_Sub::_toSymbolicAutomatonCore(bool doComplement) {
  */
 SymbolicAutomaton* ASTForm_And::_toSymbolicAutomatonCore(bool doComplement) {
     SymbolicAutomaton* lhs_aut;
-#   if (OPT_CREATE_QF_AUTOMATON == true && MONA_FAIR_MODE == false)
-    // TODO: WE ARE MISSING COMPLEMENTATION
-    IdentList free, bound;
-    this->f1->freeVars(&free, &bound);
-    if(bound.empty()) {
-        lhs_aut = baseToSymbolicAutomaton<GenericBaseAutomaton>(this->f1, false);
-    } else {
-        lhs_aut = this->f1->toSymbolicAutomaton(doComplement);
-    }
-#   else
     lhs_aut = this->f1->toSymbolicAutomaton(doComplement);
-#   endif
     SymbolicAutomaton* rhs_aut;
-#   if (OPT_CREATE_QF_AUTOMATON == true && MONA_FAIR_MODE == false)
-    // TODO: WE ARE MISSING COMPLEMENTATION
-    free.reset();
-    bound.reset();
-    this->f2->freeVars(&free, &bound);
-    if(bound.empty()) {
-        rhs_aut = baseToSymbolicAutomaton<GenericBaseAutomaton>(this->f2, false);
-    } else {
-        rhs_aut = this->f2->toSymbolicAutomaton(doComplement);
-    }
-#   else
     rhs_aut = this->f2->toSymbolicAutomaton(doComplement);
-#   endif
     return new IntersectionAutomaton(lhs_aut, rhs_aut, this);
 }
 
 SymbolicAutomaton* ASTForm_Or::_toSymbolicAutomatonCore(bool doComplement) {
     SymbolicAutomaton* lhs_aut;
-#   if (OPT_CREATE_QF_AUTOMATON == true && MONA_FAIR_MODE == false)
-    // TODO: WE ARE MISSING COMPLEMENTATION
-    IdentList free, bound;
-    this->f1->freeVars(&free, &bound);
-    if(bound.empty()) {
-        lhs_aut = baseToSymbolicAutomaton<GenericBaseAutomaton>(this->f1, false);
-    } else {
-        lhs_aut = this->f1->toSymbolicAutomaton(doComplement);
-    }
-#   else
     lhs_aut = this->f1->toSymbolicAutomaton(doComplement);
-#   endif
     SymbolicAutomaton* rhs_aut;
-#   if (OPT_CREATE_QF_AUTOMATON == true && MONA_FAIR_MODE == false)
-    // TODO: WE ARE MISSING COMPLEMENTATION
-    free.reset();
-    bound.reset();
-    this->f2->freeVars(&free, &bound);
-    if(bound.empty()) {
-        rhs_aut = baseToSymbolicAutomaton<GenericBaseAutomaton>(this->f2, false);
-    } else {
-        rhs_aut = this->f2->toSymbolicAutomaton(doComplement);
-    }
-#   else
     rhs_aut = this->f2->toSymbolicAutomaton(doComplement);
-#   endif
     return new UnionAutomaton(lhs_aut, rhs_aut, this);
 }
 
@@ -172,16 +143,6 @@ bool is_base_automaton(ASTForm* f) {
 }
 
 SymbolicAutomaton* ASTForm_Not::_toSymbolicAutomatonCore(bool doComplement) {
-#   if (OPT_CREATE_QF_AUTOMATON == true && MONA_FAIR_MODE == false)
-    // TODO: WE ARE MISSING COMPLEMENTATION
-    IdentList free, bound;
-    this->f->freeVars(&free, &bound);
-    if(bound.empty()) {
-        SymbolicAutomaton* baseAut = baseToSymbolicAutomaton<GenericBaseAutomaton>(this->f, false);
-        return new ComplementAutomaton(baseAut, this);
-    }
-#   endif
-
 #   if (OPT_DRAW_NEGATION_IN_BASE == true)
     if(is_base_automaton(this->f)) {
         return baseToSymbolicAutomaton<GenericBaseAutomaton>(this, !doComplement);
@@ -193,23 +154,6 @@ SymbolicAutomaton* ASTForm_Not::_toSymbolicAutomatonCore(bool doComplement) {
 }
 
 SymbolicAutomaton* ASTForm_Ex2::_toSymbolicAutomatonCore(bool doComplement) {
-#   if (OPT_CREATE_QF_AUTOMATON == true && MONA_FAIR_MODE == false)
-        // TODO: WE ARE MISSING COMPLEMENTATION
-        IdentList free, bound;
-        this->f->freeVars(&free, &bound);
-        if(bound.empty()) {
-            if(this->f->kind == aAnd || this->f->kind == aOr) {
-                ASTForm_ff* binary = reinterpret_cast<ASTForm_ff*>(this->f);
-                if(binary->f1->kind != aFirstOrder && binary->f2->kind != aFirstOrder) {
-                    SymbolicAutomaton* baseAut = baseToSymbolicAutomaton<GenericBaseAutomaton>(this->f, false);
-                    return new ProjectionAutomaton(baseAut, this);
-                }
-            } else {
-                return new ProjectionAutomaton(baseToSymbolicAutomaton<GenericBaseAutomaton>(this->f, false), this);
-            }
-        }
-#   endif
-
     SymbolicAutomaton* aut;
     aut = this->f->toSymbolicAutomaton(doComplement);
     return new ProjectionAutomaton(aut, this);
