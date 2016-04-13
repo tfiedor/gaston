@@ -133,8 +133,7 @@ def run_gaston(test, timeout):
     '''
     Runs dWiNA with following arguments: --method=backward
     '''
-    # Fixme: There is --test=val...
-    args = ('./gaston', '--test=val', '"{}"'.format(test))
+    args = ('./gaston', '"{}"'.format(test))
     output, retcode = runProcess(args, timeout)
 
     # Fixme: This should be the issue of segfault

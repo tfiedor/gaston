@@ -43,6 +43,7 @@ using namespace Gaston;
 using SymbolWorkshop    = Workshops::SymbolWorkshop;
 
 class SymbolicChecker;
+struct SymLink;
 
 /**
  * Base class for Symbolic Automata. Each symbolic automaton contains the
@@ -52,6 +53,7 @@ class SymbolicChecker;
 class SymbolicAutomaton {
 public:
     friend class SymbolicChecker;
+    friend struct SymLink;
 
     // <<< PUBLIC MEMBERS >>>
     static StateType stateCnt;
@@ -59,9 +61,9 @@ public:
     using TermWorkshop  = Workshops::TermWorkshop;
     SymbolWorkshop* symbolFactory;
     static DagNodeCache* dagNodeCache;
+    Formula_ptr _form;
 protected:
     // <<< PRIVATE MEMBERS >>>
-    Formula_ptr _form;
     Term_ptr _initialStates = nullptr;
     Term_ptr _finalStates = nullptr;
     TermWorkshop _factory;          // Creates terms
@@ -116,16 +118,21 @@ protected:
 
 struct SymLink {
     SymbolicAutomaton* aut;
-    ZeroSymbol* (*mapping)(ZeroSymbol*);
+    bool remap;
+    std::map<unsigned int, unsigned int>* varRemap;
 
     static ZeroSymbol* identity(ZeroSymbol* s) { return s;}
 
-    SymLink() : aut(nullptr) {
-        mapping = &identity;
+    SymLink() : aut(nullptr), remap(false), varRemap(nullptr) {}
+    explicit SymLink(SymbolicAutomaton* s) : aut(s), remap(false), varRemap(nullptr) {}
+    ~SymLink() {
+        if(varRemap != nullptr) {
+            delete varRemap;
+        }
     }
-    explicit SymLink(SymbolicAutomaton* s) : aut(s) {
-        mapping = &identity;
-    }
+
+    void InitializeSymLink(ASTForm*);
+    ZeroSymbol* ReMapSymbol(ZeroSymbol*);
 };
 
 /**

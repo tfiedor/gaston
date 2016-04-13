@@ -109,6 +109,7 @@ public:
   virtual void dump() {};
 	virtual void detach() {}
 	virtual std::string ToString(bool no_utf = false) { return std::string("");}
+	virtual void ConstructMapping(AST*, std::map<unsigned int, unsigned int>&) { assert(false && "Called ConstructMapping() base function\n");};
 
 	size_t tag = 1;
 	size_t fixpoint_number = 0;
@@ -252,6 +253,7 @@ public:
 		  ASTTerm1(kind, p), n(c) {}
 
   VISITABLE();
+	virtual void ConstructMapping(AST*, std::map<unsigned int, unsigned int>&);
 
   int n;
 };
@@ -263,6 +265,7 @@ public:
   ~ASTTerm1_T() {delete T;}
 
   VISITABLE();
+	virtual void ConstructMapping(AST*, std::map<unsigned int, unsigned int>&);
 
   void freeVars(IdentList*, IdentList*);
 
@@ -276,6 +279,7 @@ public:
   ~ASTTerm1_t() {delete t;}
 
   VISITABLE();
+	virtual void ConstructMapping(AST*, std::map<unsigned int, unsigned int>&);
 
   void freeVars(IdentList*, IdentList*);
 
@@ -289,6 +293,7 @@ public:
   ~ASTTerm1_tn() {delete t;}
 
   VISITABLE();
+	virtual void ConstructMapping(AST*, std::map<unsigned int, unsigned int>&);
 
   void freeVars(IdentList*, IdentList*);
   ASTTerm1* unfoldMacro(IdentList*, ASTList*);
@@ -304,6 +309,7 @@ public:
   ~ASTTerm1_tnt() {delete t1; delete t2;}
 
   VISITABLE();
+	virtual void ConstructMapping(AST*, std::map<unsigned int, unsigned int>&);
 
   void freeVars(IdentList*, IdentList*);
 
@@ -319,6 +325,7 @@ public:
   ~ASTTerm2_TT() {delete T1; delete T2;}
 
   VISITABLE();
+	virtual void ConstructMapping(AST*, std::map<unsigned int, unsigned int>&);
 
   void freeVars(IdentList*, IdentList*);
   ASTTerm2* unfoldMacro(IdentList*, ASTList*);
@@ -334,6 +341,7 @@ public:
   ~ASTTerm2_Tn() {delete T;}
 
   VISITABLE();
+	virtual void ConstructMapping(AST*, std::map<unsigned int, unsigned int>&);
 
   void freeVars(IdentList*, IdentList*);
   ASTTerm2 *unfoldMacro(IdentList*, ASTList*);
@@ -349,6 +357,7 @@ public:
   ~ASTForm_tT() {delete t1; delete T2;}
 
   VISITABLE();
+	virtual void ConstructMapping(AST*, std::map<unsigned int, unsigned int>&);
 
   void freeVars(IdentList*, IdentList*);
   ASTForm* unfoldMacro(IdentList*, ASTList*);
@@ -364,6 +373,7 @@ public:
   ~ASTForm_T() {delete T;}
 
   VISITABLE();
+	virtual void ConstructMapping(AST*, std::map<unsigned int, unsigned int>&);
 
   void freeVars(IdentList*, IdentList*);
   ASTForm *unfoldMacro(IdentList*, ASTList*);
@@ -378,6 +388,7 @@ public:
   ~ASTForm_TT() {delete T1; delete T2;}
 
   VISITABLE();
+	virtual void ConstructMapping(AST*, std::map<unsigned int, unsigned int>&);
 
   void freeVars(IdentList*, IdentList*);
   ASTForm* unfoldMacro(IdentList*, ASTList*);
@@ -393,6 +404,7 @@ public:
   ~ASTForm_tt() {delete t1; delete t2;}
 
   VISITABLE();
+	virtual void ConstructMapping(AST*, std::map<unsigned int, unsigned int>&);
 
   void freeVars(IdentList*, IdentList*);
   ASTForm* unfoldMacro(IdentList*, ASTList*);
@@ -408,6 +420,7 @@ public:
   ~ASTForm_nt() {delete t;}
 
   VISITABLE();
+	virtual void ConstructMapping(AST*, std::map<unsigned int, unsigned int>&);
 
   void freeVars(IdentList*, IdentList*);
 
@@ -422,6 +435,7 @@ public:
   ~ASTForm_nT() {delete T;}
 
   VISITABLE();
+	virtual void ConstructMapping(AST*, std::map<unsigned int, unsigned int>&);
 
   void freeVars(IdentList*, IdentList*);
 
@@ -436,6 +450,7 @@ public:
   ~ASTForm_f() {delete f;}
 
   VISITABLE();;
+	virtual void ConstructMapping(AST*, std::map<unsigned int, unsigned int>&);
 
   void freeVars(IdentList*, IdentList*);
   ASTForm* unfoldMacro(IdentList*, ASTList*);
@@ -450,6 +465,7 @@ public:
   ~ASTForm_ff() {delete f1; delete f2;}
 
   VISITABLE();
+	virtual void ConstructMapping(AST*, std::map<unsigned int, unsigned int>&);
 
   void freeVars(IdentList*, IdentList*);
   ASTForm* unfoldMacro(IdentList*, ASTList*);
@@ -463,6 +479,7 @@ public:
   ASTForm_q(ASTKind kind, ASTForm *ff, Pos p) :
 		  ASTForm(kind, p), f(ff) {}
   ~ASTForm_q() {delete f;}
+	virtual void ConstructMapping(AST*, std::map<unsigned int, unsigned int>&);
 
   ASTForm *f;
 };
@@ -509,6 +526,7 @@ public:
 		  ASTTerm1_n(aVar1, n, p) {}
 
   VISITABLE();
+	virtual void ConstructMapping(AST*, std::map<unsigned int, unsigned int>&);
 
   void freeVars(IdentList*, IdentList*);
   ASTTermCode *makeCode(SubstCode *subst = NULL);
@@ -668,6 +686,7 @@ public:
 		  ASTTerm2(aVar2, p), n(nn) {}
 
   VISITABLE();
+	virtual void ConstructMapping(AST*, std::map<unsigned int, unsigned int>&);
 
   void freeVars(IdentList*, IdentList*);
   ASTTermCode *makeCode(SubstCode *subst = NULL);
@@ -1013,6 +1032,7 @@ public:
   void freeVars(IdentList*, IdentList*);
   void dump();
 	virtual std::string ToString(bool no_utf = false);
+	virtual void ConstructMapping(AST*, std::map<unsigned int, unsigned int>&);
   ASTForm* clone() { return new ASTForm_FirstOrder(this->t->clone(), this->pos); }
 
   // Conversion of AST representation of formula to Automaton

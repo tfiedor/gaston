@@ -43,30 +43,20 @@ SymbolicAutomaton* ASTForm::toSymbolicAutomaton(bool doComplement) {
     if(this->sfa == nullptr) {
 #       if (OPT_USE_DAG == true)
         // First look into the dag, if there is already something structurally similar
-        bool inCache;
-        if(inCache = SymbolicAutomaton::dagNodeCache->retrieveFromCache(this, this->sfa)) {
-            std::cout << "[!] Retrieved similar automaton: ";
-            this->sfa->DumpAutomaton();
-            std::cout << " -> ";
-            this->dump();
-            std::cout << "\n";
-        }
+        if(!SymbolicAutomaton::dagNodeCache->retrieveFromCache(this, this->sfa)) {
             // If yes, return the automaton (the mapping will be constructed internally)
 #       endif
-        if(this->tag == 0) {
-            // It was tagged to be constructed by MONA
-            this->sfa = baseToSymbolicAutomaton<GenericBaseAutomaton>(this, doComplement);
-        } else {
-            this->sfa = this->_toSymbolicAutomatonCore(doComplement);
-        }
+            if (this->tag == 0) {
+                // It was tagged to be constructed by MONA
+                this->sfa = baseToSymbolicAutomaton<GenericBaseAutomaton>(this, doComplement);
+            } else {
+                this->sfa = this->_toSymbolicAutomatonCore(doComplement);
+            }
 #       if (OPT_USE_DAG == true)
-        if(!inCache)
             SymbolicAutomaton::dagNodeCache->StoreIn(this, this->sfa);
+        }
 #       endif
     }
-#   if (OPT_USE_DAG == true)
-    // Add the node into the list of dags
-#   endif
     return this->sfa;
 }
 
