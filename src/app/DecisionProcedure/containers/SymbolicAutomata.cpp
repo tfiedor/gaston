@@ -50,8 +50,8 @@ void SymLink::InitializeSymLink(ASTForm* form) {
 }
 
 ZeroSymbol* SymLink::ReMapSymbol(ZeroSymbol* symbol) {
-    if(this->remap) {
-        return symbol;
+    if(this->remap && symbol != nullptr) {
+        return this->aut->symbolFactory->CreateRemappedSymbol(symbol, this->varRemap);
     } else {
         return symbol;
     }

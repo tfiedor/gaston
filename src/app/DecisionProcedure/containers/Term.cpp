@@ -780,8 +780,8 @@ namespace Gaston {
         std::cout << s;
     }
 
-    void dumpDagKey(ASTForm* const& form) {
-        form->dump();
+    void dumpDagKey(std::pair<Formula_ptr, bool> const& form) {
+        form.first->dump();
     }
 
     void dumpDagData(SymbolicAutomaton*& aut) {

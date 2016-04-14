@@ -26,12 +26,14 @@ from cStringIO import StringIO
 sender = 'ifiedortom@fit.vutbr.cz'
 receiver = 'ifiedortom@fit.vutbr.cz'
 
+dwina_error = -5
 subprocess_error = -4
 unknown_error = -3
 timeout_error = -2
 mona_error = -1                     # BDD Too Large for MONA
 
 errors = {
+    -5: 'gaston fault',
     -4: 'subprocess_error',
     -3: 'unknown error',
     -2: 'timeout',
@@ -88,7 +90,7 @@ measures = {
                 lambda parsed: sum([int(item[3]) for item in parsed]), True)
     }
 }
-dwina_error = {key: -1 for key in measures['gaston'].keys()}
+#dwina_error = {key: -1 for key in measures['gaston'].keys()}
 
 
 def parse_measure(tool, measure_name, input):

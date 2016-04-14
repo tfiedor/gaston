@@ -2111,3 +2111,8 @@ void ASTForm_FirstOrder::ConstructMapping(AST* form, std::map<unsigned int, unsi
     assert(this->kind == form->kind);
     this->t->ConstructMapping(reinterpret_cast<ASTForm_FirstOrder*>(form)->t, map);
 }
+
+void ASTForm_Not::ConstructMapping(AST* form, std::map<unsigned int, unsigned int>& map) {
+    assert(this->kind == form->kind);
+    this->f->ConstructMapping(reinterpret_cast<ASTForm_Not*>(form)->f, map);
+}

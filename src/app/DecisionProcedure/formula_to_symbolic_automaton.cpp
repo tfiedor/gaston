@@ -42,8 +42,10 @@ SymbolicAutomaton* ASTForm::toSymbolicAutomaton(bool doComplement) {
     // automaton and return the thing.
     if(this->sfa == nullptr) {
 #       if (OPT_USE_DAG == true)
+        bool isComplemented;
+        auto key = std::make_pair(this, doComplement);
         // First look into the dag, if there is already something structurally similar
-        if(!SymbolicAutomaton::dagNodeCache->retrieveFromCache(this, this->sfa)) {
+        if(!SymbolicAutomaton::dagNodeCache->retrieveFromCache(key, this->sfa)) {
             // If yes, return the automaton (the mapping will be constructed internally)
 #       endif
             if (this->tag == 0) {
@@ -53,7 +55,7 @@ SymbolicAutomaton* ASTForm::toSymbolicAutomaton(bool doComplement) {
                 this->sfa = this->_toSymbolicAutomatonCore(doComplement);
             }
 #       if (OPT_USE_DAG == true)
-            SymbolicAutomaton::dagNodeCache->StoreIn(this, this->sfa);
+            SymbolicAutomaton::dagNodeCache->StoreIn(key, this->sfa);
         }
 #       endif
     }
@@ -139,7 +141,7 @@ SymbolicAutomaton* ASTForm_Not::_toSymbolicAutomatonCore(bool doComplement) {
     }
 #   endif
     SymbolicAutomaton* aut;
-    aut = this->f->toSymbolicAutomaton(doComplement);
+    aut = this->f->toSymbolicAutomaton(!doComplement);
     return new ComplementAutomaton(aut, this);
 }
 

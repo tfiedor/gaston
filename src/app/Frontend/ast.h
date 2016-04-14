@@ -109,7 +109,7 @@ public:
   virtual void dump() {};
 	virtual void detach() {}
 	virtual std::string ToString(bool no_utf = false) { return std::string("");}
-	virtual void ConstructMapping(AST*, std::map<unsigned int, unsigned int>&) { assert(false && "Called ConstructMapping() base function\n");};
+	virtual void ConstructMapping(AST*, std::map<unsigned int, unsigned int>&) { this->dump(); std::cout << "\n"; assert(false && "Called ConstructMapping() base function\n");};
 
 	size_t tag = 1;
 	size_t fixpoint_number = 0;
@@ -1258,6 +1258,7 @@ public:
   ASTForm* clone() { return new ASTForm_Not(this->f->clone(), this->pos); }
   ASTForm* unfoldMacro(IdentList*, ASTList*);
 	virtual bool StructuralCompare(ASTForm* f);
+	virtual void ConstructMapping(AST*, std::map<unsigned int, unsigned int>&);
 
   void toUnaryAutomaton(Automaton &aut, bool doComplement);
   void toBinaryAutomaton(Automaton &aut, bool doComplement);
