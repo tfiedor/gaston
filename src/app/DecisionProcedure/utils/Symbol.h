@@ -45,6 +45,7 @@ public:
 
     // <<< CONSTRUCTORS >>>
     NEVER_INLINE ZeroSymbol();
+    NEVER_INLINE ZeroSymbol(ZeroSymbol*, std::map<unsigned int, unsigned int>*);
     NEVER_INLINE explicit ZeroSymbol(BitMask const&);
     NEVER_INLINE ZeroSymbol(BitMask const&, VarType, VarValue);
     NEVER_INLINE ~ZeroSymbol();

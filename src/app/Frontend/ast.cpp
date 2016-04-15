@@ -25,6 +25,7 @@
 #include "symboltable.h"
 #include "predlib.h"
 #include "lib.h"
+#include "../DecisionProcedure/containers/VarToTrackMap.hh"
 
 using std::cout;
 
@@ -1955,6 +1956,8 @@ project(VarCode vc, ASTTermCode *t, Pos p)
     return vc;
 }
 
+/* Structural compare */
+
 template<class Binop>
 bool binary_structural_compare(ASTForm* lhs, ASTForm* rhs) {
     if(lhs->kind != rhs->kind) {
@@ -1964,15 +1967,6 @@ bool binary_structural_compare(ASTForm* lhs, ASTForm* rhs) {
         Binop* rhs_binop = reinterpret_cast<Binop*>(rhs);
         return lhs_binop->f1->StructuralCompare(rhs_binop->f1) && lhs_binop->f2->StructuralCompare(rhs_binop->f2);
     }
-}
-
-// Gaston stuff
-bool ASTForm_And::StructuralCompare(ASTForm *f) {
-    return binary_structural_compare<ASTForm_And>(this, f);
-}
-
-bool ASTForm_Or::StructuralCompare(ASTForm *f) {
-    return binary_structural_compare<ASTForm_Or>(this, f);
 }
 
 template<class Unop>
@@ -1986,18 +1980,284 @@ bool unary_structural_compare(ASTForm* lhs, ASTForm* rhs) {
     }
 }
 
-bool ASTForm_Not::StructuralCompare(ASTForm *f) {
-    return unary_structural_compare<ASTForm_Not>(this, f);
+bool ASTTerm1_n::StructuralCompare(AST* form) {
+    assert(form != nullptr);
+    return this->kind == form->kind && this->n == reinterpret_cast<ASTTerm1_n*>(form)->n;
 }
 
-bool ASTForm_Ex0::StructuralCompare(ASTForm *f) {
-    return unary_structural_compare<ASTForm_Ex0>(this, f);
+bool ASTTerm1_T::StructuralCompare(AST* form) {
+    assert(form != nullptr);
+    return this->kind == form->kind && this->T->StructuralCompare(reinterpret_cast<ASTTerm1_T*>(form)->T);
 }
 
-bool ASTForm_Ex1::StructuralCompare(ASTForm *f) {
-    return unary_structural_compare<ASTForm_Ex1>(this, f);
+bool ASTTerm1_t::StructuralCompare(AST* form) {
+    assert(form != nullptr);
+    return this->kind == form->kind && this->t->StructuralCompare(reinterpret_cast<ASTTerm1_t*>(form)->t);
 }
 
-bool ASTForm_Ex2::StructuralCompare(ASTForm *f) {
-    return unary_structural_compare<ASTForm_Ex2>(this, f);
+bool ASTTerm1_tn::StructuralCompare(AST* form) {
+    assert(form != nullptr);
+    if(this->kind != form->kind) {
+        return false;
+    } else {
+        ASTTerm1_tn* tn = reinterpret_cast<ASTTerm1_tn*>(form);
+        return this->t->StructuralCompare(tn->t) && this->n == tn->n;
+    }
+}
+
+bool ASTTerm1_tnt::StructuralCompare(AST* form) {
+    assert(form != nullptr);
+    if(this->kind != form->kind) {
+        return false;
+    } else {
+        ASTTerm1_tnt* tnt = reinterpret_cast<ASTTerm1_tnt*>(form);
+        return this->t1->StructuralCompare(tnt->t1) && this->n == tnt->n && this->t2->StructuralCompare(tnt->t2);
+    }
+}
+
+bool ASTTerm2_TT::StructuralCompare(AST* form) {
+    assert(form != nullptr);
+    if(this->kind != form->kind) {
+        return false;
+    } else {
+        ASTTerm2_TT* TT = reinterpret_cast<ASTTerm2_TT*>(form);
+        return this->T1->StructuralCompare(TT->T1) && this->T2->StructuralCompare(TT->T2);
+    }
+}
+
+bool ASTTerm2_Tn::StructuralCompare(AST* form) {
+    assert(form != nullptr);
+    if(this->kind != form->kind) {
+        return false;
+    } else {
+        ASTTerm2_Tn* Tn = reinterpret_cast<ASTTerm2_Tn*>(form);
+        return this->T->StructuralCompare(Tn->T) && this->n == Tn->n;
+    }
+}
+
+bool ASTForm_tt::StructuralCompare(AST* form) {
+    assert(form != nullptr);
+    if(this->kind != form->kind) {
+        return false;
+    } else {
+        ASTForm_tt* tt = reinterpret_cast<ASTForm_tt*>(form);
+        return this->t1->StructuralCompare(tt->t1) && this->t2->StructuralCompare(tt->t2);
+    }
+}
+
+bool ASTForm_tT::StructuralCompare(AST* form) {
+    assert(form != nullptr);
+    if(this->kind != form->kind) {
+        return false;
+    } else {
+        ASTForm_tT* tT = reinterpret_cast<ASTForm_tT*>(form);
+        return this->t1->StructuralCompare(tT->t1) && this->T2->StructuralCompare(tT->T2);
+    }
+}
+
+bool ASTForm_T::StructuralCompare(AST* form) {
+    assert(form != nullptr);
+    return this->kind == form->kind && this->T->StructuralCompare(reinterpret_cast<ASTForm_T*>(form)->T);
+}
+
+bool ASTForm_TT::StructuralCompare(AST* form) {
+    assert(form != nullptr);
+    if(this->kind != form->kind) {
+        return false;
+    } else {
+        ASTForm_TT* TT_form = reinterpret_cast<ASTForm_TT*>(form);
+        return this->T1->StructuralCompare(TT_form->T1) && this->T2->StructuralCompare(TT_form->T2);
+    }
+}
+
+bool ASTForm_nt::StructuralCompare(AST* form) {
+    assert(form != nullptr);
+    if(this->kind != form->kind) {
+        return false;
+    } else {
+        ASTForm_nt* nt = reinterpret_cast<ASTForm_nt*>(form);
+        return this->n == nt->n && this->t->StructuralCompare(nt->t);
+    }
+
+}
+
+bool ASTForm_nT::StructuralCompare(AST* form) {
+    assert(form != nullptr);
+    if(this->kind != form->kind) {
+        return false;
+    } else {
+        ASTForm_nT* nT = reinterpret_cast<ASTForm_nT*>(form);
+        return this->n == nT->n && this->T->StructuralCompare(nT->T);
+    }
+}
+
+bool ASTForm_f::StructuralCompare(AST* form) {
+    assert(form != nullptr);
+    return this->kind == form->kind && this->f->StructuralCompare(reinterpret_cast<ASTForm_f*>(form)->f);
+}
+
+bool ASTForm_ff::StructuralCompare(AST* form) {
+    assert(form != nullptr);
+    if(this->kind != form->kind) {
+        return false;
+    } else {
+        ASTForm_ff* ff = reinterpret_cast<ASTForm_ff*>(form);
+        return this->f1->StructuralCompare(ff->f1) && this->f2->StructuralCompare(ff->f2);
+    }
+}
+
+bool ASTForm_q::StructuralCompare(AST* form) {
+    assert(form != nullptr);
+    if(this->kind != form->kind) {
+        return false;
+    } else {
+        ASTForm_q* q = reinterpret_cast<ASTForm_q*>(form);
+        //Fixme: There should be correlation between sizes of quantified stuff
+        return this->f->StructuralCompare(q->f);
+    }
+}
+
+bool ASTTerm1_Var1::StructuralCompare(AST* form) {
+    assert(form != nullptr);
+    // Fixme: There should be mapping
+    return this->kind == form->kind;
+}
+
+bool ASTTerm2_Var2::StructuralCompare(AST* form) {
+    assert(form != nullptr);
+    // Fixme: There should be mapping
+    return this->kind == form->kind;
+}
+
+bool ASTForm_FirstOrder::StructuralCompare(AST* form) {
+    assert(form != nullptr);
+    return this->kind == form->kind && this->t->StructuralCompare(reinterpret_cast<ASTForm_FirstOrder*>(form));
+}
+
+bool ASTForm_Not::StructuralCompare(AST* form) {
+    assert(form != nullptr);
+    return this->kind == form->kind && this->f->StructuralCompare(reinterpret_cast<ASTForm_Not*>(form));
+}
+
+bool ASTTerm2_Empty::StructuralCompare(AST* form) {
+    assert(form != nullptr);
+    return this->kind == form->kind;
+}
+
+// Remapping
+void ASTTerm1_n::ConstructMapping(AST* form, std::map<unsigned int, unsigned int>& map) {
+    assert(this->kind == form->kind);
+}
+
+void ASTTerm1_T::ConstructMapping(AST* form, std::map<unsigned int, unsigned int>& map) {
+    assert(this->kind == form->kind);
+    this->T->ConstructMapping(reinterpret_cast<ASTTerm1_T*>(form)->T, map);
+}
+
+void ASTTerm1_t::ConstructMapping(AST* form, std::map<unsigned int, unsigned int>& map) {
+    assert(this->kind == form->kind);
+    this->t->ConstructMapping(reinterpret_cast<ASTTerm1_t*>(form)->t, map);
+}
+
+void ASTTerm1_tn::ConstructMapping(AST* form, std::map<unsigned int, unsigned int>& map) {
+    assert(this->kind == form->kind);
+    this->t->ConstructMapping(reinterpret_cast<ASTTerm1_tn*>(form)->t, map);
+}
+
+void ASTTerm1_tnt::ConstructMapping(AST* form, std::map<unsigned int, unsigned int>& map) {
+    assert(this->kind == form->kind);
+    ASTTerm1_tnt* tnt_form = reinterpret_cast<ASTTerm1_tnt*>(form);
+    this->t1->ConstructMapping(tnt_form->t1, map);
+    this->t2->ConstructMapping(tnt_form->t2, map);
+}
+
+void ASTTerm2_TT::ConstructMapping(AST* form, std::map<unsigned int, unsigned int>& map) {
+    assert(this->kind == form->kind);
+    ASTTerm2_TT* TT_form = reinterpret_cast<ASTTerm2_TT*>(form);
+    this->T1->ConstructMapping(TT_form->T1, map);
+    this->T2->ConstructMapping(TT_form->T2, map);
+}
+
+void ASTTerm2_Tn::ConstructMapping(AST* form, std::map<unsigned int, unsigned int>& map) {
+    assert(this->kind == form->kind);
+    this->T->ConstructMapping(reinterpret_cast<ASTTerm2_Tn*>(form)->T, map);
+}
+
+void ASTForm_tt::ConstructMapping(AST* form, std::map<unsigned int, unsigned int>& map) {
+    assert(this->kind == form->kind);
+    ASTForm_tt* tt_form = reinterpret_cast<ASTForm_tt*>(form);
+    this->t1->ConstructMapping(tt_form->t1, map);
+    this->t2->ConstructMapping(tt_form->t2, map);
+}
+
+void ASTForm_tT::ConstructMapping(AST* form, std::map<unsigned int, unsigned int>& map) {
+    assert(this->kind == form->kind);
+    ASTForm_tT* tT_form = reinterpret_cast<ASTForm_tT*>(form);
+    this->t1->ConstructMapping(tT_form->t1, map);
+    this->T2->ConstructMapping(tT_form->T2, map);
+}
+
+void ASTForm_T::ConstructMapping(AST* form, std::map<unsigned int, unsigned int>& map) {
+    assert(this->kind == form->kind);
+    ASTForm_T* T_form = reinterpret_cast<ASTForm_T*>(form);
+    this->T->ConstructMapping(T_form->T, map);
+}
+
+void ASTForm_TT::ConstructMapping(AST* form, std::map<unsigned int, unsigned int>& map) {
+    assert(this->kind == form->kind);
+    ASTForm_TT* TT_form = reinterpret_cast<ASTForm_TT*>(form);
+    this->T1->ConstructMapping(TT_form->T1, map);
+    this->T2->ConstructMapping(TT_form->T2, map);
+}
+
+void ASTForm_nt::ConstructMapping(AST* form, std::map<unsigned int, unsigned int>& map) {
+    assert(this->kind == form->kind);
+    this->t->ConstructMapping(reinterpret_cast<ASTForm_nt*>(form)->t, map);
+}
+
+void ASTForm_nT::ConstructMapping(AST* form, std::map<unsigned int, unsigned int>& map) {
+    assert(this->kind == form->kind);
+    this->T->ConstructMapping(reinterpret_cast<ASTForm_nT*>(form)->T, map);
+}
+
+void ASTForm_f::ConstructMapping(AST* form, std::map<unsigned int, unsigned int>& map) {
+    assert(this->kind == form->kind);
+    this->f->ConstructMapping(reinterpret_cast<ASTForm_f*>(form)->f, map);
+}
+
+void ASTForm_ff::ConstructMapping(AST* form, std::map<unsigned int, unsigned int>& map) {
+    assert(this->kind == form->kind);
+    ASTForm_ff* ff_form = reinterpret_cast<ASTForm_ff*>(form);
+    this->f1->ConstructMapping(ff_form->f1, map);
+    this->f2->ConstructMapping(ff_form->f2, map);
+}
+
+void ASTForm_q::ConstructMapping(AST* form, std::map<unsigned int, unsigned int>& map) {
+    assert(this->kind == form->kind);
+    this->f->ConstructMapping(reinterpret_cast<ASTForm_q*>(form)->f, map);
+}
+
+extern VarToTrackMap varMap;
+void ASTTerm1_Var1::ConstructMapping(AST* form, std::map<unsigned int, unsigned int>& map) {
+    assert(this->kind == form->kind);
+    map[varMap[this->n]] = varMap[reinterpret_cast<ASTTerm1_Var1*>(form)->n];
+}
+
+void ASTTerm2_Var2::ConstructMapping(AST* form, std::map<unsigned int, unsigned int>& map) {
+    assert(this->kind == form->kind);
+    map[varMap[this->n]] = varMap[reinterpret_cast<ASTTerm2_Var2*>(form)->n];
+}
+
+void ASTForm_FirstOrder::ConstructMapping(AST* form, std::map<unsigned int, unsigned int>& map) {
+    assert(this->kind == form->kind);
+    this->t->ConstructMapping(reinterpret_cast<ASTForm_FirstOrder*>(form)->t, map);
+}
+
+void ASTForm_Not::ConstructMapping(AST* form, std::map<unsigned int, unsigned int>& map) {
+    assert(this->kind == form->kind);
+    this->f->ConstructMapping(reinterpret_cast<ASTForm_Not*>(form)->f, map);
+}
+
+void ASTTerm2_Empty::ConstructMapping(AST* form, std::map<unsigned int, unsigned int>& map) {
+    assert(this->kind == form->kind);
 }

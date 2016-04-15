@@ -515,6 +515,11 @@ namespace Workshops {
         }
     }
 
+    Symbol* SymbolWorkshop::CreateRemappedSymbol(Symbol* str, std::map<unsigned int, unsigned int>* map) {
+        // There should be Map of Ptr -> Ptr
+        return new Symbol(str, map);
+    }
+
     void SymbolWorkshop::Dump() {
         std::cout << "  \u2218 SymbolWorkshop stats -> ";
         this->_symbolCache->dumpStats();

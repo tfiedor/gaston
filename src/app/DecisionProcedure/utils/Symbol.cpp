@@ -22,7 +22,7 @@ extern VarToTrackMap varMap;
 
 namespace Gaston {
     size_t hash_value(ZeroSymbol* s) {
-#       if (OPT_TERM_HASH_BY_APPROX == true)
+#       if (OPT_SYMBOL_HASH_BY_APPROX == true)
         return boost::hash_value(s);
 #       else
         if(s == nullptr) return 0;
@@ -76,6 +76,17 @@ ZeroSymbol::ZeroSymbol(BitMask const& track, VarType var, VarValue val) {
     this->_bdd = nullptr;
 }
 
+ZeroSymbol::ZeroSymbol(ZeroSymbol* src, std::map<unsigned int, unsigned int>* map)  : _trackMask(varMap.TrackLength() << 1) {
+    // Symbol = XXXXXX
+    this->_trackMask.set();
+    for(auto it = map->begin(); it != map->end(); ++it) {
+        unsigned int from = it->first;
+        unsigned int to = it->second;
+        this->_SetValueAt(to, src->GetSymbolAt(from));
+    }
+    this->_bdd = nullptr;
+}
+
 ZeroSymbol::~ZeroSymbol() {
     if(this->_bdd != nullptr) {
         delete this->_bdd;
@@ -105,6 +116,9 @@ bool ZeroSymbol::IsDontCareAt(VarType var) {
 }
 
 void ZeroSymbol::_SetValueAt(VarType var, VarValue val) {
+    if(val > 0x03) {
+        val = charToAsgn(val);
+    }
     switch(val) {
         case 0x01:
             this->_SetZeroAt(var);

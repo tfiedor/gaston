@@ -26,10 +26,19 @@ from cStringIO import StringIO
 sender = 'ifiedortom@fit.vutbr.cz'
 receiver = 'ifiedortom@fit.vutbr.cz'
 
+dwina_error = -5
 subprocess_error = -4
 unknown_error = -3
 timeout_error = -2
 mona_error = -1                     # BDD Too Large for MONA
+
+errors = {
+    -5: 'gaston fault',
+    -4: 'subprocess_error',
+    -3: 'unknown error',
+    -2: 'timeout',
+    -1: 'BDD too large'
+}
 
 Measure = namedtuple('Measure', 'regex default post_process is_cummulative')
 time_default = "0"
@@ -81,7 +90,7 @@ measures = {
                 lambda parsed: sum([int(item[3]) for item in parsed]), True)
     }
 }
-dwina_error = {key: -1 for key in measures['gaston'].keys()}
+#dwina_error = {key: -1 for key in measures['gaston'].keys()}
 
 
 def parse_measure(tool, measure_name, input):
@@ -133,8 +142,7 @@ def run_gaston(test, timeout):
     '''
     Runs dWiNA with following arguments: --method=backward
     '''
-    # Fixme: There is --test=val...
-    args = ('./gaston', '--test=val', '"{}"'.format(test))
+    args = ('./gaston', '"{}"'.format(test))
     output, retcode = runProcess(args, timeout)
 
     # Fixme: This should be the issue of segfault
@@ -221,7 +229,8 @@ def exportToCSV(data, bins):
             bench_list = [os.path.split(benchmark)[1]]
             for (bin, key) in keys:
                 if not hasattr(data[benchmark][bin], "__getitem__"):
-                    bench_list = bench_list + [str(data[benchmark][bin])]
+                    bench_list = bench_list + [errors[data[benchmark][bin]]]
+                    #bench_list = bench_list + [str(data[benchmark][bin])]
                 else:
                     try:
                         bench_list = bench_list + [str(data[benchmark][bin][key])]
@@ -253,7 +262,7 @@ def notify(results, contents):
 
     msg.attach(attachment)
 
-    s = smtplib.SMTP('localhost')
+    s = smtplib.SMTP('kazi.fit.vutbr.cz')
     s.sendmail(sender, [receiver], msg.as_string())
     s.quit()
 

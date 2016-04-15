@@ -101,7 +101,7 @@ namespace Gaston {
 	void dumpSubsumptionData(SubsumptionResult& s);
 	void dumpPreKey(std::pair<size_t, Symbol_ptr> const& s);
 	void dumpPreData(VATA::Util::OrdVector<size_t>& s);
-	void dumpDagKey(ASTForm* const& s);
+	void dumpDagKey(std::pair<Formula_ptr, bool> const& s);
 	void dumpDagData(SymbolicAutomaton*& s);
 
 	using TermHash 				 = boost::hash<Term_raw>;
@@ -111,7 +111,7 @@ namespace Gaston {
 	using ResultCache            = BinaryCache<ResultKey, ResultType, ResultHashType, PairCompare<ResultKey>, dumpResultKey, dumpResultData>;
 	using SubsumptionKey		 = std::pair<Term_raw, Term_raw>;
 	using SubsumptionCache       = BinaryCache<SubsumptionKey, SubsumptionResult, SubsumptionHashType, PairCompare<SubsumptionKey>, dumpSubsumptionKey, dumpSubsumptionData>;
-	using DagKey				 = ASTForm*;
+	using DagKey				 = std::pair<Formula_ptr, bool>;
 	using DagData				 = SymbolicAutomaton*;
 	using DagNodeCache			 = BinaryCache<DagKey, DagData, DagHashType, DagCompare<DagKey>, dumpDagKey, dumpDagData>;
 
@@ -164,13 +164,14 @@ public:
 
 /* >>> Debugging Options <<< *
  *****************************/
+#define DEBUG_DAG_REMAPPING				false
 #define DEBUG_ROOT_AUTOMATON		    false
 #define DEBUG_AUTOMATA_ADDRESSES		false
 #define DEBUG_EXAMPLE_PATHS				true
 #define DEBUG_BASE_AUTOMATA 			false
 #define DEBUG_MONA_DFA					false
 #define DEBUG_MONA_CODE_FORMULA			false
-#define DEBUG_RESTRICTIONS				true
+#define DEBUG_RESTRICTIONS				false
 #define DEBUG_FIXPOINT 				    false
 #define DEBUG_FIXPOINT_SYMBOLS		    false
 #define DEBUG_FIXPOINT_WORKLIST			true
@@ -206,7 +207,7 @@ public:
 #define PRINT_STATS_PRODUCT				true
 #define PRINT_STATS_NEGATION			true
 #define PRINT_STATS_BASE				true
-#define PRINT_STATS						true
+#define PRINT_STATS					    true
 
 /* >>> Dumping Options <<< *
  ***************************/
@@ -231,7 +232,7 @@ public:
 
 /* >>> Anti-Prenexing Options <<< *
  **********************************/
-#define ANTIPRENEXING_FULL			    false
+#define ANTIPRENEXING_FULL			    true
 #define ANTIPRENEXING_DISTRIBUTIVE		false
 
 /*
@@ -254,7 +255,7 @@ public:
 
 /* >>> Optimizations <<< *
  *************************/
-#define OPT_USE_DAG						true 	// < Instead of using the symbolic automata, whill use the DAGified SA
+#define OPT_USE_DAG						true    // < Instead of using the symbolic automata, whill use the DAGified SA
 #define OPT_DONT_CACHE_CONT				true	// < Do not cache terms containing continuations
 #define OPT_DONT_CACHE_UNFULL_FIXPOINTS false	// < Do not cache fixpoints that were not fully computed
 #define OPT_EQ_THROUGH_POINTERS			true	// < Test equality through pointers, not by structure
@@ -262,9 +263,10 @@ public:
 // ^- NOTE! From v1.0 onwards, disable this will introduce not only leaks, but will fuck everything up!
 #define OPT_USE_CUSTOM_PTR_HASH			false	// < Will use the custom implementation of hash function instead of boost::hash
 #define OPT_TERM_HASH_BY_APPROX			true	// < Include stateSpaceApprox into hash (i.e. better distribution of cache)
+#define OPT_SYMBOL_HASH_BY_APPROX		false	// < Will hash symbol by pointers
 #define OPT_ANTIPRENEXING				true	// < Transform formula to anti-prenex form (i.e. all of the quantifiers are deepest on leaves)
 #define OPT_DRAW_NEGATION_IN_BASE 		true    // < Negation is handled on formula level and not on computation level on base automata
-#define OPT_CREATE_QF_AUTOMATON 		false   // < Transform quantifier-free automaton to formula
+#define OPT_CREATE_QF_AUTOMATON 		true    // < Transform quantifier-free automaton to formula
 #define OPT_REDUCE_AUT_EVERYTIME		false	// < Call reduce everytime VATA automaton is created (i.e. as intermediate result)
 #define OPT_REDUCE_AUT_LAST				true	// < Call reduce after the final VATA automaton is created
 #define OPT_EARLY_EVALUATION 			false   // < Evaluates early interesection of products
@@ -288,4 +290,9 @@ public:
 #define OPT_NO_SATURATION_FOR_M2L		true    // < Will not saturate the final states for M2L(str) logic
 #define OPT_MERGE_SUBSUMED_WORKLISTS	true    // < If the parts of the fixpoint are subsumed, but worklist aren't, merge them instead
 
+/* >>> Static Assertions <<< *
+ *****************************/
+static_assert(!(OPT_USE_DAG == true && OPT_SYMBOL_HASH_BY_APPROX == true), "Conflicting optimizations: 'Usage of DAG' and 'Hashing of symbols by pointers");
+static_assert(!(OPT_USE_DAG == true && OPT_EARLY_EVALUATION == true), "Conflicting optimizations: Continuations do not support usage of DAG");
+static_assert(!(MONA_FAIR_MODE == true && MIGHTY_GASTON == true), "Gaston cannot be might and fair at the same time!");
 #endif

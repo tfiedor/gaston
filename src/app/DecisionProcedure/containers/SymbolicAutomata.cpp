@@ -33,6 +33,30 @@ DagNodeCache* SymbolicAutomaton::dagNodeCache = new DagNodeCache();
 
 using namespace Gaston;
 
+// <<< SYMLINK FUNCTIONS >>>
+void SymLink::InitializeSymLink(ASTForm* form) {
+    if(this->aut->_form != form) {
+        // Construct the mapping
+        this->varRemap = new std::map<unsigned int, unsigned int>();
+        this->remap = true;
+        form->ConstructMapping(this->aut->_form, *this->varRemap);
+#       if (DEBUG_DAG_REMAPPING == true)
+        std::cout << "[!] Mapping for: "; form->dump(); std::cout << "\n";
+        for(auto it = this->varRemap->begin(); it != this->varRemap->end(); ++it) {
+            std::cout << (it->first) << " -> " << (it->second) << "\n";
+        }
+#       endif
+    }
+}
+
+ZeroSymbol* SymLink::ReMapSymbol(ZeroSymbol* symbol) {
+    if(this->remap && symbol != nullptr) {
+        return this->aut->symbolFactory->CreateRemappedSymbol(symbol, this->varRemap);
+    } else {
+        return symbol;
+    }
+}
+
 // <<< CONSTRUCTORS >>>
 SymbolicAutomaton::SymbolicAutomaton(Formula_ptr form) :
         _form(form), _factory(this), _initialStates(nullptr), _finalStates(nullptr), _satExample(nullptr),
@@ -63,6 +87,8 @@ BinaryOpAutomaton::BinaryOpAutomaton(SymbolicAutomaton_raw lhs, SymbolicAutomato
     type = AutType::BINARY;
     lhs->IncReferences();
     rhs->IncReferences();
+    this->_lhs_aut.InitializeSymLink(reinterpret_cast<ASTForm_ff*>(this->_form)->f1);
+    this->_rhs_aut.InitializeSymLink(reinterpret_cast<ASTForm_ff*>(this->_form)->f2);
 }
 
 BinaryOpAutomaton::~BinaryOpAutomaton() {
@@ -75,6 +101,7 @@ ComplementAutomaton::ComplementAutomaton(SymbolicAutomaton *aut, Formula_ptr for
     type = AutType::COMPLEMENT;
     this->_InitializeAutomaton();
     aut->IncReferences();
+    this->_aut.InitializeSymLink(reinterpret_cast<ASTForm_Not*>(this->_form)->f);
 }
 
 ComplementAutomaton::~ComplementAutomaton() {
@@ -87,6 +114,7 @@ ProjectionAutomaton::ProjectionAutomaton(SymbolicAutomaton_raw aut, Formula_ptr 
     this->_isRoot = isRoot;
     this->_InitializeAutomaton();
     aut->IncReferences();
+    this->_aut.InitializeSymLink(reinterpret_cast<ASTForm_q*>(this->_form)->f);
 }
 
 ProjectionAutomaton::~ProjectionAutomaton() {
@@ -278,7 +306,7 @@ ResultType RootProjectionAutomaton::IntersectNonEmpty(Symbol* symbol, Term* fina
     assert(projectionApproximation->list.size() == 1);
 
     // Evaluate the initial unfolding of epsilon
-    ResultType result = this->_aut.aut->IntersectNonEmpty(symbol, projectionApproximation->list[0], underComplement);
+    ResultType result = this->_aut.aut->IntersectNonEmpty(this->_aut.ReMapSymbol(symbol), projectionApproximation->list[0], underComplement);
 
     // Create a new fixpoint term and iterator on it
     TermFixpoint* fixpoint = this->_factory.CreateFixpoint(result.first, SymbolWorkshop::CreateZeroSymbol(), underComplement, result.second, WorklistSearchType::E_UNGROUND_ROOT);
@@ -581,7 +609,7 @@ ResultType BinaryOpAutomaton::_IntersectNonEmptyCore(Symbol* symbol, Term* final
     TermProduct* productStateApproximation = reinterpret_cast<TermProduct*>(finalApproximation);
 
     // Checks if left automaton's initial states intersects the final states
-    ResultType lhs_result = this->_lhs_aut.aut->IntersectNonEmpty(symbol, productStateApproximation->left, underComplement); // TODO: another memory consumption
+    ResultType lhs_result = this->_lhs_aut.aut->IntersectNonEmpty(this->_lhs_aut.ReMapSymbol(symbol), productStateApproximation->left, underComplement); // TODO: another memory consumption
 
     // We can prune the state if left side was evaluated as Empty term
     // TODO: This is different for Unionmat!
@@ -620,7 +648,7 @@ ResultType BinaryOpAutomaton::_IntersectNonEmptyCore(Symbol* symbol, Term* final
 #   endif
 
     // Otherwise compute the right side and return full fixpoint
-    ResultType rhs_result = this->_rhs_aut.aut->IntersectNonEmpty(symbol, productStateApproximation->right, underComplement);
+    ResultType rhs_result = this->_rhs_aut.aut->IntersectNonEmpty(this->_rhs_aut.ReMapSymbol(symbol), productStateApproximation->right, underComplement);
     // We can prune the state if right side was evaluated as Empty term
     // TODO: This is different for Unionmat!
 #   if (OPT_PRUNE_EMPTY == true)
@@ -640,7 +668,7 @@ ResultType BinaryOpAutomaton::_IntersectNonEmptyCore(Symbol* symbol, Term* final
 
 ResultType ComplementAutomaton::_IntersectNonEmptyCore(Symbol* symbol, Term* finalApproximaton, bool underComplement) {
     // Compute the result of nested automaton with switched complement
-    ResultType result = this->_aut.aut->IntersectNonEmpty(symbol, finalApproximaton, !underComplement);
+    ResultType result = this->_aut.aut->IntersectNonEmpty(this->_aut.ReMapSymbol(symbol), finalApproximaton, !underComplement);
     // TODO: fix, because there may be falsely complemented things
     if(finalApproximaton->InComplement() != result.first->InComplement()) {
         if(result.first->type == TERM_EMPTY) {
@@ -668,7 +696,7 @@ ResultType ProjectionAutomaton::_IntersectNonEmptyCore(Symbol* symbol, Term* fin
         assert(projectionApproximation->list.size() == 1);
 
         // Evaluate the initial unfolding of epsilon
-        ResultType result = this->_aut.aut->IntersectNonEmpty(symbol, projectionApproximation->list[0], underComplement);
+        ResultType result = this->_aut.aut->IntersectNonEmpty(this->_aut.ReMapSymbol(symbol), projectionApproximation->list[0], underComplement);
 
         // Create a new fixpoint term and iterator on it
         #if (DEBUG_NO_WORKSHOPS == true)
@@ -1162,10 +1190,15 @@ void print_stat(std::string statName, std::string stat) {
 }
 
 void BinaryOpAutomaton::DumpStats() {
+    if(this->marked) {
+        return;
+    }
+    this->marked = true;
 #   if (PRINT_STATS_PRODUCT == true)
     this->_form->dump();
     std::cout << "\n";
-    std::cout << "  \u2218 Cache stats -> ";
+    std::cout << "  \u2218 Cache stats -> \n";
+    print_stat("Refs", this->_refs);
 #       if (MEASURE_CACHE_HITS == true)
         this->_resCache.dumpStats();
 #       endif
@@ -1186,10 +1219,15 @@ void BinaryOpAutomaton::DumpStats() {
 }
 
 void ProjectionAutomaton::DumpStats() {
+    if(this->marked) {
+        return;
+    }
+    this->marked = true;
 #   if (PRINT_STATS_PROJECTION == true)
     this->_form->dump();
     std::cout << "\n";
-    std::cout << "  \u2218 Cache stats -> ";
+    std::cout << "  \u2218 Cache stats -> \n";
+    print_stat("Refs", this->_refs);
 #       if (MEASURE_CACHE_HITS == true)
         this->_resCache.dumpStats();
 #       endif
@@ -1214,10 +1252,15 @@ void ProjectionAutomaton::DumpStats() {
 }
 
 void ComplementAutomaton::DumpStats() {
+    if(this->marked) {
+        return;
+    }
+    this->marked = true;
 #   if (PRINT_STATS_NEGATION == true)
     this->_form->dump();
     std::cout << "\n";
-    std::cout << "  \u2218 Cache stats -> ";
+    std::cout << "  \u2218 Cache stats -> \n";
+    print_stat("Refs", this->_refs);
 #       if (MEASURE_CACHE_HITS == true)
         this->_resCache.dumpStats();
 #       endif
@@ -1236,10 +1279,15 @@ void ComplementAutomaton::DumpStats() {
 }
 
 void BaseAutomaton::DumpStats() {
+    if(this->marked) {
+        return;
+    }
+    this->marked = true;
 #   if (PRINT_STATS_BASE == true)
     this->_form->dump();
     std::cout << "\n";
-    std::cout << "  \u2218 Cache stats -> ";
+    std::cout << "  \u2218 Cache stats -> \n";
+    print_stat("Refs", this->_refs);
 #       if (MEASURE_CACHE_HITS == true)
         this->_resCache.dumpStats();
 #       endif
@@ -1254,4 +1302,20 @@ void BaseAutomaton::DumpStats() {
         print_stat("Continuation Evaluation", this->_contUnfoldingCounter);
 #   endif
     std::cout << "\n";
+}
+
+unsigned int ProjectionAutomaton::CountNodes() {
+    return 1 + (this->_aut.remap ? 0 : this->_aut.aut->CountNodes());
+}
+
+unsigned int BinaryOpAutomaton::CountNodes() {
+    return 1 + (this->_lhs_aut.remap ? 0 : this->_lhs_aut.aut->CountNodes()) + (this->_rhs_aut.remap ? 0 : this->_rhs_aut.aut->CountNodes());
+}
+
+unsigned int BaseAutomaton::CountNodes() {
+    return 1;
+}
+
+unsigned int ComplementAutomaton::CountNodes() {
+    return 1 + (this->_aut.remap ? 0 : this->_aut.aut->CountNodes());
 }
