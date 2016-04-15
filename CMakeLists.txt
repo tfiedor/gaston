@@ -91,3 +91,12 @@ if (UNIX)
 else()
 	message(fatal_error "Not supported yet")
 endif()
+
+##############################################################################
+#                                   TESTS
+##############################################################################
+
+# Include CTest so that sophisticated testing can be done now
+include(CTest)
+
+add_test(regression ${PROJECT_SOURCE_DIR}/testcheck.py)
