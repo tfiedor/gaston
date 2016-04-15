@@ -111,6 +111,7 @@ public:
     virtual void DumpCacheStats() = 0;
     virtual void DumpExample(ExampleType);
     virtual void DumpStats() = 0;
+    virtual unsigned int CountNodes() = 0;
     virtual void DumpToDot(std::ofstream&, bool) = 0;
     static void AutomatonToDot(std::string, SymbolicAutomaton*, bool);
 protected:
@@ -167,6 +168,7 @@ public:
     virtual void DumpToDot(std::ofstream&, bool);
     virtual void DumpStats();
     virtual void DumpCacheStats();
+    virtual unsigned int CountNodes();
 protected:
     NEVER_INLINE virtual ~BinaryOpAutomaton();
 };
@@ -214,6 +216,7 @@ public:
     virtual void DumpToDot(std::ofstream&, bool);
     virtual void DumpStats();
     virtual void DumpCacheStats();
+    virtual unsigned int CountNodes();
 protected:
     NEVER_INLINE virtual ~ComplementAutomaton();
 };
@@ -258,6 +261,7 @@ public:
     virtual void DumpToDot(std::ofstream&, bool);
     virtual void DumpStats();
     virtual void DumpCacheStats();
+    virtual unsigned int CountNodes();
 protected:
     NEVER_INLINE virtual ~ProjectionAutomaton();
 };
@@ -309,6 +313,7 @@ public:
     virtual void BaseAutDump();
     virtual void DumpStats();
     virtual void DumpCacheStats();
+    virtual unsigned int CountNodes();
 
 protected:
     NEVER_INLINE ~BaseAutomaton();

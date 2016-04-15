@@ -41,6 +41,8 @@ void SymbolicChecker::ConstructAutomaton() {
     if(options.printProgress)
         this->_automaton->DumpAutomaton();
     std::cout << "\n";
+    unsigned int automata_nodes = this->_automaton->CountNodes();
+    std::cout << "[!] Constructed automaton with " << automata_nodes << " node" << (automata_nodes == 1 ? "" : "s") << "\n";
 
     timer_automaton.stop();
     if (options.dump) {

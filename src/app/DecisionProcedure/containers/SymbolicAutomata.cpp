@@ -1303,3 +1303,19 @@ void BaseAutomaton::DumpStats() {
 #   endif
     std::cout << "\n";
 }
+
+unsigned int ProjectionAutomaton::CountNodes() {
+    return 1 + (this->_aut.remap ? 0 : this->_aut.aut->CountNodes());
+}
+
+unsigned int BinaryOpAutomaton::CountNodes() {
+    return 1 + (this->_lhs_aut.remap ? 0 : this->_lhs_aut.aut->CountNodes()) + (this->_rhs_aut.remap ? 0 : this->_rhs_aut.aut->CountNodes());
+}
+
+unsigned int BaseAutomaton::CountNodes() {
+    return 1;
+}
+
+unsigned int ComplementAutomaton::CountNodes() {
+    return 1 + (this->_aut.remap ? 0 : this->_aut.aut->CountNodes());
+}
