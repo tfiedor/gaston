@@ -22,6 +22,7 @@ before_install:
 script:
   - make debug
   - make release
+  - make test
 
 addons:
   apt:

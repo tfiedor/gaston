@@ -1,3 +1,4 @@
+#!/usr/bin/env python2
 '''
     WSkS Test Bench
 
@@ -49,7 +50,7 @@ def run_gaston(test, timeout, checkonly=False):
     '''
     Runs dWiNA with following arguments: --method=backward
     '''
-    args = ('./gaston', '--test=val', '"{}"'.format(test))
+    args = ('build/gaston', '--test=val', '"{}"'.format(test))
     output, retcode = runProcess(args, timeout)
 
     # Fixme: This should be the issue of segfault
@@ -175,7 +176,8 @@ if __name__ == '__main__':
     data = {}
     # modification and setup of parameters
     bins = ['mona', 'gaston']
-    wdir = os.path.join(os.curdir, "tests", options.dir)
+    # wdir = os.path.join(os.curdir, "tests", options.dir)\
+    wdir = os.path.join(os.path.dirname(os.path.realpath(__file__)), "tests", options.dir)
 
     # iterate through all files in dir
     cases = 0
