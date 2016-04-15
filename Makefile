@@ -10,6 +10,8 @@ TEST_FLAGS=-j 50
 all:
 	cd $(BUILD_DIR) && $(MAKE) $(MAKE_FLAGS) || echo "Type either \"make debug\" or \"make release\"!"
 
+$(BUILD_DIR): debug
+
 debug:
 	cd $(BUILD_DIR) && cmake -DCMAKE_BUILD_TYPE=Debug .. && $(MAKE) $(MAKE_FLAGS)
 
@@ -19,7 +21,7 @@ release:
 doc:
 	cd $(BUILD_DIR) && $(MAKE) $(MAKE_FLAGS) doc
 
-test:
+test: $(BUILD_DIR)
 	cd $(BUILD_DIR) && ctest $(TEST_FLAGS)
 
 clean:
