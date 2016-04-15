@@ -207,7 +207,7 @@ public:
 #define PRINT_STATS_PRODUCT				true
 #define PRINT_STATS_NEGATION			true
 #define PRINT_STATS_BASE				true
-#define PRINT_STATS					    false
+#define PRINT_STATS					    true
 
 /* >>> Dumping Options <<< *
  ***************************/

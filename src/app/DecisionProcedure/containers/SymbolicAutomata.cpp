@@ -1190,10 +1190,15 @@ void print_stat(std::string statName, std::string stat) {
 }
 
 void BinaryOpAutomaton::DumpStats() {
+    if(this->marked) {
+        return;
+    }
+    this->marked = true;
 #   if (PRINT_STATS_PRODUCT == true)
     this->_form->dump();
     std::cout << "\n";
-    std::cout << "  \u2218 Cache stats -> ";
+    std::cout << "  \u2218 Cache stats -> \n";
+    print_stat("Refs", this->_refs);
 #       if (MEASURE_CACHE_HITS == true)
         this->_resCache.dumpStats();
 #       endif
@@ -1214,10 +1219,15 @@ void BinaryOpAutomaton::DumpStats() {
 }
 
 void ProjectionAutomaton::DumpStats() {
+    if(this->marked) {
+        return;
+    }
+    this->marked = true;
 #   if (PRINT_STATS_PROJECTION == true)
     this->_form->dump();
     std::cout << "\n";
-    std::cout << "  \u2218 Cache stats -> ";
+    std::cout << "  \u2218 Cache stats -> \n";
+    print_stat("Refs", this->_refs);
 #       if (MEASURE_CACHE_HITS == true)
         this->_resCache.dumpStats();
 #       endif
@@ -1242,10 +1252,15 @@ void ProjectionAutomaton::DumpStats() {
 }
 
 void ComplementAutomaton::DumpStats() {
+    if(this->marked) {
+        return;
+    }
+    this->marked = true;
 #   if (PRINT_STATS_NEGATION == true)
     this->_form->dump();
     std::cout << "\n";
-    std::cout << "  \u2218 Cache stats -> ";
+    std::cout << "  \u2218 Cache stats -> \n";
+    print_stat("Refs", this->_refs);
 #       if (MEASURE_CACHE_HITS == true)
         this->_resCache.dumpStats();
 #       endif
@@ -1264,10 +1279,15 @@ void ComplementAutomaton::DumpStats() {
 }
 
 void BaseAutomaton::DumpStats() {
+    if(this->marked) {
+        return;
+    }
+    this->marked = true;
 #   if (PRINT_STATS_BASE == true)
     this->_form->dump();
     std::cout << "\n";
-    std::cout << "  \u2218 Cache stats -> ";
+    std::cout << "  \u2218 Cache stats -> \n";
+    print_stat("Refs", this->_refs);
 #       if (MEASURE_CACHE_HITS == true)
         this->_resCache.dumpStats();
 #       endif

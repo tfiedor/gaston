@@ -110,6 +110,7 @@ public:
 	virtual void detach() {}
 	virtual std::string ToString(bool no_utf = false) { return std::string("");}
 	virtual void ConstructMapping(AST*, std::map<unsigned int, unsigned int>&) { this->dump(); std::cout << "\n"; assert(false && "Called ConstructMapping() base function\n");};
+	virtual bool StructuralCompare(AST* f) {return f->kind == this->kind;}
 
 	size_t tag = 1;
 	size_t fixpoint_number = 0;
@@ -180,7 +181,6 @@ public:
 
   // AST Transformations
   virtual ASTForm* unfoldMacro(IdentList* i, ASTList* a) { return this; }
-  virtual bool StructuralCompare(ASTForm* f) {return f->kind == this->kind;}
 
   ASTForm* toExistentionalPNF();
   ASTForm* toSecondOrder();
@@ -254,6 +254,7 @@ public:
 
   VISITABLE();
 	virtual void ConstructMapping(AST*, std::map<unsigned int, unsigned int>&);
+	virtual bool StructuralCompare(AST*);
 
   int n;
 };
@@ -266,6 +267,7 @@ public:
 
   VISITABLE();
 	virtual void ConstructMapping(AST*, std::map<unsigned int, unsigned int>&);
+	virtual bool StructuralCompare(AST*);
 
   void freeVars(IdentList*, IdentList*);
 
@@ -280,6 +282,7 @@ public:
 
   VISITABLE();
 	virtual void ConstructMapping(AST*, std::map<unsigned int, unsigned int>&);
+	virtual bool StructuralCompare(AST*);
 
   void freeVars(IdentList*, IdentList*);
 
@@ -294,6 +297,7 @@ public:
 
   VISITABLE();
 	virtual void ConstructMapping(AST*, std::map<unsigned int, unsigned int>&);
+	virtual bool StructuralCompare(AST*);
 
   void freeVars(IdentList*, IdentList*);
   ASTTerm1* unfoldMacro(IdentList*, ASTList*);
@@ -310,6 +314,7 @@ public:
 
   VISITABLE();
 	virtual void ConstructMapping(AST*, std::map<unsigned int, unsigned int>&);
+	virtual bool StructuralCompare(AST*);
 
   void freeVars(IdentList*, IdentList*);
 
@@ -326,6 +331,7 @@ public:
 
   VISITABLE();
 	virtual void ConstructMapping(AST*, std::map<unsigned int, unsigned int>&);
+	virtual bool StructuralCompare(AST*);
 
   void freeVars(IdentList*, IdentList*);
   ASTTerm2* unfoldMacro(IdentList*, ASTList*);
@@ -342,6 +348,7 @@ public:
 
   VISITABLE();
 	virtual void ConstructMapping(AST*, std::map<unsigned int, unsigned int>&);
+	virtual bool StructuralCompare(AST*);
 
   void freeVars(IdentList*, IdentList*);
   ASTTerm2 *unfoldMacro(IdentList*, ASTList*);
@@ -358,6 +365,7 @@ public:
 
   VISITABLE();
 	virtual void ConstructMapping(AST*, std::map<unsigned int, unsigned int>&);
+	virtual bool StructuralCompare(AST*);
 
   void freeVars(IdentList*, IdentList*);
   ASTForm* unfoldMacro(IdentList*, ASTList*);
@@ -374,6 +382,7 @@ public:
 
   VISITABLE();
 	virtual void ConstructMapping(AST*, std::map<unsigned int, unsigned int>&);
+	virtual bool StructuralCompare(AST*);
 
   void freeVars(IdentList*, IdentList*);
   ASTForm *unfoldMacro(IdentList*, ASTList*);
@@ -389,6 +398,7 @@ public:
 
   VISITABLE();
 	virtual void ConstructMapping(AST*, std::map<unsigned int, unsigned int>&);
+	virtual bool StructuralCompare(AST*);
 
   void freeVars(IdentList*, IdentList*);
   ASTForm* unfoldMacro(IdentList*, ASTList*);
@@ -405,6 +415,7 @@ public:
 
   VISITABLE();
 	virtual void ConstructMapping(AST*, std::map<unsigned int, unsigned int>&);
+	virtual bool StructuralCompare(AST*);
 
   void freeVars(IdentList*, IdentList*);
   ASTForm* unfoldMacro(IdentList*, ASTList*);
@@ -421,6 +432,7 @@ public:
 
   VISITABLE();
 	virtual void ConstructMapping(AST*, std::map<unsigned int, unsigned int>&);
+	virtual bool StructuralCompare(AST*);
 
   void freeVars(IdentList*, IdentList*);
 
@@ -436,6 +448,7 @@ public:
 
   VISITABLE();
 	virtual void ConstructMapping(AST*, std::map<unsigned int, unsigned int>&);
+	virtual bool StructuralCompare(AST*);
 
   void freeVars(IdentList*, IdentList*);
 
@@ -451,6 +464,7 @@ public:
 
   VISITABLE();;
 	virtual void ConstructMapping(AST*, std::map<unsigned int, unsigned int>&);
+	virtual bool StructuralCompare(AST*);
 
   void freeVars(IdentList*, IdentList*);
   ASTForm* unfoldMacro(IdentList*, ASTList*);
@@ -466,6 +480,7 @@ public:
 
   VISITABLE();
 	virtual void ConstructMapping(AST*, std::map<unsigned int, unsigned int>&);
+	virtual bool StructuralCompare(AST*);
 
   void freeVars(IdentList*, IdentList*);
   ASTForm* unfoldMacro(IdentList*, ASTList*);
@@ -480,6 +495,7 @@ public:
 		  ASTForm(kind, p), f(ff) {}
   ~ASTForm_q() {delete f;}
 	virtual void ConstructMapping(AST*, std::map<unsigned int, unsigned int>&);
+	virtual bool StructuralCompare(AST*);
 
   ASTForm *f;
 };
@@ -527,6 +543,7 @@ public:
 
   VISITABLE();
 	virtual void ConstructMapping(AST*, std::map<unsigned int, unsigned int>&);
+	virtual bool StructuralCompare(AST*);
 
   void freeVars(IdentList*, IdentList*);
   ASTTermCode *makeCode(SubstCode *subst = NULL);
@@ -687,6 +704,7 @@ public:
 
   VISITABLE();
 	virtual void ConstructMapping(AST*, std::map<unsigned int, unsigned int>&);
+	virtual bool StructuralCompare(AST*);
 
   void freeVars(IdentList*, IdentList*);
   ASTTermCode *makeCode(SubstCode *subst = NULL);
@@ -758,6 +776,8 @@ public:
 
   ASTTermCode *makeCode(SubstCode *subst = NULL);
 	virtual ASTTerm2* clone() { return new ASTTerm2_Empty(Pos()); }
+	virtual void ConstructMapping(AST*, std::map<unsigned int, unsigned int>&);
+	virtual bool StructuralCompare(AST*);
   void dump();
 	virtual std::string ToString(bool no_utf = false);
 };
@@ -1033,6 +1053,7 @@ public:
   void dump();
 	virtual std::string ToString(bool no_utf = false);
 	virtual void ConstructMapping(AST*, std::map<unsigned int, unsigned int>&);
+	virtual bool StructuralCompare(AST*);
   ASTForm* clone() { return new ASTForm_FirstOrder(this->t->clone(), this->pos); }
 
   // Conversion of AST representation of formula to Automaton
@@ -1204,7 +1225,6 @@ public:
 	void detach() {this->f1 = nullptr; this->f2 = nullptr;}
 	virtual std::string ToString(bool no_utf = false);
   ASTForm* clone() { return new ASTForm_And(this->f1->clone(), this->f2->clone(), this->pos); }
-	virtual bool StructuralCompare(ASTForm* f);
 
   void toUnaryAutomaton(Automaton &aut, bool doComplement);
   void toBinaryAutomaton(Automaton &aut, bool doComplement);
@@ -1235,7 +1255,6 @@ public:
 	void detach() {this->f1 = nullptr; this->f2 = nullptr;}
 	virtual std::string ToString(bool no_utf = false);
   ASTForm* clone() { return new ASTForm_Or(this->f1->clone(), this->f2->clone(), this->pos); }
-	virtual bool StructuralCompare(ASTForm* f);
 
   void toUnaryAutomaton(Automaton &aut, bool doComplement);
   void toBinaryAutomaton(Automaton &aut, bool doComplement);
@@ -1257,7 +1276,7 @@ public:
 	virtual std::string ToString(bool no_utf = false);
   ASTForm* clone() { return new ASTForm_Not(this->f->clone(), this->pos); }
   ASTForm* unfoldMacro(IdentList*, ASTList*);
-	virtual bool StructuralCompare(ASTForm* f);
+	virtual bool StructuralCompare(AST*);
 	virtual void ConstructMapping(AST*, std::map<unsigned int, unsigned int>&);
 
   void toUnaryAutomaton(Automaton &aut, bool doComplement);
@@ -1278,7 +1297,6 @@ public:
   void dump();
 	void detach() {this->vl = nullptr; this->f = nullptr;}
   ASTForm* clone() { return new ASTForm_Ex0(this->vl->copy(), this->f->clone(), this->pos); }
-	virtual bool StructuralCompare(ASTForm* f);
 };
 
 class ASTForm_Ex1: public ASTForm_uvf {
@@ -1293,7 +1311,6 @@ public:
 	void detach() {this->ul = nullptr; this->vl = nullptr; this->f = nullptr; }
 	virtual std::string ToString(bool no_utf = false);
   ASTForm* clone() { return new ASTForm_Ex1(this->ul, this->vl->copy(), this->f->clone(), this->pos); }
-	virtual bool StructuralCompare(ASTForm* f);
 };
 
 class ASTForm_Ex2: public ASTForm_uvf {
@@ -1309,7 +1326,6 @@ public:
   ASTForm* clone() { return new ASTForm_Ex2(this->ul, this->vl->copy(), this->f->clone(), this->pos); }
 	virtual std::string ToString(bool no_utf = false);
   SymbolicAutomaton* _toSymbolicAutomatonCore(bool doComplement);
-	virtual bool StructuralCompare(ASTForm* f);
 };
 
 class ASTForm_All0: public ASTForm_vf {

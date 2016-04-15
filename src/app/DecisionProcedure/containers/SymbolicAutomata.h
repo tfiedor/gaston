@@ -73,6 +73,7 @@ protected:
     Term_ptr _satExample = nullptr;
     Term_ptr _unsatExample = nullptr;
     size_t _refs;
+    bool marked = false;
 
     // <<< PRIVATE FUNCTIONS >>>
     virtual void _InitializeAutomaton() = 0;
@@ -120,8 +121,6 @@ struct SymLink {
     SymbolicAutomaton* aut;
     bool remap;
     std::map<unsigned int, unsigned int>* varRemap;
-
-    static ZeroSymbol* identity(ZeroSymbol* s) { return s;}
 
     SymLink() : aut(nullptr), remap(false), varRemap(nullptr) {}
     explicit SymLink(SymbolicAutomaton* s) : aut(s), remap(false), varRemap(nullptr) {}
