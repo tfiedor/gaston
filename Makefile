@@ -3,7 +3,7 @@ BUILD_DIR=build
 MAKE_FLAGS=-j 1
 # MAKE_FLAGS=-j 4
 #
-TEST_FLAGS=-j 50
+TEST_FLAGS=-j 50 -V
 
 .PHONY: all debug release doc clean test
 
