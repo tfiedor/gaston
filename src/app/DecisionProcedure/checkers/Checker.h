@@ -43,8 +43,8 @@ using TimerType = Timer;
 	code(SyntaxRestricter)				/* Restrict unsupported formula constructs to supported subset*/ \
 	code(BooleanUnfolder)				/* Simplify formula through various boolean laws*/ \
 	code(UniversalQuantifierRemover)	/* Remove universal quantifier from formula*/ \
-	code(NegationUnfolder)				/* Push negations deeply*/\
-	code(BaseAutomataMerger)			/* Merge some of the base automata*/
+	/*code(NegationUnfolder)				/* Push negations deeply*/\
+	/*code(BaseAutomataMerger)			/* Merge some of the base automata*/
 #endif
 
 class Checker {

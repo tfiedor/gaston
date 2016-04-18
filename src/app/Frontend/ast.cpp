@@ -2100,6 +2100,8 @@ bool ASTForm_ff::StructuralCompare(AST* form) {
     assert(form != nullptr);
     if(this->kind != form->kind) {
         return false;
+    } else if(this->size != form->size) {
+        return false;
     } else {
         ASTForm_ff* ff = reinterpret_cast<ASTForm_ff*>(form);
         return this->f1->StructuralCompare(ff->f1) && this->f2->StructuralCompare(ff->f2);
@@ -2131,12 +2133,12 @@ bool ASTTerm2_Var2::StructuralCompare(AST* form) {
 
 bool ASTForm_FirstOrder::StructuralCompare(AST* form) {
     assert(form != nullptr);
-    return this->kind == form->kind && this->t->StructuralCompare(reinterpret_cast<ASTForm_FirstOrder*>(form));
+    return this->kind == form->kind && this->t->StructuralCompare(reinterpret_cast<ASTForm_FirstOrder*>(form)->t);
 }
 
 bool ASTForm_Not::StructuralCompare(AST* form) {
     assert(form != nullptr);
-    return this->kind == form->kind && this->f->StructuralCompare(reinterpret_cast<ASTForm_Not*>(form));
+    return this->kind == form->kind && this->f->StructuralCompare(reinterpret_cast<ASTForm_Not*>(form)->f);
 }
 
 bool ASTTerm2_Empty::StructuralCompare(AST* form) {

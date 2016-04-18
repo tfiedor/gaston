@@ -192,8 +192,8 @@ ResultType SymbolicAutomaton::IntersectNonEmpty(Symbol* symbol, Term* stateAppro
     ResultType result;
 
     // Empty set needs not to be computed
-    if(stateApproximation->type == TERM_EMPTY && !stateApproximation->InComplement()) {
-        return std::make_pair(stateApproximation, underComplement);
+    if(stateApproximation->type == TERM_EMPTY) {
+        return std::make_pair(stateApproximation, underComplement != stateApproximation->InComplement());
     }
 
 #   if (DEBUG_INTERSECT_NON_EMPTY == true)
@@ -226,8 +226,8 @@ ResultType SymbolicAutomaton::IntersectNonEmpty(Symbol* symbol, Term* stateAppro
     assert(stateApproximation->type != TERM_CONTINUATION);
 
     // Empty set needs not to be computed
-    if(stateApproximation->type == TERM_EMPTY && !stateApproximation->InComplement()) {
-        return std::make_pair(stateApproximation, underComplement);
+    if(stateApproximation->type == TERM_EMPTY) {
+        return std::make_pair(stateApproximation, underComplement != stateApproximation->InComplement());
     }
 
 #   if (OPT_CACHE_RESULTS == true)
@@ -1197,8 +1197,8 @@ void BinaryOpAutomaton::DumpStats() {
 #   if (PRINT_STATS_PRODUCT == true)
     this->_form->dump();
     std::cout << "\n";
-    std::cout << "  \u2218 Cache stats -> \n";
     print_stat("Refs", this->_refs);
+    std::cout << "  \u2218 Cache stats -> ";
 #       if (MEASURE_CACHE_HITS == true)
         this->_resCache.dumpStats();
 #       endif
@@ -1226,8 +1226,8 @@ void ProjectionAutomaton::DumpStats() {
 #   if (PRINT_STATS_PROJECTION == true)
     this->_form->dump();
     std::cout << "\n";
-    std::cout << "  \u2218 Cache stats -> \n";
     print_stat("Refs", this->_refs);
+    std::cout << "  \u2218 Cache stats -> ";
 #       if (MEASURE_CACHE_HITS == true)
         this->_resCache.dumpStats();
 #       endif
@@ -1259,8 +1259,8 @@ void ComplementAutomaton::DumpStats() {
 #   if (PRINT_STATS_NEGATION == true)
     this->_form->dump();
     std::cout << "\n";
-    std::cout << "  \u2218 Cache stats -> \n";
     print_stat("Refs", this->_refs);
+    std::cout << "  \u2218 Cache stats -> ";
 #       if (MEASURE_CACHE_HITS == true)
         this->_resCache.dumpStats();
 #       endif
@@ -1286,8 +1286,8 @@ void BaseAutomaton::DumpStats() {
 #   if (PRINT_STATS_BASE == true)
     this->_form->dump();
     std::cout << "\n";
-    std::cout << "  \u2218 Cache stats -> \n";
     print_stat("Refs", this->_refs);
+    std::cout << "  \u2218 Cache stats -> ";
 #       if (MEASURE_CACHE_HITS == true)
         this->_resCache.dumpStats();
 #       endif

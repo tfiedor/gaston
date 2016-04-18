@@ -180,7 +180,7 @@ public:
 #define DEBUG_TERM_UNIQUENESS			false
 #define DEBUG_TERM_CREATION				false
 #define DEBUG_TERM_SUBSUMPTION 			false
-#define DEBUG_TERM_SUBSUMED_BY 			true
+#define DEBUG_TERM_SUBSUMED_BY 			false
 #define DEBUG_TERM_CACHE_COMPARISON		false
 #define DEBUG_SYMBOL_CREATION			true
 #define DEBUG_CACHE_MEMBERS				false
@@ -207,7 +207,7 @@ public:
 #define PRINT_STATS_PRODUCT				true
 #define PRINT_STATS_NEGATION			true
 #define PRINT_STATS_BASE				true
-#define PRINT_STATS					    true
+#define PRINT_STATS					    false
 
 /* >>> Dumping Options <<< *
  ***************************/
@@ -222,7 +222,7 @@ public:
 #define MEASURE_CACHE_BUCKETS			false   // < Prints the statistics for cache buckets
 #define MEASURE_CONTINUATION_CREATION	true	// < Measures how many continuations are created
 #define MEASURE_CONTINUATION_EVALUATION	true	// < Measures how many continuations are actually unfolded
-#define MEASURE_RESULT_HITS				false   // < Measure how many times the result hits in cache
+#define MEASURE_RESULT_HITS				true    // < Measure how many times the result hits in cache
 #define MEASURE_SYMBOLS					true	// < Measure how many symbols are created
 #define MEASURE_PROJECTION				true	// < Measures several things about projection (how many steps, how big, etc.)
 #define MEASURE_POSTPONED				true	// < Measures how many terms are postponed and how many are processed
@@ -232,7 +232,7 @@ public:
 
 /* >>> Anti-Prenexing Options <<< *
  **********************************/
-#define ANTIPRENEXING_FULL			    true
+#define ANTIPRENEXING_FULL			    false
 #define ANTIPRENEXING_DISTRIBUTIVE		false
 
 /*
@@ -255,7 +255,7 @@ public:
 
 /* >>> Optimizations <<< *
  *************************/
-#define OPT_USE_DAG						true    // < Instead of using the symbolic automata, whill use the DAGified SA
+#define OPT_USE_DAG						true    // < Instead of using the symbolic automata, will use the DAGified SA
 #define OPT_DONT_CACHE_CONT				true	// < Do not cache terms containing continuations
 #define OPT_DONT_CACHE_UNFULL_FIXPOINTS false	// < Do not cache fixpoints that were not fully computed
 #define OPT_EQ_THROUGH_POINTERS			true	// < Test equality through pointers, not by structure
@@ -266,7 +266,7 @@ public:
 #define OPT_SYMBOL_HASH_BY_APPROX		false	// < Will hash symbol by pointers
 #define OPT_ANTIPRENEXING				true	// < Transform formula to anti-prenex form (i.e. all of the quantifiers are deepest on leaves)
 #define OPT_DRAW_NEGATION_IN_BASE 		true    // < Negation is handled on formula level and not on computation level on base automata
-#define OPT_CREATE_QF_AUTOMATON 		true    // < Transform quantifier-free automaton to formula
+#define OPT_CREATE_QF_AUTOMATON 		false   // < Transform quantifier-free automaton to formula
 #define OPT_REDUCE_AUT_EVERYTIME		false	// < Call reduce everytime VATA automaton is created (i.e. as intermediate result)
 #define OPT_REDUCE_AUT_LAST				true	// < Call reduce after the final VATA automaton is created
 #define OPT_EARLY_EVALUATION 			false   // < Evaluates early interesection of products

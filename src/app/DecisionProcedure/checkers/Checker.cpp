@@ -228,18 +228,22 @@ void Checker::CloseUngroundFormula() {
                 break;
             default:
                 // We will test everything
+                ASTForm* restrictions = new ASTForm_True(Pos());
                 for(auto it = freeVars.begin(); it != freeVars.end(); ++it) {
                     // Fixme: what about zeroorder variables
                     if(symbolTable.lookupType(*it) == MonaTypeTag::Varname1) {
                         ASTForm_FirstOrder* fo = new ASTForm_FirstOrder(new ASTTerm1_Var1(*it, Pos()), Pos());
-                        this->_monaAST->formula = new ASTForm_And(fo, this->_monaAST->formula, Pos());
-                        this->_monaAST->formula
-                                = SecondOrderRestricter::RestrictFormula<ASTForm_And, ASTTerm1_Var1>(*it, this->_monaAST->formula);
+                        restrictions = new ASTForm_And(fo, restrictions, Pos());
+                        restrictions
+                                = SecondOrderRestricter::RestrictFormula<ASTForm_And, ASTTerm1_Var1>(*it, restrictions);
                     } else if(symbolTable.lookupType(*it) == MonaTypeTag::Varname2 && *it != allPosVar) {
-                        this->_monaAST->formula
-                                = SecondOrderRestricter::RestrictFormula<ASTForm_And, ASTTerm2_Var2>(*it, this->_monaAST->formula);
+                        restrictions
+                                = SecondOrderRestricter::RestrictFormula<ASTForm_And, ASTTerm2_Var2>(*it, restrictions);
                     }
                 }
+                BooleanUnfolder booleanUnfolder;
+                restrictions = static_cast<ASTForm*>(restrictions->accept(booleanUnfolder));
+                this->_monaAST->formula = new ASTForm_And(restrictions, this->_monaAST->formula, Pos());
                 break;
         }
     }
@@ -296,6 +300,9 @@ void Checker::PreprocessFormula() {
 
     SecondOrderRestricter restricter;
     this->_monaAST->formula = static_cast<ASTForm*>((this->_monaAST->formula)->accept(restricter));
+
+    QuantificationMerger quantificationMerger;
+    this->_monaAST->formula = static_cast<ASTForm*>((this->_monaAST->formula)->accept(quantificationMerger));
 
     if(options.graphvizDAG) {
         std::string dotFileName(inputFileName);
