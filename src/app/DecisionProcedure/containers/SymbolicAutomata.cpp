@@ -1189,7 +1189,11 @@ void print_stat(std::string statName, std::string stat) {
     }
 }
 
-void BinaryOpAutomaton::DumpStats() {
+void print_stat(std::string statName, double stat) {
+    std::cout << "  \u2218 " << statName << " -> " << std::fixed << std::setprecision(2) << stat << "\n";
+}
+
+void BinaryOpAutomaton::DumpComputationStats() {
     if(this->marked) {
         return;
     }
@@ -1214,11 +1218,11 @@ void BinaryOpAutomaton::DumpStats() {
         print_stat("Continuation Evaluation", this->_contUnfoldingCounter);
 #   endif
     std::cout << "\n";
-    this->_lhs_aut.aut->DumpStats();
-    this->_rhs_aut.aut->DumpStats();
+    this->_lhs_aut.aut->DumpComputationStats();
+    this->_rhs_aut.aut->DumpComputationStats();
 }
 
-void ProjectionAutomaton::DumpStats() {
+void ProjectionAutomaton::DumpComputationStats() {
     if(this->marked) {
         return;
     }
@@ -1248,10 +1252,10 @@ void ProjectionAutomaton::DumpStats() {
         print_stat("Continuation Evaluation", this->_contUnfoldingCounter);
 #   endif
     std::cout << "\n";
-    this->_aut.aut->DumpStats();
+    this->_aut.aut->DumpComputationStats();
 }
 
-void ComplementAutomaton::DumpStats() {
+void ComplementAutomaton::DumpComputationStats() {
     if(this->marked) {
         return;
     }
@@ -1275,10 +1279,10 @@ void ComplementAutomaton::DumpStats() {
         print_stat("Continuation Evaluation", this->_contUnfoldingCounter);
 #   endif
     std::cout << "\n";
-    this->_aut.aut->DumpStats();
+    this->_aut.aut->DumpComputationStats();
 }
 
-void BaseAutomaton::DumpStats() {
+void BaseAutomaton::DumpComputationStats() {
     if(this->marked) {
         return;
     }
@@ -1304,18 +1308,71 @@ void BaseAutomaton::DumpStats() {
     std::cout << "\n";
 }
 
-unsigned int ProjectionAutomaton::CountNodes() {
-    return 1 + (this->_aut.remap ? 0 : this->_aut.aut->CountNodes());
+void SymbolicAutomaton::DumpAutomatonMetrics() {
+    this->FillStats();
+
+    std::cout << "\u2218 Overall SymbolicAutomaton Metrics:\n";
+    print_stat("Nodes", this->stats.nodes);
+    print_stat("Real nodes", this->stats.real_nodes);
+    print_stat("DAG gain", ((double)this->stats.nodes / this->stats.real_nodes));
+    print_stat("Fixpoint Computations", this->stats.fixpoint_computations);
+    print_stat("Maximal Fixpoint Nesting", this->stats.max_fixpoint_nesting);
+    print_stat("Automaton Height", this->stats.height);
+    print_stat("Maximal References", this->stats.max_refs);
 }
 
-unsigned int BinaryOpAutomaton::CountNodes() {
-    return 1 + (this->_lhs_aut.remap ? 0 : this->_lhs_aut.aut->CountNodes()) + (this->_rhs_aut.remap ? 0 : this->_rhs_aut.aut->CountNodes());
+void ProjectionAutomaton::FillStats() {
+    bool count_inner = !this->_aut.remap;
+    if(count_inner) {
+        this->_aut.aut->FillStats();
+    }
+
+    this->stats.fixpoint_computations = (count_inner ? this->_aut.aut->stats.fixpoint_computations : 0) + 1;
+    this->stats.height = this->_aut.aut->stats.height + 1;
+    this->stats.nodes = 1 + (count_inner ? this->_aut.aut->stats.nodes : 0);
+    this->stats.real_nodes = 1 + this->_aut.aut->stats.real_nodes;
+    this->stats.max_refs = std::max(this->_refs, this->_aut.aut->stats.max_refs);
+    this->stats.max_fixpoint_nesting = this->_aut.aut->stats.max_fixpoint_nesting + 1;
 }
 
-unsigned int BaseAutomaton::CountNodes() {
-    return 1;
+void BinaryOpAutomaton::FillStats() {
+    bool count_left = !this->_lhs_aut.remap;
+    bool count_right = !this->_rhs_aut.remap;
+
+    if(count_left) {
+        this->_lhs_aut.aut->FillStats();
+    }
+    if(count_right) {
+        this->_rhs_aut.aut->FillStats();
+    }
+
+    this->stats.fixpoint_computations = (count_left ? this->_lhs_aut.aut->stats.fixpoint_computations : 0) + (count_right ? this->_rhs_aut.aut->stats.fixpoint_computations : 0);
+    this->stats.height = std::max(this->_lhs_aut.aut->stats.height, this->_rhs_aut.aut->stats.height) + 1;
+    this->stats.nodes = (count_left ? this->_lhs_aut.aut->stats.nodes : 0) + (count_right ? this->_rhs_aut.aut->stats.nodes : 0) + 1;
+    this->stats.real_nodes = 1 + this->_lhs_aut.aut->stats.real_nodes + this->_rhs_aut.aut->stats.real_nodes;
+    this->stats.max_refs = std::max({this->_refs, this->_lhs_aut.aut->stats.max_refs, this->_rhs_aut.aut->stats.max_refs});
+    this->stats.max_fixpoint_nesting = std::max(this->_lhs_aut.aut->stats.max_fixpoint_nesting, this->_rhs_aut.aut->stats.max_fixpoint_nesting);
 }
 
-unsigned int ComplementAutomaton::CountNodes() {
-    return 1 + (this->_aut.remap ? 0 : this->_aut.aut->CountNodes());
+void BaseAutomaton::FillStats() {
+    this->stats.fixpoint_computations = 0;
+    this->stats.height = 1;
+    this->stats.nodes = 1;
+    this->stats.real_nodes = 1;
+    this->stats.max_refs = this->_refs;
+    this->stats.max_fixpoint_nesting = 0;
+}
+
+void ComplementAutomaton::FillStats() {
+    bool count_inner = !this->_aut.remap;
+    if(count_inner) {
+        this->_aut.aut->FillStats();
+    }
+
+    this->stats.fixpoint_computations = (count_inner ? this->_aut.aut->stats.fixpoint_computations : 0);
+    this->stats.height = this->_aut.aut->stats.height + 1;
+    this->stats.nodes = (count_inner ? this->_aut.aut->stats.nodes : 0) + 1;
+    this->stats.real_nodes = 1 + this->_aut.aut->stats.real_nodes;
+    this->stats.max_refs = std::max(this->_refs, this->_aut.aut->stats.max_refs);
+    this->stats.max_fixpoint_nesting = this->_aut.aut->stats.max_fixpoint_nesting;
 }

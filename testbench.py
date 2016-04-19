@@ -45,8 +45,11 @@ time_default = "0"
 time_regex = "([0-9][0-9]:[0-9][0-9]:[0-9][0-9].[0-9][0-9])"
 space_default = "0"
 space_regex = "([0-9]+)"
+double_regex = "([0-9]+\.[0-9]+)"
+double_default = 1.0
 pair_regex = "\(([0-9]+),([0-9]+)\)"
 whatever_regex = ".*?"
+
 
 def parse_total_time(line):
     '''
@@ -70,6 +73,13 @@ measures = {
             'time-dp': Measure("decision procedure" + whatever_regex + time_regex, time_default, parse_total_time, False),
             'time-base': Measure("dfa creation" + whatever_regex + time_regex, time_default, parse_total_time, False),
             'time-conv': Measure("mona <-> vata" + whatever_regex + time_regex, time_default, parse_total_time, False),
+            'dag-nodes': Measure("nodes" + whatever_regex + space_regex, space_default, int, False),
+            'real-nodes': Measure("real nodes" + whatever_regex + space_regex, space_default, int, False),
+            'dag-gain': Measure("dag gain" + whatever_regex + double_regex, double_default, float, False),
+            'aut-fix': Measure("fixpoint computations" + whatever_regex + space_regex, space_default, int, False),
+            'aut-max-fix-nest': Measure("maximal fixpoint nesting" + whatever_regex + space_regex, space_default, int, False),
+            'aut-height': Measure("automaton height" + whatever_regex + space_regex, space_default, int, False),
+            'aut-max-refs': Measure("maximal references" + whatever_regex + space_regex, space_default, int, False)
         },
     'mona': {
             'time': Measure("total time" + whatever_regex + time_regex, time_default, parse_total_time, False),
@@ -90,7 +100,12 @@ measures = {
                 lambda parsed: sum([int(item[3]) for item in parsed]), True)
     }
 }
-#dwina_error = {key: -1 for key in measures['gaston'].keys()}
+
+csv_keys = {
+    'gaston': ['time', 'space-all', 'space', 'dag-nodes', 'real-nodes', 'dag-gain', 'aut-fix', 'aut-max-fix-nest',
+               'aut-height', 'aut-max-refs'],
+    'mona': ['time', 'space', 'space-min']
+}
 
 
 def parse_measure(tool, measure_name, input):
@@ -142,7 +157,7 @@ def run_gaston(test, timeout):
     '''
     Runs dWiNA with following arguments: --method=backward
     '''
-    args = ('./gaston', '"{}"'.format(test))
+    args = ('./build/gaston', '"{}"'.format(test))
     output, retcode = runProcess(args, timeout)
 
     # Fixme: This should be the issue of segfault
@@ -206,7 +221,7 @@ def exportToCSV(data, bins):
         csvFile.write('benchmark, ')
         first = True
         if 'mona' in bins:
-            for (key, timing) in measures['mona'].items():
+            for key in csv_keys['mona']:
                 keys.append(('mona', key))
                 if first:
                     first = False
@@ -216,7 +231,7 @@ def exportToCSV(data, bins):
         csvFile.write(", ")
         first = True
         if 'gaston' in bins:
-            for (key, timing) in measures['gaston'].items():
+            for key in csv_keys['gaston']:
                 keys.append(('gaston', key))
                 if first:
                     first = False
@@ -230,7 +245,6 @@ def exportToCSV(data, bins):
             for (bin, key) in keys:
                 if not hasattr(data[benchmark][bin], "__getitem__"):
                     bench_list = bench_list + [errors[data[benchmark][bin]]]
-                    #bench_list = bench_list + [str(data[benchmark][bin])]
                 else:
                     try:
                         bench_list = bench_list + [str(data[benchmark][bin][key])]
@@ -262,7 +276,9 @@ def notify(results, contents):
 
     msg.attach(attachment)
 
-    s = smtplib.SMTP('kazi.fit.vutbr.cz')
+    #s = smtplib.SMTP('kazi.fit.vutbr.cz')
+    s = smtplib.SMTP('localhost')
+
     s.sendmail(sender, [receiver], msg.as_string())
     s.quit()
 

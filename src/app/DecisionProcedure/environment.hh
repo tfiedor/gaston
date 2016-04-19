@@ -229,6 +229,7 @@ public:
 #define MEASURE_ALL						false   // < Measure everything, not really useful
 #define MEASURE_COMPARISONS				false	// < Measure how many times we sucessfully compared and how
 #define MEASURE_SUBSUMEDBY_HITS			true	// < Measure how many times subsumedBy cache worked
+#define MEASURE_AUTOMATA_METRICS		true	// < Measure stuff like number of nodes and stuff in resulting automaton
 
 /* >>> Anti-Prenexing Options <<< *
  **********************************/

@@ -55,6 +55,15 @@ public:
     friend class SymbolicChecker;
     friend struct SymLink;
 
+    struct SymbolicAutomatonStats {
+        unsigned int height = 0;
+        unsigned int fixpoint_computations = 0;
+        unsigned int max_fixpoint_nesting = 0;
+        unsigned int nodes = 0;
+        unsigned int real_nodes = 0;
+        unsigned int max_refs;
+    } stats;
+
     // <<< PUBLIC MEMBERS >>>
     static StateType stateCnt;
     AutType type;
@@ -72,7 +81,7 @@ protected:
     VarList _freeVars;
     Term_ptr _satExample = nullptr;
     Term_ptr _unsatExample = nullptr;
-    size_t _refs;
+    unsigned int _refs;
     bool marked = false;
 
     // <<< PRIVATE FUNCTIONS >>>
@@ -107,11 +116,12 @@ public:
     void SetUnsatisfiableExample(Term*);
 
     // <<< DUMPING FUNCTIONS >>>
+    void DumpAutomatonMetrics();
     virtual void DumpAutomaton() = 0;
     virtual void DumpCacheStats() = 0;
     virtual void DumpExample(ExampleType);
-    virtual void DumpStats() = 0;
-    virtual unsigned int CountNodes() = 0;
+    virtual void DumpComputationStats() = 0;
+    virtual void FillStats() = 0;
     virtual void DumpToDot(std::ofstream&, bool) = 0;
     static void AutomatonToDot(std::string, SymbolicAutomaton*, bool);
 protected:
@@ -166,9 +176,9 @@ public:
     // <<< DUMPING FUNCTIONS >>>
     virtual void DumpAutomaton();
     virtual void DumpToDot(std::ofstream&, bool);
-    virtual void DumpStats();
+    virtual void DumpComputationStats();
     virtual void DumpCacheStats();
-    virtual unsigned int CountNodes();
+    virtual void FillStats();
 protected:
     NEVER_INLINE virtual ~BinaryOpAutomaton();
 };
@@ -214,9 +224,9 @@ public:
     // <<< DUMPING FUNCTIONS >>>
     virtual void DumpAutomaton();
     virtual void DumpToDot(std::ofstream&, bool);
-    virtual void DumpStats();
+    virtual void DumpComputationStats();
     virtual void DumpCacheStats();
-    virtual unsigned int CountNodes();
+    virtual void FillStats();
 protected:
     NEVER_INLINE virtual ~ComplementAutomaton();
 };
@@ -229,8 +239,8 @@ public:
     // <<< PUBLIC MEMBERS >>>
     IdentList* projectedVars;
     #if (MEASURE_PROJECTION == true)
-    size_t fixpointNext = 0;
-    size_t fixpointPreNext = 0;
+    unsigned int fixpointNext = 0;
+    unsigned int fixpointPreNext = 0;
     std::string fixpointRes = "";
     std::string fixpointPreRes = "";
     #endif
@@ -259,9 +269,9 @@ public:
     // <<< DUMPING FUNCTIONS >>>
     virtual void DumpAutomaton();
     virtual void DumpToDot(std::ofstream&, bool);
-    virtual void DumpStats();
+    virtual void DumpComputationStats();
     virtual void DumpCacheStats();
-    virtual unsigned int CountNodes();
+    virtual void FillStats();
 protected:
     NEVER_INLINE virtual ~ProjectionAutomaton();
 };
@@ -311,9 +321,9 @@ public:
     // <<< DUMPING FUNCTIONS >>>
     virtual void DumpToDot(std::ofstream&, bool);
     virtual void BaseAutDump();
-    virtual void DumpStats();
+    virtual void DumpComputationStats();
     virtual void DumpCacheStats();
-    virtual unsigned int CountNodes();
+    virtual void FillStats();
 
 protected:
     NEVER_INLINE ~BaseAutomaton();
