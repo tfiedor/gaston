@@ -29,6 +29,7 @@
 #include "../visitors/Tagger.h"
 #include "../visitors/FixpointDetagger.h"
 #include "../visitors/MonaSerializer.h"
+#include "../visitors/ShuffleVisitor.h"
 
 extern PredicateLib predicateLib;
 
@@ -297,6 +298,11 @@ void Checker::PreprocessFormula() {
 
     FixpointDetagger detagger;
     (this->_monaAST->formula)->accept(detagger);
+
+#   if (OPT_SHUFFLE_FORMULA == true)
+    ShuffleVisitor shuffleVisitor;
+    this->_monaAST->formula = static_cast<ASTForm*>(this->_monaAST->formula->accept(shuffleVisitor));
+#   endif
 
     SecondOrderRestricter restricter;
     this->_monaAST->formula = static_cast<ASTForm*>((this->_monaAST->formula)->accept(restricter));

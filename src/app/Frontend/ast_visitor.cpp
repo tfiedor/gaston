@@ -31,6 +31,8 @@ RetNode traverse_T(Node* node, TransformerVisitor &v) {
             // First visit the right child, then the root
             node->T = static_cast<ASTTerm2*>(node->T->accept(v));
             return v.visit(node);
+        case TransformerVisitor::Traverse::CustomOrder:
+            return v.visit(node);
         default:
             assert(false && "Traversing AST_T not implemented yet");
     }
@@ -54,6 +56,8 @@ RetNode traverse_t(Node* node, TransformerVisitor &v) {
         case TransformerVisitor::Traverse::PostOrder:
             // First traverse the right childe, then the root
             node->t = static_cast<ASTTerm1*>(node->t->accept(v));
+            return v.visit(node);
+        case TransformerVisitor::Traverse::CustomOrder:
             return v.visit(node);
         default:
             assert(false && "Traversing AST_t not implemented yet");
@@ -86,6 +90,8 @@ RetNode traverse_tt(Node* node, TransformerVisitor &v) {
             temp = static_cast<Node*>(v.visit(node));
             temp->t2 = static_cast<ASTTerm1*>(temp->t2->accept(v));
             return temp;
+        case TransformerVisitor::Traverse::CustomOrder:
+            return v.visit(node);
         default:
             assert(false && "Traversing AST_tt not implemented yet");
     }
@@ -117,6 +123,8 @@ RetNode traverse_TT(Node* node, TransformerVisitor &v) {
             temp = static_cast<Node*>(v.visit(node));
             temp->T2 = static_cast<ASTTerm2*>(temp->T2->accept(v));
             return temp;
+        case TransformerVisitor::Traverse::CustomOrder:
+            return v.visit(node);
         default:
             assert(false && "Traversing AST_TT not implemented yet");
     }
@@ -148,6 +156,8 @@ RetNode traverse_tT(Node* node, TransformerVisitor &v) {
             temp = static_cast<Node*>(v.visit(node));
             temp->T2 = static_cast<ASTTerm2*>(temp->T2->accept(v));
             return temp;
+        case TransformerVisitor::Traverse::CustomOrder:
+            return v.visit(node);
         default:
             assert(false && "Traversing AST_tT not implemented yet");
     }
@@ -171,6 +181,8 @@ RetNode traverse_f(Node* node, TransformerVisitor &v) {
         case TransformerVisitor::Traverse::PostOrder:
             // First traverse the child, then the root
             node->f = static_cast<ASTForm*>(node->f->accept(v));
+            return v.visit(node);
+        case TransformerVisitor::Traverse::CustomOrder:
             return v.visit(node);
         default:
             assert(false && "Traversing AST_t not implemented yet");
@@ -203,6 +215,8 @@ RetNode traverse_ff(Node* node, TransformerVisitor &v) {
             temp = static_cast<Node*>(v.visit(node));
             temp->f2 = static_cast<ASTForm*>(temp->f2->accept(v));
             return temp;
+        case TransformerVisitor::Traverse::CustomOrder:
+            return v.visit(node);
         default:
             assert(false && "Traversing AST_tT not implemented yet");
     }

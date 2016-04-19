@@ -6,7 +6,7 @@
 template <typename R = void>
 class ASTVisitor {
 public:
-    enum Traverse {PreOrder, PostOrder, InOrder};
+    enum Traverse {PreOrder, PostOrder, InOrder, CustomOrder};
     const Traverse traverseDirection;
 
     // < Constructors >

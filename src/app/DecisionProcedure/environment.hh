@@ -232,7 +232,7 @@ public:
 
 /* >>> Anti-Prenexing Options <<< *
  **********************************/
-#define ANTIPRENEXING_FULL			    false
+#define ANTIPRENEXING_FULL              true
 #define ANTIPRENEXING_DISTRIBUTIVE		false
 
 /*
@@ -255,7 +255,7 @@ public:
 
 /* >>> Optimizations <<< *
  *************************/
-#define OPT_USE_DAG						true    // < Instead of using the symbolic automata, will use the DAGified SA
+#define OPT_USE_DAG						false   // < Instead of using the symbolic automata, will use the DAGified SA
 #define OPT_DONT_CACHE_CONT				true	// < Do not cache terms containing continuations
 #define OPT_DONT_CACHE_UNFULL_FIXPOINTS false	// < Do not cache fixpoints that were not fully computed
 #define OPT_EQ_THROUGH_POINTERS			true	// < Test equality through pointers, not by structure
@@ -266,7 +266,7 @@ public:
 #define OPT_SYMBOL_HASH_BY_APPROX		false	// < Will hash symbol by pointers
 #define OPT_ANTIPRENEXING				true	// < Transform formula to anti-prenex form (i.e. all of the quantifiers are deepest on leaves)
 #define OPT_DRAW_NEGATION_IN_BASE 		true    // < Negation is handled on formula level and not on computation level on base automata
-#define OPT_CREATE_QF_AUTOMATON 		false   // < Transform quantifier-free automaton to formula
+#define OPT_CREATE_QF_AUTOMATON 		true    // < Transform quantifier-free automaton to formula
 #define OPT_REDUCE_AUT_EVERYTIME		false	// < Call reduce everytime VATA automaton is created (i.e. as intermediate result)
 #define OPT_REDUCE_AUT_LAST				true	// < Call reduce after the final VATA automaton is created
 #define OPT_EARLY_EVALUATION 			false   // < Evaluates early interesection of products
@@ -289,6 +289,7 @@ public:
 #define OPT_USE_DENSE_HASHMAP			false	// < Will use the google::dense_hash_map as cache
 #define OPT_NO_SATURATION_FOR_M2L		true    // < Will not saturate the final states for M2L(str) logic
 #define OPT_MERGE_SUBSUMED_WORKLISTS	true    // < If the parts of the fixpoint are subsumed, but worklist aren't, merge them instead
+#define OPT_SHUFFLE_FORMULA				true	// < Will run ShuffleVisitor before creation of automaton, which should ease the procedure as well
 
 /* >>> Static Assertions <<< *
  *****************************/
