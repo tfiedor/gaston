@@ -173,8 +173,9 @@ public:
 #define DEBUG_MONA_CODE_FORMULA			false
 #define DEBUG_RESTRICTIONS				false
 #define DEBUG_FIXPOINT 				    false
-#define DEBUG_FIXPOINT_SYMBOLS		    false
 #define DEBUG_FIXPOINT_WORKLIST			true
+#define DEBUG_FIXPOINT_SYMBOLS		    true
+#define DEBUG_FIXPOINT_SYMBOLS_INIT     false
 #define DEBUG_INITIAL_APPROX 			false
 #define DEBUG_INTERSECT_NON_EMPTY 	    false
 #define DEBUG_TERM_UNIQUENESS			false
@@ -183,7 +184,7 @@ public:
 #define DEBUG_TERM_SUBSUMED_BY 			false
 #define DEBUG_TERM_CACHE_COMPARISON		false
 #define DEBUG_SYMBOL_CREATION			true
-#define DEBUG_CACHE_MEMBERS				false
+#define DEBUG_CACHE_MEMBERS				true
 #define DEBUG_CACHE_BUCKETS				false
 #define DEBUG_CACHE_MEMBERS_HASH		true
 #define DEBUG_CONTINUATIONS 			false
@@ -222,7 +223,7 @@ public:
 #define MEASURE_CACHE_BUCKETS			false   // < Prints the statistics for cache buckets
 #define MEASURE_CONTINUATION_CREATION	true	// < Measures how many continuations are created
 #define MEASURE_CONTINUATION_EVALUATION	true	// < Measures how many continuations are actually unfolded
-#define MEASURE_RESULT_HITS				true    // < Measure how many times the result hits in cache
+#define MEASURE_RESULT_HITS				false   // < Measure how many times the result hits in cache
 #define MEASURE_SYMBOLS					true	// < Measure how many symbols are created
 #define MEASURE_PROJECTION				true	// < Measures several things about projection (how many steps, how big, etc.)
 #define MEASURE_POSTPONED				true	// < Measures how many terms are postponed and how many are processed
@@ -256,7 +257,8 @@ public:
 
 /* >>> Optimizations <<< *
  *************************/
-#define OPT_USE_DAG						false   // < Instead of using the symbolic automata, will use the DAGified SA
+#define OPT_USE_DAG						true    // < Instead of using the symbolic automata, will use the DAGified SA
+#define OPT_SHUFFLE_FORMULA				true    // < Will run ShuffleVisitor before creation of automaton, which should ease the procedure as well
 #define OPT_DONT_CACHE_CONT				true	// < Do not cache terms containing continuations
 #define OPT_DONT_CACHE_UNFULL_FIXPOINTS false	// < Do not cache fixpoints that were not fully computed
 #define OPT_EQ_THROUGH_POINTERS			true	// < Test equality through pointers, not by structure
@@ -279,7 +281,7 @@ public:
 #define OPT_FIND_POSTPONED_CANDIDATE	true	// < Chose better candidate from list of postponed subsumption testing pairs
 #define OPT_REDUCE_FULL_FIXPOINT		true	// < Prune the fixpoint by subsumption
 #define OPT_CACHE_RESULTS 				true    // < Cache results of intersectnonempty(term, symbol)
-#define OPT_CACHE_SUBSUMES				false   // < Cache the results of subsumption testing between terms
+#define OPT_CACHE_SUBSUMES				true    // < Cache the results of subsumption testing between terms
 #define OPT_CACHE_SUBSUMED_BY			true	// < Cache the results of term subsumption by fixpoints
 #define OPT_SMARTER_MONA_CONVERSION		false	// < Use faster conversion from MONA to VATA (courtesy of PJ)
 #define OPT_SMARTER_FLATTENING          true
@@ -289,8 +291,7 @@ public:
 #define OPT_FIXPOINT_BFS_SEARCH	        false   // < Will add new things to the back of the worklist in fixpoint
 #define OPT_USE_DENSE_HASHMAP			false	// < Will use the google::dense_hash_map as cache
 #define OPT_NO_SATURATION_FOR_M2L		true    // < Will not saturate the final states for M2L(str) logic
-#define OPT_MERGE_SUBSUMED_WORKLISTS	true    // < If the parts of the fixpoint are subsumed, but worklist aren't, merge them instead
-#define OPT_SHUFFLE_FORMULA				true	// < Will run ShuffleVisitor before creation of automaton, which should ease the procedure as well
+#define OPT_SHORTTEST_FIXPOINT_SUB		true   // < Will check the generators instead of of whole fixpoints
 
 /* >>> Static Assertions <<< *
  *****************************/

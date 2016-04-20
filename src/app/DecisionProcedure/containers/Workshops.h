@@ -84,7 +84,7 @@ namespace Workshops {
     using FixpointType      = std::list<std::pair<Term*,bool>>;
     using WorklistItemType  = std::pair<Term*, Symbol*>;
     using WorklistType      = std::list<WorklistItemType>;
-    using ComputationKey    = std::pair<FixpointType*, WorklistType*>;
+    using ComputationKey    = TermFixpoint*;
 
     void dumpBaseKey(BaseKey const&);
     void dumpProductKey(ProductKey const&);

@@ -28,12 +28,7 @@ namespace Gaston {
             } else {
                 return boost::hash_value(s);
             }
-        }/* else if(s->type == TERM_FIXPOINT || s->type == TERM_LIST) {
-            // Fixme: Commenting this causes the shitty loop somehow T_T
-            size_t seed = boost::hash_value(s->stateSpaceApprox);
-            boost::hash_combine(seed, boost::hash_value(s->MeasureStateSpace()));
-            return seed;
-        } */else {
+        } else {
             return boost::hash_value(s);
         }
         #else
@@ -489,13 +484,7 @@ SubsumptionResult TermFixpoint::_IsSubsumedCore(Term* t, bool unfoldAll) {
 
 #   if (OPT_SHORTTEST_FIXPOINT_SUB == true)
     // Will tests only generators and symbols
-    bool are_source_symbols_same = true;
-    for(auto symbol : this->_symList) {
-        if(std::find_if(tt->_symList.begin(), tt->_symList.end(), [&symbol](Symbol* s) {return symbol == s;}) == tt->_symList.end()) {
-            are_source_symbols_same = false;
-            break;
-        }
-    }
+    bool are_source_symbols_same = TermFixpoint::_compareSymbols(*this, *tt);
     if(are_source_symbols_same && this->_sourceTerm != nullptr && tt->_sourceTerm != nullptr) {
         return this->_sourceTerm->IsSubsumed(tt->_sourceTerm, unfoldAll);
     }
@@ -516,23 +505,8 @@ SubsumptionResult TermFixpoint::_IsSubsumedCore(Term* t, bool unfoldAll) {
         if(!subsumes) return E_FALSE;
     }
 
-#   if (DEBUG_COMPARE_WORKLISTS == true)
-    for(auto it = this->_worklist.begin(); it != this->_worklist.end(); ++it) {
-        bool found = false;
-        for(auto tit = tt->_worklist.begin(); tit != tt->_worklist.end(); ++tit) {
-            //if(*(it->first) == *(tit->first) && (it->second == tit->second)) {
-            if((it->first)->IsSubsumed(tit->first, unfoldAll) && (it->second == tit->second)) {
-                found = true;
-                break;
-            }
-        }
-        if(!found) {
-            return E_FALSE;
-        }
-    }
-#   endif
-
-    return E_TRUE;
+    return ( (this->_worklist.size() == 0 && tt->_worklist.size() == 0) ? E_TRUE : (are_source_symbols_same ? E_TRUE : E_FALSE));
+    // Happy reading ^^
 }
 
 /**
@@ -887,8 +861,8 @@ void TermFixpoint::_dumpCore(unsigned indent) {
     }
 #   if (DEBUG_FIXPOINT_SYMBOLS == true)
     std::cout << "[";
-    for(auto& item : this->_worklist) {
-        std::cout << "(" << item.first << "+" << item.second << ") , ";
+    for(auto& item : this->_symList) {
+        std::cout << "(" << (*item) << ") , ";
     }
     std::cout << "]";
 #   endif
@@ -1152,7 +1126,7 @@ void TermFixpoint::_InitializeSymbols(Workshops::SymbolWorkshop* workshop, Gasto
     this->_symList.push_back(trimmed);
     // TODO: Optimize, this sucks
     unsigned int symNum = 1;
-#   if (DEBUG_FIXPOINT_SYMBOLS == true)
+#   if (DEBUG_FIXPOINT_SYMBOLS_INIT == true)
     std::cout << "[F] Initializing symbols of '"; this->dump(); std::cout << "\n";
 #   endif
     for(auto var = vars->begin(); var != vars->end(); ++var) {
@@ -1169,7 +1143,7 @@ void TermFixpoint::_InitializeSymbols(Workshops::SymbolWorkshop* workshop, Gasto
 
         symNum <<= 1;// times 2
     }
-#   if (DEBUG_FIXPOINT_SYMBOLS == true)
+#   if (DEBUG_FIXPOINT_SYMBOLS_INIT == true)
     for(auto sym : this->_symList) {
         std::cout << "[*] " << (*sym) << "\n";
     }
@@ -1517,20 +1491,16 @@ bool TermFixpoint::_eqCore(const Term &t) {
                 return false;
             }
         }
-        #if (DEBUG_COMPARE_WORKLISTS == true)
-            for(auto it = this->_worklist.begin(); it != this->_worklist.end(); ++it) {
-                bool found = false;
-                for(auto tit = tFix._worklist.begin(); tit != tFix._worklist.end(); ++tit) {
-                    if(*(it->first) == *(tit->first) && (it->second == tit->second)) {
-                        found = true;
-                        break;
-                    }
-                }
-                if(!found) {
-                    return false;
-                }
-            }
-        #endif
-        return true;
+
+        return (this->_worklist.size() == 0 && tFix._worklist.size() == 0) ? true : TermFixpoint::_compareSymbols(*this, tFix);
     }
+}
+
+bool TermFixpoint::_compareSymbols(const TermFixpoint& lhs, const TermFixpoint& rhs) {
+    for(auto symbol : lhs._symList) {
+        if(std::find_if(rhs._symList.begin(), rhs._symList.end(), [&symbol](Symbol_ptr s) { return s == symbol;}) == rhs._symList.end()) {
+            return false;
+        }
+    }
+    return true;
 }

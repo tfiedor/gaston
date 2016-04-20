@@ -453,6 +453,7 @@ public:
     // <<< DUMPING FUNCTIONS >>>
 protected:
     void _dumpCore(unsigned indent = 0);
+    static bool _compareSymbols(const TermFixpoint&, const TermFixpoint&);
 
 protected:
     // <<< PRIVATE FUNCTIONS >>>

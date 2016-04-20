@@ -52,83 +52,15 @@ namespace Workshops {
          * @return true if lhs = rhs
          */
         bool operator()(ComputationKey const& lhs, ComputationKey const& rhs) const {
-            bool result;
-
-            if(lhs.first == nullptr || rhs.first == nullptr) {
-                return lhs.first == rhs.first;
-            }
-
-            // Compare fixpoints
-            // Fixme: The fuck is this, this is not correct...
-            for(auto& item : (*lhs.first)) {
-                if(!item.second || item.first == nullptr) {
-                    continue;
-                }
-
-                result = false;
-                for(auto& titem : (*rhs.first)) {
-                    if(!titem.second) {
-                        continue;
-                    }
-                    if(item.first == titem.first) {
-                        result = true;
-                        break;
-                    }
-                }
-                if(!result) {
-                    return false;
-                }
-            }
-
-            for(auto& item : (*rhs.first)) {
-                if(!item.second || item.first == nullptr) {
-                    continue;
-                }
-
-                result = false;
-                for(auto& titem : (*lhs.first)) {
-                    if(!titem.second) {
-                        continue;
-                    }
-                    if(item.first == titem.first) {
-                        result = true;
-                        break;
-                    }
-                }
-                if(!result) {
-                    return false;
-                }
-            }
-
-            // Compare worklists
-            for(auto item : (*lhs.second)) {
-                result = false;
-                for(auto titem : (*rhs.second)) {
-                    if(item.first == titem.first && item.second == titem.second) {
-                        result = true;
-                        break;
-                    }
-                }
-                if(!result) {
-                    return false;
-                }
-            }
-
-            return true;
+            bool result = *lhs == *rhs;
+            return result;
         }
     };
 
     struct ComputationHash {
         size_t operator()(ComputationKey const& set) const {
-            size_t seed = 0;
-            if(set.first) {
-                for (auto& item : (*set.first)) {
-                    if(!item.second) {
-                        continue;
-                    }
-                    boost::hash_combine(seed, boost::hash_value(item.first));
-                }
-            }
+            size_t seed = boost::hash_value(set->stateSpaceApprox);
+            boost::hash_combine(seed, boost::hash_value(set->MeasureStateSpace()));
             return seed;
         }
     };
@@ -304,10 +236,10 @@ namespace Workshops {
             Term* termPtr = nullptr;
             Symbol* symbolKey = symbol;
             // Fixme: Is this needed?
-            ProjectionAutomaton* projectionAutomaton = static_cast<ProjectionAutomaton*>(this->_aut);
+            /*ProjectionAutomaton* projectionAutomaton = static_cast<ProjectionAutomaton*>(this->_aut);
             for(auto it = projectionAutomaton->projectedVars->begin(); it != projectionAutomaton->projectedVars->end(); ++it) {
                 symbolKey = this->_aut->symbolFactory->CreateSymbol(symbol, (*it), 'X');
-            }
+            }*/
 
             auto fixpointKey = std::make_pair(source, symbol);
             if(!this->_fppCache->retrieveFromCache(fixpointKey, termPtr)) {
@@ -341,7 +273,7 @@ namespace Workshops {
             return fixpoint;
         }
 
-        auto compKey = std::make_pair(&fixpoint->_fixpoint, &fixpoint->_worklist);
+        auto compKey = fixpoint;
         if(!this->_compCache->retrieveFromCache(compKey, termPtr)) {
             termPtr = fixpoint;
             this->_compCache->StoreIn(compKey, termPtr);
@@ -399,6 +331,10 @@ namespace Workshops {
         if(this->_fppCache != nullptr) {
             std::cout << "  \u2218 FixpointCachePre stats -> ";
             this->_fppCache->dumpStats();
+        }
+        if(this->_compCache != nullptr) {
+            std::cout << "  \u2218 UniqueFixpointCache stats -> ";
+            this->_compCache->dumpStats();
         }
     }
 
@@ -562,10 +498,10 @@ namespace Workshops {
     }
 
     void dumpComputationKey(ComputationKey const&s) {
-        std::cout << "<" << (s.first) << ", " << (s.second) << ">";
+        std::cout << "<" << (s) << ">";
     }
 
     void dumpCacheData(Term *&s) {
-        std::cout << s;
+        std::cout << "[" << s << "]" << (*s);
     }
 }
