@@ -61,7 +61,7 @@ namespace Workshops {
             // Compare fixpoints
             // Fixme: The fuck is this, this is not correct...
             for(auto& item : (*lhs.first)) {
-                if(!item.second) {
+                if(!item.second || item.first == nullptr) {
                     continue;
                 }
 
@@ -81,7 +81,7 @@ namespace Workshops {
             }
 
             for(auto& item : (*rhs.first)) {
-                if(!item.second) {
+                if(!item.second || item.first == nullptr) {
                     continue;
                 }
 
@@ -104,7 +104,7 @@ namespace Workshops {
             for(auto item : (*lhs.second)) {
                 result = false;
                 for(auto titem : (*rhs.second)) {
-                    if(item == titem) {
+                    if(item.first == titem.first && item.second == titem.second) {
                         result = true;
                         break;
                     }
@@ -302,13 +302,20 @@ namespace Workshops {
             assert(source != nullptr);
 
             Term* termPtr = nullptr;
+            Symbol* symbolKey = symbol;
+            // Fixme: Is this needed?
+            ProjectionAutomaton* projectionAutomaton = static_cast<ProjectionAutomaton*>(this->_aut);
+            for(auto it = projectionAutomaton->projectedVars->begin(); it != projectionAutomaton->projectedVars->end(); ++it) {
+                symbolKey = this->_aut->symbolFactory->CreateSymbol(symbol, (*it), 'X');
+            }
+
             auto fixpointKey = std::make_pair(source, symbol);
             if(!this->_fppCache->retrieveFromCache(fixpointKey, termPtr)) {
                 #if (DEBUG_WORKSHOPS == true && DEBUG_TERM_CREATION == true)
                 std::cout << "[*] Creating FixpointPre: ";
                 std::cout << "from [" << source << "] to ";
                 #endif
-                termPtr = new TermFixpoint(this->_aut, source, symbol, inCompl);
+                termPtr = new TermFixpoint(this->_aut, source, symbolKey, inCompl);
                 this->_fppCache->StoreIn(fixpointKey, termPtr);
             }
             assert(termPtr != nullptr);
@@ -358,6 +365,7 @@ namespace Workshops {
                 this->_contCache->StoreIn(contKey, termPtr);
             }
             assert(termPtr != nullptr);
+            // Fixme: return unfolded term if possible biatch
             return termPtr;
         #else
             return new TermContinuation(aut, term, symbol, underComplement);

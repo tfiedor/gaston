@@ -134,6 +134,8 @@ def createArgumentParser():
     parser.add_argument('--no-export-to-csv', '-x', action='store_true', help='will not export to csv')
     parser.add_argument('--timeout', '-t', default=None, help='timeouts in minutes')
     parser.add_argument('--notify', '-n', action='store_true', help="sends email notification to email")
+    parser.add_argument('--message', '-m', default=None, help='additional message printed into testbench output')
+    parser.add_argument('--csv-name', '-c', default=None, help='name of the output csv file')
     return parser
 
 
@@ -203,7 +205,7 @@ def getTagsFromString(string):
     return [tag[1:-1] for tag in tags]
 
 
-def exportToCSV(data, bins):
+def exportToCSV(data, bins, options):
     '''
     Exports data to csv file
 
@@ -214,9 +216,15 @@ def exportToCSV(data, bins):
                    ['gaston-dfa'] = (time, time-dp-only, time-dfa, time-conversion, base-aut, space, space-unpruned)
 
     '''
-    saveTo = generateCSVname()
+    saveTo = generateCSVname() if options.csv_name is None else options.csv_name
+    if not saveTo.endswith('.csv'):
+        saveTo = saveTo + ".csv"
     keys = []
     with open(saveTo, 'w') as csvFile:
+        if options.message is not None:
+            csvFile.write('"')
+            csvFile.write(options.message)
+            csvFile.write('"\n')
         # header of the file
         csvFile.write('benchmark, ')
         first = True
@@ -244,7 +252,9 @@ def exportToCSV(data, bins):
             bench_list = [os.path.split(benchmark)[1]]
             for (bin, key) in keys:
                 if not hasattr(data[benchmark][bin], "__getitem__"):
-                    bench_list = bench_list + [errors[data[benchmark][bin]]]
+                    error_code = data[benchmark][bin]
+                    error_message = errors[error_code] + ("" if error_code != timeout_error else "({}m)".format(options.timeout))
+                    bench_list = bench_list + [error_message]
                 else:
                     try:
                         bench_list = bench_list + [str(data[benchmark][bin][key])]
@@ -428,7 +438,7 @@ if __name__ == '__main__':
                 print("; Formula is"),
                 print(colored("'{}'".format(rets['mona']), "white"))
     if not options.no_export_to_csv:
-        csv = exportToCSV(data, bins)
+        csv = exportToCSV(data, bins, options)
         if options.notify:
             notify(csv, notified_out.getvalue())
             sys.stdout = saveout

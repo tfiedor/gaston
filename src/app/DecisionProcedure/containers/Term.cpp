@@ -28,12 +28,12 @@ namespace Gaston {
             } else {
                 return boost::hash_value(s);
             }
-        /*} else if(s->type == TERM_FIXPOINT || s->type == TERM_LIST) {
+        }/* else if(s->type == TERM_FIXPOINT || s->type == TERM_LIST) {
             // Fixme: Commenting this causes the shitty loop somehow T_T
             size_t seed = boost::hash_value(s->stateSpaceApprox);
             boost::hash_combine(seed, boost::hash_value(s->MeasureStateSpace()));
-            return seed;*/
-        } else {
+            return seed;
+        } */else {
             return boost::hash_value(s);
         }
         #else
@@ -200,7 +200,7 @@ TermList::TermList(Term_ptr first, bool isCompl) {
 }
 
 TermFixpoint::TermFixpoint(Aut_ptr aut, Term_ptr startingTerm, Symbol* symbol, bool inComplement, bool initbValue, WorklistSearchType search = WorklistSearchType::E_DFS)
-        : _sourceTerm(nullptr), _sourceIt(nullptr), _aut(reinterpret_cast<ProjectionAutomaton*>(aut)->GetBase()), _bValue(initbValue) {
+        : _sourceTerm(nullptr), _sourceSymbol(symbol), _sourceIt(nullptr), _aut(reinterpret_cast<ProjectionAutomaton*>(aut)->GetBase()), _bValue(initbValue) {
     #if (MEASURE_STATE_SPACE == true)
     ++TermFixpoint::instances;
     #endif
@@ -242,16 +242,16 @@ TermFixpoint::TermFixpoint(Aut_ptr aut, Term_ptr startingTerm, Symbol* symbol, b
     }
 #   endif
 
-    #if (DEBUG_TERM_CREATION == true)
+#   if (DEBUG_TERM_CREATION == true)
     std::cout << "[" << this << "]";
     std::cout << "TermFixpoint::";
     this->dump();
     std::cout << "\n";
-    #endif
+#   endif
 }
 
 TermFixpoint::TermFixpoint(Aut_ptr aut, Term_ptr sourceTerm, Symbol* symbol, bool inComplement)
-        : _sourceTerm(sourceTerm), _sourceIt(reinterpret_cast<TermFixpoint*>(sourceTerm)->GetIteratorDynamic()),
+        : _sourceTerm(sourceTerm), _sourceSymbol(symbol), _sourceIt(reinterpret_cast<TermFixpoint*>(sourceTerm)->GetIteratorDynamic()),
           _aut(reinterpret_cast<ProjectionAutomaton*>(aut)->GetBase()), _worklist(), _bValue(inComplement) {
     #if (MEASURE_STATE_SPACE == true)
     ++TermFixpoint::instances;
@@ -487,6 +487,20 @@ SubsumptionResult TermFixpoint::_IsSubsumedCore(Term* t, bool unfoldAll) {
     // Reinterpret
     TermFixpoint* tt = reinterpret_cast<TermFixpoint*>(t);
 
+#   if (OPT_SHORTTEST_FIXPOINT_SUB == true)
+    // Will tests only generators and symbols
+    bool are_source_symbols_same = true;
+    for(auto symbol : this->_symList) {
+        if(std::find_if(tt->_symList.begin(), tt->_symList.end(), [&symbol](Symbol* s) {return symbol == s;}) == tt->_symList.end()) {
+            are_source_symbols_same = false;
+            break;
+        }
+    }
+    if(are_source_symbols_same && this->_sourceTerm != nullptr && tt->_sourceTerm != nullptr) {
+        return this->_sourceTerm->IsSubsumed(tt->_sourceTerm, unfoldAll);
+    }
+#   endif
+
     // Do the piece-wise comparison
     for(auto& item : this->_fixpoint) {
         // Skip the nullptr
@@ -513,11 +527,7 @@ SubsumptionResult TermFixpoint::_IsSubsumedCore(Term* t, bool unfoldAll) {
             }
         }
         if(!found) {
-#           if (OPT_MERGE_SUBSUMED_WORKLISTS == true)
-            tt->_worklist.insert(tt->_worklist.begin(), *it);
-#           else
             return E_FALSE;
-#           endif
         }
     }
 #   endif

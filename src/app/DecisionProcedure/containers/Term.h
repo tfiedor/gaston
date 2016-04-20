@@ -77,7 +77,7 @@ class Term {
 protected:
     TermCache _isSubsumedCache;     // [36B] << Cache for results of subsumption
 public:
-    struct {                        // [12B] << Link for counterexamplse
+    struct {                        // [12B] << Link for counterexamples
         Term* succ;
         Symbol* symbol;
         size_t len;
@@ -312,7 +312,6 @@ public:
     public:
         Term_ptr GetNext() {
             assert(!_termFixpoint._fixpoint.empty());
-            // TODO: Not sure if this is valid
             if(_termFixpoint._fixpoint.cend() == _it) {
                 return this->_Invalidate();
             }
@@ -409,6 +408,7 @@ protected:
     size_t _iteratorNumber = 0;             // [4-8B] << How many iterators are pointing to fixpoint
     Aut_ptr _aut;                           // [4B] << Source automaton
     Term_ptr _sourceTerm;                   // [4B] << Source term of the fixpoint
+    Symbol_ptr _sourceSymbol;               // [4B] << Source symbol before breaking to little symboiles
     Term_ptr _satTerm = nullptr;            // [4B] << Satisfiable term of the fixpoint computation
     Term_ptr _unsatTerm = nullptr;          // [4B] << Unsatisfiable term of the fixpoint computation
     bool (*_aggregate_result)(bool, bool);  // [4B] << Agregation function for fixpoint boolean results

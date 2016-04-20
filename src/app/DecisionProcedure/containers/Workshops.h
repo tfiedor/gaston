@@ -116,7 +116,7 @@ namespace Workshops {
         static TermEmpty *_empty;
         static TermEmpty *_emptyComplement;
 
-        SymbolicAutomaton* _aut;
+        SymbolicAutomaton* _aut; // ProjectionAutomaton for Fixpoints
     private:
         // <<< PRIVATE FUNCTIONS >>>
         template<class A, class B, class C, class D, void (*E)(const A&), void (*F)(B&)>

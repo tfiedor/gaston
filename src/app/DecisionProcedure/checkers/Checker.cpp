@@ -30,6 +30,7 @@
 #include "../visitors/FixpointDetagger.h"
 #include "../visitors/MonaSerializer.h"
 #include "../visitors/ShuffleVisitor.h"
+#include "../visitors/ExistentialPrenexer.h"
 
 extern PredicateLib predicateLib;
 
