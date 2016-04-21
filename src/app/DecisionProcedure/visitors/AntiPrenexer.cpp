@@ -158,8 +158,9 @@ ASTForm* FullAntiPrenexer::nonDistributiveRule(QuantifierClass *qForm) {
         } // f1 op f2           | var notin f1 && var notin f2
     }
 
-    qForm->f = nullptr;
-    delete qForm;
+    if(left.empty() && right.empty()) {
+        return qForm;
+    }
 
     if(!left.empty()) {
         tempResult = new QuantifierClass(nullptr, new IdentList(left), binopForm->f1, binopForm->f1->pos);
@@ -172,9 +173,13 @@ ASTForm* FullAntiPrenexer::nonDistributiveRule(QuantifierClass *qForm) {
     }
 
     if(!middle.empty()) {
-        tempResult = new QuantifierClass(nullptr, new IdentList(middle), binopForm, binopForm->pos);
-        return tempResult;
+        qForm->vl->reset();
+        qForm->vl->insert(&middle);
+        return qForm;
     } else {
+        qForm->f = nullptr;
+        delete qForm;
+
         return binopForm;
     }
 }

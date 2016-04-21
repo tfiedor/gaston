@@ -73,6 +73,7 @@ measures = {
             'time-dp': Measure("decision procedure" + whatever_regex + time_regex, time_default, parse_total_time, False),
             'time-base': Measure("dfa creation" + whatever_regex + time_regex, time_default, parse_total_time, False),
             'time-conv': Measure("mona <-> vata" + whatever_regex + time_regex, time_default, parse_total_time, False),
+            'time-pre': Measure("preprocessing" + whatever_regex + time_regex, time_default, parse_total_time, False),
             'dag-nodes': Measure("nodes" + whatever_regex + space_regex, space_default, int, False),
             'real-nodes': Measure("real nodes" + whatever_regex + space_regex, space_default, int, False),
             'dag-gain': Measure("dag gain" + whatever_regex + double_regex, double_default, float, False),
@@ -102,7 +103,7 @@ measures = {
 }
 
 csv_keys = {
-    'gaston': ['time', 'space-all', 'space', 'dag-nodes', 'real-nodes', 'dag-gain', 'aut-fix', 'aut-max-fix-nest',
+    'gaston': ['time', 'time-pre', 'space-all', 'space', 'dag-nodes', 'real-nodes', 'dag-gain', 'aut-fix', 'aut-max-fix-nest',
                'aut-height', 'aut-max-refs'],
     'mona': ['time', 'space', 'space-min']
 }

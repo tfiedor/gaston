@@ -118,7 +118,7 @@ void SymbolicChecker::Decide() {
         }
 
         std::cout << "\n";
-        std::cout << "[*] Preprocesing:       ";
+        std::cout << "[*] Preprocessing:       ";
         timer_preprocess.print();
         std::cout << "[*] DFA creation:       ";
         timer_mona.print();
