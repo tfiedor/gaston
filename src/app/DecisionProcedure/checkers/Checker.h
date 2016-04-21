@@ -36,7 +36,7 @@ using TimerType = Timer;
 	code(BooleanUnfolder)				/* Simplify formula through various boolean laws*/ \
 	code(UniversalQuantifierRemover)	/* Remove universal quantifier from formula*/ \
 	code(NegationUnfolder)				/* Push negations deeply*/ \
-	code(BaseAutomataMerger)			/* Merge some of the base automata*/
+	/*code(BaseAutomataMerger)			/* Merge some of the base automata*/
 #else
 #define FILTER_LIST(code) \
 	code(ZeroOrderRemover)				/* Transform zero-order variables to second-order interpretation */ \

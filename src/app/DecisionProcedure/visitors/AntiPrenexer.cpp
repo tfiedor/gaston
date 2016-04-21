@@ -84,7 +84,7 @@ AST* AntiPrenexer::visit(ASTForm_All2* form) {
  *-------------------------------------------------------------------------*/
 
 template<class QuantifierClass, class BinopClass>
-ASTForm* FullAntiPrenexer::distributiveRule(QuantifierClass *qForm) {
+ASTForm* FullAntiPrenexer::distributiveRule(QuantifierClass *qForm, bool onlyByOne) {
     static_assert(std::is_base_of<ASTForm_q, QuantifierClass>::value, "QuantifierClass is not derived from 'ASTForm_q' class");
     static_assert(std::is_base_of<ASTForm_ff, BinopClass>::value, "BinopClass is not derived from 'ASTForm_ff' class");
     // Ex . f1 op f2 -> (Ex X. f1) op (Ex X. f2)
@@ -111,13 +111,19 @@ ASTForm* FullAntiPrenexer::distributiveRule(QuantifierClass *qForm) {
     }
 
     if(!left.empty()) {
-        tempResult = new QuantifierClass(nullptr, new IdentList(left), binopForm->f1, binopForm->f1->pos);
-        binopForm->f1 = static_cast<ASTForm*>(tempResult->accept(*this));
+        binopForm->f1 = new QuantifierClass(nullptr, new IdentList(left), binopForm->f1, binopForm->f1->pos);
+        binopForm->f1->allVars = copy(static_cast<ASTForm_q*>(binopForm->f1)->f->allVars);
+        if(!onlyByOne) {
+            binopForm->f1 = static_cast<ASTForm *>(binopForm->f1->accept(*this));
+        }
     }
 
     if(!right.empty()) {
-        tempResult = new QuantifierClass(nullptr, new IdentList(right), binopForm->f2, binopForm->f2->pos);
-        binopForm->f2 = static_cast<ASTForm*>(tempResult->accept(*this));
+        binopForm->f2 = new QuantifierClass(nullptr, new IdentList(right), binopForm->f2, binopForm->f2->pos);
+        binopForm->f2->allVars = copy(static_cast<ASTForm_q*>(binopForm->f2)->f->allVars);
+        if(!onlyByOne) {
+            binopForm->f2 = static_cast<ASTForm *>(binopForm->f2->accept(*this));
+        }
     }
 
     // Cleanup
@@ -128,7 +134,7 @@ ASTForm* FullAntiPrenexer::distributiveRule(QuantifierClass *qForm) {
 }
 
 template<class QuantifierClass, class BinopClass>
-ASTForm* FullAntiPrenexer::nonDistributiveRule(QuantifierClass *qForm) {
+ASTForm* FullAntiPrenexer::nonDistributiveRule(QuantifierClass *qForm, bool onlyByOne) {
     static_assert(std::is_base_of<ASTForm_q, QuantifierClass>::value, "QuantifierClass is not derived from 'ASTForm_q' class");
     static_assert(std::is_base_of<ASTForm_ff, BinopClass>::value, "BinopClass is not derived from 'ASTForm_ff' class");
 
@@ -163,13 +169,19 @@ ASTForm* FullAntiPrenexer::nonDistributiveRule(QuantifierClass *qForm) {
     }
 
     if(!left.empty()) {
-        tempResult = new QuantifierClass(nullptr, new IdentList(left), binopForm->f1, binopForm->f1->pos);
-        binopForm->f1 = static_cast<ASTForm*>(tempResult->accept(*this));
+        binopForm->f1 = new QuantifierClass(nullptr, new IdentList(left), binopForm->f1, binopForm->f1->pos);
+        binopForm->f1->allVars = copy(static_cast<ASTForm_q*>(binopForm->f1)->f->allVars);
+        if(!onlyByOne) {
+            binopForm->f1 = static_cast<ASTForm *>(binopForm->f1->accept(*this));
+        }
     }
 
     if(!right.empty()) {
-        tempResult = new QuantifierClass(nullptr, new IdentList(right), binopForm->f2, binopForm->f2->pos);
-        binopForm->f2 = static_cast<ASTForm*>(tempResult->accept(*this));
+        binopForm->f2 = new QuantifierClass(nullptr, new IdentList(right), binopForm->f2, binopForm->f2->pos);
+        binopForm->f2->allVars = copy(static_cast<ASTForm_q*>(binopForm->f2)->f->allVars);
+        if(!onlyByOne) {
+            binopForm->f2 = static_cast<ASTForm *>(binopForm->f2->accept(*this));
+        }
     }
 
     if(!middle.empty()) {
@@ -184,6 +196,36 @@ ASTForm* FullAntiPrenexer::nonDistributiveRule(QuantifierClass *qForm) {
     }
 }
 
+template<class OuterQuantifier, class InnerQuantifier>
+ASTForm* FullAntiPrenexer::_pushExistentialByOne(OuterQuantifier *form, bool byOne) {
+    ASTForm* f = existentialAntiPrenex<InnerQuantifier>(form->f, true);
+    assert(f != nullptr);
+
+    if(f == form->f) {
+        form->f = static_cast<ASTForm*>(form->f->accept(*this));
+        assert(form->f != nullptr);
+        return form;
+    } else {
+        form->f = f;
+        return universalAntiPrenex<OuterQuantifier>(form, byOne);
+    }
+}
+
+template<class OuterQuantifier, class InnerQuantifier>
+ASTForm* FullAntiPrenexer::_pushUniversalByOne(OuterQuantifier *form, bool byOne) {
+    ASTForm* f = universalAntiPrenex<InnerQuantifier>(form->f, true);
+    assert(f != nullptr);
+
+    if(f == form->f) {
+        form->f = static_cast<ASTForm*>(form->f->accept(*this));
+        assert(form->f != nullptr);
+        return form;
+    } else {
+        form->f = f;
+        return existentialAntiPrenex<OuterQuantifier>(form, byOne);
+    }
+}
+
 /*-------------------------------------------------------------------------*
  | Ex X . f1          ->    f1                 -- if X \notin freeVars(f1) |
  | Ex X . f1 /\ f2    ->    (Ex X. f1) /\ f2   -- if X \notin freeVars(f2) |
@@ -191,37 +233,38 @@ ASTForm* FullAntiPrenexer::nonDistributiveRule(QuantifierClass *qForm) {
  | Ex X . f1 \/ f2    ->    (Ex X. f1) \/ (Ex X. f2)                       |
  *-------------------------------------------------------------------------*/
 template<class ExistClass>
-ASTForm* FullAntiPrenexer::existentialAntiPrenex(ASTForm *form) {
+ASTForm* FullAntiPrenexer::existentialAntiPrenex(ASTForm *form, bool onlyByOne) {
     static_assert(std::is_base_of<ASTForm_q, ExistClass>::value, "ExistClass is not derived from 'ASTForm_q' class");
 
-    NegationUnfolder negationUnfolder;
-    form = reinterpret_cast<ASTForm*>(form->accept(negationUnfolder));
-
-    OccuringVariableDecorator decorator;
-    form->accept(decorator);
-
     ExistClass* exForm = static_cast<ExistClass*>(form);
+    ASTForm* temp;
     switch(exForm->f->kind) {
         case aOr:
             // Process Or Rule
-            return distributiveRule<ExistClass, ASTForm_Or>(exForm);
+            return distributiveRule<ExistClass, ASTForm_Or>(exForm, false);
         case aAnd:
             // Process And Rule
-            return nonDistributiveRule<ExistClass, ASTForm_And>(exForm);
+            return nonDistributiveRule<ExistClass, ASTForm_And>(exForm, false);
         case aImpl:
         case aBiimpl:
             assert(false && "Implication and Biimplication is unsupported in Anti-Prenexing");
+        case aNot:
+            return exForm;
+        case aAll1:
+            return this->_pushUniversalByOne<ExistClass, ASTForm_All1>(exForm, onlyByOne);
+        case aAll2:
+            return this->_pushUniversalByOne<ExistClass, ASTForm_All2>(exForm, onlyByOne);
         default:
             return exForm;
     }
 }
 
 AST* FullAntiPrenexer::visit(ASTForm_Ex1 *form) {
-    return existentialAntiPrenex<ASTForm_Ex1>(form);
+    return existentialAntiPrenex<ASTForm_Ex1>(form, false);
 }
 
 AST* FullAntiPrenexer::visit(ASTForm_Ex2 *form) {
-    return existentialAntiPrenex<ASTForm_Ex2>(form);
+    return existentialAntiPrenex<ASTForm_Ex2>(form, false);
 }
 
 /*-------------------------------------------------------------------------*
@@ -231,38 +274,63 @@ AST* FullAntiPrenexer::visit(ASTForm_Ex2 *form) {
  |All X . f1 /\ f2    ->    (All X. f1) /\ (All X. f2)\                    |
  *-------------------------------------------------------------------------*/
 template<class ForallClass>
-ASTForm* FullAntiPrenexer::universalAntiPrenex(ASTForm *form) {
+ASTForm* FullAntiPrenexer::universalAntiPrenex(ASTForm *form, bool onlyByOne) {
     static_assert(std::is_base_of<ASTForm_q, ForallClass>::value, "ForallClass is not derived from 'ASTForm_q' class");
-
-    NegationUnfolder negationUnfolder;
-    form = reinterpret_cast<ASTForm*>(form->accept(negationUnfolder));
-
-    OccuringVariableDecorator decorator;
-    form->accept(decorator);
 
     ForallClass* allForm = static_cast<ForallClass*>(form);
     switch(allForm->f->kind) {
         case aOr:
             // Process Or Rule
-            return nonDistributiveRule<ForallClass, ASTForm_Or>(allForm);
+            return nonDistributiveRule<ForallClass, ASTForm_Or>(allForm, false);
         case aAnd:
             // Process And Rule
-            return distributiveRule<ForallClass, ASTForm_And>(allForm);
+            return distributiveRule<ForallClass, ASTForm_And>(allForm, false);
         case aImpl:
         case aBiimpl:
             assert(false && "Implication and Biimplication is unsupported in Anti-Prenexing");
+        case aNot:
+            return allForm;
+        case aEx1:
+            return this->_pushExistentialByOne<ForallClass, ASTForm_Ex1>(allForm, onlyByOne);
+        case aEx2:
+            return this->_pushExistentialByOne<ForallClass, ASTForm_Ex2>(allForm, onlyByOne);
         default:
             return allForm;
     }
 }
 
 AST* FullAntiPrenexer::visit(ASTForm_All1 *form) {
-    return universalAntiPrenex<ASTForm_All1>(form);
+    return universalAntiPrenex<ASTForm_All1>(form, false);
 }
 
 AST* FullAntiPrenexer::visit(ASTForm_All2 *form) {
-    return universalAntiPrenex<ASTForm_All2>(form);
+    return universalAntiPrenex<ASTForm_All2>(form, false);
 }
+
+AST* FullAntiPrenexer::visit(ASTForm_And *form) {
+    form->f1 = static_cast<ASTForm*>(form->f1->accept(*this));
+    assert(form->f1 != nullptr);
+    form->f2 = static_cast<ASTForm*>(form->f2->accept(*this));
+    assert(form->f2 != nullptr);
+    return form;
+}
+
+AST* FullAntiPrenexer::visit(ASTForm_Or *form) {
+    form->f1 = static_cast<ASTForm*>(form->f1->accept(*this));
+    assert(form->f1 != nullptr);
+    form->f2 = static_cast<ASTForm*>(form->f2->accept(*this));
+    assert(form->f2 != nullptr);
+    return form;
+}
+
+AST* FullAntiPrenexer::visit(ASTForm_Not *form) {
+    form->f = static_cast<ASTForm*>(form->f->accept(*this));
+    return form;
+}
+
+/*********************************
+ **  DISTRIBUTIVE ANTI PRENEXER **
+ *********************************/
 
 
 /*----------------------------------------------------------------------*

@@ -13,12 +13,12 @@
 #ifndef WSKS_ANTIPRENEXER_H
 #define WSKS_ANTIPRENEXER_H
 
-#include "../Frontend/ast.h"
-#include "../Frontend/ast_visitor.h"
+#include "../../Frontend/ast.h"
+#include "../../Frontend/ast_visitor.h"
 
 class AntiPrenexer : public TransformerVisitor {
 public:
-    AntiPrenexer() : TransformerVisitor(Traverse::PostOrder) {}
+    AntiPrenexer(Traverse td) : TransformerVisitor(td) {}
 
     // Works in preorder
     virtual AST* visit(ASTForm_Ex0* form);
@@ -46,22 +46,30 @@ public:
  */
 class FullAntiPrenexer : public AntiPrenexer {
 public:
-    FullAntiPrenexer() {}
+    FullAntiPrenexer() : AntiPrenexer(Traverse::CustomOrder) {}
 
     template<class QuantifierClass, class BinopClass>
-    ASTForm* distributiveRule(QuantifierClass *qForm);
+    ASTForm* distributiveRule(QuantifierClass *qForm, bool onlyByOne = false);
     template<class QuantifierClass, class BinopClass>
-    ASTForm* nonDistributiveRule(QuantifierClass *qForm);
+    ASTForm* nonDistributiveRule(QuantifierClass *qForm, bool onlyByOne = false);
     template<class ExistClass>
-    ASTForm* existentialAntiPrenex(ASTForm *form);
+    ASTForm* existentialAntiPrenex(ASTForm* form, bool onlyByOne = false);
     template<class ForallClass>
-    ASTForm* universalAntiPrenex(ASTForm *form);
+    ASTForm* universalAntiPrenex(ASTForm* form, bool onlyByOne = false);
+    template<class OuterQuantifier, class InnerQantifier>
+    ASTForm* _pushUniversalByOne(OuterQuantifier* form, bool byOne = false);
+    template<class OuterQuantifier, class InnerQuantifier>
+    ASTForm* _pushExistentialByOne(OuterQuantifier* form, bool byOne = false);
 
     // Works in preorder
     virtual AST* visit(ASTForm_Ex1* form);
     virtual AST* visit(ASTForm_Ex2* form);
     virtual AST* visit(ASTForm_All1* form);
     virtual AST* visit(ASTForm_All2* form);
+
+    virtual AST* visit(ASTForm_And* form);
+    virtual AST* visit(ASTForm_Or* form);
+    virtual AST* visit(ASTForm_Not* form);
 };
 
 /**
@@ -77,6 +85,9 @@ public:
  * *----------------------------------------------------------------------*
  */
 class DistributiveAntiPrenexer : public FullAntiPrenexer {
+public:
+    DistributiveAntiPrenexer() {};
+
     ASTForm* findDisjunctiveDistributivePoint(ASTForm *form);
     ASTForm* findConjunctiveDistributivePoint(ASTForm *form);
 

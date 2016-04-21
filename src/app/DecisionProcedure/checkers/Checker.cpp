@@ -271,6 +271,10 @@ void Checker::PreprocessFormula() {
 
     // Additional filter phases
     #define CALL_FILTER(filter) \
+        if(!strcmp(#filter, "FullAntiPrenexer")) { \
+            OccuringVariableDecorator decorator; \
+            this->_monaAST->formula->accept(decorator); \
+        } \
 		filter filter##_visitor;    \
 		this->_monaAST->formula = static_cast<ASTForm *>(this->_monaAST->formula->accept(filter##_visitor));    \
 		if(options.dump) {    \
