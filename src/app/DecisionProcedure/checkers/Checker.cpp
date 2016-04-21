@@ -31,6 +31,7 @@
 #include "../visitors/MonaSerializer.h"
 #include "../visitors/ShuffleVisitor.h"
 #include "../visitors/ExistentialPrenexer.h"
+#include "../visitors/decorators/OccuringVariableDecorator.h"
 
 extern PredicateLib predicateLib;
 
@@ -48,6 +49,7 @@ extern Deque<FileSource *> source;
 // Fixme: remove maybe?
 extern char *inputFileName;
 extern Ident lastPosVar, allPosVar;
+extern Timer timer_preprocess;
 
 Checker::~Checker() {
     // Clean up
@@ -257,6 +259,7 @@ void Checker::CloseUngroundFormula() {
  * some of the tags in order to transform them into the subautomata. Finally everything is restricted to second order.
  */
 void Checker::PreprocessFormula() {
+    this->_startTimer(timer_preprocess);
     // Flattening of the formula
     PredicateUnfolder predicateUnfolder;
     this->_monaAST->formula = static_cast<ASTForm *>((this->_monaAST->formula)->accept(predicateUnfolder));
@@ -317,6 +320,8 @@ void Checker::PreprocessFormula() {
         DotWalker dw_visitor(dotFileName);
         (this->_monaAST->formula)->accept(dw_visitor);
     }
+
+    this->_stopTimer(timer_preprocess, "Preprocess");
 
     // Table or BDD tracks are reordered
     initializeVarMap(this->_monaAST->formula);

@@ -58,7 +58,7 @@ AST* ShuffleVisitor::_visitBinary(BinopClass*  form) {
 
     // 3. Distribute evenly
     while(leaves.size() != 1) {
-        assert(leaves.size() > 2);
+        assert(leaves.size() >= 2);
         left = leaves.front();
         leaves.pop_front();
         right = leaves.front();

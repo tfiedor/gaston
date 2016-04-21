@@ -80,7 +80,7 @@ VarToTrackMap varMap;
 int numTypes = 0;
 bool regenerate = false;
 char *inputFileName = NULL;
-Timer timer_conversion, timer_mona, timer_base, timer_automaton;
+Timer timer_conversion, timer_mona, timer_base, timer_automaton, timer_preprocess;
 Timer timer_gaston;
 
 //extern void (*mona_callback)();

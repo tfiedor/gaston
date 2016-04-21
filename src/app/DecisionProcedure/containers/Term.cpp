@@ -19,21 +19,25 @@ extern Ident allPosVar;
 
 namespace Gaston {
     size_t hash_value(Term* s) {
-        #if (OPT_TERM_HASH_BY_APPROX == true)
+#       if (OPT_TERM_HASH_BY_APPROX == true)
         if (s->type == TERM_CONTINUATION) {
             // Todo: this is never hit fuck
-            TermContinuation* sCont = reinterpret_cast<TermContinuation*>(s);
-            if(sCont->IsUnfolded()) {
+            TermContinuation *sCont = reinterpret_cast<TermContinuation *>(s);
+            if (sCont->IsUnfolded()) {
                 return boost::hash_value(sCont->GetUnfoldedTerm());
             } else {
                 return boost::hash_value(s);
             }
+        } else if(s->type == TERM_FIXPOINT) {
+            size_t seed = boost::hash_value(s->stateSpaceApprox);
+            boost::hash_combine(seed, boost::hash_value(s->MeasureStateSpace()));
+            return seed;
         } else {
             return boost::hash_value(s);
         }
-        #else
+#       else
         return boost::hash_value(s->MeasureStateSpace());
-        #endif
+#       endif
     }
 }
 

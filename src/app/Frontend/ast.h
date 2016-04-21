@@ -102,7 +102,11 @@ class AST {
 public:
   AST(ASTOrder o, ASTKind k, Pos p) :
 		  order(o), kind(k), pos(p) {}
-  virtual ~AST() {};
+  virtual ~AST() {
+	  if(allVars != nullptr) {
+		  delete allVars;
+	  }
+  };
 
   virtual AST* unfoldMacro(IdentList*, ASTList*) { return this;};
   virtual void freeVars(IdentList*, IdentList*) {};
@@ -117,6 +121,7 @@ public:
 	size_t height = 1;
 	size_t dag_height = 1;
 	size_t size = 1;
+	IdentList* allVars = nullptr;
   ASTOrder order;
   ASTKind kind;
   Pos pos;

@@ -8,7 +8,7 @@
 #include "../../Frontend/env.h"
 #include "../environment.hh"
 
-extern Timer timer_conversion, timer_mona, timer_base, timer_automaton;
+extern Timer timer_conversion, timer_mona, timer_base, timer_automaton, timer_preprocess;
 extern Ident lastPosVar, allPosVar;
 extern Options options;
 
@@ -117,14 +117,17 @@ void SymbolicChecker::Decide() {
                 break;
         }
 
-        std::cout << "\n[*] Decision procedure: ";
-        timer_deciding.print();
+        std::cout << "\n";
+        std::cout << "[*] Preprocesing:       ";
+        timer_preprocess.print();
         std::cout << "[*] DFA creation:       ";
         timer_mona.print();
         std::cout << "[*] MONA <-> VATA:      ";
         timer_conversion.print();
         std::cout << "[*] Bases creation:     ";
         timer_automaton.print();
+        std::cout << "[*] Decision procedure: ";
+        timer_deciding.print();
         // Something that was used is not supported by dWiNA
 
         delete this->_automaton;

@@ -15,6 +15,7 @@
 #include "BooleanUnfolder.h"
 #include "NegationUnfolder.h"
 #include "UniversalQuantifierRemover.h"
+#include "decorators/OccuringVariableDecorator.h"
 #include "../../Frontend/ast.h"
 
 /**
@@ -93,14 +94,12 @@ ASTForm* FullAntiPrenexer::distributiveRule(QuantifierClass *qForm) {
 
     IdentList *bound = qForm->vl;
     IdentList left, right, middle;
-    IdentList free1, bound1;
-    IdentList free2, bound2;
-    binopForm->f1->freeVars(&free1, &bound1);
-    binopForm->f2->freeVars(&free2, &bound2);
+    assert(binopForm->f1->allVars != nullptr);
+    assert(binopForm->f2->allVars != nullptr);
 
     for (auto var = bound->begin(); var != bound->end(); ++var) {
-        bool varInLeft = free1.exists(*var);
-        bool varInRight = free2.exists(*var);
+        bool varInLeft = binopForm->f1->allVars->exists(*var);
+        bool varInRight = binopForm->f2->allVars->exists(*var);
 
         if(varInLeft) {
             left.push_back(*var);
@@ -140,14 +139,12 @@ ASTForm* FullAntiPrenexer::nonDistributiveRule(QuantifierClass *qForm) {
 
     IdentList *bound = qForm->vl;
     IdentList left, right, middle;
-    IdentList free1, bound1;
-    IdentList free2, bound2;
-    binopForm->f1->freeVars(&free1, &bound1);
-    binopForm->f2->freeVars(&free2, &bound2);
+    assert(binopForm->f1->allVars != nullptr);
+    assert(binopForm->f2->allVars != nullptr);
 
     for (auto var = bound->begin(); var != bound->end(); ++var) {
-        bool varInLeft = free1.exists(*var);
-        bool varInRight = free2.exists(*var);
+        bool varInLeft = binopForm->f1->allVars->exists(*var);
+        bool varInRight = binopForm->f2->allVars->exists(*var);
 
         // Ex var. f1 op f2     | var in f1 && var in f2
         if (varInLeft && varInRight) {
@@ -195,6 +192,9 @@ ASTForm* FullAntiPrenexer::existentialAntiPrenex(ASTForm *form) {
     NegationUnfolder negationUnfolder;
     form = reinterpret_cast<ASTForm*>(form->accept(negationUnfolder));
 
+    OccuringVariableDecorator decorator;
+    form->accept(decorator);
+
     ExistClass* exForm = static_cast<ExistClass*>(form);
     switch(exForm->f->kind) {
         case aOr:
@@ -231,6 +231,9 @@ ASTForm* FullAntiPrenexer::universalAntiPrenex(ASTForm *form) {
 
     NegationUnfolder negationUnfolder;
     form = reinterpret_cast<ASTForm*>(form->accept(negationUnfolder));
+
+    OccuringVariableDecorator decorator;
+    form->accept(decorator);
 
     ForallClass* allForm = static_cast<ForallClass*>(form);
     switch(allForm->f->kind) {

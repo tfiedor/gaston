@@ -28,6 +28,10 @@ public:
         }
     };
 
+    void visit(ASTForm* form) {};
+    void visit(ASTTerm* term) {};
+    void visit(ASTUniv* univ) {};
+
     void visit(ASTForm_And*);
     void visit(ASTForm_Or*);
     void visit(ASTForm_Impl*);

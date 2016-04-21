@@ -2,6 +2,7 @@
 #define __WSKS_AST_VISITOR_H
 
 #include "ast.h"
+#include <iostream>
 
 template <typename R = void>
 class ASTVisitor {
@@ -134,104 +135,104 @@ public:
     // < Constructors >
     VoidVisitor(Traverse td) : ASTVisitor<>(td) {}
 
-    virtual void visit(ASTTerm* term) {}
-    virtual void visit(ASTForm* form) {}
-    virtual void visit(ASTUniv* univ) {}
+    virtual void visit(ASTTerm* term) { std::cerr << "[!] Warning called base VoidVisitor visit(ASTTerm*) for: "; term->dump(); std::cerr<< "\n"; assert(false); }
+    virtual void visit(ASTForm* form) { std::cerr << "[!] Warning called base VoidVisitor visit(ASTForm*) for: "; form->dump(); std::cerr<< "\n"; assert(false); }
+    virtual void visit(ASTUniv* univ) { std::cerr << "[!] Warning called base VoidVisitor visit(ASTUniv*) for: "; univ->dump(); std::cerr<< "\n"; assert(false); }
 
     // < ASTTerm1 Derives > //
-    virtual void visit(ASTTerm1_n* term) {}
-    virtual void visit(ASTTerm1_T* term) {}
-    virtual void visit(ASTTerm1_t* term) {}
-    virtual void visit(ASTTerm1_tn* term) {}
-    virtual void visit(ASTTerm1_tnt* term) {}
+    virtual void visit(ASTTerm1_n* term) { this->visit(static_cast<ASTTerm*>(term)); }
+    virtual void visit(ASTTerm1_T* term) { this->visit(static_cast<ASTTerm*>(term)); }
+    virtual void visit(ASTTerm1_t* term) { this->visit(static_cast<ASTTerm*>(term)); }
+    virtual void visit(ASTTerm1_tn* term) { this->visit(static_cast<ASTTerm*>(term)); }
+    virtual void visit(ASTTerm1_tnt* term) { this->visit(static_cast<ASTTerm*>(term)); }
 
     // < ASTTerm2 Derives > //
-    virtual void visit(ASTTerm2_TT* Term) {}
-    virtual void visit(ASTTerm2_Tn* Term) {}
+    virtual void visit(ASTTerm2_TT* Term) { this->visit(static_cast<ASTTerm*>(Term)); }
+    virtual void visit(ASTTerm2_Tn* Term) { this->visit(static_cast<ASTTerm*>(Term)); }
 
     // < ASTForm Derives > //
-    virtual void visit(ASTForm_tT* form) {}
-    virtual void visit(ASTForm_T* form) {}
-    virtual void visit(ASTForm_TT* form) {}
-    virtual void visit(ASTForm_tt* form) {}
-    virtual void visit(ASTForm_nt* form) {}
-    virtual void visit(ASTForm_nT* form) {}
-    virtual void visit(ASTForm_f* form) {}
-    virtual void visit(ASTForm_ff* form) {}
-    virtual void visit(ASTForm_vf* form) {}
-    virtual void visit(ASTForm_uvf* form) {}
+    virtual void visit(ASTForm_tT* form) { this->visit(static_cast<ASTForm*>(form)); }
+    virtual void visit(ASTForm_T* form) { this->visit(static_cast<ASTForm*>(form)); }
+    virtual void visit(ASTForm_TT* form) { this->visit(static_cast<ASTForm*>(form)); }
+    virtual void visit(ASTForm_tt* form) { this->visit(static_cast<ASTForm*>(form)); }
+    virtual void visit(ASTForm_nt* form) { this->visit(static_cast<ASTForm*>(form)); }
+    virtual void visit(ASTForm_nT* form) { this->visit(static_cast<ASTForm*>(form)); }
+    virtual void visit(ASTForm_f* form) { this->visit(static_cast<ASTForm*>(form)); }
+    virtual void visit(ASTForm_ff* form) { this->visit(static_cast<ASTForm*>(form)); }
+    virtual void visit(ASTForm_vf* form) { this->visit(static_cast<ASTForm*>(form)); }
+    virtual void visit(ASTForm_uvf* form) { this->visit(static_cast<ASTForm*>(form)); }
 
     // < ASTTerm1 Specific > //
-    virtual void visit(ASTTerm1_Var1* term) {}
-    virtual void visit(ASTTerm1_Dot* term) {}
-    virtual void visit(ASTTerm1_Up* term) {}
-    virtual void visit(ASTTerm1_Root* term) {}
-    virtual void visit(ASTTerm1_Int* term) {}
-    virtual void visit(ASTTerm1_Plus* term) {}
-    virtual void visit(ASTTerm1_Minus* term) {}
-    virtual void visit(ASTTerm1_PlusModulo* term) {}
-    virtual void visit(ASTTerm1_MinusModulo* term) {}
-    virtual void visit(ASTTerm1_Min* term) {}
-    virtual void visit(ASTTerm1_Max* term) {}
-    virtual void visit(ASTTerm1_TreeRoot* term) {}
+    virtual void visit(ASTTerm1_Var1* term) { this->visit(static_cast<ASTTerm1_n*>(term)); }
+    virtual void visit(ASTTerm1_Dot* term) { this->visit(static_cast<ASTTerm1_t*>(term)); }
+    virtual void visit(ASTTerm1_Up* term) { this->visit(static_cast<ASTTerm1_t*>(term)); }
+    virtual void visit(ASTTerm1_Root* term) { this->visit(static_cast<ASTTerm1*>(term)); }
+    virtual void visit(ASTTerm1_Int* term) { this->visit(static_cast<ASTTerm1_n*>(term)); }
+    virtual void visit(ASTTerm1_Plus* term) { this->visit(static_cast<ASTTerm1_tn*>(term)); }
+    virtual void visit(ASTTerm1_Minus* term) { this->visit(static_cast<ASTTerm1_tn*>(term)); }
+    virtual void visit(ASTTerm1_PlusModulo* term) { this->visit(static_cast<ASTTerm1_tnt*>(term)); }
+    virtual void visit(ASTTerm1_MinusModulo* term) { this->visit(static_cast<ASTTerm1_tnt*>(term)); }
+    virtual void visit(ASTTerm1_Min* term) { this->visit(static_cast<ASTTerm1_T*>(term)); }
+    virtual void visit(ASTTerm1_Max* term) { this->visit(static_cast<ASTTerm1_T*>(term)); }
+    virtual void visit(ASTTerm1_TreeRoot* term) { this->visit(static_cast<ASTTerm1_T*>(term)); }
 
     // < ASTTerm2 Specific > //
-    virtual void visit(ASTTerm2_Var2* Term) {}
-    virtual void visit(ASTTerm2_VarTree* Term) {}
-    virtual void visit(ASTTerm2_Dot* Term) {}
-    virtual void visit(ASTTerm2_Up* Term) {}
-    virtual void visit(ASTTerm2_Empty* Term) {}
-    virtual void visit(ASTTerm2_Union* Term) {}
-    virtual void visit(ASTTerm2_Inter* Term) {}
-    virtual void visit(ASTTerm2_Setminus* Term) {}
-    virtual void visit(ASTTerm2_Set* Term) {}
-    virtual void visit(ASTTerm2_Plus* Term) {}
-    virtual void visit(ASTTerm2_Minus* Term) {}
-    virtual void visit(ASTTerm2_Interval* Term) {}
-    virtual void visit(ASTTerm2_PresbConst* Term) {}
-    virtual void visit(ASTTerm2_Formula* Term) {}
+    virtual void visit(ASTTerm2_Var2* Term) { this->visit(static_cast<ASTTerm2*>(Term)); }
+    virtual void visit(ASTTerm2_VarTree* Term) { this->visit(static_cast<ASTTerm2*>(Term)); }
+    virtual void visit(ASTTerm2_Dot* Term) { this->visit(static_cast<ASTTerm2*>(Term)); }
+    virtual void visit(ASTTerm2_Up* Term) { this->visit(static_cast<ASTTerm2*>(Term)); }
+    virtual void visit(ASTTerm2_Empty* Term) { this->visit(static_cast<ASTTerm2*>(Term)); }
+    virtual void visit(ASTTerm2_Union* Term) { this->visit(static_cast<ASTTerm2_TT*>(Term)); }
+    virtual void visit(ASTTerm2_Inter* Term) { this->visit(static_cast<ASTTerm2_TT*>(Term)); }
+    virtual void visit(ASTTerm2_Setminus* Term) { this->visit(static_cast<ASTTerm2_TT*>(Term)); }
+    virtual void visit(ASTTerm2_Set* Term) { this->visit(static_cast<ASTTerm2*>(Term)); }
+    virtual void visit(ASTTerm2_Plus* Term) { this->visit(static_cast<ASTTerm2_Tn*>(Term)); }
+    virtual void visit(ASTTerm2_Minus* Term) { this->visit(static_cast<ASTTerm2_Tn*>(Term)); }
+    virtual void visit(ASTTerm2_Interval* Term) { this->visit(static_cast<ASTTerm2*>(Term)); }
+    virtual void visit(ASTTerm2_PresbConst* Term) { this->visit(static_cast<ASTTerm2*>(Term)); }
+    virtual void visit(ASTTerm2_Formula* Term) { this->visit(static_cast<ASTTerm2*>(Term)); }
 
     // < ASTForm Specific > //
-    virtual void visit(ASTForm_Var0* form) {}
-    virtual void visit(ASTForm_AllPosVar* form) {}
-    virtual void visit(ASTForm_True* form) {}
-    virtual void visit(ASTForm_False* form) {}
-    virtual void visit(ASTForm_In* form) {}
-    virtual void visit(ASTForm_Notin* form) {}
-    virtual void visit(ASTForm_RootPred* form) {}
-    virtual void visit(ASTForm_EmptyPred* form) {}
-    virtual void visit(ASTForm_FirstOrder* form) {}
-    virtual void visit(ASTForm_Sub* form) {}
-    virtual void visit(ASTForm_Equal1* form) {}
-    virtual void visit(ASTForm_Equal2* form) {}
-    virtual void visit(ASTForm_NotEqual1* form) {}
-    virtual void visit(ASTForm_NotEqual2* form) {}
-    virtual void visit(ASTForm_Less* form) {}
-    virtual void visit(ASTForm_LessEq* form) {}
-    virtual void visit(ASTForm_WellFormedTree* form) {}
-    virtual void visit(ASTForm_Impl* form) {}
-    virtual void visit(ASTForm_Biimpl* form) {}
-    virtual void visit(ASTForm_And* form) {}
-    virtual void visit(ASTForm_IdLeft* form) {}
-    virtual void visit(ASTForm_Or* form) {}
-    virtual void visit(ASTForm_Not* form) {}
-    virtual void visit(ASTForm_Ex0* form) {}
-    virtual void visit(ASTForm_Ex1* form) {}
-    virtual void visit(ASTForm_Ex2* form) {}
-    virtual void visit(ASTForm_All0* form) {}
-    virtual void visit(ASTForm_All1* form) {}
-    virtual void visit(ASTForm_All2* form) {}
-    virtual void visit(ASTForm_Let0* form) {}
-    virtual void visit(ASTForm_Let1* form) {}
-    virtual void visit(ASTForm_Let2* form) {}
-    virtual void visit(ASTForm_Call* form) {}
-    virtual void visit(ASTForm_Import* form) {}
-    virtual void visit(ASTForm_Export* form) {}
-    virtual void visit(ASTForm_Prefix* form) {}
-    virtual void visit(ASTForm_Restrict* form) {}
-    virtual void visit(ASTForm_InStateSpace1* form) {}
-    virtual void visit(ASTForm_InStateSpace2* form) {}
-    virtual void visit(ASTForm_SomeType* form) {}
+    virtual void visit(ASTForm_Var0* form) { this->visit(static_cast<ASTForm*>(form)); }
+    virtual void visit(ASTForm_AllPosVar* form) { this->visit(static_cast<ASTForm*>(form)); }
+    virtual void visit(ASTForm_True* form) { this->visit(static_cast<ASTForm*>(form)); }
+    virtual void visit(ASTForm_False* form) { this->visit(static_cast<ASTForm*>(form)); }
+    virtual void visit(ASTForm_In* form) { this->visit(static_cast<ASTForm_tT*>(form)); }
+    virtual void visit(ASTForm_Notin* form) { this->visit(static_cast<ASTForm_tT*>(form)); }
+    virtual void visit(ASTForm_RootPred* form) { this->visit(static_cast<ASTForm*>(form)); }
+    virtual void visit(ASTForm_EmptyPred* form) { this->visit(static_cast<ASTForm_T*>(form)); }
+    virtual void visit(ASTForm_FirstOrder* form) { this->visit(static_cast<ASTForm*>(form)); }
+    virtual void visit(ASTForm_Sub* form) { this->visit(static_cast<ASTForm_TT*>(form)); }
+    virtual void visit(ASTForm_Equal1* form) { this->visit(static_cast<ASTForm_tt*>(form)); }
+    virtual void visit(ASTForm_Equal2* form) { this->visit(static_cast<ASTForm_TT*>(form)); }
+    virtual void visit(ASTForm_NotEqual1* form) { this->visit(static_cast<ASTForm_tt*>(form)); }
+    virtual void visit(ASTForm_NotEqual2* form) { this->visit(static_cast<ASTForm_TT*>(form)); }
+    virtual void visit(ASTForm_Less* form) { this->visit(static_cast<ASTForm_tt*>(form)); }
+    virtual void visit(ASTForm_LessEq* form) { this->visit(static_cast<ASTForm_tt*>(form)); }
+    virtual void visit(ASTForm_WellFormedTree* form) { this->visit(static_cast<ASTForm_T*>(form)); }
+    virtual void visit(ASTForm_Impl* form) { this->visit(static_cast<ASTForm_ff*>(form)); }
+    virtual void visit(ASTForm_Biimpl* form) { this->visit(static_cast<ASTForm_ff*>(form)); }
+    virtual void visit(ASTForm_And* form) { this->visit(static_cast<ASTForm_ff*>(form));}
+    virtual void visit(ASTForm_IdLeft* form) { this->visit(static_cast<ASTForm_ff*>(form)); }
+    virtual void visit(ASTForm_Or* form) { this->visit(static_cast<ASTForm_ff*>(form));}
+    virtual void visit(ASTForm_Not* form) { this->visit(static_cast<ASTForm*>(form)); }
+    virtual void visit(ASTForm_Ex0* form) { this->visit(static_cast<ASTForm_vf*>(form)); }
+    virtual void visit(ASTForm_Ex1* form) { this->visit(static_cast<ASTForm_uvf*>(form)); }
+    virtual void visit(ASTForm_Ex2* form) { this->visit(static_cast<ASTForm_uvf*>(form)); }
+    virtual void visit(ASTForm_All0* form) { this->visit(static_cast<ASTForm_vf*>(form)); }
+    virtual void visit(ASTForm_All1* form) { this->visit(static_cast<ASTForm_uvf*>(form)); }
+    virtual void visit(ASTForm_All2* form) { this->visit(static_cast<ASTForm_uvf*>(form)); }
+    virtual void visit(ASTForm_Let0* form) { this->visit(static_cast<ASTForm*>(form)); }
+    virtual void visit(ASTForm_Let1* form) { this->visit(static_cast<ASTForm*>(form)); }
+    virtual void visit(ASTForm_Let2* form) { this->visit(static_cast<ASTForm*>(form)); }
+    virtual void visit(ASTForm_Call* form) { this->visit(static_cast<ASTForm*>(form)); }
+    virtual void visit(ASTForm_Import* form) { this->visit(static_cast<ASTForm*>(form)); }
+    virtual void visit(ASTForm_Export* form) { this->visit(static_cast<ASTForm_f*>(form)); }
+    virtual void visit(ASTForm_Prefix* form) { this->visit(static_cast<ASTForm_f*>(form)); }
+    virtual void visit(ASTForm_Restrict* form) { this->visit(static_cast<ASTForm_f*>(form)); }
+    virtual void visit(ASTForm_InStateSpace1* form) { this->visit(static_cast<ASTForm*>(form)); }
+    virtual void visit(ASTForm_InStateSpace2* form) { this->visit(static_cast<ASTForm*>(form)); }
+    virtual void visit(ASTForm_SomeType* form) { this->visit(static_cast<ASTForm*>(form)); }
 };
 
 #endif //WSKS_AST_VISITOR_H
