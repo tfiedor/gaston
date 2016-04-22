@@ -19,7 +19,7 @@
  */
 
 #include <iostream>
-#include <map>
+#include <unordered_map>
 #include <stdlib.h>
 #include <string.h>
 #include "ast.h"
@@ -38,7 +38,7 @@ extern Ident lastPosVar;
 extern Ident allPosVar;
 extern int numTypes;
 
-std::map<unsigned int, unsigned int> AST::temporalMapping;
+std::unordered_map<unsigned int, unsigned int> AST::temporalMapping;
 
 //////////  Restriction ///////////////////////////////////////////////////////
 

@@ -60,6 +60,10 @@ public:
     ASTForm* _pushUniversalByOne(OuterQuantifier* form, bool byOne = false);
     template<class OuterQuantifier, class InnerQuantifier>
     ASTForm* _pushExistentialByOne(OuterQuantifier* form, bool byOne = false);
+    template<class OuterQuantifier, class InnerQantifier>
+    ASTForm* _pushCompatibleUniversalByOne(OuterQuantifier* form, bool byOne = false);
+    template<class OuterQuantifier, class InnerQuantifier>
+    ASTForm* _pushCompatibleExistentialByOne(OuterQuantifier* form, bool byOne = false);
 
     // Works in preorder
     virtual AST* visit(ASTForm_Ex1* form);

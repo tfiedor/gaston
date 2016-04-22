@@ -226,6 +226,36 @@ ASTForm* FullAntiPrenexer::_pushUniversalByOne(OuterQuantifier *form, bool byOne
     }
 }
 
+template<class OuterQuantifier, class InnerQuantifier>
+ASTForm* FullAntiPrenexer::_pushCompatibleExistentialByOne(OuterQuantifier *form, bool byOne) {
+    ASTForm* f = existentialAntiPrenex<InnerQuantifier>(form->f, true);
+    assert(f != nullptr);
+
+    if(f == form->f) {
+        form->f = static_cast<ASTForm*>(form->f->accept(*this));
+        assert(form->f != nullptr);
+        return form;
+    } else {
+        form->f = f;
+        return existentialAntiPrenex<OuterQuantifier>(form, byOne);
+    }
+}
+
+template<class OuterQuantifier, class InnerQuantifier>
+ASTForm* FullAntiPrenexer::_pushCompatibleUniversalByOne(OuterQuantifier *form, bool byOne) {
+    ASTForm* f = universalAntiPrenex<InnerQuantifier>(form->f, true);
+    assert(f != nullptr);
+
+    if(f == form->f) {
+        form->f = static_cast<ASTForm*>(form->f->accept(*this));
+        assert(form->f != nullptr);
+        return form;
+    } else {
+        form->f = f;
+        return universalAntiPrenex<OuterQuantifier>(form, byOne);
+    }
+}
+
 /*-------------------------------------------------------------------------*
  | Ex X . f1          ->    f1                 -- if X \notin freeVars(f1) |
  | Ex X . f1 /\ f2    ->    (Ex X. f1) /\ f2   -- if X \notin freeVars(f2) |
@@ -250,6 +280,10 @@ ASTForm* FullAntiPrenexer::existentialAntiPrenex(ASTForm *form, bool onlyByOne) 
             assert(false && "Implication and Biimplication is unsupported in Anti-Prenexing");
         case aNot:
             return exForm;
+        case aEx1:
+            return this->_pushCompatibleExistentialByOne<ExistClass, ASTForm_Ex1>(exForm, onlyByOne);
+        case aEx2:
+            return this->_pushCompatibleExistentialByOne<ExistClass, ASTForm_Ex2>(exForm, onlyByOne);
         case aAll1:
             return this->_pushUniversalByOne<ExistClass, ASTForm_All1>(exForm, onlyByOne);
         case aAll2:
@@ -291,6 +325,10 @@ ASTForm* FullAntiPrenexer::universalAntiPrenex(ASTForm *form, bool onlyByOne) {
         case aNot:
             // Fixme: Push by one
             return allForm;
+        case aAll1:
+            return this->_pushCompatibleUniversalByOne<ForallClass, ASTForm_All1>(allForm, onlyByOne);
+        case aAll2:
+            return this->_pushCompatibleUniversalByOne<ForallClass, ASTForm_All2>(allForm, onlyByOne);
         case aEx1:
             return this->_pushExistentialByOne<ForallClass, ASTForm_Ex1>(allForm, onlyByOne);
         case aEx2:

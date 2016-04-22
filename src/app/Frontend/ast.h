@@ -26,6 +26,7 @@
 #include "printline.h"
 #include <vata/bdd_bu_tree_aut.hh>
 #include <cstring>
+#include <unordered_map>
 
 using Automaton = VATA::BDDBottomUpTreeAut;
 
@@ -122,7 +123,7 @@ public:
 	size_t dag_height = 1;
 	size_t size = 1;
 	IdentList* allVars = nullptr;
-	static std::map<unsigned int, unsigned int> temporalMapping;
+	static std::unordered_map<unsigned int, unsigned int> temporalMapping;
   ASTOrder order;
   ASTKind kind;
   Pos pos;
