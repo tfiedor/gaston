@@ -2147,12 +2147,12 @@ bool ASTTerm2_Var2::StructuralCompare(AST* form) {
 
 bool ASTForm_FirstOrder::StructuralCompare(AST* form) {
     assert(form != nullptr);
-    return this->kind == form->kind && this->t->StructuralCompare(reinterpret_cast<ASTForm_FirstOrder*>(form)->t);
+    return this->kind == form->kind && this->t->StructuralCompare(static_cast<ASTForm_FirstOrder*>(form)->t);
 }
 
 bool ASTForm_Not::StructuralCompare(AST* form) {
     assert(form != nullptr);
-    return this->kind == form->kind && this->f->StructuralCompare(reinterpret_cast<ASTForm_Not*>(form)->f);
+    return this->kind == form->kind && this->f->StructuralCompare(static_cast<ASTForm_Not*>(form)->f);
 }
 
 bool ASTTerm2_Empty::StructuralCompare(AST* form) {
@@ -2167,111 +2167,111 @@ void ASTTerm1_n::ConstructMapping(AST* form, std::map<unsigned int, unsigned int
 
 void ASTTerm1_T::ConstructMapping(AST* form, std::map<unsigned int, unsigned int>& map) {
     assert(this->kind == form->kind);
-    this->T->ConstructMapping(reinterpret_cast<ASTTerm1_T*>(form)->T, map);
+    this->T->ConstructMapping(static_cast<ASTTerm1_T*>(form)->T, map);
 }
 
 void ASTTerm1_t::ConstructMapping(AST* form, std::map<unsigned int, unsigned int>& map) {
     assert(this->kind == form->kind);
-    this->t->ConstructMapping(reinterpret_cast<ASTTerm1_t*>(form)->t, map);
+    this->t->ConstructMapping(static_cast<ASTTerm1_t*>(form)->t, map);
 }
 
 void ASTTerm1_tn::ConstructMapping(AST* form, std::map<unsigned int, unsigned int>& map) {
     assert(this->kind == form->kind);
-    this->t->ConstructMapping(reinterpret_cast<ASTTerm1_tn*>(form)->t, map);
+    this->t->ConstructMapping(static_cast<ASTTerm1_tn*>(form)->t, map);
 }
 
 void ASTTerm1_tnt::ConstructMapping(AST* form, std::map<unsigned int, unsigned int>& map) {
     assert(this->kind == form->kind);
-    ASTTerm1_tnt* tnt_form = reinterpret_cast<ASTTerm1_tnt*>(form);
+    ASTTerm1_tnt* tnt_form = static_cast<ASTTerm1_tnt*>(form);
     this->t1->ConstructMapping(tnt_form->t1, map);
     this->t2->ConstructMapping(tnt_form->t2, map);
 }
 
 void ASTTerm2_TT::ConstructMapping(AST* form, std::map<unsigned int, unsigned int>& map) {
     assert(this->kind == form->kind);
-    ASTTerm2_TT* TT_form = reinterpret_cast<ASTTerm2_TT*>(form);
+    ASTTerm2_TT* TT_form = static_cast<ASTTerm2_TT*>(form);
     this->T1->ConstructMapping(TT_form->T1, map);
     this->T2->ConstructMapping(TT_form->T2, map);
 }
 
 void ASTTerm2_Tn::ConstructMapping(AST* form, std::map<unsigned int, unsigned int>& map) {
     assert(this->kind == form->kind);
-    this->T->ConstructMapping(reinterpret_cast<ASTTerm2_Tn*>(form)->T, map);
+    this->T->ConstructMapping(static_cast<ASTTerm2_Tn*>(form)->T, map);
 }
 
 void ASTForm_tt::ConstructMapping(AST* form, std::map<unsigned int, unsigned int>& map) {
     assert(this->kind == form->kind);
-    ASTForm_tt* tt_form = reinterpret_cast<ASTForm_tt*>(form);
+    ASTForm_tt* tt_form = static_cast<ASTForm_tt*>(form);
     this->t1->ConstructMapping(tt_form->t1, map);
     this->t2->ConstructMapping(tt_form->t2, map);
 }
 
 void ASTForm_tT::ConstructMapping(AST* form, std::map<unsigned int, unsigned int>& map) {
     assert(this->kind == form->kind);
-    ASTForm_tT* tT_form = reinterpret_cast<ASTForm_tT*>(form);
+    ASTForm_tT* tT_form = static_cast<ASTForm_tT*>(form);
     this->t1->ConstructMapping(tT_form->t1, map);
     this->T2->ConstructMapping(tT_form->T2, map);
 }
 
 void ASTForm_T::ConstructMapping(AST* form, std::map<unsigned int, unsigned int>& map) {
     assert(this->kind == form->kind);
-    ASTForm_T* T_form = reinterpret_cast<ASTForm_T*>(form);
+    ASTForm_T* T_form = static_cast<ASTForm_T*>(form);
     this->T->ConstructMapping(T_form->T, map);
 }
 
 void ASTForm_TT::ConstructMapping(AST* form, std::map<unsigned int, unsigned int>& map) {
     assert(this->kind == form->kind);
-    ASTForm_TT* TT_form = reinterpret_cast<ASTForm_TT*>(form);
+    ASTForm_TT* TT_form = static_cast<ASTForm_TT*>(form);
     this->T1->ConstructMapping(TT_form->T1, map);
     this->T2->ConstructMapping(TT_form->T2, map);
 }
 
 void ASTForm_nt::ConstructMapping(AST* form, std::map<unsigned int, unsigned int>& map) {
     assert(this->kind == form->kind);
-    this->t->ConstructMapping(reinterpret_cast<ASTForm_nt*>(form)->t, map);
+    this->t->ConstructMapping(static_cast<ASTForm_nt*>(form)->t, map);
 }
 
 void ASTForm_nT::ConstructMapping(AST* form, std::map<unsigned int, unsigned int>& map) {
     assert(this->kind == form->kind);
-    this->T->ConstructMapping(reinterpret_cast<ASTForm_nT*>(form)->T, map);
+    this->T->ConstructMapping(static_cast<ASTForm_nT*>(form)->T, map);
 }
 
 void ASTForm_f::ConstructMapping(AST* form, std::map<unsigned int, unsigned int>& map) {
     assert(this->kind == form->kind);
-    this->f->ConstructMapping(reinterpret_cast<ASTForm_f*>(form)->f, map);
+    this->f->ConstructMapping(static_cast<ASTForm_f*>(form)->f, map);
 }
 
 void ASTForm_ff::ConstructMapping(AST* form, std::map<unsigned int, unsigned int>& map) {
     assert(this->kind == form->kind);
-    ASTForm_ff* ff_form = reinterpret_cast<ASTForm_ff*>(form);
+    ASTForm_ff* ff_form = static_cast<ASTForm_ff*>(form);
     this->f1->ConstructMapping(ff_form->f1, map);
     this->f2->ConstructMapping(ff_form->f2, map);
 }
 
 void ASTForm_q::ConstructMapping(AST* form, std::map<unsigned int, unsigned int>& map) {
     assert(this->kind == form->kind);
-    this->f->ConstructMapping(reinterpret_cast<ASTForm_q*>(form)->f, map);
+    this->f->ConstructMapping(static_cast<ASTForm_q*>(form)->f, map);
 }
 
 extern VarToTrackMap varMap;
 void ASTTerm1_Var1::ConstructMapping(AST* form, std::map<unsigned int, unsigned int>& map) {
     assert(this->kind == form->kind);
-    map[varMap[this->n]] = varMap[reinterpret_cast<ASTTerm1_Var1*>(form)->n];
+    map[varMap[this->n]] = varMap[static_cast<ASTTerm1_Var1*>(form)->n];
 }
 
 void ASTTerm2_Var2::ConstructMapping(AST* form, std::map<unsigned int, unsigned int>& map) {
     assert(this->kind == form->kind);
-    map[varMap[this->n]] = varMap[reinterpret_cast<ASTTerm2_Var2*>(form)->n];
+    map[varMap[this->n]] = varMap[static_cast<ASTTerm2_Var2*>(form)->n];
 }
 
 void ASTForm_FirstOrder::ConstructMapping(AST* form, std::map<unsigned int, unsigned int>& map) {
     assert(this->kind == form->kind);
-    this->t->ConstructMapping(reinterpret_cast<ASTForm_FirstOrder*>(form)->t, map);
+    this->t->ConstructMapping(static_cast<ASTForm_FirstOrder*>(form)->t, map);
 }
 
 void ASTForm_Not::ConstructMapping(AST* form, std::map<unsigned int, unsigned int>& map) {
     assert(this->kind == form->kind);
-    this->f->ConstructMapping(reinterpret_cast<ASTForm_Not*>(form)->f, map);
+    this->f->ConstructMapping(static_cast<ASTForm_Not*>(form)->f, map);
 }
 
 void ASTTerm2_Empty::ConstructMapping(AST* form, std::map<unsigned int, unsigned int>& map) {

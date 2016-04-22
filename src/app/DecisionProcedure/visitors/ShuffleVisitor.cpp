@@ -59,10 +59,10 @@ AST* ShuffleVisitor::_visitBinary(BinopClass*  form) {
     // 3. Distribute evenly
     while(leaves.size() != 1) {
         assert(leaves.size() >= 2);
-        left = leaves.front();
-        leaves.pop_front();
-        right = leaves.front();
-        leaves.pop_front();
+        left = leaves.back();
+        leaves.pop_back();
+        right = leaves.back();
+        leaves.pop_back();
 
         newForm = static_cast<AST*>(new BinopClass(static_cast<ASTForm*>(left), static_cast<ASTForm*>(right), Pos()));
         newForm->dag_height = std::max(left->dag_height, right->dag_height) + 1;
@@ -70,7 +70,7 @@ AST* ShuffleVisitor::_visitBinary(BinopClass*  form) {
     }
 
     // Return the last
-    return leaves.front();
+    return leaves.back();
 }
 
 void ShuffleVisitor::_CollectLeaves(AST* form, ASTKind kind, LeafBuffer&leaves) {
@@ -91,7 +91,7 @@ void ShuffleVisitor::_AddFormToBuffer(AST* form, LeafBuffer& leaves) {
 
 void ShuffleVisitor::_AddToBuffer(AST* result, LeafBuffer& leaves) {
     for(auto it = leaves.begin(); it != leaves.end(); ++it) {
-        if((*it)->dag_height >= result->dag_height) {
+        if((*it)->dag_height <= result->dag_height) {
             leaves.insert(it, result);
             return;
         }
