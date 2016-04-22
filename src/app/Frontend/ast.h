@@ -122,6 +122,7 @@ public:
 	size_t dag_height = 1;
 	size_t size = 1;
 	IdentList* allVars = nullptr;
+	static std::map<unsigned int, unsigned int> temporalMapping;
   ASTOrder order;
   ASTKind kind;
   Pos pos;

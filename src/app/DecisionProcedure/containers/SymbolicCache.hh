@@ -148,6 +148,7 @@ struct PrePairCompare : public std::binary_function<Key, Key, bool>
 template<class Key>
 struct DagCompare : public std::binary_function<Key, Key, bool> {
 	bool operator()(Key const& lhs, Key const& rhs) const {
+		AST::temporalMapping.clear();
 		bool result = lhs.second == rhs.second && lhs.first->StructuralCompare(rhs.first);
 		return result;
 	}

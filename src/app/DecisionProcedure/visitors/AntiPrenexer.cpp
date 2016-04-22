@@ -289,6 +289,7 @@ ASTForm* FullAntiPrenexer::universalAntiPrenex(ASTForm *form, bool onlyByOne) {
         case aBiimpl:
             assert(false && "Implication and Biimplication is unsupported in Anti-Prenexing");
         case aNot:
+            // Fixme: Push by one
             return allForm;
         case aEx1:
             return this->_pushExistentialByOne<ForallClass, ASTForm_Ex1>(allForm, onlyByOne);
@@ -324,12 +325,14 @@ AST* FullAntiPrenexer::visit(ASTForm_Or *form) {
 }
 
 AST* FullAntiPrenexer::visit(ASTForm_Not *form) {
+    // Fixme: Push all
     form->f = static_cast<ASTForm*>(form->f->accept(*this));
     return form;
 }
 
 /*********************************
  **  DISTRIBUTIVE ANTI PRENEXER **
+ **    (currently obsolete)     **
  *********************************/
 
 

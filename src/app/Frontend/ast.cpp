@@ -19,6 +19,7 @@
  */
 
 #include <iostream>
+#include <map>
 #include <stdlib.h>
 #include <string.h>
 #include "ast.h"
@@ -36,6 +37,8 @@ extern AutLib lib;
 extern Ident lastPosVar;
 extern Ident allPosVar;
 extern int numTypes;
+
+std::map<unsigned int, unsigned int> AST::temporalMapping;
 
 //////////  Restriction ///////////////////////////////////////////////////////
 
@@ -2119,16 +2122,25 @@ bool ASTForm_q::StructuralCompare(AST* form) {
     }
 }
 
+template<class VarClass>
+bool check_mapping(VarClass* lhs, VarClass* rhs) {
+    auto it = AST::temporalMapping.find(lhs->n);
+    if(it == AST::temporalMapping.end()) {
+        AST::temporalMapping[lhs->n] = rhs->n;
+        return true;
+    } else {
+        return it->second == rhs->n;
+    }
+}
+
 bool ASTTerm1_Var1::StructuralCompare(AST* form) {
     assert(form != nullptr);
-    // Fixme: There should be mapping
-    return this->kind == form->kind;
+    return (this->kind == form->kind) ? check_mapping<ASTTerm1_Var1>(this, static_cast<ASTTerm1_Var1*>(form)) : false;
 }
 
 bool ASTTerm2_Var2::StructuralCompare(AST* form) {
     assert(form != nullptr);
-    // Fixme: There should be mapping
-    return this->kind == form->kind;
+    return (this->kind == form->kind) ? check_mapping<ASTTerm2_Var2>(this, static_cast<ASTTerm2_Var2*>(form)) : false;
 }
 
 bool ASTForm_FirstOrder::StructuralCompare(AST* form) {
