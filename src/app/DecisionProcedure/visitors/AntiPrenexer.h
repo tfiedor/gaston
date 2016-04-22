@@ -56,14 +56,6 @@ public:
     ASTForm* existentialAntiPrenex(ASTForm* form, bool onlyByOne = false);
     template<class ForallClass>
     ASTForm* universalAntiPrenex(ASTForm* form, bool onlyByOne = false);
-    template<class OuterQuantifier, class InnerQantifier>
-    ASTForm* _pushUniversalByOne(OuterQuantifier* form, bool byOne = false);
-    template<class OuterQuantifier, class InnerQuantifier>
-    ASTForm* _pushExistentialByOne(OuterQuantifier* form, bool byOne = false);
-    template<class OuterQuantifier, class InnerQantifier>
-    ASTForm* _pushCompatibleUniversalByOne(OuterQuantifier* form, bool byOne = false);
-    template<class OuterQuantifier, class InnerQuantifier>
-    ASTForm* _pushCompatibleExistentialByOne(OuterQuantifier* form, bool byOne = false);
 
     // Works in preorder
     virtual AST* visit(ASTForm_Ex1* form);
@@ -74,6 +66,18 @@ public:
     virtual AST* visit(ASTForm_And* form);
     virtual AST* visit(ASTForm_Or* form);
     virtual AST* visit(ASTForm_Not* form);
+
+private:
+    template<class OuterQuantifier, class InnerQantifier>
+    ASTForm* _pushUniversalByOne(OuterQuantifier* form, bool byOne = false);
+    template<class OuterQuantifier, class InnerQuantifier>
+    ASTForm* _pushExistentialByOne(OuterQuantifier* form, bool byOne = false);
+    template<class OuterQuantifier, class InnerQantifier>
+    ASTForm* _pushCompatibleUniversalByOne(OuterQuantifier* form, bool byOne = false);
+    template<class OuterQuantifier, class InnerQuantifier>
+    ASTForm* _pushCompatibleExistentialByOne(OuterQuantifier* form, bool byOne = false);
+    template<class OuterQuantifier>
+    ASTForm* _pushNegationByOne(OuterQuantifier* f, bool byOne);
 };
 
 /**

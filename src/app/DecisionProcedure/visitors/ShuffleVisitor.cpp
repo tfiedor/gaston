@@ -76,7 +76,7 @@ AST* ShuffleVisitor::_visitBinary(BinopClass*  form) {
 void ShuffleVisitor::_CollectLeaves(AST* form, ASTKind kind, LeafBuffer&leaves) {
     // Fixme: there should be deletion
     if(form->kind == kind) {
-        ASTForm_ff* ff_form = reinterpret_cast<ASTForm_ff*>(form);
+        ASTForm_ff* ff_form = static_cast<ASTForm_ff*>(form);
         this->_CollectLeaves(ff_form->f1, kind, leaves);
         this->_CollectLeaves(ff_form->f2, kind, leaves);
     } else {

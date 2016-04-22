@@ -415,6 +415,7 @@ protected:
     WorklistSearchType _searchType;         // [4B] << Search type for Worklist
     bool _bValue;                           // [1B] << Boolean value of the fixpoint testing
     bool _updated = false;                  // [1B] << Flag if the fixpoint was updated during the last unique check
+    bool _shortBoolValue;                   // [1B] << Value that leads to early termination fo the fixpoint
 
 public:
     // << STATIC MEASURES >>

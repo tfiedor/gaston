@@ -2067,6 +2067,8 @@ bool ASTForm_TT::StructuralCompare(AST* form) {
     assert(form != nullptr);
     if(this->kind != form->kind) {
         return false;
+    } else if(this->size != form->size || this->dag_height != form->dag_height || this->fixpoint_number != form->fixpoint_number) {
+        return false;
     } else {
         ASTForm_TT* TT_form = reinterpret_cast<ASTForm_TT*>(form);
         return this->T1->StructuralCompare(TT_form->T1) && this->T2->StructuralCompare(TT_form->T2);
@@ -2103,7 +2105,7 @@ bool ASTForm_ff::StructuralCompare(AST* form) {
     assert(form != nullptr);
     if(this->kind != form->kind) {
         return false;
-    } else if(this->size != form->size) {
+    } else if(this->size != form->size || this->dag_height != form->dag_height || this->fixpoint_number != form->fixpoint_number) {
         return false;
     } else {
         ASTForm_ff* ff = reinterpret_cast<ASTForm_ff*>(form);

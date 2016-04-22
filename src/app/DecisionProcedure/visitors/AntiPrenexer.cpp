@@ -256,6 +256,58 @@ ASTForm* FullAntiPrenexer::_pushCompatibleUniversalByOne(OuterQuantifier *form, 
     }
 }
 
+template<class OuterQuantifier>
+ASTForm* FullAntiPrenexer::_pushNegationByOne(OuterQuantifier* form, bool byOne) {
+    ASTForm_Not* not_form = static_cast<ASTForm_Not*>(form->f);
+    ASTForm* result, *left, *right;
+    ASTForm_And* andForm;
+    ASTForm_Or* orForm;
+
+    switch(not_form->f->kind) {
+        case aAnd:
+            andForm = static_cast<ASTForm_And*>(not_form->f);
+            left = new ASTForm_Not(andForm->f1, Pos());
+            left->allVars = copy(andForm->f1->allVars);
+            right = new ASTForm_Not(andForm->f2, Pos());
+            right->allVars = copy(andForm->f2->allVars);
+            result = new ASTForm_Or(left, right, Pos());
+            result->allVars = copy(andForm->allVars);
+            break;
+        case aOr:
+            orForm = static_cast<ASTForm_Or*>(not_form->f);
+            left = new ASTForm_Not(orForm->f1, Pos());
+            left->allVars = copy(orForm->f1->allVars);
+            right = new ASTForm_Not(orForm->f2, Pos());
+            right->allVars = copy(orForm->f2->allVars);
+            result = new ASTForm_And(left, right, Pos());
+            result->allVars = copy(orForm->allVars);
+            break;
+        case aNot:
+            // Fixme: add delete
+            result = static_cast<ASTForm_Not*>(not_form->f)->f;
+            break;
+        case aAll1:
+        case aAll2:
+        case aEx1:
+        case aEx2:
+        default:
+            result = form->f;
+    }
+
+    if(result == form->f) {
+        form->f = static_cast<ASTForm*>(form->f->accept(*this));
+        return form;
+    } else {
+        form->f = result;
+        if(form->kind == aAll1 || form->kind == aAll2) {
+            return universalAntiPrenex<OuterQuantifier>(form, byOne);
+        } else {
+            assert(form->kind == aEx1 || form->kind == aEx2);
+            return existentialAntiPrenex<OuterQuantifier>(form, byOne);
+        }
+    }
+}
+
 /*-------------------------------------------------------------------------*
  | Ex X . f1          ->    f1                 -- if X \notin freeVars(f1) |
  | Ex X . f1 /\ f2    ->    (Ex X. f1) /\ f2   -- if X \notin freeVars(f2) |
@@ -279,7 +331,7 @@ ASTForm* FullAntiPrenexer::existentialAntiPrenex(ASTForm *form, bool onlyByOne) 
         case aBiimpl:
             assert(false && "Implication and Biimplication is unsupported in Anti-Prenexing");
         case aNot:
-            return exForm;
+            return this->_pushNegationByOne<ExistClass>(exForm, onlyByOne);
         case aEx1:
             return this->_pushCompatibleExistentialByOne<ExistClass, ASTForm_Ex1>(exForm, onlyByOne);
         case aEx2:
@@ -323,8 +375,7 @@ ASTForm* FullAntiPrenexer::universalAntiPrenex(ASTForm *form, bool onlyByOne) {
         case aBiimpl:
             assert(false && "Implication and Biimplication is unsupported in Anti-Prenexing");
         case aNot:
-            // Fixme: Push by one
-            return allForm;
+           return this->_pushNegationByOne<ForallClass>(allForm, onlyByOne);
         case aAll1:
             return this->_pushCompatibleUniversalByOne<ForallClass, ASTForm_All1>(allForm, onlyByOne);
         case aAll2:
@@ -363,7 +414,7 @@ AST* FullAntiPrenexer::visit(ASTForm_Or *form) {
 }
 
 AST* FullAntiPrenexer::visit(ASTForm_Not *form) {
-    // Fixme: Push all
+    // Fixme: Probably everything could be pushed now
     form->f = static_cast<ASTForm*>(form->f->accept(*this));
     return form;
 }

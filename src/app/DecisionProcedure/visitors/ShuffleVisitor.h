@@ -5,11 +5,12 @@
 #ifndef WSKS_SHUFFLEVISITOR_H
 #define WSKS_SHUFFLEVISITOR_H
 
+#include <deque>
 #include "../../Frontend/ast.h"
 #include "../../Frontend/ast_visitor.h"
 
 using AST_ptr = AST*;
-using LeafBuffer = std::list<AST_ptr>;
+using LeafBuffer = std::deque<AST_ptr>;
 
 class ShuffleVisitor  : public TransformerVisitor {
 public:

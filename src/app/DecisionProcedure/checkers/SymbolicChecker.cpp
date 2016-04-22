@@ -130,6 +130,11 @@ void SymbolicChecker::Decide() {
         timer_deciding.print();
         // Something that was used is not supported by dWiNA
 
+#   if (DEBUG_GENERATE_DOT_AUTOMATON == true)
+        if(options.graphvizDAG) {
+            SymbolicAutomaton::AutomatonToDot("automaton.dot", this->_automaton, false);
+        }
+#   endif
         delete this->_automaton;
         this->_automaton = nullptr;
     } catch (NotImplementedException& e) {
@@ -236,10 +241,6 @@ bool SymbolicChecker::Run() {
     std::cout << "[*] Printing Statistics\n";
     this->_automaton->DumpComputationStats();
     std::cout << "\n";
-#   endif
-
-#   if (DEBUG_GENERATE_DOT_AUTOMATON == true)
-    SymbolicAutomaton::AutomatonToDot("automaton.dot", this->_automaton, false);
 #   endif
 
     // If Initial States does intersect final ones, the formula is valid, else it is unsatisfiable

@@ -486,9 +486,9 @@ SubsumptionResult TermFixpoint::_IsSubsumedCore(Term* t, bool unfoldAll) {
     // Reinterpret
     TermFixpoint* tt = reinterpret_cast<TermFixpoint*>(t);
 
+    bool are_source_symbols_same = TermFixpoint::_compareSymbols(*this, *tt);
 #   if (OPT_SHORTTEST_FIXPOINT_SUB == true)
     // Will tests only generators and symbols
-    bool are_source_symbols_same = TermFixpoint::_compareSymbols(*this, *tt);
     if(are_source_symbols_same && this->_sourceTerm != nullptr && tt->_sourceTerm != nullptr) {
         return this->_sourceTerm->IsSubsumed(tt->_sourceTerm, unfoldAll);
     }
@@ -1058,7 +1058,11 @@ void TermFixpoint::ComputeNextFixpoint() {
     }
 
     // Push new term to fixpoint
-    _fixpoint.push_back(std::make_pair(result.first, true));
+    if(result.second == this->_shortBoolValue && _iteratorNumber == 0) {
+        _fixpoint.push_front(std::make_pair(result.first, true));
+    } else {
+        _fixpoint.push_back(std::make_pair(result.first, true));
+    }
     _updated = true;
     // Aggregate the result of the fixpoint computation
     _bValue = this->_aggregate_result(_bValue,result.second);
@@ -1092,7 +1096,11 @@ void TermFixpoint::ComputeNextPre() {
     }
 
     // Push the computed thing and aggregate the result
-    _fixpoint.push_back(std::make_pair(result.first, true));
+    if(result.second == this->_shortBoolValue && _iteratorNumber == 0) {
+        _fixpoint.push_front(std::make_pair(result.first, true));
+    } else {
+        _fixpoint.push_back(std::make_pair(result.first, true));
+    }
     _updated = true;
     _bValue = this->_aggregate_result(_bValue,result.second);
 }
@@ -1108,8 +1116,10 @@ void TermFixpoint::ComputeNextPre() {
 void TermFixpoint::_InitializeAggregateFunction(bool inComplement) {
     if(!inComplement) {
         this->_aggregate_result = [](bool a, bool b) {return a || b;};
+        this->_shortBoolValue = true;
     } else {
         this->_aggregate_result = [](bool a, bool b) {return a && b;};
+        this->_shortBoolValue = false;
     }
 }
 

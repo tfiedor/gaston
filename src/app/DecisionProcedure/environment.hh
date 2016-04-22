@@ -291,7 +291,7 @@ public:
 #define OPT_FIXPOINT_BFS_SEARCH	        false   // < Will add new things to the back of the worklist in fixpoint
 #define OPT_USE_DENSE_HASHMAP			false	// < Will use the google::dense_hash_map as cache
 #define OPT_NO_SATURATION_FOR_M2L		true    // < Will not saturate the final states for M2L(str) logic
-#define OPT_SHORTTEST_FIXPOINT_SUB		true   // < Will check the generators instead of of whole fixpoints
+#define OPT_SHORTTEST_FIXPOINT_SUB		false   // < Will check the generators instead of of whole fixpoints
 
 /* >>> Static Assertions <<< *
  *****************************/
