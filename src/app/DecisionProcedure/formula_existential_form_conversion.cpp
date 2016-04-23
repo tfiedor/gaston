@@ -10,10 +10,10 @@
 
 #include "../Frontend/ast.h"
 #include "../Frontend/symboltable.h"
-#include "visitors/SyntaxRestricter.h"
-#include "visitors/NegationUnfolder.h"
-#include "visitors/UniversalQuantifierRemover.h"
-#include "visitors/PrenexNormalFormTransformer.h"
+#include "visitors/restricters/SyntaxRestricter.h"
+#include "visitors/restricters/NegationUnfolder.h"
+#include "visitors/restricters/UniversalQuantifierRemover.h"
+#include "visitors/transformers/PrenexNormalFormTransformer.h"
 
 #include <cstring>
 

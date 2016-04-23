@@ -54,28 +54,28 @@ add_executable(gaston
 	src/app/DecisionProcedure/containers/Term.cpp
 	src/app/DecisionProcedure/containers/Workshops.cpp
 	src/app/DecisionProcedure/utils/Symbol.cpp
-	src/app/DecisionProcedure/visitors/BooleanUnfolder.cpp
-	src/app/DecisionProcedure/visitors/Flattener.cpp
-	src/app/DecisionProcedure/visitors/NegationUnfolder.cpp
-	src/app/DecisionProcedure/visitors/PrenexNormalFormTransformer.cpp
-	src/app/DecisionProcedure/visitors/SecondOrderRestricter.cpp
-	src/app/DecisionProcedure/visitors/SyntaxRestricter.cpp
-	src/app/DecisionProcedure/visitors/UniversalQuantifierRemover.cpp
-	src/app/DecisionProcedure/visitors/AntiPrenexer.cpp
-	src/app/DecisionProcedure/visitors/Reorderer.cpp
-	src/app/DecisionProcedure/visitors/BinaryReorderer.cpp
-	src/app/DecisionProcedure/visitors/QuantificationMerger.cpp
-	src/app/DecisionProcedure/visitors/FixpointDetagger.cpp
-	src/app/DecisionProcedure/visitors/PredicateUnfolder.cpp
-	src/app/DecisionProcedure/visitors/Tagger.cpp
-	src/app/DecisionProcedure/visitors/DotWalker.cpp
-	src/app/DecisionProcedure/visitors/MonaAutomataDotWalker.cpp
-	src/app/DecisionProcedure/visitors/BaseAutomataMerger.cpp
-	src/app/DecisionProcedure/visitors/ExistentialPrenexer.cpp
-	src/app/DecisionProcedure/visitors/ZeroOrderRemover.cpp
-	src/app/DecisionProcedure/visitors/MonaSerializer.cpp
-	src/app/DecisionProcedure/visitors/ShuffleVisitor.cpp
+	src/app/DecisionProcedure/visitors/restricters/Flattener.cpp
+	src/app/DecisionProcedure/visitors/restricters/NegationUnfolder.cpp
+	src/app/DecisionProcedure/visitors/restricters/SecondOrderRestricter.cpp
+	src/app/DecisionProcedure/visitors/restricters/SyntaxRestricter.cpp
+	src/app/DecisionProcedure/visitors/restricters/UniversalQuantifierRemover.cpp
+	src/app/DecisionProcedure/visitors/restricters/PredicateUnfolder.cpp
+	src/app/DecisionProcedure/visitors/restricters/ZeroOrderRemover.cpp
+	src/app/DecisionProcedure/visitors/transformers/BooleanUnfolder.cpp
+	src/app/DecisionProcedure/visitors/transformers/PrenexNormalFormTransformer.cpp
+	src/app/DecisionProcedure/visitors/transformers/AntiPrenexer.cpp
+	src/app/DecisionProcedure/visitors/transformers/Reorderer.cpp
+	src/app/DecisionProcedure/visitors/transformers/BinaryReorderer.cpp
+	src/app/DecisionProcedure/visitors/transformers/QuantificationMerger.cpp
+	src/app/DecisionProcedure/visitors/transformers/BaseAutomataMerger.cpp
+	src/app/DecisionProcedure/visitors/transformers/ExistentialPrenexer.cpp
+	src/app/DecisionProcedure/visitors/transformers/ShuffleVisitor.cpp
+	src/app/DecisionProcedure/visitors/decorators/FixpointDetagger.cpp
+	src/app/DecisionProcedure/visitors/decorators/Tagger.cpp
 	src/app/DecisionProcedure/visitors/decorators/OccuringVariableDecorator.cpp
+	src/app/DecisionProcedure/visitors/printers/DotWalker.cpp
+	src/app/DecisionProcedure/visitors/printers/MonaAutomataDotWalker.cpp
+	src/app/DecisionProcedure/visitors/printers/MonaSerializer.cpp
 )
 
 link_directories(${CMAKE_SOURCE_DIR}/src/libs/)

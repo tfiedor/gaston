@@ -8,7 +8,7 @@
 #include "../DecisionProcedure/containers/SymbolicAutomata.h"
 #include "../DecisionProcedure/environment.hh"
 #include "../DecisionProcedure/automata.hh"
-#include "../DecisionProcedure/visitors/NegationUnfolder.h"
+#include "../DecisionProcedure/visitors/restricters/NegationUnfolder.h"
 #include <memory>
 
 extern Timer timer_base;

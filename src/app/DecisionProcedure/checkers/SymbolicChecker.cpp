@@ -180,13 +180,13 @@ bool SymbolicChecker::Run() {
 #   if (DUMP_EXAMPLES == true)
     // TODO: Better output
     if(this->_automaton->_satExample) {
-        std::cout << "[*] Printing satisfying example of least (" << (count_example_len(this->_automaton->_satExample)) << ") length\n";
+        std::cout << "[*] Printing \033[1;32msatisfying\033[0m example of least (" << (count_example_len(this->_automaton->_satExample)) << ") length\n";
         this->_automaton->DumpExample(ExampleType::SATISFYING);
         std::cout << "\n";
     }
 
     if(this->_automaton->_unsatExample) {
-        std::cout << "[*] Printing unsatisfying example of least (" << (count_example_len(this->_automaton->_unsatExample)) << ") length\n";
+        std::cout << "[*] Printing \033[1;31munsatisfying\033[0m example of least (" << (count_example_len(this->_automaton->_unsatExample)) << ") length\n";
         this->_automaton->DumpExample(ExampleType::UNSATISFYING);
         std::cout << "\n";
     }

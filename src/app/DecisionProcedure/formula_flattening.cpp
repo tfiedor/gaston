@@ -12,8 +12,8 @@
 #include "../Frontend/symboltable.h"
 #include "../Frontend/env.h"
 #include "../Frontend/predlib.h"
-#include "visitors/Flattener.h"
-#include "visitors/PredicateUnfolder.h"
+#include "visitors/restricters/Flattener.h"
+#include "visitors/restricters/PredicateUnfolder.h"
 #include "environment.hh"
 #include <vector>
 
