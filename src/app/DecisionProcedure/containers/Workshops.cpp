@@ -303,8 +303,9 @@ namespace Workshops {
                 this->_contCache->StoreIn(contKey, termPtr);
             }
             assert(termPtr != nullptr);
-            // Fixme: return unfolded term if possible biatch
-            return termPtr;
+            assert(termPtr->type == TERM_CONTINUATION);
+            Term* unfoldedPtr = static_cast<TermContinuation*>(termPtr)->GetUnfoldedTerm();
+            return (unfoldedPtr == nullptr ? termPtr : unfoldedPtr);
         #else
             return new TermContinuation(aut, term, symbol, underComplement);
         #endif

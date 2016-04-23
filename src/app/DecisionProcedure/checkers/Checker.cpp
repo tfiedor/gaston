@@ -246,8 +246,9 @@ void Checker::CloseUngroundFormula() {
                     }
                 }
                 BooleanUnfolder booleanUnfolder;
-                restrictions = static_cast<ASTForm*>(restrictions->accept(booleanUnfolder));
-                this->_monaAST->formula = new ASTForm_And(restrictions, this->_monaAST->formula, Pos());
+                this->_rootRestriction = static_cast<ASTForm*>(restrictions->accept(booleanUnfolder));
+                FixpointDetagger detagger;
+                this->_rootRestriction->accept(detagger);
                 break;
         }
     }

@@ -67,9 +67,9 @@ measures = {
             'space': Measure("explored fixpoint space" + whatever_regex + space_regex, space_default, int, False),
             'space-all': Measure("overall state space" + whatever_regex + space_regex, space_default, int, False),
             'space-fix': Measure("fixpoints" + whatever_regex + space_regex, space_default, int, False),
-            'space-bases': Measure("bases" + whatever_regex + space_regex, space_default, int, False),
-            'space-continuations': Measure("continuations" + whatever_regex + space_regex, space_default, int, False),
-            'space-products': Measure("products" + whatever_regex + space_regex, space_default, int, False),
+            'space-base': Measure("bases" + whatever_regex + space_regex, space_default, int, False),
+            'space-cont': Measure("continuations" + whatever_regex + space_regex, space_default, int, False),
+            'space-prod': Measure("products" + whatever_regex + space_regex, space_default, int, False),
             'time-dp': Measure("decision procedure" + whatever_regex + time_regex, time_default, parse_total_time, False),
             'time-base': Measure("dfa creation" + whatever_regex + time_regex, time_default, parse_total_time, False),
             'time-conv': Measure("mona <-> vata" + whatever_regex + time_regex, time_default, parse_total_time, False),
@@ -81,7 +81,10 @@ measures = {
             'aut-fix': Measure("fixpoint computations" + whatever_regex + space_regex, space_default, int, False),
             'aut-max-fix-nest': Measure("maximal fixpoint nesting" + whatever_regex + space_regex, space_default, int, False),
             'aut-height': Measure("automaton height" + whatever_regex + space_regex, space_default, int, False),
-            'aut-max-refs': Measure("maximal references" + whatever_regex + space_regex, space_default, int, False)
+            'aut-max-refs': Measure("maximal references" + whatever_regex + space_regex, space_default, int, False),
+            'cont-eval': Measure("evaluated" + whatever_regex + space_regex, space_default, int, False),
+            'cont-eval-in-sub': Measure("in subsumption" + whatever_regex + space_regex, space_default, int, False),
+            'cont-eval-in-isect': Measure("in isect nonempty" + whatever_regex + space_regex, space_default, int, False),
         },
     'mona': {
             'time': Measure("total time" + whatever_regex + time_regex, time_default, parse_total_time, False),
@@ -104,8 +107,8 @@ measures = {
 }
 
 csv_keys = {
-    'gaston': ['time', 'time-pre', 'space-all', 'space', 'dag-nodes', 'real-nodes', 'dag-gain', 'aut-fix', 'aut-max-fix-nest',
-               'aut-height', 'aut-max-refs'],
+    'gaston': ['time', 'time-pre', 'space-all', 'space', 'dag-nodes', 'real-nodes', 'space-cont', 'cont-eval',
+               'cont-eval-in-sub', 'cont-eval-in-isect'],
     'mona': ['time', 'space', 'space-min']
 }
 

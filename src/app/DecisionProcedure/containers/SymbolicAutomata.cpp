@@ -195,7 +195,9 @@ ResultType SymbolicAutomaton::IntersectNonEmpty(Symbol* symbol, Term* stateAppro
 
     // Empty set needs not to be computed
     if(stateApproximation->type == TERM_EMPTY) {
-        return std::make_pair(stateApproximation, underComplement != stateApproximation->InComplement());
+        bool res = underComplement != stateApproximation->InComplement();
+        this->_lastResult = res;
+        return std::make_pair(stateApproximation, res);
     }
 
 #   if (DEBUG_INTERSECT_NON_EMPTY == true)
@@ -229,7 +231,9 @@ ResultType SymbolicAutomaton::IntersectNonEmpty(Symbol* symbol, Term* stateAppro
 
     // Empty set needs not to be computed
     if(stateApproximation->type == TERM_EMPTY) {
-        return std::make_pair(stateApproximation, underComplement != stateApproximation->InComplement());
+        bool res = underComplement != stateApproximation->InComplement();
+        this->_lastResult = res;
+        return std::make_pair(stateApproximation, res);
     }
 
 #   if (OPT_CACHE_RESULTS == true)
@@ -243,6 +247,7 @@ ResultType SymbolicAutomaton::IntersectNonEmpty(Symbol* symbol, Term* stateAppro
         if (inCache = this->_resCache.retrieveFromCache(key, result)) {
 #       endif
         assert(result.first != nullptr);
+        this->_lastResult = result.second;
         return result;
     }
     //}
@@ -297,6 +302,7 @@ ResultType SymbolicAutomaton::IntersectNonEmpty(Symbol* symbol, Term* stateAppro
 
     // Return results
     assert(result.first != nullptr);
+    this->_lastResult = result.second;
     return result;
 }
 
@@ -902,6 +908,9 @@ void BinaryOpAutomaton::DumpAutomaton() {
     #if (DEBUG_AUTOMATA_ADDRESSES == true)
         std::cout << "[" << this << "]";
     #endif
+    if(this->_isRestriction) {
+        std::cout << "\033[1;35m[\033[0m";
+    }
     if(this->type == AutType::INTERSECTION) {
         std::cout << "\033[1;32m";
     } else {
@@ -921,21 +930,33 @@ void BinaryOpAutomaton::DumpAutomaton() {
         std::cout << "\033[1;33m";
     }
     std::cout << ")\033[0m";
+    if(this->_isRestriction) {
+        std::cout << "\033[1;35m]\033[0m";
+    }
 }
 
 void ComplementAutomaton::DumpAutomaton() {
     #if (DEBUG_AUTOMATA_ADDRESSES == true)
         std::cout << "[" << this << "]";
     #endif
+    if(this->_isRestriction) {
+        std::cout << "\033[1;35m[\033[0m";
+    }
     std::cout << "\033[1;31m\u2201(\033[0m";
     this->_aut.aut->DumpAutomaton();
     std::cout << "\033[1;31m)\033[0m";
+    if(this->_isRestriction) {
+        std::cout << "\033[1;35m]\033[0m";
+    }
 }
 
 void ProjectionAutomaton::DumpAutomaton() {
     #if (DEBUG_AUTOMATA_ADDRESSES == true)
         std::cout << "[" << this << "]";
     #endif
+    if(this->_isRestriction) {
+        std::cout << "\033[1;35m[\033[0m";
+    }
     std::cout << "\033[1;34m";
     std::cout << "\u2203";
     for(auto it = this->projectedVars->begin(); it != this->projectedVars->end(); ++it) {
@@ -947,17 +968,26 @@ void ProjectionAutomaton::DumpAutomaton() {
     std::cout << "(\033[0m";
     this->_aut.aut->DumpAutomaton();
     std::cout << "\033[1;34m)\033[0m";
+    if(this->_isRestriction) {
+        std::cout << "\033[1;35m]\033[0m";
+    }
 }
 
 void GenericBaseAutomaton::DumpAutomaton() {
     #if (DEBUG_AUTOMATA_ADDRESSES == true)
         std::cout << "[" << this << "]";
     #endif
+    if(this->_isRestriction) {
+        std::cout << "\033[1;35m[\033[0m";
+    }
     std::cout << "Automaton";
     _form->dump();
     #if (DEBUG_BASE_AUTOMATA == true)
     this->BaseAutDump();
     #endif
+    if(this->_isRestriction) {
+        std::cout << "\033[1;35m]\033[0m";
+    }
 }
 
 void SubAutomaton::DumpAutomaton() {
@@ -1385,4 +1415,32 @@ void ComplementAutomaton::FillStats() {
     this->stats.real_nodes = 1 + this->_aut.aut->stats.real_nodes;
     this->stats.max_refs = std::max(this->_refs, this->_aut.aut->stats.max_refs);
     this->stats.max_fixpoint_nesting = this->_aut.aut->stats.max_fixpoint_nesting;
+}
+
+bool BinaryOpAutomaton::WasLastExampleValid() {
+    if(this->_isRestriction && this->_lastResult == false) {
+        return false;
+    } else {
+        return this->_lhs_aut.aut->WasLastExampleValid() && this->_rhs_aut.aut->WasLastExampleValid();
+    }
+}
+
+bool BaseAutomaton::WasLastExampleValid() {
+    if(this->_isRestriction && this->_lastResult == false) {
+        return false;
+    } else {
+        return true;
+    }
+}
+
+bool ComplementAutomaton::WasLastExampleValid() {
+    if(this->_isRestriction && this->_lastResult == false) {
+        return false;
+    } else {
+        return this->_aut.aut->WasLastExampleValid();
+    }
+}
+
+bool ProjectionAutomaton::WasLastExampleValid() {
+    return true;
 }

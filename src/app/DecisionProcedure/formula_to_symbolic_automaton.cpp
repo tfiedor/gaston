@@ -53,9 +53,6 @@ SymbolicAutomaton* ASTForm::toSymbolicAutomaton(bool doComplement) {
                 // It was tagged to be constructed by MONA
                 this->sfa = baseToSymbolicAutomaton<GenericBaseAutomaton>(this, doComplement);
             } else {
-                if(this->fixpoint_number == 0) {
-                    this->dump(); std::cout << "\n";
-                }
                 assert(this->fixpoint_number > 0);
                 this->sfa = this->_toSymbolicAutomatonCore(doComplement);
             }

@@ -56,7 +56,7 @@ class DagCompare;
  * GLOBAL ENUMERATIONS *
  ***********************/
 enum Decision {SATISFIABLE, UNSATISFIABLE, VALID, INVALID};
-enum AutType {SYMBOLIC_BASE, BINARY, INTERSECTION, UNION, PROJECTION, BASE, COMPLEMENT};
+enum AutType {SYMBOLIC_BASE, BINARY, INTERSECTION, UNION, PROJECTION, ROOT_PROJECTION, BASE, COMPLEMENT};
 enum TermType {TERM_PRODUCT, TERM, TERM_EMPTY, TERM_BASE, TERM_FIXPOINT, TERM_LIST, TERM_CONTINUATION};
 enum ProductType {E_INTERSECTION, E_UNION};
 enum FixpointTermSem {E_FIXTERM_FIXPOINT, E_FIXTERM_PRE};
@@ -258,42 +258,43 @@ public:
 
 /* >>> Optimizations <<< *
  *************************/
-#define OPT_USE_DAG						true    // < Instead of using the symbolic automata, will use the DAGified SA
-#define OPT_SHUFFLE_FORMULA				true    // < Will run ShuffleVisitor before creation of automaton, which should ease the procedure as well
-#define OPT_DONT_CACHE_CONT				true	// < Do not cache terms containing continuations
-#define OPT_DONT_CACHE_UNFULL_FIXPOINTS false	// < Do not cache fixpoints that were not fully computed
-#define OPT_EQ_THROUGH_POINTERS			true	// < Test equality through pointers, not by structure
-#define OPT_GENERATE_UNIQUE_TERMS		true	// < Use Workshops to generate unique pointers
+#define OPT_USE_DAG							false   // < Instead of using the symbolic automata, will use the DAGified SA
+#define OPT_SHUFFLE_FORMULA					true    // < Will run ShuffleVisitor before creation of automaton, which should ease the procedure as well
+#define OPT_DONT_CACHE_CONT					true	// < Do not cache terms containing continuations
+#define OPT_DONT_CACHE_UNFULL_FIXPOINTS 	false	// < Do not cache fixpoints that were not fully computed
+#define OPT_EQ_THROUGH_POINTERS				true	// < Test equality through pointers, not by structure
+#define OPT_GENERATE_UNIQUE_TERMS			true	// < Use Workshops to generate unique pointers
 // ^- NOTE! From v1.0 onwards, disable this will introduce not only leaks, but will fuck everything up!
-#define OPT_USE_CUSTOM_PTR_HASH			false	// < Will use the custom implementation of hash function instead of boost::hash
-#define OPT_TERM_HASH_BY_APPROX			true	// < Include stateSpaceApprox into hash (i.e. better distribution of cache)
-#define OPT_SYMBOL_HASH_BY_APPROX		false	// < Will hash symbol by pointers
-#define OPT_ANTIPRENEXING				true	// < Transform formula to anti-prenex form (i.e. all of the quantifiers are deepest on leaves)
-#define OPT_DRAW_NEGATION_IN_BASE 		true    // < Negation is handled on formula level and not on computation level on base automata
-#define OPT_CREATE_QF_AUTOMATON 		true    // < Transform quantifier-free automaton to formula
-#define OPT_REDUCE_AUT_EVERYTIME		false	// (-) < Call reduce everytime VATA automaton is created (i.e. as intermediate result)
-#define OPT_REDUCE_AUT_LAST				true	// < Call reduce after the final VATA automaton is created
-#define OPT_EARLY_EVALUATION 			false   // < Evaluates early interesection of products
-#define OPT_EARLY_PARTIAL_SUB			true	// < Postpone the partially subsumed terms
-#define OPT_CONT_ONLY_WHILE_UNSAT		true	// < Generate continuation only if there wasn't found (un)satisfying (counter)example yet
-#define OPT_PRUNE_EMPTY					true	// < Prune terms by empty set
-#define OPT_REDUCE_FIXPOINT_EVERYTIME	false	// (-) < Prune the fixpoint everytime any iterator is invalidated
-#define OPT_REDUCE_PREFIXPOINT			true	// < Prune the fixpoint when returning pre (i.e. fixpoint - symbol)
-#define OPT_FIND_POSTPONED_CANDIDATE	true	// < Chose better candidate from list of postponed subsumption testing pairs
-#define OPT_REDUCE_FULL_FIXPOINT		true	// < Prune the fixpoint by subsumption
-#define OPT_CACHE_RESULTS 				true    // < Cache results of intersectnonempty(term, symbol)
-#define OPT_CACHE_SUBSUMES				true    // < Cache the results of subsumption testing between terms
-#define OPT_CACHE_SUBSUMED_BY			true	// < Cache the results of term subsumption by fixpoints
-#define OPT_SMARTER_MONA_CONVERSION		false	// (-) < Use faster conversion from MONA to VATA (courtesy of PJ)
-#define OPT_SMARTER_FLATTENING          true
-#define OPT_CREATE_TAGGED_AUTOMATA		false	// < Use tags to create a specific subformula to automaton
-#define OPT_EXTRACT_MORE_AUTOMATA		true	// < Calls detagger to heuristically convert some subformulae to automata
-#define OPT_UNIQUE_TRIMMED_SYMBOLS		true    // < Will guarantee that there will not be a collisions between symbols after trimming
-#define OPT_FIXPOINT_BFS_SEARCH	        false   // (-) < Will add new things to the back of the worklist in fixpoint
-#define OPT_USE_DENSE_HASHMAP			false	// (-) < Will use the google::dense_hash_map as cache
-#define OPT_NO_SATURATION_FOR_M2L		true    // < Will not saturate the final states for M2L(str) logic
-#define OPT_SHORTTEST_FIXPOINT_SUB		false   // (-) < Will check the generators instead of of whole fixpoints
-#define OPT_UNIQUE_FIXPOINTS_BY_SUB		false   // < Fixpoints will not be unique by equality but by subsumption (Fixme: This is most likely incorrect)
+#define OPT_USE_CUSTOM_PTR_HASH				false	// < Will use the custom implementation of hash function instead of boost::hash
+#define OPT_TERM_HASH_BY_APPROX				true	// < Include stateSpaceApprox into hash (i.e. better distribution of cache)
+#define OPT_SYMBOL_HASH_BY_APPROX			false	// < Will hash symbol by pointers
+#define OPT_ANTIPRENEXING					true	// < Transform formula to anti-prenex form (i.e. all of the quantifiers are deepest on leaves)
+#define OPT_DRAW_NEGATION_IN_BASE 			true    // < Negation is handled on formula level and not on computation level on base automata
+#define OPT_CREATE_QF_AUTOMATON 			true    // < Transform quantifier-free automaton to formula
+#define OPT_REDUCE_AUT_EVERYTIME			false	// (-) < Call reduce everytime VATA automaton is created (i.e. as intermediate result)
+#define OPT_REDUCE_AUT_LAST					true	// < Call reduce after the final VATA automaton is created
+#define OPT_EARLY_EVALUATION 				true    // < Evaluates early interesection of product
+#define OPT_EARLY_PARTIAL_SUB				true    // < Postpone the partially subsumed terms
+#define OPT_CONT_ONLY_WHILE_UNSAT			true	// < Generate continuation only if there wasn't found (un)satisfying (counter)example yet
+#define OPT_PRUNE_EMPTY						true	// < Prune terms by empty set
+#define OPT_REDUCE_FIXPOINT_EVERYTIME		false	// (-) < Prune the fixpoint everytime any iterator is invalidated
+#define OPT_REDUCE_PREFIXPOINT				true	// < Prune the fixpoint when returning pre (i.e. fixpoint - symbol)
+#define OPT_FIND_POSTPONED_CANDIDATE		true	// < Chose better candidate from list of postponed subsumption testing pairs
+#define OPT_REDUCE_FULL_FIXPOINT			true	// < Prune the fixpoint by subsumption
+#define OPT_CACHE_RESULTS 					true    // < Cache results of intersectnonempty(term, symbol)
+#define OPT_CACHE_SUBSUMES					true    // < Cache the results of subsumption testing between terms
+#define OPT_CACHE_SUBSUMED_BY				true	// < Cache the results of term subsumption by fixpoints
+#define OPT_SMARTER_MONA_CONVERSION			false	// (-) < Use faster conversion from MONA to VATA (courtesy of PJ)
+#define OPT_SMARTER_FLATTENING          	true
+#define OPT_CREATE_TAGGED_AUTOMATA			false	// < Use tags to create a specific subformula to automaton
+#define OPT_EXTRACT_MORE_AUTOMATA			true	// < Calls detagger to heuristically convert some subformulae to automata
+#define OPT_UNIQUE_TRIMMED_SYMBOLS			true    // < Will guarantee that there will not be a collisions between symbols after trimming
+#define OPT_FIXPOINT_BFS_SEARCH	        	false   // (-) < Will add new things to the back of the worklist in fixpoint
+#define OPT_USE_DENSE_HASHMAP				false	// (-) < Will use the google::dense_hash_map as cache
+#define OPT_NO_SATURATION_FOR_M2L			true    // < Will not saturate the final states for M2L(str) logic
+#define OPT_SHORTTEST_FIXPOINT_SUB			false   // (-) < Will check the generators instead of of whole fixpoints
+#define OPT_UNIQUE_FIXPOINTS_BY_SUB			false   // < Fixpoints will not be unique by equality but by subsumption (Fixme: This is most likely incorrect)
+#define OPT_PARTIALLY_LIMITED_SUBSUMPTION	-1		// < Will limited the subsumption testing to certain depth (-1 = unlimited)
 
 /* >>> Static Assertions <<< *
  *****************************/

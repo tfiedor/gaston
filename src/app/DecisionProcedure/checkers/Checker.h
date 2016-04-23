@@ -63,6 +63,7 @@ public:
 protected:
     // <<< PRIVATE MEMBERS >>>
     MonaAST* _monaAST;
+	ASTForm* _rootRestriction = nullptr;
 	bool _printProgress;
 	bool _isGround;
 

@@ -33,6 +33,12 @@ void SymbolicChecker::ConstructAutomaton() {
     IdentList free, bound;
     this->_monaAST->formula->freeVars(&free, &bound);
     if (!free.empty()) {
+        if(this->_rootRestriction != nullptr) {
+            this->_monaAST->formula = new ASTForm_And(this->_rootRestriction, this->_monaAST->formula, Pos());
+            SymbolicAutomaton* restrAutomaton = this->_rootRestriction->toSymbolicAutomaton(false);
+            restrAutomaton->MarkAsRestriction();
+            this->_automaton = new IntersectionAutomaton(restrAutomaton, this->_automaton, this->_monaAST->formula);
+        }
         this->_monaAST->formula = new ASTForm_Ex1(nullptr, free.copy(), this->_monaAST->formula, Pos());
         //                        ^---- this is just a placeholding Ex1, semantically it is not First Order
         this->_automaton = new RootProjectionAutomaton(this->_automaton, this->_monaAST->formula);

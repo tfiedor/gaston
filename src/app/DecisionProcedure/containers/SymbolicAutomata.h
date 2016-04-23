@@ -84,6 +84,8 @@ protected:
     Term_ptr _unsatExample = nullptr;
     unsigned int _refs;
     bool marked = false;
+    bool _isRestriction = false;
+    bool _lastResult;
 
     // <<< PRIVATE FUNCTIONS >>>
     virtual void _InitializeAutomaton() = 0;
@@ -105,6 +107,7 @@ public:
     NEVER_INLINE explicit SymbolicAutomaton(Formula_ptr form);
 
     // <<< PUBLIC API >>>
+    void MarkAsRestriction() { this->_isRestriction = true; }
     void IncReferences() {++this->_refs;}
     void DecReferences() {assert(this->_refs > 0); --this->_refs; if(this->_refs < 1) delete this;}
     void InitializeStates();
@@ -115,6 +118,7 @@ public:
     virtual ResultType IntersectNonEmpty(Symbol*, Term*, bool);
     void SetSatisfiableExample(Term*);
     void SetUnsatisfiableExample(Term*);
+    virtual bool WasLastExampleValid() = 0;
 
     // <<< DUMPING FUNCTIONS >>>
     void DumpAutomatonMetrics();
@@ -173,6 +177,7 @@ public:
 
     // <<< PUBLIC API >>>
     virtual Term* Pre(Symbol*, Term*, bool);
+    virtual bool WasLastExampleValid();
 
     // <<< DUMPING FUNCTIONS >>>
     virtual void DumpAutomaton();
@@ -221,6 +226,7 @@ public:
 
     // <<< PUBLIC API >>>
     virtual Term* Pre(Symbol*, Term*, bool);
+    virtual bool WasLastExampleValid();
 
     // <<< DUMPING FUNCTIONS >>>
     virtual void DumpAutomaton();
@@ -266,6 +272,7 @@ public:
     virtual Term* Pre(Symbol*, Term*, bool);
     SymbolicAutomaton* GetBase() { return this->_aut.aut;}
     bool IsRoot() { return this-> _isRoot; }
+    virtual bool WasLastExampleValid();
 
     // <<< DUMPING FUNCTIONS >>>
     virtual void DumpAutomaton();
@@ -318,6 +325,7 @@ public:
 
     // <<< PUBLIC API >>>
     virtual Term* Pre(Symbol*, Term*, bool);
+    virtual bool WasLastExampleValid();
 
     // <<< DUMPING FUNCTIONS >>>
     virtual void DumpToDot(std::ofstream&, bool);

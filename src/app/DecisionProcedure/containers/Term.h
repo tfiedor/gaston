@@ -100,7 +100,7 @@ public:
 public:
     // <<< PUBLIC API >>>
     virtual SubsumptionResult IsSubsumedBy(FixpointType& fixpoint, Term*&) = 0;
-    virtual SubsumptionResult IsSubsumed(Term* t, bool b = false);
+    virtual SubsumptionResult IsSubsumed(Term* t, int limit, bool b = false);
     virtual bool IsEmpty() = 0;
     virtual void Complement();
     virtual bool InComplement() {return this->_inComplement;}
@@ -122,7 +122,7 @@ public:
 protected:
     // <<< PRIVATE FUNCTIONS >>>
     virtual unsigned int _MeasureStateSpaceCore() = 0;
-    virtual SubsumptionResult _IsSubsumedCore(Term* t, bool b = false) = 0;
+    virtual SubsumptionResult _IsSubsumedCore(Term* t, int limit, bool b = false) = 0;
     virtual void _dumpCore(unsigned indent = 0) = 0;
     virtual bool _eqCore(const Term&) = 0;
 
@@ -153,7 +153,7 @@ private:
 
     // <<< PRIVATE FUNCTIONS >>>
     unsigned int _MeasureStateSpaceCore();
-    SubsumptionResult _IsSubsumedCore(Term* t, bool b = false);
+    SubsumptionResult _IsSubsumedCore(Term* t, int limit, bool b = false);
 };
 
 /**
@@ -186,7 +186,7 @@ private:
 private:
     // <<< PRIVATE FUNCTIONS >>>
     unsigned int _MeasureStateSpaceCore();
-    SubsumptionResult _IsSubsumedCore(Term* t, bool b = false);
+    SubsumptionResult _IsSubsumedCore(Term* t, int limit, bool b = false);
 };
 
 /**
@@ -216,7 +216,7 @@ private:
 private:
     // <<< PRIVATE FUNCTIONS >>>
     unsigned int _MeasureStateSpaceCore();
-    SubsumptionResult _IsSubsumedCore(Term* t, bool b = false);
+    SubsumptionResult _IsSubsumedCore(Term* t, int limit, bool b = false);
 };
 
 /**
@@ -256,7 +256,7 @@ protected:
     // <<< PRIVATE FUNCTIONS >>>
     unsigned int _MeasureStateSpaceCore();
     bool _eqCore(const Term&);
-    SubsumptionResult _IsSubsumedCore(Term* t, bool b = false);
+    SubsumptionResult _IsSubsumedCore(Term* t, int limit, bool b = false);
 };
 
 /**
@@ -284,7 +284,7 @@ private:
 private:
     // <<< PRIVATE FUNCTIONS >>>
     unsigned int _MeasureStateSpaceCore();
-    SubsumptionResult _IsSubsumedCore(Term* t, bool b = false);
+    SubsumptionResult _IsSubsumedCore(Term* t, int limit, bool b = false);
     bool _eqCore(const Term&);
 };
 
@@ -465,7 +465,7 @@ protected:
     void _updateExamples(ResultType&);
     void _InitializeAggregateFunction(bool inComplement);
     void _InitializeSymbols(Workshops::SymbolWorkshop* form, Gaston::VarList*, IdentList*, Symbol*);
-    SubsumptionResult _IsSubsumedCore(Term* t, bool b = false);
+    SubsumptionResult _IsSubsumedCore(Term* t, int limit, bool b = false);
     SubsumptionResult _fixpointTest(Term_ptr const& term);
     SubsumptionResult _testIfSubsumes(Term_ptr const& term);
     SubsumptionResult _testIfIn(Term_ptr const& term);
