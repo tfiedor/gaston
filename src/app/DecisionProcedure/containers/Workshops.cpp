@@ -52,7 +52,11 @@ namespace Workshops {
          * @return true if lhs = rhs
          */
         bool operator()(ComputationKey const& lhs, ComputationKey const& rhs) const {
+#           if (OPT_UNIQUE_FIXPOINTS_BY_SUB == true)
+            bool result = lhs->IsSubsumed(rhs, true) == E_TRUE;
+#           else
             bool result = *lhs == *rhs;
+#           endif
             return result;
         }
     };

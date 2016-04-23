@@ -327,11 +327,12 @@ bool Term::IsNotComputed() {
  * @return:         true if this is subsumed by @p t
  */
 SubsumptionResult Term::IsSubsumed(Term *t, bool unfoldAll) {
-    // unfold the continuation
     if(this == t) {
         return E_TRUE;
     }
 
+    // unfold the continuation
+#   if (OPT_EARLY_EVALUATION == true)
     if(t->type == TERM_CONTINUATION) {
         TermContinuation *continuation = static_cast<TermContinuation *>(t);
         Term* unfoldedContinuation = continuation->unfoldContinuation(UnfoldedInType::E_IN_SUBSUMPTION);
@@ -341,17 +342,15 @@ SubsumptionResult Term::IsSubsumed(Term *t, bool unfoldAll) {
         Term* unfoldedContinuation = continuation->unfoldContinuation(UnfoldedInType::E_IN_SUBSUMPTION);
         return unfoldedContinuation->IsSubsumed(t, unfoldAll);
     }
-    if(this->_inComplement != t->_inComplement) {
-        this->dump(); std::cout << " and ";t->dump(); std::cout << "\n";
-    }
+#   endif
     assert(this->_inComplement == t->_inComplement);
     assert(this->type != TERM_CONTINUATION && t->type != TERM_CONTINUATION);
 
     // Else if it is not continuation we first look into cache and then recompute if needed
     SubsumptionResult result;
-    #if (OPT_CACHE_SUBSUMES == true)
+#   if (OPT_CACHE_SUBSUMES == true)
     if(this->type != TERM_FIXPOINT || !this->_isSubsumedCache.retrieveFromCache(t, result)) {
-    #endif
+#   endif
         if (this->_inComplement) {
             if(this->type == TERM_EMPTY) {
                 result = (t->type == TERM_EMPTY ? E_TRUE : E_FALSE);
@@ -365,11 +364,11 @@ SubsumptionResult Term::IsSubsumed(Term *t, bool unfoldAll) {
                 result = this->_IsSubsumedCore(t, unfoldAll);
             }
         }
-    #if (OPT_CACHE_SUBSUMES == true)
-        if(result != E_PARTIALLY && this->type == TERM_FIXPOINT)
+#   if (OPT_CACHE_SUBSUMES == true)
+        if(result == E_TRUE)
             this->_isSubsumedCache.StoreIn(t, result);
     }
-    #endif
+#   endif
     assert(!unfoldAll || result != E_PARTIALLY);
 #   if (DEBUG_TERM_SUBSUMPTION == true)
     this->dump();
@@ -1376,6 +1375,7 @@ void Term::comparedByStructure(TermType t, bool res) {
  * @param[in] t:        tested term
  */
 bool Term::operator==(const Term &t) {
+    assert(this->_inComplement == t._inComplement);
     if(&t == nullptr) {
         return false;
     }

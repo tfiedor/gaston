@@ -779,6 +779,10 @@ ResultType ProjectionAutomaton::_IntersectNonEmptyCore(Symbol* symbol, Term* fin
         fixpoint->RemoveSubsumed();
         #endif
         #if (OPT_GENERATE_UNIQUE_TERMS == true && UNIQUE_FIXPOINTS == true)
+        if(fixpoint->InComplement() != finalApproximation->InComplement()) {
+            assert(fixpoint->type != TERM_EMPTY);
+            fixpoint->Complement();
+        }
         fixpoint = this->_factory.GetUniqueFixpoint(fixpoint);
         #endif
         return std::make_pair(fixpoint, fixpoint->GetResult());
