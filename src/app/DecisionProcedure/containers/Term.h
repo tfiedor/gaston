@@ -440,6 +440,7 @@ public:
     ExamplePair GetFixpointExamples();
     bool IsFullyComputed() const;
     bool IsShared();
+    unsigned int ValidMemberSize() const;
     bool HasEmptyWorklist() { return this->_worklist.empty();}
     void RemoveSubsumed();
     bool TestAndSetUpdate() {

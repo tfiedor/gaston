@@ -64,7 +64,9 @@ namespace Workshops {
     struct ComputationHash {
         size_t operator()(ComputationKey const& set) const {
             size_t seed = boost::hash_value(set->stateSpaceApprox);
+#           if (OPT_UNIQUE_FIXPOINTS_BY_SUB == false)
             boost::hash_combine(seed, boost::hash_value(set->MeasureStateSpace()));
+#           endif
             return seed;
         }
     };

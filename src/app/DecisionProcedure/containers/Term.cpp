@@ -604,14 +604,12 @@ SubsumptionResult TermList::IsSubsumedBy(FixpointType& fixpoint, Term*& biggerTe
 }
 
 SubsumptionResult TermFixpoint::IsSubsumedBy(FixpointType& fixpoint, Term*& biggerTerm) {
-    // TODO: There should be unfolding of fixpoint probably
-
     auto result = E_FALSE;
     // Component-wise comparison
     for(auto& item : fixpoint) {
         if(item.first == nullptr || !item.second) continue;
         if (this->IsSubsumed(item.first)) {
-            result = E_TRUE ;
+            result = E_TRUE;
             break;
         }
 
@@ -620,7 +618,6 @@ SubsumptionResult TermFixpoint::IsSubsumedBy(FixpointType& fixpoint, Term*& bigg
         }
 
     }
-    // Fixme: Here in subsumption testing is the core of the problem...
 #if (DEBUG_TERM_SUBSUMED_BY == true)
     this->dump();
     std::cout << (result == E_TRUE ? " \u2286 " : " \u2288 ");
@@ -1486,6 +1483,14 @@ bool TermList::_eqCore(const Term &t) {
     G_NOT_IMPLEMENTED_YET("TermList::_eqCore");
 }
 
+unsigned int TermFixpoint::ValidMemberSize() const {
+    unsigned int members = 0;
+    for(auto& item : this->_fixpoint) {
+        members += (item.second ? 1 : 0);
+    }
+    return members;
+}
+
 bool TermFixpoint::_eqCore(const Term &t) {
     assert(t.type == TERM_FIXPOINT && "Testing equality of different term types");
 
@@ -1493,29 +1498,35 @@ bool TermFixpoint::_eqCore(const Term &t) {
     if(this->_bValue != tFix._bValue) {
         // If the values are different, we can automatically assume that there is some difference
         return false;
-    } else if(this->_fixpoint.size() != tFix._fixpoint.size()) {
-        // TODO: Can this happen: that we have something twice in fixpoint?
+    }
+
+    if(this->ValidMemberSize() != tFix.ValidMemberSize()) {
         return false;
-    } else {
-        for(auto it = this->_fixpoint.begin(); it != this->_fixpoint.end(); ++it) {
-            if((*it).first == nullptr || !(*it).second)
+    }
+
+    bool are_symbols_the_same = TermFixpoint::_compareSymbols(*this, tFix);
+    if(!are_symbols_the_same && (this->_worklist.size() != 0 || tFix._worklist.size() != 0)) {
+        return false;
+    }
+
+    for(auto it = this->_fixpoint.begin(); it != this->_fixpoint.end(); ++it) {
+        if((*it).first == nullptr || !(*it).second)
+            continue;
+        bool found = false;
+        for(auto tit = tFix._fixpoint.begin(); tit != tFix._fixpoint.end(); ++tit) {
+            if((*tit).first == nullptr || !(*tit).second)
                 continue;
-            bool found = false;
-            for(auto tit = tFix._fixpoint.begin(); tit != tFix._fixpoint.end(); ++tit) {
-                if((*tit).first == nullptr || !(*tit).second)
-                    continue;
-                if(*(*it).first == *(*tit).first) {
-                    found = true;
-                    break;
-                }
-            }
-            if(!found) {
-                return false;
+            if(*(*it).first == *(*tit).first) {
+                found = true;
+                break;
             }
         }
-
-        return (this->_worklist.size() == 0 && tFix._worklist.size() == 0) ? true : TermFixpoint::_compareSymbols(*this, tFix);
+        if(!found) {
+            return false;
+        }
     }
+
+    return true;
 }
 
 bool TermFixpoint::_compareSymbols(const TermFixpoint& lhs, const TermFixpoint& rhs) {
