@@ -984,7 +984,7 @@ bool TermFixpoint::_processOnePostponed() {
 }
 
 SubsumptionResult TermFixpoint::_fixpointTest(Term_ptr const &term) {
-    if(this->_searchType == WorklistSearchType::E_UNGROUND_ROOT) {
+    if(this->_searchType == WorklistSearchType::E_UNGROUND_ROOT /*&& allPosVar != -1*/) {
         // Fixme: Not sure if this is really correct, but somehow I still feel that the Root search is special and
         //   subsumption is maybe not enough? But maybe this simply does not work for fixpoints of negated thing.
         return this->_testIfIn(term);

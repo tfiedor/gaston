@@ -844,16 +844,16 @@ void ComplementAutomaton::_DumpExampleCore(ExampleType e) {
     assert(false && "ComplementAutomata cannot have examples yet!");
 }
 
-std::string interpretModel(std::string& str, bool isFirstOrder) {
+std::string interpretModel(std::string& str, MonaTypeTag order) {
     size_t idx = 0;
-    if(isFirstOrder) {
+    if(order == MonaTypeTag::Varname1) {
         // Interpret the first one
         while(idx < str.length() && str[idx] != '1') {++idx;}
         if(idx == str.length()) {
             return std::string("");
         }
         return std::string(std::to_string(idx));
-    } else {
+    } else if (order == MonaTypeTag::Varname2) {
         if(str.empty()) {
             return std::string("{}");
         }
@@ -874,6 +874,14 @@ std::string interpretModel(std::string& str, bool isFirstOrder) {
         }
         result += "}";
         return result;
+    } else {
+        assert(order == MonaTypeTag::Varname0);
+        while(idx != str.size()) {
+            if(str[idx++] == '1') {
+                return std::string("false");
+            }
+        }
+        return std::string("true");
     }
 }
 
@@ -883,6 +891,7 @@ void ProjectionAutomaton::_DumpExampleCore(ExampleType e) {
     // Print the bounded part
     auto varNo = this->projectedVars->size();
     std::string* examples = new std::string[varNo];
+    this->projectedVars->sort();
 
     while(example != nullptr && example->link.succ != nullptr && example != example->link.succ) {
     //                                                           ^--- not sure this is right
@@ -895,10 +904,9 @@ void ProjectionAutomaton::_DumpExampleCore(ExampleType e) {
     for(size_t i = 0; i < varNo; ++i) {
         std::cout << (symbolTable.lookupSymbol(this->projectedVars->get(i))) << ": " << examples[i] << "\n";
     }
-
+    std::cout << "\n";
     for(size_t i = 0; i < varNo; ++i) {
-        bool isFirstOrder = (symbolTable.lookupType(this->projectedVars->get(i)) == MonaTypeTag::Varname1);
-        std::cout << (symbolTable.lookupSymbol(this->projectedVars->get(i))) << " = " << interpretModel(examples[i], isFirstOrder) << "\n";
+        std::cout << (symbolTable.lookupSymbol(this->projectedVars->get(i))) << " = " << interpretModel(examples[i], symbolTable.lookupType(this->projectedVars->get(i))) << "\n";
     }
 
     delete[] examples;

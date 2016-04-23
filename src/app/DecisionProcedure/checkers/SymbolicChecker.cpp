@@ -33,7 +33,7 @@ void SymbolicChecker::ConstructAutomaton() {
     IdentList free, bound;
     this->_monaAST->formula->freeVars(&free, &bound);
     if (!free.empty()) {
-        if(this->_rootRestriction != nullptr) {
+        if(this->_rootRestriction != nullptr && this->_rootRestriction->kind != aTrue) {
             this->_monaAST->formula = new ASTForm_And(this->_rootRestriction, this->_monaAST->formula, Pos());
             SymbolicAutomaton* restrAutomaton = this->_rootRestriction->toSymbolicAutomaton(false);
             restrAutomaton->MarkAsRestriction();
