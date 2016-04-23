@@ -29,7 +29,9 @@ extern SymbolTable symbolTable;
 extern Ident lastPosVar, allPosVar;
 
 StateType SymbolicAutomaton::stateCnt = 0;
+// Fixme: Delete this shit
 DagNodeCache* SymbolicAutomaton::dagNodeCache = new DagNodeCache();
+DagNodeCache* SymbolicAutomaton::dagNegNodeCache = new DagNodeCache();
 
 using namespace Gaston;
 
@@ -1056,6 +1058,7 @@ void SymbolicAutomaton::AutomatonToDot(std::string filename, SymbolicAutomaton *
 
 void BinaryOpAutomaton::DumpToDot(std::ofstream & os, bool inComplement) {
     os << "\t" << (uintptr_t) &*this << "[label=\"";
+    os << this->_form->dag_height << "\\n";
     os << "\u03B5 " << (inComplement ? "\u2209 " : "\u2208 ");
     if(this->_productType == ProductType::E_INTERSECTION) {
         os << "\u2229";
@@ -1075,6 +1078,7 @@ void BinaryOpAutomaton::DumpToDot(std::ofstream & os, bool inComplement) {
 
 void ComplementAutomaton::DumpToDot(std::ofstream & os, bool inComplement) {
     os << "\t" << (uintptr_t) &*this << "[label=\"";
+    os << this->_form->dag_height << "\\n";
     os << "\u03B5 " << (inComplement ? "\u2209 " : "\u2208 ");
     os << "\u00AC\\n(" << this->_trueCounter << "\u22A8, " << this->_falseCounter << "\u22AD)\"";
     if(this->_trueCounter == 0 && this->_falseCounter != 0) {
@@ -1087,6 +1091,7 @@ void ComplementAutomaton::DumpToDot(std::ofstream & os, bool inComplement) {
 
 void ProjectionAutomaton::DumpToDot(std::ofstream & os, bool inComplement) {
     os << "\t" << (uintptr_t) &*this << "[label=\"";
+    os << this->_form->dag_height << "\\n";
     os << "\u03B5 " << (inComplement ? "\u2209 " : "\u2208 ");
     os << "\u2203";
     for(auto id = this->projectedVars->begin(); id != this->projectedVars->end(); ++id) {
@@ -1103,6 +1108,7 @@ void ProjectionAutomaton::DumpToDot(std::ofstream & os, bool inComplement) {
 
 void BaseAutomaton::DumpToDot(std::ofstream & os, bool inComplement) {
     os << "\t" << (uintptr_t) &*this << "[label=\"";
+    os << this->_form->dag_height << "\\n";
     os << "\u03B5 " << (inComplement ? "\u2209 " : "\u2208 ") << this->_form->ToString();
     os << "\\n(" << this->_trueCounter << "\u22A8, " << this->_falseCounter << "\u22AD)\"";
     if(this->_trueCounter == 0 && this->_falseCounter != 0) {

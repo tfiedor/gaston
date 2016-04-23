@@ -80,8 +80,9 @@ struct PreHashType {
 };
 
 struct DagHashType {
-	size_t operator()(std::pair<ASTForm*, bool> const& f) const {
-		return boost::hash_value(f.first->kind);
+	size_t operator()(ASTForm* const& f) const {
+		size_t seed = boost::hash_value(f->kind);
+		return seed;
 	}
 };
 
@@ -149,7 +150,7 @@ template<class Key>
 struct DagCompare : public std::binary_function<Key, Key, bool> {
 	bool operator()(Key const& lhs, Key const& rhs) const {
 		AST::temporalMapping.clear();
-		bool result = lhs.second == rhs.second && lhs.first->StructuralCompare(rhs.first);
+		bool result = lhs->StructuralCompare(rhs);
 		return result;
 	}
 };

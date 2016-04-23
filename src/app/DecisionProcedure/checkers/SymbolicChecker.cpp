@@ -118,20 +118,18 @@ void SymbolicChecker::Decide() {
         }
 
         std::cout << "\n";
-        std::cout << "[*] Preprocessing:       ";
+        std::cout << "[*] Preprocessing:      ";
         timer_preprocess.print();
         std::cout << "[*] DFA creation:       ";
         timer_mona.print();
-        std::cout << "[*] MONA <-> VATA:      ";
-        timer_conversion.print();
-        std::cout << "[*] Bases creation:     ";
+        std::cout << "[*] SA creation:        ";
         timer_automaton.print();
         std::cout << "[*] Decision procedure: ";
         timer_deciding.print();
         // Something that was used is not supported by dWiNA
 
 #   if (DEBUG_GENERATE_DOT_AUTOMATON == true)
-        if(options.graphvizDAG) {
+        if(options.printProgress) {
             SymbolicAutomaton::AutomatonToDot("automaton.dot", this->_automaton, false);
         }
 #   endif

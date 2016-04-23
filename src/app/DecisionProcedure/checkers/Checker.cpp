@@ -301,12 +301,6 @@ void Checker::PreprocessFormula() {
     readTags(inputFileName, stringTag);
     parseTags(stringTag, tags);
 
-    Tagger tagger(tags);
-    (this->_monaAST->formula)->accept(tagger);
-
-    FixpointDetagger detagger;
-    (this->_monaAST->formula)->accept(detagger);
-
 #   if (OPT_SHUFFLE_FORMULA == true)
     ShuffleVisitor shuffleVisitor;
     this->_monaAST->formula = static_cast<ASTForm*>(this->_monaAST->formula->accept(shuffleVisitor));
@@ -317,6 +311,12 @@ void Checker::PreprocessFormula() {
 
     QuantificationMerger quantificationMerger;
     this->_monaAST->formula = static_cast<ASTForm*>((this->_monaAST->formula)->accept(quantificationMerger));
+
+    Tagger tagger(tags);
+    (this->_monaAST->formula)->accept(tagger);
+
+    FixpointDetagger detagger;
+    (this->_monaAST->formula)->accept(detagger);
 
     if(options.graphvizDAG) {
         std::string dotFileName(inputFileName);

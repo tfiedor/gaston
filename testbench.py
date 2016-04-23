@@ -74,6 +74,7 @@ measures = {
             'time-base': Measure("dfa creation" + whatever_regex + time_regex, time_default, parse_total_time, False),
             'time-conv': Measure("mona <-> vata" + whatever_regex + time_regex, time_default, parse_total_time, False),
             'time-pre': Measure("preprocessing" + whatever_regex + time_regex, time_default, parse_total_time, False),
+            'time-sa': Measure("sa creation" + whatever_regex + time_regex, time_default, parse_total_time, False),
             'dag-nodes': Measure("nodes" + whatever_regex + space_regex, space_default, int, False),
             'real-nodes': Measure("real nodes" + whatever_regex + space_regex, space_default, int, False),
             'dag-gain': Measure("dag gain" + whatever_regex + double_regex, double_default, float, False),

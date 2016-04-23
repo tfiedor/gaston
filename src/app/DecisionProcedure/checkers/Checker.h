@@ -35,8 +35,7 @@ using TimerType = Timer;
 	code(FullAntiPrenexer)				/* Push quantifiers as deep as possible */ \
 	code(BooleanUnfolder)				/* Simplify formula through various boolean laws*/ \
 	code(UniversalQuantifierRemover)	/* Remove universal quantifier from formula*/ \
-	code(NegationUnfolder)				/* Push negations deeply*/ \
-	/*code(BaseAutomataMerger)			/* Merge some of the base automata*/
+	code(NegationUnfolder)				/* Push negations deeply*/
 #else
 #define FILTER_LIST(code) \
 	code(ZeroOrderRemover)				/* Transform zero-order variables to second-order interpretation */ \

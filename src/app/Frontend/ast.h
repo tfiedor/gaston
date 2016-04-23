@@ -81,15 +81,20 @@ public:
 ////////// Abstract syntax tree ///////////////////////////////////////////////
 
 enum ASTKind {
-  aVar1, aDot1, aUp1, aInt, aPlus1, aMinus1, aPlusModulo1, aMinusModulo1,
-  aPlus2, aMinus2, aMin, aMax, aInterval, aVar2, aEmpty, aUnion, aInter,
-  aSetminus, aSet, aVar0, aTrue, aFalse, aIn, aNotin, aRoot, aEmptyPred,
-  aSub, aEqual1, aEqual2, aNotEqual1, aFirstOrder, aIdLeft, aPresbConst,
-  aNotEqual2, aLess, aLessEq, aImpl, aBiimpl, aAnd, aOr, aNot, aEx0, aEx1,
-  aEx2, aAll0, aAll1, aAll2, aLet0, aLet1, aLet2, aCall,
-  aUniv, aImport, aExport, aPrefix, aDot2, aUp2, aRootPred, aInStateSpace1,
-  aInStateSpace2, aTreeRoot, aWellFormedTree, aTree, aTerm2Formula,
-  aSomeType, aRestrict, aAllPos
+  	/*00-04*/ aVar1, aDot1, aUp1, aInt, aPlus1,
+	/*05-09*/ aMinus1, aPlusModulo1, aMinusModulo1, aPlus2, aMinus2,
+	/*10-14*/ aMin, aMax, aInterval, aVar2, aEmpty,
+	/*15-19*/ aUnion, aInter, aSetminus, aSet, aVar0,
+	/*20-24*/ aTrue, aFalse, aIn, aNotin, aRoot,
+	/*25-29*/ aEmptyPred, aSub, aEqual1, aEqual2, aNotEqual1,
+	/*30-34*/ aFirstOrder, aIdLeft, aPresbConst, aNotEqual2, aLess,
+	/*35-39*/ aLessEq, aImpl, aBiimpl, aAnd, aOr,
+	/*40-44*/ aNot, aEx0, aEx1, aEx2, aAll0,
+	/*45-49*/ aAll1, aAll2, aLet0, aLet1, aLet2,
+	/*50-54*/ aCall, aUniv, aImport, aExport, aPrefix,
+	/*54-59*/ aDot2, aUp2, aRootPred, aInStateSpace1, aInStateSpace2,
+	/*60-64*/ aTreeRoot, aWellFormedTree, aTree, aTerm2Formula, aSomeType,
+	/*65-67*/ aRestrict, aAllPos
 };
 
 enum ASTOrder {oTerm1, oTerm2, oForm, oUniv};

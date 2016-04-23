@@ -9,6 +9,7 @@
 AST* ShuffleVisitor::visit(ASTForm_Ex1 *form) {
     auto result = form->f->accept(*this);
     form->f = reinterpret_cast<ASTForm*>(result);
+    assert(form->f->dag_height > 0);
     form->dag_height = form->f->dag_height + 1;
     return form;
 }
@@ -47,6 +48,9 @@ template<class BinopClass>
 AST* ShuffleVisitor::_visitBinary(BinopClass*  form) {
     // No need to shuffle
     if(form->f1->kind != form->kind && form->f2->kind != form->kind) {
+        form->f1->accept(*this);
+        form->f2->accept(*this);
+        form->dag_height = std::max(form->f1->dag_height, form->f2->dag_height) + 1;
         return form;
     }
     // 1. Collect all lists for the chain of ff kind;
@@ -64,6 +68,7 @@ AST* ShuffleVisitor::_visitBinary(BinopClass*  form) {
         right = leaves.back();
         leaves.pop_back();
 
+        assert(left->dag_height <= right->dag_height);
         newForm = static_cast<AST*>(new BinopClass(static_cast<ASTForm*>(left), static_cast<ASTForm*>(right), Pos()));
         newForm->dag_height = std::max(left->dag_height, right->dag_height) + 1;
         this->_AddToBuffer(newForm, leaves);

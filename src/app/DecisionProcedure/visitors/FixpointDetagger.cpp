@@ -5,6 +5,12 @@
 #include "FixpointDetagger.h"
 #include "../environment.hh"
 
+void FixpointDetagger::visit(ASTForm *form) {
+    if(form->fixpoint_number <= this->_cFixpointThreshold) {
+        form->tag = 0;
+    }
+}
+
 void FixpointDetagger::visit(ASTForm_And *form) {
     form->fixpoint_number = std::max(form->f1->fixpoint_number, form->f2->fixpoint_number);
     form->height = std::max(form->f1->height, form->f2->height) + 1;
@@ -58,7 +64,7 @@ void FixpointDetagger::visit(ASTForm_Not *form) {
     form->height = form->height + 1;
     form->size = form->f->size + 1;
 
-    if( (form->f->kind == aEx1 || form->f->kind == aEx2 || form->f->kind == aAll1 || form->f->kind == aAll2) && form->f->tag == 0)  {
+    if(form->f->tag == 0)  {
         // Pull the negation in
         form->tag = 0;
     }

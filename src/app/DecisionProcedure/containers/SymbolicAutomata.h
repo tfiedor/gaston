@@ -70,6 +70,7 @@ public:
     using TermWorkshop  = Workshops::TermWorkshop;
     SymbolWorkshop* symbolFactory;
     static DagNodeCache* dagNodeCache;
+    static DagNodeCache* dagNegNodeCache;
     Formula_ptr _form;
 protected:
     // <<< PRIVATE MEMBERS >>>

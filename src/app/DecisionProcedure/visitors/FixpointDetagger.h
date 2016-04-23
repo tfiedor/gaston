@@ -17,7 +17,7 @@ private:
 public:
     FixpointDetagger() : VoidVisitor(Traverse::PostOrder) {}
 
-    void visit(ASTForm* form) {};
+    void visit(ASTForm* form);
     void visit(ASTTerm* term) {};
     void visit(ASTUniv* univ) {};
 

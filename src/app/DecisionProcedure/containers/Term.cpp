@@ -22,16 +22,18 @@ namespace Gaston {
 #       if (OPT_TERM_HASH_BY_APPROX == true)
         if (s->type == TERM_CONTINUATION) {
             // Todo: this is never hit fuck
-            TermContinuation *sCont = reinterpret_cast<TermContinuation *>(s);
+            TermContinuation *sCont = static_cast<TermContinuation *>(s);
             if (sCont->IsUnfolded()) {
                 return boost::hash_value(sCont->GetUnfoldedTerm());
             } else {
                 return boost::hash_value(s);
             }
+#       if (DEBUG_DONT_HASH_FIXPOINTS == true)
         } else if(s->type == TERM_FIXPOINT) {
             size_t seed = boost::hash_value(s->stateSpaceApprox);
             boost::hash_combine(seed, boost::hash_value(s->MeasureStateSpace()));
             return seed;
+#       endif
         } else {
             return boost::hash_value(s);
         }
@@ -199,7 +201,7 @@ TermList::TermList(Term_ptr first, bool isCompl) {
 }
 
 TermFixpoint::TermFixpoint(Aut_ptr aut, Term_ptr startingTerm, Symbol* symbol, bool inComplement, bool initbValue, WorklistSearchType search = WorklistSearchType::E_DFS)
-        : _sourceTerm(nullptr), _sourceSymbol(symbol), _sourceIt(nullptr), _aut(reinterpret_cast<ProjectionAutomaton*>(aut)->GetBase()), _bValue(initbValue) {
+        : _sourceTerm(nullptr), _sourceSymbol(symbol), _sourceIt(nullptr), _aut(static_cast<ProjectionAutomaton*>(aut)->GetBase()), _bValue(initbValue) {
     #if (MEASURE_STATE_SPACE == true)
     ++TermFixpoint::instances;
     #endif
@@ -230,10 +232,10 @@ TermFixpoint::TermFixpoint(Aut_ptr aut, Term_ptr startingTerm, Symbol* symbol, b
 
 #   if (OPT_NO_SATURATION_FOR_M2L == true)
     // Push symbols to worklist
-    if (reinterpret_cast<ProjectionAutomaton*>(aut)->IsRoot() || allPosVar == -1) {
+    if (static_cast<ProjectionAutomaton*>(aut)->IsRoot() || allPosVar == -1) {
 #   endif
         this->_InitializeSymbols(aut->symbolFactory, aut->GetFreeVars(),
-                                     reinterpret_cast<ProjectionAutomaton *>(aut)->projectedVars, symbol);
+                                     static_cast<ProjectionAutomaton *>(aut)->projectedVars, symbol);
             for (auto symbol : this->_symList) {
                 this->_worklist.insert(this->_worklist.cbegin(), std::make_pair(startingTerm, symbol));
             }
@@ -250,8 +252,8 @@ TermFixpoint::TermFixpoint(Aut_ptr aut, Term_ptr startingTerm, Symbol* symbol, b
 }
 
 TermFixpoint::TermFixpoint(Aut_ptr aut, Term_ptr sourceTerm, Symbol* symbol, bool inComplement)
-        : _sourceTerm(sourceTerm), _sourceSymbol(symbol), _sourceIt(reinterpret_cast<TermFixpoint*>(sourceTerm)->GetIteratorDynamic()),
-          _aut(reinterpret_cast<ProjectionAutomaton*>(aut)->GetBase()), _worklist(), _bValue(inComplement) {
+        : _sourceTerm(sourceTerm), _sourceSymbol(symbol), _sourceIt(static_cast<TermFixpoint*>(sourceTerm)->GetIteratorDynamic()),
+          _aut(static_cast<ProjectionAutomaton*>(aut)->GetBase()), _worklist(), _bValue(inComplement) {
     #if (MEASURE_STATE_SPACE == true)
     ++TermFixpoint::instances;
     ++TermFixpoint::preInstances;
@@ -272,7 +274,7 @@ TermFixpoint::TermFixpoint(Aut_ptr aut, Term_ptr sourceTerm, Symbol* symbol, boo
     // Initialize the fixpoint
     this->_fixpoint.push_front(std::make_pair(nullptr, true));
     // Push things into worklist
-    this->_InitializeSymbols(aut->symbolFactory, aut->GetFreeVars(), reinterpret_cast<ProjectionAutomaton*>(aut)->projectedVars, symbol);
+    this->_InitializeSymbols(aut->symbolFactory, aut->GetFreeVars(), static_cast<ProjectionAutomaton*>(aut)->projectedVars, symbol);
 
     #if (DEBUG_TERM_CREATION == true)
     std::cout << "[" << this << "]";
@@ -306,9 +308,9 @@ void Term::SetSuccessor(Term* succ, Symbol* symb) {
 bool Term::IsNotComputed() {
 #if (OPT_EARLY_EVALUATION == true && MONA_FAIR_MODE == false)
     if(this->type == TERM_CONTINUATION) {
-        return !reinterpret_cast<TermContinuation *>(this)->IsUnfolded();
+        return !static_cast<TermContinuation *>(this)->IsUnfolded();
     } else if(this->type == TERM_PRODUCT) {
-        TermProduct* termProduct = reinterpret_cast<TermProduct*>(this);
+        TermProduct* termProduct = static_cast<TermProduct*>(this);
         return termProduct->left->IsNotComputed() || termProduct->right->IsNotComputed();
     } else {
         return false;
@@ -331,11 +333,11 @@ SubsumptionResult Term::IsSubsumed(Term *t, bool unfoldAll) {
     }
 
     if(t->type == TERM_CONTINUATION) {
-        TermContinuation *continuation = reinterpret_cast<TermContinuation *>(t);
+        TermContinuation *continuation = static_cast<TermContinuation *>(t);
         Term* unfoldedContinuation = continuation->unfoldContinuation(UnfoldedInType::E_IN_SUBSUMPTION);
         return this->IsSubsumed(unfoldedContinuation, unfoldAll);
     } else if(this->type == TERM_CONTINUATION) {
-        TermContinuation *continuation = reinterpret_cast<TermContinuation *>(this);
+        TermContinuation *continuation = static_cast<TermContinuation *>(this);
         Term* unfoldedContinuation = continuation->unfoldContinuation(UnfoldedInType::E_IN_SUBSUMPTION);
         return unfoldedContinuation->IsSubsumed(t, unfoldAll);
     }
@@ -387,7 +389,7 @@ SubsumptionResult TermProduct::_IsSubsumedCore(Term* t, bool unfoldAll) {
     assert(t->type == TERM_PRODUCT);
 
     // Retype and test the subsumption component-wise
-    TermProduct *rhs = reinterpret_cast<TermProduct*>(t);
+    TermProduct *rhs = static_cast<TermProduct*>(t);
     Term *lhsl = this->left;
     Term *lhsr = this->right;
     Term *rhsl = rhs->left;
@@ -426,7 +428,7 @@ SubsumptionResult TermBaseSet::_IsSubsumedCore(Term* term, bool unfoldAll) {
 
     // Test component-wise, not very efficient though
     // TODO: Change to bit-vectors if possible
-    TermBaseSet *t = reinterpret_cast<TermBaseSet*>(term);
+    TermBaseSet *t = static_cast<TermBaseSet*>(term);
     if(t->states.size() < this->states.size()) {
         return E_FALSE;
     } else {
@@ -464,7 +466,7 @@ SubsumptionResult TermList::_IsSubsumedCore(Term* t, bool unfoldAll) {
     assert(t->type == TERM_LIST);
 
     // Reinterpret
-    TermList* tt = reinterpret_cast<TermList*>(t);
+    TermList* tt = static_cast<TermList*>(t);
     // Do the item-wise subsumption check
     for(auto& item : this->list) {
         bool subsumes = false;
@@ -484,9 +486,14 @@ SubsumptionResult TermFixpoint::_IsSubsumedCore(Term* t, bool unfoldAll) {
     assert(t->type == TERM_FIXPOINT);
 
     // Reinterpret
-    TermFixpoint* tt = reinterpret_cast<TermFixpoint*>(t);
+    TermFixpoint* tt = static_cast<TermFixpoint*>(t);
 
     bool are_source_symbols_same = TermFixpoint::_compareSymbols(*this, *tt);
+    // Worklists surely differ
+    if(!are_source_symbols_same && (this->_worklist.size() != 0 || tt->_worklist.size() != 0) ) {
+        return E_FALSE;
+    }
+
 #   if (OPT_SHORTTEST_FIXPOINT_SUB == true)
     // Will tests only generators and symbols
     if(are_source_symbols_same && this->_sourceTerm != nullptr && tt->_sourceTerm != nullptr) {
@@ -525,6 +532,7 @@ SubsumptionResult TermEmpty::IsSubsumedBy(FixpointType& fixpoint, Term*& biggerT
 }
 
 SubsumptionResult TermProduct::IsSubsumedBy(FixpointType& fixpoint, Term*& biggerTerm) {
+    //Fixme: is this true?
     if(this->IsEmpty()) {
         return E_TRUE;
     }
@@ -633,7 +641,7 @@ SubsumptionResult TermFixpoint::IsSubsumedBy(FixpointType& fixpoint, Term*& bigg
  * Tests the emptiness of Term
  */
 bool TermEmpty::IsEmpty() {
-    return true;
+    return !this->_inComplement;
 }
 
 bool TermProduct::IsEmpty() {
@@ -768,8 +776,8 @@ namespace Gaston {
         std::cout << s;
     }
 
-    void dumpDagKey(std::pair<Formula_ptr, bool> const& form) {
-        form.first->dump();
+    void dumpDagKey(Formula_ptr const& form) {
+        form->dump();
     }
 
     void dumpDagData(SymbolicAutomaton*& aut) {
@@ -915,8 +923,8 @@ bool TermFixpoint::_processOnePostponed() {
     TermProduct* first_product, *second_product;
     // first is the postponed term, second is the thing from fixpoint!!!
     for(auto it = this->_postponed.begin(); it != this->_postponed.end(); ++it) {
-        first_product = reinterpret_cast<TermProduct*>((*it).first);
-        second_product = reinterpret_cast<TermProduct*>((*it).second);
+        first_product = static_cast<TermProduct*>((*it).first);
+        second_product = static_cast<TermProduct*>((*it).second);
         if(!first_product->right->IsNotComputed() && !second_product->right->IsNotComputed()) {
             // If left thing was not unfolded it means we don't need to compute more stuff
             postponedPair = (*it);
@@ -933,8 +941,8 @@ bool TermFixpoint::_processOnePostponed() {
     this->_postponed.pop_front();
     #endif
 
-    TermProduct* postponedTerm = reinterpret_cast<TermProduct*>(postponedPair.first);
-    TermProduct* postponedFixTerm = reinterpret_cast<TermProduct*>(postponedPair.second);
+    TermProduct* postponedTerm = static_cast<TermProduct*>(postponedPair.first);
+    TermProduct* postponedFixTerm = static_cast<TermProduct*>(postponedPair.second);
 
     assert(postponedPair.second != nullptr);
 
@@ -1374,11 +1382,11 @@ bool Term::operator==(const Term &t) {
     Term* tt = const_cast<Term*>(&t);
     Term* tthis = this;
     if(tt->type == TERM_CONTINUATION) {
-        TermContinuation* ttCont = reinterpret_cast<TermContinuation*>(tt);
+        TermContinuation* ttCont = static_cast<TermContinuation*>(tt);
         tt = ttCont->unfoldContinuation(UnfoldedInType::E_IN_COMPARISON);
     }
     if(this->type == TERM_CONTINUATION) {
-        TermContinuation* thisCont = reinterpret_cast<TermContinuation*>(this);
+        TermContinuation* thisCont = static_cast<TermContinuation*>(this);
         tthis = thisCont->unfoldContinuation(UnfoldedInType::E_IN_COMPARISON);
     }
 

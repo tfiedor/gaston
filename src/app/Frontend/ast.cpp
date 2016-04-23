@@ -2126,12 +2126,11 @@ bool ASTForm_q::StructuralCompare(AST* form) {
 
 template<class VarClass>
 bool check_mapping(VarClass* lhs, VarClass* rhs) {
-    auto it = AST::temporalMapping.find(lhs->n);
-    if(it == AST::temporalMapping.end()) {
-        AST::temporalMapping[lhs->n] = rhs->n;
-        return true;
+    auto it = AST::temporalMapping.insert(std::make_pair(lhs->n, rhs->n));
+    if(!it.second) {
+        return it.first->second == rhs->n;
     } else {
-        return it->second == rhs->n;
+        return true;
     }
 }
 

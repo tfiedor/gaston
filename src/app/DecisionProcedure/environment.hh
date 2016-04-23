@@ -101,7 +101,7 @@ namespace Gaston {
 	void dumpSubsumptionData(SubsumptionResult& s);
 	void dumpPreKey(std::pair<size_t, Symbol_ptr> const& s);
 	void dumpPreData(VATA::Util::OrdVector<size_t>& s);
-	void dumpDagKey(std::pair<Formula_ptr, bool> const& s);
+	void dumpDagKey(Formula_ptr const& s);
 	void dumpDagData(SymbolicAutomaton*& s);
 
 	using TermHash 				 = boost::hash<Term_raw>;
@@ -111,7 +111,7 @@ namespace Gaston {
 	using ResultCache            = BinaryCache<ResultKey, ResultType, ResultHashType, PairCompare<ResultKey>, dumpResultKey, dumpResultData>;
 	using SubsumptionKey		 = std::pair<Term_raw, Term_raw>;
 	using SubsumptionCache       = BinaryCache<SubsumptionKey, SubsumptionResult, SubsumptionHashType, PairCompare<SubsumptionKey>, dumpSubsumptionKey, dumpSubsumptionData>;
-	using DagKey				 = std::pair<Formula_ptr, bool>;
+	using DagKey				 = Formula_ptr;
 	using DagData				 = SymbolicAutomaton*;
 	using DagNodeCache			 = BinaryCache<DagKey, DagData, DagHashType, DagCompare<DagKey>, dumpDagKey, dumpDagData>;
 
@@ -197,6 +197,7 @@ public:
 #define DEBUG_MAX_SEARCH_PATH			0
 #define DEBUG_M2L_AS_GROUND				false
 #define DEBUG_WORKSHOPS					true	// Fixme: This should not be DEBUG, but measure
+#define DEBUG_DONT_HASH_FIXPOINTS		false
 
 #define ALT_SKIP_EMPTY_UNIVERSE			true // < Skip empty example
 #define ALT_ALWAYS_DETERMINISTIC	    true
