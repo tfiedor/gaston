@@ -371,11 +371,15 @@ ResultType RootProjectionAutomaton::IntersectNonEmpty(Symbol* symbol, Term* fina
         std::cout << "\n";
 #       endif
         if(this->_satExample == nullptr && examples.first != nullptr) {
+#           if (DEBUG_ROOT_AUTOMATON == true)
             std::cout << "[*] Found satisfying example\n";
+#           endif
             this->_satExample = examples.first;
         }
         if(this->_unsatExample == nullptr && examples.second != nullptr) {
+#           if (DEBUG_ROOT_AUTOMATON == true)
             std::cout << "[*] Found unsatisfying counter-example\n";
+#           endif
             this->_unsatExample = examples.second;
         }
     }
@@ -885,6 +889,17 @@ std::string interpretModel(std::string& str, MonaTypeTag order) {
     }
 }
 
+int max_varname_lenght(IdentList* idents, int varNo) {
+    int max = 0, varlen;
+    for(size_t i = 0; i < varNo; ++i) {
+        varlen = strlen(symbolTable.lookupSymbol(idents->get(i)));
+        if(varlen > max) {
+            max = varlen;
+        }
+    }
+    return max;
+}
+
 void ProjectionAutomaton::_DumpExampleCore(ExampleType e) {
     Term* example = (e == ExampleType::SATISFYING ? this->_satExample : this->_unsatExample);
 
@@ -892,6 +907,7 @@ void ProjectionAutomaton::_DumpExampleCore(ExampleType e) {
     auto varNo = this->projectedVars->size();
     std::string* examples = new std::string[varNo];
     this->projectedVars->sort();
+    int max_len = max_varname_lenght(this->projectedVars, varNo);
 
     while(example != nullptr && example->link.succ != nullptr && example != example->link.succ) {
     //                                                           ^--- not sure this is right
@@ -902,7 +918,8 @@ void ProjectionAutomaton::_DumpExampleCore(ExampleType e) {
     }
 
     for(size_t i = 0; i < varNo; ++i) {
-        std::cout << (symbolTable.lookupSymbol(this->projectedVars->get(i))) << ": " << examples[i] << "\n";
+        auto varname = (symbolTable.lookupSymbol(this->projectedVars->get(i)));
+        std::cout << varname << std::string(max_len - strlen(varname) + 1, ' ') << ": " << examples[i] << "\n";
     }
     std::cout << "\n";
     for(size_t i = 0; i < varNo; ++i) {

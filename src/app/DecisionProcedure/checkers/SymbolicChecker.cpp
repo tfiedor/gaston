@@ -146,6 +146,15 @@ void SymbolicChecker::Decide() {
     }
 }
 
+int count_example_len(Term* t) {
+    int len = 0;
+    while(t->link.succ != nullptr && t->link.succ != t) {
+        ++len;
+        t = t->link.succ;
+    }
+    return len;
+}
+
 /**
  * Runs the decision procedure on the constructed automaton
  */
@@ -171,13 +180,13 @@ bool SymbolicChecker::Run() {
 #   if (DUMP_EXAMPLES == true)
     // TODO: Better output
     if(this->_automaton->_satExample) {
-        std::cout << "[*] Printing satisfying example of least length\n";
+        std::cout << "[*] Printing satisfying example of least (" << (count_example_len(this->_automaton->_satExample)) << ") length\n";
         this->_automaton->DumpExample(ExampleType::SATISFYING);
         std::cout << "\n";
     }
 
     if(this->_automaton->_unsatExample) {
-        std::cout << "[*] Printing unsatisfying example of least length\n";
+        std::cout << "[*] Printing unsatisfying example of least (" << (count_example_len(this->_automaton->_unsatExample)) << ") length\n";
         this->_automaton->DumpExample(ExampleType::UNSATISFYING);
         std::cout << "\n";
     }

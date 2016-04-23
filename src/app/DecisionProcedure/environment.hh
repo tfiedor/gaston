@@ -167,7 +167,7 @@ public:
 #define DEBUG_DAG_REMAPPING				false
 #define DEBUG_ROOT_AUTOMATON		    false
 #define DEBUG_AUTOMATA_ADDRESSES		false
-#define DEBUG_EXAMPLE_PATHS				true
+#define DEBUG_EXAMPLE_PATHS				false
 #define DEBUG_BASE_AUTOMATA 			false
 #define DEBUG_MONA_DFA					false
 #define DEBUG_MONA_CODE_FORMULA			false
