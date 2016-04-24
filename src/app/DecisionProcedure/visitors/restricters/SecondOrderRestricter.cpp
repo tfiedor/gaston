@@ -46,8 +46,19 @@ ASTForm* SecondOrderRestricter::RestrictFormula(Ident var, ASTForm* form) {
         restriction = restriction->clone();
     }
 
+    ASTForm_FirstOrder *singleton;
+    if(symbolTable.lookupType(var) == MonaTypeTag::Varname1) {
+        singleton = new ASTForm_FirstOrder(new ASTTerm1_Var1(var, form->pos), form->pos);
+        restriction = (restriction != nullptr && restriction->kind != aTrue) ?
+                      static_cast<ASTForm*>(new BinaryFormula(singleton, restriction, form->pos)) : singleton;
+    }
+
     if(restriction != nullptr && restriction->kind != aTrue) {
-        return reinterpret_cast<ASTForm*>(new BinaryFormula(restriction, form, form->pos));
+#       if (ALT_EXPLICIT_RESTRICTIONS == true)
+        restriction->is_restriction = true;
+        restriction->tag = 0;
+#       endif
+        return static_cast<ASTForm*>(new BinaryFormula(restriction, form, form->pos));
     } else {
         return form;
     }
@@ -63,12 +74,8 @@ AST* SecondOrderRestricter::_firstOrderRestrict(FirstOrderQuantification* form) 
     while(form->vl->size() != 0) {
         auto it = form->vl->pop_back();
         assert(symbolTable.lookupType(it) == MonaTypeTag::Varname1);
-        ASTForm_FirstOrder *singleton = new ASTForm_FirstOrder(new ASTTerm1_Var1(it, form->pos), form->pos);
-        BinaryFormula* binopForm = new BinaryFormula(singleton, restrictedFormula, form->pos);
-        binopForm = reinterpret_cast<BinaryFormula*>(SecondOrderRestricter::RestrictFormula<BinaryFormula, ASTTerm1_Var1>(it, binopForm));
+        BinaryFormula* binopForm = reinterpret_cast<BinaryFormula*>(SecondOrderRestricter::RestrictFormula<BinaryFormula, ASTTerm1_Var1>(it, restrictedFormula));
         restrictedFormula = new SecondOrderQuantification(nullptr, new IdentList(it), binopForm, Pos());
-        //restrictedFormula = new FirstOrderQuantification(nullptr, new IdentList(it), binopForm, Pos());
-        // ^-- FIXME: DO NOT EVER TRY TO PUSH SUCH FUCKING NONSENSE CRAP YOU STUPID SEA LION
     }
 
     // Free the previous form
@@ -92,6 +99,7 @@ AST* SecondOrderRestricter::_secondOrderRestrict(SecondOrderQuantification *form
         binopForm = reinterpret_cast<BinaryFormula*>(SecondOrderRestricter::RestrictFormula<BinaryFormula, ASTTerm2_Var2>(it, binopForm));
         restrictedFormula = new SecondOrderQuantification(nullptr, new IdentList(it), binopForm, form->pos);
     }
+
 
     form->detach();
     delete form;

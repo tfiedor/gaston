@@ -235,8 +235,6 @@ void Checker::CloseUngroundFormula() {
                 for(auto it = freeVars.begin(); it != freeVars.end(); ++it) {
                     // Fixme: what about zeroorder variables
                     if(symbolTable.lookupType(*it) == MonaTypeTag::Varname1) {
-                        ASTForm_FirstOrder* fo = new ASTForm_FirstOrder(new ASTTerm1_Var1(*it, Pos()), Pos());
-                        restrictions = new ASTForm_And(fo, restrictions, Pos());
                         restrictions
                                 = SecondOrderRestricter::RestrictFormula<ASTForm_And, ASTTerm1_Var1>(*it, restrictions);
                     } else if(symbolTable.lookupType(*it) == MonaTypeTag::Varname2 && *it != allPosVar) {
@@ -306,17 +304,17 @@ void Checker::PreprocessFormula() {
     this->_monaAST->formula = static_cast<ASTForm*>(this->_monaAST->formula->accept(shuffleVisitor));
 #   endif
 
-    SecondOrderRestricter restricter;
-    this->_monaAST->formula = static_cast<ASTForm*>((this->_monaAST->formula)->accept(restricter));
-
-    QuantificationMerger quantificationMerger;
-    this->_monaAST->formula = static_cast<ASTForm*>((this->_monaAST->formula)->accept(quantificationMerger));
-
     Tagger tagger(tags);
     (this->_monaAST->formula)->accept(tagger);
 
     FixpointDetagger detagger;
     (this->_monaAST->formula)->accept(detagger);
+
+    SecondOrderRestricter restricter;
+    this->_monaAST->formula = static_cast<ASTForm*>((this->_monaAST->formula)->accept(restricter));
+
+    QuantificationMerger quantificationMerger;
+    this->_monaAST->formula = static_cast<ASTForm*>((this->_monaAST->formula)->accept(quantificationMerger));
 
     if(options.graphvizDAG) {
         std::string dotFileName(inputFileName);

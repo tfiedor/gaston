@@ -128,6 +128,7 @@ public:
 	size_t dag_height = 1;
 	size_t size = 1;
 	IdentList* allVars = nullptr;
+	bool is_restriction = false;
 	static std::unordered_map<unsigned int, unsigned int> temporalMapping;
   ASTOrder order;
   ASTKind kind;

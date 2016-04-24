@@ -53,13 +53,16 @@ SymbolicAutomaton* ASTForm::toSymbolicAutomaton(bool doComplement) {
                 // It was tagged to be constructed by MONA
                 this->sfa = baseToSymbolicAutomaton<GenericBaseAutomaton>(this, doComplement);
             } else {
-                assert(this->fixpoint_number > 0);
+                assert(this->fixpoint_number > 0 || this->tag == 1);
                 this->sfa = this->_toSymbolicAutomatonCore(doComplement);
             }
 #       if (OPT_USE_DAG == true)
             cache->StoreIn(key, this->sfa);
         }
 #       endif
+        if(this->is_restriction) {
+            this->sfa->MarkAsRestriction();
+        }
     }
     return this->sfa;
 }

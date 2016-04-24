@@ -201,6 +201,7 @@ public:
 
 #define ALT_SKIP_EMPTY_UNIVERSE			true // < Skip empty example
 #define ALT_ALWAYS_DETERMINISTIC	    true
+#define ALT_EXPLICIT_RESTRICTIONS		true // < Restrictions will be specific subautomata.
 
 /*
  * >>> Automata stats options
