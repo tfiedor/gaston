@@ -9,6 +9,7 @@
 import argparse
 import itertools
 import os
+import pickle
 import re
 import subprocess
 import sys
@@ -127,7 +128,7 @@ def parse_measure(tool, measure_name, input):
         return measure.post_process(match.group(1))
 
 
-def createArgumentParser():
+def create_argument_parser():
     '''
     Creates Argument Parser object
     '''
@@ -141,6 +142,7 @@ def createArgumentParser():
     parser.add_argument('--notify', '-n', action='store_true', help="sends email notification to email")
     parser.add_argument('--message', '-m', default=None, help='additional message printed into testbench output')
     parser.add_argument('--csv-name', '-c', default=None, help='name of the output csv file')
+    parser.add_argument('--repeat', '-r', action='store_true', help='repeat the last experiment with the exact same options')
     return parser
 
 
@@ -362,7 +364,7 @@ def parse_arguments():
     '''
     Parse input arguments
     '''
-    parser = createArgumentParser()
+    parser = create_argument_parser()
     if len(sys.argv) == 0:
         parser.print_help()
         quit()
@@ -373,6 +375,13 @@ def parse_arguments():
 
 if __name__ == '__main__':
     options = parse_arguments()
+    if options.repeat:
+        with open('testbench.config', 'rb') as f:
+            options = pickle.load(f)
+    else:
+        with open('testbench.config', 'wb') as f:
+            pickle.dump(options, f)
+
 
     # we will generate stuff
     data = {}
