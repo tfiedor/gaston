@@ -23,6 +23,22 @@ MonaSerializer::MonaSerializer(std::string filename, ASTForm* form) {
     } else {
         this->_monaFile << "m2l-str;\n";
     }
+    IdentList free, bound;
+    form->freeVars(&free, &bound);
+    for(auto it = free.begin(); it != free.end(); ++it) {
+        switch(symbolTable.lookupType(*it)) {
+            case MonaTypeTag::Varname0:
+                this->_monaFile << "var0";
+                break;
+            case MonaTypeTag::Varname1:
+                this->_monaFile << "var1";
+                break;
+            case MonaTypeTag::Varname2:
+                this->_monaFile << "var2";
+                break;
+        }
+        this->_monaFile << " " << symbolTable.lookupSymbol(*it) << ";\n";
+    }
     this->_monaFile << form->ToString(true) << ";\n";
 }
 

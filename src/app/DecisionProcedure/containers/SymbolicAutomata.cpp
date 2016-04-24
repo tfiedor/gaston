@@ -636,14 +636,16 @@ ResultType BinaryOpAutomaton::_IntersectNonEmptyCore(Symbol* symbol, Term* final
     // For intersection of automata we can return early, if left term was evaluated
     // as false, whereas for union of automata we can return early if left term
     // was true.
+    bool canGenerateContinuations = true;
 #   if (OPT_CONT_ONLY_WHILE_UNSAT == true)
-    bool canGenerateContinuations = (this->_productType == ProductType::E_INTERSECTION ?
-                                     (this->_trueCounter == 0 && this->_falseCounter >= 0) :
-                                     (this->_falseCounter == 0 && this->_trueCounter >= 0) );
-    if(canGenerateContinuations && this->_eval_early(lhs_result.second, underComplement)) {
-#   else
-    if(this->_eval_early(lhs_result.second, underComplement)) {
+    canGenerateContinuations = canGenerateContinuations &&
+        (this->_productType == ProductType::E_INTERSECTION ?
+            (this->_trueCounter == 0 && this->_falseCounter >= 0) : (this->_falseCounter == 0 && this->_trueCounter >= 0) );
 #   endif
+#   if (OPT_CONT_ONLY_FOR_NONRESTRICTED == true)
+    canGenerateContinuations = canGenerateContinuations && !this->_lhs_aut.aut->IsRestriction();
+#   endif
+    if(canGenerateContinuations && this->_eval_early(lhs_result.second, underComplement)) {
         // Construct the pointer for symbol (either symbol or epsilon---nullptr)
 #       if (MEASURE_CONTINUATION_CREATION == true || MEASURE_ALL == true)
         ++this->_contCreationCounter;
@@ -1117,7 +1119,7 @@ void SymbolicAutomaton::AutomatonToDot(std::string filename, SymbolicAutomaton *
 
 void BinaryOpAutomaton::DumpToDot(std::ofstream & os, bool inComplement) {
     os << "\t" << (uintptr_t) &*this << "[label=\"";
-    os << this->_form->dag_height << "\\n";
+    os << this->_factory.ToSimpleStats() << "\\n";
     os << "\u03B5 " << (inComplement ? "\u2209 " : "\u2208 ");
     if(this->_productType == ProductType::E_INTERSECTION) {
         os << "\u2229";
@@ -1137,7 +1139,7 @@ void BinaryOpAutomaton::DumpToDot(std::ofstream & os, bool inComplement) {
 
 void ComplementAutomaton::DumpToDot(std::ofstream & os, bool inComplement) {
     os << "\t" << (uintptr_t) &*this << "[label=\"";
-    os << this->_form->dag_height << "\\n";
+    os << this->_factory.ToSimpleStats() << "\\n";
     os << "\u03B5 " << (inComplement ? "\u2209 " : "\u2208 ");
     os << "\u00AC\\n(" << this->_trueCounter << "\u22A8, " << this->_falseCounter << "\u22AD)\"";
     if(this->_trueCounter == 0 && this->_falseCounter != 0) {
@@ -1150,7 +1152,7 @@ void ComplementAutomaton::DumpToDot(std::ofstream & os, bool inComplement) {
 
 void ProjectionAutomaton::DumpToDot(std::ofstream & os, bool inComplement) {
     os << "\t" << (uintptr_t) &*this << "[label=\"";
-    os << this->_form->dag_height << "\\n";
+    os << this->_factory.ToSimpleStats() << "\\n";
     os << "\u03B5 " << (inComplement ? "\u2209 " : "\u2208 ");
     os << "\u2203";
     for(auto id = this->projectedVars->begin(); id != this->projectedVars->end(); ++id) {
@@ -1167,11 +1169,14 @@ void ProjectionAutomaton::DumpToDot(std::ofstream & os, bool inComplement) {
 
 void BaseAutomaton::DumpToDot(std::ofstream & os, bool inComplement) {
     os << "\t" << (uintptr_t) &*this << "[label=\"";
-    os << this->_form->dag_height << "\\n";
+    os << this->_factory.ToSimpleStats() << "\\n";
     os << "\u03B5 " << (inComplement ? "\u2209 " : "\u2208 ") << this->_form->ToString();
     os << "\\n(" << this->_trueCounter << "\u22A8, " << this->_falseCounter << "\u22AD)\"";
     if(this->_trueCounter == 0 && this->_falseCounter != 0) {
         os << ",style=filled, fillcolor=red";
+    }
+    if(this->_isRestriction) {
+        os << ", shape=rect";
     }
     os << "];\n";
 

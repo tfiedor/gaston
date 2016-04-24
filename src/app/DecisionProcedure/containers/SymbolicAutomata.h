@@ -108,6 +108,7 @@ public:
 
     // <<< PUBLIC API >>>
     void MarkAsRestriction() { this->_isRestriction = true; }
+    bool IsRestriction() { return this->_isRestriction; };
     void IncReferences() {++this->_refs;}
     void DecReferences() {assert(this->_refs > 0); --this->_refs; if(this->_refs < 1) delete this;}
     void InitializeStates();

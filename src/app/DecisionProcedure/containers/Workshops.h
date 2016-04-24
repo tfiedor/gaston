@@ -138,6 +138,7 @@ namespace Workshops {
         TermFixpoint* GetUniqueFixpoint(TermFixpoint*&);
         TermList* CreateList(Term_ptr const&, bool);
         Term* CreateContinuation(SymbolicAutomaton*, Term* const&, Symbol*, bool);
+        std::string ToSimpleStats();
 
         void Dump();
     };

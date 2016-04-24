@@ -173,8 +173,8 @@ public:
 #define DEBUG_MONA_CODE_FORMULA			false
 #define DEBUG_RESTRICTIONS				false
 #define DEBUG_FIXPOINT 				    false
-#define DEBUG_FIXPOINT_WORKLIST			true
-#define DEBUG_FIXPOINT_SYMBOLS		    true
+#define DEBUG_FIXPOINT_WORKLIST		    false
+#define DEBUG_FIXPOINT_SYMBOLS		    false
 #define DEBUG_FIXPOINT_SYMBOLS_INIT     false
 #define DEBUG_INITIAL_APPROX 			false
 #define DEBUG_INTERSECT_NON_EMPTY 	    false
@@ -184,7 +184,7 @@ public:
 #define DEBUG_TERM_SUBSUMED_BY 			false
 #define DEBUG_TERM_CACHE_COMPARISON		false
 #define DEBUG_SYMBOL_CREATION			true
-#define DEBUG_CACHE_MEMBERS				true
+#define DEBUG_CACHE_MEMBERS			    false
 #define DEBUG_CACHE_BUCKETS				false
 #define DEBUG_CACHE_MEMBERS_HASH		true
 #define DEBUG_CONTINUATIONS 			false
@@ -210,7 +210,7 @@ public:
 #define PRINT_STATS_PRODUCT				true
 #define PRINT_STATS_NEGATION			true
 #define PRINT_STATS_BASE				true
-#define PRINT_STATS					    false
+#define PRINT_STATS					    true
 
 /* >>> Dumping Options <<< *
  ***************************/
@@ -225,7 +225,7 @@ public:
 #define MEASURE_CACHE_BUCKETS			false   // < Prints the statistics for cache buckets
 #define MEASURE_CONTINUATION_CREATION	true	// < Measures how many continuations are created
 #define MEASURE_CONTINUATION_EVALUATION	true	// < Measures how many continuations are actually unfolded
-#define MEASURE_RESULT_HITS				false   // < Measure how many times the result hits in cache
+#define MEASURE_RESULT_HITS				true    // < Measure how many times the result hits in cache
 #define MEASURE_SYMBOLS					true	// < Measure how many symbols are created
 #define MEASURE_PROJECTION				true	// < Measures several things about projection (how many steps, how big, etc.)
 #define MEASURE_POSTPONED				true	// < Measures how many terms are postponed and how many are processed
@@ -274,9 +274,10 @@ public:
 #define OPT_CREATE_QF_AUTOMATON 			true    // < Transform quantifier-free automaton to formula
 #define OPT_REDUCE_AUT_EVERYTIME			false	// (-) < Call reduce everytime VATA automaton is created (i.e. as intermediate result)
 #define OPT_REDUCE_AUT_LAST					true	// < Call reduce after the final VATA automaton is created
-#define OPT_EARLY_EVALUATION 				true    // < Evaluates early interesection of product
+#define OPT_EARLY_EVALUATION 				false   // < Evaluates early interesection of product
 #define OPT_EARLY_PARTIAL_SUB				true    // < Postpone the partially subsumed terms
-#define OPT_CONT_ONLY_WHILE_UNSAT			true	// < Generate continuation only if there wasn't found (un)satisfying (counter)example yet
+#define OPT_CONT_ONLY_WHILE_UNSAT			false	// < Generate continuation only if there wasn't found (un)satisfying (counter)example yet
+#define OPT_CONT_ONLY_FOR_NONRESTRICTED		true	// < Generate continuations only for pairs that do not contain restrictions
 #define OPT_PRUNE_EMPTY						true	// < Prune terms by empty set
 #define OPT_REDUCE_FIXPOINT_EVERYTIME		false	// (-) < Prune the fixpoint everytime any iterator is invalidated
 #define OPT_REDUCE_PREFIXPOINT				true	// < Prune the fixpoint when returning pre (i.e. fixpoint - symbol)

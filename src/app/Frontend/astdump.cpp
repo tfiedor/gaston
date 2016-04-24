@@ -111,7 +111,11 @@ ASTTerm1_Var1::dump()
 
 std::string ASTTerm1_Var1::ToString(bool no_utf) {
   if(no_utf) {
-    return std::string(symbolTable.lookupSymbol(n));
+    std::string s = std::string(symbolTable.lookupSymbol(n));
+    if (s[0] == '<')
+      return s.substr(1, s.length()-2);
+    else
+      return s;
   } else {
     return (std::string(symbolTable.lookupSymbol(n)) + "\u00B9");
   }
@@ -239,7 +243,11 @@ ASTTerm2_Var2::dump()
 
 std::string ASTTerm2_Var2::ToString(bool no_utf) {
   if(no_utf) {
-    return std::string(symbolTable.lookupSymbol(n));
+    std::string s = std::string(symbolTable.lookupSymbol(n));
+    if (s[0] == '<')
+      return s.substr(1, s.length()-2);
+    else
+      return s;
   } else {
     return (std::string(symbolTable.lookupSymbol(n)) + "\u00B2");
   }
@@ -691,6 +699,7 @@ ASTForm_Ex1::dump()
 
 std::string quantifier_to_string(IdentList* free, std::string quantifier) {
   std::string s(quantifier);
+  std::string var("");
   s += " ";
   bool first = true;
   for (auto it = free->begin(); it != free->end(); ++it) {
@@ -699,7 +708,8 @@ std::string quantifier_to_string(IdentList* free, std::string quantifier) {
     } else {
       s += ", ";
     }
-    s += std::string(symbolTable.lookupSymbol(*it));
+    var = std::string(symbolTable.lookupSymbol(*it));
+    s += (var[0] == '<' ? var.substr(1, var.length()-2) : var);
   }
   s += ": ";
   return s;

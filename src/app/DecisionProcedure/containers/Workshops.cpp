@@ -345,6 +345,17 @@ namespace Workshops {
         }
     }
 
+    std::string TermWorkshop::ToSimpleStats() {
+        std::string out("");
+        out += (this->_bCache != nullptr ? std::to_string(this->_bCache->GetSize()) + "b, " : "");
+        out += (this->_compCache != nullptr ? std::to_string(this->_compCache->GetSize()) + "uf, " : "");
+        out += (this->_pCache != nullptr ? std::to_string(this->_pCache->GetSize()) + "p, " : "");
+        out += (this->_contCache != nullptr ? std::to_string(this->_contCache->GetSize()) + "c, " : "");
+        out += (this->_fpCache != nullptr ? std::to_string(this->_fpCache->GetSize()) + "fp, " : "");
+        out += (this->_fppCache != nullptr ? std::to_string(this->_fppCache->GetSize()) + "fpp, " : "");
+        return out;
+    }
+
     NEVER_INLINE SymbolWorkshop::SymbolWorkshop() {
         this->_symbolCache = new SymbolCache();
         this->_trimmedSymbolCache = new SymbolCache();

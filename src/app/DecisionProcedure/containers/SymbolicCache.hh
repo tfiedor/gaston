@@ -323,6 +323,10 @@ public:
 		return size;
 	}
 
+	int GetSize() {
+		return this->_cache.size();
+	}
+
 	inline const_iterator begin() const{
 		return this->_cache.begin();
 	}
