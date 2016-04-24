@@ -23,12 +23,13 @@
 #include "../mtbdd/ondriks_mtbdd.hh"
 #include "../mtbdd/monawrapper.hh"
 #include "../utils/Symbol.h"
-#include "../environment.hh"
+#include "../utils/Timer.h"
 #include "../containers/SymbolicCache.hh"
+#include "../containers/VarToTrackMap.hh"
 #include "../containers/Workshops.h"
 #include "../../Frontend/ident.h"
 #include "../../Frontend/ast.h"
-#include "../containers/VarToTrackMap.hh"
+#include "../environment.hh"
 #include <vector>
 #include <vata/util/binary_relation.hh>
 #include <string>
@@ -82,6 +83,9 @@ protected:
     VarList _freeVars;
     Term_ptr _satExample = nullptr;
     Term_ptr _unsatExample = nullptr;
+#   if (MEASURE_SUBAUTOMATA_TIMING == true)
+    ChronoTimer timer;
+#   endif
     unsigned int _refs;
     bool marked = false;
     bool _isRestriction = false;

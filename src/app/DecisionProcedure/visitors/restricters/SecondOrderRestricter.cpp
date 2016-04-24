@@ -78,6 +78,8 @@ AST* SecondOrderRestricter::_firstOrderRestrict(FirstOrderQuantification* form) 
         restrictedFormula = new SecondOrderQuantification(nullptr, new IdentList(it), binopForm, Pos());
     }
 
+    restrictedFormula->fixpoint_number = form->fixpoint_number;
+
     // Free the previous form
     form->detach();
     delete form;
@@ -100,6 +102,7 @@ AST* SecondOrderRestricter::_secondOrderRestrict(SecondOrderQuantification *form
         restrictedFormula = new SecondOrderQuantification(nullptr, new IdentList(it), binopForm, form->pos);
     }
 
+    restrictedFormula->fixpoint_number = form->fixpoint_number;
 
     form->detach();
     delete form;

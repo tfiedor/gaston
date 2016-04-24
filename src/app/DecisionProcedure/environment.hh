@@ -173,7 +173,7 @@ public:
 #define DEBUG_MONA_CODE_FORMULA			false
 #define DEBUG_RESTRICTIONS				false
 #define DEBUG_FIXPOINT 				    false
-#define DEBUG_FIXPOINT_WORKLIST		    false
+#define DEBUG_FIXPOINT_WORKLIST		    true
 #define DEBUG_FIXPOINT_SYMBOLS		    false
 #define DEBUG_FIXPOINT_SYMBOLS_INIT     false
 #define DEBUG_INITIAL_APPROX 			false
@@ -207,9 +207,10 @@ public:
  * >>> Automata stats options
  *****************************/
 #define PRINT_STATS_PROJECTION			true
-#define PRINT_STATS_PRODUCT				true
-#define PRINT_STATS_NEGATION			true
-#define PRINT_STATS_BASE				true
+#define PRINT_STATS_QF_PROJECTION		true
+#define PRINT_STATS_PRODUCT			    false
+#define PRINT_STATS_NEGATION			false
+#define PRINT_STATS_BASE				false
 #define PRINT_STATS					    true
 
 /* >>> Dumping Options <<< *
@@ -233,6 +234,7 @@ public:
 #define MEASURE_COMPARISONS				false	// < Measure how many times we sucessfully compared and how
 #define MEASURE_SUBSUMEDBY_HITS			true	// < Measure how many times subsumedBy cache worked
 #define MEASURE_AUTOMATA_METRICS		true	// < Measure stuff like number of nodes and stuff in resulting automaton
+#define MEASURE_SUBAUTOMATA_TIMING		false    // < Every SA will have a timer that will time how much time the isect does
 
 /* >>> Anti-Prenexing Options <<< *
  **********************************/

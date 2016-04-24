@@ -20,9 +20,9 @@
 #include "../environment.hh"
 #include "../containers/VarToTrackMap.hh"
 #include "../containers/Workshops.h"
+#include "../utils/Timer.h"
 #include "../../Frontend/dfa.h"
 #include "../../Frontend/symboltable.h"
-#include "../../Frontend/timer.h"
 
 extern VarToTrackMap varMap;
 extern SymbolTable symbolTable;
@@ -191,12 +191,18 @@ UnionAutomaton::UnionAutomaton(SymbolicAutomaton_raw lhs, SymbolicAutomaton_raw 
 ResultType SymbolicAutomaton::IntersectNonEmpty(Symbol* symbol, Term* stateApproximation, bool underComplement) {
     assert(this->type != AutType::SYMBOLIC_BASE);
     assert(stateApproximation != nullptr);
+#   if (MEASURE_SUBAUTOMATA_TIMING == true)
+    this->timer.Start();
+#   endif
     ResultType result;
 
     // Empty set needs not to be computed
     if(stateApproximation->type == TERM_EMPTY) {
         bool res = underComplement != stateApproximation->InComplement();
         this->_lastResult = res;
+#       if (MEASURE_SUBAUTOMATA_TIMING == true)
+        this->timer.Stop();
+#       endif
         return std::make_pair(stateApproximation, res);
     }
 
@@ -233,6 +239,9 @@ ResultType SymbolicAutomaton::IntersectNonEmpty(Symbol* symbol, Term* stateAppro
     if(stateApproximation->type == TERM_EMPTY) {
         bool res = underComplement != stateApproximation->InComplement();
         this->_lastResult = res;
+#       if (MEASURE_SUBAUTOMATA_TIMING == true)
+        this->timer.Stop();
+#       endif
         return std::make_pair(stateApproximation, res);
     }
 
@@ -248,6 +257,9 @@ ResultType SymbolicAutomaton::IntersectNonEmpty(Symbol* symbol, Term* stateAppro
 #       endif
         assert(result.first != nullptr);
         this->_lastResult = result.second;
+#       if (MEASURE_SUBAUTOMATA_TIMING == true)
+        this->timer.Stop();
+#       endif
         return result;
     }
     //}
@@ -303,6 +315,9 @@ ResultType SymbolicAutomaton::IntersectNonEmpty(Symbol* symbol, Term* stateAppro
     // Return results
     assert(result.first != nullptr);
     this->_lastResult = result.second;
+#   if (MEASURE_SUBAUTOMATA_TIMING == true)
+    this->timer.Stop();
+#   endif
     return result;
 }
 
@@ -1271,6 +1286,9 @@ void BinaryOpAutomaton::DumpComputationStats() {
 #   if (PRINT_STATS_PRODUCT == true)
     this->_form->dump();
     std::cout << "\n";
+#   if (MEASURE_SUBAUTOMATA_TIMING == true)
+    std::cout << "  \u2218 Workload time: "; this->timer.PrintElapsed();
+#   endif
     print_stat("Refs", this->_refs);
     std::cout << "  \u2218 Cache stats -> ";
 #       if (MEASURE_CACHE_HITS == true)
@@ -1286,8 +1304,8 @@ void BinaryOpAutomaton::DumpComputationStats() {
         print_stat("False Hits", this->_falseCounter);
         print_stat("Continuation Generation", this->_contCreationCounter);
         print_stat("Continuation Evaluation", this->_contUnfoldingCounter);
-#   endif
     std::cout << "\n";
+#   endif
     this->_lhs_aut.aut->DumpComputationStats();
     this->_rhs_aut.aut->DumpComputationStats();
 }
@@ -1298,30 +1316,39 @@ void ProjectionAutomaton::DumpComputationStats() {
     }
     this->marked = true;
 #   if (PRINT_STATS_PROJECTION == true)
-    this->_form->dump();
-    std::cout << "\n";
-    print_stat("Refs", this->_refs);
-    std::cout << "  \u2218 Cache stats -> ";
-#       if (MEASURE_CACHE_HITS == true)
-        this->_resCache.dumpStats();
+#       if (PRINT_STATS_QF_PROJECTION == true)
+        if (this->_form->fixpoint_number == 1){
 #       endif
-#       if (DEBUG_WORKSHOPS)
-        this->_factory.Dump();
+                this->_form->dump();
+                std::cout << "\n";
+#               if (MEASURE_SUBAUTOMATA_TIMING == true)
+                std::cout << "  \u2218 Workload time: "; this->timer.PrintElapsed();
+#               endif
+                print_stat("Refs", this->_refs);
+                std::cout << "  \u2218 Cache stats -> ";
+#           if (MEASURE_CACHE_HITS == true)
+                this->_resCache.dumpStats();
+#           endif
+#           if (DEBUG_WORKSHOPS)
+                this->_factory.Dump();
+#           endif
+#           if (DEBUG_SYMBOL_CREATION == true)
+                this->symbolFactory->Dump();
+#           endif
+#           if (MEASURE_PROJECTION == true)
+                print_stat("Fixpoint Nexts", this->fixpointNext);
+                print_stat("Fixpoint Results", this->fixpointRes);
+                print_stat("FixpointPre Nexts", this->fixpointPreNext);
+                print_stat("FixpointPre Results", this->fixpointPreRes);
+#           endif
+                print_stat("True Hits", this->_trueCounter);
+                print_stat("False Hits", this->_falseCounter);
+                print_stat("Continuation Evaluation", this->_contUnfoldingCounter);
+                std::cout << "\n";
+#       if (PRINT_STATS_QF_PROJECTION == true)
+        }
 #       endif
-#       if (DEBUG_SYMBOL_CREATION == true)
-        this->symbolFactory->Dump();
-#       endif
-#       if (MEASURE_PROJECTION == true)
-        print_stat("Fixpoint Nexts", this->fixpointNext);
-        print_stat("Fixpoint Results", this->fixpointRes);
-        print_stat("FixpointPre Nexts", this->fixpointPreNext);
-        print_stat("FixpointPre Results", this->fixpointPreRes);
-#       endif
-        print_stat("True Hits", this->_trueCounter);
-        print_stat("False Hits", this->_falseCounter);
-        print_stat("Continuation Evaluation", this->_contUnfoldingCounter);
 #   endif
-    std::cout << "\n";
     this->_aut.aut->DumpComputationStats();
 }
 
@@ -1333,6 +1360,9 @@ void ComplementAutomaton::DumpComputationStats() {
 #   if (PRINT_STATS_NEGATION == true)
     this->_form->dump();
     std::cout << "\n";
+#   if (MEASURE_SUBAUTOMATA_TIMING == true)
+    std::cout << "  \u2218 Workload time: "; this->timer.PrintElapsed();
+#   endif
     print_stat("Refs", this->_refs);
     std::cout << "  \u2218 Cache stats -> ";
 #       if (MEASURE_CACHE_HITS == true)
@@ -1347,8 +1377,8 @@ void ComplementAutomaton::DumpComputationStats() {
         print_stat("True Hits", this->_trueCounter);
         print_stat("False Hits", this->_falseCounter);
         print_stat("Continuation Evaluation", this->_contUnfoldingCounter);
-#   endif
     std::cout << "\n";
+#   endif
     this->_aut.aut->DumpComputationStats();
 }
 
@@ -1360,6 +1390,9 @@ void BaseAutomaton::DumpComputationStats() {
 #   if (PRINT_STATS_BASE == true)
     this->_form->dump();
     std::cout << "\n";
+#   if (MEASURE_SUBAUTOMATA_TIMING == true)
+    std::cout << "  \u2218 Workload time: "; this->timer.PrintElapsed();
+#   endif
     print_stat("Refs", this->_refs);
     std::cout << "  \u2218 Cache stats -> ";
 #       if (MEASURE_CACHE_HITS == true)
@@ -1374,8 +1407,8 @@ void BaseAutomaton::DumpComputationStats() {
         print_stat("True Hits", this->_trueCounter);
         print_stat("False Hits", this->_falseCounter);
         print_stat("Continuation Evaluation", this->_contUnfoldingCounter);
-#   endif
     std::cout << "\n";
+#   endif
 }
 
 void SymbolicAutomaton::DumpAutomatonMetrics() {

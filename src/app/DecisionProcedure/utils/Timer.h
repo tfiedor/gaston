@@ -21,28 +21,38 @@
 
 #include <chrono>
 
-struct Timer {
+struct ChronoTimer {
 private:
     std::uint64_t _startTime;
+    std::uint64_t _elapsed;
+    bool _running = false;
 
     const unsigned long hour = 360000;
     const unsigned long min  = 6000;
     const unsigned long sec  = 100;
 
 public:
-    Timer() : _startTime(_takeTimeStamp()) {}
+    ChronoTimer() : _startTime(0), _elapsed(0) {}
 
 public:
-    void Restart() {
+    void Start() {
         _startTime = _takeTimeStamp();
+        _running = true;
+    }
+
+    void Stop() {
+        if(_running) {
+            _elapsed += GetTimeElapsed();
+            _running = false;
+        }
     }
 
     std::uint64_t GetTimeElapsed() {
         return (_takeTimeStamp() - _startTime)*1e-7;
     }
 
-    void Elapsed() {
-        std::uint64_t t = GetTimeElapsed(), hours, mins, secs;
+    void PrintElapsed() {
+        std::uint64_t t = _elapsed, hours, mins, secs;
 
         hours = t / hour;
         t -= hours * hour;
@@ -58,7 +68,7 @@ public:
 
 protected:
     static std::uint64_t _takeTimeStamp() {
-        return std::chrono::duraction_cast<std::chrono::nanoseconds>(std::chrono::steady_clock::now().time_since_epoch()).count();
+        return std::chrono::duration_cast<std::chrono::nanoseconds>(std::chrono::steady_clock::now().time_since_epoch()).count();
     }
 };
 

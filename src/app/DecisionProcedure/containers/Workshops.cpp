@@ -241,11 +241,6 @@ namespace Workshops {
 
             Term* termPtr = nullptr;
             Symbol* symbolKey = symbol;
-            // Fixme: Is this needed?
-            /*ProjectionAutomaton* projectionAutomaton = static_cast<ProjectionAutomaton*>(this->_aut);
-            for(auto it = projectionAutomaton->projectedVars->begin(); it != projectionAutomaton->projectedVars->end(); ++it) {
-                symbolKey = this->_aut->symbolFactory->CreateSymbol(symbol, (*it), 'X');
-            }*/
 
             auto fixpointKey = std::make_pair(source, symbol);
             if(!this->_fppCache->retrieveFromCache(fixpointKey, termPtr)) {
@@ -509,9 +504,9 @@ namespace Workshops {
 
     void dumpFixpointKey(FixpointKey const&s) {
         if(s.second != nullptr) {
-            std::cout << "<" << (*s.first) << ", " << (*s.second) << ">";
+            std::cout << "<[" << (s.first) << "]" << (*s.first) << ", " << (*s.second) << ">";
         } else {
-            std::cout << "<" << (*s.first) << ", \u0437>";
+            std::cout << "<[" << (s.first) << "]" << (*s.first) << ", \u0437>";
         }
     }
 
