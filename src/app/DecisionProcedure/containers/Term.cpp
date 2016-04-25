@@ -65,56 +65,56 @@ size_t TermContinuation::unfoldInIsectNonempty = 0;
 
 extern Ident lastPosVar, allPosVar;
 
-// <<< TERM CONSTRUCTORS AND DESTRUCTORS >>>
-Term::Term(): link{ nullptr, nullptr, 0} {}
-Term::~Term() {}
+    // <<< TERM CONSTRUCTORS AND DESTRUCTORS >>>
+    Term::Term(): link{ nullptr, nullptr, 0} {}
+    Term::~Term() {}
 
-TermEmpty::TermEmpty(bool inComplement) {
-    #if (MEASURE_STATE_SPACE == true)
-    ++TermEmpty::instances;
-    #endif
-    this->_inComplement = inComplement;
-    this->type = TERM_EMPTY;
+    TermEmpty::TermEmpty(bool inComplement) {
+                                                #if (MEASURE_STATE_SPACE == true)
+                                                ++TermEmpty::instances;
+                                                #endif
+                                                this->_inComplement = inComplement;
+                                                this->type = TERM_EMPTY;
 
-    // Initialization of state space
-    this->stateSpace = 0;
-    this->stateSpaceApprox = 0;
+                                                // Initialization of state space
+                                                this->stateSpace = 0;
+                                                this->stateSpaceApprox = 0;
 
-    #if (DEBUG_TERM_CREATION == true)
-    std::cout << "[" << this << "]";
-    std::cout << "TermEmpty::";
-    this->dump();
-    std::cout << "\n";
-    #endif
-}
+                                                #if (DEBUG_TERM_CREATION == true)
+                                                std::cout << "[" << this << "]";
+                                                std::cout << "TermEmpty::";
+                                                this->dump();
+                                                std::cout << "\n";
+                                                #endif
+                                                }
 
-/*Term::~Term() {
-    this->_isSubsumedCache.clear();
-}*/
+    /*Term::~Term() {
+        this->_isSubsumedCache.clear();
+        }*/
 
-/**
- * Constructor of Term Product---construct intersecting product of
- * @p lhs and @p rhs
- *
- * @param[in] lhs:  left operand of term intersection
- * @param[in] rhs:  right operand of term intersection
- */
-TermProduct::TermProduct(Term_ptr lhs, Term_ptr rhs, ProductType pt) : left(lhs), right(rhs) {
-    #if (MEASURE_STATE_SPACE == true)
-    ++TermProduct::instances;
-    #endif
+    /**
+        * Constructor of Term Product---construct intersecting product of
+        * @p lhs and @p rhs
+        *
+        * @param[in] lhs:  left operand of term intersection
+        * @param[in] rhs:  right operand of term intersection
+        */
+    TermProduct::TermProduct(Term_ptr lhs, Term_ptr rhs, ProductType pt) : left(lhs), right(rhs) {
+        #if (MEASURE_STATE_SPACE == true)
+        ++TermProduct::instances;
+        #endif
 
-    this->_inComplement = false;
-    this->type = TermType::TERM_PRODUCT;
-    this->subtype = pt;
+        this->_inComplement = false;
+        this->type = TermType::TERM_PRODUCT;
+        this->subtype = pt;
 
-    // Initialization of state space
-    if(this->left->stateSpace != 0 && this->right->stateSpace != 0) {
-        this->stateSpace = this->left->stateSpace + this->right->stateSpace +1;
-    } else {
-        this->stateSpace = 0;
-    }
-    this->stateSpaceApprox = this->left->stateSpaceApprox + this->right->stateSpaceApprox + 1;
+        // Initialization of state space
+        if(this->left->stateSpace != 0 && this->right != nullptr &&  this->right->stateSpace != 0) {
+            this->stateSpace = this->left->stateSpace + this->right->stateSpace +1;
+        } else {
+            this->stateSpace = 0;
+        }
+    this->stateSpaceApprox = this->left->stateSpaceApprox + (this->right != nullptr ? this->right->stateSpaceApprox : 0) + 1;
 
     #if (DEBUG_TERM_CREATION == true)
     std::cout << "TermProduct::";
@@ -148,7 +148,7 @@ TermBaseSet::~TermBaseSet() {
     this->states.clear();
 }
 
-TermContinuation::TermContinuation(SymbolicAutomaton* a, Term* t, SymbolType* s, bool b) : aut(a), term(t), symbol(s), underComplement(b) {
+TermContinuation::TermContinuation(SymbolicAutomaton* a, Term* t, SymbolType* s, bool b, bool lazy) : aut(a), term(t), symbol(s), underComplement(b), lazyEval(lazy) {
     #if (DEBUG_TERM_CREATION == true)
     std::cout << "[" << this << "]";
     std::cout << "TermContinuation::";
@@ -158,13 +158,13 @@ TermContinuation::TermContinuation(SymbolicAutomaton* a, Term* t, SymbolType* s,
     #if (MEASURE_STATE_SPACE == true)
     ++TermContinuation::instances;
     #endif
-    assert(t != nullptr);
+    assert(t != nullptr || lazyEval);
 
     this->type = TERM_CONTINUATION;
 
     // Initialization of state space
     this->stateSpace = 0;
-    this->stateSpaceApprox = t->stateSpaceApprox;
+    this->stateSpaceApprox = (t == nullptr ? 0 : t->stateSpaceApprox);
 
     #if (DEBUG_CONTINUATIONS == true)
     std::cout << "Postponing computation as [";
@@ -311,7 +311,7 @@ bool Term::IsNotComputed() {
         return !static_cast<TermContinuation *>(this)->IsUnfolded();
     } else if(this->type == TERM_PRODUCT) {
         TermProduct* termProduct = static_cast<TermProduct*>(this);
-        return termProduct->left->IsNotComputed() || termProduct->right->IsNotComputed();
+        return termProduct->left->IsNotComputed() || (termProduct->right == nullptr || termProduct->right->IsNotComputed());
     } else {
         return false;
     }
@@ -1282,6 +1282,13 @@ FixpointTermSem TermFixpoint::GetSemantics() const {
 // <<< ADDITIONAL TERMCONTINUATION FUNCTIONS >>>
 Term* TermContinuation::unfoldContinuation(UnfoldedInType t) {
     if(this->_unfoldedTerm == nullptr) {
+        if(lazyEval) {
+            assert(this->aut->type == AutType::INTERSECTION || this->aut->type == AutType::UNION);
+            BinaryOpAutomaton* boAutomaton = static_cast<BinaryOpAutomaton*>(this->aut);
+            std::tie(this->aut, this->term) = boAutomaton->LazyInit(this->term);
+            lazyEval = false;
+        }
+
         this->_unfoldedTerm = (this->aut->IntersectNonEmpty(
                 (this->symbol == nullptr ? nullptr : this->symbol), this->term, this->underComplement)).first;
         #if (MEASURE_CONTINUATION_EVALUATION == true)

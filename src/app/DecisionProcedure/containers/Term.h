@@ -230,6 +230,7 @@ public:
     SymbolicAutomaton* aut;             // [4B] << Link to the automaton for computation
     Term* term;                         // [4B] << Term we postponed the evaluation on
     SymbolType* symbol;                 // [4B] << Symbol we were subtracting from the term
+    bool lazyEval = false;              // [1B] << The automaton will be lazily constructed
     bool underComplement;               // [1B] << Whether we were doing the membership or nonmembership
     // TODO: ^-- This is maybe redundant with _nonmembershipTesting??
 
@@ -240,7 +241,7 @@ public:
     static size_t unfoldInIsectNonempty;
 
     // <<< CONSTRUCTORS >>>
-    NEVER_INLINE TermContinuation(SymbolicAutomaton*, Term*, SymbolType*, bool);
+    NEVER_INLINE TermContinuation(SymbolicAutomaton*, Term*, SymbolType*, bool, bool lazy = false);
 
     // <<< PUBLIC API >>>
     SubsumptionResult IsSubsumedBy(FixpointType& fixpoint, Term*&);

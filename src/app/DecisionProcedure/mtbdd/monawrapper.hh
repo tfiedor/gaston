@@ -15,6 +15,7 @@
 #include <assert.h>
 #include <string>
 #include <boost/dynamic_bitset.hpp>
+#include <boost/functional/hash.hpp>
 
 extern VarToTrackMap varMap;
 
@@ -22,9 +23,13 @@ template<class Data>
 class MonaWrapper
 {
 private:
+    template<class T>
+    struct WrappedCompare;
+
     struct WrappedNode
     {
-        std::unordered_set<struct WrappedNode *> pred_[2];
+
+        std::unordered_set<struct WrappedNode*, boost::hash<struct WrappedNode*>, WrappedCompare<struct WrappedNode*>> pred_[2];
         unsigned node_;
         int var_;
 
@@ -34,16 +39,24 @@ private:
         }
     };
 
+    template<class Key>
+    struct WrappedCompare : public std::binary_function<Key, Key, bool> {
+        bool operator()(Key const& lhs, Key const& rhs) const {
+            return lhs->node_ == rhs->node_ && lhs->var_ == rhs->var_;
+        }
+    };
+
     using DataType = Data;
     using VectorType = VATA::Util::OrdVector<Data>;
     using WrappedNode = struct WrappedNode;
     using InternalNodesType = std::unordered_map<unsigned, WrappedNode *>;
-    using SetType = std::unordered_set<WrappedNode *>;
+    using HashType = boost::hash<WrappedNode*>;
+    using SetType = std::unordered_set<WrappedNode*, HashType, WrappedCompare<WrappedNode*>>;
     using CacheType = std::unordered_map<size_t, VectorType>;
 
 protected:
-    std::vector<WrappedNode *> roots_;
-    std::vector<WrappedNode *> leafNodes_;
+    std::vector<WrappedNode*> roots_;
+    std::vector<WrappedNode*> leafNodes_;
     InternalNodesType internalNodes_;
     DFA *dfa_;
     unsigned numVars_;
@@ -176,13 +189,13 @@ private:
 
     VectorType RecPre(const SetType &nodes, int var)
     {
-        SetType res;
-
         --var;
         if(var < 0)
         {
             return CreateResultSet(nodes);
         }
+
+        SetType res;
 
         if(symbol_[var << 1] & symbol_[(var << 1) + 1])
         {

@@ -121,7 +121,12 @@ SymbolicAutomaton* ASTForm_And::_toSymbolicAutomatonCore(bool doComplement) {
     SymbolicAutomaton* lhs_aut;
     lhs_aut = this->f1->toSymbolicAutomaton(doComplement);
     SymbolicAutomaton* rhs_aut;
+#   if (OPT_EARLY_EVALUATION == true)
+    // This automaton will be constructed lazily
+    rhs_aut = nullptr;
+#   else
     rhs_aut = this->f2->toSymbolicAutomaton(doComplement);
+#   endif
     return new IntersectionAutomaton(lhs_aut, rhs_aut, this);
 }
 
@@ -129,7 +134,11 @@ SymbolicAutomaton* ASTForm_Or::_toSymbolicAutomatonCore(bool doComplement) {
     SymbolicAutomaton* lhs_aut;
     lhs_aut = this->f1->toSymbolicAutomaton(doComplement);
     SymbolicAutomaton* rhs_aut;
+#   if (OPT_EARLY_EVALUATION == true)
+    rhs_aut = nullptr;
+#   else
     rhs_aut = this->f2->toSymbolicAutomaton(doComplement);
+#   endif
     return new UnionAutomaton(lhs_aut, rhs_aut, this);
 }
 

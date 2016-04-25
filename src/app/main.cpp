@@ -80,7 +80,7 @@ VarToTrackMap varMap;
 int numTypes = 0;
 bool regenerate = false;
 char *inputFileName = NULL;
-Timer timer_conversion, timer_mona, timer_base, timer_automaton, timer_preprocess;
+Timer timer_conversion, timer_mona, timer_base, timer_automaton, timer_preprocess, timer_parse, timer_closure;
 Timer timer_gaston;
 
 //extern void (*mona_callback)();
@@ -197,8 +197,12 @@ int main(int argc, char *argv[]) {
 
 	timer_gaston.start();
     Checker *checker = new SymbolicChecker();
+	timer_parse.start();
     checker->LoadFormulaFromFile();
+	timer_parse.stop();
+	timer_closure.start();
     checker->CloseUngroundFormula();
+	timer_closure.stop();
     checker->PreprocessFormula();
 
     if(options.monaWalk) {

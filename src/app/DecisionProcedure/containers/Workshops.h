@@ -137,7 +137,7 @@ namespace Workshops {
         TermFixpoint* CreateFixpointPre(Term_ptr const&, Symbol*, bool);
         TermFixpoint* GetUniqueFixpoint(TermFixpoint*&);
         TermList* CreateList(Term_ptr const&, bool);
-        Term* CreateContinuation(SymbolicAutomaton*, Term* const&, Symbol*, bool);
+        Term* CreateContinuation(SymbolicAutomaton*, Term* const&, Symbol*, bool, bool lazy = false);
         std::string ToSimpleStats();
 
         void Dump();

@@ -183,6 +183,7 @@ public:
     // <<< PUBLIC API >>>
     virtual Term* Pre(Symbol*, Term*, bool);
     virtual bool WasLastExampleValid();
+    std::pair<SymbolicAutomaton*, Term_ptr> LazyInit(Term_ptr);
 
     // <<< DUMPING FUNCTIONS >>>
     virtual void DumpAutomaton();

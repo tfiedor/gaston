@@ -88,14 +88,22 @@ BinaryOpAutomaton::BinaryOpAutomaton(SymbolicAutomaton_raw lhs, SymbolicAutomato
         : SymbolicAutomaton(form), _lhs_aut(lhs), _rhs_aut(rhs) {
     type = AutType::BINARY;
     lhs->IncReferences();
-    rhs->IncReferences();
     this->_lhs_aut.InitializeSymLink(reinterpret_cast<ASTForm_ff*>(this->_form)->f1);
+#   if (OPT_EARLY_EVALUATION == true)
+    // We will do the lazy initialization by ourselves;
+    assert(rhs == nullptr);
+    this->_rhs_aut.aut = nullptr;
+#   else
+    rhs->IncReferences();
     this->_rhs_aut.InitializeSymLink(reinterpret_cast<ASTForm_ff*>(this->_form)->f2);
+#   endif
 }
 
 BinaryOpAutomaton::~BinaryOpAutomaton() {
     this->_lhs_aut.aut->DecReferences();
-    this->_rhs_aut.aut->DecReferences();
+    if(this->_rhs_aut.aut != nullptr) {
+        this->_rhs_aut.aut->DecReferences();
+    }
 }
 
 ComplementAutomaton::ComplementAutomaton(SymbolicAutomaton *aut, Formula_ptr form)
@@ -277,7 +285,7 @@ ResultType SymbolicAutomaton::IntersectNonEmpty(Symbol* symbol, Term* stateAppro
         if(stateApproximation->type == TERM_PRODUCT) {
             // If either side is not fully computed, we do not cache it
             TermProduct* tProduct = reinterpret_cast<TermProduct*>(stateApproximation);
-            inCache = tProduct->left->IsNotComputed() || tProduct->right->IsNotComputed();
+            inCache = tProduct->left->IsNotComputed() || tProduct->right == nullptr || tProduct->right->IsNotComputed();
         }
 #       endif
 #       if (OPT_DONT_CACHE_UNFULL_FIXPOINTS == true)
@@ -411,10 +419,6 @@ ResultType RootProjectionAutomaton::IntersectNonEmpty(Symbol* symbol, Term* fina
  * @return: Final states of automaton as Term
  */
 Term_ptr SymbolicAutomaton::GetFinalStates() {
-    if(this->_finalStates == nullptr) {
-        this->_InitializeFinalStates();
-    }
-
     return this->_finalStates;
 }
 
@@ -424,10 +428,6 @@ Term_ptr SymbolicAutomaton::GetFinalStates() {
  * @return: Initial states of automaton as Term
  */
 Term_ptr SymbolicAutomaton::GetInitialStates() {
-    if(this->_initialStates == nullptr) {
-        this->_InitializeInitialStates();
-    }
-
     return this->_initialStates;
 }
 
@@ -489,7 +489,12 @@ void BinaryOpAutomaton::_InitializeInitialStates() {
     #if (DEBUG_NO_WORKSHOPS)
     this->_initialStates = new TermProduct(this->_lhs_aut.aut->GetInitialStates(), this->_rhs_aut.aut->GetInitialStates(), this->_productType);
     #else
+#   if (OPT_EARLY_EVALUATION == true)
+    this->_initialStates = this->_factory.CreateProduct(this->_lhs_aut.aut->GetInitialStates(),
+          (this->_rhs_aut.aut == nullptr ? nullptr : this->_rhs_aut.aut->GetInitialStates()), this->_productType);
+#   else
     this->_initialStates = this->_factory.CreateProduct(this->_lhs_aut.aut->GetInitialStates(), this->_rhs_aut.aut->GetInitialStates(), this->_productType);
+#   endif
     #endif
 }
 
@@ -523,7 +528,12 @@ void BinaryOpAutomaton::_InitializeFinalStates() {
     #if (DEBUG_NO_WORKSHOPS == true)
     this->_finalStates = new TermProduct(this->_lhs_aut.aut->GetFinalStates(), this->_rhs_aut.aut->GetFinalStates(), this->_productType);
     #else
+#   if (OPT_EARLY_EVALUATION == true)
+    this->_finalStates = this->_factory.CreateProduct(this->_lhs_aut.aut->GetFinalStates(),
+          (this->_rhs_aut.aut == nullptr) ? nullptr : this->_rhs_aut.aut->GetFinalStates(), this->_productType);
+#   else
     this->_finalStates = this->_factory.CreateProduct(this->_lhs_aut.aut->GetFinalStates(), this->_rhs_aut.aut->GetFinalStates(), this->_productType);
+#   endif
     #endif
 }
 
@@ -669,7 +679,13 @@ ResultType BinaryOpAutomaton::_IntersectNonEmptyCore(Symbol* symbol, Term* final
         TermContinuation *continuation = new TermContinuation(this->_rhs_aut.aut, productStateApproximation->right, symbol, underComplement);
         Term_ptr leftCombined = new TermProduct(lhs_result.first, continuation, this->_productType);
 #       else
-        Term* continuation = this->_factory.CreateContinuation(this->_rhs_aut.aut, productStateApproximation->right, symbol, underComplement);
+        Term *continuation;
+        if(this->_rhs_aut.aut == nullptr) {
+            continuation = this->_factory.CreateContinuation(this, productStateApproximation->right, symbol, underComplement, true);
+        } else {
+            continuation = this->_factory.CreateContinuation(this->_rhs_aut.aut, productStateApproximation->right,
+                                                                   symbol, underComplement);
+        }
         Term_ptr leftCombined = this->_factory.CreateProduct(lhs_result.first, continuation, this->_productType);
 #       endif
         return std::make_pair(leftCombined, this->_early_val(underComplement));
@@ -677,6 +693,11 @@ ResultType BinaryOpAutomaton::_IntersectNonEmptyCore(Symbol* symbol, Term* final
 #   endif
 
     // Otherwise compute the right side and return full fixpoint
+#   if (OPT_EARLY_EVALUATION == true)
+    if(this->_rhs_aut.aut == nullptr) {
+        std::tie(this->_rhs_aut.aut, productStateApproximation->right) = this->LazyInit(productStateApproximation->right);
+    }
+#   endif
     ResultType rhs_result = this->_rhs_aut.aut->IntersectNonEmpty(this->_rhs_aut.ReMapSymbol(symbol), productStateApproximation->right, underComplement);
     // We can prune the state if right side was evaluated as Empty term
     // TODO: This is different for Unionmat!
@@ -965,7 +986,11 @@ void BinaryOpAutomaton::DumpAutomaton() {
     } else {
         std::cout << "\033[1;33m \u222A \033[0m";
     };
-    this->_rhs_aut.aut->DumpAutomaton();
+    if(this->_rhs_aut.aut != nullptr) {
+        this->_rhs_aut.aut->DumpAutomaton();
+    } else {
+        std::cout << "??";
+    }
     if(this->type == AutType::INTERSECTION) {
         std::cout << "\033[1;32m";
     } else {
@@ -1149,7 +1174,9 @@ void BinaryOpAutomaton::DumpToDot(std::ofstream & os, bool inComplement) {
     os << "\t" << (uintptr_t) &*this << " -- " << (uintptr_t) (this->_lhs_aut.aut) << ";\n";
     os << "\t" << (uintptr_t) &*this << " -- " << (uintptr_t) (this->_rhs_aut.aut) << ";\n";
     this->_lhs_aut.aut->DumpToDot(os, inComplement);
-    this->_rhs_aut.aut->DumpToDot(os, inComplement);
+    if(this->_rhs_aut.aut != nullptr) {
+        this->_rhs_aut.aut->DumpToDot(os, inComplement);
+    }
 }
 
 void ComplementAutomaton::DumpToDot(std::ofstream & os, bool inComplement) {
@@ -1307,7 +1334,9 @@ void BinaryOpAutomaton::DumpComputationStats() {
     std::cout << "\n";
 #   endif
     this->_lhs_aut.aut->DumpComputationStats();
-    this->_rhs_aut.aut->DumpComputationStats();
+    if(this->_rhs_aut.aut != nullptr) {
+        this->_rhs_aut.aut->DumpComputationStats();
+    }
 }
 
 void ProjectionAutomaton::DumpComputationStats() {
@@ -1440,7 +1469,7 @@ void ProjectionAutomaton::FillStats() {
 
 void BinaryOpAutomaton::FillStats() {
     bool count_left = !this->_lhs_aut.remap;
-    bool count_right = !this->_rhs_aut.remap;
+    volatile bool count_right = !this->_rhs_aut.remap && this->_rhs_aut.aut != nullptr;
 
     if(count_left) {
         this->_lhs_aut.aut->FillStats();
@@ -1450,11 +1479,12 @@ void BinaryOpAutomaton::FillStats() {
     }
 
     this->stats.fixpoint_computations = (count_left ? this->_lhs_aut.aut->stats.fixpoint_computations : 0) + (count_right ? this->_rhs_aut.aut->stats.fixpoint_computations : 0);
-    this->stats.height = std::max(this->_lhs_aut.aut->stats.height, this->_rhs_aut.aut->stats.height) + 1;
+    this->stats.height = std::max(this->_lhs_aut.aut->stats.height, (this->_rhs_aut.aut != nullptr ? this->_rhs_aut.aut->stats.height : 0)) + 1;
     this->stats.nodes = (count_left ? this->_lhs_aut.aut->stats.nodes : 0) + (count_right ? this->_rhs_aut.aut->stats.nodes : 0) + 1;
-    this->stats.real_nodes = 1 + this->_lhs_aut.aut->stats.real_nodes + this->_rhs_aut.aut->stats.real_nodes;
-    this->stats.max_refs = std::max({this->_refs, this->_lhs_aut.aut->stats.max_refs, this->_rhs_aut.aut->stats.max_refs});
-    this->stats.max_fixpoint_nesting = std::max(this->_lhs_aut.aut->stats.max_fixpoint_nesting, this->_rhs_aut.aut->stats.max_fixpoint_nesting);
+    this->stats.real_nodes = 1 + this->_lhs_aut.aut->stats.real_nodes + (this->_rhs_aut.aut != nullptr ? this->_rhs_aut.aut->stats.real_nodes : 0);
+    this->stats.max_refs = std::max({this->_refs, this->_lhs_aut.aut->stats.max_refs, (this->_rhs_aut.aut != nullptr ? this->_rhs_aut.aut->stats.max_refs : 0)});
+    this->stats.max_fixpoint_nesting = std::max(this->_lhs_aut.aut->stats.max_fixpoint_nesting,
+        (this->_rhs_aut.aut != nullptr ? this->_rhs_aut.aut->stats.max_fixpoint_nesting : 0));
 }
 
 void BaseAutomaton::FillStats() {
@@ -1506,4 +1536,18 @@ bool ComplementAutomaton::WasLastExampleValid() {
 
 bool ProjectionAutomaton::WasLastExampleValid() {
     return true;
+}
+
+std::pair<SymbolicAutomaton *, Term_ptr> BinaryOpAutomaton::LazyInit(Term_ptr term) {
+    if (this->_rhs_aut.aut == nullptr) {
+        ASTForm_ff *form = static_cast<ASTForm_ff *>(this->_form);
+        this->_rhs_aut.aut = form->f2->toSymbolicAutomaton(false);
+        this->_rhs_aut.InitializeSymLink(form->f2);
+        this->_rhs_aut.aut->IncReferences();
+    }
+    if(term == nullptr) {
+        return std::make_pair(this->_rhs_aut.aut, this->_rhs_aut.aut->GetFinalStates());
+    } else {
+        return std::make_pair(this->_rhs_aut.aut, term);
+    }
 }

@@ -8,7 +8,7 @@
 #include "../../Frontend/env.h"
 #include "../environment.hh"
 
-extern Timer timer_conversion, timer_mona, timer_base, timer_automaton, timer_preprocess;
+extern Timer timer_conversion, timer_mona, timer_base, timer_automaton, timer_preprocess, timer_closure, timer_parse;
 extern Ident lastPosVar, allPosVar;
 extern Options options;
 
@@ -124,6 +124,10 @@ void SymbolicChecker::Decide() {
         }
 
         std::cout << "\n";
+        std::cout << "[*] Formula parse:      ";
+        timer_parse.print();
+        std::cout << "[*] Formula closure:    ";
+        timer_closure.print();
         std::cout << "[*] Preprocessing:      ";
         timer_preprocess.print();
         std::cout << "[*] DFA creation:       ";
@@ -139,8 +143,13 @@ void SymbolicChecker::Decide() {
             SymbolicAutomaton::AutomatonToDot("automaton.dot", this->_automaton, false);
         }
 #   endif
+        Timer timer_clean_up;
+        timer_clean_up.start();
         delete this->_automaton;
         this->_automaton = nullptr;
+        timer_clean_up.stop();
+        std::cout << "[*] Cleaning:           ";
+        timer_clean_up.print();
     } catch (NotImplementedException& e) {
         std::cerr << e.what() << std::endl;
     }
