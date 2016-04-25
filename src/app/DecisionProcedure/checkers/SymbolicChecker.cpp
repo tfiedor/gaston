@@ -251,9 +251,11 @@ bool SymbolicChecker::Run() {
 #   endif
 
 #   if (PRINT_STATS == true)
-    std::cout << "[*] Printing Statistics\n";
-    this->_automaton->DumpComputationStats();
-    std::cout << "\n";
+    if (options.printProgress) {
+        std::cout << "[*] Printing Statistics\n";
+        this->_automaton->DumpComputationStats();
+        std::cout << "\n";
+    }
 #   endif
 
     // If Initial States does intersect final ones, the formula is valid, else it is unsatisfiable

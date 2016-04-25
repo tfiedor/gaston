@@ -63,7 +63,7 @@ public:
         secs = t / sec;
         t -= secs * sec;
 
-        printf("%02lu:%02lu:%02lu.%02lu\n", hours, mins, secs, t);
+        printf("%02lu:%02lu:%02lu.%02lu (%02lu)\n", hours, mins, secs, t, _elapsed);
     }
 
 protected:

@@ -496,11 +496,13 @@ SubsumptionResult TermFixpoint::_IsSubsumedCore(Term *t, int limit, bool unfoldA
     // Reinterpret
     TermFixpoint* tt = static_cast<TermFixpoint*>(t);
 
+#   if (OPT_UNFOLD_FIX_DURING_SUB == false)
     bool are_source_symbols_same = TermFixpoint::_compareSymbols(*this, *tt);
     // Worklists surely differ
     if(!are_source_symbols_same && (this->_worklist.size() != 0 || tt->_worklist.size() != 0) ) {
         return E_FALSE;
     }
+#   endif
 
 #   if (OPT_SHORTTEST_FIXPOINT_SUB == true)
     // Will tests only generators and symbols
@@ -523,9 +525,35 @@ SubsumptionResult TermFixpoint::_IsSubsumedCore(Term *t, int limit, bool unfoldA
         }
         if(!subsumes) return E_FALSE;
     }
-
+#   if (OPT_UNFOLD_FIX_DURING_SUB == true)
+    if(this->_worklist.size() == 0 && tt->_worklist.size() == 0) {
+        return E_TRUE;
+    } else {
+        // We'll start to unfold the fixpoints;
+        auto this_it = this->GetIterator();
+        auto tt_it = tt->GetIterator();
+        Term_ptr tit, ttit, temp;
+        SubsumptionResult result;
+        while( (tit = this_it.GetNext()) != nullptr && (ttit = tt_it.GetNext()) != nullptr) {
+            if(tit != nullptr) {
+                if((result = tit->IsSubsumedBy(tt->_fixpoint, temp)) == E_FALSE) {
+                    return E_FALSE;
+                }
+                assert(result != E_PARTIALLY && "Continuations currently do not work with this optimizations!");
+            }
+            if(ttit != nullptr) {
+                if((result = ttit->IsSubsumedBy(this->_fixpoint, temp)) == E_FALSE) {
+                    return E_FALSE;
+                }
+                assert(result != E_PARTIALLY && "Continuations currently do not work with this optimizations!");
+            }
+        }
+        return E_TRUE;
+    }
+#   else
     return ( (this->_worklist.size() == 0 && tt->_worklist.size() == 0) ? E_TRUE : (are_source_symbols_same ? E_TRUE : E_FALSE));
     // Happy reading ^^
+#   endif
 }
 
 /**
