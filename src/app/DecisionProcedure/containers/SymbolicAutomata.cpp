@@ -1514,7 +1514,7 @@ bool BinaryOpAutomaton::WasLastExampleValid() {
     if(this->_isRestriction && this->_lastResult == false) {
         return false;
     } else {
-        return this->_lhs_aut.aut->WasLastExampleValid() && this->_rhs_aut.aut->WasLastExampleValid();
+        return this->_lhs_aut.aut->WasLastExampleValid() && (this->_rhs_aut.aut != nullptr && this->_rhs_aut.aut->WasLastExampleValid());
     }
 }
 
