@@ -42,6 +42,7 @@ ASTForm* SecondOrderRestricter::RestrictFormula(Ident var, ASTForm* form) {
         }
         if(restriction != nullptr)
             restriction = restriction->clone()->unfoldMacro(new IdentList(formal), list);
+        delete list;
     } else {
         restriction = restriction->clone();
     }

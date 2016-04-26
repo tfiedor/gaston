@@ -208,9 +208,9 @@ public:
  *****************************/
 #define PRINT_STATS_PROJECTION			true
 #define PRINT_STATS_QF_PROJECTION		false
-#define PRINT_STATS_PRODUCT			    false
-#define PRINT_STATS_NEGATION			false
-#define PRINT_STATS_BASE				false
+#define PRINT_STATS_PRODUCT			    true
+#define PRINT_STATS_NEGATION			true
+#define PRINT_STATS_BASE				true
 #define PRINT_STATS					    true
 
 /* >>> Dumping Options <<< *
@@ -261,7 +261,7 @@ public:
 
 /* >>> Optimizations <<< *
  *************************/
-#define OPT_USE_DAG							false   // < Instead of using the symbolic automata, will use the DAGified SA
+#define OPT_USE_DAG							true    // < Instead of using the symbolic automata, will use the DAGified SA
 #define OPT_SHUFFLE_FORMULA					true    // < Will run ShuffleVisitor before creation of automaton, which should ease the procedure as well
 #define OPT_DONT_CACHE_CONT					true	// < Do not cache terms containing continuations
 #define OPT_DONT_CACHE_UNFULL_FIXPOINTS 	false	// < Do not cache fixpoints that were not fully computed
@@ -276,7 +276,7 @@ public:
 #define OPT_CREATE_QF_AUTOMATON 			true    // < Transform quantifier-free automaton to formula
 #define OPT_REDUCE_AUT_EVERYTIME			false	// (-) < Call reduce everytime VATA automaton is created (i.e. as intermediate result)
 #define OPT_REDUCE_AUT_LAST					true	// < Call reduce after the final VATA automaton is created
-#define OPT_EARLY_EVALUATION 				true    // < Evaluates early interesection of product
+#define OPT_EARLY_EVALUATION 				false   // < Evaluates early interesection of product
 #define OPT_EARLY_PARTIAL_SUB				true    // < Postpone the partially subsumed terms
 #define OPT_CONT_ONLY_WHILE_UNSAT			false	// < Generate continuation only if there wasn't found (un)satisfying (counter)example yet
 #define OPT_CONT_ONLY_FOR_NONRESTRICTED		true	// < Generate continuations only for pairs that do not contain restrictions

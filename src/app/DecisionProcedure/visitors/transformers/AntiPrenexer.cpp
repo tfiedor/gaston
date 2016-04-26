@@ -272,6 +272,8 @@ ASTForm* FullAntiPrenexer::_pushNegationByOne(OuterQuantifier* form, bool byOne)
             right->allVars = copy(andForm->f2->allVars);
             result = new ASTForm_Or(left, right, Pos());
             result->allVars = copy(andForm->allVars);
+            andForm->detach();
+            delete andForm;
             break;
         case aOr:
             orForm = static_cast<ASTForm_Or*>(not_form->f);
@@ -281,10 +283,13 @@ ASTForm* FullAntiPrenexer::_pushNegationByOne(OuterQuantifier* form, bool byOne)
             right->allVars = copy(orForm->f2->allVars);
             result = new ASTForm_And(left, right, Pos());
             result->allVars = copy(orForm->allVars);
+            orForm->detach();
+            delete orForm;
             break;
         case aNot:
-            // Fixme: add delete
             result = static_cast<ASTForm_Not*>(not_form->f)->f;
+            not_form->f->detach();
+            delete not_form;
             break;
         case aAll1:
         case aAll2:
