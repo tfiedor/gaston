@@ -327,6 +327,8 @@ void Checker::PreprocessFormula() {
 
     // Table or BDD tracks are reordered
     initializeVarMap(this->_monaAST->formula);
+    AST::temporalMapping.resize(symbolTable.noIdents);
+    std::fill(AST::temporalMapping.begin(), AST::temporalMapping.end(), 0);
 }
 
 /**

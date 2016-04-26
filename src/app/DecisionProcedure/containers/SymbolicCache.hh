@@ -24,12 +24,16 @@
 #include <typeinfo>
 #include "../environment.hh"
 #include "../../Frontend/ast.h"
+#include "../../Frontend/symboltable.h"
+
 #if (OPT_USE_DENSE_HASHMAP == true)
 #include <sparsehash/dense_hash_map>
 #include <sparsehash/sparse_hash_map>
 #endif
 
 #include <boost/functional/hash.hpp>
+
+extern SymbolTable symbolTable;
 
 namespace Gaston {
 	extern size_t hash_value(Term *);
@@ -149,7 +153,7 @@ struct PrePairCompare : public std::binary_function<Key, Key, bool>
 template<class Key>
 struct DagCompare : public std::binary_function<Key, Key, bool> {
 	bool operator()(Key const& lhs, Key const& rhs) const {
-		AST::temporalMapping.clear();
+		std::fill(AST::temporalMapping.begin(), AST::temporalMapping.end(), 0);
 		bool result = lhs->StructuralCompare(rhs);
 		return result;
 	}

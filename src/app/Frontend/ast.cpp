@@ -38,7 +38,7 @@ extern Ident lastPosVar;
 extern Ident allPosVar;
 extern int numTypes;
 
-std::unordered_map<unsigned int, unsigned int> AST::temporalMapping;
+std::vector<Ident> AST::temporalMapping;
 
 //////////  Restriction ///////////////////////////////////////////////////////
 
@@ -2126,10 +2126,16 @@ bool ASTForm_q::StructuralCompare(AST* form) {
 
 template<class VarClass>
 bool check_mapping(VarClass* lhs, VarClass* rhs) {
-    auto it = AST::temporalMapping.insert(std::make_pair(lhs->n, rhs->n));
-    if(!it.second) {
-        return it.first->second == rhs->n;
+    assert(lhs->n < AST::temporalMapping.size());
+    Ident mapped = AST::temporalMapping[lhs->n];
+    if(mapped) {
+        assert(mapped > 0);
+        // There exists mapping
+        return (mapped - 1) == rhs->n;
     } else {
+        assert(mapped == 0);
+        // NOTE: As there exist variable with 0 value, we have to map the values shifted by 1, so 0 can mean empty mapping
+        AST::temporalMapping[lhs->n] = rhs->n + 1;
         return true;
     }
 }

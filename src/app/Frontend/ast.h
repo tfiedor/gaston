@@ -129,7 +129,7 @@ public:
 	size_t size = 1;
 	IdentList* allVars = nullptr;
 	bool is_restriction = false;
-	static std::unordered_map<unsigned int, unsigned int> temporalMapping;
+	static std::vector<Ident> temporalMapping;
   ASTOrder order;
   ASTKind kind;
   Pos pos;
