@@ -1171,8 +1171,8 @@ void BinaryOpAutomaton::DumpToDot(std::ofstream & os, bool inComplement) {
         os << ",style=filled, fillcolor=red";
     }
     os << "];\n";
-    os << "\t" << (uintptr_t) &*this << " -- " << (uintptr_t) (this->_lhs_aut.aut) << ";\n";
-    os << "\t" << (uintptr_t) &*this << " -- " << (uintptr_t) (this->_rhs_aut.aut) << ";\n";
+    os << "\t" << (uintptr_t) &*this << " -- " << (uintptr_t) (this->_lhs_aut.aut) << " [label=\"lhs\"];\n";
+    os << "\t" << (uintptr_t) &*this << " -- " << (uintptr_t) (this->_rhs_aut.aut) << " [label=\"rhs\"];\n";
     this->_lhs_aut.aut->DumpToDot(os, inComplement);
     if(this->_rhs_aut.aut != nullptr) {
         this->_rhs_aut.aut->DumpToDot(os, inComplement);

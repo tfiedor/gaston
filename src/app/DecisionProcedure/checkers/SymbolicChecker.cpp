@@ -175,6 +175,11 @@ void sig_handler(int signum) {
     throw GastonSignalException(signum);
 }
 
+void g_new_handler() {
+    AST::temporalMapping.clear();
+    throw GastonOutOfMemory();
+}
+
 /**
  * Runs the decision procedure on the constructed automaton
  */
@@ -195,12 +200,16 @@ bool SymbolicChecker::Run() {
     // Initialize signal handlers for timeouts, in order to be polite and clean
     signal(SIGINT, sig_handler);
     signal(SIGSEGV, sig_handler); // This might be suicidal though
+    std::set_new_handler(g_new_handler);
 
     // Checks if Initial States intersect Final states
     std::pair<Term_ptr, bool> result;
     try {
         result = this->_automaton->IntersectNonEmpty(nullptr, finalStatesApproximation, false);
     } catch (const GastonSignalException& exception) {
+        std::cout << exception.what() << "\n";
+        this->_terminatedBySignal = true;
+    } catch (const GastonOutOfMemory& exception) {
         std::cout << exception.what() << "\n";
         this->_terminatedBySignal = true;
     }

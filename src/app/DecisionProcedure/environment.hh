@@ -157,6 +157,13 @@ public:
 	}
 };
 
+class GastonOutOfMemory : public std::exception {
+public:
+	virtual const char* what() const throw() {
+		return "Gaston is Out of Memory. Oaw oaw.";
+	}
+};
+
 /****************
  * DEBUG MACROS *
  ****************/
