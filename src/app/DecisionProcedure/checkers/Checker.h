@@ -66,6 +66,7 @@ protected:
 	ASTForm* _rootRestriction = nullptr;
 	bool _printProgress;
 	bool _isGround;
+	bool _terminatedBySignal = false;
 
 	// <<< PRIVATE METHODS >>>
 	void _startTimer(Timer& t);

@@ -55,7 +55,7 @@ class DagCompare;
 /***********************
  * GLOBAL ENUMERATIONS *
  ***********************/
-enum Decision {SATISFIABLE, UNSATISFIABLE, VALID, INVALID};
+enum Decision {SATISFIABLE, UNSATISFIABLE, VALID, INVALID, UNKNOWN};
 enum AutType {SYMBOLIC_BASE, BINARY, INTERSECTION, UNION, PROJECTION, ROOT_PROJECTION, BASE, COMPLEMENT};
 enum TermType {TERM_PRODUCT, TERM, TERM_EMPTY, TERM_BASE, TERM_FIXPOINT, TERM_LIST, TERM_CONTINUATION};
 enum ProductType {E_INTERSECTION, E_UNION};
@@ -143,6 +143,17 @@ class MonaFailureException : public std::exception {
 public:
 	virtual const char* what() const throw() {
 		return "Mona Failed on BDDs\n";
+	}
+};
+
+class GastonSignalException : public std::exception {
+private:
+	int _raisedSignal;
+public:
+	GastonSignalException(int signal) : _raisedSignal(signal) {}
+
+	virtual const char* what() const throw() {
+		return (std::string("Decision procedure terminated with signal ") + std::to_string(_raisedSignal)).c_str();
 	}
 };
 
@@ -261,7 +272,7 @@ public:
 
 /* >>> Optimizations <<< *
  *************************/
-#define OPT_USE_DAG							true    // < Instead of using the symbolic automata, will use the DAGified SA
+#define OPT_USE_DAG							false   // < Instead of using the symbolic automata, will use the DAGified SA
 #define OPT_SHUFFLE_FORMULA					true    // < Will run ShuffleVisitor before creation of automaton, which should ease the procedure as well
 #define OPT_DONT_CACHE_CONT					true	// < Do not cache terms containing continuations
 #define OPT_DONT_CACHE_UNFULL_FIXPOINTS 	false	// < Do not cache fixpoints that were not fully computed
@@ -276,7 +287,7 @@ public:
 #define OPT_CREATE_QF_AUTOMATON 			true    // < Transform quantifier-free automaton to formula
 #define OPT_REDUCE_AUT_EVERYTIME			false	// (-) < Call reduce everytime VATA automaton is created (i.e. as intermediate result)
 #define OPT_REDUCE_AUT_LAST					true	// < Call reduce after the final VATA automaton is created
-#define OPT_EARLY_EVALUATION 				false   // < Evaluates early interesection of product
+#define OPT_EARLY_EVALUATION 				true    // < Evaluates early interesection of product
 #define OPT_EARLY_PARTIAL_SUB				true    // < Postpone the partially subsumed terms
 #define OPT_CONT_ONLY_WHILE_UNSAT			false	// < Generate continuation only if there wasn't found (un)satisfying (counter)example yet
 #define OPT_CONT_ONLY_FOR_NONRESTRICTED		true	// < Generate continuations only for pairs that do not contain restrictions

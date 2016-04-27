@@ -2,6 +2,7 @@
 // Created by Raph on 02/02/2016.
 //
 
+#include <csignal>
 #include "SymbolicChecker.h"
 #include "../containers/Term.h"
 #include "../../Frontend/timer.h"
@@ -69,7 +70,9 @@ void SymbolicChecker::ConstructAutomaton() {
 int SymbolicChecker::_DecideCore(bool isValid) {
     assert(this->_automaton != nullptr);
 
-    if(this->_isGround) {
+    if (this->_terminatedBySignal) {
+        return Decision::UNKNOWN;
+    } else if(this->_isGround) {
         // Ground formula is valid if epsilon is in its language
         if(isValid) {
             return Decision::VALID;
@@ -118,6 +121,9 @@ void SymbolicChecker::Decide() {
             case Decision::VALID:
                 std::cout << "\033[1;32m'VALID'\033[0m";
                 break;
+            case Decision::UNKNOWN:
+                std::cout << "\033[1;33m'UNKNOWN'\033[0m";
+                break;
             default:
                 std::cout << "undecided due to an error.\n";
                 break;
@@ -164,6 +170,11 @@ int count_example_len(Term* t) {
     return len;
 }
 
+void sig_handler(int signum) {
+    // Programming like a boss 8)
+    throw GastonSignalException(signum);
+}
+
 /**
  * Runs the decision procedure on the constructed automaton
  */
@@ -181,8 +192,18 @@ bool SymbolicChecker::Run() {
     std::cout << "\n";
 #   endif
 
+    // Initialize signal handlers for timeouts, in order to be polite and clean
+    signal(SIGINT, sig_handler);
+    signal(SIGSEGV, sig_handler); // This might be suicidal though
+
     // Checks if Initial States intersect Final states
-    std::pair<Term_ptr, bool> result = this->_automaton->IntersectNonEmpty(nullptr, finalStatesApproximation, false);
+    std::pair<Term_ptr, bool> result;
+    try {
+        result = this->_automaton->IntersectNonEmpty(nullptr, finalStatesApproximation, false);
+    } catch (const GastonSignalException& exception) {
+        std::cout << exception.what() << "\n";
+        this->_terminatedBySignal = true;
+    }
     Term_ptr fixpoint = result.first;
     bool isValid = result.second;
 
@@ -203,7 +224,8 @@ bool SymbolicChecker::Run() {
 
 #   if (DEBUG_FIXPOINT == true)
     std::cout << "[!] Finished deciding WS1S formula with following fixpoint:\n";
-    fixpoint->dump();
+    if(fixpoint != nullptr)
+        fixpoint->dump();
     std::cout << "\n";
 #   endif
 
@@ -256,7 +278,7 @@ bool SymbolicChecker::Run() {
 #   undef OUTPUT_MEASURES
     std::cout << "[*] Overall State Space: " << (TermProduct::instances + TermBaseSet::instances + TermFixpoint::instances
                                                  + TermList::instances + TermContinuation::instances) << "\n";
-    std::cout << "[*] Explored Fixpoint Space: " << fixpoint->MeasureStateSpace() << "\n";
+    std::cout << "[*] Explored Fixpoint Space: " << (fixpoint != nullptr ? fixpoint->MeasureStateSpace() : 0) << "\n";
 #   endif
 
 #   if (PRINT_STATS == true)
