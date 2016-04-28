@@ -70,6 +70,7 @@ add_executable(gaston
 	src/app/DecisionProcedure/visitors/transformers/BaseAutomataMerger.cpp
 	src/app/DecisionProcedure/visitors/transformers/ExistentialPrenexer.cpp
 	src/app/DecisionProcedure/visitors/transformers/ShuffleVisitor.cpp
+	src/app/DecisionProcedure/visitors/transformers/ContinuationSwitcher.cpp
 	src/app/DecisionProcedure/visitors/decorators/FixpointDetagger.cpp
 	src/app/DecisionProcedure/visitors/decorators/Tagger.cpp
 	src/app/DecisionProcedure/visitors/decorators/OccuringVariableDecorator.cpp

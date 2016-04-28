@@ -18,6 +18,7 @@
 #include "../visitors/transformers/BaseAutomataMerger.h"
 #include "../visitors/transformers/ExistentialPrenexer.h"
 #include "../visitors/transformers/ShuffleVisitor.h"
+#include "../visitors/transformers/ContinuationSwitcher.h"
 #include "../visitors/restricters/UniversalQuantifierRemover.h"
 #include "../visitors/restricters/SyntaxRestricter.h"
 #include "../visitors/restricters/SecondOrderRestricter.h"
@@ -315,6 +316,11 @@ void Checker::PreprocessFormula() {
 
     QuantificationMerger quantificationMerger;
     this->_monaAST->formula = static_cast<ASTForm*>((this->_monaAST->formula)->accept(quantificationMerger));
+
+#   if (OPT_EARLY_EVALUATION == true)
+    ContinuationSwitcher continuationSwitcher;
+    this->_monaAST->formula = static_cast<ASTForm*>((this->_monaAST->formula)->accept(continuationSwitcher));
+#   endif
 
     if(options.graphvizDAG) {
         std::string dotFileName(inputFileName);
