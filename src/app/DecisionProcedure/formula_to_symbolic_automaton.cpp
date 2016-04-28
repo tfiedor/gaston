@@ -124,6 +124,7 @@ SymbolicAutomaton* ASTForm_And::_toSymbolicAutomatonCore(bool doComplement) {
 #   if (OPT_EARLY_EVALUATION == true)
     // This automaton will be constructed lazily
     rhs_aut = nullptr;
+    this->f2->under_complement = doComplement;
 #   else
     rhs_aut = this->f2->toSymbolicAutomaton(doComplement);
 #   endif
@@ -136,6 +137,7 @@ SymbolicAutomaton* ASTForm_Or::_toSymbolicAutomatonCore(bool doComplement) {
     SymbolicAutomaton* rhs_aut;
 #   if (OPT_EARLY_EVALUATION == true)
     rhs_aut = nullptr;
+    this->f2->under_complement = doComplement;
 #   else
     rhs_aut = this->f2->toSymbolicAutomaton(doComplement);
 #   endif

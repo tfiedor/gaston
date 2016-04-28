@@ -148,7 +148,8 @@ TermBaseSet::~TermBaseSet() {
     this->states.clear();
 }
 
-TermContinuation::TermContinuation(SymbolicAutomaton* a, Term* t, SymbolType* s, bool b, bool lazy) : aut(a), term(t), symbol(s), underComplement(b), lazyEval(lazy) {
+TermContinuation::TermContinuation(SymLink* a, SymbolicAutomaton* init, Term* t, SymbolType* s, bool b, bool lazy)
+        : aut(a), initAut(init), term(t), symbol(s), underComplement(b), lazyEval(lazy) {
     #if (DEBUG_TERM_CREATION == true)
     std::cout << "[" << this << "]";
     std::cout << "TermContinuation::";
@@ -464,10 +465,7 @@ SubsumptionResult TermContinuation::_IsSubsumedCore(Term *t, int limit, bool unf
     // TODO: How to do this smartly?
     // TODO: Maybe if we have {} we can answer sooner, without unpacking
     assert(false);
-
-    // We unpack this term
-    auto unfoldedTerm = (this->aut->IntersectNonEmpty(this->symbol, this->term, this->underComplement)).first;
-    return unfoldedTerm->IsSubsumed(t, limit, unfoldAll);
+    return E_FALSE;
 }
 
 SubsumptionResult TermList::_IsSubsumedCore(Term *t, int limit, bool unfoldAll) {
@@ -1284,13 +1282,14 @@ Term* TermContinuation::unfoldContinuation(UnfoldedInType t) {
     if(this->_unfoldedTerm == nullptr) {
         if(lazyEval) {
             assert(this->aut->type == AutType::INTERSECTION || this->aut->type == AutType::UNION);
-            BinaryOpAutomaton* boAutomaton = static_cast<BinaryOpAutomaton*>(this->aut);
+            assert(this->initAut != nullptr);
+            BinaryOpAutomaton* boAutomaton = static_cast<BinaryOpAutomaton*>(this->initAut);
             std::tie(this->aut, this->term) = boAutomaton->LazyInit(this->term);
             lazyEval = false;
         }
 
-        this->_unfoldedTerm = (this->aut->IntersectNonEmpty(
-                (this->symbol == nullptr ? nullptr : this->symbol), this->term, this->underComplement)).first;
+        this->_unfoldedTerm = (this->aut->aut->IntersectNonEmpty(
+                (this->symbol == nullptr ? nullptr : this->aut->ReMapSymbol(this->symbol)), this->term, this->underComplement)).first;
         #if (MEASURE_CONTINUATION_EVALUATION == true)
         switch(t){
             case UnfoldedInType::E_IN_SUBSUMPTION:

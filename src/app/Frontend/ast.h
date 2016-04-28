@@ -129,6 +129,7 @@ public:
 	size_t size = 1;
 	IdentList* allVars = nullptr;
 	bool is_restriction = false;
+	bool under_complement = false;
 	static std::vector<Ident> temporalMapping;
   ASTOrder order;
   ASTKind kind;

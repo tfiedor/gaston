@@ -49,6 +49,7 @@
 
 // <<< FORWARD CLASS DECLARATION >>>
 class SymbolicAutomaton;
+struct SymLink;
 
 // TODO: Move away the usings
 using Term_ptr          = Term*;
@@ -227,7 +228,8 @@ protected:
     Term* _unfoldedTerm = nullptr;      // [4B] << Unfolded term for optimizations
 public:
     // <<< PUBLIC MEMBERS >>>
-    SymbolicAutomaton* aut;             // [4B] << Link to the automaton for computation
+    SymLink* aut;                       // [4B] << Link to the automaton for computation
+    SymbolicAutomaton* initAut;         // [4B] << Automaton for lazy initialization
     Term* term;                         // [4B] << Term we postponed the evaluation on
     SymbolType* symbol;                 // [4B] << Symbol we were subtracting from the term
     bool lazyEval = false;              // [1B] << The automaton will be lazily constructed
@@ -241,7 +243,7 @@ public:
     static size_t unfoldInIsectNonempty;
 
     // <<< CONSTRUCTORS >>>
-    NEVER_INLINE TermContinuation(SymbolicAutomaton*, Term*, SymbolType*, bool, bool lazy = false);
+    NEVER_INLINE TermContinuation(SymLink*, SymbolicAutomaton*, Term*, SymbolType*, bool, bool lazy = false);
 
     // <<< PUBLIC API >>>
     SubsumptionResult IsSubsumedBy(FixpointType& fixpoint, Term*&);

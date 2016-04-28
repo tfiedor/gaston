@@ -279,7 +279,7 @@ public:
 
 /* >>> Optimizations <<< *
  *************************/
-#define OPT_USE_DAG							false   // < Instead of using the symbolic automata, will use the DAGified SA
+#define OPT_USE_DAG							true    // < Instead of using the symbolic automata, will use the DAGified SA
 #define OPT_SHUFFLE_FORMULA					true    // < Will run ShuffleVisitor before creation of automaton, which should ease the procedure as well
 #define OPT_DONT_CACHE_CONT					true	// < Do not cache terms containing continuations
 #define OPT_DONT_CACHE_UNFULL_FIXPOINTS 	false	// < Do not cache fixpoints that were not fully computed
@@ -322,6 +322,6 @@ public:
 /* >>> Static Assertions <<< *
  *****************************/
 static_assert(!(OPT_USE_DAG == true && OPT_SYMBOL_HASH_BY_APPROX == true), "Conflicting optimizations: 'Usage of DAG' and 'Hashing of symbols by pointers");
-static_assert(!(OPT_USE_DAG == true && OPT_EARLY_EVALUATION == true), "Conflicting optimizations: Continuations do not support usage of DAG");
+//static_assert(!(OPT_USE_DAG == true && OPT_EARLY_EVALUATION == true), "Conflicting optimizations: Continuations do not support usage of DAG");
 static_assert(!(MONA_FAIR_MODE == true && MIGHTY_GASTON == true), "Gaston cannot be might and fair at the same time!");
 #endif

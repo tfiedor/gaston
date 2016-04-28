@@ -681,9 +681,9 @@ ResultType BinaryOpAutomaton::_IntersectNonEmptyCore(Symbol* symbol, Term* final
 #       else
         Term *continuation;
         if(this->_rhs_aut.aut == nullptr) {
-            continuation = this->_factory.CreateContinuation(this, productStateApproximation->right, symbol, underComplement, true);
+            continuation = this->_factory.CreateContinuation(&this->_rhs_aut, this, productStateApproximation->right, symbol, underComplement, true);
         } else {
-            continuation = this->_factory.CreateContinuation(this->_rhs_aut.aut, productStateApproximation->right,
+            continuation = this->_factory.CreateContinuation(&this->_rhs_aut, nullptr, productStateApproximation->right,
                                                                    symbol, underComplement);
         }
         Term_ptr leftCombined = this->_factory.CreateProduct(lhs_result.first, continuation, this->_productType);
@@ -695,7 +695,8 @@ ResultType BinaryOpAutomaton::_IntersectNonEmptyCore(Symbol* symbol, Term* final
     // Otherwise compute the right side and return full fixpoint
 #   if (OPT_EARLY_EVALUATION == true)
     if(this->_rhs_aut.aut == nullptr) {
-        std::tie(this->_rhs_aut.aut, productStateApproximation->right) = this->LazyInit(productStateApproximation->right);
+        SymLink* temp;
+        std::tie(temp, productStateApproximation->right) = this->LazyInit(productStateApproximation->right);
     }
 #   endif
     ResultType rhs_result = this->_rhs_aut.aut->IntersectNonEmpty(this->_rhs_aut.ReMapSymbol(symbol), productStateApproximation->right, underComplement);
@@ -1538,16 +1539,16 @@ bool ProjectionAutomaton::WasLastExampleValid() {
     return true;
 }
 
-std::pair<SymbolicAutomaton *, Term_ptr> BinaryOpAutomaton::LazyInit(Term_ptr term) {
+std::pair<SymLink*, Term_ptr> BinaryOpAutomaton::LazyInit(Term_ptr term) {
     if (this->_rhs_aut.aut == nullptr) {
         ASTForm_ff *form = static_cast<ASTForm_ff *>(this->_form);
-        this->_rhs_aut.aut = form->f2->toSymbolicAutomaton(false);
+        this->_rhs_aut.aut = form->f2->toSymbolicAutomaton(form->f2->under_complement);
         this->_rhs_aut.InitializeSymLink(form->f2);
         this->_rhs_aut.aut->IncReferences();
     }
     if(term == nullptr) {
-        return std::make_pair(this->_rhs_aut.aut, this->_rhs_aut.aut->GetFinalStates());
+        return std::make_pair(&this->_rhs_aut, this->_rhs_aut.aut->GetFinalStates());
     } else {
-        return std::make_pair(this->_rhs_aut.aut, term);
+        return std::make_pair(&this->_rhs_aut, term);
     }
 }

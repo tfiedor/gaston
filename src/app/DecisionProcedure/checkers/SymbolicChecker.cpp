@@ -177,6 +177,8 @@ void sig_handler(int signum) {
 
 void g_new_handler() {
     AST::temporalMapping.clear();
+    SymbolicAutomaton::dagNegNodeCache->clear();
+    SymbolicAutomaton::dagNodeCache->clear();
     throw GastonOutOfMemory();
 }
 

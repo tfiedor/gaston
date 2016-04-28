@@ -54,6 +54,7 @@ class TermFixpoint;
 class TermList;
 class TermContinuation;
 class SymbolicAutomaton;
+struct SymLink;
 
 namespace Workshops {
     struct ComputationHash;
@@ -137,7 +138,7 @@ namespace Workshops {
         TermFixpoint* CreateFixpointPre(Term_ptr const&, Symbol*, bool);
         TermFixpoint* GetUniqueFixpoint(TermFixpoint*&);
         TermList* CreateList(Term_ptr const&, bool);
-        Term* CreateContinuation(SymbolicAutomaton*, Term* const&, Symbol*, bool, bool lazy = false);
+        Term* CreateContinuation(SymLink*, SymbolicAutomaton*, Term* const&, Symbol*, bool, bool lazy = false);
         std::string ToSimpleStats();
 
         void Dump();
