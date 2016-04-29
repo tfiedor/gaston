@@ -216,6 +216,7 @@ public:
 #define DEBUG_M2L_AS_GROUND				false
 #define DEBUG_WORKSHOPS					true	// Fixme: This should not be DEBUG, but measure
 #define DEBUG_DONT_HASH_FIXPOINTS		false
+#define DEBUG_DONT_CATCH_SIGSEGV		true
 
 #define ALT_SKIP_EMPTY_UNIVERSE			true // < Skip empty example
 #define ALT_ALWAYS_DETERMINISTIC	    true
@@ -229,7 +230,7 @@ public:
 #define PRINT_STATS_PRODUCT			    true
 #define PRINT_STATS_NEGATION			true
 #define PRINT_STATS_BASE				true
-#define PRINT_STATS					    true
+#define PRINT_STATS					    false
 
 /* >>> Dumping Options <<< *
  ***************************/

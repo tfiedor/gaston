@@ -201,7 +201,9 @@ bool SymbolicChecker::Run() {
 
     // Initialize signal handlers for timeouts, in order to be polite and clean
     signal(SIGINT, sig_handler);
+#   if (DEBUG_DONT_CATCH_SIGSEGV == false)
     signal(SIGSEGV, sig_handler); // This might be suicidal though
+#   endif
     std::set_new_handler(g_new_handler);
 
     // Checks if Initial States intersect Final states

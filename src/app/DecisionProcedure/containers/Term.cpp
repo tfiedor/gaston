@@ -1010,13 +1010,37 @@ bool TermFixpoint::_processOnePostponed() {
 }
 
 SubsumptionResult TermFixpoint::_fixpointTest(Term_ptr const &term) {
-    if(this->_searchType == WorklistSearchType::E_UNGROUND_ROOT /*&& allPosVar != -1*/) {
+    if(this->_searchType == WorklistSearchType::E_UNGROUND_ROOT) {
         // Fixme: Not sure if this is really correct, but somehow I still feel that the Root search is special and
         //   subsumption is maybe not enough? But maybe this simply does not work for fixpoints of negated thing.
-        return this->_testIfIn(term);
+        if(!term->InComplement()) {
+            return this->_testIfBiggerExists(term);
+        } else {
+            return this->_testIfSmallerExists(term);
+        }
     } else {
         return this->_testIfSubsumes(term);
     }
+}
+
+SubsumptionResult TermFixpoint::_testIfBiggerExists(Term_ptr const &term) {
+    return (std::find_if(this->_fixpoint.begin(), this->_fixpoint.end(), [&term](FixpointMember const& member) {
+        if(!member.second || member.first == nullptr) {
+            return false;
+        } else {
+            return term->IsSubsumed(member.first, OPT_PARTIALLY_LIMITED_SUBSUMPTION, true) != E_FALSE;
+        }
+    }) == this->_fixpoint.end() ? E_FALSE : E_TRUE);
+}
+
+SubsumptionResult TermFixpoint::_testIfSmallerExists(Term_ptr const &term) {
+    return (std::find_if(this->_fixpoint.begin(), this->_fixpoint.end(), [&term](FixpointMember const& member) {
+        if(!member.second || member.first == nullptr) {
+            return false;
+        } else {
+            return member.first->IsSubsumed(term, OPT_PARTIALLY_LIMITED_SUBSUMPTION, true) != E_FALSE;
+        }
+    }) == this->_fixpoint.end() ? E_FALSE : E_TRUE);
 }
 
 SubsumptionResult TermFixpoint::_testIfIn(Term_ptr const &term) {
