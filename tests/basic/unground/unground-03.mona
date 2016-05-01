@@ -1,0 +1,9 @@
+# Gaston WS1S Benchmark
+# Tests: unground formulae
+# Field: unground semantics
+# Ground: false
+# Long Description: Tests the valid tautology.
+
+ws1s;
+var1 x, y, z;
+(x < y & y < z) => (x < z);

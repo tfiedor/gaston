@@ -1,0 +1,9 @@
+# Gaston WS1S Benchmark
+# Tests: unground formulae
+# Field: unground semantics
+# Ground: false
+# Long Description: Test the valid unground formula with fixpoint computation.
+
+ws1s;
+var1 x;
+ex1 y: y = x + 1;

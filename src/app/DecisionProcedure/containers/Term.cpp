@@ -1013,10 +1013,15 @@ SubsumptionResult TermFixpoint::_fixpointTest(Term_ptr const &term) {
     if(this->_searchType == WorklistSearchType::E_UNGROUND_ROOT) {
         // Fixme: Not sure if this is really correct, but somehow I still feel that the Root search is special and
         //   subsumption is maybe not enough? But maybe this simply does not work for fixpoints of negated thing.
-        if(!term->InComplement()) {
-            return this->_testIfBiggerExists(term);
+        return this->_testIfIn(term);
+        // ^--- however i still feel that this is wrong and may cause loop.
+        if(this->_unsatTerm == nullptr && this->_satTerm == nullptr) {
+            return this->_testIfIn(term);
+        } else if(this->_satTerm == nullptr) {
+            return (!term->InComplement() ? this->_testIfBiggerExists(term) : this->_testIfSmallerExists(term));
         } else {
-            return this->_testIfSmallerExists(term);
+            assert(this->_unsatTerm == nullptr);
+            return (!term->InComplement() ? this->_testIfSmallerExists(term) : this->_testIfBiggerExists(term));
         }
     } else {
         return this->_testIfSubsumes(term);

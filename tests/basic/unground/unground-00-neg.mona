@@ -1,0 +1,9 @@
+# Gaston WS1S Benchmark
+# Tests: unground formulae
+# Field: unground semantics
+# Ground: false
+# Long Description: Test the valid unground formulae.
+
+ws1s;
+var1 x, y;
+~(x <= y | y <= x);

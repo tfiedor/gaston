@@ -51,7 +51,7 @@ def run_gaston(test, timeout, checkonly=False):
     Runs dWiNA with following arguments: --method=backward
     '''
     gaston_bin = os.path.join(os.path.dirname(os.path.realpath(__file__)), 'build/gaston')
-    args = (gaston_bin, '--test=val', '"{}"'.format(test))
+    args = (gaston_bin, '"{}"'.format(test))
     output, retcode = runProcess(args, timeout)
 
     # Fixme: This should be the issue of segfault
