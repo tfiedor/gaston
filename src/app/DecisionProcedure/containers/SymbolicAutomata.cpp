@@ -22,11 +22,13 @@
 #include "../containers/Workshops.h"
 #include "../utils/Timer.h"
 #include "../../Frontend/dfa.h"
+#include "../../Frontend/env.h"
 #include "../../Frontend/symboltable.h"
 
 extern VarToTrackMap varMap;
 extern SymbolTable symbolTable;
 extern Ident lastPosVar, allPosVar;
+extern Options options;
 
 StateType SymbolicAutomaton::stateCnt = 0;
 // Fixme: Delete this shit
@@ -343,6 +345,7 @@ ResultType RootProjectionAutomaton::IntersectNonEmpty(Symbol* symbol, Term* fina
     TermFixpoint* fixpoint = this->_factory.CreateFixpoint(result.first, SymbolWorkshop::CreateZeroSymbol(), underComplement, result.second, WorklistSearchType::E_UNGROUND_ROOT);
     TermFixpoint::iterator it = fixpoint->GetIterator();
     Term_ptr fixpointTerm = nullptr;
+    assert(allPosVar != -1 || options.test == TestType::EVERYTHING);
 
 #   if (DEBUG_EXAMPLE_PATHS == true)
     size_t maxPath = 0;
@@ -351,6 +354,15 @@ ResultType RootProjectionAutomaton::IntersectNonEmpty(Symbol* symbol, Term* fina
 #   endif
     // While the fixpoint is not fully unfolded and while we cannot evaluate early
     while((this->_satExample == nullptr || this->_unsatExample == nullptr) && ((fixpointTerm = it.GetNext()) != nullptr)) {
+        if(allPosVar != -1 && options.test != TestType::EVERYTHING) {
+            if (options.test == TestType::VALIDITY && this->_unsatExample != nullptr) {
+                break;
+            } else if ((options.test == TestType::SATISFIABILITY || options.test == TestType::UNSATISFIABILITY) &&
+                       this->_satExample != nullptr) {
+                break;
+            }
+        }
+
         fixpoint->RemoveSubsumed();
 #       if (DEBUG_EXAMPLE_PATHS == true)
         if(fixpointTerm != nullptr && fixpointTerm->link.len > maxPath) {

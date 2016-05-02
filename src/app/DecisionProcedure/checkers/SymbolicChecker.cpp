@@ -72,11 +72,21 @@ int SymbolicChecker::_DecideCore(bool isValid) {
 
     if (this->_terminatedBySignal) {
         return Decision::UNKNOWN;
+    } else if(allPosVar != -1 && options.test != TestType::EVERYTHING) {
+        if(options.test == TestType::VALIDITY) {
+            return (this->_automaton->_unsatExample == nullptr) ? Decision::VALID : Decision::INVALID;
+        } else if(options.test == TestType::SATISFIABILITY) {
+            return (this->_automaton->_satExample != nullptr) ? Decision::SATISFIABLE : Decision::UNSATISFIABLE;
+        } else {
+            assert(options.test == TestType::UNSATISFIABILITY);
+            return (this->_automaton->_satExample != nullptr) ? Decision::UNSATISFIABLE : Decision::SATISFIABLE;
+        }
     } else if(this->_isGround) {
         // Ground formula is valid if epsilon is in its language
-        if(isValid) {
+        assert(options.test == TestType::EVERYTHING);
+        if (isValid) {
             return Decision::VALID;
-        // Else it is unsatisfiable
+            // Else it is unsatisfiable
         } else {
             return Decision::UNSATISFIABLE;
         }
@@ -123,6 +133,9 @@ void SymbolicChecker::Decide() {
                 break;
             case Decision::UNKNOWN:
                 std::cout << "\033[1;33m'UNKNOWN'\033[0m";
+                break;
+            case Decision::INVALID:
+                std::cout << "\033[1;36m'INVALID'\033[0m";
                 break;
             default:
                 std::cout << "undecided due to an error.\n";
