@@ -29,6 +29,7 @@
 #include "../visitors/printers/DotWalker.h"
 #include "../visitors/printers/MonaAutomataDotWalker.h"
 #include "../visitors/printers/MonaSerializer.h"
+#include "../visitors/decorators/UnderComplementDecorator.h"
 #include "../visitors/decorators/Tagger.h"
 #include "../visitors/decorators/FixpointDetagger.h"
 #include "../visitors/decorators/OccuringVariableDecorator.h"
@@ -318,8 +319,11 @@ void Checker::PreprocessFormula() {
     this->_monaAST->formula = static_cast<ASTForm*>((this->_monaAST->formula)->accept(quantificationMerger));
 
 #   if (OPT_EARLY_EVALUATION == true)
+    UnderComplementDecorator underComplementDecorator;
+    (this->_monaAST->formula)->accept(underComplementDecorator);
+
     ContinuationSwitcher continuationSwitcher;
-    this->_monaAST->formula = static_cast<ASTForm*>((this->_monaAST->formula)->accept(continuationSwitcher));
+    (this->_monaAST->formula)->accept(continuationSwitcher);
 #   endif
 
     if(options.graphvizDAG) {

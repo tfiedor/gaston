@@ -7,19 +7,55 @@
 
 extern SymbolTable symbolTable;
 
-AST* ContinuationSwitcher::visit(ASTForm_ff* form) {
-    int left_rank = 0, right_rank = 0;
-    for(auto it = form->f1->allVars->begin(); it != form->f1->allVars->end(); ++it) {
-        left_rank += (symbolTable.lookupType(*it) == MonaTypeTag::Varname1 ? 0 : 1);
-    }
-    for(auto tit = form->f2->allVars->begin(); tit != form->f2->allVars->end(); ++tit) {
-        right_rank += (symbolTable.lookupType(*tit) == MonaTypeTag::Varname1 ? 0 : 1);
-    }
-    if(left_rank > right_rank && form->f2->kind != aNot) {
-        ASTForm* temp = form->f1;
+template<class Binop>
+void ContinuationSwitcher::_switch(Binop* form) {
+    if(!form->f1->is_restriction) {
+        ASTForm *f = form->f1;
         form->f1 = form->f2;
-        form->f2 = temp;
+        form->f2 = f;
     }
+}
 
-    return static_cast<AST*>(form);
+void ContinuationSwitcher::visit(ASTForm_And *form) {
+    if(form->under_complement) {
+        if(!form->f1->epsilon_in && form->f2->epsilon_in) {
+            // Switch
+            this->_switch<ASTForm_And>(form);
+        }
+        form->epsilon_in = form->f1->epsilon_in || form->f2->epsilon_in;
+    } else {
+        if(form->f1->epsilon_in && !form->f2->epsilon_in) {
+            // Switch
+            this->_switch<ASTForm_And>(form);
+        }
+        form->epsilon_in = form->f2->epsilon_in && form->f2->epsilon_in;
+    }
+}
+
+void ContinuationSwitcher::visit(ASTForm_Or *form) {
+    if(form->under_complement) {
+        if(form->f1->epsilon_in && !form->f2->epsilon_in) {
+            // Switch
+            this->_switch<ASTForm_Or>(form);
+        }
+        form->epsilon_in = form->f1->epsilon_in && form->f2->epsilon_in;
+    } else {
+        if(!form->f1->epsilon_in && form->f2->epsilon_in) {
+            // Switch
+            this->_switch<ASTForm_Or>(form);
+        }
+        form->epsilon_in = form->f1->epsilon_in || form->f2->epsilon_in;
+    }
+}
+
+void ContinuationSwitcher::visit(ASTForm_Ex1 *form) {
+    form->epsilon_in = form->f->epsilon_in;
+}
+
+void ContinuationSwitcher::visit(ASTForm_Ex2 *form) {
+    form->epsilon_in = form->f->epsilon_in;
+}
+
+void ContinuationSwitcher::visit(ASTForm_Not *form) {
+    form->epsilon_in = !form->f->epsilon_in;
 }

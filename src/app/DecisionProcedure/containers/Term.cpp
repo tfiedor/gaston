@@ -404,9 +404,9 @@ SubsumptionResult TermProduct::_IsSubsumedCore(Term *t, int limit, bool unfoldAl
     Term *rhsl = rhs->left;
     Term *rhsr = rhs->right;
 
-    if(!unfoldAll && (lhsr->IsNotComputed() || rhsr->IsNotComputed())) {
+    if(!unfoldAll && (lhsr->IsNotComputed() && rhsr->IsNotComputed())) {
         #if (OPT_EARLY_PARTIAL_SUB == true)
-        if(lhsr->type == TERM_CONTINUATION || rhsr->type == TERM_CONTINUATION) {
+        if(lhsr->type == TERM_CONTINUATION && rhsr->type == TERM_CONTINUATION) {
             return (lhsl->IsSubsumed(rhsl, limit, unfoldAll) == E_FALSE ? E_FALSE : E_PARTIALLY);
         } else {
             SubsumptionResult leftIsSubsumed = lhsl->IsSubsumed(rhsl, limit, unfoldAll);

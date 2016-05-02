@@ -74,6 +74,7 @@ add_executable(gaston
 	src/app/DecisionProcedure/visitors/decorators/FixpointDetagger.cpp
 	src/app/DecisionProcedure/visitors/decorators/Tagger.cpp
 	src/app/DecisionProcedure/visitors/decorators/OccuringVariableDecorator.cpp
+	src/app/DecisionProcedure/visitors/decorators/UnderComplementDecorator.cpp
 	src/app/DecisionProcedure/visitors/printers/DotWalker.cpp
 	src/app/DecisionProcedure/visitors/printers/MonaAutomataDotWalker.cpp
 	src/app/DecisionProcedure/visitors/printers/MonaSerializer.cpp

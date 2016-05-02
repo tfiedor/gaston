@@ -130,6 +130,7 @@ public:
 	IdentList* allVars = nullptr;
 	bool is_restriction = false;
 	bool under_complement = false;
+	bool epsilon_in = false;
 	static std::vector<Ident> temporalMapping;
   ASTOrder order;
   ASTKind kind;
