@@ -65,55 +65,55 @@ size_t TermContinuation::unfoldInIsectNonempty = 0;
 
 extern Ident lastPosVar, allPosVar;
 
-    // <<< TERM CONSTRUCTORS AND DESTRUCTORS >>>
-    Term::Term(): link{ nullptr, nullptr, 0} {}
-    Term::~Term() {}
+// <<< TERM CONSTRUCTORS AND DESTRUCTORS >>>
+Term::Term(): link{ nullptr, nullptr, 0} {}
+Term::~Term() {}
 
-    TermEmpty::TermEmpty(bool inComplement) {
-                                                #if (MEASURE_STATE_SPACE == true)
-                                                ++TermEmpty::instances;
-                                                #endif
-                                                this->_inComplement = inComplement;
-                                                this->type = TERM_EMPTY;
+TermEmpty::TermEmpty(bool inComplement) {
+    #if (MEASURE_STATE_SPACE == true)
+    ++TermEmpty::instances;
+    #endif
+    this->_inComplement = inComplement;
+    this->type = TERM_EMPTY;
 
-                                                // Initialization of state space
-                                                this->stateSpace = 0;
-                                                this->stateSpaceApprox = 0;
+    // Initialization of state space
+    this->stateSpace = 0;
+    this->stateSpaceApprox = 0;
 
-                                                #if (DEBUG_TERM_CREATION == true)
-                                                std::cout << "[" << this << "]";
-                                                std::cout << "TermEmpty::";
-                                                this->dump();
-                                                std::cout << "\n";
-                                                #endif
-                                                }
+    #if (DEBUG_TERM_CREATION == true)
+    std::cout << "[" << this << "]";
+    std::cout << "TermEmpty::";
+    this->dump();
+    std::cout << "\n";
+    #endif
+}
 
-    /*Term::~Term() {
-        this->_isSubsumedCache.clear();
-        }*/
+/*Term::~Term() {
+    this->_isSubsumedCache.clear();
+    }*/
 
-    /**
-        * Constructor of Term Product---construct intersecting product of
-        * @p lhs and @p rhs
-        *
-        * @param[in] lhs:  left operand of term intersection
-        * @param[in] rhs:  right operand of term intersection
-        */
-    TermProduct::TermProduct(Term_ptr lhs, Term_ptr rhs, ProductType pt) : left(lhs), right(rhs) {
-        #if (MEASURE_STATE_SPACE == true)
-        ++TermProduct::instances;
-        #endif
+/**
+    * Constructor of Term Product---construct intersecting product of
+    * @p lhs and @p rhs
+    *
+    * @param[in] lhs:  left operand of term intersection
+    * @param[in] rhs:  right operand of term intersection
+    */
+TermProduct::TermProduct(Term_ptr lhs, Term_ptr rhs, ProductType pt) : left(lhs), right(rhs) {
+    #if (MEASURE_STATE_SPACE == true)
+    ++TermProduct::instances;
+    #endif
 
-        this->_inComplement = false;
-        this->type = TermType::TERM_PRODUCT;
-        this->subtype = pt;
+    this->_inComplement = false;
+    this->type = TermType::TERM_PRODUCT;
+    this->subtype = pt;
 
-        // Initialization of state space
-        if(this->left->stateSpace != 0 && this->right != nullptr &&  this->right->stateSpace != 0) {
-            this->stateSpace = this->left->stateSpace + this->right->stateSpace +1;
-        } else {
-            this->stateSpace = 0;
-        }
+    // Initialization of state space
+    if(this->left->stateSpace != 0 && this->right != nullptr &&  this->right->stateSpace != 0) {
+        this->stateSpace = this->left->stateSpace + this->right->stateSpace +1;
+    } else {
+        this->stateSpace = 0;
+    }
     this->stateSpaceApprox = this->left->stateSpaceApprox + (this->right != nullptr ? this->right->stateSpaceApprox : 0) + 1;
 
     #if (DEBUG_TERM_CREATION == true)
@@ -404,9 +404,9 @@ SubsumptionResult TermProduct::_IsSubsumedCore(Term *t, int limit, bool unfoldAl
     Term *rhsl = rhs->left;
     Term *rhsr = rhs->right;
 
-    if(!unfoldAll && (lhsr->IsNotComputed() && rhsr->IsNotComputed())) {
+    if(!unfoldAll && (lhsr->IsNotComputed() || rhsr->IsNotComputed())) {
         #if (OPT_EARLY_PARTIAL_SUB == true)
-        if(lhsr->type == TERM_CONTINUATION && rhsr->type == TERM_CONTINUATION) {
+        if(lhsr->type == TERM_CONTINUATION || rhsr->type == TERM_CONTINUATION) {
             return (lhsl->IsSubsumed(rhsl, limit, unfoldAll) == E_FALSE ? E_FALSE : E_PARTIALLY);
         } else {
             SubsumptionResult leftIsSubsumed = lhsl->IsSubsumed(rhsl, limit, unfoldAll);
@@ -1033,7 +1033,7 @@ SubsumptionResult TermFixpoint::_testIfBiggerExists(Term_ptr const &term) {
         if(!member.second || member.first == nullptr) {
             return false;
         } else {
-            return term->IsSubsumed(member.first, OPT_PARTIALLY_LIMITED_SUBSUMPTION, true) != E_FALSE;
+            return term->IsSubsumed(member.first, OPT_PARTIALLY_LIMITED_SUBSUMPTION, false) != E_FALSE;
         }
     }) == this->_fixpoint.end() ? E_FALSE : E_TRUE);
 }
@@ -1043,7 +1043,7 @@ SubsumptionResult TermFixpoint::_testIfSmallerExists(Term_ptr const &term) {
         if(!member.second || member.first == nullptr) {
             return false;
         } else {
-            return member.first->IsSubsumed(term, OPT_PARTIALLY_LIMITED_SUBSUMPTION, true) != E_FALSE;
+            return member.first->IsSubsumed(term, OPT_PARTIALLY_LIMITED_SUBSUMPTION, false) != E_FALSE;
         }
     }) == this->_fixpoint.end() ? E_FALSE : E_TRUE);
 }
@@ -1136,7 +1136,9 @@ void TermFixpoint::ComputeNextFixpoint() {
     _bValue = this->_aggregate_result(_bValue,result.second);
     // Push new symbols from _symList
     for(auto& symbol : _symList) {
-#       if (OPT_FIXPOINT_BFS_SEARCH == true)
+#       if (OPT_WORKLIST_DRIVEN_BY_RESTRICTIONS == true)
+        _worklist.insert(_worklist.cbegin(), std::make_pair(result.first, symbol));
+#       elif (OPT_FIXPOINT_BFS_SEARCH == true)
         _worklist.push_back(std::make_pair(result.first, symbol));
 #       else
         _worklist.insert(_worklist.cbegin(), std::make_pair(result.first, symbol));

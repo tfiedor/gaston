@@ -364,7 +364,9 @@ public:
                         if ((term = _termFixpoint._sourceIt->GetNext()) != nullptr) {
                             // if more are to be processed
                             for (auto symbol : _termFixpoint._symList) {
-#                               if (OPT_FIXPOINT_BFS_SEARCH == true)
+#                               if (OPT_WORKLIST_DRIVEN_BY_RESTRICTIONS == true)
+                                _termFixpoint._worklist.insert(_termFixpoint._worklist.cbegin(), std::make_pair(term, symbol));
+#                               elif (OPT_FIXPOINT_BFS_SEARCH == true)
                                 _termFixpoint._worklist.push_back(std::make_pair(term, symbol));
 #                               else
                                 _termFixpoint._worklist.insert(_termFixpoint._worklist.cbegin(), std::make_pair(term, symbol));

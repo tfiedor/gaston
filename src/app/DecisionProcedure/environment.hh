@@ -187,6 +187,7 @@ public:
 #define DEBUG_AUTOMATA_ADDRESSES		false
 #define DEBUG_EXAMPLE_PATHS				false
 #define DEBUG_BASE_AUTOMATA 			false
+#define DEBUG_RESTRICTION_AUTOMATA		false
 #define DEBUG_MONA_DFA					false
 #define DEBUG_MONA_CODE_FORMULA			false
 #define DEBUG_RESTRICTIONS				false
@@ -231,6 +232,7 @@ public:
 #define PRINT_STATS_NEGATION			true
 #define PRINT_STATS_BASE				true
 #define PRINT_STATS					    false
+#define PRINT_DOT_LIMIT					20
 
 /* >>> Dumping Options <<< *
  ***************************/
@@ -295,7 +297,7 @@ public:
 #define OPT_CREATE_QF_AUTOMATON 			true    // < Transform quantifier-free automaton to formula
 #define OPT_REDUCE_AUT_EVERYTIME			false	// (-) < Call reduce everytime VATA automaton is created (i.e. as intermediate result)
 #define OPT_REDUCE_AUT_LAST					true	// < Call reduce after the final VATA automaton is created
-#define OPT_EARLY_EVALUATION 				false   // < Evaluates early interesection of product
+#define OPT_EARLY_EVALUATION 				true    // < Evaluates early interesection of product
 #define OPT_EARLY_PARTIAL_SUB				true    // < Postpone the partially subsumed terms
 #define OPT_CONT_ONLY_WHILE_UNSAT			false	// < Generate continuation only if there wasn't found (un)satisfying (counter)example yet
 #define OPT_CONT_ONLY_FOR_NONRESTRICTED		true	// < Generate continuations only for pairs that do not contain restrictions
@@ -319,6 +321,7 @@ public:
 #define OPT_UNIQUE_FIXPOINTS_BY_SUB			false   // < Fixpoints will not be unique by equality but by subsumption (Fixme: This is most likely incorrect)
 #define OPT_UNFOLD_FIX_DURING_SUB			false   // (0) < During the fixpoint testing if there are things in fixpoint, unfold maybe?
 #define OPT_PARTIALLY_LIMITED_SUBSUMPTION	-1		// < Will limited the subsumption testing to certain depth (-1 = unlimited)
+#define OPT_WORKLIST_DRIVEN_BY_RESTRICTIONS true    // < Worklist will be initialized according to the restrictions
 
 /* >>> Static Assertions <<< *
  *****************************/

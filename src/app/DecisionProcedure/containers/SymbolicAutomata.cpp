@@ -1050,8 +1050,9 @@ void GenericBaseAutomaton::DumpAutomaton() {
     }
     std::cout << "Automaton";
     _form->dump();
-    #if (DEBUG_BASE_AUTOMATA == true)
-    this->BaseAutDump();
+    #if (DEBUG_BASE_AUTOMATA == true || DEBUG_RESTRICTION_AUTOMATA == true)
+    if(this->_isRestriction || DEBUG_BASE_AUTOMATA)
+        this->BaseAutDump();
     #endif
     if(this->_isRestriction) {
         std::cout << "\033[1;35m]\033[0m";
@@ -1210,10 +1211,37 @@ void ProjectionAutomaton::DumpToDot(std::ofstream & os, bool inComplement) {
     this->_aut.aut->DumpToDot(os, inComplement);
 }
 
+std::string utf8_substr(std::string originalString, int maxLength)
+{
+    std::string resultString = originalString;
+
+    int len = 0;
+    int byteCount = 0;
+
+    const char* aStr = originalString.c_str();
+
+    while(*aStr)
+    {
+        if( (*aStr & 0xc0) != 0x80 )
+            len += 1;
+
+        if(len>maxLength)
+        {
+            resultString = resultString.substr(0, byteCount);
+            resultString += "...";
+            break;
+        }
+        byteCount++;
+        aStr++;
+    }
+
+    return resultString;
+}
+
 void BaseAutomaton::DumpToDot(std::ofstream & os, bool inComplement) {
     os << "\t" << (uintptr_t) &*this << "[label=\"";
     os << this->_factory.ToSimpleStats() << "\\n";
-    os << "\u03B5 " << (inComplement ? "\u2209 " : "\u2208 ") << this->_form->ToString();
+    os << "\u03B5 " << (inComplement ? "\u2209 " : "\u2208 ") << utf8_substr(this->_form->ToString(), PRINT_DOT_LIMIT);
     os << "\\n(" << this->_trueCounter << "\u22A8, " << this->_falseCounter << "\u22AD)\"";
     if(this->_trueCounter == 0 && this->_falseCounter != 0) {
         os << ",style=filled, fillcolor=red";

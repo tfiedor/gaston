@@ -15,7 +15,7 @@ AST* ContinuationSwitcher::visit(ASTForm_ff* form) {
     for(auto tit = form->f2->allVars->begin(); tit != form->f2->allVars->end(); ++tit) {
         right_rank += (symbolTable.lookupType(*tit) == MonaTypeTag::Varname1 ? 0 : 1);
     }
-    if(left_rank > right_rank) {
+    if(left_rank > right_rank && form->f2->kind != aNot) {
         ASTForm* temp = form->f1;
         form->f1 = form->f2;
         form->f2 = temp;
