@@ -286,7 +286,7 @@ ASTTerm2_Empty::dump()
 
 std::string ASTTerm2_Empty::ToString(bool no_utf) {
   if(no_utf) {
-    return "Empty";
+    return "empty";
   } else {
     return std::string("\u2205");
   }

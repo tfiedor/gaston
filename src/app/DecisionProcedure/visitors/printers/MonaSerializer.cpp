@@ -26,13 +26,13 @@ MonaSerializer::MonaSerializer(std::string filename, ASTForm* form) {
     IdentList free, bound;
     form->freeVars(&free, &bound);
     for(auto it = free.begin(); it != free.end(); ++it) {
+        if(*it == allPosVar)
+            continue;
         switch(symbolTable.lookupType(*it)) {
-            case MonaTypeTag::Varname0:
-                this->_monaFile << "var0";
-                break;
             case MonaTypeTag::Varname1:
                 this->_monaFile << "var1";
                 break;
+            case MonaTypeTag::Varname0:
             case MonaTypeTag::Varname2:
                 this->_monaFile << "var2";
                 break;
