@@ -183,7 +183,7 @@ public:
     NEVER_INLINE BinaryOpAutomaton(SymbolicAutomaton_raw lhs, SymbolicAutomaton_raw rhs, Formula_ptr form);
 
     // <<< PUBLIC API >>>
-    SymbolicAutomaton* GetLeft() { return this->_lhs_aut.aut;}
+    SymLink* GetLeft() { return &this->_lhs_aut;}
     virtual Term* Pre(Symbol*, Term*, bool);
     virtual bool WasLastExampleValid();
     std::pair<SymLink*, Term_ptr> LazyInit(Term_ptr);

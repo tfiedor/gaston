@@ -115,6 +115,10 @@ bool ZeroSymbol::IsDontCareAt(VarType var) {
     return this->_trackMask.test(2*var+1) && this->_trackMask.test(2*var);
 }
 
+bool ZeroSymbol::IsZeroString() const {
+    return this->_trackMask.none();
+}
+
 void ZeroSymbol::_SetValueAt(VarType var, VarValue val) {
     if(val > 0x03) {
         val = charToAsgn(val);

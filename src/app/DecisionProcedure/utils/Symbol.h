@@ -57,6 +57,7 @@ public:
     BaseAutomatonMTBDD* GetMTBDD();
     std::string ToString() const;
     char GetSymbolAt(size_t) const;
+    bool IsZeroString() const;
 
     // <<< STATIC METHODS >>>
     static TrackType constructUniversalTrack();

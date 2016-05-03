@@ -10,18 +10,18 @@
 
 enum GuideTip {G_FRONT, G_BACK, G_THROW, G_PROJECT};
 
-class SymbolicAutomaton;
+class SymLink;
 class Term;
 
 class FixpointGuide {
-    SymbolicAutomaton* _aut;
+    SymLink* _link;
 public:
-    NEVER_INLINE FixpointGuide() : _aut(nullptr) {}
-    NEVER_INLINE explicit FixpointGuide(SymbolicAutomaton* aut) : _aut(aut) {}
+    NEVER_INLINE FixpointGuide() : _link(nullptr) {}
+    NEVER_INLINE explicit FixpointGuide(SymLink* link) : _link(link) {}
 
     GuideTip GiveTip(Term*, Symbol*);
 
-    void SetAutomaton(SymbolicAutomaton *aut);
+    void SetAutomaton(SymLink*);
 };
 
 

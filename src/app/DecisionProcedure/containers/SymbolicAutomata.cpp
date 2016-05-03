@@ -135,7 +135,11 @@ ProjectionAutomaton::ProjectionAutomaton(SymbolicAutomaton_raw aut, Formula_ptr 
         if(ff_form->f1->is_restriction) {
             BinaryOpAutomaton* binaryOpAutomaton = static_cast<BinaryOpAutomaton*>(aut);
             this->_guide = new FixpointGuide(binaryOpAutomaton->GetLeft());
+        } else {
+            this->_guide = new FixpointGuide();
         }
+    } else {
+        this->_guide = new FixpointGuide();
     }
 }
 
