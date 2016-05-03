@@ -186,7 +186,7 @@ public:
 #define DEBUG_ROOT_AUTOMATON		    false
 #define DEBUG_AUTOMATA_ADDRESSES		false
 #define DEBUG_EXAMPLE_PATHS				false
-#define DEBUG_BASE_AUTOMATA 			false
+#define DEBUG_BASE_AUTOMATA 		    false
 #define DEBUG_RESTRICTION_AUTOMATA		false
 #define DEBUG_MONA_DFA					false
 #define DEBUG_MONA_CODE_FORMULA			false
@@ -203,7 +203,7 @@ public:
 #define DEBUG_TERM_SUBSUMED_BY 			false
 #define DEBUG_TERM_CACHE_COMPARISON		false
 #define DEBUG_SYMBOL_CREATION			true
-#define DEBUG_CACHE_MEMBERS			    false
+#define DEBUG_CACHE_MEMBERS			    true
 #define DEBUG_CACHE_BUCKETS				false
 #define DEBUG_CACHE_MEMBERS_HASH		true
 #define DEBUG_CONTINUATIONS 			false
@@ -218,6 +218,7 @@ public:
 #define DEBUG_WORKSHOPS					true	// Fixme: This should not be DEBUG, but measure
 #define DEBUG_DONT_HASH_FIXPOINTS		false
 #define DEBUG_DONT_CATCH_SIGSEGV		true
+#define DEBUG_RESTRICTION_DRIVEN_FIX	false
 
 #define ALT_SKIP_EMPTY_UNIVERSE			true // < Skip empty example
 #define ALT_ALWAYS_DETERMINISTIC	    true
@@ -282,7 +283,7 @@ public:
 
 /* >>> Optimizations <<< *
  *************************/
-#define OPT_USE_DAG							true    // < Instead of using the symbolic automata, will use the DAGified SA
+#define OPT_USE_DAG							false   // < Instead of using the symbolic automata, will use the DAGified SA
 #define OPT_SHUFFLE_FORMULA					true    // < Will run ShuffleVisitor before creation of automaton, which should ease the procedure as well
 #define OPT_DONT_CACHE_CONT					true	// < Do not cache terms containing continuations
 #define OPT_DONT_CACHE_UNFULL_FIXPOINTS 	false	// < Do not cache fixpoints that were not fully computed
@@ -297,7 +298,7 @@ public:
 #define OPT_CREATE_QF_AUTOMATON 			true    // < Transform quantifier-free automaton to formula
 #define OPT_REDUCE_AUT_EVERYTIME			false	// (-) < Call reduce everytime VATA automaton is created (i.e. as intermediate result)
 #define OPT_REDUCE_AUT_LAST					true	// < Call reduce after the final VATA automaton is created
-#define OPT_EARLY_EVALUATION 				true    // < Evaluates early interesection of product
+#define OPT_EARLY_EVALUATION 				false   // < Evaluates early interesection of product
 #define OPT_EARLY_PARTIAL_SUB				true    // < Postpone the partially subsumed terms
 #define OPT_CONT_ONLY_WHILE_UNSAT			false	// < Generate continuation only if there wasn't found (un)satisfying (counter)example yet
 #define OPT_CONT_ONLY_FOR_NONRESTRICTED		true	// < Generate continuations only for pairs that do not contain restrictions

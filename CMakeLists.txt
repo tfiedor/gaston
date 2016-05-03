@@ -53,6 +53,7 @@ add_executable(gaston
 	src/app/DecisionProcedure/containers/SymbolicAutomata.cpp
 	src/app/DecisionProcedure/containers/Term.cpp
 	src/app/DecisionProcedure/containers/Workshops.cpp
+	src/app/DecisionProcedure/containers/FixpointGuide.cpp
 	src/app/DecisionProcedure/utils/Symbol.cpp
 	src/app/DecisionProcedure/visitors/restricters/Flattener.cpp
 	src/app/DecisionProcedure/visitors/restricters/NegationUnfolder.cpp

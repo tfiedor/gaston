@@ -22,6 +22,7 @@
 #include "../utils/Symbol.h"
 #include "../mtbdd/ondriks_mtbdd.hh"
 #include "../containers/SymbolicAutomata.h"
+#include "../containers/FixpointGuide.h"
 #include "../environment.hh"
 #include "../containers/Workshops.h"
 
@@ -363,9 +364,42 @@ public:
                         assert(_termFixpoint._sourceIt.get() != nullptr);
                         if ((term = _termFixpoint._sourceIt->GetNext()) != nullptr) {
                             // if more are to be processed
+#                           if (DEBUG_RESTRICTION_DRIVEN_FIX == true)
+                            std::cout << "ComputeNextPre()\n";
+#                           endif
                             for (auto symbol : _termFixpoint._symList) {
 #                               if (OPT_WORKLIST_DRIVEN_BY_RESTRICTIONS == true)
-                                _termFixpoint._worklist.insert(_termFixpoint._worklist.cbegin(), std::make_pair(term, symbol));
+#                               if (DEBUG_RESTRICTION_DRIVEN_FIX == true)
+                                term->dump(); std::cout << " + " << (*symbol) << " -> ";
+#                               endif
+                                if(_termFixpoint._guide != nullptr) {
+                                    switch(_termFixpoint._guide->GiveTip(term, symbol)) {
+                                        case GuideTip::G_FRONT:
+#                                           if (DEBUG_RESTRICTION_DRIVEN_FIX == true)
+                                            std::cout << "G_FRONT\n";
+#                                           endif
+                                            _termFixpoint._worklist.insert(_termFixpoint._worklist.cbegin(), std::make_pair(term, symbol));
+                                            break;
+                                        case GuideTip::G_BACK:
+#                                           if (DEBUG_RESTRICTION_DRIVEN_FIX == true)
+                                            std::cout << "G_BACK\n";
+#                                           endif
+                                            _termFixpoint._worklist.push_back(std::make_pair(term, symbol));
+                                            break;
+                                        case GuideTip::G_THROW:
+#                                           if (DEBUG_RESTRICTION_DRIVEN_FIX == true)
+                                            std::cout << "G_THROW\n";
+#                                           endif
+                                            break;
+                                        case GuideTip::G_PROJECT:
+                                            _termFixpoint._worklist.insert(_termFixpoint._worklist.cbegin(), std::make_pair(term, symbol));
+                                            break;
+                                        default:
+                                            assert(false && "Unsupported guide tip");
+                                    }
+                                } else {
+                                    _termFixpoint._worklist.insert(_termFixpoint._worklist.cbegin(), std::make_pair(term, symbol));
+                                }
 #                               elif (OPT_FIXPOINT_BFS_SEARCH == true)
                                 _termFixpoint._worklist.push_back(std::make_pair(term, symbol));
 #                               else
@@ -418,6 +452,7 @@ protected:
     Term_ptr _unsatTerm = nullptr;          // [4B] << Unsatisfiable term of the fixpoint computation
     bool (*_aggregate_result)(bool, bool);  // [4B] << Agregation function for fixpoint boolean results
     WorklistSearchType _searchType;         // [4B] << Search type for Worklist
+    FixpointGuide* _guide = nullptr;        // [4B] << Guide for fixpoints
     bool _bValue;                           // [1B] << Boolean value of the fixpoint testing
     bool _updated = false;                  // [1B] << Flag if the fixpoint was updated during the last unique check
     bool _shortBoolValue;                   // [1B] << Value that leads to early termination fo the fixpoint

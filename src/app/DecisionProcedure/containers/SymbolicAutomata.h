@@ -27,6 +27,7 @@
 #include "../containers/SymbolicCache.hh"
 #include "../containers/VarToTrackMap.hh"
 #include "../containers/Workshops.h"
+#include "../containers/FixpointGuide.h"
 #include "../../Frontend/ident.h"
 #include "../../Frontend/ast.h"
 #include "../environment.hh"
@@ -38,6 +39,7 @@
 
 // <<< FORWARD CLASS DECLARATIONS >>>
 class Term;
+class FixpointGuide;
 extern VarToTrackMap varMap;
 
 using namespace Gaston;
@@ -181,6 +183,7 @@ public:
     NEVER_INLINE BinaryOpAutomaton(SymbolicAutomaton_raw lhs, SymbolicAutomaton_raw rhs, Formula_ptr form);
 
     // <<< PUBLIC API >>>
+    SymbolicAutomaton* GetLeft() { return this->_lhs_aut.aut;}
     virtual Term* Pre(Symbol*, Term*, bool);
     virtual bool WasLastExampleValid();
     std::pair<SymLink*, Term_ptr> LazyInit(Term_ptr);
@@ -262,6 +265,7 @@ protected:
     // <<< PRIVATE MEMBERS >>>
     SymLink _aut;
     bool _isRoot;
+    FixpointGuide* _guide = nullptr;
 
     // <<< PRIVATE FUNCTIONS >>>
     virtual void _InitializeAutomaton();
@@ -278,6 +282,7 @@ public:
     virtual Term* Pre(Symbol*, Term*, bool);
     SymbolicAutomaton* GetBase() { return this->_aut.aut;}
     bool IsRoot() { return this-> _isRoot; }
+    FixpointGuide* GetGuide() { return this->_guide; }
     virtual bool WasLastExampleValid();
 
     // <<< DUMPING FUNCTIONS >>>

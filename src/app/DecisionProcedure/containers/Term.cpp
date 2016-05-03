@@ -202,7 +202,8 @@ TermList::TermList(Term_ptr first, bool isCompl) {
 }
 
 TermFixpoint::TermFixpoint(Aut_ptr aut, Term_ptr startingTerm, Symbol* symbol, bool inComplement, bool initbValue, WorklistSearchType search = WorklistSearchType::E_DFS)
-        : _sourceTerm(nullptr), _sourceSymbol(symbol), _sourceIt(nullptr), _aut(static_cast<ProjectionAutomaton*>(aut)->GetBase()), _bValue(initbValue) {
+        : _sourceTerm(nullptr), _sourceSymbol(symbol), _sourceIt(nullptr), _aut(static_cast<ProjectionAutomaton*>(aut)->GetBase()),
+          _guide(static_cast<ProjectionAutomaton*>(aut)->GetGuide()), _bValue(initbValue) {
     #if (MEASURE_STATE_SPACE == true)
     ++TermFixpoint::instances;
     #endif
@@ -237,9 +238,47 @@ TermFixpoint::TermFixpoint(Aut_ptr aut, Term_ptr startingTerm, Symbol* symbol, b
 #   endif
         this->_InitializeSymbols(aut->symbolFactory, aut->GetFreeVars(),
                                      static_cast<ProjectionAutomaton *>(aut)->projectedVars, symbol);
-            for (auto symbol : this->_symList) {
+#       if (DEBUG_RESTRICTION_DRIVEN_FIX == true)
+        std::cout << "Created new fixpoint for '"; this->_aut->_form->dump(); std::cout << "'\n";
+#       endif
+        for (auto symbol : this->_symList) {
+#           if (OPT_WORKLIST_DRIVEN_BY_RESTRICTIONS == true)
+#           if (DEBUG_RESTRICTION_DRIVEN_FIX == true)
+            startingTerm->dump(); std::cout << " + " << (*symbol) << " -> ";
+#           endif
+            if(this->_guide != nullptr) {
+                switch (this->_guide->GiveTip(startingTerm, symbol)) {
+                    case GuideTip::G_FRONT:
+#                       if (DEBUG_RESTRICTION_DRIVEN_FIX == true)
+                        std::cout << "G_FRONT\n";
+#                       endif
+                        this->_worklist.insert(this->_worklist.cbegin(), std::make_pair(startingTerm, symbol));
+                        break;
+                    case GuideTip::G_BACK:
+#                       if (DEBUG_RESTRICTION_DRIVEN_FIX == true)
+                        std::cout << "G_BACK\n";
+#                       endif
+                        this->_worklist.push_back(std::make_pair(startingTerm, symbol));
+                        break;
+                    case GuideTip::G_THROW:
+#                       if (DEBUG_RESTRICTION_DRIVEN_FIX == true)
+                        std::cout << "G_THROW\n";
+#                       endif
+                        break;
+                    default:
+                        assert(false && "Unsupported guiding tip\n");
+                }
+            } else {
+#               if (DEBUG_RESTRICTION_DRIVEN_FIX == true)
+                std::cout << "insert\n";
+#               endif
                 this->_worklist.insert(this->_worklist.cbegin(), std::make_pair(startingTerm, symbol));
             }
+#           else
+            this->_worklist.insert(this->_worklist.cbegin(), std::make_pair(startingTerm, symbol));
+#           endif
+        }
+        assert(this->_worklist.size() > 0 || startingTerm->type == TERM_EMPTY);
 #   if (OPT_NO_SATURATION_FOR_M2L == true)
     }
 #   endif
@@ -254,6 +293,7 @@ TermFixpoint::TermFixpoint(Aut_ptr aut, Term_ptr startingTerm, Symbol* symbol, b
 
 TermFixpoint::TermFixpoint(Aut_ptr aut, Term_ptr sourceTerm, Symbol* symbol, bool inComplement)
         : _sourceTerm(sourceTerm), _sourceSymbol(symbol), _sourceIt(static_cast<TermFixpoint*>(sourceTerm)->GetIteratorDynamic()),
+          _guide(static_cast<ProjectionAutomaton*>(aut)->GetGuide()),
           _aut(static_cast<ProjectionAutomaton*>(aut)->GetBase()), _worklist(), _bValue(inComplement) {
     #if (MEASURE_STATE_SPACE == true)
     ++TermFixpoint::instances;
@@ -1096,11 +1136,13 @@ SubsumptionResult TermFixpoint::_testIfSubsumes(Term_ptr const& term) {
 }
 
 WorklistItemType TermFixpoint::_popFromWorklist() {
-    if(this->_searchType == WorklistSearchType::E_DFS) {
+    assert(_worklist.size() > 0);
+    if(this->_searchType != WorklistSearchType::E_BFS) {
         WorklistItemType item = _worklist.front();
         _worklist.pop_front();
         return item;
     } else {
+        assert(false);
         WorklistItemType item = _worklist.back();
         _worklist.pop_back();
         return item;
@@ -1111,7 +1153,8 @@ WorklistItemType TermFixpoint::_popFromWorklist() {
  * Does the computation of the next fixpoint, i.e. the next iteration.
  */
 void TermFixpoint::ComputeNextFixpoint() {
-    assert(!_worklist.empty());
+    if(_worklist.empty())
+        return;
 
     // Pop the front item from worklist
     WorklistItemType item = this->_popFromWorklist();
@@ -1135,9 +1178,46 @@ void TermFixpoint::ComputeNextFixpoint() {
     // Aggregate the result of the fixpoint computation
     _bValue = this->_aggregate_result(_bValue,result.second);
     // Push new symbols from _symList
+#   if (DEBUG_RESTRICTION_DRIVEN_FIX == true)
+    std::cout << "ComputeNextFixpoint()\n";
+#   endif
     for(auto& symbol : _symList) {
 #       if (OPT_WORKLIST_DRIVEN_BY_RESTRICTIONS == true)
-        _worklist.insert(_worklist.cbegin(), std::make_pair(result.first, symbol));
+#       if (DEBUG_RESTRICTION_DRIVEN_FIX == true)
+        result.first->dump(); std::cout << " + " << (*symbol) << " -> ";
+#       endif
+        if(this->_guide != nullptr) {
+            bool break_from_for = false;
+            switch(this->_guide->GiveTip(result.first, symbol)) {
+                case GuideTip::G_FRONT:
+#                   if (DEBUG_RESTRICTION_DRIVEN_FIX == true)
+                    std::cout << "G_FRONT\n";
+#                   endif
+                    _worklist.insert(_worklist.cbegin(), std::make_pair(result.first, symbol));
+                    break;
+                case GuideTip::G_BACK:
+#                   if (DEBUG_RESTRICTION_DRIVEN_FIX == true)
+                    std::cout << "G_BACK\n";
+#                   endif
+                    _worklist.push_back(std::make_pair(result.first, symbol));
+                    break;
+                case GuideTip::G_THROW:
+#                   if (DEBUG_RESTRICTION_DRIVEN_FIX == true)
+                    std::cout << "G_THROW\n";
+#                   endif
+                    break;
+                case GuideTip::G_PROJECT:
+                    _worklist.insert(_worklist.cbegin(), std::make_pair(result.first, symbol));
+                    break;
+                default:
+                    assert(false && "Unsupported guide tip");
+            }
+        } else {
+#           if (DEBUG_RESTRICTION_DRIVEN_FIX == true)
+            std::cout << "insert\n";
+#           endif
+            _worklist.insert(_worklist.cbegin(), std::make_pair(result.first, symbol));
+        }
 #       elif (OPT_FIXPOINT_BFS_SEARCH == true)
         _worklist.push_back(std::make_pair(result.first, symbol));
 #       else
@@ -1151,7 +1231,8 @@ void TermFixpoint::ComputeNextFixpoint() {
  * as we had already the fixpoint computed from previous step
  */
 void TermFixpoint::ComputeNextPre() {
-    assert(!_worklist.empty());
+    if(_worklist.empty())
+        return;
 
     // Pop item from worklist
     WorklistItemType item = this->_popFromWorklist();
@@ -1312,7 +1393,7 @@ FixpointTermSem TermFixpoint::GetSemantics() const {
 Term* TermContinuation::unfoldContinuation(UnfoldedInType t) {
     if(this->_unfoldedTerm == nullptr) {
         if(lazyEval) {
-            assert(this->aut->type == AutType::INTERSECTION || this->aut->type == AutType::UNION);
+            assert(this->aut->aut->type == AutType::INTERSECTION || this->aut->aut->type == AutType::UNION);
             assert(this->initAut != nullptr);
             BinaryOpAutomaton* boAutomaton = static_cast<BinaryOpAutomaton*>(this->initAut);
             std::tie(this->aut, this->term) = boAutomaton->LazyInit(this->term);

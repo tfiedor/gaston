@@ -127,9 +127,22 @@ ProjectionAutomaton::ProjectionAutomaton(SymbolicAutomaton_raw aut, Formula_ptr 
     this->_InitializeAutomaton();
     aut->IncReferences();
     this->_aut.InitializeSymLink(reinterpret_cast<ASTForm_q*>(this->_form)->f);
+
+    // Initialize the guide
+    ASTForm* innerForm = static_cast<ASTForm_q*>(this->_form)->f;
+    if(innerForm->kind == aAnd || innerForm->kind == aOr) {
+        ASTForm_ff* ff_form = static_cast<ASTForm_ff*>(innerForm);
+        if(ff_form->f1->is_restriction) {
+            BinaryOpAutomaton* binaryOpAutomaton = static_cast<BinaryOpAutomaton*>(aut);
+            this->_guide = new FixpointGuide(binaryOpAutomaton->GetLeft());
+        }
+    }
 }
 
 ProjectionAutomaton::~ProjectionAutomaton() {
+    if(this->_guide != nullptr) {
+        delete _guide;
+    }
     this->_aut.aut->DecReferences();
 }
 
