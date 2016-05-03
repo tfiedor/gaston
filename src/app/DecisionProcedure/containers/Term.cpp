@@ -13,6 +13,7 @@
  *****************************************************************************/
 
 #include "Term.h"
+#include "TermEnumerator.h"
 #include <boost/functional/hash.hpp>
 
 extern Ident allPosVar;
@@ -628,6 +629,17 @@ SubsumptionResult TermProduct::IsSubsumedBy(FixpointType& fixpoint, Term*& bigge
             item.second = false;
         }
     }
+    /*
+     * TermEnumerator t(this);
+     * while(t.IsNotNull()) {
+     *   for(auto &item : fixpoint) {
+     *     if(item.first == nullptr || !item.second) continue;
+     *     if(...) {
+     *       t->Next();
+     *     }
+     *   }
+     * }
+     */
 
     return E_FALSE;
 }

@@ -30,9 +30,14 @@ GuideTip FixpointGuide::GiveTip(Term* term, Symbol* symbol) {
         assert(this->_link->aut->type == AutType::BASE);
         TermProduct* tp = static_cast<TermProduct*>(term);
         if(static_cast<TermBaseSet*>(tp->left)->Intersects(static_cast<TermBaseSet*>(this->_link->aut->GetInitialStates()))) {
-            ASTForm_FirstOrder* fo = static_cast<ASTForm_FirstOrder*>(this->_link->aut->_form);
-            if(symbol->GetSymbolAt(varMap[static_cast<ASTTerm1_Var1*>(fo->t)->n]) != '1') {
-                return GuideTip::G_FRONT;
+            // Restriction holds, we'll look back at link and if the right side did not progress, we will throw it away
+            if(tp->link.succ != nullptr) {
+                TermProduct* tpp = static_cast<TermProduct*>(tp->link.succ);
+                if(tpp->right == tp->right && tp->link.symbol == symbol) {
+                    return GuideTip::G_BACK;
+                } else {
+                    return GuideTip::G_FRONT;
+                }
             } else {
                 return GuideTip::G_FRONT;
             }
