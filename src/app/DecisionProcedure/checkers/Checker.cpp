@@ -269,41 +269,41 @@ void Checker::PreprocessFormula() {
         (this->_monaAST->formula)->dump();
     }
 
-    // Additional filter phases
-    #define CALL_FILTER(filter) \
+        // Additional filter phases
+#define CALL_FILTER(filter) \
         if(!strcmp(#filter, "FullAntiPrenexer")) { \
             OccuringVariableDecorator decorator; \
             this->_monaAST->formula->accept(decorator); \
         } \
-		filter filter##_visitor;    \
-		this->_monaAST->formula = static_cast<ASTForm *>(this->_monaAST->formula->accept(filter##_visitor));    \
-		if(options.dump) {    \
-			G_DEBUG_FORMULA_AFTER_PHASE(#filter);    \
-			(this->_monaAST->formula)->dump();    std::cout << "\n";    \
-		} \
-		if(options.graphvizDAG) {\
-			std::string filter##_dotName(""); \
-			filter##_dotName += #filter; \
-			filter##_dotName += ".dot"; \
-			DotWalker filter##_dw_visitor(filter##_dotName); \
-			(this->_monaAST->formula)->accept(filter##_dw_visitor); \
-		}
+        filter filter##_visitor;    \
+        this->_monaAST->formula = static_cast<ASTForm *>(this->_monaAST->formula->accept(filter##_visitor));    \
+        if(options.dump) {    \
+            G_DEBUG_FORMULA_AFTER_PHASE(#filter);    \
+            (this->_monaAST->formula)->dump();    std::cout << "\n";    \
+        } \
+        if(options.graphvizDAG) {\
+            std::string filter##_dotName(""); \
+            filter##_dotName += #filter; \
+            filter##_dotName += ".dot"; \
+            DotWalker filter##_dw_visitor(filter##_dotName); \
+            (this->_monaAST->formula)->accept(filter##_dw_visitor); \
+        }
     FILTER_LIST(CALL_FILTER)
-    #undef CALL_FILTER
+#undef CALL_FILTER
 
-    if(options.serializeMona) {
+    if (options.serializeMona) {
         std::string path(inputFileName);
         MonaSerializer serializer(path.substr(0, path.find_last_of(".")) + "_serialized.mona", this->_monaAST->formula);
     }
 
-    std::list<size_t> tags;
+    std::list <size_t> tags;
     std::string stringTag("");
     readTags(inputFileName, stringTag);
     parseTags(stringTag, tags);
 
 #   if (OPT_SHUFFLE_FORMULA == true)
     ShuffleVisitor shuffleVisitor;
-    this->_monaAST->formula = static_cast<ASTForm*>(this->_monaAST->formula->accept(shuffleVisitor));
+    this->_monaAST->formula = static_cast<ASTForm *>(this->_monaAST->formula->accept(shuffleVisitor));
 #   endif
 
     Tagger tagger(tags);
@@ -312,19 +312,21 @@ void Checker::PreprocessFormula() {
     FixpointDetagger detagger;
     (this->_monaAST->formula)->accept(detagger);
 
-    SecondOrderRestricter restricter;
-    this->_monaAST->formula = static_cast<ASTForm*>((this->_monaAST->formula)->accept(restricter));
+    if (!options.monaWalk) {
+        SecondOrderRestricter restricter;
+        this->_monaAST->formula = static_cast<ASTForm *>((this->_monaAST->formula)->accept(restricter));
 
-    QuantificationMerger quantificationMerger;
-    this->_monaAST->formula = static_cast<ASTForm*>((this->_monaAST->formula)->accept(quantificationMerger));
+        QuantificationMerger quantificationMerger;
+        this->_monaAST->formula = static_cast<ASTForm *>((this->_monaAST->formula)->accept(quantificationMerger));
 
-#   if (OPT_EARLY_EVALUATION == true)
-    UnderComplementDecorator underComplementDecorator;
-    (this->_monaAST->formula)->accept(underComplementDecorator);
+#       if (OPT_EARLY_EVALUATION == true)
+        UnderComplementDecorator underComplementDecorator;
+        (this->_monaAST->formula)->accept(underComplementDecorator);
 
-    ContinuationSwitcher continuationSwitcher;
-    (this->_monaAST->formula)->accept(continuationSwitcher);
-#   endif
+        ContinuationSwitcher continuationSwitcher;
+        (this->_monaAST->formula)->accept(continuationSwitcher);
+#       endif
+    }
 
     if(options.graphvizDAG) {
         std::string dotFileName(inputFileName);
@@ -347,6 +349,6 @@ void Checker::PreprocessFormula() {
 void Checker::CreateAutomataSizeEstimations() {
     std::string monaDot(inputFileName);
     monaDot += "-walk.dot";
-    MonaAutomataDotWalker monaWalker(monaDot);
+    MonaAutomataDotWalker monaWalker(monaDot, true);
     (this->_monaAST->formula)->accept(monaWalker);
 }

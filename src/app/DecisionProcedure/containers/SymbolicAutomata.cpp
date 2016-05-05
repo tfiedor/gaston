@@ -1306,7 +1306,7 @@ void BaseAutomaton::BaseAutDump() {
     } else {
         std::cout << "-> not initialized\n";
     }
-    this->_autWrapper.DumpDFA();
+    this->_autWrapper.DumpDFA(std::cout);
     std::cout << "[----------------------->]\n";
 }
 

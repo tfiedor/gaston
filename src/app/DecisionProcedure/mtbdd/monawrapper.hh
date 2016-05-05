@@ -314,7 +314,8 @@ public:
         ofs << "}" << std::endl;*/
     }
 
-    void GetAllPathFromMona(const bdd_manager *bddm,
+    void GetAllPathFromMona(std::ostream &os,
+                            const bdd_manager *bddm,
                             unsigned p,
                             std::string transition,
                             size_t root,
@@ -326,23 +327,46 @@ public:
 
         if (index == BDD_LEAF_INDEX)
         {
-            std::cout << root << " -(" << transition << ")-> " << l << std::endl;
+#           if (PRINT_IN_TIMBUK == true)
+            os << transition << "(" << root << ") -> " << l << "\n";
+#           else
+            os << root << " -(" << transition << ")-> " << l << "\n";
+#           endif
         }
         else
         {
             transition[varMap[index]] = '0';
-            GetAllPathFromMona(bddm, l, transition, root, varNum);
+            GetAllPathFromMona(os, bddm, l, transition, root, varNum);
 
             transition[varMap[index]] = '1';
-            GetAllPathFromMona(bddm, r, transition, root, varNum);
+            GetAllPathFromMona(os, bddm, r, transition, root, varNum);
         }
     }
 
-    void DumpDFA() {
+    void DumpDFA(std::ostream &os) {
         std::string str(this->numVars_, 'X');
         for(size_t i = this->initialState_; i < this->dfa_->ns; ++i) {
-            GetAllPathFromMona(this->dfa_->bddm, this->dfa_->q[i], str, i, this->numVars_);
+            GetAllPathFromMona(os, this->dfa_->bddm, this->dfa_->q[i], str, i, this->numVars_);
         }
+    }
+
+    void DumpTo(std::ostream &os) {
+        os << "Ops\n";
+        os << "Automaton anonymous\n";
+        os << "States";
+        for(size_t i = this->initialState_; i < this->dfa_->ns; ++i) {
+            os << " " << i;
+        }
+        os << "\n";
+        os << "Final States";
+        for(size_t i = this->initialState_; i < this->dfa_->ns; ++i) {
+            if(this->dfa_->f[i] == 1) {
+                os << " " << i;
+            }
+        }
+        os << "\n";
+        os << "Transitions\n";
+        DumpDFA(os);
     }
 
     VectorType Pre(size_t state, const boost::dynamic_bitset<> &symbol)

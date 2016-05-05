@@ -11,8 +11,14 @@
 using TimeType = std::pair<size_t, size_t>;
 
 class MonaAutomataDotWalker : public DotWalker {
+    const unsigned int _threshold = 10;
+    unsigned int _counter = 0;
+    bool _print_intermediate;
 public:
-    explicit MonaAutomataDotWalker(std::string filename) : DotWalker(filename) {}
+    explicit MonaAutomataDotWalker(std::string filename) : DotWalker(filename), _print_intermediate(false) {}
+    MonaAutomataDotWalker(std::string filename, bool print_intermediate) : DotWalker(filename), _print_intermediate(print_intermediate) {
+
+    }
 
     void visit(ASTForm_And*);
     void visit(ASTForm_Or*);

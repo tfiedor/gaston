@@ -6,7 +6,7 @@
 #include <ios>
 #include <stdint.h>
 
-DotWalker::DotWalker(std::string filename) : VoidVisitor(Traverse::PreOrder) {
+DotWalker::DotWalker(std::string filename) : VoidVisitor(Traverse::PreOrder), _fileName(filename) {
     this->_dotFile.open(filename);
     if(!this->_dotFile.is_open()) {
         std::cerr << "[!] Unable to open '" << filename << "'\n";

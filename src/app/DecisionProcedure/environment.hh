@@ -237,6 +237,7 @@ public:
 #define PRINT_STATS_NEGATION			true
 #define PRINT_STATS_BASE				true
 #define PRINT_STATS					    false
+#define PRINT_IN_TIMBUK					true
 #define PRINT_DOT_LIMIT					20
 
 /* >>> Dumping Options <<< *
@@ -264,7 +265,7 @@ public:
 
 /* >>> Anti-Prenexing Options <<< *
  **********************************/
-#define ANTIPRENEXING_FULL              true
+#define ANTIPRENEXING_FULL              false
 #define ANTIPRENEXING_DISTRIBUTIVE		false
 
 /*

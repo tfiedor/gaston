@@ -626,7 +626,6 @@ SubsumptionResult TermProduct::IsSubsumedBy(FixpointType& fixpoint, Term*& bigge
     }
 
     // For each item in fixpoint
-    size_t valid_members = 0;
     for(auto& item : fixpoint) {
         // Nullptr is skipped
         if(item.first == nullptr || !item.second) continue;
@@ -635,18 +634,6 @@ SubsumptionResult TermProduct::IsSubsumedBy(FixpointType& fixpoint, Term*& bigge
         if(this->IsSubsumed(item.first, OPT_PARTIALLY_LIMITED_SUBSUMPTION)) {
             return E_TRUE ;
         }
-
-        if(!no_prune) {
-            if (item.first->IsSubsumed(this, OPT_PARTIALLY_LIMITED_SUBSUMPTION)) {
-                item.second = false;
-            } else {
-                ++valid_members;
-            }
-        }
-    }
-
-    if(!valid_members) {
-        return E_FALSE;
     }
 
     // For each item in fixpoint
@@ -663,6 +650,15 @@ SubsumptionResult TermProduct::IsSubsumedBy(FixpointType& fixpoint, Term*& bigge
             }
         }
         if (!subsumed) {
+            if(!no_prune) {
+                for (auto &item : fixpoint) {
+                    if (item.first == nullptr || !item.second) continue;
+
+                    if (item.first->IsSubsumed(this, OPT_PARTIALLY_LIMITED_SUBSUMPTION)) {
+                        item.second = false;
+                    }
+                }
+            }
             return E_FALSE;
         }
     }

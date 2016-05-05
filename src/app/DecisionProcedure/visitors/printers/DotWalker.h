@@ -16,6 +16,9 @@ public:
     explicit DotWalker(std::string filename);
     ~DotWalker();
 
+    void visit(ASTTerm*) {};
+    void visit(ASTUniv*) {};
+
     void visit(ASTForm_And*);
     void visit(ASTForm_Or*);
     void visit(ASTForm_Impl*);
@@ -45,6 +48,7 @@ public:
 
 protected:
     std::ofstream _dotFile;
+    std::string _fileName;
 
     void _atomicToDot(ASTForm*);
     template<class ExistClass>

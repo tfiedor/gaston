@@ -2,11 +2,16 @@
 // Created by Raph on 27/01/2016.
 //
 
+#include <iostream>
 #include "MonaAutomataDotWalker.h"
 #include "DotWalker.h"
 #include "../../../Frontend/dfa.h"
+#include "../../mtbdd/monawrapper.hh"
+#include "../../containers/VarToTrackMap.hh"
 #include "../../automata.hh"
 #include "../../environment.hh"
+
+extern VarToTrackMap varMap;
 
 TimeType MonaAutomataDotWalker::_constructAutomaton(ASTForm* form) {
     DFA *monaAutomaton = nullptr;
@@ -18,10 +23,31 @@ TimeType MonaAutomataDotWalker::_constructAutomaton(ASTForm* form) {
         monaStates = monaAutomaton->ns;
 
         temp = dfaCopy(monaAutomaton);
+        if(_print_intermediate && monaStates >= this->_threshold) {
+            std::ofstream pre_minimization;
+            std::string pm_file(this->_fileName);
+            pm_file += "_" + std::to_string(this->_counter) + "__" + std::to_string(monaStates) + "states.dfa";
+            pre_minimization.open(pm_file);
+            pre_minimization << "(*" << form->ToString(true) << "*)\n";
+            MonaWrapper<size_t> wrapper(monaAutomaton, true, varMap.TrackLength());
+            wrapper.DumpTo(pre_minimization);
+
+        }
+
         dfaUnrestrict(temp);
         monaAutomaton = dfaMinimize(temp);
-
         minimizedStates = monaAutomaton->ns;
+
+        temp = dfaCopy(monaAutomaton);
+        if(_print_intermediate && monaStates >= this->_threshold) {
+            std::ofstream post_minimization;
+            std::string am_file(this->_fileName);
+            am_file += "_" + std::to_string(this->_counter++) + "__" + std::to_string(minimizedStates) + "states.mdfa";
+            post_minimization.open(am_file);
+            post_minimization << "(*" << form->ToString(true) << "*)\n";
+            MonaWrapper<size_t> wrapper(temp, true, varMap.TrackLength());
+            wrapper.DumpTo(post_minimization);
+        }
 
         // Clean up
         dfaFree(monaAutomaton);
