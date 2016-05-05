@@ -23,6 +23,7 @@
 #include "../mtbdd/ondriks_mtbdd.hh"
 #include "../containers/SymbolicAutomata.h"
 #include "../containers/FixpointGuide.h"
+#include "../containers/TermEnumerator.h"
 #include "../environment.hh"
 #include "../containers/Workshops.h"
 
@@ -103,6 +104,7 @@ public:
     // <<< PUBLIC API >>>
     virtual SubsumptionResult IsSubsumedBy(FixpointType& fixpoint, Term*&) = 0;
     virtual SubsumptionResult IsSubsumed(Term* t, int limit, bool b = false);
+    virtual SubsumptionResult Subsumes(TermEnumerator*);
     virtual bool IsEmpty() = 0;
     virtual void Complement();
     virtual bool InComplement() {return this->_inComplement;}
@@ -127,6 +129,7 @@ protected:
     virtual SubsumptionResult _IsSubsumedCore(Term* t, int limit, bool b = false) = 0;
     virtual void _dumpCore(unsigned indent = 0) = 0;
     virtual bool _eqCore(const Term&) = 0;
+    virtual SubsumptionResult _SubsumesCore(TermEnumerator*);
 
     friend size_t hash_value(Term* s);
     friend std::ostream& operator <<(std::ostream& osObject, Term& z);
@@ -189,6 +192,7 @@ private:
     // <<< PRIVATE FUNCTIONS >>>
     unsigned int _MeasureStateSpaceCore();
     SubsumptionResult _IsSubsumedCore(Term* t, int limit, bool b = false);
+    SubsumptionResult _SubsumesCore(TermEnumerator*);
 };
 
 /**
@@ -219,6 +223,7 @@ private:
     // <<< PRIVATE FUNCTIONS >>>
     unsigned int _MeasureStateSpaceCore();
     SubsumptionResult _IsSubsumedCore(Term* t, int limit, bool b = false);
+    SubsumptionResult _SubsumesCore(TermEnumerator*);
 };
 
 /**

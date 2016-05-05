@@ -610,38 +610,50 @@ SubsumptionResult TermProduct::IsSubsumedBy(FixpointType& fixpoint, Term*& bigge
     //Fixme: is this true?
     if(this->IsEmpty()) {
         return E_TRUE;
+    } else if((fixpoint.size() == 0)) {
+        return E_FALSE;
+    } else {
+        bool isEmpty = true;
+        for(auto& item : fixpoint) {
+            if(item.first == nullptr || !item.second)
+                continue;
+            isEmpty = false;
+            break;
+        }
+        if(isEmpty)
+            return E_FALSE;
     }
     // For each item in fixpoint
-    // TODO: This should be holikoptimized
-    SubsumptionResult result;
-    for(auto& item : fixpoint) {
-        // Nullptr is skipped
-        if(item.first == nullptr || !item.second) continue;
-
-        // Test the subsumption
-        if((result = this->IsSubsumed(item.first, OPT_PARTIALLY_LIMITED_SUBSUMPTION)) != E_FALSE) {
-            if(result == E_PARTIALLY)
-                biggerTerm = item.first;
-            return result;
+    //std::cout << "\nTesting: "; this->dump(); std::cout << "\n";
+    ProductEnumerator productEnumerator(this);
+    while(productEnumerator.IsNull() == false) {
+        bool subsumed = false;
+        //std::cout << "Processing: " << productEnumerator << "\n";
+        for(auto& item : fixpoint) {
+            if(item.first == nullptr || !item.second)
+                continue;
+            //std::cout << "\u2208 "; item.first->dump();std::cout << "\n";
+            if(item.first->Subsumes(&productEnumerator) != E_FALSE) {
+                productEnumerator.Next();
+                subsumed = true;
+                //std::cout << " = true\n";
+                break;
+            }
+            //std::cout << " = false\n";
         }
-
-        if(item.first->IsSubsumed(this, OPT_PARTIALLY_LIMITED_SUBSUMPTION)) {
-            item.second = false;
+        if(!subsumed) {
+            for(auto& item : fixpoint) {
+                if(item.first == nullptr || !item.second)
+                    continue;
+                if(item.first->IsSubsumed(this, OPT_PARTIALLY_LIMITED_SUBSUMPTION, false)) {
+                    item.second = false;
+                }
+            }
+            return E_FALSE;
         }
     }
-    /*
-     * TermEnumerator t(this);
-     * while(t.IsNotNull()) {
-     *   for(auto &item : fixpoint) {
-     *     if(item.first == nullptr || !item.second) continue;
-     *     if(...) {
-     *       t->Next();
-     *     }
-     *   }
-     * }
-     */
 
-    return E_FALSE;
+    return E_TRUE;
 }
 
 SubsumptionResult TermBaseSet::IsSubsumedBy(FixpointType& fixpoint, Term*& biggerTerm) {
@@ -718,6 +730,50 @@ SubsumptionResult TermFixpoint::IsSubsumedBy(FixpointType& fixpoint, Term*& bigg
     std::cout << "\n";
 #endif
     return result;
+}
+
+/**
+ * Tests if the single element is subsumed by the term
+ */
+SubsumptionResult Term::Subsumes(TermEnumerator* enumerator) {
+    return this->_SubsumesCore(enumerator);
+}
+
+SubsumptionResult Term::_SubsumesCore(TermEnumerator* enumerator) {
+    assert(enumerator->type == ENUM_GENERIC);
+    GenericEnumerator* genericEnumerator = static_cast<GenericEnumerator*>(enumerator);
+    //genericEnumerator->GetItem()->dump(); std::cout << " vs "; this->dump();
+    auto result = genericEnumerator->GetItem()->IsSubsumed(this, OPT_PARTIALLY_LIMITED_SUBSUMPTION, false);
+    //std::cout << " = " << (result != E_FALSE ? "true" : "false") << "\n";
+    return result;
+}
+
+SubsumptionResult TermProduct::_SubsumesCore(TermEnumerator* enumerator) {
+    // TODO: Missing partial subsumption
+    assert(enumerator->type == ENUM_PRODUCT);
+    ProductEnumerator* productEnumerator = static_cast<ProductEnumerator*>(enumerator);
+    return (this->left->Subsumes(productEnumerator->GetLeft()) != E_FALSE &&
+            this->right->Subsumes(productEnumerator->GetRight()) != E_FALSE) ? E_TRUE : E_FALSE;
+}
+
+SubsumptionResult TermBaseSet::_SubsumesCore(TermEnumerator* enumerator) {
+    assert(enumerator->type == ENUM_BASE);
+    BaseEnumerator* baseEnumerator = static_cast<BaseEnumerator*>(enumerator);
+    auto item = baseEnumerator->GetItem();
+    //std::cout << "Test if " << item << " \u2208 "; this->dump();
+
+    for(auto state : this->states) {
+        if(state == item) {
+            //std::cout << " = true\n";
+            return E_TRUE;
+        } else if(state > item) {
+            //std::cout << " = false\n";
+            return E_FALSE;
+        }
+    }
+
+    //std::cout << " = false\n";
+    return E_FALSE;
 }
 
 /**
@@ -1655,7 +1711,7 @@ bool TermList::_eqCore(const Term &t) {
 unsigned int TermFixpoint::ValidMemberSize() const {
     unsigned int members = 0;
     for(auto& item : this->_fixpoint) {
-        members += (item.second ? 1 : 0);
+        members += ((item.second && item.first != nullptr) ? 1 : 0);
     }
     return members;
 }

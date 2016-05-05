@@ -15,24 +15,31 @@ class TermFixpoint;
 using BaseVector = std::vector<long unsigned int>;
 using BaseItem = long unsigned int;
 
+enum EnumeratorType {ENUM_GENERIC, ENUM_PRODUCT, ENUM_BASE};
+
 class TermEnumerator {
 public:
+    EnumeratorType type;
+
     virtual void Reset() = 0;
     virtual void Next() = 0;
     virtual bool IsNull() = 0;
 
     static TermEnumerator* ConstructEnumerator(Term*);
+    friend std::ostream &operator<<(std::ostream &stream, const TermEnumerator&);
 };
 
-class FixpointEnumerator : public TermEnumerator {
-    TermFixpoint* _fixpoint;
+class GenericEnumerator : public TermEnumerator {
+    Term* _term;
 public:
-    FixpointEnumerator(TermFixpoint*);
+    GenericEnumerator(Term*);
 
     void Reset();
     void Next();
     bool IsNull();
-    Term* GetItem();
+    Term* GetItem() const;
+
+    friend std::ostream &operator<<(std::ostream &stream, const GenericEnumerator&);
 };
 
 class ProductEnumerator : public TermEnumerator {
@@ -44,8 +51,10 @@ public:
     void Reset();
     void Next();
     bool IsNull();
-    TermEnumerator* GetLeft() {return _lhs_enum;};
-    TermEnumerator* GetRight() {return _rhs_enum;};
+    TermEnumerator* GetLeft() const {return _lhs_enum;};
+    TermEnumerator* GetRight() const {return _rhs_enum;};
+
+    friend std::ostream &operator<<(std::ostream &stream, const ProductEnumerator&);
 };
 
 class BaseEnumerator : public TermEnumerator {
@@ -57,7 +66,9 @@ public:
     void Reset();
     void Next();
     bool IsNull();
-    BaseItem GetItem();
+    BaseItem GetItem() const;
+
+    friend std::ostream &operator<<(std::ostream &stream, const BaseEnumerator&);
 };
 
 #endif //WSKS_TERMENUMERATOR_H

@@ -2,6 +2,7 @@
 // Created by Raph on 03/05/2016.
 //
 
+#include <iostream>
 #include "TermEnumerator.h"
 #include "Term.h"
 
@@ -11,16 +12,47 @@ TermEnumerator* TermEnumerator::ConstructEnumerator(Term* term) {
     switch(term->type) {
         case TermType::TERM_BASE:
             return new BaseEnumerator(static_cast<TermBaseSet*>(term));
-        case TermType::TERM_FIXPOINT:
-            return new FixpointEnumerator(static_cast<TermFixpoint*>(term));
         case TermType::TERM_PRODUCT:
             return new ProductEnumerator(static_cast<TermProduct*>(term));
         default:
-            assert(false && "Unsupported term type\n");
+            return new GenericEnumerator(term);
     }
 }
 
+std::ostream &operator<<(std::ostream &out, const TermEnumerator& rhs) {
+    switch(rhs.type) {
+        case ENUM_BASE:
+            out << static_cast<const BaseEnumerator&>(rhs);
+            break;
+        case ENUM_PRODUCT:
+            out << static_cast<const ProductEnumerator&>(rhs);
+            break;
+        case ENUM_GENERIC:
+            out << static_cast<const GenericEnumerator&>(rhs);
+            break;
+        default:
+            assert(false && "Unsupported Enumerator for operator<<\n");
+    }
+    return out;
+}
+
+std::ostream &operator<<(std::ostream &out, const ProductEnumerator& rhs) {
+    out << "(" << (*rhs.GetLeft()) << ", " << (*rhs.GetRight()) << ")";
+    return out;
+}
+
+std::ostream &operator<<(std::ostream &out, const BaseEnumerator& rhs) {
+    out << rhs.GetItem();
+    return out;
+}
+
+std::ostream &operator<<(std::ostream &out, const GenericEnumerator& rhs) {
+    out << rhs.GetItem();
+    return out;
+}
+
 BaseEnumerator::BaseEnumerator(TermBaseSet* base) : _base(base) {
+    this->type = ENUM_BASE;
     this->_iterator = this->_base->states.begin();
 }
 
@@ -29,7 +61,7 @@ void BaseEnumerator::Next() {
     ++this->_iterator;
 }
 
-BaseItem BaseEnumerator::GetItem() {
+BaseItem BaseEnumerator::GetItem() const {
     assert(this->_iterator != this->_base->states.end());
     return *this->_iterator;
 }
@@ -43,6 +75,7 @@ void BaseEnumerator::Reset() {
 }
 
 ProductEnumerator::ProductEnumerator(TermProduct* product) {
+    this->type = ENUM_PRODUCT;
     this->_lhs_enum = TermEnumerator::ConstructEnumerator(product->left);
     this->_rhs_enum = TermEnumerator::ConstructEnumerator(product->right);
 }
@@ -64,22 +97,22 @@ void ProductEnumerator::Reset() {
     this->_rhs_enum->Reset();
 }
 
-FixpointEnumerator::FixpointEnumerator(TermFixpoint* fixpoint) : _fixpoint(fixpoint) {
+GenericEnumerator::GenericEnumerator(Term* term) : _term(term) {
+    this->type = ENUM_GENERIC;
+}
+
+void GenericEnumerator::Next() {
 
 }
 
-void FixpointEnumerator::Next() {
+Term* GenericEnumerator::GetItem() const {
+    return this->_term;
+}
+
+void GenericEnumerator::Reset() {
 
 }
 
-Term* FixpointEnumerator::GetItem() {
-    return this->_fixpoint;
-}
-
-void FixpointEnumerator::Reset() {
-
-}
-
-bool FixpointEnumerator::IsNull() {
+bool GenericEnumerator::IsNull() {
     return true;
 }
