@@ -116,12 +116,19 @@ TermProduct::TermProduct(Term_ptr lhs, Term_ptr rhs, ProductType pt) : left(lhs)
         this->stateSpace = 0;
     }
     this->stateSpaceApprox = this->left->stateSpaceApprox + (this->right != nullptr ? this->right->stateSpaceApprox : 0) + 1;
+    this->enumerator = new ProductEnumerator(this);
 
     #if (DEBUG_TERM_CREATION == true)
     std::cout << "TermProduct::";
     this->dump();
     std::cout << "\n";
     #endif
+}
+
+TermProduct::~TermProduct() {
+    if(this->enumerator != nullptr) {
+        delete this->enumerator;
+    }
 }
 
 TermBaseSet::TermBaseSet(VATA::Util::OrdVector<size_t>& s, unsigned int offset, unsigned int stateNo) : states() {
@@ -551,18 +558,13 @@ SubsumptionResult TermFixpoint::_IsSubsumedCore(Term *t, int limit, bool unfoldA
 #   endif
 
     // Do the piece-wise comparison
+    Term* tptr;
     for(auto& item : this->_fixpoint) {
         // Skip the nullptr
         if(item.first == nullptr || !item.second) continue;
-        bool subsumes = false;
-        for(auto& tt_item : tt->_fixpoint) {
-            if(tt_item.first == nullptr || !item.second) continue;
-            if((item.first)->IsSubsumed(tt_item.first, limit, unfoldAll)) {
-                subsumes = true;
-                break;
-            }
+        if((item.first)->IsSubsumedBy(tt->_fixpoint, tptr, true) == E_FALSE) {
+            return E_FALSE;
         }
-        if(!subsumes) return E_FALSE;
     }
 #   if (OPT_UNFOLD_FIX_DURING_SUB == true)
     if(this->_worklist.size() == 0 && tt->_worklist.size() == 0) {
@@ -600,18 +602,17 @@ SubsumptionResult TermFixpoint::_IsSubsumedCore(Term *t, int limit, bool unfoldA
  *
  * @param[in] fixpoint:     list of terms contained as fixpoint
  */
-SubsumptionResult TermEmpty::IsSubsumedBy(FixpointType& fixpoint, Term*& biggerTerm) {
+SubsumptionResult TermEmpty::IsSubsumedBy(FixpointType& fixpoint, Term*& biggerTerm, bool no_prune) {
     // Empty term is subsumed by everything
     // Fixme: Complemented fixpoint should subsume everything right?
     return ( ( (fixpoint.size() == 1 && fixpoint.front().first == nullptr) || this->_inComplement) ? E_FALSE : E_TRUE);
 }
 
-SubsumptionResult TermProduct::IsSubsumedBy(FixpointType& fixpoint, Term*& biggerTerm) {
+SubsumptionResult TermProduct::IsSubsumedBy(FixpointType& fixpoint, Term*& biggerTerm, bool no_prune) {
     //Fixme: is this true?
+    std::pair<Term_ptr, bool>*  last_one;
     if(this->IsEmpty()) {
         return E_TRUE;
-    } else if((fixpoint.size() == 0)) {
-        return E_FALSE;
     } else {
         bool isEmpty = true;
         for(auto& item : fixpoint) {
@@ -623,32 +624,45 @@ SubsumptionResult TermProduct::IsSubsumedBy(FixpointType& fixpoint, Term*& bigge
         if(isEmpty)
             return E_FALSE;
     }
+
     // For each item in fixpoint
-    //std::cout << "\nTesting: "; this->dump(); std::cout << "\n";
-    ProductEnumerator productEnumerator(this);
-    while(productEnumerator.IsNull() == false) {
+    size_t valid_members = 0;
+    for(auto& item : fixpoint) {
+        // Nullptr is skipped
+        if(item.first == nullptr || !item.second) continue;
+
+        // Test the subsumption
+        if(this->IsSubsumed(item.first, OPT_PARTIALLY_LIMITED_SUBSUMPTION)) {
+            return E_TRUE ;
+        }
+
+        if(!no_prune) {
+            if (item.first->IsSubsumed(this, OPT_PARTIALLY_LIMITED_SUBSUMPTION)) {
+                item.second = false;
+            } else {
+                ++valid_members;
+            }
+        }
+    }
+
+    if(!valid_members) {
+        return E_FALSE;
+    }
+
+    // For each item in fixpoint
+    this->enumerator->FullReset();
+    while (this->enumerator->IsNull() == false) {
         bool subsumed = false;
-        //std::cout << "Processing: " << productEnumerator << "\n";
-        for(auto& item : fixpoint) {
-            if(item.first == nullptr || !item.second)
+        for (auto &item : fixpoint) {
+            if (item.first == nullptr || !item.second)
                 continue;
-            //std::cout << "\u2208 "; item.first->dump();std::cout << "\n";
-            if(item.first->Subsumes(&productEnumerator) != E_FALSE) {
-                productEnumerator.Next();
+            if (item.first->Subsumes(this->enumerator) != E_FALSE) {
+                this->enumerator->Next();
                 subsumed = true;
-                //std::cout << " = true\n";
                 break;
             }
-            //std::cout << " = false\n";
         }
-        if(!subsumed) {
-            for(auto& item : fixpoint) {
-                if(item.first == nullptr || !item.second)
-                    continue;
-                if(item.first->IsSubsumed(this, OPT_PARTIALLY_LIMITED_SUBSUMPTION, false)) {
-                    item.second = false;
-                }
-            }
+        if (!subsumed) {
             return E_FALSE;
         }
     }
@@ -656,7 +670,7 @@ SubsumptionResult TermProduct::IsSubsumedBy(FixpointType& fixpoint, Term*& bigge
     return E_TRUE;
 }
 
-SubsumptionResult TermBaseSet::IsSubsumedBy(FixpointType& fixpoint, Term*& biggerTerm) {
+SubsumptionResult TermBaseSet::IsSubsumedBy(FixpointType& fixpoint, Term*& biggerTerm, bool no_prune) {
     if(this->IsEmpty()) {
         return E_TRUE;
     }
@@ -669,19 +683,22 @@ SubsumptionResult TermBaseSet::IsSubsumedBy(FixpointType& fixpoint, Term*& bigge
         if(this->IsSubsumed(item.first, OPT_PARTIALLY_LIMITED_SUBSUMPTION)) {
             return E_TRUE ;
         }
-        if(item.first->IsSubsumed(this, OPT_PARTIALLY_LIMITED_SUBSUMPTION)) {
-            item.second = false;
+
+        if(!no_prune) {
+            if (item.first->IsSubsumed(this, OPT_PARTIALLY_LIMITED_SUBSUMPTION)) {
+                item.second = false;
+            }
         }
     }
 
     return E_FALSE;
 }
 
-SubsumptionResult TermContinuation::IsSubsumedBy(FixpointType& fixpoint, Term*& biggerTerm) {
+SubsumptionResult TermContinuation::IsSubsumedBy(FixpointType& fixpoint, Term*& biggerTerm, bool no_prune) {
     assert(false && "TermContSubset.IsSubsumedBy() is impossible to happen~!");
 }
 
-SubsumptionResult TermList::IsSubsumedBy(FixpointType& fixpoint, Term*& biggerTerm) {
+SubsumptionResult TermList::IsSubsumedBy(FixpointType& fixpoint, Term*& biggerTerm, bool no_prune) {
     if(this->IsEmpty()) {
         return E_TRUE;
     }
@@ -694,15 +711,17 @@ SubsumptionResult TermList::IsSubsumedBy(FixpointType& fixpoint, Term*& biggerTe
             return E_TRUE;
         }
 
-        if(item.first->IsSubsumed(this, OPT_PARTIALLY_LIMITED_SUBSUMPTION)) {
-            item.second = false;
+        if(!no_prune) {
+            if (item.first->IsSubsumed(this, OPT_PARTIALLY_LIMITED_SUBSUMPTION)) {
+                item.second = false;
+            }
         }
     }
 
     return E_FALSE;
 }
 
-SubsumptionResult TermFixpoint::IsSubsumedBy(FixpointType& fixpoint, Term*& biggerTerm) {
+SubsumptionResult TermFixpoint::IsSubsumedBy(FixpointType& fixpoint, Term*& biggerTerm, bool no_prune) {
     auto result = E_FALSE;
     // Component-wise comparison
     for(auto& item : fixpoint) {
@@ -712,8 +731,10 @@ SubsumptionResult TermFixpoint::IsSubsumedBy(FixpointType& fixpoint, Term*& bigg
             break;
         }
 
-        if(item.first->IsSubsumed(this, OPT_PARTIALLY_LIMITED_SUBSUMPTION)) {
-            item.second = false;
+        if(!no_prune) {
+            if (item.first->IsSubsumed(this, OPT_PARTIALLY_LIMITED_SUBSUMPTION)) {
+                item.second = false;
+            }
         }
 
     }
@@ -736,15 +757,19 @@ SubsumptionResult TermFixpoint::IsSubsumedBy(FixpointType& fixpoint, Term*& bigg
  * Tests if the single element is subsumed by the term
  */
 SubsumptionResult Term::Subsumes(TermEnumerator* enumerator) {
-    return this->_SubsumesCore(enumerator);
+    SubsumptionResult result;
+    if(!this->_subsumesCache.retrieveFromCache(enumerator, result)) {
+        result = this->_SubsumesCore(enumerator);
+        if(result != E_FALSE)
+            this->_subsumesCache.StoreIn(enumerator, result);
+    }
+    return result;
 }
 
 SubsumptionResult Term::_SubsumesCore(TermEnumerator* enumerator) {
     assert(enumerator->type == ENUM_GENERIC);
     GenericEnumerator* genericEnumerator = static_cast<GenericEnumerator*>(enumerator);
-    //genericEnumerator->GetItem()->dump(); std::cout << " vs "; this->dump();
     auto result = genericEnumerator->GetItem()->IsSubsumed(this, OPT_PARTIALLY_LIMITED_SUBSUMPTION, false);
-    //std::cout << " = " << (result != E_FALSE ? "true" : "false") << "\n";
     return result;
 }
 
@@ -752,15 +777,19 @@ SubsumptionResult TermProduct::_SubsumesCore(TermEnumerator* enumerator) {
     // TODO: Missing partial subsumption
     assert(enumerator->type == ENUM_PRODUCT);
     ProductEnumerator* productEnumerator = static_cast<ProductEnumerator*>(enumerator);
-    return (this->left->Subsumes(productEnumerator->GetLeft()) != E_FALSE &&
-            this->right->Subsumes(productEnumerator->GetRight()) != E_FALSE) ? E_TRUE : E_FALSE;
+    if(this->left->stateSpaceApprox <= this->right->stateSpaceApprox) {
+        return (this->left->Subsumes(productEnumerator->GetLeft()) != E_FALSE &&
+                this->right->Subsumes(productEnumerator->GetRight()) != E_FALSE) ? E_TRUE : E_FALSE;
+    } else {
+        return (this->right->Subsumes(productEnumerator->GetRight()) != E_FALSE &&
+                this->left->Subsumes(productEnumerator->GetLeft()) != E_FALSE) ? E_TRUE : E_FALSE;
+    }
 }
 
 SubsumptionResult TermBaseSet::_SubsumesCore(TermEnumerator* enumerator) {
     assert(enumerator->type == ENUM_BASE);
     BaseEnumerator* baseEnumerator = static_cast<BaseEnumerator*>(enumerator);
     auto item = baseEnumerator->GetItem();
-    //std::cout << "Test if " << item << " \u2208 "; this->dump();
 
     for(auto state : this->states) {
         if(state == item) {
@@ -921,6 +950,10 @@ namespace Gaston {
 
     void dumpDagData(SymbolicAutomaton*& aut) {
         aut->DumpAutomaton();
+    }
+
+    void dumpEnumKey(TermEnumerator* const& key) {
+        std::cout << key;
     }
 }
 

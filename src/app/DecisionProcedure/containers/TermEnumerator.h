@@ -7,6 +7,7 @@
 
 #include <cstdlib>
 #include <vector>
+#include "../environment.hh"
 
 class Term;
 class TermProduct;
@@ -19,9 +20,11 @@ enum EnumeratorType {ENUM_GENERIC, ENUM_PRODUCT, ENUM_BASE};
 
 class TermEnumerator {
 public:
+    NEVER_INLINE virtual ~TermEnumerator() {}
     EnumeratorType type;
 
     virtual void Reset() = 0;
+    virtual void FullReset() = 0;
     virtual void Next() = 0;
     virtual bool IsNull() = 0;
 
@@ -35,6 +38,7 @@ public:
     GenericEnumerator(Term*);
 
     void Reset();
+    void FullReset();
     void Next();
     bool IsNull();
     Term* GetItem() const;
@@ -43,12 +47,14 @@ public:
 };
 
 class ProductEnumerator : public TermEnumerator {
-    TermEnumerator* _lhs_enum;
-    TermEnumerator* _rhs_enum;
+    TermEnumerator* _lhs_enum = nullptr;
+    TermEnumerator* _rhs_enum = nullptr;
 public:
-    ProductEnumerator(TermProduct*);
+    NEVER_INLINE ProductEnumerator(TermProduct*);
+    NEVER_INLINE ~ProductEnumerator();
 
     void Reset();
+    void FullReset();
     void Next();
     bool IsNull();
     TermEnumerator* GetLeft() const {return _lhs_enum;};
@@ -64,6 +70,7 @@ public:
     BaseEnumerator(TermBaseSet*);
 
     void Reset();
+    void FullReset();
     void Next();
     bool IsNull();
     BaseItem GetItem() const;

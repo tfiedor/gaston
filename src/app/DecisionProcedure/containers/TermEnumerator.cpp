@@ -80,6 +80,13 @@ ProductEnumerator::ProductEnumerator(TermProduct* product) {
     this->_rhs_enum = TermEnumerator::ConstructEnumerator(product->right);
 }
 
+ProductEnumerator::~ProductEnumerator() {
+    if (this->_lhs_enum)
+        delete this->_lhs_enum;
+    if (this->_rhs_enum)
+        delete this->_rhs_enum;
+}
+
 void ProductEnumerator::Next() {
     this->_rhs_enum->Next();
     if(this->_rhs_enum->IsNull()) {
@@ -115,4 +122,17 @@ void GenericEnumerator::Reset() {
 
 bool GenericEnumerator::IsNull() {
     return true;
+}
+
+void ProductEnumerator::FullReset() {
+    this->_lhs_enum->FullReset();
+    this->_rhs_enum->FullReset();
+}
+
+void BaseEnumerator::FullReset() {
+    this->Reset();
+}
+
+void GenericEnumerator::FullReset() {
+    this->Reset();
 }

@@ -37,6 +37,7 @@
 class SymbolicAutomaton;
 class ZeroSymbol;
 class Term;
+class TermEnumerator;
 class ASTForm;
 template<class A, class B, class C, class D, void (*E)(A const&),void (*F)(B&)>
 class BinaryCache;
@@ -103,6 +104,7 @@ namespace Gaston {
 	void dumpPreData(VATA::Util::OrdVector<size_t>& s);
 	void dumpDagKey(Formula_ptr const& s);
 	void dumpDagData(SymbolicAutomaton*& s);
+	void dumpEnumKey(TermEnumerator* const& s);
 
 	using TermHash 				 = boost::hash<Term_raw>;
 	using TermCompare			 = std::equal_to<Term_raw>;
@@ -114,6 +116,8 @@ namespace Gaston {
 	using DagKey				 = Formula_ptr;
 	using DagData				 = SymbolicAutomaton*;
 	using DagNodeCache			 = BinaryCache<DagKey, DagData, DagHashType, DagCompare<DagKey>, dumpDagKey, dumpDagData>;
+	using EnumKey				 = TermEnumerator*;
+	using EnumSubsumesCache		 = BinaryCache<EnumKey, SubsumptionResult, boost::hash<EnumKey>, std::equal_to<EnumKey>, dumpEnumKey, dumpSubsumptionData>;
 
 	using WorkListTerm           = Term;
 	using WorkListTerm_raw       = Term*;

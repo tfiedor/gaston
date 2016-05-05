@@ -78,7 +78,8 @@ class Term {
 
     // <<< MEMBERS >>>
 protected:
-    TermCache _isSubsumedCache;     // [36B] << Cache for results of subsumption
+    TermCache _isSubsumedCache;         // [36B] << Cache for results of subsumption
+    EnumSubsumesCache _subsumesCache;   // [36B] << Cache for results of subsumes
 public:
     struct {                        // [12B] << Link for counterexamples
         Term* succ;
@@ -102,7 +103,7 @@ public:
 
 public:
     // <<< PUBLIC API >>>
-    virtual SubsumptionResult IsSubsumedBy(FixpointType& fixpoint, Term*&) = 0;
+    virtual SubsumptionResult IsSubsumedBy(FixpointType& fixpoint, Term*&, bool no_prune = false) = 0;
     virtual SubsumptionResult IsSubsumed(Term* t, int limit, bool b = false);
     virtual SubsumptionResult Subsumes(TermEnumerator*);
     virtual bool IsEmpty() = 0;
@@ -148,7 +149,7 @@ public:
     NEVER_INLINE ~TermEmpty() {}
 
     // <<< PUBLIC API >>>
-    SubsumptionResult IsSubsumedBy(FixpointType& fixpoint, Term*&);
+    SubsumptionResult IsSubsumedBy(FixpointType& fixpoint, Term*&, bool no_prune = false);
     bool IsEmpty();
 
     // <<< DUMPING FUNCTIONS >>>
@@ -168,19 +169,20 @@ private:
 class TermProduct : public Term {
 public:
     // <<< PUBLIC MEMBERS >>>
-    Term_ptr left;          // [4B] << Left member of the product
-    Term_ptr right;         // [4B] << Right member of the product
-    ProductType subtype;    // [4B] << Product type (Union, Intersection)
+    Term_ptr left;                              // [4B] << Left member of the product
+    Term_ptr right;                             // [4B] << Right member of the product
+    ProductType subtype;                        // [4B] << Product type (Union, Intersection)
+    ProductEnumerator* enumerator = nullptr;    // [4B] << Enumerator through the terms
 
     // See #L29
     TERM_MEASURELIST(DEFINE_STATIC_MEASURE)
 
     // <<< CONSTRUCTORS >>>
     NEVER_INLINE TermProduct(Term_ptr lhs, Term_ptr rhs, ProductType subtype);
-    NEVER_INLINE ~TermProduct() {}
+    NEVER_INLINE ~TermProduct();
 
     // <<< PUBLIC API >>>
-    SubsumptionResult IsSubsumedBy(FixpointType& fixpoint, Term*&);
+    SubsumptionResult IsSubsumedBy(FixpointType& fixpoint, Term*&, bool no_prune = false);
     bool IsEmpty();
 
     // <<< DUMPING FUNCTIONS >>>
@@ -211,7 +213,7 @@ public:
 
     // <<< PUBLIC API >>>
     bool Intersects(TermBaseSet* rhs);
-    SubsumptionResult IsSubsumedBy(FixpointType& fixpoint, Term*&);
+    SubsumptionResult IsSubsumedBy(FixpointType& fixpoint, Term*&, bool no_prune = false);
     bool IsEmpty();
 
     // <<< DUMPING FUNCTIONS >>>
@@ -252,7 +254,7 @@ public:
     NEVER_INLINE TermContinuation(SymLink*, SymbolicAutomaton*, Term*, SymbolType*, bool, bool lazy = false);
 
     // <<< PUBLIC API >>>
-    SubsumptionResult IsSubsumedBy(FixpointType& fixpoint, Term*&);
+    SubsumptionResult IsSubsumedBy(FixpointType& fixpoint, Term*&, bool no_prune = false);
     bool IsUnfolded() {return this->_unfoldedTerm != nullptr;}
     bool IsEmpty();
     Term* GetUnfoldedTerm() {return this->_unfoldedTerm; }
@@ -283,7 +285,7 @@ public:
     NEVER_INLINE TermList(Term_ptr first, bool isCompl);
 
     // <<< PUBLIC API >>>
-    SubsumptionResult IsSubsumedBy(FixpointType& fixpoint, Term*&);
+    SubsumptionResult IsSubsumedBy(FixpointType& fixpoint, Term*&, bool no_prune = false);
     bool IsEmpty();
 
     // <<< DUMPING FUNCTIONS >>>
@@ -480,7 +482,7 @@ public:
     // <<< PUBLIC API >>>
     FixpointTermSem GetSemantics() const;
     bool IsEmpty();
-    SubsumptionResult IsSubsumedBy(FixpointType& fixpoint, Term*&);
+    SubsumptionResult IsSubsumedBy(FixpointType& fixpoint, Term*&, bool no_prune = false);
     bool GetResult();
     ExamplePair GetFixpointExamples();
     bool IsFullyComputed() const;
