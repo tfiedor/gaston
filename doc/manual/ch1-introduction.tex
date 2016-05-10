@@ -1,0 +1,128 @@
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% Contents: Things you need to know
+% $Id: things.tex 536 2015-06-26 06:41:33Z oetiker $
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+ 
+\chapter{Introduction}
+\begin{intro}
+Long ago, there was a brave soldier that lived behind the bars and
+led a fun splashy life. Then one day water have risen and thanks to
+the flood, the brave soldier escaped from his capture and swam all
+the way to the Dresden. Here he was caught and during his return
+back to custody he sadly succumbed to the diseases and died before
+seeing his home again.
+
+This manual is dedicated to Gaston, the brave sea lion from the Prague 
+Zoo, that gave name to our tool.
+\end{intro}
+
+\section{Introduction}
+
+Logics are widely used as a great tool for describing invariants,
+models and various properties used in verification tools.
+WS1S is weak monadic second order logic with one successor (or WS1S).
+Its applications are wide, mostly because of the successful 
+implementation of its classical decision procedure in the \mona tool.
+This tool has been the fastest, however as the theoretical 
+complexity of deciding WS1S is in \nonelementary~\cite{ws1s:nonelementary} class,
+there are still some limitations and some classes of formulae,
+where \mona runs out of memory. 
+
+However, we try to push the usability border even further and try to
+develop a novel decision procedure. 
+
+\section{Related Work and Application of WS1S logic}
+
+\gaston was built on the initial work conducted in~\cite{dwina}, where we first 
+tried to address the issue of repeated automata determinization, as the 
+quantifier alternation is the main source of the \nonelementary complexity
+of deciding the WS1S logic. In this work we exploited the recent advancements
+in testing of language inclusion and universality based on the so-called antichains
+~\cite{antichains, wulf:antichains}. The proposed approach suggested not to construct the automaton
+explicitely, but only use the final states represented symbolically using anti-chains. 
+Such antichains are nested, as the determinization is performed for every quantifier
+alternation, with one nesting for each alternation. 
+
+However, this work suffered from several issues, that we tried to address in \gaston
+by generalizing the structure of the terms and introduce the laziness to the procedure.
+The approach was restricted to formulae in Prenex Normal Form, and moreover could
+suffer from state explosion at the base level of the state space, as no minimization took
+place during the constructions (which \mona exploits).
+
+The foremost implementation of WS1S logic, that enabled its application in wide areas
+of computer science, is the \mona tool~\cite{mona}. Its efficiency stems from wide
+number of optimizations both higher-level (such as automata minimization, encoding of the
+first-order variables used in models, or the use of BDDs to encode the transition relation
+\footnote{note that this is the most important optimizations, as no serious implementation
+of decision procedure could be based on naive table representation of the transition relation}
+as well as dozens of lower-level ones (e.g. optimizations of hash tables)~\cite{mona:secrets,
+mona:relativization}.
+
+Apart from \mona, there are some other related approaches that are based on the classical
+automata-based approach such as \jmosel \cite{jmosel} for a related logic \msl, which
+introduces some other orthogonal optimizations such as second-order value numbering~\cite{jmosel:dag},
+that allows \jmosel to outperform other tools.
+
+Recently, apart from our approaches, a couple of interesting logic-based approaches 
+for WS1S logic appeared. Ganzow and Kaiser~\cite{kaiser} developed a new decision procedure
+for the weak monadic second-order slogic on inductive structures, which is more general
+than WS$k$S, completely avoiding usage of automata. Instead it is based on Shelah's 
+composition method. Traytel~\cite{traytel}, on the other hand, build his approach on
+classical decision procedure, however in the framework of coalgebras. His work focuses
+on testing equivalence of a pair of formulae, which is performed by finding a bisimulation
+between derivatives of the formulae. 
+
+Further we list some of  the most recent applications of WS1S in practice. For full list
+of either WS1S application or the direct usage of implementation of the \mona tool conform
+the \mona manual~\cite{mona:manual}.
+
+\tsf{Add several tools that are not in mona manual, like regsys, bow-yaw, etc.}
+
+\section{Related Tools}
+
+This section describes some other tools and prototypes that can be 
+used for deciding of WS1S formulae. Further we discuss their 
+limitations and compare their main usage.
+
+Table~\ref{tab:tools-comparison} shows comparisons between the most recent tools
+that implement decision procedure for WS1S logic or can be considered as 
+state-of-the art. Out of the five chosen tools we can see the limitations of all
+approaches, with only \gaston and \mona being capable of deciding unground formulae.
+
+The \jmosel tool is tuned for the \msl logic \footnote{note that the decision
+procedures for \msl and WS1S is almost identical with exception of the phase
+of saturation}, which means it can be considered
+incomparable to other tools. However, its approach introduces interesting 
+orthogonal optimizations and is widely used in practice.
+
+The tools of~\cite{kaiser} and \cite{traytel} are novel and prototype tools, that
+do not fully support the wide syntax available to \mona, as well as extensions and
+other capabilities.
+
+\begin{table}
+\footnotesize
+  \begin{tabular}{l|lll|ll|l|l}
+\hline
+\multicolumn{1}{c}{\multirow{2}{*}{Tool}} & \multicolumn{3}{|l|}{Supported logics} & \multicolumn{2}{l|}{Syntax} & \multirow{2}{*}{Models} & \multirow{2}{*}{Last update} \\
+\multicolumn{1}{c}{} & WS1S & WS2S & \msl & Atomic & Predicates & & \\
+\hline
+ \gaston & \checkmark & $\times$ & \checkmark & Full & \checkmark & \checkmark & 07/05/2016\\
+ \dwina & \checkmark & $\times$ & $\times$ & Partial & \checkmark & $\times$ & 05/02/2015\\
+ \mona & \checkmark & \checkmark & \checkmark & Full & \checkmark & \checkmark & ??/??/????\\
+ \jmosel & ?? & ?? & ?? & ?? & ?? & ?? & ??/??/????\\
+ Traytel & ?? & ?? & ?? & ?? & ?? & ?? & ??/??/????\\
+ Kaiser & ?? & ?? & ?? & ?? & ?? & ?? & ??/??/????\\
+ \hline
+\end{tabular}
+ \caption{Comparison of tools capable of deciding WS1S logic, their support for
+ other kinds of logics, different syntactic expressions, ability to generate
+ (counter)examples and liveness of the development.}\label{tab:tools-comparison}
+\end{table}
+
+%
+
+% Local Variables:
+% TeX-master: "lshort2e"
+% mode: latex
+% mode: flyspell
+% End:

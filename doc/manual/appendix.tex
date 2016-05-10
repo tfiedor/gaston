@@ -1,0 +1,115 @@
+\appendix
+\chapter{Installing Gaston}
+\begin{intro}
+
+\end{intro}
+
+\section{Installing dependencies}
+
+Before installing the mighty Gaston you need the following friends.
+
+\begin{itemize}
+	\item[] git (>= 1.6.0.0)
+	\item[] cmake (>= 2.8.2)
+	\item[] gcc (>= 4.8.0)
+	\item[] flex (>= 2.5.35)
+	\item[] bison (>= 2.7.1)
+	\item[] python (>= 2.0)
+\end{itemize}
+\tsf{i'm sure there are actually more of them}
+
+\section{Setup and configure}
+
+In order to compile and run \gaston first clone the source repository:
+
+\begin{lstlisting}[language=bash]
+ $ git clone https://github.com/tfiedor/Gaston.git
+\end{lstlisting}
+
+Go to source folder and run
+\begin{lstlisting}[language=bash]
+ $ make release
+\end{lstlisting}
+to run the Release version of \gaston.
+
+In order to validate the installation and correctness of the tool
+run the set of regressive tests:
+
+\begin{lstlisting}[language=bash]
+ $ python testbench.py
+\end{lstlisting}
+
+\chapter{Syntax of input formulae}
+
+This chapter provides the supported syntax of the Gaston. For full
+syntax of MONA formulae syntax conform the official MONA manual~\cite{mona:manual}.
+
+\begin{verbatim}
+program ::= (header;)? (declaration;)+
+header ::=  ws1s } ws2s
+
+declaration ::= formula
+             |  var0 (varname)+
+             |  var1 (varname)+
+             |  var2 (varname)+
+             |  'pred' varname (params)? = formula
+             |  'macro' varname (params)? = formula
+
+formula ::= 'true' | 'false' | (formula)
+         |  zero-order-var
+         | ~formula
+         | formula | formula
+         | formula & formula
+         | formula => formula
+         | formula <=> formula
+         | first-order-term = first-order-term 
+         | first-order-term ~= first-order-term 
+         | first-order-term < first-order-term 
+         | first-order-term > first-order-term
+         | first-order-term <= first-order-term 
+         | first-order-term >= first-order-term
+         | second-order-term = second-order-term
+         | second-order-term = { (int)+ }
+         | second-order-term ~= second-order-term
+         | second-order-term 'sub' second-order-term
+         | first-order-term 'in' second-order-term
+         | ex1 (varname)+ : formula
+         | all1 (varname)+ : formula
+         | ex2 (varname)+ : formula
+         | all2 (varname)+ : formula
+
+first-order-term ::= varname | (first-order-term)
+                  |  int
+                  | first-order-term + int
+
+second-order-term ::= varname | (second-order-term)
+                   |  second-order-term + int
+\end{verbatim}
+\tsf{better representation of the syntax}
+
+\chapter{Command line interface}
+
+\begin{lstlisting}[language=bash]
+	Usage: gaston [options] <filename>
+\end{lstlisting}
+
+\begin{itemize}
+	\item[\texttt{-t}, \texttt{--time}] Prints the elapsed time for each
+		phase of the decision procedure
+	\item[\texttt{-d}, \texttt{--dump-all}] Prints additional statistics
+		about each phases (symbol table, etc.)
+	\item[\texttt{-ga}, \texttt{--print-aut}] Outputs the resulting 
+		automaton in graphviz format
+	\item[\texttt{--no-automaton}] Does not output the resulting
+		automaton
+	\item[\texttt{--test=OPT}] Tests either satisfiability (\texttt{sat}),
+		validity (\texttt{val}) or unsatisfiability (\texttt{unsat}) only
+	\item[\texttt{--walk-aut}] Will walk the input formula and try to
+		convert each subformula to automaton and prints statistics
+	\item[\texttt{-e},\texttt{--expand-tagged}] Expands the automata
+		with specific tags that are specified in the first line of
+		the input formulae
+	\item[\texttt{-q},\texttt{--quite}] Will not print any progress,
+		only minimalistic informations
+	\item[\texttt{-oX}] Sets optimization level (deprecated)
+\end{itemize}

@@ -1,0 +1,44 @@
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% Contents: Things you need to know
+% $Id: things.tex 536 2015-06-26 06:41:33Z oetiker $
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+ 
+\chapter{Deciding WS1S}
+\begin{intro}
+In 1960~\cite{buchi} B\"{u}chi proved that there exists a one-to-one
+correspondence between finite automata and formulae of WS1S logic.
+This gave grounds for most of the popular decision procedures that 
+are based on the construction of automata corresponding to the formulae.
+Such automaton then accepts all of the models of the formulae.
+\end{intro}
+
+WS1S is Weak monadic logic with one successors:
+quantify over:
+\begin{itemize}
+  \item \textbf{second-order}\,---\,can quantify over relations,
+  \item \textbf{monadic}\,---\,unary relations (i.e. sets),
+  \item \textbf{weak}\,---\,over finite sets,
+  \item \textbf{one successor}\,---\,useful for describing linked structures.
+\end{itemize}
+
+Language-wise we can see the correspondence of WS1S logic with the
+class of regular languages closed under the concatenations with 
+strings of zero symbols (see \ref{sec:semantics}). WS1S is interpret
+over infinite sets, but its quantification is restricted to finite
+sets only\footnote{Note that there exists a variation of WS1S that is
+interpreted over finite strings, which is often called M2L-str. 
+Contrary to WS1S there exists a one to one correspondence with 
+regular languages}.
+
+\section{Automata-logic based connection}
+
+\section{Symbolic decision procedure for WS1S}
+
+
+%
+
+% Local Variables:
+% TeX-master: "lshort2e"
+% mode: latex
+% mode: flyspell
+% End:

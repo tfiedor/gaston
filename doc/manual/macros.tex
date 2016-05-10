@@ -1,0 +1,54 @@
+% macros
+
+\newcommand{\td}[1]{\textcolor{blue}{\ifmmode \text{[#1]}\else [#1] \fi}}
+\newcommand{\tv}[1]{\textcolor{red!60}{\ifmmode \text{[TV: #1]}\else [TV: #1] \fi}}
+\newcommand{\tsf}[1]{\textcolor{gray!60}{\ifmmode \text{[TsF: #1]}\else [TsF: #1] \fi}} 
+%           ^---- C-lion wants his own fecking macro
+\newcommand{\lukas}[1]{\td{Lukas: #1}}
+\newcommand{\hide}[1]{}
+
+\newcommand{\dwinabench}{\texttt{Antichains}}
+\newcommand{\secretsbench}{\texttt{Secrets}}
+\newcommand{\strandbenchone}{\texttt{Strand1}}
+\newcommand{\strandbenchtwo}{\texttt{Strand2}}
+
+\newcommand{\pspace}[0]{\textsc{PSpace}}
+\newcommand{\oom}[0]{\texttt{oom}}
+\newcommand{\timeout}[0]{$\infty$}
+
+\newcommand{\msl}[0]{M2L(Str)}
+\newcommand{\wsks}[0]{WS$k$S}
+
+\newcommand{\jmosel}[0]{\textsc{jMosel}}
+\newcommand{\gaston}[0]{\textsc{Gaston}}
+\newcommand{\mona}[0]{\textsc{MONA}}
+\newcommand{\dwina}[0]{\textsc{dWiNA}}
+\newcommand{\freeVars}[1]{\text{freeVars}(#1)}
+\newcommand{\automaton}[1]{\mathcal{A}_{#1}}
+\newcommand{\sizeofaut}[1]{|\mathcal{A}_{#1}|}
+\newcommand{\firstorder}[1]{\text{FO}(#1)}
+\newcommand{\restriction}[1]{\mathcal{R}_{#1}}
+%\newcommand{\freeVars}[1]{\ifmode \text{freeVars}(#1)\else freeVars($#1$)\fi}
+
+\newcommand{\sat}[0]{\texttt{SAT}}
+\newcommand{\val}[0]{\texttt{VAL}}
+\newcommand{\unsat}[0]{\texttt{UNSAT}}
+
+\newcommand{\nonelementary}[0]{\textsc{NONELEMENTARY}}
+
+\newcommand*{\marginlabel}[1]{\mbox{}\marginpar{\raggedleft \textbf{(#1)}}\ignorespaces}
+\newcommand{\multirotatedrow}[2]{\parbox[t]{2mm}{\multirow{#1}{*}{\rotatebox[origin=c]{90}{#2}}}}
+
+% Environment for optimizations
+\newcommand{\optsummary}[3]{
+	\vspace{-0.3cm}
+	\begin{table}[h!]
+		\begin{tabular}{r l}
+			\textbf{Speed-up factor: } & #1\\
+			\textbf{Compatible with: } & #2\\
+			\textbf{Conflicts with: } & #3\\
+		\end{tabular}
+	\end{table}
+	\vspace{-0.3cm}
+	\noindent\hrulefill
+}

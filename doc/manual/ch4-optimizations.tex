@@ -1,0 +1,457 @@
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% Contents: Things you need to know
+% $Id: things.tex 536 2015-06-26 06:41:33Z oetiker $
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+ 
+\chapter{The secrets of gaston}
+\begin{intro}
+Through the years of the development of decision procedure for WS1S we 
+have went through hell and back in order to achieve high efficiency
+of deciding even smaller formula and to beat MONA on some class of the
+formulae. Like in~\cite{mona:secrets} we believe that there is no silver
+bullet to achieve great performance on the wide syntax of the WS1S logic,
+as the complexity of deciding WS1S is in \nonelementary 
+class~\cite{ws1s:nonelementary} after all.
+\end{intro}
+
+\section{The Secrets of Gaston}
+
+This chapter introduces the foremost optimizations and their theoretical background. Most of these optimizations are specific for
+Gaston and cannot be used in other tools. 
+
+  \subsection{Lazy evaluation}
+  The most notable optimizations and advantage of our approach is the
+  its laziness. By default the evaluation of fixpoints can be early
+  terminated if the (un)satisfying example is encountered. This is 
+  the first source of the laziness. 
+  
+  The other source of laziness is the explicit notion of the early
+  evaluation of products\,---\,so called continuations. However its
+  implementation in imperative language is not as efficient as in
+  functional languages and needs several heuristics for it to work.
+
+    \subsubsection{Early evaluation of the fixpoints}      
+    \optsummary{~0.37\%}{}{none}
+    
+    The first source of laziness is the mentioned early evaluation
+    of fixpoints. During the computation of fixpoint, we are either
+    testing whether the intersection of initial and final states is
+    empty (or nonempty). This means we are computing either the huge
+    conjunction or disjunction. Both of these operators have their
+    early terminators\,---\,false and true. This means we do not
+    have to compute the full fixpoint, it is sufficient to compute
+    the fixpoint up to the (un)satisfying example.
+    
+    However, when one computes the fixpoint computation higher in the
+    AST, i.e. computing the pre of the fixpoint computation, or when
+    one needs to compute the subsumption of two fixpoints, the 
+    fixpoints needs to be further computed. This is implemented
+    using the iterators. The outer fixpoints have inner fixpoints
+    as sources that are further computed by demand.
+  
+    \subsubsection{The notion of continuations}    
+    \optsummary{~0.37\%}{}{none}
+    
+    Like the fixpoints, the products of terms have the early 
+    terminators as well. However, as there are no iterators for
+    produts, so we cannot exploit the partial computation. However
+    we introduced the similar notion of laziness by generating the
+    explicit continuation term that encapsulates the postponed
+    computation and holds the state. 
+    
+    When the early terminator is computed on the left side, we can
+    omit the computation of the right side. However, the state needs
+    to be captured as during the subsumption testing we have to
+    unfold the uncomputed right side. This however can introduce
+    overhead, as the continuations are getting generated and unfolded
+    all the time, which is time consuming. Thus we have introduced 
+    several optimizations and heuristics described in following
+    Sections~\ref{opt:heuristic-cont} and \ref{opt:partial-sub}
+    \tsf{wtf, why the products cannot be implemented the same way?}
+
+    \subsubsection{Heuristical generation of continuations}\label{opt:heuristic-cont}    
+    \optsummary{~0.37\%}{Continuations (\ref{opt:cont}}{none}
+    
+    The explicit continuations are generated only while the right
+    side of the product was not computed, i.e. this way we can
+    capture the unsatisfiable cores of the formulae and never 
+    compute the right side. 
+    
+    Further we do not generate continuations for restrictions as
+    restrictions are eventually satisfied during the computation.
+  
+    \subsubsection{Partial subsumption of terms}\label{opt:partial-sub}
+    \optsummary{~0.37\%}{Continuations (\ref{opt:cont}}{none}
+    
+    subsumption on the left operand of the product, we postpone the
+    testing of the right side. Such term is then added to the list
+    of postponed terms and during the need is popped out of the
+    postponed list, the subsumption test is completed and the
+    item is according to the results pushed to the fixpoint.
+    
+    \subsubsection{Lazy automata construction}
+    \optsummary{~0.37\%}{Continuations (\ref{opt:cont}}{none}
+    As minor optimization the automata are constructed lazily 
+    not before the decision procedure, but during the procedure
+    if needed.
+    
+  \subsection{Subsumption of Terms}\label{opt:sub}
+  \optsummary{~0.37\%}{}{none}
+  
+  One of the dominant optimizations of our approach is pruning of the
+  state space by the subsumption relation. We have defined 
+  subsumption on the terms as follows:
+  	\begin{eqnarray}
+  	t_1 \sqsubseteq t_2 \Leftrightarrow t_1 \subseteq t_2 \\
+  	t_1^l \circ t_1^r \sqsubseteq t_2^l \circ t_2^r 
+  	  \Leftrightarrow t_1^l \sqsubseteq t_2^l \wedge
+  	                  t_1^r \sqsubseteq t_2^r\\
+    \overline{t_1} \sqsubseteq \overline{t_2} \Leftrightarrow
+      t_2 \sqsubseteq t_1
+	\end{eqnarray}  	  
+	\tsf{add subsumption of fixpoints}
+  
+    \subsubsection{Heuristics and optimizations of term subsumption}
+    \optsummary{~0.37\%}{Subsumption (\ref{opt:sub}}{none}
+      
+	We have tried several heuristics on subsumption testing as
+	following:
+	\begin{enumerate}
+	  \item \textbf{Space heuristics}\,---\,test the subsumption of
+	  product terms according to the real state space (or at least
+	  approximation of the state space)
+	\end{enumerate}
+	\tsf{times}
+	
+	The initial implementation of product state space used the 
+	theoretically inefficient implementation that could in worst
+	case generate exponential state space. We tried the other
+	approach with optimized subsumption testing that explicitely
+	enumerated the pairs of the product state space. This lead to
+	further reduction of the state space, however with notable 
+	time overhead.
+    
+    \subsubsection{Subsumption pruning of fixpoints}
+  \optsummary{~0.37\%}{}{none}
+  
+    During the test, whether the generated item is subsumed by
+    fixpoint, the items of fixpoints are gradually pruned. However
+    as there can exists a iterators that points to the fixpoint,
+    we cannot remove the items as it could invalidate the iterators.
+    
+	We tried several strategies when removing the invalid items from
+	fixpoints\,---\,anytime possible, after partial unfolding or 
+	never. The results are in the Table~\ref{table:fixpoint-prune}.    
+    
+    \tsf{table pruning, time, space}
+  
+  \subsection{Fixpoints guided by restrictions}\label{opt:fixpoint-guides}
+  \optsummary{~0.37\%}{Anti-Prenexing (\ref{opt:full-ap}}{none}
+  
+  Section~\ref{theory:restr} introduced the notion of the formula
+  restrictions. MONA exploits of this theory by introducing the
+  \emph{don't care} states, that semantically models that in the
+  state the restrictions do not holds and thus its model cannot
+  be interpreted. This mainly helps the minimization technique
+  of MONA.
+  
+  We choose the different approach, as we do not do the minimization
+  during the state search. Instead as we unfold the fixpoint 
+  computation, we let the restrictions guide the computation by
+  helping the upper levels with giving hints which parts of the
+  constructed computation tree can be exploited.
+  \tsf{time, states}
+
+  \subsection{Conversion of subformulae to subautomata}
+  \optsummary{~0.37\%}{Balancing (\ref{opt:balance}}{none}
+  
+  One of the advantages of our approach is that we can finely tune
+  the ratio between the classical automata construction (i.e. finely
+  choose which subformulae to convert to automaton) and our novel
+  symbolic procedure. In such way we can exploit the minimization
+  of automata while avoiding the exponential blow-up of quantifier
+  alternations.
+  
+  By default every quantifier free subformulae is converted and
+  minimized by MONA. This is clear optimization as the main source
+  of the huge complexity is, as mentioned, quantifier alternations.
+  
+  We have experimented with various heuristics how to convert the
+  subformulae to subautomata as is presented in the
+  Table~\ref{opt:subautomata} according to the height of the tree, 
+  the size of the subformulae, number of fixpoints, etc.
+  \tsf{table time, size}
+
+\section{Formula preprocessing}
+These optimizations are mostly orthogonal to the use decision 
+procedure and can be used as preprocessing of the formulae.
+However, some of these filters are specific to optimizations that
+are used in Gaston.
+
+  \subsection{Anti-prenexing}
+  \optsummary{~0.37\%}{Fixpoint guiding (\ref{opt:fixpoint-guides})}{none}
+  
+  This is one of the foremost optimizations we introduced during the
+  years of Gaston development. The main idea is to push the
+  quantifiers as deep to the leaves as possible. Note that this is
+  complementary preprocessing that was used in the prototype 
+  implementation in the \dwina tool. 
+  
+  \marginlabel{Intuition} By pushing the quantifiers down in the computation
+  we work with the smaller state space. The main source of the time consumption
+  in \gaston is precisely the fixpoint computations. This means we do less 
+  iteration of fixpoint computation.
+  
+  \marginlabel{Theoretical explanation} Consider the following formula $\varphi$:
+  \begin{equation}
+  \forall X. \exists Y. (X \subseteq Y \wedge X \neq Y) \wedge \exists x. x \in X \label{eq:ap-example}
+  \end{equation}
+
+  Lets assume that the complexity of the deciding atomic formula $\psi$ is the size of
+  its corresponding automaton $|\automaton{\psi}|$. Then the theoretical complexity of 
+  the (\ref{eq:ap-example}) is:
+  
+  \begin{equation}
+  2^{2^{\sizeofaut{X \subseteq Y} + \sizeofaut{X \neq Y} + 2^{\sizeofaut{x \in Y}}}}
+  \end{equation}
+  
+  By using the rules of (\ref{opt:full-ap}) we can obtain the following formula in
+  two steps:
+  \begin{eqnarray}
+  \forall X. \exists Y. (X \subseteq Y \wedge X \neq Y) \wedge \exists x. x \in X 
+  	\overset{[\ref{eq:ap-ex-free}]}{\Longrightarrow}\\
+  \forall X. (\exists Y. X \subseteq Y \wedge X \neq Y) \wedge \exists x. x \in X
+  	\overset{[\ref{eq:ap-fa-and}]}{\Longrightarrow}\\
+  (\forall X\exists Y. X \subseteq Y \wedge X \neq Y) \wedge (\forall X\exists x. x \in X)
+  \end{eqnarray}
+  
+  Then the complexity of such formula is:
+  \begin{equation}
+  2^{2^{\sizeofaut{X \subseteq Y}+\sizeofaut{X \neq Y}}}\cdot 2^{2^{\sizeofaut{x \in X}}}
+  \end{equation}
+ 
+    \subsubsection{Full anti-prenexing}\label{opt:full-ap}
+	Implements the following rules:    
+	\begin{eqnarray}
+	\forall X. (\varphi \wedge \varrho) \Leftrightarrow 
+	  (\forall X. \varphi) \wedge (\forall X. \varrho)\label{eq:ap-fa-and}\\
+	\exists X. (\varphi \vee \varrho) \Leftrightarrow
+	  (\exists X. \varphi) \vee (\exists X. \varrho)\label{eq:ap-ex-or}
+	\end{eqnarray}
+	Further we can use the following rules. While theoretically they do not
+	bring any potential speed, in practice in combination with other optimizations
+	(\ref{opt:fixpoint-guides}) they can bring really efficient speed-up:
+	\begin{eqnarray}
+	\forall X. (\varphi \vee \varrho) \Leftrightarrow 
+	  (\forall X. \varphi) \vee \varrho, X \notin \freeVars{\varrho}\label{eq:ap-fa-free}\\
+	\exists X. (\varphi \wedge \varrho) \Leftrightarrow
+	  (\exists X. \varphi) \wedge \varrho, X \notin \freeVars{\varrho}\label{eq:ap-ex-free}\\
+	\forall X. \varphi \Leftrightarrow \varphi, X \notin\freeVars{\varphi}\\
+	\exists X. \varphi \Leftrightarrow \varphi, X \notin\freeVars{\varphi}
+	\end{eqnarray}
+	
+	\begin{table}[h!]
+	  \centering
+	  \caption{Impact of Anti-prenexing on decision procedures}
+	  \label{tab:ap}
+    {\renewcommand{\arraystretch}{1.2}
+	  \begin{tabular}{|l||rr|rr||rr|rr||l|}
+	    \hline
+		\multirotatedrow{3}{bench} & \multicolumn{4}{c||}{Classic}                           & \multicolumn{4}{c||}{Anti-Prenexing} & \multirotatedrow{3}{gain}\\
+		\cline{2-9}
+		& \multicolumn{2}{c|}{MONA} & \multicolumn{2}{c||}{Gaston} & \multicolumn{2}{c|}{MONA} & \multicolumn{2}{c||}{Gaston} & \\
+		& Time       & Space       & Time        & Space        & Time       & Space       & Time         & Space & \\    
+		\hline
+		\hline
+		\input{data/opt-anti.tex}
+		\hline
+	  \end{tabular}}
+	\end{table}
+    
+    \subsubsection{Distributive anti-prenexing}
+    Based on the distributive rules. Enables to push even more 
+    quantifiers down:
+    \begin{eqnarray}
+    \forall X. (\varphi \wedge \varrho) \vee \phi \Leftrightarrow\\
+    \forall X. (\varphi \vee \phi) \wedge (\varrho \vee \phi) \Leftrightarrow\\
+    (\forall X. \varphi \vee \phi) \wedge (\forall X. \varrho \vee \phi)
+    \end{eqnarray}
+    
+  
+  \subsection{Weightening of the AST}\label{opt:balance}
+  \optsummary{~0.37\%}{DAGification (\ref{opt:dag})}{Anti-prenexing (\ref{opt:full-ap})}
+  
+  While finding the optimal AST representing the symbolic automata
+  is NP hard (\tsf{does this need proof?}) we introduced several
+  AST reordering in order to generate the lesser state space.
+  Before the decision procedure the AST is weightened on the
+  corresponding logical operators. 
+  
+  \begin{table}[h!]
+    \centering
+    \tiny
+    \caption{Impact of tree structure on decision procedures}
+    {\renewcommand{\arraystretch}{1.5}
+    \label{tab:balancing}
+    \begin{tabular}{|l||rrr||rrr||rrr||l|}
+    			  \hline
+ \multirotatedrow{2}{bench} & \multicolumn{3}{c||}{Balanced} & \multicolumn{3}{c||}{Left Associativity} & \multicolumn{3}{c||}{Right Associativity} & \multirotatedrow{2}{gain}\\
+ 				  \cline{2-10}
+                  & Time    & Space    & Nodes   & Time       & Space       & Nodes       & Time        & Space       & Nodes & \\
+                  \hline
+                  \hline
+                  \input{data/opt-balanced.tex}
+                  \hline
+    \end{tabular}}
+  \end{table}    
+  
+  \subsection{DAGification}\label{opt:dag}
+  \optsummary{~0.37\%}{Caching (\ref{opt:cache})}{none}
+  
+  This optimization corresponds to the optimization used by MONA
+  better described in~\cite{mona:secrets}. DAG nodes corresponds
+  to the structurally equal formulae. While MONA does the variable
+  reordering in the BDDs on the transitions of stored automata,
+  Gaston searches the state space \emph{on-the-fly} and is thus 
+  unusable. However during the computations one can simply
+  remap the symbol we are computing pre on.
+  
+  \begin{table}[h!]
+    \centering
+    \small
+    \caption{Comparison of AST and DAG size}
+    \label{tab:dag}
+    {\renewcommand{\arraystretch}{1.2}
+    \begin{tabular}{|l||rr||rr||rrr||l|}
+    \hline
+    \multirotatedrow{2}{bench} & \multicolumn{2}{c||}{Classic} & \multicolumn{2}{c||}{DAG} & \multicolumn{3}{c||}{AST Size}   & \multirotatedrow{2}{Gain} \\
+    \cline{2-8}
+                       & Time         & Space        & Time       & Space      & Nodes & DAG Nodes & Space Gain & \\                     
+    \hline
+    \input{data/opt-dag.tex}
+    \hline
+    \end{tabular}}
+  \end{table}  
+  
+  \marginlabel{Proof}The following lemma proves the correctness 
+  of the DAGification process.\begin{lemma}
+  $\varepsilon \in t - w \Leftrightarrow \varepsilon \in t - \tau(w) 
+  \Leftrightarrow \automaton{\varphi} \thicksim \automaton{\psi}$
+  \end{lemma}
+  \begin{proof}
+  Coz.\tsf{?}
+  \end{proof}
+
+\section{Implementation secrets}
+These optimizations cannot be used in other implementations and tools
+as they are specific for our implementation of the procedure. These
+secrets can also be specific for C/C++.
+
+  \subsection{Caching}\label{opt:cache}
+  \optsummary{~0.37\%}{DAGification (\ref{opt:dag})}{none}
+  
+  In the tool there are several bottlenecks that uses the caching
+  in order to lessen the number of computations. Gaston uses the
+  following caches:
+  \begin{enumerate}
+  	\item \textbf{Result cache}\,---\,in each symbolic automaton;
+  	stores the results of the $\varepsilon \in \text{pre}[s](t)$,
+  	for symbol $s$ and term $t$. 
+  	\item \textbf{Subsumption cache}\,---\,in each term; stores each
+  	positive subsumption results. The negative results are not 
+  	stored as they can be results of the comparisons of not fully
+  	unfolded fixpoints. 
+  	\item \textbf{Fixpoint subsumption cache}\,---\,in each fixpoint;
+  	stores each positive subsumption results during the testing 
+  	whether generated item is subsumed by fixpoint or not. Partial
+  	subsumptions are stored as well.
+  	\item \textbf{Pre cache}\,---\,in each base automaton; stores
+  	results of the pre computionat on leaf states for each state.
+  	\item \textbf{DAG node cache}\,---\,two per run; stores 
+  	constructed nodes for DAG. Does not introduce any gain, but is
+  	needed for DAGification alone.
+  \end{enumerate}
+  \tsf{Table time, states, for each cache, maybe compute the caching overhead as well?}
+  
+\section{Lesser optimizations}
+These optimization either do not help by themselves and only serves
+as optimizations and heuristics for other optimizations, or are not
+as important for the decision procedure (but still do gives a 
+noticeable performance gain).
+
+  \subsection{Pruning of the state space through empty term}
+  \optsummary{~0.37\%}{none}{none}
+  
+  During the decision procedure, some of the pres of the terms can
+  lead to empty set of states. Such state can be then used for 
+  pruning of the state space and prune the whole symbolic structure.
+  However, such term can only be pruned through the Intersection 
+  Automata.
+  \tsf{Table: state space all + pruned, timed for those that helps}
+  
+  \subsection{Generation of unique terms}\label{opt:unique}
+  \optsummary{~0.37\%}{DAGification (\ref{opt:dag}}{none}
+  
+  During the state space exploration, terms corresponding to Product
+  Automata, Projection Automata and Base Automata are generated.
+  These terms are generated by the corresponding factories that
+  generate unique terms, that can be obtained by computing the
+  pre of the different terms.
+  
+  While these factories are not optimizations by themselves, and 
+  moreover introduces notable overhead (by cache lookup). They 
+  have the following benefits:
+  \begin{enumerate}
+  	\item \textbf{Using pointers as cache keys}\,---\,each term is
+  	thus uniquely identified by its pointers. This means they can
+  	be used as keys for caches, that allows efficient storage and
+  	quick lookup
+  	\item \textbf{Using pointers for comparisons}\,---\,the unique
+  	identification can be further used for efficient comparison of
+  	the terms by checking the pointers only, without the need for
+  	fully structural compare.
+  	\item \textbf{Memory management}\,---\,by encapsulation of the
+  	term generation, we lessen the need for memory management, 
+  	object destruction, etc.
+  \end{enumerate}
+  \tsf{Table: Overall Terms vs Unique Terms}
+  \tsf{Table: Using pointers as hashes}
+  
+  \subsection{On efficiency of various hash tables}
+  \optsummary{~0.37\%}{Caching (\ref{opt:cache}}{none}
+  
+  One of the vital points of our implementation of our tool
+  are caches used in various places, like e.g. during the
+  computation of intersection of initial and final states 
+  (i.e. the core of our decision procedure), during the
+  subsumption testing and during the generation of the terms.
+  
+  However, the caches alone are bottlenecks and require efficient
+  implementation as well. We have experimented with several 
+  various implementations: \texttt{std::unordered\_map},
+  \texttt{google::sparse\_hash} and \texttt{google::dense\_hash}
+  
+  Morever the caches needs tweaking of the ratio between the
+  size of the hash table and the number of buckets used for
+  distribution of the values.
+  \tsf{Table of times, sizes of hashes}
+
+  \subsection{Optimizing the Symbolic Automaton search}
+  \optsummary{~0.37\%}{Balancing (\ref{opt:balance}}{none}
+  
+  Gaston decides the formulae by traversal of the symbolic
+  representation of the formulae and computes the state space
+  \emph{on-the-fly}. The efficiency of the procedure is thus
+  dependant on the strategies of the tree traversal. We have
+  experimented with the breadth-first-search (BFS), depth-first
+  search and various heuristical reorderings of the tree\footnote{However,
+  some of these reorderings are used for other optimizations, like
+  e.g. anti-prenexing, that can have better impact if the
+  variable spaces are minimal for each subformulae.}
+  \tsf{Table of node visits, generated terms, time}
+
+% Local Variables:
+% TeX-master: "lshort2e"
+% mode: latex
+% mode: flyspell
+% End:
