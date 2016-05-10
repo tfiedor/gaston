@@ -265,7 +265,7 @@ public:
 
 /* >>> Anti-Prenexing Options <<< *
  **********************************/
-#define ANTIPRENEXING_FULL              false
+#define ANTIPRENEXING_FULL              true
 #define ANTIPRENEXING_DISTRIBUTIVE		false
 
 /*

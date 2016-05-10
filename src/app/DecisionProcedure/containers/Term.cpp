@@ -613,16 +613,6 @@ SubsumptionResult TermProduct::IsSubsumedBy(FixpointType& fixpoint, Term*& bigge
     std::pair<Term_ptr, bool>*  last_one;
     if(this->IsEmpty()) {
         return E_TRUE;
-    } else {
-        bool isEmpty = true;
-        for(auto& item : fixpoint) {
-            if(item.first == nullptr || !item.second)
-                continue;
-            isEmpty = false;
-            break;
-        }
-        if(isEmpty)
-            return E_FALSE;
     }
 
     // For each item in fixpoint
@@ -634,36 +624,15 @@ SubsumptionResult TermProduct::IsSubsumedBy(FixpointType& fixpoint, Term*& bigge
         if(this->IsSubsumed(item.first, OPT_PARTIALLY_LIMITED_SUBSUMPTION)) {
             return E_TRUE ;
         }
-    }
 
-    // For each item in fixpoint
-    this->enumerator->FullReset();
-    while (this->enumerator->IsNull() == false) {
-        bool subsumed = false;
-        for (auto &item : fixpoint) {
-            if (item.first == nullptr || !item.second)
-                continue;
-            if (item.first->Subsumes(this->enumerator) != E_FALSE) {
-                this->enumerator->Next();
-                subsumed = true;
-                break;
+        if(!no_prune) {
+            if (item.first->IsSubsumed(this, OPT_PARTIALLY_LIMITED_SUBSUMPTION)) {
+                item.second = false;
             }
-        }
-        if (!subsumed) {
-            if(!no_prune) {
-                for (auto &item : fixpoint) {
-                    if (item.first == nullptr || !item.second) continue;
-
-                    if (item.first->IsSubsumed(this, OPT_PARTIALLY_LIMITED_SUBSUMPTION)) {
-                        item.second = false;
-                    }
-                }
-            }
-            return E_FALSE;
         }
     }
 
-    return E_TRUE;
+    return E_FALSE;
 }
 
 SubsumptionResult TermBaseSet::IsSubsumedBy(FixpointType& fixpoint, Term*& biggerTerm, bool no_prune) {
@@ -789,15 +758,12 @@ SubsumptionResult TermBaseSet::_SubsumesCore(TermEnumerator* enumerator) {
 
     for(auto state : this->states) {
         if(state == item) {
-            //std::cout << " = true\n";
             return E_TRUE;
         } else if(state > item) {
-            //std::cout << " = false\n";
             return E_FALSE;
         }
     }
 
-    //std::cout << " = false\n";
     return E_FALSE;
 }
 
