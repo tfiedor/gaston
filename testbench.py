@@ -409,10 +409,10 @@ if __name__ == '__main__':
     for root, dirs, filenames in os.walk(wdir):
         for f in filenames:
             benchmark = os.path.join(root, f)
-            data[benchmark] = {}
-            tags = getTagsFromString(benchmark)
             if not benchmark.endswith('.mona'):
                 continue
+            data[benchmark] = {}
+            tags = getTagsFromString(benchmark)
             # skips some benchmarks according to the tag
             if any([tag in options.skip for tag in tags]):
                 continue
