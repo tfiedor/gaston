@@ -546,7 +546,7 @@ void BaseAutomaton::_InitializeInitialStates() {
     BaseAutomatonStateSet initialStates;
     initialStates.insert(this->_autWrapper.GetInitialState());
 
-    this->_initialStates = this->_factory.CreateBaseSet(initialStates, this->_stateOffset, this->_stateSpace);
+    this->_initialStates = this->_factory.CreateBaseSet(std::move(initialStates), this->_stateOffset, this->_stateSpace);
 }
 
 /**
@@ -590,7 +590,7 @@ void BaseAutomaton::_InitializeFinalStates() {
 
     // Push states to new Base Set
     // #TERM_CREATION
-    this->_finalStates = reinterpret_cast<Term*>(this->_factory.CreateBaseSet(finalStates, this->_stateOffset, this->_stateSpace));
+    this->_finalStates = reinterpret_cast<Term*>(this->_factory.CreateBaseSet(std::move(finalStates), this->_stateOffset, this->_stateSpace));
 }
 
 /**
@@ -620,8 +620,8 @@ Term* BaseAutomaton::Pre(Symbol* symbol, Term* finalApproximation, bool underCom
 
     // Reinterpret the approximation as base states
     TermBaseSet* baseSet = reinterpret_cast<TermBaseSet*>(finalApproximation);
-    BaseAutomatonStateSet states;
-    BaseAutomatonStateSet preStates;
+    Term_ptr preState = nullptr;
+    Term_ptr  accumulatedState = nullptr;
 
     #if (DEBUG_PRE == true)
     std::cout << "[!] ";
@@ -632,18 +632,15 @@ Term* BaseAutomaton::Pre(Symbol* symbol, Term* finalApproximation, bool underCom
     std::cout << (*symbol) << "\n";
     #endif
 
-    BaseAutomatonStateSet null;
-
     for(auto state : baseSet->states) {
         // Get MTBDD for Pre of states @p state
         auto key = std::make_pair(state, symbol);
-        preStates.clear();
-        if(!this->_preCache.retrieveFromCache(key, preStates)) {
+        if(!this->_preCache.retrieveFromCache(key, preState)) {
             // TODO: there is probably useless copying --^
-            preStates = this->_autWrapper.Pre(state, symbol->GetTrackMask());
-            this->_preCache.StoreIn(key, preStates);
+            preState = this->_factory.CreateBaseSet(this->_autWrapper.Pre(state, symbol->GetTrackMask()), this->_stateOffset, this->_stateSpace);
+            this->_preCache.StoreIn(key, preState);
         }
-        states.insert(preStates);
+        accumulatedState = static_cast<TermBaseSet*>(this->_factory.CreateUnionBaseSet(accumulatedState, preState));
         #if (DEBUG_PRE == true)
         std::cout << "{" << state << "} \u2212 " << (*symbol) << " = " << preStates << "\n";
         #endif
@@ -653,7 +650,7 @@ Term* BaseAutomaton::Pre(Symbol* symbol, Term* finalApproximation, bool underCom
     std::cout << "= " << states << "\n";
     #endif
 
-    return this->_factory.CreateBaseSet(states, this->_stateOffset, this->_stateSpace);
+    return accumulatedState;
 }
 
 /**

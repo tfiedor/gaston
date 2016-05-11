@@ -6,7 +6,7 @@ extern VarToTrackMap varMap;
 
 namespace Workshops {
     NEVER_INLINE TermWorkshop::TermWorkshop(SymbolicAutomaton* aut) :
-            _bCache(nullptr), _pCache(nullptr), _lCache(nullptr), _fpCache(nullptr), _fppCache(nullptr),
+            _bCache(nullptr), _ubCache(nullptr), _pCache(nullptr), _lCache(nullptr), _fpCache(nullptr), _fppCache(nullptr),
             _contCache(nullptr),
             _compCache(nullptr), _aut(aut) { }
 
@@ -26,6 +26,7 @@ namespace Workshops {
 
     NEVER_INLINE TermWorkshop::~TermWorkshop() {
         this->_bCache = TermWorkshop::_cleanCache(this->_bCache);
+        this->_ubCache = TermWorkshop::_cleanCache(this->_ubCache, true);
         this->_fpCache = TermWorkshop::_cleanCache(this->_fpCache);
         this->_fppCache = TermWorkshop::_cleanCache(this->_fppCache);
         this->_pCache = TermWorkshop::_cleanCache(this->_pCache);
@@ -75,6 +76,7 @@ namespace Workshops {
         switch(this->_aut->type) {
             case AutType::BASE:
                 this->_bCache = new BaseCache();
+                this->_ubCache = new ProductCache();
                 break;
             case AutType::BINARY:
             case AutType::INTERSECTION:
@@ -126,7 +128,7 @@ namespace Workshops {
      * @param[in] stateno:      state number for bitmask
      * @return:                 unique pointer for TermBaseSet
      */
-    Term* TermWorkshop::CreateBaseSet(VATA::Util::OrdVector<size_t>& states, unsigned int offset, unsigned int stateno) {
+    Term* TermWorkshop::CreateBaseSet(VATA::Util::OrdVector<size_t> && states, unsigned int offset, unsigned int stateno) {
         #if (OPT_GENERATE_UNIQUE_TERMS == true && UNIQUE_BASE == true)
             assert(this->_bCache != nullptr);
 
@@ -140,14 +142,35 @@ namespace Workshops {
                 std::cout << "[*] Creating BaseSet: ";
                 #endif
                 // The object was not created yet, so we create it and store it in cache
-                termPtr = new TermBaseSet(states, offset, stateno);
+                termPtr = new TermBaseSet(std::move(states), offset, stateno);
                 this->_bCache->StoreIn(states, termPtr);
             }
             assert(termPtr != nullptr);
-            return reinterpret_cast<TermBaseSet*>(termPtr);
+            return termPtr;
         #else
             return new TermBaseSet(states, offset, stateno);
         #endif
+    }
+
+    Term* TermWorkshop::CreateUnionBaseSet(const Term_ptr& lhs, const Term_ptr& rhs) {
+        if(lhs == nullptr) {
+            return rhs;
+        } else if(lhs == rhs) {
+            return lhs;
+        } else if(lhs->IsSubsumed(rhs, OPT_PARTIALLY_LIMITED_SUBSUMPTION, false)) {
+            return rhs;
+        } else if(rhs->IsSubsumed(lhs, OPT_PARTIALLY_LIMITED_SUBSUMPTION, false)) {
+            return lhs;
+        } else {
+            Term_ptr result;
+            auto key = std::make_pair(lhs, rhs);
+            if(!this->_ubCache->retrieveFromCache(key, result)) {
+                TermBaseSet* llhs = static_cast<TermBaseSet*>(lhs);
+                result = this->CreateBaseSet(llhs->states.Union(static_cast<TermBaseSet*>(rhs)->states), 0, 0);
+                this->_ubCache->StoreIn(key, result);
+            }
+            return result;
+        }
     }
 
     /**
@@ -158,7 +181,7 @@ namespace Workshops {
      * @param[in] rptr:     right term of product
      * @param[in] type:     type of the product
      */
-    TermProduct* TermWorkshop::CreateProduct(Term_ptr const&lptr, Term_ptr const&rptr, ProductType type) {
+    TermProduct* TermWorkshop::CreateProduct(Term_ptr const& lptr, Term_ptr const&rptr, ProductType type) {
         // TODO: Can there be sets that have same lhs rhs, but different product type??
         // TODO: I don't think so actually, because this is on the node, so it cannot generate different things
         // TODO: And same thing goes for complements

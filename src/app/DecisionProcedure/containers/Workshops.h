@@ -107,6 +107,7 @@ namespace Workshops {
     private:
         // <<< PRIVATE MEMBERS >>>
         BaseCache* _bCache;
+        ProductCache* _ubCache; // Union of Bases Cache
         ProductCache* _pCache;
         ListCache* _lCache;
         ListCache* _fpCache;
@@ -132,7 +133,8 @@ namespace Workshops {
         // <<< PUBLIC API >>>
         static TermEmpty* CreateEmpty();
         static TermEmpty* CreateComplementedEmpty();
-        Term* CreateBaseSet(BaseKey &states, unsigned int offset, unsigned int stateno);
+        Term* CreateBaseSet(BaseKey && states, unsigned int offset, unsigned int stateno);
+        Term* CreateUnionBaseSet(Term_ptr const&, Term_ptr const&);
         TermProduct* CreateProduct(Term_ptr const&, Term_ptr const&, ProductType);
         TermFixpoint* CreateFixpoint(Term_ptr const&, Symbol*, bool, bool, WorklistSearchType search = WorklistSearchType::E_DFS);
         TermFixpoint* CreateFixpointPre(Term_ptr const&, Symbol*, bool);

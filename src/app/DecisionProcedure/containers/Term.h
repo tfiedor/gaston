@@ -58,7 +58,8 @@ using Term_ptr          = Term*;
 using TermProductStates = std::pair<Term_ptr, Term_ptr>;
 using TermListStates    = std::vector<Term_ptr>;
 using BaseState         = size_t;
-using TermBaseSetStates = std::vector<BaseState>;
+//using TermBaseSetStates = std::vector<BaseState>;
+using TermBaseSetStates = BaseAutomatonStateSet;
 using ResultType        = std::pair<Term_ptr, bool>;
 using ExamplePair       = std::pair<Term_ptr, Term_ptr>;
 using SymbolType        = ZeroSymbol;
@@ -206,9 +207,12 @@ public:
     TermBaseSetStates states;       // [12B] << Linear Structure with Atomic States
     // See #L29
     TERM_MEASURELIST(DEFINE_STATIC_MEASURE)
+#   if (MEASURE_BASE_SIZE == true)
+    static size_t maxBaseSize;
+#   endif
 
     // <<< CONSTRUCTORS >>>
-    NEVER_INLINE TermBaseSet(VATA::Util::OrdVector<size_t>&, unsigned int, unsigned int);
+    NEVER_INLINE TermBaseSet(VATA::Util::OrdVector<size_t> &&, unsigned int, unsigned int);
     NEVER_INLINE ~TermBaseSet();
 
     // <<< PUBLIC API >>>

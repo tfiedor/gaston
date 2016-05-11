@@ -101,7 +101,7 @@ namespace Gaston {
 	void dumpSubsumptionKey(std::pair<Term_ptr, Term_ptr> const& s);
 	void dumpSubsumptionData(SubsumptionResult& s);
 	void dumpPreKey(std::pair<size_t, Symbol_ptr> const& s);
-	void dumpPreData(VATA::Util::OrdVector<size_t>& s);
+	void dumpPreData(Term_ptr& s);
 	void dumpDagKey(Formula_ptr const& s);
 	void dumpDagData(SymbolicAutomaton*& s);
 	void dumpEnumKey(TermEnumerator* const& s);
@@ -129,7 +129,7 @@ namespace Gaston {
 	using BaseAutomatonMTBDD	 = VATA::MTBDDPkg::OndriksMTBDD<BaseAutomatonStateSet>;
 
 	using PreKey				 = std::pair<StateType, Symbol_ptr>;
-	using PreCache				 = BinaryCache<PreKey, BaseAutomatonStateSet, PreHashType, PrePairCompare<PreKey>, dumpPreKey, dumpPreData>;
+	using PreCache				 = BinaryCache<PreKey, Term_ptr, PreHashType, PrePairCompare<PreKey>, dumpPreKey, dumpPreData>;
 }
 
 /*************************
@@ -248,6 +248,7 @@ public:
 
 /* >>> Measuring Options <<< *
  *****************************/
+#define MEASURE_BASE_SIZE				true	// < Measure the maximal and average size of the bases
 #define MEASURE_STATE_SPACE 			true	// < Measures how many instances of terms were created
 #define MEASURE_CACHE_HITS 				true	// < Prints the statistics for each cache on each node
 #define MEASURE_CACHE_BUCKETS			false   // < Prints the statistics for cache buckets
@@ -328,10 +329,12 @@ public:
 #define OPT_UNFOLD_FIX_DURING_SUB			false   // (0) < During the fixpoint testing if there are things in fixpoint, unfold maybe?
 #define OPT_PARTIALLY_LIMITED_SUBSUMPTION	-1		// < Will limited the subsumption testing to certain depth (-1 = unlimited)
 #define OPT_WORKLIST_DRIVEN_BY_RESTRICTIONS true    // < Worklist will be initialized according to the restrictions
+#define OPT_SHUFFLE_HASHES					true	// < Shuffles the bits in the hashes
 
 /* >>> Static Assertions <<< *
  *****************************/
 static_assert(!(OPT_USE_DAG == true && OPT_SYMBOL_HASH_BY_APPROX == true), "Conflicting optimizations: 'Usage of DAG' and 'Hashing of symbols by pointers");
 //static_assert(!(OPT_USE_DAG == true && OPT_EARLY_EVALUATION == true), "Conflicting optimizations: Continuations do not support usage of DAG");
 static_assert(!(MONA_FAIR_MODE == true && MIGHTY_GASTON == true), "Gaston cannot be might and fair at the same time!");
+static_assert(sizeof(size_t) == 8, "Shuffling of hashes require 64bit architecture");
 #endif

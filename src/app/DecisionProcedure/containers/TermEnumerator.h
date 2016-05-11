@@ -13,7 +13,7 @@ class Term;
 class TermProduct;
 class TermBaseSet;
 class TermFixpoint;
-using BaseVector = std::vector<long unsigned int>;
+using BaseVector = std::vector<size_t>;
 using BaseItem = long unsigned int;
 
 enum EnumeratorType {ENUM_GENERIC, ENUM_PRODUCT, ENUM_BASE};
@@ -65,7 +65,7 @@ public:
 
 class BaseEnumerator : public TermEnumerator {
     TermBaseSet* _base;
-    BaseVector::iterator _iterator;
+    BaseVector::const_iterator _iterator;
 public:
     BaseEnumerator(TermBaseSet*);
 

@@ -63,6 +63,9 @@ size_t TermFixpoint::postponedProcessed = 0;
 size_t TermContinuation::continuationUnfolding = 0;
 size_t TermContinuation::unfoldInSubsumption = 0;
 size_t TermContinuation::unfoldInIsectNonempty = 0;
+#if (MEASURE_BASE_SIZE == true)
+size_t TermBaseSet::maxBaseSize = 0;
+#endif
 
 extern Ident lastPosVar, allPosVar;
 
@@ -131,14 +134,18 @@ TermProduct::~TermProduct() {
     }
 }
 
-TermBaseSet::TermBaseSet(VATA::Util::OrdVector<size_t>& s, unsigned int offset, unsigned int stateNo) : states() {
+TermBaseSet::TermBaseSet(VATA::Util::OrdVector<size_t> && s, unsigned int offset, unsigned int stateNo) : states(std::move(s)) {
     #if (MEASURE_STATE_SPACE == true)
     ++TermBaseSet::instances;
     #endif
-    type = TERM_BASE;
-    for(auto state : s) {
-        this->states.push_back(state);
+#   if (MEASURE_BASE_SIZE == true)
+    size_t size = s.size();
+    if(size > TermBaseSet::maxBaseSize) {
+        TermBaseSet::maxBaseSize = size;
     }
+#   endif
+    type = TERM_BASE;
+    assert(s.size() > 0);
 
     // Initialization of state space
     this->_inComplement = false;
@@ -902,8 +909,8 @@ namespace Gaston {
         std::cout << "(" << s.first << ", " << (*s.second) << ")";
     }
 
-    void dumpPreData(VATA::Util::OrdVector<size_t>& s) {
-        std::cout << s;
+    void dumpPreData(Term_ptr& s) {
+        std::cout << (*s);
     }
 
     void dumpDagKey(Formula_ptr const& form) {

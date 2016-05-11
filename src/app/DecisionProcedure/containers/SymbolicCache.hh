@@ -22,6 +22,7 @@
 #include <vector>
 #include <unordered_map>
 #include <typeinfo>
+#include <bitset>
 #include "../environment.hh"
 #include "../../Frontend/ast.h"
 #include "../../Frontend/symboltable.h"
@@ -32,6 +33,18 @@
 #endif
 
 #include <boost/functional/hash.hpp>
+
+inline size_t hash64shift(size_t key)
+{
+	key = (~key) + (key << 21); // key = (key << 21) - key - 1;
+	key = key ^ (key >> 24);
+	key = (key + (key << 3)) + (key << 8); // key * 265
+	key = key ^ (key >> 14);
+	key = (key + (key << 2)) + (key << 4); // key * 21
+	key = key ^ (key >> 28);
+	key = key + (key << 31);
+	return key;
+}
 
 extern SymbolTable symbolTable;
 
@@ -58,35 +71,68 @@ struct ResultHashType {
 #       if (OPT_USE_CUSTOM_PTR_HASH == true)
         size_t seed = HashPointer<Term>(set.first);
 		boost::hash_combine(seed, HashPointer<ZeroSymbol>(set.second));
+#		if (OPT_SHUFFLE_HASHES == true)
+        return hash64shift(seed);
+#		else
 		return seed;
+#		endif
 #       else
+#		if (OPT_SHUFFLE_HASHES == true)
+		size_t seed = hash64shift(Gaston::hash_value(set.first));
+#		else
 		size_t seed = Gaston::hash_value(set.first);
+#		endif
 		boost::hash_combine(seed, Gaston::hash_value(set.second));
+#		if (OPT_SHUFFLE_HASHES == true)
+		return hash64shift(seed);
+#		else
 		return seed;
+#		endif
 #       endif
 	}
 };
 
 struct SubsumptionHashType {
 	size_t operator()(std::pair<Term*, Term*> const& set) const {
+#		if (OPT_SHUFFLE_HASHES == true)
+        size_t seed = hash64shift(Gaston::hash_value(set.first));
+#		else
 		size_t seed = Gaston::hash_value(set.first);
+#		endif
 		boost::hash_combine(seed, Gaston::hash_value(set.second));
+#		if (OPT_SHUFFLE_HASHES == true)
+        return hash64shift(seed);
+#		else
 		return seed;
+#		endif
 	}
 };
 
+
 struct PreHashType {
 	size_t operator()(std::pair<size_t, ZeroSymbol*> const& set) const {
-		size_t seed = boost::hash_value(set.first);
+#		if (OPT_SHUFFLE_HASHES == true)
+		size_t seed = hash64shift(boost::hash_value(set.first));
+#		else
+        size_t seed = boost::hash_value(set.first);
+#		endif
 		boost::hash_combine(seed, Gaston::hash_value(set.second));
+#		if (OPT_SHUFFLE_HASHES == true)
+		return hash64shift(seed);
+#		else
 		return seed;
+#		endif
 	}
 };
 
 struct DagHashType {
 	size_t operator()(ASTForm* const& f) const {
 		size_t seed = boost::hash_value(f->kind);
+#		if(OPT_SHUFFLE_HASHES == true)
+        return hash64shift(seed);
+#		else
 		return seed;
+#		endif
 	}
 };
 
