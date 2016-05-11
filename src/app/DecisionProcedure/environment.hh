@@ -331,6 +331,7 @@ public:
 #define OPT_PARTIALLY_LIMITED_SUBSUMPTION	-1		// < Will limited the subsumption testing to certain depth (-1 = unlimited)
 #define OPT_WORKLIST_DRIVEN_BY_RESTRICTIONS true    // < Worklist will be initialized according to the restrictions
 #define OPT_SHUFFLE_HASHES					true	// < Shuffles the bits in the hashes
+#define OPT_ENUMERATED_SUBSUMPTION_TESTING  true	// < Partially enumerates the products
 
 /* >>> Static Assertions <<< *
  *****************************/

@@ -620,7 +620,20 @@ SubsumptionResult TermProduct::IsSubsumedBy(FixpointType& fixpoint, Term*& bigge
     std::pair<Term_ptr, bool>*  last_one;
     if(this->IsEmpty()) {
         return E_TRUE;
+#   if (OPT_ENUMERATED_SUBSUMPTION_TESTING == true)
+    } else {
+        bool isEmpty = true;
+        for (auto &item : fixpoint) {
+            if (item.first == nullptr || !item.second)
+                continue;
+            isEmpty = false;
+            break;
+        }
+        if (isEmpty)
+            return E_FALSE;
+#   endif
     }
+
 
     // For each item in fixpoint
     for(auto& item : fixpoint) {
@@ -639,7 +652,28 @@ SubsumptionResult TermProduct::IsSubsumedBy(FixpointType& fixpoint, Term*& bigge
         }
     }
 
+#   if (OPT_ENUMERATED_SUBSUMPTION_TESTING == true)
+    this->enumerator->FullReset();
+    while (this->enumerator->IsNull() == false) {
+        bool subsumed = false;
+        for (auto &item : fixpoint) {
+            if (item.first == nullptr || !item.second) continue;
+
+            if (item.first->Subsumes(this->enumerator) != E_FALSE) {
+                this->enumerator->Next();
+                subsumed = true;
+                break;
+            }
+        }
+
+        if (!subsumed) {
+            return E_FALSE;
+        }
+    }
+    return E_TRUE;
+#   else
     return E_FALSE;
+#   endif
 }
 
 SubsumptionResult TermBaseSet::IsSubsumedBy(FixpointType& fixpoint, Term*& biggerTerm, bool no_prune) {
