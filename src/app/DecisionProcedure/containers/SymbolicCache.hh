@@ -51,6 +51,7 @@ extern SymbolTable symbolTable;
 namespace Gaston {
 	extern size_t hash_value(Term *);
 	extern size_t hash_value(ZeroSymbol *);
+	extern size_t hash_value_no_ptr(ZeroSymbol *);
 }
 
 template<class T>

@@ -22,6 +22,7 @@ using namespace Gaston;
 
 namespace Gaston {
     size_t hash_value(ZeroSymbol*);
+    size_t hash_value_no_ptr(ZeroSymbol*);
 }
 
 /**
@@ -69,6 +70,7 @@ public:
     friend bool operator==(const ZeroSymbol& lhs, const ZeroSymbol& rhs);
 
     friend size_t Gaston::hash_value(ZeroSymbol* s);
+    friend size_t Gaston::hash_value_no_ptr(ZeroSymbol* s);
 };
 
 inline bool operator==(const ZeroSymbol& lhs, const ZeroSymbol& rhs) {

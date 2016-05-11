@@ -377,6 +377,7 @@ namespace Workshops {
     NEVER_INLINE SymbolWorkshop::SymbolWorkshop() {
         this->_symbolCache = new SymbolCache();
         this->_trimmedSymbolCache = new SymbolCache();
+        this->_remappedSymbolCache = new SymbolCache();
     }
 
     NEVER_INLINE SymbolWorkshop::~SymbolWorkshop() {
@@ -497,7 +498,23 @@ namespace Workshops {
 
     Symbol* SymbolWorkshop::CreateRemappedSymbol(Symbol* str, std::map<unsigned int, unsigned int>* map) {
         // There should be Map of Ptr -> Ptr
-        return new Symbol(str, map);
+        auto symbolKey = std::make_tuple(str, static_cast<VarType>(0u), 'R');
+        Symbol* symPtr;
+        if(!this->_remappedSymbolCache->retrieveFromCache(symbolKey, symPtr)) {
+            symPtr = new Symbol(str, map);
+#           if (OPT_UNIQUE_REMAPPED_SYMBOLS == true)
+            for(auto item = this->_remappedSymbols.begin(); item != this->_remappedSymbols.end(); ++item) {
+                if(*(*item) == *symPtr) {
+                    Symbol* uniqPtr = (*item);
+                    this->_remappedSymbolCache->StoreIn(symbolKey, uniqPtr);
+                    delete symPtr;
+                    return uniqPtr;
+                }
+            }
+#           endif
+            this->_remappedSymbolCache->StoreIn(symbolKey, symPtr);
+        }
+        return symPtr;
     }
 
     void SymbolWorkshop::Dump() {

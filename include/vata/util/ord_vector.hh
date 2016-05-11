@@ -94,7 +94,7 @@ public:   // Public methods
 	}
 
 	explicit OrdVector(const VectorType& vec) :
-		vec_(vec)
+		vec_(std::move(vec))
 	{
 		// sort
 		std::sort(vec_.begin(), vec_.end());

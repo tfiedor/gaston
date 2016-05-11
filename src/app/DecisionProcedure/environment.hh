@@ -298,7 +298,7 @@ public:
 // ^- NOTE! From v1.0 onwards, disable this will introduce not only leaks, but will fuck everything up!
 #define OPT_USE_CUSTOM_PTR_HASH				false	// < Will use the custom implementation of hash function instead of boost::hash
 #define OPT_TERM_HASH_BY_APPROX				true	// < Include stateSpaceApprox into hash (i.e. better distribution of cache)
-#define OPT_SYMBOL_HASH_BY_APPROX			false	// < Will hash symbol by pointers
+#define OPT_SYMBOL_HASH_BY_APPROX			true    // < Will hash symbol by pointers
 #define OPT_ANTIPRENEXING					true	// < Transform formula to anti-prenex form (i.e. all of the quantifiers are deepest on leaves)
 #define OPT_DRAW_NEGATION_IN_BASE 			true    // < Negation is handled on formula level and not on computation level on base automata
 #define OPT_CREATE_QF_AUTOMATON 			true    // < Transform quantifier-free automaton to formula
@@ -321,6 +321,7 @@ public:
 #define OPT_CREATE_TAGGED_AUTOMATA			false	// < Use tags to create a specific subformula to automaton
 #define OPT_EXTRACT_MORE_AUTOMATA			true	// < Calls detagger to heuristically convert some subformulae to automata
 #define OPT_UNIQUE_TRIMMED_SYMBOLS			true    // < Will guarantee that there will not be a collisions between symbols after trimming
+#define OPT_UNIQUE_REMAPPED_SYMBOLS			true	// < Will guarantee that there will not be a collisions between symbols after remapping
 #define OPT_FIXPOINT_BFS_SEARCH	        	false   // (-) < Will add new things to the back of the worklist in fixpoint
 #define OPT_USE_DENSE_HASHMAP				false	// (-) < Will use the google::dense_hash_map as cache
 #define OPT_NO_SATURATION_FOR_M2L			true    // < Will not saturate the final states for M2L(str) logic
@@ -333,8 +334,6 @@ public:
 
 /* >>> Static Assertions <<< *
  *****************************/
-static_assert(!(OPT_USE_DAG == true && OPT_SYMBOL_HASH_BY_APPROX == true), "Conflicting optimizations: 'Usage of DAG' and 'Hashing of symbols by pointers");
-//static_assert(!(OPT_USE_DAG == true && OPT_EARLY_EVALUATION == true), "Conflicting optimizations: Continuations do not support usage of DAG");
 static_assert(!(MONA_FAIR_MODE == true && MIGHTY_GASTON == true), "Gaston cannot be might and fair at the same time!");
 static_assert(sizeof(size_t) == 8, "Shuffling of hashes require 64bit architecture");
 #endif

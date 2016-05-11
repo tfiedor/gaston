@@ -96,7 +96,24 @@ namespace Workshops {
     void dumpSymbolKey(SymbolKey const&);
     void dumpSymbolData(Symbol* &);
 
-    using SymbolCache       = BinaryCache<SymbolKey, Symbol*, SymbolHash, SymbolCompare, dumpSymbolKey, dumpSymbolData>;
+    struct SymbolKeyHashType {
+        size_t operator()(std::tuple<Symbol*, VarType, ValType> const& set) const {
+            size_t seed = (Gaston::hash_value_no_ptr(std::get<0>(set)));
+            boost::hash_combine(seed, hash64shift(boost::hash_value(std::get<1>(set))));
+            boost::hash_combine(seed, hash64shift(boost::hash_value(std::get<2>(set))));
+            return seed;
+        }
+    };
+
+    template<class Key>
+    struct SymbolKeyCompare : public std::binary_function<Key, Key, bool> {
+        bool operator()(Key const& lhs, Key const& rhs) const {
+            return std::get<1>(lhs) == std::get<1>(rhs) && std::get<2>(lhs) == std::get<2>(rhs) &&
+                    *(std::get<0>(lhs)) == *(std::get<0>(rhs));
+        }
+    };
+
+    using SymbolCache       = BinaryCache<SymbolKey, Symbol*, SymbolKeyHashType, SymbolKeyCompare<SymbolKey>, dumpSymbolKey, dumpSymbolData>;
     using BaseCache         = BinaryCache<BaseKey, CacheData, BaseHash, BaseCompare, dumpBaseKey, dumpCacheData>;
     using ProductCache      = BinaryCache<ProductKey, CacheData, ProductHash, ProductCompare, dumpProductKey, dumpCacheData>;
     using ListCache         = BinaryCache<ListKey, CacheData, ListHash, ListCompare, dumpListKey, dumpCacheData>;
@@ -150,7 +167,9 @@ namespace Workshops {
     private:
         SymbolCache* _symbolCache = nullptr;
         SymbolCache* _trimmedSymbolCache = nullptr;
+        SymbolCache* _remappedSymbolCache = nullptr;
         std::vector<Symbol*> _trimmedSymbols;
+        std::vector<Symbol*> _remappedSymbols;
         Symbol* _CreateProjectedSymbol(Symbol*, VarType, ValType);
 
     public:

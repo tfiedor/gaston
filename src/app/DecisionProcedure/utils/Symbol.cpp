@@ -17,6 +17,7 @@
 
 #include "Symbol.h"
 #include <boost/functional/hash.hpp>
+#include "../containers/SymbolicCache.hh"
 
 extern VarToTrackMap varMap;
 
@@ -26,6 +27,24 @@ namespace Gaston {
         return boost::hash_value(s);
 #       else
         if(s == nullptr) return 0;
+#       if (OPT_SHUFFLE_HASHES == true)
+        size_t seed = hash64shift(boost::hash_value(s->_trackMask.count()));
+        boost::hash_combine(seed, hash64shift(boost::hash_value(s->_trackMask.find_first())));
+        return hash64shift(seed);
+#       else
+        size_t seed = boost::hash_value(s->_trackMask.count());
+        boost::hash_combine(seed, boost::hash_value(s->_trackMask.find_first()));
+        return seed;
+#       endif
+#       endif
+    }
+
+    size_t hash_value_no_ptr(ZeroSymbol* s) {
+#       if (OPT_SHUFFLE_HASHES == true)
+        size_t seed = hash64shift(boost::hash_value(s->_trackMask.count()));
+        boost::hash_combine(seed, hash64shift(boost::hash_value(s->_trackMask.find_first())));
+        return hash64shift(seed);
+#       else
         size_t seed = boost::hash_value(s->_trackMask.count());
         boost::hash_combine(seed, boost::hash_value(s->_trackMask.find_first()));
         return seed;
