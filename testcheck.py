@@ -217,6 +217,13 @@ def check_times(time, reference_time):
     """
     lower_bound = reference_time*(1-time_error)
     upper_bound = reference_time*(1+time_error)
+
+    if time == -2:
+        if reference_time == -2:
+            return True, False, reference_time, reference_time
+        else:
+            return True, False, lower_bound, upper_bound
+
     if time > upper_bound:
         return True, False, lower_bound, upper_bound
     if time < lower_bound:

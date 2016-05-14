@@ -32,13 +32,15 @@ subprocess_error = -4
 unknown_error = -3
 timeout_error = -2
 mona_error = -1                     # BDD Too Large for MONA
+no_error = 0
 
 errors = {
     -5: 'gaston fault',
     -4: 'subprocess_error',
     -3: 'unknown error',
     -2: 'timeout',
-    -1: 'BDD too large'
+    -1: 'BDD too large',
+    0: 'no error'
 }
 
 Measure = namedtuple('Measure', 'regex default post_process is_cummulative')
@@ -110,7 +112,8 @@ measures = {
 }
 
 csv_keys = {
-    'gaston': ['time', 'time-pre', 'space-all', 'space', 'dag-nodes', 'real-nodes', 'space-cont', 'form-vars', 'form-atoms'],
+    'gaston': ['ret', 'time', 'time-pre', 'space-all', 'space', 'dag-nodes', 'real-nodes', 'space-cont', 'form-vars',
+               'form-atoms'],
     'mona': ['time', 'space', 'space-min']
 }
 
@@ -163,20 +166,25 @@ def run_mona(test, timeout):
     return parseMonaOutput(output)
 
 
+def retcode_to_error(retcode):
+    """
+    :returns error code for output
+    """
+    if retcode == 0:
+        return 0
+    elif retcode == 124:
+        return timeout_error
+    else:
+        return dwina_error
+
+
 def run_gaston(test, timeout):
     '''
     Runs dWiNA with following arguments: --method=backward
     '''
     args = ('./build/gaston', '"{}"'.format(test))
     output, retcode = runProcess(args, timeout)
-
-    # Fixme: This should be the issue of segfault
-    if (retcode != 0):
-        if(retcode == 124):
-            return timeout_error, ""
-        else:
-            return dwina_error, ""
-    return parsedWiNAOutput(output, "")
+    return parse_gaston_output(output, retcode_to_error(retcode))
 
 
 def runProcess(args, timeout, from_error=False):
@@ -265,9 +273,14 @@ def exportToCSV(data, bins, options):
                     bench_list = bench_list + [error_message]
                 else:
                     try:
-                        bench_list = bench_list + [str(data[benchmark][bin][key])]
-                    except Exception:
-                        print(bin, key, data[benchmark][bin])
+                        if key == 'ret':
+                            ret_code = data[benchmark][bin][key]
+                            ret_message = errors[ret_code] + ("" if ret_code != timeout_error else "({}m)".format(options.timeout))
+                            bench_list = bench_list + [ret_message]
+                        else:
+                            bench_list = bench_list + [str(data[benchmark][bin][key])]
+                    except Exception as exc:
+                        print(exc)
             csvFile.write(", ".join(bench_list))
             csvFile.write('\n')
     return saveTo
@@ -310,7 +323,7 @@ def generateCSVname():
     return "{0:02}.{1:02}.{2:02}-{3:02}.{4:02}-timing.csv".format(today.year, today.month, today.day, today.hour, today.minute)
 
 
-def parsedWiNAOutput(output, unprunedOutput):
+def parse_gaston_output(output, retcode):
     '''
 
     @param output: lines with dwina output
@@ -324,6 +337,7 @@ def parsedWiNAOutput(output, unprunedOutput):
             break
 
     data = {}
+    data['ret'] = retcode
     for (name, measure) in measures['gaston'].items():
         data[name] = parse_measure('gaston', name, strippedLines)
 
