@@ -79,6 +79,8 @@ measures = {
             'dag-nodes': Measure("nodes" + whatever_regex + space_regex, space_default, int, False),
             'real-nodes': Measure("real nodes" + whatever_regex + space_regex, space_default, int, False),
             'dag-gain': Measure("dag gain" + whatever_regex + double_regex, double_default, float, False),
+            'form-vars': Measure("vars" + whatever_regex + space_regex, space_default, int, False),
+            'form-atoms': Measure("atoms" + whatever_regex + space_regex, space_default, int, False),
             'aut-fix': Measure("fixpoint computations" + whatever_regex + space_regex, space_default, int, False),
             'aut-max-fix-nest': Measure("maximal fixpoint nesting" + whatever_regex + space_regex, space_default, int, False),
             'aut-height': Measure("automaton height" + whatever_regex + space_regex, space_default, int, False),
@@ -108,8 +110,7 @@ measures = {
 }
 
 csv_keys = {
-    'gaston': ['time', 'time-pre', 'space-all', 'space', 'dag-nodes', 'real-nodes', 'space-cont', 'cont-eval',
-               'cont-eval-in-sub', 'cont-eval-in-isect'],
+    'gaston': ['time', 'time-pre', 'space-all', 'space', 'dag-nodes', 'real-nodes', 'space-cont', 'form-vars', 'form-atoms'],
     'mona': ['time', 'space', 'space-min']
 }
 

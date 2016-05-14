@@ -1,7 +1,0 @@
-# WSkS Benchmarks
-# Batch: Atomic
-# Validity: valid
-
-ws1s;
-var1 x, y;
-x + 1 < y;

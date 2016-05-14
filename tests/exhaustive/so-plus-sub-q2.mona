@@ -1,6 +1,0 @@
-# WSkS Benchmarks
-# Batch: Atomic
-# Validity: valid
-
-ws1s;
-~ex2 X: ~ex2 Y: X + 1 sub Y;
