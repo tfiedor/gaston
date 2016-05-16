@@ -125,6 +125,49 @@ BinaryOpAutomaton::~BinaryOpAutomaton() {
     }
 }
 
+TernaryOpAutomaton::TernaryOpAutomaton(SymbolicAutomaton_raw lhs, SymbolicAutomaton_raw mhs, SymbolicAutomaton_raw rhs, Formula_ptr form)
+        : SymbolicAutomaton(form), _lhs_aut(lhs), _mhs_aut(mhs), _rhs_aut(rhs) {
+    // Fixme: Add lazy init
+    type = AutType::TERNARY;
+    lhs->IncReferences();
+    this->_lhs_aut.InitializeSymLink(static_cast<ASTForm_ff*>(this->_form)->f1); // Fixme: This is wrong
+    mhs->IncReferences();
+    this->_mhs_aut.InitializeSymLink(static_cast<ASTForm_ff*>(this->_form)->f1);
+    rhs->IncReferences();
+    this->_rhs_aut.InitializeSymLink(static_cast<ASTForm_ff*>(this->_form)->f2);
+}
+
+TernaryOpAutomaton::~TernaryOpAutomaton() {
+    this->_lhs_aut.aut->DecReferences();
+    if(this->_mhs_aut.aut != nullptr) {
+        this->_mhs_aut.aut->DecReferences();
+    }
+    if(this->_rhs_aut.aut != nullptr) {
+        this->_rhs_aut.aut->DecReferences();
+    }
+}
+
+NaryOpAutomaton::NaryOpAutomaton(SymbolicAutomaton_raw auts[], Formula_ptr form, size_t arity)
+        : SymbolicAutomaton(form), _arity(arity) {
+    type = AutType::NARY;
+    this->_auts = new SymLink[arity];
+    for (int i = 0; i < arity; ++i) {
+        // Fixme: There should be some initialization
+        this->_auts[i].aut = auts[i];
+        auts[i]->IncReferences();
+        this->_auts[i].InitializeSymLink(form);
+    }
+}
+
+NaryOpAutomaton::~NaryOpAutomaton() {
+    for (int i = 0; i < this->_arity; ++i) {
+        if(this->_auts[i].aut != nullptr) {
+            this->_auts[i].aut->DecReferences();
+        }
+    }
+    delete[] this->_auts;
+}
+
 ComplementAutomaton::ComplementAutomaton(SymbolicAutomaton *aut, Formula_ptr form)
         : SymbolicAutomaton(form), _aut(aut) {
     type = AutType::COMPLEMENT;
@@ -203,6 +246,52 @@ IntersectionAutomaton::IntersectionAutomaton(SymbolicAutomaton_raw lhs, Symbolic
     this->_InitializeAutomaton();
 }
 
+TernaryIntersectionAutomaton::TernaryIntersectionAutomaton(SymbolicAutomaton_raw lhs, SymbolicAutomaton_raw mhs, SymbolicAutomaton_raw rhs, Formula_ptr form)
+        : TernaryOpAutomaton(lhs, mhs, rhs, form) {
+    this->type = AutType::TERNARY_INTERSECTION;
+    this->_productType = ProductType::E_INTERSECTION;
+    this->_eval_result = [](bool l, bool m, bool r, bool underC) {
+        // e in L cap M cap R == e in L && e in M && e in R
+        if(!underC) {return l && m && r;}
+        // e notin L cap M cap R == e notin L || ...
+        else {return l || m || r;}
+    };
+    this->_eval_early = [](bool l, bool m, bool underC) {
+        if(!underC) {
+            return !l || !m;
+        } else {
+            return l || m;
+        }
+    };
+    this->_early_val = [](bool underC) {
+        return underC;
+    };
+
+    this->_InitializeAutomaton();
+}
+
+NaryIntersectionAutomaton::NaryIntersectionAutomaton(SymbolicAutomaton_raw *auts, Formula_ptr form, size_t arity)
+        : NaryOpAutomaton(auts, form, arity) {
+    this->type = AutType::NARY_INTERSECTION;
+    this->_productType = E_INTERSECTION;
+    this->_eval_result = [](bool a, bool b, bool underC) {
+        // e in A cap B == e in A && e in B
+        if(!underC) {return a && b;}
+            // e notin A cap B == e notin A || e notin B
+        else {return a || b;}
+    };
+    this->_eval_early = [](bool a, bool underC) {
+        // e in A && e in B => False
+        // e notin A || e notin B => True
+        return (a == underC);
+    };
+    this->_early_val = [](bool underC) {
+        return underC;
+    };
+
+    this->_InitializeAutomaton();
+}
+
 // Derive of BinaryOpAutomaton
 UnionAutomaton::UnionAutomaton(SymbolicAutomaton_raw lhs, SymbolicAutomaton_raw rhs, Formula_ptr form)
         : BinaryOpAutomaton(lhs, rhs, form) {
@@ -217,6 +306,50 @@ UnionAutomaton::UnionAutomaton(SymbolicAutomaton_raw lhs, SymbolicAutomaton_raw 
     this->_eval_early = [](bool a, bool underC) {
         // e in A || e in B => True
         // e notin A && e notin B => False
+        return (a != underC);
+    };
+    this->_early_val = [](bool underC) {
+        return !underC;
+    };
+
+    this->_InitializeAutomaton();
+}
+
+TernaryUnionAutomaton::TernaryUnionAutomaton(SymbolicAutomaton_raw lhs, SymbolicAutomaton_raw mhs, SymbolicAutomaton_raw rhs, Formula_ptr form)
+        : TernaryOpAutomaton(lhs, mhs, rhs, form) {
+    this->type = AutType::TERNARY_UNION;
+    this->_productType = ProductType::E_UNION;
+    this->_eval_result = [](bool l, bool m, bool r, bool underC) {
+        // e in L cup M cup R == e in L || e in M || e in R
+        if(!underC) {return l || m || r;}
+            // e notin L cup M cup R == e notin L && ...
+        else {return l && m && r;}
+    };
+    this->_eval_early = [](bool l, bool m, bool underC) {
+        if(!underC) {
+            return l || m;
+        } else {
+            return !l || !m;
+        }
+    };
+    this->_early_val = [](bool underC) {
+        return !underC;
+    };
+
+    this->_InitializeAutomaton();
+}
+
+NaryUnionAutomaton::NaryUnionAutomaton(SymbolicAutomaton_raw *auts, Formula_ptr form, size_t arity)
+        : NaryOpAutomaton(auts, form, arity) {
+    this->type = AutType::NARY_INTERSECTION;
+    this->_productType = E_INTERSECTION;
+    this->_eval_result = [](bool a, bool b, bool underC) {
+        // e in A cup B == e in A || e in B
+        if(!underC) {return a || b;}
+            // e notin A cup B == e notin A && e notin B
+        else {return a && b;}
+    };
+    this->_eval_early = [](bool a, bool underC) {
         return (a != underC);
     };
     this->_early_val = [](bool underC) {
@@ -517,6 +650,18 @@ void BinaryOpAutomaton::_InitializeAutomaton() {
     this->_InitializeFinalStates();
 }
 
+void TernaryOpAutomaton::_InitializeAutomaton() {
+    this->_factory.InitializeWorkshop();
+    this->_InitializeInitialStates();
+    this->_InitializeFinalStates();
+}
+
+void NaryOpAutomaton::_InitializeAutomaton() {
+    this->_factory.InitializeWorkshop();
+    this->_InitializeInitialStates();
+    this->_InitializeFinalStates();
+}
+
 void ComplementAutomaton::_InitializeAutomaton() {
     this->_factory.InitializeWorkshop();
     this->_InitializeInitialStates();
@@ -545,6 +690,17 @@ void BinaryOpAutomaton::_InitializeInitialStates() {
     this->_initialStates = this->_factory.CreateProduct(this->_lhs_aut.aut->GetInitialStates(), this->_rhs_aut.aut->GetInitialStates(), this->_productType);
 #   endif
     #endif
+}
+
+void TernaryOpAutomaton::_InitializeInitialStates() {
+    // Fixme: Add lazy initialization + no workshops
+    assert(false && "Missing CreateTernaryProduct()");
+    // this->_initialStates = this->_factory.CreateTernaryProduct(this->_lhs_aut.aut->GetInitialStates() ...
+}
+
+void NaryOpAutomaton::_InitializeInitialStates() {
+    // Fixme: Add lazy initialization + no workshops
+    assert(false && "Missing CreateNaryProduct()");
 }
 
 void ComplementAutomaton::_InitializeInitialStates() {
@@ -586,6 +742,16 @@ void BinaryOpAutomaton::_InitializeFinalStates() {
     #endif
 }
 
+void TernaryOpAutomaton::_InitializeFinalStates() {
+    // Fixme: Add lazy initialization + no workshops
+    assert(false && "Missing CreateTernaryProduct()");
+}
+
+void NaryOpAutomaton::_InitializeFinalStates() {
+    // Fixme: Add lazy initialization + no workshops
+    assert(false && "Missing CreateNaryProduct()");
+}
+
 void ComplementAutomaton::_InitializeFinalStates() {
     this->_finalStates = this->_aut.aut->GetFinalStates();
     assert(this->_finalStates->type != TERM_EMPTY);
@@ -624,6 +790,14 @@ void BaseAutomaton::_InitializeFinalStates() {
  */
 Term* BinaryOpAutomaton::Pre(Symbol* symbol, Term* finalApproximation, bool underComplement) {
     assert(false && "Doing Pre on BinaryOp Automaton!");
+}
+
+Term* TernaryOpAutomaton::Pre(Symbol* symbol, Term* finalApproximation, bool underComplement) {
+    assert(false && "Doing Pre on TernaryOp Automaton!");
+}
+
+Term* NaryOpAutomaton::Pre(Symbol* symbol, Term* finalApproximation, bool underComplement) {
+    assert(false && "Doing Pre on NaryOpAutomaton!");
 }
 
 Term* ComplementAutomaton::Pre(Symbol* symbol, Term* finalApproximation, bool underComplement) {
@@ -761,6 +935,14 @@ ResultType BinaryOpAutomaton::_IntersectNonEmptyCore(Symbol* symbol, Term* final
     Term_ptr combined = this->_factory.CreateProduct(lhs_result.first, rhs_result.first, this->_productType);
 #   endif
     return std::make_pair(combined, this->_eval_result(lhs_result.second, rhs_result.second, underComplement));
+}
+
+ResultType TernaryOpAutomaton::_IntersectNonEmptyCore(Symbol* symbol, Term* finalApproximation, bool underComplement) {
+    assert(false && "Missing implementation of _IntersectNonEmptyCore");
+}
+
+ResultType NaryOpAutomaton::_IntersectNonEmptyCore(Symbol* symbol, Term* finalApproximation, bool underComplement) {
+    assert(false && "Missing implementation of _IntersectNonEmptyCore");
 }
 
 ResultType ComplementAutomaton::_IntersectNonEmptyCore(Symbol* symbol, Term* finalApproximaton, bool underComplement) {
@@ -929,6 +1111,14 @@ void BinaryOpAutomaton::_DumpExampleCore(ExampleType e) {
     assert(false && "BinaryOpAutomata cannot have examples yet!");
 }
 
+void TernaryOpAutomaton::_DumpExampleCore(ExampleType) {
+    assert(false && "TernaryOpAutomata cannot have examples yet!");
+}
+
+void NaryOpAutomaton::_DumpExampleCore(ExampleType) {
+    assert(false && "NaryOpAutomata cannot have examples yet!");
+}
+
 void ComplementAutomaton::_DumpExampleCore(ExampleType e) {
     assert(false && "ComplementAutomata cannot have examples yet!");
 }
@@ -1029,15 +1219,101 @@ void BinaryOpAutomaton::DumpAutomaton() {
     std::cout << "(\033[0m";
     this->_lhs_aut.aut->DumpAutomaton();
     if(this->type == AutType::INTERSECTION) {
-        std::cout << "\033[1;32m \u2229 \033[0m";
+        std::cout << "\033[1;32m \u2229\u00B2 \033[0m";
     } else {
-        std::cout << "\033[1;33m \u222A \033[0m";
+        std::cout << "\033[1;33m \u222A\u00B2 \033[0m";
     };
     if(this->_rhs_aut.aut != nullptr) {
         this->_rhs_aut.aut->DumpAutomaton();
     } else {
         std::cout << "??";
     }
+    if(this->type == AutType::INTERSECTION) {
+        std::cout << "\033[1;32m";
+    } else {
+        std::cout << "\033[1;33m";
+    }
+    std::cout << ")\033[0m";
+    if(this->_isRestriction) {
+        std::cout << "\033[1;35m]\033[0m";
+    }
+}
+
+void TernaryOpAutomaton::DumpAutomaton() {
+#   if (DEBUG_AUTOMATA_ADDRESSES == true)
+    std::cout << "[" << this << "]";
+#   endif
+    if(this->_isRestriction) {
+        std::cout << "\033[1;35m[\033[0m";
+    }
+    if(this->type == AutType::INTERSECTION) {
+        std::cout << "\033[1;32m";
+    } else {
+        std::cout << "\033[1;33m";
+    }
+    std::cout << "(\033[0m";
+    this->_lhs_aut.aut->DumpAutomaton();
+    if(this->type == AutType::INTERSECTION) {
+        std::cout << "\033[1;32m \u2229\u00B3 \033[0m";
+    } else {
+        std::cout << "\033[1;33m \u222A\u00B3 \033[0m";
+    };
+    if(this->_mhs_aut.aut != nullptr) {
+        this->_mhs_aut.aut->DumpAutomaton();
+    } else {
+        std::cout << "??";
+    }
+    if(this->type == AutType::INTERSECTION) {
+        std::cout << "\033[1;32m \u2229\u00B3 \033[0m";
+    } else {
+        std::cout << "\033[1;33m \u222A\u00B3 \033[0m";
+    };
+    if(this->_rhs_aut.aut != nullptr) {
+        this->_rhs_aut.aut->DumpAutomaton();
+    } else {
+        std::cout << "??";
+    }
+    if(this->type == AutType::INTERSECTION) {
+        std::cout << "\033[1;32m";
+    } else {
+        std::cout << "\033[1;33m";
+    }
+    std::cout << ")\033[0m";
+    if(this->_isRestriction) {
+        std::cout << "\033[1;35m]\033[0m";
+    }
+}
+
+
+void NaryOpAutomaton::DumpAutomaton() {
+#   if (DEBUG_AUTOMATA_ADDRESSES == true)
+    std::cout << "[" << this << "]";
+#   endif
+    if(this->_isRestriction) {
+        std::cout << "\033[1;35m[\033[0m";
+    }
+    if(this->type == AutType::INTERSECTION) {
+        std::cout << "\033[1;32m";
+    } else {
+        std::cout << "\033[1;33m";
+    }
+    std::cout << "(\033[0m";
+    for (int i = 0; i < this->_arity; ++i) {
+        if(i != 0) {
+            if(this->type == AutType::INTERSECTION) {
+                std::cout << "\033[1;32m \u2229\u207F \033[0m";
+            } else {
+                std::cout << "\033[1;33m \u222A\u207F \033[0m";
+            };
+        }
+        if(this->_auts[i].aut != nullptr) {
+            this->_auts[i].aut->DumpAutomaton();
+        } else {
+            std::cout << "??";
+        }
+    }
+
+
     if(this->type == AutType::INTERSECTION) {
         std::cout << "\033[1;32m";
     } else {
@@ -1205,11 +1481,11 @@ void SymbolicAutomaton::AutomatonToDot(std::string filename, SymbolicAutomaton *
     os.close();
 }
 
-void BinaryOpAutomaton::DumpToDot(std::ofstream & os, bool inComplement) {
+void SymbolicAutomaton::DumpProductHeader(std::ofstream & os, bool inComplement, ProductType productType) {
     os << "\t" << (uintptr_t) &*this << "[label=\"";
     os << this->_factory.ToSimpleStats() << "\\n";
     os << "\u03B5 " << (inComplement ? "\u2209 " : "\u2208 ");
-    if(this->_productType == ProductType::E_INTERSECTION) {
+    if(productType == ProductType::E_INTERSECTION) {
         os << "\u2229";
     } else {
         os << "\u222A";
@@ -1219,11 +1495,41 @@ void BinaryOpAutomaton::DumpToDot(std::ofstream & os, bool inComplement) {
         os << ",style=filled, fillcolor=red";
     }
     os << "];\n";
+}
+
+void BinaryOpAutomaton::DumpToDot(std::ofstream & os, bool inComplement) {
+    this->DumpProductHeader(os, inComplement, this->_productType);
     os << "\t" << (uintptr_t) &*this << " -- " << (uintptr_t) (this->_lhs_aut.aut) << " [label=\"lhs\"];\n";
     os << "\t" << (uintptr_t) &*this << " -- " << (uintptr_t) (this->_rhs_aut.aut) << " [label=\"rhs\"];\n";
     this->_lhs_aut.aut->DumpToDot(os, inComplement);
     if(this->_rhs_aut.aut != nullptr) {
         this->_rhs_aut.aut->DumpToDot(os, inComplement);
+    }
+}
+
+void TernaryOpAutomaton::DumpToDot(std::ofstream &os, bool inComplement) {
+    this->DumpProductHeader(os, inComplement, this->_productType);
+    os << "\t" << (uintptr_t) &*this << " -- " << (uintptr_t) (this->_lhs_aut.aut) << " [label=\"lhs\"];\n";
+    os << "\t" << (uintptr_t) &*this << " -- " << (uintptr_t) (this->_mhs_aut.aut) << " [label=\"mhs\"];\n";
+    os << "\t" << (uintptr_t) &*this << " -- " << (uintptr_t) (this->_rhs_aut.aut) << " [label=\"rhs\"];\n";
+    this->_lhs_aut.aut->DumpToDot(os, inComplement);
+    if(this->_mhs_aut.aut != nullptr) {
+        this->_mhs_aut.aut->DumpToDot(os, inComplement);
+    }
+    if(this->_rhs_aut.aut != nullptr) {
+        this->_rhs_aut.aut->DumpToDot(os, inComplement);
+    }
+}
+
+void NaryOpAutomaton::DumpToDot(std::ofstream &os, bool inComplement) {
+    this->DumpProductHeader(os, inComplement, this->_productType);
+    for (int i = 0; i < this->_arity; ++i) {
+        os << "\t" << (uintptr_t) &*this << " -- " << (uintptr_t) (this->_auts[i].aut) << " [label=\"" << i << "hs\"];\n";
+    }
+    for (int i = 0; i < this->_arity; ++i) {
+        if(this->_auts[i].aut != nullptr) {
+            this->_auts[i].aut->DumpToDot(os, inComplement);
+        }
     }
 }
 
@@ -1414,6 +1720,78 @@ void BinaryOpAutomaton::DumpComputationStats() {
     }
 }
 
+void TernaryOpAutomaton::DumpComputationStats() {
+    if(this->marked) {
+        return;
+    }
+    this->marked = true;
+#   if (PRINT_STATS_TERNARY_PRODUCT == true)
+    this->_form->dump();
+    std::cout << "\n";
+#   if (MEASURE_SUBAUTOMATA_TIMING == true)
+    std::cout << "  \u2218 Workload time: "; this->timer.PrintElapsed();
+#   endif
+    print_stat("Refs", this->_refs);
+    std::cout << "  \u2218 Cache stats -> ";
+#       if (MEASURE_CACHE_HITS == true)
+    this->_resCache.dumpStats();
+#       endif
+#       if (DEBUG_WORKSHOPS == true)
+    this->_factory.Dump();
+#       endif
+#       if (DEBUG_SYMBOL_CREATION == true)
+    this->symbolFactory->Dump();
+#       endif
+    print_stat("True Hits", this->_trueCounter);
+    print_stat("False Hits", this->_falseCounter);
+    print_stat("Continuation Generation", this->_contCreationCounter);
+    print_stat("Continuation Evaluation", this->_contUnfoldingCounter);
+    std::cout << "\n";
+#   endif
+    this->_lhs_aut.aut->DumpComputationStats();
+    if(this->_mhs_aut.aut != nullptr) {
+        this->_mhs_aut.aut->DumpComputationStats();
+    }
+    if(this->_rhs_aut.aut != nullptr) {
+        this->_rhs_aut.aut->DumpComputationStats();
+    }
+}
+
+void NaryOpAutomaton::DumpComputationStats() {
+    if(this->marked) {
+        return;
+    }
+    this->marked = true;
+#   if (PRINT_STATS_NARY == true)
+    this->_form->dump();
+    std::cout << "\n";
+#   if (MEASURE_SUBAUTOMATA_TIMING == true)
+    std::cout << "  \u2218 Workload time: "; this->timer.PrintElapsed();
+#   endif
+    print_stat("Refs", this->_refs);
+    std::cout << "  \u2218 Cache stats -> ";
+#       if (MEASURE_CACHE_HITS == true)
+    this->_resCache.dumpStats();
+#       endif
+#       if (DEBUG_WORKSHOPS == true)
+    this->_factory.Dump();
+#       endif
+#       if (DEBUG_SYMBOL_CREATION == true)
+    this->symbolFactory->Dump();
+#       endif
+    print_stat("True Hits", this->_trueCounter);
+    print_stat("False Hits", this->_falseCounter);
+    print_stat("Continuation Generation", this->_contCreationCounter);
+    print_stat("Continuation Evaluation", this->_contUnfoldingCounter);
+    std::cout << "\n";
+#   endif
+    for (int i = 0; i < this->_arity; ++i) {
+        if(this->_auts[i].aut != nullptr) {
+            this->_auts[i].aut->DumpComputationStats();
+        }
+    }
+}
+
 void ProjectionAutomaton::DumpComputationStats() {
     if(this->marked) {
         return;
@@ -1563,6 +1941,63 @@ void BinaryOpAutomaton::FillStats() {
         (this->_rhs_aut.aut != nullptr ? this->_rhs_aut.aut->stats.max_fixpoint_nesting : 0));
 }
 
+void TernaryOpAutomaton::FillStats() {
+    bool count_left = !this->_lhs_aut.remap;
+    volatile bool count_middle = !this->_mhs_aut.remap && this->_mhs_aut.aut != nullptr;
+    volatile bool count_right = !this->_rhs_aut.remap && this->_rhs_aut.aut != nullptr;
+
+    if(count_left) this->_lhs_aut.aut->FillStats();
+    if(count_middle) this->_mhs_aut.aut->FillStats();
+    if(count_right) this->_rhs_aut.aut->FillStats();
+
+    this->stats.fixpoint_computations = 1 + (count_left ? this->_lhs_aut.aut->stats.fixpoint_computations : 0) +
+            (count_middle ? this->_mhs_aut.aut->stats.fixpoint_computations : 0) +
+            (count_right ? this->_rhs_aut.aut->stats.fixpoint_computations : 0);
+    this->stats.height = 1 +std::max({this->_lhs_aut.aut->stats.height,
+            (this->_mhs_aut.aut != nullptr ? this->_mhs_aut.aut->stats.height : 0),
+            (this->_rhs_aut.aut != nullptr ? this->_rhs_aut.aut->stats.height : 0)});
+    this->stats.nodes = 1 + (count_left ? this->_lhs_aut.aut->stats.nodes : 0) +
+            (count_middle ? this->_mhs_aut.aut->stats.nodes : 0) + (count_right ? this->_rhs_aut.aut->stats.nodes : 0);
+    this->stats.real_nodes = 1 + this->_lhs_aut.aut->stats.real_nodes +
+            (this->_mhs_aut.aut != nullptr ? this->_mhs_aut.aut->stats.real_nodes : 0) +
+            (this->_rhs_aut.aut != nullptr ? this->_rhs_aut.aut->stats.real_nodes : 0);
+    this->stats.max_refs = std::max({this->_refs, this->_lhs_aut.aut->stats.max_refs,
+            (this->_mhs_aut.aut != nullptr ? this->_mhs_aut.aut->stats.max_refs : 0),
+            (this->_rhs_aut.aut != nullptr ? this->_rhs_aut.aut->stats.max_refs : 0)});
+    this->stats.max_fixpoint_nesting = std::max({this->_lhs_aut.aut->stats.max_fixpoint_nesting,
+                                     (this->_mhs_aut.aut != nullptr ? this->_mhs_aut.aut->stats.max_fixpoint_nesting : 0),
+                                     (this->_rhs_aut.aut != nullptr ? this->_rhs_aut.aut->stats.max_fixpoint_nesting : 0)});
+}
+
+void NaryOpAutomaton::FillStats() {
+    volatile bool count;
+    for (int i = 0; i < this->_arity; ++i) {
+        count = !this->_auts[i].remap && this->_auts[i].aut != nullptr;
+        if(count) this->_auts[i].aut->FillStats();
+    }
+
+    this->stats.fixpoint_computations = 1;
+    this->stats.height = 1;
+    this->stats.nodes = 1;
+    this->stats.real_nodes = 1;
+    this->stats.max_refs = this->_refs;
+    this->stats.max_fixpoint_nesting = 0;
+
+    for (int j = 0; j < this->_arity; ++j) {
+        count = !this->_auts[j].remap && this->_auts[j].aut != nullptr;
+        if(count) {
+            this->stats.fixpoint_computations += this->_auts[j].aut->stats.fixpoint_computations;
+            this->stats.nodes += this->_auts[j].aut->stats.nodes;
+        }
+        if(this->_auts[j].aut != nullptr) {
+            this->stats.real_nodes += this->_auts[j].aut->stats.real_nodes;
+            if(this->stats.height < this->_auts[j].aut->stats.height) this->stats.height = this->_auts[j].aut->stats.height;
+            if(this->stats.max_refs < this->_auts[j].aut->stats.height) this->stats.max_refs = this->_auts[j].aut->stats.max_refs;
+            if(this->stats.max_fixpoint_nesting < this->_auts[j].aut->stats.max_fixpoint_nesting) this->stats.max_fixpoint_nesting = this->_auts[j].aut->stats.max_fixpoint_nesting;
+        }
+    }
+}
+
 void BaseAutomaton::FillStats() {
     this->stats.fixpoint_computations = 0;
     this->stats.height = 1;
@@ -1591,6 +2026,28 @@ bool BinaryOpAutomaton::WasLastExampleValid() {
         return false;
     } else {
         return this->_lhs_aut.aut->WasLastExampleValid() && (this->_rhs_aut.aut != nullptr && this->_rhs_aut.aut->WasLastExampleValid());
+    }
+}
+
+bool TernaryOpAutomaton::WasLastExampleValid() {
+    if(this->_isRestriction && this->_lastResult == false) {
+        return false;
+    } else {
+        return this->_lhs_aut.aut->WasLastExampleValid() && (this->_mhs_aut.aut != nullptr && this->_mhs_aut.aut->WasLastExampleValid())
+                && (this->_rhs_aut.aut != nullptr && this->_rhs_aut.aut->WasLastExampleValid());
+    }
+}
+
+bool NaryOpAutomaton::WasLastExampleValid() {
+    if(this->_isRestriction && this->_lastResult == false) {
+        return false;
+    } else {
+        for (int i = 0; i < this->_arity; ++i) {
+            if(this->_auts[i].aut != nullptr && !this->_auts[i].aut->WasLastExampleValid()) {
+                return false;
+            }
+        }
+        return true;
     }
 }
 

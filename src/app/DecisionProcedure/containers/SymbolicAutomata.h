@@ -134,6 +134,7 @@ public:
     virtual void DumpExample(ExampleType);
     virtual void DumpComputationStats() = 0;
     virtual void FillStats() = 0;
+    virtual void DumpProductHeader(std::ofstream&, bool, ProductType);
     virtual void DumpToDot(std::ofstream&, bool) = 0;
     static void AutomatonToDot(std::string, SymbolicAutomaton*, bool);
 protected:
@@ -162,7 +163,10 @@ struct SymLink {
 /**
  * BinaryOpAutomaton corresponds to Binary Operations of Intersection and
  * Union of subautomata. It further contains the links to left and right
- * operands and some additional functions for evaluation of results
+ * operands and some additional functions for evaluation of results.
+ *
+ * The TernaryOpAutomaton and NaryOpAutomaton are the extensions of this
+ * approach for optimization purposes.
  */
 class BinaryOpAutomaton : public SymbolicAutomaton {
 protected:
@@ -200,6 +204,77 @@ protected:
     NEVER_INLINE virtual ~BinaryOpAutomaton();
 };
 
+class TernaryOpAutomaton : public SymbolicAutomaton {
+protected:
+    // <<< PRIVATE MEMBERS >>>
+    SymLink _lhs_aut;
+    SymLink _mhs_aut;
+    SymLink _rhs_aut;
+    ProductType _productType;
+    bool (*_eval_result)(bool, bool, bool, bool);   // Boolean function for evaluation of left, middle and right results
+    bool (*_eval_early)(bool, bool, bool);          // Boolean function for early evaluation
+    bool (*_early_val)(bool);
+
+    // <<< PRIVATE FUNCTIONS >>>
+    virtual void _InitializeAutomaton();
+    virtual void _InitializeInitialStates();
+    virtual void _InitializeFinalStates();
+    virtual ResultType _IntersectNonEmptyCore(Symbol*, Term*, bool);
+    virtual void _DumpExampleCore(ExampleType);
+
+public:
+    NEVER_INLINE TernaryOpAutomaton(SymbolicAutomaton_raw lhs, SymbolicAutomaton_raw mhs, SymbolicAutomaton_raw rhs, Formula_ptr form);
+
+    // <<< PUBLIC API >>>
+    virtual Term* Pre(Symbol*, Term*, bool);
+    virtual bool WasLastExampleValid();
+    std::pair<SymLink*, Term_ptr> LazyInit(Term_ptr); // Fixme: This maybe will need change of implementation
+
+    // <<< DUMPING FUNCTIONS >>>
+    virtual void DumpAutomaton();
+    virtual void DumpToDot(std::ofstream&, bool);
+    virtual void DumpComputationStats();
+    virtual void FillStats();
+
+protected:
+    NEVER_INLINE virtual ~TernaryOpAutomaton();
+};
+
+class NaryOpAutomaton : public SymbolicAutomaton {
+protected:
+    // <<< PRIVATE MEMBERS >>>
+    SymLink* _auts;
+    size_t _arity;
+    ProductType _productType;
+    bool (*_eval_result)(bool, bool, bool);
+    bool (*_eval_early)(bool, bool);
+    bool (*_early_val)(bool);
+
+    // <<< PRIVATE FUNCTIONS >>>
+    virtual void _InitializeAutomaton();
+    virtual void _InitializeInitialStates();
+    virtual void _InitializeFinalStates();
+    virtual ResultType _IntersectNonEmptyCore(Symbol*, Term*, bool);
+    virtual void _DumpExampleCore(ExampleType);
+
+public:
+    NEVER_INLINE NaryOpAutomaton(SymbolicAutomaton_raw auts[], Formula_ptr form, size_t arity);
+
+    // <<< PUBLIC API >>>
+    virtual Term* Pre(Symbol*, Term*, bool);
+    virtual bool WasLastExampleValid();
+    // Fixme: Lazy init?
+
+    // <<< DUMPING FUNCTIONS >>>
+    virtual void DumpAutomaton();
+    virtual void DumpToDot(std::ofstream&, bool);
+    virtual void DumpComputationStats();
+    virtual void FillStats();
+
+protected:
+    NEVER_INLINE virtual ~NaryOpAutomaton();
+};
+
 /**
  * Automaton corresponding to the formula: phi and psi
  */
@@ -208,12 +283,32 @@ public:
     NEVER_INLINE IntersectionAutomaton(SymbolicAutomaton* lhs, SymbolicAutomaton* rhs, Formula_ptr form);
 };
 
+class TernaryIntersectionAutomaton : public TernaryOpAutomaton {
+public:
+    NEVER_INLINE TernaryIntersectionAutomaton(SymbolicAutomaton_raw lhs, SymbolicAutomaton_raw mhs, SymbolicAutomaton_raw rhs, Formula_ptr form);
+};
+
+class NaryIntersectionAutomaton : public NaryOpAutomaton {
+public:
+    NEVER_INLINE NaryIntersectionAutomaton(SymbolicAutomaton_raw auts[], Formula_ptr form, size_t arity);
+};
+
 /**
  * Automaton corresponding to the formula: phi or psi
  */
 class UnionAutomaton : public BinaryOpAutomaton {
 public:
     NEVER_INLINE UnionAutomaton(SymbolicAutomaton* lhs, SymbolicAutomaton* rhs, Formula_ptr form);
+};
+
+class TernaryUnionAutomaton : public TernaryOpAutomaton {
+public:
+    NEVER_INLINE TernaryUnionAutomaton(SymbolicAutomaton_raw lhs, SymbolicAutomaton_raw mhs, SymbolicAutomaton_raw rhs, Formula_ptr form);
+};
+
+class NaryUnionAutomaton : public NaryOpAutomaton {
+public:
+    NEVER_INLINE NaryUnionAutomaton(SymbolicAutomaton_raw auts[], Formula_ptr form, size_t arity);
 };
 
 /**

@@ -57,7 +57,8 @@ class DagCompare;
  * GLOBAL ENUMERATIONS *
  ***********************/
 enum Decision {SATISFIABLE, UNSATISFIABLE, VALID, INVALID, UNKNOWN};
-enum AutType {SYMBOLIC_BASE, BINARY, INTERSECTION, UNION, PROJECTION, ROOT_PROJECTION, BASE, COMPLEMENT};
+enum AutType {SYMBOLIC_BASE, BINARY, TERNARY, NARY, INTERSECTION, TERNARY_INTERSECTION, NARY_INTERSECTION, UNION,
+	TERNARY_UNION, NARY_UNION, PROJECTION, ROOT_PROJECTION, BASE, COMPLEMENT};
 enum TermType {TERM_PRODUCT, TERM, TERM_EMPTY, TERM_BASE, TERM_FIXPOINT, TERM_LIST, TERM_CONTINUATION};
 enum ProductType {E_INTERSECTION, E_UNION};
 enum FixpointTermSem {E_FIXTERM_FIXPOINT, E_FIXTERM_PRE};
@@ -234,6 +235,8 @@ public:
 #define PRINT_STATS_PROJECTION			true
 #define PRINT_STATS_QF_PROJECTION		false
 #define PRINT_STATS_PRODUCT			    true
+#define PRINT_STATS_TERNARY_PRODUCT		true
+#define PRINT_STATS_NARY_PRODUCT		true
 #define PRINT_STATS_NEGATION			true
 #define PRINT_STATS_BASE				true
 #define PRINT_STATS					    false
@@ -302,7 +305,7 @@ public:
 #define OPT_SYMBOL_HASH_BY_APPROX			true    // < Will hash symbol by pointers
 #define OPT_ANTIPRENEXING					true	// < Transform formula to anti-prenex form (i.e. all of the quantifiers are deepest on leaves)
 #define OPT_DRAW_NEGATION_IN_BASE 			true    // < Negation is handled on formula level and not on computation level on base automata
-#define OPT_CREATE_QF_AUTOMATON 			true    // < Transform quantifier-free automaton to formula
+#define OPT_CREATE_QF_AUTOMATON 			false   // < Transform quantifier-free automaton to formula
 #define OPT_REDUCE_AUT_EVERYTIME			false	// (-) < Call reduce everytime VATA automaton is created (i.e. as intermediate result)
 #define OPT_REDUCE_AUT_LAST					true	// < Call reduce after the final VATA automaton is created
 #define OPT_EARLY_EVALUATION 				false   // < Evaluates early interesection of product
@@ -334,6 +337,8 @@ public:
 #define OPT_THROW_CLASSIC_FIRST_ORDER_REP	true	// < Will interpret first orders on fixpoints as having only one one
 #define OPT_SHUFFLE_HASHES					true    // < Shuffles the bits in the hashes
 #define OPT_ENUMERATED_SUBSUMPTION_TESTING  false   // < Partially enumerates the products
+#define OPT_USE_TERNARY_AUTOMATA			true	// < Will use ternary automata if possible
+#define OPT_USE_NARY_AUTOMATA				false	// < Will use nary automata if possible
 
 /* >>> Static Assertions <<< *
  *****************************/

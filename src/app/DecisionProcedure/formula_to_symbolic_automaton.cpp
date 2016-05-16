@@ -53,7 +53,9 @@ SymbolicAutomaton* ASTForm::toSymbolicAutomaton(bool doComplement) {
                 // It was tagged to be constructed by MONA
                 this->sfa = baseToSymbolicAutomaton<GenericBaseAutomaton>(this, doComplement);
             } else {
+#               if (OPT_CREATE_QF_AUTOMATON == TRUE)
                 assert(this->fixpoint_number > 0 || this->tag == 1);
+#               endif
                 this->sfa = this->_toSymbolicAutomatonCore(doComplement);
             }
 #       if (OPT_USE_DAG == true)
@@ -112,36 +114,48 @@ SymbolicAutomaton* ASTForm_Sub::_toSymbolicAutomatonCore(bool doComplement) {
     return baseToSymbolicAutomaton<SubAutomaton>(this, doComplement);
 }
 
+template<class FormClass, class BinaryProduct, class TernaryProduct, class NaryProduct>
+SymbolicAutomaton* product_to_automaton(FormClass* form, bool doComplement) {
+    ASTKind k = form->kind;
+#   if (OPT_USE_NARY_AUTOMATA == true)
+    if(form->f1->kind == k && form->f2->kind == k) {
+#   else
+    if(false) {
+#   endif
+        // Create nary representation
+#   if (OPT_USE_TERNARY_AUTOMATA == true && false)
+    } else if(form->f1->kind == k && form->f2->kind != k) {
+        // Create ternary representation
+    } else if(form->f2->kind == k && form->f1->kind != k) {
+        // Create ternary representation
+#   endif
+    } else {
+        // Create binary automaton
+        SymbolicAutomaton* lhs_aut;
+        lhs_aut = form->f1->toSymbolicAutomaton(doComplement);
+        SymbolicAutomaton* rhs_aut;
+#       if (OPT_EARLY_EVALUATION == true)
+        rhs_aut = nullptr;
+        form->f2->under_complement = doComplement;
+#       else
+        rhs_aut = form->f2->toSymbolicAutomaton(doComplement);
+#       endif
+        return new BinaryProduct(lhs_aut, rhs_aut, form);
+    }
+
+};
+
 /**
  * Returns IntersectionAutomaton consisting of converted left and right automaton
  *
  * @param doComplement: true if we are making complementon
  */
 SymbolicAutomaton* ASTForm_And::_toSymbolicAutomatonCore(bool doComplement) {
-    SymbolicAutomaton* lhs_aut;
-    lhs_aut = this->f1->toSymbolicAutomaton(doComplement);
-    SymbolicAutomaton* rhs_aut;
-#   if (OPT_EARLY_EVALUATION == true)
-    // This automaton will be constructed lazily
-    rhs_aut = nullptr;
-    this->f2->under_complement = doComplement;
-#   else
-    rhs_aut = this->f2->toSymbolicAutomaton(doComplement);
-#   endif
-    return new IntersectionAutomaton(lhs_aut, rhs_aut, this);
+    return product_to_automaton<ASTForm_And, IntersectionAutomaton, TernaryIntersectionAutomaton, NaryIntersectionAutomaton>(this, doComplement);
 }
 
 SymbolicAutomaton* ASTForm_Or::_toSymbolicAutomatonCore(bool doComplement) {
-    SymbolicAutomaton* lhs_aut;
-    lhs_aut = this->f1->toSymbolicAutomaton(doComplement);
-    SymbolicAutomaton* rhs_aut;
-#   if (OPT_EARLY_EVALUATION == true)
-    rhs_aut = nullptr;
-    this->f2->under_complement = doComplement;
-#   else
-    rhs_aut = this->f2->toSymbolicAutomaton(doComplement);
-#   endif
-    return new UnionAutomaton(lhs_aut, rhs_aut, this);
+    return product_to_automaton<ASTForm_Or, UnionAutomaton, TernaryUnionAutomaton, NaryUnionAutomaton>(this, doComplement);
 }
 
 bool is_base_automaton(ASTForm* f) {
