@@ -123,11 +123,27 @@ SymbolicAutomaton* product_to_automaton(FormClass* form, bool doComplement) {
     if(false) {
 #   endif
         // Create nary representation
-#   if (OPT_USE_TERNARY_AUTOMATA == true && false)
+#   if (OPT_USE_TERNARY_AUTOMATA == true)
     } else if(form->f1->kind == k && form->f2->kind != k) {
         // Create ternary representation
+        ASTForm_ff* form_f1 = static_cast<ASTForm_ff*>(form->f1);
+        SymbolicAutomaton* lhs_aut;
+        lhs_aut = form_f1->f1->toSymbolicAutomaton(doComplement);
+        SymbolicAutomaton* mhs_aut;
+        mhs_aut = form_f1->f2->toSymbolicAutomaton(doComplement);
+        SymbolicAutomaton* rhs_aut;
+        rhs_aut = form->f2->toSymbolicAutomaton(doComplement);
+        return new TernaryProduct(lhs_aut, mhs_aut, rhs_aut, form);
     } else if(form->f2->kind == k && form->f1->kind != k) {
         // Create ternary representation
+        ASTForm_ff* form_f2 = static_cast<ASTForm_ff*>(form->f2);
+        SymbolicAutomaton* lhs_aut;
+        lhs_aut = form->f1->toSymbolicAutomaton(doComplement);
+        SymbolicAutomaton* mhs_aut;
+        mhs_aut = form_f2->f1->toSymbolicAutomaton(doComplement);
+        SymbolicAutomaton* rhs_aut;
+        rhs_aut = form_f2->f2->toSymbolicAutomaton(doComplement);
+        return new TernaryProduct(lhs_aut, mhs_aut, rhs_aut, form);
 #   endif
     } else {
         // Create binary automaton

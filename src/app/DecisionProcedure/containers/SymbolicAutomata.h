@@ -130,7 +130,6 @@ public:
     // <<< DUMPING FUNCTIONS >>>
     void DumpAutomatonMetrics();
     virtual void DumpAutomaton() = 0;
-    virtual void DumpCacheStats() = 0;
     virtual void DumpExample(ExampleType);
     virtual void DumpComputationStats() = 0;
     virtual void FillStats() = 0;
@@ -198,7 +197,6 @@ public:
     virtual void DumpAutomaton();
     virtual void DumpToDot(std::ofstream&, bool);
     virtual void DumpComputationStats();
-    virtual void DumpCacheStats();
     virtual void FillStats();
 protected:
     NEVER_INLINE virtual ~BinaryOpAutomaton();
@@ -226,6 +224,7 @@ public:
     NEVER_INLINE TernaryOpAutomaton(SymbolicAutomaton_raw lhs, SymbolicAutomaton_raw mhs, SymbolicAutomaton_raw rhs, Formula_ptr form);
 
     // <<< PUBLIC API >>>
+    SymLink* GetLeft() { return &this->_lhs_aut; }
     virtual Term* Pre(Symbol*, Term*, bool);
     virtual bool WasLastExampleValid();
     std::pair<SymLink*, Term_ptr> LazyInit(Term_ptr); // Fixme: This maybe will need change of implementation
@@ -338,7 +337,6 @@ public:
     virtual void DumpAutomaton();
     virtual void DumpToDot(std::ofstream&, bool);
     virtual void DumpComputationStats();
-    virtual void DumpCacheStats();
     virtual void FillStats();
 protected:
     NEVER_INLINE virtual ~ComplementAutomaton();
@@ -386,7 +384,6 @@ public:
     virtual void DumpAutomaton();
     virtual void DumpToDot(std::ofstream&, bool);
     virtual void DumpComputationStats();
-    virtual void DumpCacheStats();
     virtual void FillStats();
 protected:
     NEVER_INLINE virtual ~ProjectionAutomaton();
@@ -439,7 +436,6 @@ public:
     virtual void DumpToDot(std::ofstream&, bool);
     virtual void BaseAutDump();
     virtual void DumpComputationStats();
-    virtual void DumpCacheStats();
     virtual void FillStats();
 
 protected:

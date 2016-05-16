@@ -7,9 +7,8 @@ extern VarToTrackMap varMap;
 
 namespace Workshops {
     NEVER_INLINE TermWorkshop::TermWorkshop(SymbolicAutomaton* aut) :
-            _bCache(nullptr), _ubCache(nullptr), _pCache(nullptr), _lCache(nullptr), _fpCache(nullptr), _fppCache(nullptr),
-            _contCache(nullptr),
-            _compCache(nullptr), _aut(aut) { }
+            _bCache(nullptr), _ubCache(nullptr), _pCache(nullptr), _tpCache(nullptr), _lCache(nullptr), _fpCache(nullptr),
+            _fppCache(nullptr), _contCache(nullptr),_compCache(nullptr), _aut(aut) { }
 
     template<class A, class B, class C, class D, void (*E)(const A&), void (*F)(B&)>
     BinaryCache<A, B, C, D, E, F>* TermWorkshop::_cleanCache(BinaryCache<A, B, C, D, E, F>* cache, bool noMemberDelete) {
@@ -31,6 +30,7 @@ namespace Workshops {
         this->_fpCache = TermWorkshop::_cleanCache(this->_fpCache);
         this->_fppCache = TermWorkshop::_cleanCache(this->_fppCache);
         this->_pCache = TermWorkshop::_cleanCache(this->_pCache);
+        this->_tpCache = TermWorkshop::_cleanCache(this->_tpCache);
         this->_lCache = TermWorkshop::_cleanCache(this->_lCache);
         this->_contCache = TermWorkshop::_cleanCache(this->_contCache);
         this->_compCache = TermWorkshop::_cleanCache(this->_compCache, true);
@@ -86,6 +86,16 @@ namespace Workshops {
 #               if (OPT_EARLY_EVALUATION == true && MONA_FAIR_MODE == false)
                 this->_contCache = new FixpointCache();
 #               endif
+                break;
+            case AutType::TERNARY:
+            case AutType::TERNARY_INTERSECTION:
+            case AutType::TERNARY_UNION:
+                this->_tpCache = new TernaryCache();
+                break;
+            case AutType::NARY:
+            case AutType::NARY_INTERSECTION:
+            case AutType::NARY_UNION:
+                // Fixme: Add nary cache
                 break;
             case AutType::COMPLEMENT:
                 break;
@@ -172,6 +182,23 @@ namespace Workshops {
             }
             return result;
         }
+    }
+
+    Term* TermWorkshop::CreateTernaryProduct(const Term_ptr& lhs, const Term_ptr& mhs, const Term_ptr& rhs, ProductType type) {
+#       if (OPT_GENERATE_UNIQUE_TERMS == true && UNIQUE_PRODUCTS == true)
+        assert(this->_tpCache != nullptr);
+
+        Term* termPtr = nullptr;
+        auto ternaryKey = std::make_tuple(lhs, mhs, rhs);
+        if(!this->_tpCache->retrieveFromCache(ternaryKey, termPtr)) {
+            termPtr = new TermTernaryProduct(lhs, mhs, rhs, type);
+            this->_tpCache->StoreIn(ternaryKey, termPtr);
+        }
+        assert(termPtr != nullptr);
+        return termPtr;
+#       else
+        return new TermTernaryProduct(lhs, mhs, rhs, type);
+#       endif
     }
 
     /**
@@ -368,6 +395,7 @@ namespace Workshops {
         std::string out("");
         out += (this->_bCache != nullptr ? std::to_string(this->_bCache->GetSize()) + "b, " : "");
         out += (this->_compCache != nullptr ? std::to_string(this->_compCache->GetSize()) + "uf, " : "");
+        out += (this->_tpCache != nullptr ? std::to_string(this->_tpCache->GetSize()) + "tp, " : "");
         out += (this->_pCache != nullptr ? std::to_string(this->_pCache->GetSize()) + "p, " : "");
         out += (this->_contCache != nullptr ? std::to_string(this->_contCache->GetSize()) + "c, " : "");
         out += (this->_fpCache != nullptr ? std::to_string(this->_fpCache->GetSize()) + "fp, " : "");
@@ -527,6 +555,10 @@ namespace Workshops {
 
     void dumpSymbolKey(SymbolKey const&s) {
         std::cout << "<[" <<  (std::get<0>(s)) << "]" << (*std::get<0>(s)) << ", " << std::get<1>(s) << ", " << std::get<2>(s) << ">";
+    }
+
+    void dumpTernaryKey(TernaryKey const&s) {
+        std::cout << "<" << (*std::get<0>(s)) << ", " << (*std::get<1>(s)) << ", " << (*std::get<2>(s)) << ">";
     }
 
     void dumpSymbolData(Symbol*&s) {

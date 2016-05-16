@@ -33,6 +33,8 @@
     code(Term, var)              \
     code(TermEmpty, var)        \
 	code(TermProduct, var)		\
+    code(TermTernaryProduct, var) \
+    code(TermNaryProduct, var)  \
 	code(TermBaseSet, var)		\
 	code(TermList, var)			\
 	code(TermFixpoint, var)		\
@@ -197,6 +199,65 @@ private:
     unsigned int _MeasureStateSpaceCore();
     SubsumptionResult _IsSubsumedCore(Term* t, int limit, bool b = false);
     SubsumptionResult _SubsumesCore(TermEnumerator*);
+};
+
+class TermTernaryProduct : public Term {
+public:
+    /// <<< PUBLIC MEMBERS >>>
+    Term_ptr left;
+    Term_ptr middle;
+    Term_ptr right;
+    ProductType subtype;
+    // Fixme: add enumerator
+
+    // See #L29
+    TERM_MEASURELIST(DEFINE_STATIC_MEASURE)
+
+    // <<< CONSTRUCTORS >>>
+    NEVER_INLINE TermTernaryProduct(Term_ptr, Term_ptr, Term_ptr, ProductType);
+    NEVER_INLINE ~TermTernaryProduct();
+
+    // <<< PUBLIC API >>>
+    SubsumptionResult IsSubsumedBy(FixpointType&, Term*&, bool no_prune = false);
+    bool IsEmpty();
+
+    // <<< DUMPING FUNCTIONS >>>
+private:
+    void _dumpCore(unsigned indent = 0);
+    bool _eqCore(const Term&);
+
+    // <<< PRIVATE FUNCTIONS >>>
+    unsigned int _MeasureStateSpaceCore();
+    SubsumptionResult _IsSubsumedCore(Term* t, int limit, bool b = false);
+};
+
+class TermNaryProduct : public Term {
+public:
+    // <<< PUBLIC MEMBERS >>>
+    size_t arity;
+    Term_ptr* terms;
+    ProductType subtype;
+    // Fixme: add iterator
+
+    // See #L29
+    TERM_MEASURELIST(DEFINE_STATIC_MEASURE)
+
+    // <<< CONSTRUCTORS >>>
+    NEVER_INLINE TermNaryProduct(Term_ptr*, ProductType, size_t);
+    NEVER_INLINE ~TermNaryProduct();
+
+    // <<< PUBLIC API >>>
+    SubsumptionResult IsSubsumedBy(FixpointType&, Term*&, bool no_prune = false);
+    bool IsEmpty();
+
+    // <<< DUMPING FUNCTIONS >>>
+private:
+    void _dumpCore(unsigned indent = 0);
+    bool _eqCore(const Term&);
+
+    // <<< PRIVATE FUNCTIONS >>>
+    unsigned int _MeasureStateSpaceCore();
+    SubsumptionResult _IsSubsumedCore(Term* t, int limit, bool b = false);
 };
 
 /**

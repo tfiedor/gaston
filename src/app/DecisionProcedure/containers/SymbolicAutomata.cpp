@@ -129,12 +129,28 @@ TernaryOpAutomaton::TernaryOpAutomaton(SymbolicAutomaton_raw lhs, SymbolicAutoma
         : SymbolicAutomaton(form), _lhs_aut(lhs), _mhs_aut(mhs), _rhs_aut(rhs) {
     // Fixme: Add lazy init
     type = AutType::TERNARY;
+
+    ASTForm* left, *middle, *right;
+    ASTKind k = form->kind;
+    ASTForm_ff* ff_form = static_cast<ASTForm_ff*>(form);
+    if(ff_form->f1->kind == k) {
+        ASTForm_ff* f1_form = static_cast<ASTForm_ff*>(ff_form->f1);
+        left = f1_form->f1;
+        middle = f1_form->f2;
+        right = ff_form->f2;
+    } else {
+        ASTForm_ff* f2_form = static_cast<ASTForm_ff*>(ff_form->f2);
+        left = ff_form->f1;
+        middle = f2_form->f1;
+        right = f2_form->f2;
+    }
+
     lhs->IncReferences();
-    this->_lhs_aut.InitializeSymLink(static_cast<ASTForm_ff*>(this->_form)->f1); // Fixme: This is wrong
+    this->_lhs_aut.InitializeSymLink(left);
     mhs->IncReferences();
-    this->_mhs_aut.InitializeSymLink(static_cast<ASTForm_ff*>(this->_form)->f1);
+    this->_mhs_aut.InitializeSymLink(middle);
     rhs->IncReferences();
-    this->_rhs_aut.InitializeSymLink(static_cast<ASTForm_ff*>(this->_form)->f2);
+    this->_rhs_aut.InitializeSymLink(right);
 }
 
 TernaryOpAutomaton::~TernaryOpAutomaton() {
@@ -193,8 +209,12 @@ ProjectionAutomaton::ProjectionAutomaton(SymbolicAutomaton_raw aut, Formula_ptr 
     if(innerForm->kind == aAnd || innerForm->kind == aOr) {
         ASTForm_ff* ff_form = static_cast<ASTForm_ff*>(innerForm);
         if(ff_form->f1->is_restriction) {
-            BinaryOpAutomaton* binaryOpAutomaton = static_cast<BinaryOpAutomaton*>(aut);
-            this->_guide = new FixpointGuide(binaryOpAutomaton->GetLeft());
+            if(aut->type == AutType::TERNARY_INTERSECTION || aut->type == AutType::TERNARY_UNION) {
+                TernaryOpAutomaton *ternaryOpAutomaton = static_cast<TernaryOpAutomaton*>(aut);
+            } else {
+                BinaryOpAutomaton *binaryOpAutomaton = static_cast<BinaryOpAutomaton *>(aut);
+                this->_guide = new FixpointGuide(binaryOpAutomaton->GetLeft());
+            }
         } else {
             this->_guide = new FixpointGuide();
         }
@@ -694,8 +714,8 @@ void BinaryOpAutomaton::_InitializeInitialStates() {
 
 void TernaryOpAutomaton::_InitializeInitialStates() {
     // Fixme: Add lazy initialization + no workshops
-    assert(false && "Missing CreateTernaryProduct()");
-    // this->_initialStates = this->_factory.CreateTernaryProduct(this->_lhs_aut.aut->GetInitialStates() ...
+    this->_initialStates = this->_factory.CreateTernaryProduct(this->_lhs_aut.aut->GetInitialStates(),
+        this->_mhs_aut.aut->GetInitialStates(), this->_rhs_aut.aut->GetInitialStates(), this->_productType);
 }
 
 void NaryOpAutomaton::_InitializeInitialStates() {
@@ -744,7 +764,8 @@ void BinaryOpAutomaton::_InitializeFinalStates() {
 
 void TernaryOpAutomaton::_InitializeFinalStates() {
     // Fixme: Add lazy initialization + no workshops
-    assert(false && "Missing CreateTernaryProduct()");
+    this->_finalStates = this->_factory.CreateTernaryProduct(this->_lhs_aut.aut->GetFinalStates(),
+        this->_mhs_aut.aut->GetFinalStates(), this->_rhs_aut.aut->GetFinalStates(), this->_productType);
 }
 
 void NaryOpAutomaton::_InitializeFinalStates() {
@@ -938,7 +959,37 @@ ResultType BinaryOpAutomaton::_IntersectNonEmptyCore(Symbol* symbol, Term* final
 }
 
 ResultType TernaryOpAutomaton::_IntersectNonEmptyCore(Symbol* symbol, Term* finalApproximation, bool underComplement) {
-    assert(false && "Missing implementation of _IntersectNonEmptyCore");
+    assert(finalApproximation != nullptr);
+    assert(finalApproximation->type == TERM_TERNARY_PRODUCT);
+
+    // Retype the approximation to TermProduct type
+    TermTernaryProduct* termTernaryProduct = static_cast<TermTernaryProduct*>(finalApproximation);
+
+    // Checks if left automaton's initial states interesct the final states;
+    ResultType lhs_result = this->_lhs_aut.aut->IntersectNonEmpty(this->_lhs_aut.ReMapSymbol(symbol), termTernaryProduct->left, underComplement);
+#   if (OPT_PRUNE_EMPTY == true)
+    if(lhs_result.first->type == TERM_EMPTY && !lhs_result.first->InComplement() && this->_productType == ProductType::E_INTERSECTION) {
+        return std::make_pair(lhs_result.first, underComplement);
+    }
+#   endif
+    // Fixme: Add early evaluation
+
+    ResultType mhs_result = this->_mhs_aut.aut->IntersectNonEmpty(this->_mhs_aut.ReMapSymbol(symbol), termTernaryProduct->middle, underComplement);
+#   if (OPT_PRUNE_EMPTY == true)
+    if(mhs_result.first->type == TERM_EMPTY && !mhs_result.first->InComplement() && this->_productType == ProductType::E_INTERSECTION) {
+        return std::make_pair(mhs_result.first, underComplement);
+    }
+#   endif
+
+    ResultType rhs_result = this->_rhs_aut.aut->IntersectNonEmpty(this->_rhs_aut.ReMapSymbol(symbol), termTernaryProduct->right, underComplement);
+#   if (OPT_PRUNE_EMPTY == true)
+    if(rhs_result.first->type == TERM_EMPTY && !rhs_result.first->InComplement() && this->_productType == ProductType::E_INTERSECTION) {
+        return std::make_pair(rhs_result.first, underComplement);
+    }
+#   endif
+
+    Term_ptr combined = this->_factory.CreateTernaryProduct(lhs_result.first, mhs_result.first, rhs_result.first, this->_productType);
+    return std::make_pair(combined, this->_eval_result(lhs_result.second, mhs_result.second, rhs_result.second, underComplement));
 }
 
 ResultType NaryOpAutomaton::_IntersectNonEmptyCore(Symbol* symbol, Term* finalApproximation, bool underComplement) {
@@ -1246,14 +1297,14 @@ void TernaryOpAutomaton::DumpAutomaton() {
     if(this->_isRestriction) {
         std::cout << "\033[1;35m[\033[0m";
     }
-    if(this->type == AutType::INTERSECTION) {
+    if(this->_productType == ProductType::E_INTERSECTION) {
         std::cout << "\033[1;32m";
     } else {
         std::cout << "\033[1;33m";
     }
     std::cout << "(\033[0m";
     this->_lhs_aut.aut->DumpAutomaton();
-    if(this->type == AutType::INTERSECTION) {
+    if(this->_productType == ProductType::E_INTERSECTION) {
         std::cout << "\033[1;32m \u2229\u00B3 \033[0m";
     } else {
         std::cout << "\033[1;33m \u222A\u00B3 \033[0m";
@@ -1263,7 +1314,7 @@ void TernaryOpAutomaton::DumpAutomaton() {
     } else {
         std::cout << "??";
     }
-    if(this->type == AutType::INTERSECTION) {
+    if(this->_productType == ProductType::E_INTERSECTION) {
         std::cout << "\033[1;32m \u2229\u00B3 \033[0m";
     } else {
         std::cout << "\033[1;33m \u222A\u00B3 \033[0m";
@@ -1273,7 +1324,7 @@ void TernaryOpAutomaton::DumpAutomaton() {
     } else {
         std::cout << "??";
     }
-    if(this->type == AutType::INTERSECTION) {
+    if(this->_productType == ProductType::E_INTERSECTION) {
         std::cout << "\033[1;32m";
     } else {
         std::cout << "\033[1;33m";
@@ -1284,7 +1335,6 @@ void TernaryOpAutomaton::DumpAutomaton() {
     }
 }
 
-
 void NaryOpAutomaton::DumpAutomaton() {
 #   if (DEBUG_AUTOMATA_ADDRESSES == true)
     std::cout << "[" << this << "]";
@@ -1292,7 +1342,7 @@ void NaryOpAutomaton::DumpAutomaton() {
     if(this->_isRestriction) {
         std::cout << "\033[1;35m[\033[0m";
     }
-    if(this->type == AutType::INTERSECTION) {
+    if(this->_productType == ProductType::E_INTERSECTION) {
         std::cout << "\033[1;32m";
     } else {
         std::cout << "\033[1;33m";
@@ -1300,7 +1350,7 @@ void NaryOpAutomaton::DumpAutomaton() {
     std::cout << "(\033[0m";
     for (int i = 0; i < this->_arity; ++i) {
         if(i != 0) {
-            if(this->type == AutType::INTERSECTION) {
+            if(this->_productType == ProductType::E_INTERSECTION) {
                 std::cout << "\033[1;32m \u2229\u207F \033[0m";
             } else {
                 std::cout << "\033[1;33m \u222A\u207F \033[0m";
@@ -1314,7 +1364,7 @@ void NaryOpAutomaton::DumpAutomaton() {
     }
 
 
-    if(this->type == AutType::INTERSECTION) {
+    if(this->_productType == ProductType::E_INTERSECTION) {
         std::cout << "\033[1;32m";
     } else {
         std::cout << "\033[1;33m";
@@ -1631,33 +1681,6 @@ void BaseAutomaton::BaseAutDump() {
     }
     this->_autWrapper.DumpDFA(std::cout);
     std::cout << "[----------------------->]\n";
-}
-
-/**
- * Dump Cache stats of automaton only
- */
-void BinaryOpAutomaton::DumpCacheStats() {
-    this->_form->dump();
-    this->_resCache.dumpStats();
-    this->_lhs_aut.aut->DumpCacheStats();
-    this->_rhs_aut.aut->DumpCacheStats();
-}
-
-void ComplementAutomaton::DumpCacheStats() {
-    this->_form->dump();
-    this->_resCache.dumpStats();
-    this->_aut.aut->DumpCacheStats();
-}
-
-void ProjectionAutomaton::DumpCacheStats() {
-    this->_form->dump();
-    this->_resCache.dumpStats();
-    this->_aut.aut->DumpCacheStats();
-}
-
-void BaseAutomaton::DumpCacheStats() {
-    this->_form->dump();
-    this->_resCache.dumpStats();
 }
 
 /**

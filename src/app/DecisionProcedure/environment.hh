@@ -59,7 +59,8 @@ class DagCompare;
 enum Decision {SATISFIABLE, UNSATISFIABLE, VALID, INVALID, UNKNOWN};
 enum AutType {SYMBOLIC_BASE, BINARY, TERNARY, NARY, INTERSECTION, TERNARY_INTERSECTION, NARY_INTERSECTION, UNION,
 	TERNARY_UNION, NARY_UNION, PROJECTION, ROOT_PROJECTION, BASE, COMPLEMENT};
-enum TermType {TERM_PRODUCT, TERM, TERM_EMPTY, TERM_BASE, TERM_FIXPOINT, TERM_LIST, TERM_CONTINUATION};
+enum TermType {TERM_PRODUCT, TERM_TERNARY_PRODUCT, TERM_NARY_PRODUCT, TERM, TERM_EMPTY, TERM_BASE, TERM_FIXPOINT,
+	TERM_LIST, TERM_CONTINUATION};
 enum ProductType {E_INTERSECTION, E_UNION};
 enum FixpointTermSem {E_FIXTERM_FIXPOINT, E_FIXTERM_PRE};
 enum ComparisonType {E_BY_SAME_PTR, E_BY_DIFFERENT_TYPE, E_BY_STRUCTURE};
@@ -200,7 +201,7 @@ public:
 #define DEBUG_FIXPOINT_WORKLIST		    true
 #define DEBUG_FIXPOINT_SYMBOLS		    false
 #define DEBUG_FIXPOINT_SYMBOLS_INIT     false
-#define DEBUG_INITIAL_APPROX 			false
+#define DEBUG_INITIAL_APPROX 		    false
 #define DEBUG_INTERSECT_NON_EMPTY 	    false
 #define DEBUG_TERM_UNIQUENESS			false
 #define DEBUG_TERM_CREATION				false
@@ -305,7 +306,7 @@ public:
 #define OPT_SYMBOL_HASH_BY_APPROX			true    // < Will hash symbol by pointers
 #define OPT_ANTIPRENEXING					true	// < Transform formula to anti-prenex form (i.e. all of the quantifiers are deepest on leaves)
 #define OPT_DRAW_NEGATION_IN_BASE 			true    // < Negation is handled on formula level and not on computation level on base automata
-#define OPT_CREATE_QF_AUTOMATON 			false   // < Transform quantifier-free automaton to formula
+#define OPT_CREATE_QF_AUTOMATON 			true    // < Transform quantifier-free automaton to formula
 #define OPT_REDUCE_AUT_EVERYTIME			false	// (-) < Call reduce everytime VATA automaton is created (i.e. as intermediate result)
 #define OPT_REDUCE_AUT_LAST					true	// < Call reduce after the final VATA automaton is created
 #define OPT_EARLY_EVALUATION 				false   // < Evaluates early interesection of product

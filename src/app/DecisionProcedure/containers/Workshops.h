@@ -75,6 +75,9 @@ namespace Workshops {
     using ProductKey        = std::pair<Term*, Term*>;
     using ProductHash       = boost::hash<ProductKey>;
     using ProductCompare    = PairCompare<ProductKey>;
+    using TernaryKey        = std::tuple<Term*, Term*, Term*>;
+    using TernaryHash       = boost::hash<TernaryKey>;
+    using TernaryCompare    = std::equal_to<TernaryKey>;
     using ListKey           = Term*;
     using ListHash          = boost::hash<ListKey>;
     using ListCompare       = std::equal_to<ListKey>;
@@ -89,6 +92,7 @@ namespace Workshops {
 
     void dumpBaseKey(BaseKey const&);
     void dumpProductKey(ProductKey const&);
+    void dumpTernaryKey(TernaryKey const&);
     void dumpListKey(ListKey const&);
     void dumpFixpointKey(FixpointKey const&);
     void dumpComputationKey(ComputationKey const&);
@@ -116,6 +120,7 @@ namespace Workshops {
     using SymbolCache       = BinaryCache<SymbolKey, Symbol*, SymbolKeyHashType, SymbolKeyCompare<SymbolKey>, dumpSymbolKey, dumpSymbolData>;
     using BaseCache         = BinaryCache<BaseKey, CacheData, BaseHash, BaseCompare, dumpBaseKey, dumpCacheData>;
     using ProductCache      = BinaryCache<ProductKey, CacheData, ProductHash, ProductCompare, dumpProductKey, dumpCacheData>;
+    using TernaryCache      = BinaryCache<TernaryKey, CacheData, TernaryHash, TernaryCompare, dumpTernaryKey, dumpCacheData>;
     using ListCache         = BinaryCache<ListKey, CacheData, ListHash, ListCompare, dumpListKey, dumpCacheData>;
     using FixpointCache     = BinaryCache<FixpointKey, CacheData, FixpointHash, FixpointCompare, dumpFixpointKey, dumpCacheData>;
     using ComputationCache  = BinaryCache<ComputationKey, CacheData, ComputationHash, ComputationCompare, dumpComputationKey, dumpCacheData>;
@@ -126,6 +131,7 @@ namespace Workshops {
         BaseCache* _bCache;
         ProductCache* _ubCache; // Union of Bases Cache
         ProductCache* _pCache;
+        TernaryCache* _tpCache;
         ListCache* _lCache;
         ListCache* _fpCache;
         FixpointCache* _fppCache;
@@ -153,6 +159,7 @@ namespace Workshops {
         Term* CreateBaseSet(BaseKey && states, unsigned int offset, unsigned int stateno);
         Term* CreateUnionBaseSet(Term_ptr const&, Term_ptr const&);
         TermProduct* CreateProduct(Term_ptr const&, Term_ptr const&, ProductType);
+        Term* CreateTernaryProduct(Term_ptr const&, Term_ptr const&, Term_ptr const&, ProductType);
         TermFixpoint* CreateFixpoint(Term_ptr const&, Symbol*, bool, bool, WorklistSearchType search = WorklistSearchType::E_DFS);
         TermFixpoint* CreateFixpointPre(Term_ptr const&, Symbol*, bool);
         TermFixpoint* GetUniqueFixpoint(TermFixpoint*&);

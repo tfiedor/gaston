@@ -16,6 +16,7 @@
 #include "TermEnumerator.h"
 #include <boost/functional/hash.hpp>
 #include <future>
+#include <algorithm>
 
 extern Ident allPosVar;
 
@@ -135,6 +136,75 @@ TermProduct::~TermProduct() {
     if(this->enumerator != nullptr) {
         delete this->enumerator;
     }
+}
+
+TermTernaryProduct::TermTernaryProduct(Term_ptr lhs, Term_ptr mhs, Term_ptr rhs, ProductType pt)
+    : left(lhs), middle(mhs), right(rhs) {
+#   if(MEASURE_STATE_SPACE == true)
+    ++TermTernaryProduct::instances;
+#   endif
+
+    this->_inComplement = false;
+    this->type = TermType::TERM_TERNARY_PRODUCT;
+    this->subtype = pt;
+
+    // Initialization of state space
+    if(this->left->stateSpace != 0 && this->middle->stateSpace != 0 && this->right->stateSpace != 0) {
+        this->stateSpace = this->left->stateSpace + this->middle->stateSpace + this->right->stateSpace + 1;
+    } else {
+        this->stateSpace = 0;
+    }
+    this->stateSpaceApprox = this->left->stateSpaceApprox + this->right->stateSpaceApprox + this->middle->stateSpaceApprox + 1;
+    // Fixme: Add enumerator
+
+#   if (DEBUG_TERM_CREATION == true)
+    std::cout << "TermTernaryProduct::";
+    this->dump();
+    std::cout << "\n";
+#   endif
+}
+
+TermTernaryProduct::~TermTernaryProduct() {
+
+}
+
+TermNaryProduct::TermNaryProduct(Term_ptr* terms, ProductType pt, size_t arity) {
+#   if (MEASURE_STATE_SPACE == true)
+    ++TermNaryProduct::instances;
+#   endif
+
+    this->terms = new Term_ptr[arity];
+    std::copy(terms, terms+arity, this->terms);
+    this->arity = arity;
+    this->_inComplement = false;
+    this->type = TermType::TERM_NARY_PRODUCT;
+    this->subtype = pt;
+
+    bool null_state_space = false;
+    this->stateSpace = 0;
+    for (int i = 0; i < this->arity; ++i) {
+        if(this->terms[i]->stateSpace == 0) {
+            null_state_space = true;
+            break;
+        } else {
+            this->stateSpace += this->terms[i]->stateSpace;
+        }
+    }
+
+    this->stateSpaceApprox = 0;
+    for (int j = 0; j < this->arity; ++j) {
+        this->stateSpaceApprox += this->terms[j]->stateSpaceApprox;
+    }
+
+#   if (DEBUG_TERM_CREATION == true)
+    std::cout << "TermNaryProduct::";
+    this->dump();
+    std::cout << "\n";
+#   endif
+}
+
+TermNaryProduct::~TermNaryProduct() {
+    delete[] this->terms;
 }
 
 TermBaseSet::TermBaseSet(VATA::Util::OrdVector<size_t> && s, unsigned int offset, unsigned int stateNo) : states(std::move(s)) {
@@ -493,6 +563,56 @@ SubsumptionResult TermProduct::_IsSubsumedCore(Term *t, int limit, bool unfoldAl
     }
 }
 
+SubsumptionResult _ternary_subsumption_test(Term* f1, Term* f2, Term* s1, Term* s2, Term* l1, Term* l2, size_t approx_max, int limit, bool unfoldAll) {
+    if(f1->IsSubsumed(f2, limit, unfoldAll) != E_FALSE) {
+        if(s1->stateSpaceApprox == approx_max) {
+            return (l1->IsSubsumed(l2, limit, unfoldAll) != E_FALSE && s1->IsSubsumed(s2, limit, unfoldAll) != E_FALSE) ? E_TRUE : E_FALSE;
+        } else {
+            return (s1->IsSubsumed(s2, limit, unfoldAll) != E_FALSE && l1->IsSubsumed(l2, limit, unfoldAll) != E_FALSE) ? E_TRUE : E_FALSE;
+        }
+    } else {
+        return E_FALSE;
+    }
+}
+
+SubsumptionResult TermTernaryProduct::_IsSubsumedCore(Term *t, int limit, bool unfoldAll) {
+    assert(t->type == TERM_TERNARY_PRODUCT);
+
+    // Retype and test the subsumption component-wise
+    TermTernaryProduct *rhs = static_cast<TermTernaryProduct*>(t);
+    Term *lhsl = this->left;
+    Term *lhsm = this->middle;
+    Term *lhsr = this->right;
+    Term *rhsl = rhs->left;
+    Term *rhsm = rhs->middle;
+    Term *rhsr = rhs->right;
+
+    size_t approx_max = std::max({lhsl->stateSpaceApprox, lhsm->stateSpaceApprox, lhsr->stateSpaceApprox});
+    size_t approx_min = std::min({lhsl->stateSpaceApprox, lhsm->stateSpaceApprox, lhsr->stateSpaceApprox});
+    if(lhsl->stateSpaceApprox == approx_min) {
+        return _ternary_subsumption_test(lhsl, rhsl, lhsm, rhsm, lhsr, rhsr, approx_max, limit,unfoldAll);
+    } else if(lhsr->stateSpaceApprox == approx_min) {
+        return _ternary_subsumption_test(lhsr, rhsr, lhsl, rhsl, lhsm, rhsm, approx_max, limit, unfoldAll);
+    } else {
+        return _ternary_subsumption_test(lhsm, rhsm, lhsr, rhsr, lhsm, rhsm, approx_max, limit, unfoldAll);
+    }
+}
+
+SubsumptionResult TermNaryProduct::_IsSubsumedCore(Term *t, int limit, bool b) {
+    assert(t->type == TERM_NARY_PRODUCT);
+
+    // Retype and test the subsumption component-wise
+    TermNaryProduct *rhs = static_cast<TermNaryProduct*>(t);
+    assert(this->arity == rhs->arity);
+    for (int i = 0; i < this->arity; ++i) {
+        if(this->terms[i]->IsSubsumed(rhs->terms[i], limit, b) == E_FALSE) {
+            return E_FALSE;
+        }
+    }
+
+    return E_TRUE;
+}
+
 SubsumptionResult TermBaseSet::_IsSubsumedCore(Term *term, int limit, bool unfoldAll) {
     assert(term->type == TERM_BASE);
 
@@ -680,6 +800,50 @@ SubsumptionResult TermProduct::IsSubsumedBy(FixpointType& fixpoint, Term*& bigge
 #   endif
 }
 
+SubsumptionResult TermTernaryProduct::IsSubsumedBy(FixpointType& fixpoint, Term *& biggerTerm, bool no_prune) {
+    if(this->IsEmpty()) {
+        return E_TRUE;
+    }
+
+    for(auto& item : fixpoint) {
+        if(item.first == nullptr || !item.second) continue;
+
+        if(this->IsSubsumed(item.first, OPT_PARTIALLY_LIMITED_SUBSUMPTION)) {
+            return E_TRUE;
+        }
+
+        if(!no_prune) {
+            if(item.first->IsSubsumed(this, OPT_PARTIALLY_LIMITED_SUBSUMPTION)) {
+                item.second = false;
+            }
+        }
+    }
+
+    return E_FALSE;
+}
+
+SubsumptionResult TermNaryProduct::IsSubsumedBy(FixpointType& fixpoint, Term *& biggerTerm, bool no_prune) {
+    if(this->IsEmpty()) {
+        return E_TRUE;
+    }
+
+    for(auto& item : fixpoint) {
+        if(item.first == nullptr || !item.second) continue;
+
+        if(this->IsSubsumed(item.first, OPT_PARTIALLY_LIMITED_SUBSUMPTION)) {
+            return E_TRUE;
+        }
+
+        if(!no_prune) {
+            if(item.first->IsSubsumed(this, OPT_PARTIALLY_LIMITED_SUBSUMPTION)) {
+                item.second = false;
+            }
+        }
+    }
+
+    return E_FALSE;
+}
+
 SubsumptionResult TermBaseSet::IsSubsumedBy(FixpointType& fixpoint, Term*& biggerTerm, bool no_prune) {
     if(this->IsEmpty()) {
         return E_TRUE;
@@ -823,6 +987,20 @@ bool TermProduct::IsEmpty() {
     return this->left->IsEmpty() && this->right->IsEmpty();
 }
 
+bool TermTernaryProduct::IsEmpty() {
+    return this->left->IsEmpty() && this->middle->IsEmpty() && this->right->IsEmpty();
+}
+
+bool TermNaryProduct::IsEmpty() {
+    for (int i = 0; i < this->arity; ++i) {
+        if(!this->terms[i]->IsEmpty()) {
+            return false;
+        }
+    }
+
+    return true;
+}
+
 bool TermBaseSet::IsEmpty() {
     return this->states.size() == 0;
 }
@@ -865,6 +1043,17 @@ unsigned int TermEmpty::_MeasureStateSpaceCore() {
 
 unsigned int TermProduct::_MeasureStateSpaceCore() {
     return this->left->MeasureStateSpace() + this->right->MeasureStateSpace() + 1;
+}
+
+unsigned int TermTernaryProduct::_MeasureStateSpaceCore() {
+    return this->left->MeasureStateSpace() + this->middle->MeasureStateSpace() + this->right->MeasureStateSpace() + 1;
+}
+
+unsigned int TermNaryProduct::_MeasureStateSpaceCore() {
+    size_t state_space = 0;
+    for (int i = 0; i < this->arity; ++i) {
+        state_space += this->terms[i]->MeasureStateSpace();
+    }
 }
 
 unsigned int TermBaseSet::_MeasureStateSpaceCore() {
@@ -996,6 +1185,60 @@ void TermProduct::_dumpCore(unsigned indent) {
         std::cout << "\033[1;33m \u2294 \033[0m";
     };
     right->dump(indent);
+    if(this->subtype == ProductType::E_INTERSECTION) {
+        std::cout << "\033[1;32m";
+    } else {
+        std::cout << "\033[1;33m";
+    }
+    std::cout << "}\033[0m";
+}
+
+void TermTernaryProduct::_dumpCore(unsigned int indent) {
+    if(this->subtype == ProductType::E_INTERSECTION) {
+        std::cout << "\033[1;32m";
+    } else {
+        std::cout << "\033[1;33m";
+    }
+    std::cout << "{\033[0m";
+    left->dump(indent);
+    if(this->subtype == ProductType::E_INTERSECTION) {
+        std::cout << "\033[1;32m \u2293\u00B3 \033[0m";
+    } else {
+        std::cout << "\033[1;33m \u2294\u00B3 \033[0m";
+    };
+    middle->dump(indent);
+    if(this->subtype == ProductType::E_INTERSECTION) {
+        std::cout << "\033[1;32m \u2293\u00B3 \033[0m";
+    } else {
+        std::cout << "\033[1;33m \u2294\u00B3 \033[0m";
+    };
+    right->dump(indent);
+    if(this->subtype == ProductType::E_INTERSECTION) {
+        std::cout << "\033[1;32m";
+    } else {
+        std::cout << "\033[1;33m";
+    }
+    std::cout << "}\033[0m";
+}
+
+void TermNaryProduct::_dumpCore(unsigned int indent) {
+    if(this->subtype == ProductType::E_INTERSECTION) {
+        std::cout << "\033[1;32m";
+    } else {
+        std::cout << "\033[1;33m";
+    }
+    std::cout << "{\033[0m";
+    for (int i = 0; i < this->arity; ++i) {
+        if(i != 0) {
+            if (this->subtype == ProductType::E_INTERSECTION) {
+                std::cout << "\033[1;32m \u2293\u207F \033[0m";
+            } else {
+                std::cout << "\033[1;33m \u2294\u207F \033[0m";
+            };
+        }
+        this->terms[i]->dump(indent);
+    }
+
     if(this->subtype == ProductType::E_INTERSECTION) {
         std::cout << "\033[1;32m";
     } else {
@@ -1705,6 +1948,35 @@ bool TermProduct::_eqCore(const Term &t) {
         return (*tProduct.right == *this->right) && (*tProduct.left == *this->left);
     }
     #endif
+}
+
+bool TermTernaryProduct::_eqCore(const Term &t) {
+    assert(t.type == TERM_TERNARY_PRODUCT && "Testing equality of different term types");
+
+#   if (OPT_EQ_THROUGH_POINTERS == true)
+    assert(this != &t);
+    return false;
+#   else
+    const TermTernaryProduct &tProduct = static_cast<const TermTernaryProduct&>(t);
+    return (*tProduct.left == *this->left) && (*tProduct.middle == *this->middle) && (*tProduct.right == *this->middle);
+#   endif
+}
+
+bool TermNaryProduct::_eqCore(const Term &t) {
+    assert(t.type == TERM_NARY_PRODUCT && "Testing equality of different term types");
+
+#   if (OPT_EQ_THROUGH_POINTERS == true && false)
+    assert(This != &t);
+    return false;
+#   else
+    const TermNaryProduct &tProduct = static_cast<const TermNaryProduct&>(t);
+    for (int i = 0; i < this->arity; ++i) {
+        if(!(*tProduct.terms[i] == *this->terms[i])) {
+            return false;
+        }
+    }
+    return true;
+#   endif
 }
 
 bool TermBaseSet::_eqCore(const Term &t) {
