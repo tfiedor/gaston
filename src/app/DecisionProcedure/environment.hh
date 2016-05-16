@@ -248,6 +248,7 @@ public:
 
 /* >>> Measuring Options <<< *
  *****************************/
+#define MEASURE_ATOMS					true	// < Measure the number of atomic formulae
 #define MEASURE_BASE_SIZE				true	// < Measure the maximal and average size of the bases
 #define MEASURE_STATE_SPACE 			true	// < Measures how many instances of terms were created
 #define MEASURE_CACHE_HITS 				true	// < Prints the statistics for each cache on each node
@@ -289,7 +290,7 @@ public:
 
 /* >>> Optimizations <<< *
  *************************/
-#define OPT_USE_DAG							true    // < Instead of using the symbolic automata, will use the DAGified SA
+#define OPT_USE_DAG							true    // < Instead of using the symbolic automata, will use the DAGified SA, there is probably issue with remapped cache
 #define OPT_SHUFFLE_FORMULA					true    // < Will run ShuffleVisitor before creation of automaton, which should ease the procedure as well
 #define OPT_DONT_CACHE_CONT					true	// < Do not cache terms containing continuations
 #define OPT_DONT_CACHE_UNFULL_FIXPOINTS 	false	// < Do not cache fixpoints that were not fully computed
@@ -306,7 +307,7 @@ public:
 #define OPT_REDUCE_AUT_LAST					true	// < Call reduce after the final VATA automaton is created
 #define OPT_EARLY_EVALUATION 				false   // < Evaluates early interesection of product
 #define OPT_EARLY_PARTIAL_SUB				true    // < Postpone the partially subsumed terms
-#define OPT_CONT_ONLY_WHILE_UNSAT			false	// < Generate continuation only if there wasn't found (un)satisfying (counter)example yet
+#define OPT_CONT_ONLY_WHILE_UNSAT			true    // < Generate continuation only if there wasn't found (un)satisfying (counter)example yet
 #define OPT_CONT_ONLY_FOR_NONRESTRICTED		true	// < Generate continuations only for pairs that do not contain restrictions
 #define OPT_PRUNE_EMPTY						true	// < Prune terms by empty set
 #define OPT_REDUCE_FIXPOINT_EVERYTIME		false	// (-) < Prune the fixpoint everytime any iterator is invalidated
@@ -330,8 +331,9 @@ public:
 #define OPT_UNFOLD_FIX_DURING_SUB			false   // (0) < During the fixpoint testing if there are things in fixpoint, unfold maybe?
 #define OPT_PARTIALLY_LIMITED_SUBSUMPTION	-1		// < Will limited the subsumption testing to certain depth (-1 = unlimited)
 #define OPT_WORKLIST_DRIVEN_BY_RESTRICTIONS true    // < Worklist will be initialized according to the restrictions
-#define OPT_SHUFFLE_HASHES					true	// < Shuffles the bits in the hashes
-#define OPT_ENUMERATED_SUBSUMPTION_TESTING  true	// < Partially enumerates the products
+#define OPT_THROW_CLASSIC_FIRST_ORDER_REP	true	// < Will interpret first orders on fixpoints as having only one one
+#define OPT_SHUFFLE_HASHES					true    // < Shuffles the bits in the hashes
+#define OPT_ENUMERATED_SUBSUMPTION_TESTING  false   // < Partially enumerates the products
 
 /* >>> Static Assertions <<< *
  *****************************/

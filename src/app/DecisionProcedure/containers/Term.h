@@ -86,7 +86,8 @@ public:
         Term* succ;
         Symbol* symbol;
         size_t len;
-    } link;
+        std::vector<Symbol*> history;
+    } link, last_link;
 public:
     size_t stateSpace = 0;          // [4-8B] << Exact size of the state space, 0 if unknown
     size_t stateSpaceApprox = 0;    // [4-8B] << Approximation of the state space, used for heuristics

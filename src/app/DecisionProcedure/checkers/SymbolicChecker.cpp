@@ -45,7 +45,7 @@ void SymbolicChecker::ConstructAutomaton() {
         this->_automaton = new RootProjectionAutomaton(this->_automaton, this->_monaAST->formula);
     }
 
-    if(options.printProgress)
+    if(options.printProgress && !options.dontDumpAutomaton)
         this->_automaton->DumpAutomaton();
     std::cout << "\n";
 #   if (MEASURE_AUTOMATA_METRICS == true)

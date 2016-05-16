@@ -15,6 +15,7 @@
 #include "Term.h"
 #include "TermEnumerator.h"
 #include <boost/functional/hash.hpp>
+#include <future>
 
 extern Ident allPosVar;
 
@@ -70,7 +71,7 @@ size_t TermBaseSet::maxBaseSize = 0;
 extern Ident lastPosVar, allPosVar;
 
 // <<< TERM CONSTRUCTORS AND DESTRUCTORS >>>
-Term::Term(): link{ nullptr, nullptr, 0} {}
+Term::Term(): link{ nullptr, nullptr, 0}, last_link{nullptr, nullptr, 0} {}
 Term::~Term() {}
 
 TermEmpty::TermEmpty(bool inComplement) {
@@ -119,7 +120,9 @@ TermProduct::TermProduct(Term_ptr lhs, Term_ptr rhs, ProductType pt) : left(lhs)
         this->stateSpace = 0;
     }
     this->stateSpaceApprox = this->left->stateSpaceApprox + (this->right != nullptr ? this->right->stateSpaceApprox : 0) + 1;
+#   if (OPT_ENUMERATED_SUBSUMPTION_TESTING == true)
     this->enumerator = new ProductEnumerator(this);
+#   endif
 
     #if (DEBUG_TERM_CREATION == true)
     std::cout << "TermProduct::";
@@ -356,6 +359,9 @@ void Term::SetSuccessor(Term* succ, Symbol* symb) {
         this->link.symbol = symb;
         this->link.len = succ->link.len + 1;
     }
+    this->last_link.succ = succ;
+    this->last_link.symbol = symb;
+    this->last_link.len = succ->last_link.len + 1;
 }
 
 /**
@@ -617,7 +623,6 @@ SubsumptionResult TermEmpty::IsSubsumedBy(FixpointType& fixpoint, Term*& biggerT
 
 SubsumptionResult TermProduct::IsSubsumedBy(FixpointType& fixpoint, Term*& biggerTerm, bool no_prune) {
     //Fixme: is this true?
-    std::pair<Term_ptr, bool>*  last_one;
     if(this->IsEmpty()) {
         return E_TRUE;
 #   if (OPT_ENUMERATED_SUBSUMPTION_TESTING == true)
@@ -633,7 +638,6 @@ SubsumptionResult TermProduct::IsSubsumedBy(FixpointType& fixpoint, Term*& bigge
             return E_FALSE;
 #   endif
     }
-
 
     // For each item in fixpoint
     for(auto& item : fixpoint) {

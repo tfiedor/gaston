@@ -308,6 +308,9 @@ void Checker::PreprocessFormula() {
 
     Tagger tagger(tags);
     (this->_monaAST->formula)->accept(tagger);
+#   if (MEASURE_ATOMS == true)
+    std::cout << "Atoms: " << tagger.atoms << "\n";
+#   endif
 
     FixpointDetagger detagger;
     (this->_monaAST->formula)->accept(detagger);

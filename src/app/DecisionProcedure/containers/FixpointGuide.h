@@ -15,9 +15,12 @@ class Term;
 
 class FixpointGuide {
     SymLink* _link;
+    std::vector<size_t> _vars;
+
+    void _InitializeVars(ASTForm*);
 public:
     NEVER_INLINE FixpointGuide() : _link(nullptr) {}
-    NEVER_INLINE explicit FixpointGuide(SymLink* link) : _link(link) {}
+    NEVER_INLINE explicit FixpointGuide(SymLink* link);
 
     GuideTip GiveTip(Term*, Symbol*);
 

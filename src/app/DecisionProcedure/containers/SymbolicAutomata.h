@@ -144,6 +144,8 @@ struct SymLink {
     SymbolicAutomaton* aut;
     bool remap;
     std::map<unsigned int, unsigned int>* varRemap;
+    size_t remap_tag;
+    static size_t remap_number;
 
     SymLink() : aut(nullptr), remap(false), varRemap(nullptr) {}
     explicit SymLink(SymbolicAutomaton* s) : aut(s), remap(false), varRemap(nullptr) {}

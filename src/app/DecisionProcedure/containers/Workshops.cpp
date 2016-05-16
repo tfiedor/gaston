@@ -1,6 +1,7 @@
 #include "Workshops.h"
 #include "Term.h"
 #include "VarToTrackMap.hh"
+#include <stdint.h>
 
 extern VarToTrackMap varMap;
 
@@ -496,9 +497,10 @@ namespace Workshops {
         }
     }
 
-    Symbol* SymbolWorkshop::CreateRemappedSymbol(Symbol* str, std::map<unsigned int, unsigned int>* map) {
+    Symbol* SymbolWorkshop::CreateRemappedSymbol(Symbol* str, std::map<unsigned int, unsigned int>*& map, size_t tag) {
         // There should be Map of Ptr -> Ptr
-        auto symbolKey = std::make_tuple(str, static_cast<VarType>(0u), 'R');
+        //auto symbolKey = std::make_tuple(str, static_cast<VarType>(0u), 'R');
+        auto symbolKey = std::make_tuple(str, tag, 'R');
         Symbol* symPtr;
         if(!this->_remappedSymbolCache->retrieveFromCache(symbolKey, symPtr)) {
             symPtr = new Symbol(str, map);
@@ -508,6 +510,7 @@ namespace Workshops {
                     Symbol* uniqPtr = (*item);
                     this->_remappedSymbolCache->StoreIn(symbolKey, uniqPtr);
                     delete symPtr;
+                    std::cout << (*uniqPtr) << "} ";
                     return uniqPtr;
                 }
             }

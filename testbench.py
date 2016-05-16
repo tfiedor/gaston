@@ -182,7 +182,7 @@ def run_gaston(test, timeout):
     '''
     Runs dWiNA with following arguments: --method=backward
     '''
-    args = ('./build/gaston', '"{}"'.format(test))
+    args = ('./build/gaston', '--no-automaton', '"{}"'.format(test))
     output, retcode = runProcess(args, timeout)
     return parse_gaston_output(output, retcode_to_error(retcode))
 

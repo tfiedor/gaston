@@ -37,13 +37,30 @@ DagNodeCache* SymbolicAutomaton::dagNegNodeCache = new DagNodeCache();
 
 using namespace Gaston;
 
+size_t SymLink::remap_number = 0;
+
 // <<< SYMLINK FUNCTIONS >>>
 void SymLink::InitializeSymLink(ASTForm* form) {
     if(this->aut->_form != form) {
         // Construct the mapping
         this->varRemap = new std::map<unsigned int, unsigned int>();
-        this->remap = true;
         form->ConstructMapping(this->aut->_form, *this->varRemap);
+        bool is_identity = true;
+        for(auto it = this->varRemap->begin(); it != this->varRemap->end(); ++it) {
+            if(it->first != it->second) {
+                is_identity = false;
+                break;
+            }
+        }
+
+        if(is_identity) {
+            this->remap = false;
+            delete this->varRemap;
+            this->varRemap = nullptr;
+        } else {
+            this->remap = true;
+            this->remap_tag = ++SymLink::remap_number;
+        }
 #       if (DEBUG_DAG_REMAPPING == true)
         std::cout << "[!] Mapping for: "; form->dump(); std::cout << "\n";
         for(auto it = this->varRemap->begin(); it != this->varRemap->end(); ++it) {
@@ -55,7 +72,7 @@ void SymLink::InitializeSymLink(ASTForm* form) {
 
 ZeroSymbol* SymLink::ReMapSymbol(ZeroSymbol* symbol) {
     if(this->remap && symbol != nullptr) {
-        return this->aut->symbolFactory->CreateRemappedSymbol(symbol, this->varRemap);
+        return this->aut->symbolFactory->CreateRemappedSymbol(symbol, this->varRemap, this->remap_tag);
     } else {
         return symbol;
     }
@@ -287,6 +304,9 @@ ResultType SymbolicAutomaton::IntersectNonEmpty(Symbol* symbol, Term* stateAppro
 #       if (MEASURE_SUBAUTOMATA_TIMING == true)
         this->timer.Stop();
 #       endif
+        if(symbol != nullptr) {
+            result.first->SetSuccessor(stateApproximation, symbol);
+        }
         return result;
     }
     //}
@@ -1499,6 +1519,7 @@ void SymbolicAutomaton::DumpAutomatonMetrics() {
     this->FillStats();
 
     std::cout << "\u2218 Overall SymbolicAutomaton Metrics:\n";
+    print_stat("Vars", varMap.TrackLength());
     print_stat("Nodes", this->stats.nodes);
     print_stat("Real nodes", this->stats.real_nodes);
     print_stat("DAG gain", ((double)this->stats.nodes / this->stats.real_nodes));

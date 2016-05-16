@@ -135,7 +135,16 @@ bool ZeroSymbol::IsDontCareAt(VarType var) {
 }
 
 bool ZeroSymbol::IsZeroString() const {
-    return this->_trackMask.none();
+    if(this->_trackMask.none()) {
+        return true;
+    } else {
+        for(int i = 0; i < this->_trackMask.size(); i += 2) {
+            if(this->_trackMask.test(i) && !this->_trackMask.test(i+1)) {
+                return false;
+            }
+        }
+        return true;
+    }
 }
 
 void ZeroSymbol::_SetValueAt(VarType var, VarValue val) {

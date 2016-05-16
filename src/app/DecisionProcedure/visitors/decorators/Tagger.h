@@ -9,6 +9,8 @@
 #include "../../../Frontend/ast_visitor.h"
 
 class Tagger : public VoidVisitor{
+public:
+    size_t atoms = 0;
 private:
     using TagList = std::list<size_t>;
     using TagIterator = std::list<size_t>::iterator;
@@ -28,7 +30,7 @@ public:
         }
     };
 
-    void visit(ASTForm* form) {};
+    void visit(ASTForm* form) {++atoms;};
     void visit(ASTTerm* term) {};
     void visit(ASTUniv* univ) {};
 

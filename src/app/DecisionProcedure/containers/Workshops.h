@@ -182,7 +182,7 @@ namespace Workshops {
         static Symbol* CreateZeroSymbol();
         Symbol* CreateSymbol(Symbol*, VarType, ValType);
         Symbol* CreateTrimmedSymbol(Symbol*, Gaston::VarList*);
-        Symbol* CreateRemappedSymbol(Symbol*, std::map<unsigned int, unsigned int>*);
+        Symbol* CreateRemappedSymbol(Symbol*, std::map<unsigned int, unsigned int>*&, size_t);
 
         void Dump();
     };
