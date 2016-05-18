@@ -107,7 +107,7 @@ public:
 
 public:
     // <<< PUBLIC API >>>
-    virtual SubsumptionResult IsSubsumedBy(FixpointType& fixpoint, Term*&, bool no_prune = false) = 0;
+    virtual SubsumptionResult IsSubsumedBy(FixpointType& fixpoint, WorklistType& worklist, Term*&, bool no_prune = false) = 0;
     virtual SubsumptionResult IsSubsumed(Term* t, int limit, bool b = false);
     virtual SubsumptionResult Subsumes(TermEnumerator*);
     virtual bool IsEmpty() = 0;
@@ -153,7 +153,7 @@ public:
     NEVER_INLINE ~TermEmpty() {}
 
     // <<< PUBLIC API >>>
-    SubsumptionResult IsSubsumedBy(FixpointType& fixpoint, Term*&, bool no_prune = false);
+    SubsumptionResult IsSubsumedBy(FixpointType& fixpoint, WorklistType& worklist, Term*&, bool no_prune = false);
     bool IsEmpty();
 
     // <<< DUMPING FUNCTIONS >>>
@@ -186,7 +186,7 @@ public:
     NEVER_INLINE ~TermProduct();
 
     // <<< PUBLIC API >>>
-    SubsumptionResult IsSubsumedBy(FixpointType& fixpoint, Term*&, bool no_prune = false);
+    SubsumptionResult IsSubsumedBy(FixpointType& fixpoint, WorklistType& worklist, Term*&, bool no_prune = false);
     bool IsEmpty();
 
     // <<< DUMPING FUNCTIONS >>>
@@ -218,7 +218,7 @@ public:
     NEVER_INLINE ~TermTernaryProduct();
 
     // <<< PUBLIC API >>>
-    SubsumptionResult IsSubsumedBy(FixpointType&, Term*&, bool no_prune = false);
+    SubsumptionResult IsSubsumedBy(FixpointType&, WorklistType& worklist, Term*&, bool no_prune = false);
     bool IsEmpty();
 
     // <<< DUMPING FUNCTIONS >>>
@@ -247,7 +247,7 @@ public:
     NEVER_INLINE ~TermNaryProduct();
 
     // <<< PUBLIC API >>>
-    SubsumptionResult IsSubsumedBy(FixpointType&, Term*&, bool no_prune = false);
+    SubsumptionResult IsSubsumedBy(FixpointType&, WorklistType& worklist, Term*&, bool no_prune = false);
     bool IsEmpty();
 
     // <<< DUMPING FUNCTIONS >>>
@@ -279,7 +279,7 @@ public:
 
     // <<< PUBLIC API >>>
     bool Intersects(TermBaseSet* rhs);
-    SubsumptionResult IsSubsumedBy(FixpointType& fixpoint, Term*&, bool no_prune = false);
+    SubsumptionResult IsSubsumedBy(FixpointType& fixpoint, WorklistType& worklist, Term*&, bool no_prune = false);
     bool IsEmpty();
 
     // <<< DUMPING FUNCTIONS >>>
@@ -320,7 +320,7 @@ public:
     NEVER_INLINE TermContinuation(SymLink*, SymbolicAutomaton*, Term*, SymbolType*, bool, bool lazy = false);
 
     // <<< PUBLIC API >>>
-    SubsumptionResult IsSubsumedBy(FixpointType& fixpoint, Term*&, bool no_prune = false);
+    SubsumptionResult IsSubsumedBy(FixpointType& fixpoint, WorklistType& worklist, Term*&, bool no_prune = false);
     bool IsUnfolded() {return this->_unfoldedTerm != nullptr;}
     bool IsEmpty();
     Term* GetUnfoldedTerm() {return this->_unfoldedTerm; }
@@ -351,7 +351,7 @@ public:
     NEVER_INLINE TermList(Term_ptr first, bool isCompl);
 
     // <<< PUBLIC API >>>
-    SubsumptionResult IsSubsumedBy(FixpointType& fixpoint, Term*&, bool no_prune = false);
+    SubsumptionResult IsSubsumedBy(FixpointType& fixpoint, WorklistType& worklist, Term*&, bool no_prune = false);
     bool IsEmpty();
 
     // <<< DUMPING FUNCTIONS >>>
@@ -548,7 +548,7 @@ public:
     // <<< PUBLIC API >>>
     FixpointTermSem GetSemantics() const;
     bool IsEmpty();
-    SubsumptionResult IsSubsumedBy(FixpointType& fixpoint, Term*&, bool no_prune = false);
+    SubsumptionResult IsSubsumedBy(FixpointType& fixpoint, WorklistType& worklist, Term*&, bool no_prune = false);
     bool GetResult();
     ExamplePair GetFixpointExamples();
     bool IsFullyComputed() const;

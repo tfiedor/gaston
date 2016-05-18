@@ -163,15 +163,27 @@ TernaryOpAutomaton::~TernaryOpAutomaton() {
     }
 }
 
-NaryOpAutomaton::NaryOpAutomaton(SymbolicAutomaton_raw auts[], Formula_ptr form, size_t arity)
-        : SymbolicAutomaton(form), _arity(arity) {
+void collect_leaves(ASTKind k, ASTForm* form, std::vector<ASTForm*>& leaves) {
+    if(form->kind == k) {
+        ASTForm_ff* ff_form = static_cast<ASTForm_ff*>(form);
+        collect_leaves(k, ff_form->f1, leaves);
+        collect_leaves(k, ff_form->f2, leaves);
+    } else {
+        leaves.push_back(form);
+    }
+}
+
+NaryOpAutomaton::NaryOpAutomaton(Formula_ptr form, bool doComplement) : SymbolicAutomaton(form) {
     type = AutType::NARY;
-    this->_auts = new SymLink[arity];
-    for (int i = 0; i < arity; ++i) {
+    collect_leaves(form->kind, form, this->_leaves);
+    this->_arity = this->_leaves.size();
+    this->_auts = new SymLink[this->_arity];
+    for (int i = 0; i < this->_arity; ++i) {
         // Fixme: There should be some initialization
-        this->_auts[i].aut = auts[i];
-        auts[i]->IncReferences();
-        this->_auts[i].InitializeSymLink(form);
+        this->_auts[i].aut = this->_leaves[i]->toSymbolicAutomaton(doComplement);
+        assert(this->_auts[i].aut != nullptr);
+        this->_auts[i].aut->IncReferences();
+        this->_auts[i].InitializeSymLink(this->_leaves[i]);
     }
 }
 
@@ -211,6 +223,7 @@ ProjectionAutomaton::ProjectionAutomaton(SymbolicAutomaton_raw aut, Formula_ptr 
         if(ff_form->f1->is_restriction) {
             if(aut->type == AutType::TERNARY_INTERSECTION || aut->type == AutType::TERNARY_UNION) {
                 TernaryOpAutomaton *ternaryOpAutomaton = static_cast<TernaryOpAutomaton*>(aut);
+                this->_guide = new FixpointGuide(ternaryOpAutomaton->GetLeft());
             } else {
                 BinaryOpAutomaton *binaryOpAutomaton = static_cast<BinaryOpAutomaton *>(aut);
                 this->_guide = new FixpointGuide(binaryOpAutomaton->GetLeft());
@@ -290,8 +303,7 @@ TernaryIntersectionAutomaton::TernaryIntersectionAutomaton(SymbolicAutomaton_raw
     this->_InitializeAutomaton();
 }
 
-NaryIntersectionAutomaton::NaryIntersectionAutomaton(SymbolicAutomaton_raw *auts, Formula_ptr form, size_t arity)
-        : NaryOpAutomaton(auts, form, arity) {
+NaryIntersectionAutomaton::NaryIntersectionAutomaton(Formula_ptr form, bool doComplement) : NaryOpAutomaton(form, doComplement) {
     this->type = AutType::NARY_INTERSECTION;
     this->_productType = E_INTERSECTION;
     this->_eval_result = [](bool a, bool b, bool underC) {
@@ -359,8 +371,7 @@ TernaryUnionAutomaton::TernaryUnionAutomaton(SymbolicAutomaton_raw lhs, Symbolic
     this->_InitializeAutomaton();
 }
 
-NaryUnionAutomaton::NaryUnionAutomaton(SymbolicAutomaton_raw *auts, Formula_ptr form, size_t arity)
-        : NaryOpAutomaton(auts, form, arity) {
+NaryUnionAutomaton::NaryUnionAutomaton(Formula_ptr form, bool doComplement) : NaryOpAutomaton(form, doComplement) {
     this->type = AutType::NARY_INTERSECTION;
     this->_productType = E_INTERSECTION;
     this->_eval_result = [](bool a, bool b, bool underC) {
@@ -1973,7 +1984,7 @@ void TernaryOpAutomaton::FillStats() {
     if(count_middle) this->_mhs_aut.aut->FillStats();
     if(count_right) this->_rhs_aut.aut->FillStats();
 
-    this->stats.fixpoint_computations = 1 + (count_left ? this->_lhs_aut.aut->stats.fixpoint_computations : 0) +
+    this->stats.fixpoint_computations = (count_left ? this->_lhs_aut.aut->stats.fixpoint_computations : 0) +
             (count_middle ? this->_mhs_aut.aut->stats.fixpoint_computations : 0) +
             (count_right ? this->_rhs_aut.aut->stats.fixpoint_computations : 0);
     this->stats.height = 1 +std::max({this->_lhs_aut.aut->stats.height,

@@ -117,10 +117,29 @@ namespace Workshops {
         }
     };
 
+    struct TernaryKeyHashType {
+        size_t operator()(std::tuple<Term*, Term*, Term*> const& set) const {
+            size_t seed = Gaston::hash_value(std::get<0>(set));
+            boost::hash_combine(seed, Gaston::hash_value(std::get<1>(set)));
+            boost::hash_combine(seed, Gaston::hash_value(std::get<2>(set)));
+            return seed;
+        }
+    };
+
+    template<class Key>
+    struct TernaryKeyCompare : public std::binary_function<Key, Key, bool> {
+        bool operator()(Key const& lhs, Key const& rhs) const {
+            return *(std::get<0>(lhs)) == *(std::get<0>(rhs)) &&
+                   *(std::get<1>(lhs)) == *(std::get<1>(rhs)) &&
+                   *(std::get<2>(lhs)) == *(std::get<2>(rhs));
+        }
+    };
+
     using SymbolCache       = BinaryCache<SymbolKey, Symbol*, SymbolKeyHashType, SymbolKeyCompare<SymbolKey>, dumpSymbolKey, dumpSymbolData>;
     using BaseCache         = BinaryCache<BaseKey, CacheData, BaseHash, BaseCompare, dumpBaseKey, dumpCacheData>;
     using ProductCache      = BinaryCache<ProductKey, CacheData, ProductHash, ProductCompare, dumpProductKey, dumpCacheData>;
-    using TernaryCache      = BinaryCache<TernaryKey, CacheData, TernaryHash, TernaryCompare, dumpTernaryKey, dumpCacheData>;
+    //using TernaryCache      = BinaryCache<TernaryKey, CacheData, TernaryHash, TernaryCompare, dumpTernaryKey, dumpCacheData>;
+    using TernaryCache      = BinaryCache<TernaryKey, CacheData, TernaryKeyHashType, TernaryKeyCompare<TernaryKey>, dumpTernaryKey, dumpCacheData>;
     using ListCache         = BinaryCache<ListKey, CacheData, ListHash, ListCompare, dumpListKey, dumpCacheData>;
     using FixpointCache     = BinaryCache<FixpointKey, CacheData, FixpointHash, FixpointCompare, dumpFixpointKey, dumpCacheData>;
     using ComputationCache  = BinaryCache<ComputationKey, CacheData, ComputationHash, ComputationCompare, dumpComputationKey, dumpCacheData>;
@@ -160,6 +179,7 @@ namespace Workshops {
         Term* CreateUnionBaseSet(Term_ptr const&, Term_ptr const&);
         TermProduct* CreateProduct(Term_ptr const&, Term_ptr const&, ProductType);
         Term* CreateTernaryProduct(Term_ptr const&, Term_ptr const&, Term_ptr const&, ProductType);
+        Term* CreateNaryProduct(Term_ptr* const&, ProductType);
         TermFixpoint* CreateFixpoint(Term_ptr const&, Symbol*, bool, bool, WorklistSearchType search = WorklistSearchType::E_DFS);
         TermFixpoint* CreateFixpointPre(Term_ptr const&, Symbol*, bool);
         TermFixpoint* GetUniqueFixpoint(TermFixpoint*&);

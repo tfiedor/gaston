@@ -271,9 +271,12 @@ bool SymbolicChecker::Run() {
 #   if (MEASURE_COMPARISONS == true)
     OUTPUT_MEASURES(TermProduct)
 #   endif
+#   if (OPT_USE_TERNARY_AUTOMATA == true)
+    std::cout << "\t\u2218 Term TernaryProducts: " << TermTernaryProduct::instances << "\n";
+#   endif
     std::cout << "\t\u2218 Term Bases: " << TermBaseSet::instances;
 #   if (MEASURE_BASE_SIZE == true)
-    std::cout << "(max size = " << TermBaseSet::maxBaseSize << ")";
+    std::cout << " (max size = " << TermBaseSet::maxBaseSize << ")";
 #   endif
     std::cout << "\n";
 #   if (MEASURE_COMPARISONS == true)

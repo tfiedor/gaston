@@ -590,11 +590,11 @@ SubsumptionResult TermTernaryProduct::_IsSubsumedCore(Term *t, int limit, bool u
     size_t approx_max = std::max({lhsl->stateSpaceApprox, lhsm->stateSpaceApprox, lhsr->stateSpaceApprox});
     size_t approx_min = std::min({lhsl->stateSpaceApprox, lhsm->stateSpaceApprox, lhsr->stateSpaceApprox});
     if(lhsl->stateSpaceApprox == approx_min) {
-        return _ternary_subsumption_test(lhsl, rhsl, lhsm, rhsm, lhsr, rhsr, approx_max, limit,unfoldAll);
+        return _ternary_subsumption_test(lhsl, rhsl, lhsm, rhsm, lhsr, rhsr, approx_max, limit, unfoldAll);
     } else if(lhsr->stateSpaceApprox == approx_min) {
         return _ternary_subsumption_test(lhsr, rhsr, lhsl, rhsl, lhsm, rhsm, approx_max, limit, unfoldAll);
     } else {
-        return _ternary_subsumption_test(lhsm, rhsm, lhsr, rhsr, lhsm, rhsm, approx_max, limit, unfoldAll);
+        return _ternary_subsumption_test(lhsm, rhsm, lhsr, rhsr, lhsl, rhsl, approx_max, limit, unfoldAll);
     }
 }
 
@@ -678,7 +678,7 @@ SubsumptionResult TermFixpoint::_IsSubsumedCore(Term *t, int limit, bool unfoldA
 #   if (OPT_UNFOLD_FIX_DURING_SUB == false)
     bool are_source_symbols_same = TermFixpoint::_compareSymbols(*this, *tt);
     // Worklists surely differ
-    if(!are_source_symbols_same && (this->_worklist.size() != 0 || tt->_worklist.size() != 0) ) {
+    if(!are_source_symbols_same && (this->_worklist.size() != 0/* || tt->_worklist.size() != 0*/) ) {
         return E_FALSE;
     }
 #   endif
@@ -695,7 +695,7 @@ SubsumptionResult TermFixpoint::_IsSubsumedCore(Term *t, int limit, bool unfoldA
     for(auto& item : this->_fixpoint) {
         // Skip the nullptr
         if(item.first == nullptr || !item.second) continue;
-        if((item.first)->IsSubsumedBy(tt->_fixpoint, tptr, true) == E_FALSE) {
+        if((item.first)->IsSubsumedBy(tt->_fixpoint, tt->_worklist, tptr, true) == E_FALSE) {
             return E_FALSE;
         }
     }
@@ -725,8 +725,8 @@ SubsumptionResult TermFixpoint::_IsSubsumedCore(Term *t, int limit, bool unfoldA
         return E_TRUE;
     }
 #   else
-    return ( (this->_worklist.size() == 0 && tt->_worklist.size() == 0) ? E_TRUE : (are_source_symbols_same ? E_TRUE : E_FALSE));
-    // Happy reading ^^
+    return ( (this->_worklist.size() == 0 /*&& tt->_worklist.size() == 0*/) ? E_TRUE : (are_source_symbols_same ? E_TRUE : E_FALSE));
+    // Happy reading ^^                   ^---- Fixme: maybe this is incorrect?
 #   endif
 }
 
@@ -735,13 +735,23 @@ SubsumptionResult TermFixpoint::_IsSubsumedCore(Term *t, int limit, bool unfoldA
  *
  * @param[in] fixpoint:     list of terms contained as fixpoint
  */
-SubsumptionResult TermEmpty::IsSubsumedBy(FixpointType& fixpoint, Term*& biggerTerm, bool no_prune) {
+SubsumptionResult TermEmpty::IsSubsumedBy(FixpointType& fixpoint, WorklistType& worklist, Term*& biggerTerm, bool no_prune) {
     // Empty term is subsumed by everything
     // Fixme: Complemented fixpoint should subsume everything right?
     return ( ( (fixpoint.size() == 1 && fixpoint.front().first == nullptr) || this->_inComplement) ? E_FALSE : E_TRUE);
 }
 
-SubsumptionResult TermProduct::IsSubsumedBy(FixpointType& fixpoint, Term*& biggerTerm, bool no_prune) {
+void prune_worklist(WorklistType& worklist, Term*& item) {
+    for(auto it = worklist.begin(); it != worklist.end();) {
+        if(it->first == item) {
+            it = worklist.erase(it);
+        } else {
+            ++it;
+        }
+    }
+}
+
+SubsumptionResult TermProduct::IsSubsumedBy(FixpointType& fixpoint, WorklistType& worklist, Term*& biggerTerm, bool no_prune) {
     //Fixme: is this true?
     if(this->IsEmpty()) {
         return E_TRUE;
@@ -771,6 +781,9 @@ SubsumptionResult TermProduct::IsSubsumedBy(FixpointType& fixpoint, Term*& bigge
 
         if(!no_prune) {
             if (item.first->IsSubsumed(this, OPT_PARTIALLY_LIMITED_SUBSUMPTION)) {
+#               if (OPT_PRUNE_WORKLIST == true)
+                prune_worklist(worklist, item.first);
+#               endif
                 item.second = false;
             }
         }
@@ -800,7 +813,32 @@ SubsumptionResult TermProduct::IsSubsumedBy(FixpointType& fixpoint, Term*& bigge
 #   endif
 }
 
-SubsumptionResult TermTernaryProduct::IsSubsumedBy(FixpointType& fixpoint, Term *& biggerTerm, bool no_prune) {
+SubsumptionResult TermTernaryProduct::IsSubsumedBy(FixpointType& fixpoint, WorklistType& worklist, Term *& biggerTerm, bool no_prune) {
+    if(this->IsEmpty()) {
+        return E_TRUE;
+    }
+
+    for(auto& item : fixpoint) {
+        if(item.first == nullptr || !item.second) continue;
+
+        if(this->IsSubsumed(item.first, OPT_PARTIALLY_LIMITED_SUBSUMPTION) != E_FALSE) {
+            return E_TRUE;
+        }
+
+        if(!no_prune) {
+            if(item.first->IsSubsumed(this, OPT_PARTIALLY_LIMITED_SUBSUMPTION) != E_FALSE) {
+#               if (OPT_PRUNE_WORKLIST == true)
+                prune_worklist(worklist, item.first);
+#               endif
+                item.second = false;
+            }
+        }
+    }
+
+    return E_FALSE;
+}
+
+SubsumptionResult TermNaryProduct::IsSubsumedBy(FixpointType& fixpoint, WorklistType& worklist, Term *& biggerTerm, bool no_prune) {
     if(this->IsEmpty()) {
         return E_TRUE;
     }
@@ -814,6 +852,9 @@ SubsumptionResult TermTernaryProduct::IsSubsumedBy(FixpointType& fixpoint, Term 
 
         if(!no_prune) {
             if(item.first->IsSubsumed(this, OPT_PARTIALLY_LIMITED_SUBSUMPTION)) {
+#               if (OPT_PRUNE_WORKLIST == true)
+                prune_worklist(worklist, item.first);
+#               endif
                 item.second = false;
             }
         }
@@ -822,29 +863,7 @@ SubsumptionResult TermTernaryProduct::IsSubsumedBy(FixpointType& fixpoint, Term 
     return E_FALSE;
 }
 
-SubsumptionResult TermNaryProduct::IsSubsumedBy(FixpointType& fixpoint, Term *& biggerTerm, bool no_prune) {
-    if(this->IsEmpty()) {
-        return E_TRUE;
-    }
-
-    for(auto& item : fixpoint) {
-        if(item.first == nullptr || !item.second) continue;
-
-        if(this->IsSubsumed(item.first, OPT_PARTIALLY_LIMITED_SUBSUMPTION)) {
-            return E_TRUE;
-        }
-
-        if(!no_prune) {
-            if(item.first->IsSubsumed(this, OPT_PARTIALLY_LIMITED_SUBSUMPTION)) {
-                item.second = false;
-            }
-        }
-    }
-
-    return E_FALSE;
-}
-
-SubsumptionResult TermBaseSet::IsSubsumedBy(FixpointType& fixpoint, Term*& biggerTerm, bool no_prune) {
+SubsumptionResult TermBaseSet::IsSubsumedBy(FixpointType& fixpoint, WorklistType& worklist, Term*& biggerTerm, bool no_prune) {
     if(this->IsEmpty()) {
         return E_TRUE;
     }
@@ -855,11 +874,14 @@ SubsumptionResult TermBaseSet::IsSubsumedBy(FixpointType& fixpoint, Term*& bigge
 
         // Test the subsumption
         if(this->IsSubsumed(item.first, OPT_PARTIALLY_LIMITED_SUBSUMPTION)) {
-            return E_TRUE ;
+            return E_TRUE;
         }
 
         if(!no_prune) {
             if (item.first->IsSubsumed(this, OPT_PARTIALLY_LIMITED_SUBSUMPTION)) {
+#               if (OPT_PRUNE_WORKLIST == true)
+                prune_worklist(worklist, item.first);
+#               endif
                 item.second = false;
             }
         }
@@ -868,11 +890,11 @@ SubsumptionResult TermBaseSet::IsSubsumedBy(FixpointType& fixpoint, Term*& bigge
     return E_FALSE;
 }
 
-SubsumptionResult TermContinuation::IsSubsumedBy(FixpointType& fixpoint, Term*& biggerTerm, bool no_prune) {
+SubsumptionResult TermContinuation::IsSubsumedBy(FixpointType& fixpoint, WorklistType& worklist, Term*& biggerTerm, bool no_prune) {
     assert(false && "TermContSubset.IsSubsumedBy() is impossible to happen~!");
 }
 
-SubsumptionResult TermList::IsSubsumedBy(FixpointType& fixpoint, Term*& biggerTerm, bool no_prune) {
+SubsumptionResult TermList::IsSubsumedBy(FixpointType& fixpoint, WorklistType& worklist, Term*& biggerTerm, bool no_prune) {
     if(this->IsEmpty()) {
         return E_TRUE;
     }
@@ -887,6 +909,9 @@ SubsumptionResult TermList::IsSubsumedBy(FixpointType& fixpoint, Term*& biggerTe
 
         if(!no_prune) {
             if (item.first->IsSubsumed(this, OPT_PARTIALLY_LIMITED_SUBSUMPTION)) {
+#               if (OPT_PRUNE_WORKLIST == true)
+                prune_worklist(worklist, item.first);
+#               endif
                 item.second = false;
             }
         }
@@ -895,11 +920,12 @@ SubsumptionResult TermList::IsSubsumedBy(FixpointType& fixpoint, Term*& biggerTe
     return E_FALSE;
 }
 
-SubsumptionResult TermFixpoint::IsSubsumedBy(FixpointType& fixpoint, Term*& biggerTerm, bool no_prune) {
+SubsumptionResult TermFixpoint::IsSubsumedBy(FixpointType& fixpoint, WorklistType& worklist, Term*& biggerTerm, bool no_prune) {
     auto result = E_FALSE;
     // Component-wise comparison
     for(auto& item : fixpoint) {
         if(item.first == nullptr || !item.second) continue;
+
         if (this->IsSubsumed(item.first, OPT_PARTIALLY_LIMITED_SUBSUMPTION)) {
             result = E_TRUE;
             break;
@@ -907,6 +933,9 @@ SubsumptionResult TermFixpoint::IsSubsumedBy(FixpointType& fixpoint, Term*& bigg
 
         if(!no_prune) {
             if (item.first->IsSubsumed(this, OPT_PARTIALLY_LIMITED_SUBSUMPTION)) {
+#               if (OPT_PRUNE_WORKLIST == true)
+                prune_worklist(worklist, item.first);
+#               endif
                 item.second = false;
             }
         }
@@ -1463,7 +1492,7 @@ SubsumptionResult TermFixpoint::_testIfSubsumes(Term_ptr const& term) {
     Term* key = term, *subsumedByTerm;
     if(!this->_subsumedByCache.retrieveFromCache(key, result)) {
         // True/Partial results are stored in cache
-        if((result = term->IsSubsumedBy(this->_fixpoint, subsumedByTerm)) != E_FALSE) {
+        if((result = term->IsSubsumedBy(this->_fixpoint, this->_worklist, subsumedByTerm)) != E_FALSE) {
             this->_subsumedByCache.StoreIn(key, result);
         }
 
@@ -1493,7 +1522,6 @@ WorklistItemType TermFixpoint::_popFromWorklist() {
         _worklist.pop_front();
         return item;
     } else {
-        assert(false);
         WorklistItemType item = _worklist.back();
         _worklist.pop_back();
         return item;
@@ -1958,7 +1986,7 @@ bool TermTernaryProduct::_eqCore(const Term &t) {
     return false;
 #   else
     const TermTernaryProduct &tProduct = static_cast<const TermTernaryProduct&>(t);
-    return (*tProduct.left == *this->left) && (*tProduct.middle == *this->middle) && (*tProduct.right == *this->middle);
+    return (*tProduct.left == *this->left) && (*tProduct.middle == *this->middle) && (*tProduct.right == *this->right);
 #   endif
 }
 

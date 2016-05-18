@@ -243,6 +243,7 @@ class NaryOpAutomaton : public SymbolicAutomaton {
 protected:
     // <<< PRIVATE MEMBERS >>>
     SymLink* _auts;
+    std::vector<ASTForm*> _leaves;
     size_t _arity;
     ProductType _productType;
     bool (*_eval_result)(bool, bool, bool);
@@ -257,7 +258,7 @@ protected:
     virtual void _DumpExampleCore(ExampleType);
 
 public:
-    NEVER_INLINE NaryOpAutomaton(SymbolicAutomaton_raw auts[], Formula_ptr form, size_t arity);
+    NEVER_INLINE NaryOpAutomaton(Formula_ptr form, bool doComplement);
 
     // <<< PUBLIC API >>>
     virtual Term* Pre(Symbol*, Term*, bool);
@@ -289,7 +290,7 @@ public:
 
 class NaryIntersectionAutomaton : public NaryOpAutomaton {
 public:
-    NEVER_INLINE NaryIntersectionAutomaton(SymbolicAutomaton_raw auts[], Formula_ptr form, size_t arity);
+    NEVER_INLINE NaryIntersectionAutomaton(Formula_ptr form, bool doComplement);
 };
 
 /**
@@ -307,7 +308,7 @@ public:
 
 class NaryUnionAutomaton : public NaryOpAutomaton {
 public:
-    NEVER_INLINE NaryUnionAutomaton(SymbolicAutomaton_raw auts[], Formula_ptr form, size_t arity);
+    NEVER_INLINE NaryUnionAutomaton(Formula_ptr form, bool doComplement);
 };
 
 /**

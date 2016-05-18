@@ -201,6 +201,10 @@ namespace Workshops {
 #       endif
     }
 
+    Term* TermWorkshop::CreateNaryProduct(Term_ptr* const& terms, ProductType type) {
+        return nullptr;
+    }
+
     /**
      * Checks if there is already created TermProduct in cache, in case there is not
      * it creates the new object and populates the cache
@@ -368,6 +372,10 @@ namespace Workshops {
         if(this->_pCache != nullptr) {
             std::cout << "  \u2218 ProductCache stats -> ";
             this->_pCache->dumpStats();
+        }
+        if(this->_tpCache != nullptr) {
+            std::cout << "  \u2218 TernaryProductCache stats -> ";
+            this->_tpCache->dumpStats();
         }
         if(this->_contCache != nullptr) {
             std::cout << "  \u2218 ContinuationCache stats -> ";

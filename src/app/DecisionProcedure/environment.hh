@@ -208,7 +208,7 @@ public:
 #define DEBUG_TERM_SUBSUMPTION 			false
 #define DEBUG_TERM_SUBSUMED_BY 			false
 #define DEBUG_TERM_CACHE_COMPARISON		false
-#define DEBUG_SYMBOL_CREATION			true
+#define DEBUG_SYMBOL_CREATION			false
 #define DEBUG_CACHE_MEMBERS			    true
 #define DEBUG_CACHE_BUCKETS				false
 #define DEBUG_CACHE_MEMBERS_HASH		true
@@ -233,13 +233,13 @@ public:
 /*
  * >>> Automata stats options
  *****************************/
-#define PRINT_STATS_PROJECTION			true
+#define PRINT_STATS_PROJECTION			false
 #define PRINT_STATS_QF_PROJECTION		false
-#define PRINT_STATS_PRODUCT			    true
+#define PRINT_STATS_PRODUCT			    false
 #define PRINT_STATS_TERNARY_PRODUCT		true
 #define PRINT_STATS_NARY_PRODUCT		true
-#define PRINT_STATS_NEGATION			true
-#define PRINT_STATS_BASE				true
+#define PRINT_STATS_NEGATION			false
+#define PRINT_STATS_BASE				false
 #define PRINT_STATS					    false
 #define PRINT_IN_TIMBUK					true
 #define PRINT_DOT_LIMIT					20
@@ -298,7 +298,7 @@ public:
 #define OPT_SHUFFLE_FORMULA					true    // < Will run ShuffleVisitor before creation of automaton, which should ease the procedure as well
 #define OPT_DONT_CACHE_CONT					true	// < Do not cache terms containing continuations
 #define OPT_DONT_CACHE_UNFULL_FIXPOINTS 	false	// < Do not cache fixpoints that were not fully computed
-#define OPT_EQ_THROUGH_POINTERS				true	// < Test equality through pointers, not by structure
+#define OPT_EQ_THROUGH_POINTERS				true    // < Test equality through pointers, not by structure
 #define OPT_GENERATE_UNIQUE_TERMS			true	// < Use Workshops to generate unique pointers
 // ^- NOTE! From v1.0 onwards, disable this will introduce not only leaks, but will fuck everything up!
 #define OPT_USE_CUSTOM_PTR_HASH				false	// < Will use the custom implementation of hash function instead of boost::hash
@@ -338,8 +338,9 @@ public:
 #define OPT_THROW_CLASSIC_FIRST_ORDER_REP	true	// < Will interpret first orders on fixpoints as having only one one
 #define OPT_SHUFFLE_HASHES					true    // < Shuffles the bits in the hashes
 #define OPT_ENUMERATED_SUBSUMPTION_TESTING  false   // < Partially enumerates the products
-#define OPT_USE_TERNARY_AUTOMATA			true	// < Will use ternary automata if possible
-#define OPT_USE_NARY_AUTOMATA				false	// < Will use nary automata if possible
+#define OPT_USE_TERNARY_AUTOMATA			true    // < Will use ternary automata if possible
+#define OPT_USE_NARY_AUTOMATA				false   // < Will use nary automata if possible
+#define OPT_PRUNE_WORKLIST					true	// < Will remove stuff from worklist during the pruning
 
 /* >>> Static Assertions <<< *
  *****************************/

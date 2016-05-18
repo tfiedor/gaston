@@ -73,6 +73,7 @@ measures = {
             'space-base': Measure("bases" + whatever_regex + space_regex, space_default, int, False),
             'space-cont': Measure("continuations" + whatever_regex + space_regex, space_default, int, False),
             'space-prod': Measure("products" + whatever_regex + space_regex, space_default, int, False),
+            'space-ternary': Measure("ternaryproducts" + whatever_regex + space_regex, space_default, int, False),
             'time-dp': Measure("decision procedure" + whatever_regex + time_regex, time_default, parse_total_time, False),
             'time-base': Measure("dfa creation" + whatever_regex + time_regex, time_default, parse_total_time, False),
             'time-conv': Measure("mona <-> vata" + whatever_regex + time_regex, time_default, parse_total_time, False),
@@ -112,8 +113,7 @@ measures = {
 }
 
 csv_keys = {
-    'gaston': ['ret', 'time', 'time-pre', 'space-all', 'space', 'dag-nodes', 'real-nodes', 'space-cont', 'form-vars',
-               'form-atoms'],
+    'gaston': ['ret', 'time', 'time-pre', 'space-all', 'space', 'space-base', 'space-prod', 'space-ternary', 'space-fix'],
     'mona': ['time', 'space', 'space-min']
 }
 
