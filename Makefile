@@ -13,10 +13,10 @@ all:
 $(BUILD_DIR): debug
 
 debug:
-	cd $(BUILD_DIR) && cmake -DCMAKE_BUILD_TYPE=Debug .. && $(MAKE) $(MAKE_FLAGS)
+	cd $(BUILD_DIR) && cmake -B$(BUILD_DIR) -DCMAKE_BUILD_TYPE=Debug .. && $(MAKE) $(MAKE_FLAGS)
 
 release:
-	cd $(BUILD_DIR) && cmake -DCMAKE_BUILD_TYPE=Release .. && $(MAKE) $(MAKE_FLAGS)
+	cd $(BUILD_DIR) && cmake -B$(BUILD_DIR) -DCMAKE_BUILD_TYPE=Release .. && $(MAKE) $(MAKE_FLAGS)
 
 doc:
 	cd $(BUILD_DIR) && $(MAKE) $(MAKE_FLAGS) doc
