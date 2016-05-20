@@ -338,3 +338,7 @@ if __name__ == '__main__':
             fc_file.write("\n".join(failed_cases))
     else:
         print(colored("passed", "green", attrs=["bold"]))
+    if cases-fails != cases:
+        exit(1)
+    else:
+        exit(0)
