@@ -124,7 +124,7 @@ SymbolicAutomaton* product_to_automaton(FormClass* form, bool doComplement) {
 #   endif
         // Create nary representation
 #   if (OPT_USE_TERNARY_AUTOMATA == true)
-    } else if(form->f1->kind == k && form->f2->kind != k) {
+    } else if(form->f1->kind == k && form->f1->fixpoint_number > 0) {
         // Create ternary representation
         ASTForm_ff* form_f1 = static_cast<ASTForm_ff*>(form->f1);
         SymbolicAutomaton* lhs_aut;
@@ -134,7 +134,7 @@ SymbolicAutomaton* product_to_automaton(FormClass* form, bool doComplement) {
         SymbolicAutomaton* rhs_aut;
         rhs_aut = form->f2->toSymbolicAutomaton(doComplement);
         return new TernaryProduct(lhs_aut, mhs_aut, rhs_aut, form);
-    } else if(form->f2->kind == k && form->f1->kind != k && !(form->f1->is_restriction && form->f2->tag == 0)) {
+    } else if(form->f2->kind == k && form->f1->kind != k && form->f2->fixpoint_number > 0) {
         // Create ternary representation
         ASTForm_ff* form_f2 = static_cast<ASTForm_ff*>(form->f2);
         SymbolicAutomaton* lhs_aut;
