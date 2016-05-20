@@ -1,4 +1,5 @@
 # Gaston - Decision Procedure for WS1S Logic
+[![Build Status](https://travis-ci.org/tfiedor/gaston.svg?branch=master)](https://travis-ci.org/tfiedor/gaston)
 ## About 
   
   Gaston is an implementation of backward decision procedure for WS1S logic
@@ -105,7 +106,7 @@ second-order-term ::= varname | (second-order-term)
   * Petr Janku <ijanku@fit.vutbr.cz> (optimizations of MONA wrapper)
   * Ondrej Lengal <ilengal@fit.vutbr.cz> (corresponding author of VATA)
   * Tomas Vojnar <vojnar@fit.vutbr.cz>
- 
+
  ---
  Copyright (c) 2015  Tomas Fiedor <ifiedortom@fit.vutbr.cz>
  
