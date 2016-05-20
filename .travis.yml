@@ -1,4 +1,11 @@
 language: cpp
+notifications:
+  email:
+    recipients:
+      - TomasFiedor@gmail.com
+    on_success: always
+    on_failure: always
+
 compiler:
   - gcc
   # - clang
