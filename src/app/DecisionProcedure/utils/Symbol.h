@@ -43,6 +43,7 @@ protected:
 public:
     // <<< STATIC MEMBERS >>>
     static size_t instances;
+    size_t hash = 0;
 
     // <<< CONSTRUCTORS >>>
     NEVER_INLINE ZeroSymbol();

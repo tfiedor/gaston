@@ -274,6 +274,9 @@ bool SymbolicChecker::Run() {
 #   if (OPT_USE_TERNARY_AUTOMATA == true)
     std::cout << "\t\u2218 Term TernaryProducts: " << TermTernaryProduct::instances << "\n";
 #   endif
+#   if (OPT_USE_NARY_AUTOMATA == true)
+    std::cout << "\t\u2218 Term NaryProducts: " << TermNaryProduct::instances << "\n";
+#   endif
     std::cout << "\t\u2218 Term Bases: " << TermBaseSet::instances;
 #   if (MEASURE_BASE_SIZE == true)
     std::cout << " (max size = " << TermBaseSet::maxBaseSize << ")";
@@ -310,7 +313,8 @@ bool SymbolicChecker::Run() {
 #   endif
 #   undef OUTPUT_MEASURES
     std::cout << "[*] Overall State Space: " << (TermProduct::instances + TermBaseSet::instances + TermFixpoint::instances
-                                                 + TermList::instances + TermContinuation::instances) << "\n";
+                                                 + TermList::instances + TermContinuation::instances + TermNaryProduct::instances
+                                                 + TermTernaryProduct::instances) << "\n";
     std::cout << "[*] Explored Fixpoint Space: " << (fixpoint != nullptr ? fixpoint->MeasureStateSpace() : 0) << "\n";
 #   endif
 

@@ -59,6 +59,7 @@ class DagCompare;
 enum Decision {SATISFIABLE, UNSATISFIABLE, VALID, INVALID, UNKNOWN};
 enum AutType {SYMBOLIC_BASE, BINARY, TERNARY, NARY, INTERSECTION, TERNARY_INTERSECTION, NARY_INTERSECTION, UNION,
 	TERNARY_UNION, NARY_UNION, PROJECTION, ROOT_PROJECTION, BASE, COMPLEMENT};
+enum StatesSetType {E_INITIAL, E_FINAL};
 enum TermType {TERM_PRODUCT, TERM_TERNARY_PRODUCT, TERM_NARY_PRODUCT, TERM, TERM_EMPTY, TERM_BASE, TERM_FIXPOINT,
 	TERM_LIST, TERM_CONTINUATION};
 enum ProductType {E_INTERSECTION, E_UNION};
@@ -294,7 +295,7 @@ public:
 
 /* >>> Optimizations <<< *
  *************************/
-#define OPT_USE_DAG							false    // < Instead of using the symbolic automata, will use the DAGified SA, there is probably issue with remapped cache
+#define OPT_USE_DAG							true    // < Instead of using the symbolic automata, will use the DAGified SA, there is probably issue with remapped cache
 #define OPT_SHUFFLE_FORMULA					true    // < Will run ShuffleVisitor before creation of automaton, which should ease the procedure as well
 #define OPT_DONT_CACHE_CONT					true	// < Do not cache terms containing continuations
 #define OPT_DONT_CACHE_UNFULL_FIXPOINTS 	false	// < Do not cache fixpoints that were not fully computed
@@ -338,8 +339,8 @@ public:
 #define OPT_THROW_CLASSIC_FIRST_ORDER_REP	true	// < Will interpret first orders on fixpoints as having only one one
 #define OPT_SHUFFLE_HASHES					true    // < Shuffles the bits in the hashes
 #define OPT_ENUMERATED_SUBSUMPTION_TESTING  false   // < Partially enumerates the products
-#define OPT_USE_TERNARY_AUTOMATA			false   // < Will use ternary automata if possible
-#define OPT_USE_NARY_AUTOMATA				false   // < Will use nary automata if possible
+#define OPT_USE_TERNARY_AUTOMATA			true    // < Will use ternary automata if possible
+#define OPT_USE_NARY_AUTOMATA				true    // < Will use nary automata if possible
 #define OPT_PRUNE_WORKLIST					true	// < Will remove stuff from worklist during the pruning
 
 /* >>> Static Assertions <<< *

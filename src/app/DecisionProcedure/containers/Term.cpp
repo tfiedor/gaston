@@ -14,6 +14,7 @@
 
 #include "Term.h"
 #include "TermEnumerator.h"
+#include "../environment.hh"
 #include <boost/functional/hash.hpp>
 #include <future>
 #include <algorithm>
@@ -168,13 +169,10 @@ TermTernaryProduct::~TermTernaryProduct() {
 
 }
 
-TermNaryProduct::TermNaryProduct(Term_ptr* terms, ProductType pt, size_t arity) {
+void TermNaryProduct::_InitNaryProduct(ProductType pt, size_t arity) {
 #   if (MEASURE_STATE_SPACE == true)
     ++TermNaryProduct::instances;
 #   endif
-
-    this->terms = new Term_ptr[arity];
-    std::copy(terms, terms+arity, this->terms);
     this->arity = arity;
     this->_inComplement = false;
     this->type = TermType::TERM_NARY_PRODUCT;
@@ -201,6 +199,34 @@ TermNaryProduct::TermNaryProduct(Term_ptr* terms, ProductType pt, size_t arity) 
     this->dump();
     std::cout << "\n";
 #   endif
+}
+
+TermNaryProduct::TermNaryProduct(Term_ptr* terms, ProductType pt, size_t arity) {
+    this->terms = new Term_ptr[arity];
+    std::copy(terms, terms+arity, this->terms);
+    this->_InitNaryProduct(pt, arity);
+}
+
+TermNaryProduct::TermNaryProduct(SymLink* auts, StatesSetType st, ProductType pt, size_t arity) {
+    // Fixme: add link to auts
+    this->terms = new Term_ptr[arity];
+    for(auto i = 0; i < arity; ++i) {
+        if(st == StatesSetType::E_INITIAL)
+            this->terms[i] = auts[i].aut->GetInitialStates();
+        else
+            this->terms[i] = auts[i].aut->GetFinalStates();
+    }
+    this->_InitNaryProduct(pt, arity);
+}
+
+TermNaryProduct::TermNaryProduct(Term_ptr source, Symbol_ptr symbol, ProductType pt, size_t arity) {
+#   if (MEASURE_STATE_SPACE == true)
+    ++TermNaryProduct::instances;
+#   endif
+
+    this->terms = new Term_ptr[arity];
+//    std::copy(terms, terms+arity, this->terms);
+    this->_InitNaryProduct(pt, arity);
 }
 
 TermNaryProduct::~TermNaryProduct() {
@@ -1798,6 +1824,15 @@ Term* TermContinuation::unfoldContinuation(UnfoldedInType t) {
     return this->_unfoldedTerm;
 }
 
+// <<< ADDITIONAL TERMNARYOPERATOR FUNCTIONS >>>
+Term_ptr TermNaryProduct::operator[](size_t idx) {
+    assert(idx < this->arity);
+    if(this->terms[idx] == nullptr) {
+        // compute the value
+    }
+    return this->terms[idx];
+}
+
 // <<< EQUALITY MEASURING FUNCTIONS
 #if (MEASURE_COMPARISONS == true)
 void Term::comparedBySamePtr(TermType t) {
@@ -1993,8 +2028,8 @@ bool TermTernaryProduct::_eqCore(const Term &t) {
 bool TermNaryProduct::_eqCore(const Term &t) {
     assert(t.type == TERM_NARY_PRODUCT && "Testing equality of different term types");
 
-#   if (OPT_EQ_THROUGH_POINTERS == true && false)
-    assert(This != &t);
+#   if (OPT_EQ_THROUGH_POINTERS == true)
+    assert(this != &t);
     return false;
 #   else
     const TermNaryProduct &tProduct = static_cast<const TermNaryProduct&>(t);

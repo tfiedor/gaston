@@ -78,6 +78,7 @@ namespace Workshops {
     using TernaryKey        = std::tuple<Term*, Term*, Term*>;
     using TernaryHash       = boost::hash<TernaryKey>;
     using TernaryCompare    = std::equal_to<TernaryKey>;
+    using NaryKey           = std::pair<Term**, size_t>;
     using ListKey           = Term*;
     using ListHash          = boost::hash<ListKey>;
     using ListCompare       = std::equal_to<ListKey>;
@@ -99,6 +100,7 @@ namespace Workshops {
     void dumpCacheData(CacheData &);
     void dumpSymbolKey(SymbolKey const&);
     void dumpSymbolData(Symbol* &);
+    void dumpNaryKey(NaryKey const&);
 
     struct SymbolKeyHashType {
         size_t operator()(std::tuple<Symbol*, VarType, ValType> const& set) const {
@@ -135,14 +137,37 @@ namespace Workshops {
         }
     };
 
+    struct NaryKeyHashType {
+        size_t operator()(std::pair<Term_ptr*, size_t> const& set) const {
+            size_t seed = 0;
+            for(auto i = 0; i < set.second; ++i) {
+                boost::hash_combine(seed, Gaston::hash_value(set.first[i]));
+            }
+            return seed;
+        }
+    };
+
+    template<class Key>
+    struct NaryKeyCompare : public std::binary_function<Key, Key, bool> {
+        bool operator()(Key const& lhs, Key const& rhs) const {
+            assert(lhs.second == rhs.second);
+            for(auto i = 0; i < lhs.second; ++i) {
+                if(*lhs.first != *rhs.first) {
+                    return false;
+                }
+            }
+            return true;
+        }
+    };
+
     using SymbolCache       = BinaryCache<SymbolKey, Symbol*, SymbolKeyHashType, SymbolKeyCompare<SymbolKey>, dumpSymbolKey, dumpSymbolData>;
     using BaseCache         = BinaryCache<BaseKey, CacheData, BaseHash, BaseCompare, dumpBaseKey, dumpCacheData>;
     using ProductCache      = BinaryCache<ProductKey, CacheData, ProductHash, ProductCompare, dumpProductKey, dumpCacheData>;
-    //using TernaryCache      = BinaryCache<TernaryKey, CacheData, TernaryHash, TernaryCompare, dumpTernaryKey, dumpCacheData>;
     using TernaryCache      = BinaryCache<TernaryKey, CacheData, TernaryKeyHashType, TernaryKeyCompare<TernaryKey>, dumpTernaryKey, dumpCacheData>;
     using ListCache         = BinaryCache<ListKey, CacheData, ListHash, ListCompare, dumpListKey, dumpCacheData>;
     using FixpointCache     = BinaryCache<FixpointKey, CacheData, FixpointHash, FixpointCompare, dumpFixpointKey, dumpCacheData>;
     using ComputationCache  = BinaryCache<ComputationKey, CacheData, ComputationHash, ComputationCompare, dumpComputationKey, dumpCacheData>;
+    using NaryCache         = BinaryCache<NaryKey, CacheData, NaryKeyHashType, NaryKeyCompare<NaryKey>, dumpNaryKey, dumpCacheData>;
 
     class TermWorkshop {
     private:
@@ -151,6 +176,7 @@ namespace Workshops {
         ProductCache* _ubCache; // Union of Bases Cache
         ProductCache* _pCache;
         TernaryCache* _tpCache;
+        NaryCache* _npCache;
         ListCache* _lCache;
         ListCache* _fpCache;
         FixpointCache* _fppCache;
@@ -179,7 +205,10 @@ namespace Workshops {
         Term* CreateUnionBaseSet(Term_ptr const&, Term_ptr const&);
         TermProduct* CreateProduct(Term_ptr const&, Term_ptr const&, ProductType);
         Term* CreateTernaryProduct(Term_ptr const&, Term_ptr const&, Term_ptr const&, ProductType);
-        Term* CreateNaryProduct(Term_ptr* const&, ProductType);
+        Term* CreateNaryProduct(Term_ptr const&, Symbol*, size_t, ProductType);
+        Term* CreateNaryProduct(Term_ptr* const&, size_t, ProductType);
+        Term* CreateBaseNaryProduct(SymLink*, size_t, StatesSetType, ProductType);
+        Term* CreateUniqueNaryProduct(Term_ptr* const&, size_t, ProductType);
         TermFixpoint* CreateFixpoint(Term_ptr const&, Symbol*, bool, bool, WorklistSearchType search = WorklistSearchType::E_DFS);
         TermFixpoint* CreateFixpointPre(Term_ptr const&, Symbol*, bool);
         TermFixpoint* GetUniqueFixpoint(TermFixpoint*&);

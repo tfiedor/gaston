@@ -236,6 +236,7 @@ public:
     // <<< PUBLIC MEMBERS >>>
     size_t arity;
     Term_ptr* terms;
+    char* access_vector;
     ProductType subtype;
     // Fixme: add iterator
 
@@ -244,14 +245,18 @@ public:
 
     // <<< CONSTRUCTORS >>>
     NEVER_INLINE TermNaryProduct(Term_ptr*, ProductType, size_t);
+    NEVER_INLINE TermNaryProduct(SymLink*, StatesSetType, ProductType, size_t); // NaryBase
+    NEVER_INLINE TermNaryProduct(Term_ptr, Symbol_ptr, ProductType, size_t); // NaryPre
     NEVER_INLINE ~TermNaryProduct();
 
     // <<< PUBLIC API >>>
     SubsumptionResult IsSubsumedBy(FixpointType&, WorklistType& worklist, Term*&, bool no_prune = false);
     bool IsEmpty();
+    Term_ptr operator[](size_t);
 
     // <<< DUMPING FUNCTIONS >>>
 private:
+    void _InitNaryProduct(ProductType, size_t);
     void _dumpCore(unsigned indent = 0);
     bool _eqCore(const Term&);
 

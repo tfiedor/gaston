@@ -7,8 +7,8 @@ extern VarToTrackMap varMap;
 
 namespace Workshops {
     NEVER_INLINE TermWorkshop::TermWorkshop(SymbolicAutomaton* aut) :
-            _bCache(nullptr), _ubCache(nullptr), _pCache(nullptr), _tpCache(nullptr), _lCache(nullptr), _fpCache(nullptr),
-            _fppCache(nullptr), _contCache(nullptr),_compCache(nullptr), _aut(aut) { }
+            _bCache(nullptr), _ubCache(nullptr), _pCache(nullptr), _tpCache(nullptr), _npCache(nullptr), _lCache(nullptr),
+            _fpCache(nullptr), _fppCache(nullptr), _contCache(nullptr),_compCache(nullptr), _aut(aut) { }
 
     template<class A, class B, class C, class D, void (*E)(const A&), void (*F)(B&)>
     BinaryCache<A, B, C, D, E, F>* TermWorkshop::_cleanCache(BinaryCache<A, B, C, D, E, F>* cache, bool noMemberDelete) {
@@ -27,6 +27,7 @@ namespace Workshops {
     NEVER_INLINE TermWorkshop::~TermWorkshop() {
         this->_bCache = TermWorkshop::_cleanCache(this->_bCache);
         this->_ubCache = TermWorkshop::_cleanCache(this->_ubCache, true);
+        this->_npCache = TermWorkshop::_cleanCache(this->_npCache);
         this->_fpCache = TermWorkshop::_cleanCache(this->_fpCache);
         this->_fppCache = TermWorkshop::_cleanCache(this->_fppCache);
         this->_pCache = TermWorkshop::_cleanCache(this->_pCache);
@@ -95,7 +96,7 @@ namespace Workshops {
             case AutType::NARY:
             case AutType::NARY_INTERSECTION:
             case AutType::NARY_UNION:
-                // Fixme: Add nary cache
+                this->_npCache = new NaryCache();
                 break;
             case AutType::COMPLEMENT:
                 break;
@@ -201,8 +202,33 @@ namespace Workshops {
 #       endif
     }
 
-    Term* TermWorkshop::CreateNaryProduct(Term_ptr* const& terms, ProductType type) {
+    Term* TermWorkshop::CreateNaryProduct(Term_ptr const& base, Symbol* symbol, size_t arity, ProductType pt) {
+        return new TermNaryProduct(base, symbol, pt, arity);
+    }
+
+    Term* TermWorkshop::CreateNaryProduct(Term_ptr* const& terms, size_t arity, ProductType pt) {
+#       if (OPT_GENERATE_UNIQUE_TERMS == true && UNIQUE_PRODUCTS)
+        assert(this->_npCache != nullptr);
+
+        Term* termPtr = nullptr;
+        auto naryKey = std::make_pair(terms, arity);
+        if(!this->_npCache->retrieveFromCache(naryKey, termPtr)) {
+            termPtr = new TermNaryProduct(terms, pt, arity);
+            this->_npCache->StoreIn(naryKey, termPtr);
+        }
+        assert(termPtr != nullptr);
+        return termPtr;
+#       else
+        return new TermNaryProduct(terms, pt, arity);
+#       endif
+    }
+
+    Term* TermWorkshop::CreateUniqueNaryProduct(Term_ptr* const& terms, size_t arity, ProductType pt) {
         return nullptr;
+    }
+
+    Term* TermWorkshop::CreateBaseNaryProduct(SymLink* symlinks, size_t arity, StatesSetType st, ProductType pt) {
+        return new TermNaryProduct(symlinks, st, pt, arity);
     }
 
     /**
@@ -377,6 +403,10 @@ namespace Workshops {
             std::cout << "  \u2218 TernaryProductCache stats -> ";
             this->_tpCache->dumpStats();
         }
+        if(this->_npCache != nullptr) {
+            std::cout << "  \u2218 NaryProductcache stats -> ";
+            this->_npCache->dumpStats();
+        }
         if(this->_contCache != nullptr) {
             std::cout << "  \u2218 ContinuationCache stats -> ";
             this->_contCache->dumpStats();
@@ -404,6 +434,7 @@ namespace Workshops {
         out += (this->_bCache != nullptr ? std::to_string(this->_bCache->GetSize()) + "b, " : "");
         out += (this->_compCache != nullptr ? std::to_string(this->_compCache->GetSize()) + "uf, " : "");
         out += (this->_tpCache != nullptr ? std::to_string(this->_tpCache->GetSize()) + "tp, " : "");
+        out += (this->_npCache != nullptr ? std::to_string(this->_npCache->GetSize()) + "np, " : "");
         out += (this->_pCache != nullptr ? std::to_string(this->_pCache->GetSize()) + "p, " : "");
         out += (this->_contCache != nullptr ? std::to_string(this->_contCache->GetSize()) + "c, " : "");
         out += (this->_fpCache != nullptr ? std::to_string(this->_fpCache->GetSize()) + "fp, " : "");
@@ -567,6 +598,16 @@ namespace Workshops {
 
     void dumpTernaryKey(TernaryKey const&s) {
         std::cout << "<" << (*std::get<0>(s)) << ", " << (*std::get<1>(s)) << ", " << (*std::get<2>(s)) << ">";
+    }
+
+    void dumpNaryKey(NaryKey const& s) {
+        std::cout << "<";
+        for(auto i = 0; i < s.second; ++i) {
+            if(i)
+                std::cout << ", ";
+            std::cout << (*s.first[i]);
+        }
+        std::cout << ">";
     }
 
     void dumpSymbolData(Symbol*&s) {

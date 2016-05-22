@@ -123,6 +123,7 @@ SymbolicAutomaton* product_to_automaton(FormClass* form, bool doComplement) {
     if(false) {
 #   endif
         // Create nary representation
+        return new NaryProduct(form, doComplement);
 #   if (OPT_USE_TERNARY_AUTOMATA == true)
     } else if(form->f1->kind == k && form->f1->fixpoint_number > 0) {
         // Create ternary representation

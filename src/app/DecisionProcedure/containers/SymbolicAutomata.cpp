@@ -163,27 +163,50 @@ TernaryOpAutomaton::~TernaryOpAutomaton() {
     }
 }
 
-void collect_leaves(ASTKind k, ASTForm* form, std::vector<ASTForm*>& leaves) {
+void collect_leaves(ASTKind k, ASTForm* form, std::vector<ASTForm*>& leaves, ASTForm*& qf_free) {
     if(form->kind == k) {
         ASTForm_ff* ff_form = static_cast<ASTForm_ff*>(form);
-        collect_leaves(k, ff_form->f1, leaves);
-        collect_leaves(k, ff_form->f2, leaves);
+        collect_leaves(k, ff_form->f1, leaves, qf_free);
+        collect_leaves(k, ff_form->f2, leaves, qf_free);
     } else {
-        leaves.push_back(form);
+        if(form->fixpoint_number > 0) {
+            leaves.push_back(form);
+        } else {
+            // Collect qf_free stuff to the same shit
+            if(qf_free == nullptr) {
+                qf_free = form;
+            } else {
+                if(k == aAnd) {
+                    qf_free = new ASTForm_And(form, qf_free, Pos());
+                } else {
+                    assert(k == aOr);
+                    qf_free = new ASTForm_Or(form, qf_free, Pos());
+                }
+            }
+            qf_free->fixpoint_number = 0;
+            qf_free->tag = 0;
+        }
     }
 }
 
 NaryOpAutomaton::NaryOpAutomaton(Formula_ptr form, bool doComplement) : SymbolicAutomaton(form) {
     type = AutType::NARY;
-    collect_leaves(form->kind, form, this->_leaves);
-    this->_arity = this->_leaves.size();
+
+    ASTForm* qf_free = nullptr;
+    collect_leaves(form->kind, form, this->_leaves, qf_free);
+    this->_arity = this->_leaves.size() + (qf_free == nullptr ? 0 : 1);
     this->_auts = new SymLink[this->_arity];
-    for (int i = 0; i < this->_arity; ++i) {
-        // Fixme: There should be some initialization
-        this->_auts[i].aut = this->_leaves[i]->toSymbolicAutomaton(doComplement);
+    for (int i = (qf_free == nullptr ? 0 : 1); i < this->_arity; ++i) {
+        this->_auts[i].aut = this->_leaves[i - (qf_free == nullptr ? 0 : 1)]->toSymbolicAutomaton(doComplement);
         assert(this->_auts[i].aut != nullptr);
         this->_auts[i].aut->IncReferences();
-        this->_auts[i].InitializeSymLink(this->_leaves[i]);
+        this->_auts[i].InitializeSymLink(this->_leaves[i - (qf_free == nullptr ? 0 : 1)]);
+    }
+
+    if(qf_free != nullptr) {
+        this->_auts[0].aut = qf_free->toSymbolicAutomaton(doComplement);
+        this->_auts[0].aut->IncReferences();
+        this->_auts[0].InitializeSymLink(qf_free);
     }
 }
 
@@ -731,7 +754,7 @@ void TernaryOpAutomaton::_InitializeInitialStates() {
 
 void NaryOpAutomaton::_InitializeInitialStates() {
     // Fixme: Add lazy initialization + no workshops
-    assert(false && "Missing CreateNaryProduct()");
+    this->_initialStates = this->_factory.CreateBaseNaryProduct(this->_auts, this->_arity, StatesSetType::E_INITIAL, this->_productType);
 }
 
 void ComplementAutomaton::_InitializeInitialStates() {
@@ -781,7 +804,7 @@ void TernaryOpAutomaton::_InitializeFinalStates() {
 
 void NaryOpAutomaton::_InitializeFinalStates() {
     // Fixme: Add lazy initialization + no workshops
-    assert(false && "Missing CreateNaryProduct()");
+    this->_finalStates = this->_factory.CreateBaseNaryProduct(this->_auts, this->_arity, StatesSetType::E_FINAL, this->_productType);
 }
 
 void ComplementAutomaton::_InitializeFinalStates() {
@@ -1004,7 +1027,31 @@ ResultType TernaryOpAutomaton::_IntersectNonEmptyCore(Symbol* symbol, Term* fina
 }
 
 ResultType NaryOpAutomaton::_IntersectNonEmptyCore(Symbol* symbol, Term* finalApproximation, bool underComplement) {
-    assert(false && "Missing implementation of _IntersectNonEmptyCore");
+    assert(finalApproximation != nullptr);
+    assert(finalApproximation->type == TERM_NARY_PRODUCT);
+
+    // Retype the approximation
+    TermNaryProduct* termNaryProduct = static_cast<TermNaryProduct*>(finalApproximation);
+    assert(this->_arity == termNaryProduct->arity);
+
+    // Fixme: Leak
+    ResultType result;
+    bool bool_result = !this->_early_val(underComplement);
+    Term_ptr* terms = new Term_ptr[this->_arity];
+    for(auto i = 0; i < this->_arity; ++i) {
+        result = this->_auts[i].aut->IntersectNonEmpty(this->_auts[i].ReMapSymbol(symbol), termNaryProduct->terms[i], underComplement);
+#       if (OPT_PRUNE_EMPTY == true)
+        if(result.first->type == TERM_EMPTY && !result.first->InComplement() && this->_productType == ProductType::E_INTERSECTION) {
+            delete[] terms;
+            return std::make_pair(result.first, underComplement);
+        }
+#       endif
+        bool_result = this->_eval_result(bool_result, result.second, underComplement);
+        terms[i] = result.first;
+    };
+
+    Term_ptr combined = this->_factory.CreateNaryProduct(terms, this->_arity, this->_productType);
+    return std::make_pair(combined, bool_result);
 }
 
 ResultType ComplementAutomaton::_IntersectNonEmptyCore(Symbol* symbol, Term* finalApproximaton, bool underComplement) {
@@ -1585,7 +1632,7 @@ void TernaryOpAutomaton::DumpToDot(std::ofstream &os, bool inComplement) {
 void NaryOpAutomaton::DumpToDot(std::ofstream &os, bool inComplement) {
     this->DumpProductHeader(os, inComplement, this->_productType);
     for (int i = 0; i < this->_arity; ++i) {
-        os << "\t" << (uintptr_t) &*this << " -- " << (uintptr_t) (this->_auts[i].aut) << " [label=\"" << i << "hs\"];\n";
+        os << "\t" << (uintptr_t) &*this << " -- " << (uintptr_t) (this->_auts[i].aut) << " [label=\"" << (i) << "hs\"];\n";
     }
     for (int i = 0; i < this->_arity; ++i) {
         if(this->_auts[i].aut != nullptr) {
