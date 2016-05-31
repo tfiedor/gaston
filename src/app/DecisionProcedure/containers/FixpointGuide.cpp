@@ -9,6 +9,21 @@
 
 extern VarToTrackMap varMap;
 
+std::ostream &operator<<(std::ostream &out, const FixpointGuide &rhs) {
+    out << "{";
+    bool first = true;
+    for(auto var : rhs._vars) {
+        if(!first) {
+            out << ", ";
+        } else {
+            first = false;
+        }
+        out << var;
+    }
+    out << "}";
+    return out;
+}
+
 FixpointGuide::FixpointGuide(SymLink *link) : _link(link) {
     this->_InitializeVars(link->aut->_form);
 }

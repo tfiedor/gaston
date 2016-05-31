@@ -1463,6 +1463,7 @@ void ProjectionAutomaton::DumpAutomaton() {
             std::cout << ", ";
         }
     }
+    std::cout << (*this->_guide);
     std::cout << "(\033[0m";
     this->_aut.aut->DumpAutomaton();
     std::cout << "\033[1;34m)\033[0m";

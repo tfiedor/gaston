@@ -174,6 +174,7 @@ void TermNaryProduct::_InitNaryProduct(ProductType pt, size_t arity) {
     ++TermNaryProduct::instances;
 #   endif
     this->arity = arity;
+    this->access_vector = new size_t[this->arity];
     this->_inComplement = false;
     this->type = TermType::TERM_NARY_PRODUCT;
     this->subtype = pt;
@@ -191,6 +192,7 @@ void TermNaryProduct::_InitNaryProduct(ProductType pt, size_t arity) {
 
     this->stateSpaceApprox = 0;
     for (int j = 0; j < this->arity; ++j) {
+        this->access_vector[j] = static_cast<size_t>(j);
         this->stateSpaceApprox += this->terms[j]->stateSpaceApprox;
     }
 
@@ -230,6 +232,7 @@ TermNaryProduct::TermNaryProduct(Term_ptr source, Symbol_ptr symbol, ProductType
 }
 
 TermNaryProduct::~TermNaryProduct() {
+    delete[] this->access_vector;
     delete[] this->terms;
 }
 
@@ -631,7 +634,14 @@ SubsumptionResult TermNaryProduct::_IsSubsumedCore(Term *t, int limit, bool b) {
     TermNaryProduct *rhs = static_cast<TermNaryProduct*>(t);
     assert(this->arity == rhs->arity);
     for (int i = 0; i < this->arity; ++i) {
-        if(this->terms[i]->IsSubsumed(rhs->terms[i], limit, b) == E_FALSE) {
+        assert(this->access_vector[i] < this->arity);
+        if(this->terms[this->access_vector[i]]->IsSubsumed(rhs->terms[this->access_vector[i]], limit, b) == E_FALSE) {
+            if(i != 0) {
+                // Propagate the values towards 0 index
+                this->access_vector[i] ^= this->access_vector[i-1];
+                this->access_vector[i-1] ^= this->access_vector[i];
+                this->access_vector[i] ^= this->access_vector[i-1];
+            }
             return E_FALSE;
         }
     }

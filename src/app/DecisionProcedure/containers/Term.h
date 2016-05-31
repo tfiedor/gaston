@@ -235,9 +235,9 @@ class TermNaryProduct : public Term {
 public:
     // <<< PUBLIC MEMBERS >>>
     size_t arity;
-    Term_ptr* terms;
-    char* access_vector;
     ProductType subtype;
+    Term_ptr* terms;
+    size_t* access_vector;
     // Fixme: add iterator
 
     // See #L29

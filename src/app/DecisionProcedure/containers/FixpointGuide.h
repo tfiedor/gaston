@@ -25,6 +25,7 @@ public:
     GuideTip GiveTip(Term*, Symbol*);
 
     void SetAutomaton(SymLink*);
+    friend std::ostream &operator<<(std::ostream &stream, const FixpointGuide &);
 };
 
 
