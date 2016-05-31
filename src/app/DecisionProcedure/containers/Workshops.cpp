@@ -577,10 +577,10 @@ namespace Workshops {
                     Symbol* uniqPtr = (*item);
                     this->_remappedSymbolCache->StoreIn(symbolKey, uniqPtr);
                     delete symPtr;
-                    std::cout << (*uniqPtr) << "} ";
                     return uniqPtr;
                 }
             }
+            this->_remappedSymbols.push_back(symPtr);
 #           endif
             this->_remappedSymbolCache->StoreIn(symbolKey, symPtr);
         }
