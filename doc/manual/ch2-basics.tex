@@ -9,14 +9,102 @@
 \end{intro}
 
 \section{Basic syntax of WS1S logic}
+Consider the following unground formula:
+\begin{equation}
+x > 5 \wedge \exists y. y = x + 1
+\end{equation}
+As there exists both satisfying ($\{x \mapsto 6\}$) and unsatisfying ($\{x \mapsto 0\}$) examples
+the formula is satisfiable. We can use the following input and decide the formula inside our
+tool \gaston.
 
-\section{Interpreting the outputs}
+\begin{Verbatim}[label={input.mona}]
+ws1s;
+var1 x;
 
-\section{Basic usage of Gaston}
+x > 5 & ex1 y: y = x + 1;
+\end{Verbatim}
 
-\section{Output explained}
+\section{Interpreting the formula}
+By running \gaston on the input formula we get the following output, that will be further
+explained in more details. \gaston proves that the formula is \emph{satisfiable} and 
+moreover provides a satisfying and unsatisfying example along with some additional
+outputs\footnote{note that some of the outputs were omitted for the sake of clarity}
 
-\section{Introductory example}
+\begin{Verbatim}                                                                   
+\textbf{\textcolor{blue}{∃x(}}\textbf{\textcolor{OliveGreen}{(}}[Aut(FirstOrder(y¹))] 
+\textbf{\textcolor{OliveGreen}{ ∩² (}}Aut(5 <¹ x¹)\textbf{\textcolor{OliveGreen}{ ∩² }}
+  \textbf{\textcolor{blue}{∃y(}}\textbf{\textcolor{OliveGreen}{(}}[Aut(FirstOrder(y¹))]\textbf{\textcolor{OliveGreen}{ ∩² }}Aut(y¹ =¹ (x¹ +¹ 1))\textbf{\textcolor{OliveGreen}{)}}\textbf{\textcolor{blue}{)}}\textbf{\textcolor{OliveGreen}{))}}\textbf{\textcolor{blue}{)}}
+
+[*] Printing \textbf{\textcolor{OliveGreen}{satisfying}} example of least (7) length
+x : 0000001
+
+x = 6
+
+[*] Printing \textbf{\textcolor{red}{unsatisfying}} example of least (1) length
+x : 1
+
+x = 0
+
+[*] Overall State Space: 74
+[*] Explored Fixpoint Space: 168
+[!] Formula is \textbf{\textcolor{blue}{'SATISFIABLE'}}
+
+[*] Total elapsed time: 00:00:00.01
+\end{Verbatim}
+
+We will explore the outputs of \gaston in more details
+
+\begin{Verbatim}                               
+\textbf{\textcolor{blue}{∃x(}}\textbf{\textcolor{OliveGreen}{(}}[Aut(FirstOrder(y¹))] 
+\textbf{\textcolor{OliveGreen}{ ∩² (}}Aut(5 <¹ x¹)\textbf{\textcolor{OliveGreen}{ ∩² }}
+  \textbf{\textcolor{blue}{∃y(}}\textbf{\textcolor{OliveGreen}{(}}[Aut(FirstOrder(y¹))]\textbf{\textcolor{OliveGreen}{ ∩² }}Aut(y¹ =¹ (x¹ +¹ 1))\textbf{\textcolor{OliveGreen}{)}}\textbf{\textcolor{blue}{)}}\textbf{\textcolor{OliveGreen}{))}}\textbf{\textcolor{blue}{)}}
+\end{Verbatim}
+
+This part of the output prints the symbolic automaton representation of the formula.
+After the input file \texttt{input.mona} is parsed into Abstract Syntax Tree (AST),
+the formula is first preprocessed by several filters, that restricts the syntax to
+supported subset of expressions and does several optimization techniques to achieve
+faster decision procedure. Preprocessed formula is then converted to the
+Symbolic Automaton represented as Direct Acyclic Graph (DAG).
+
+\begin{Verbatim}
+[*] Printing \textbf{\textcolor{OliveGreen}{satisfying}} example of least (7) length
+x : 0000001
+
+x = 6
+\end{Verbatim}
+
+For unground formulae, \gaston prints the satisfiable and unsatisfying models 
+(if such exists) as a mapping of free variables to words. The first half of the
+example representation is the accepted (or rejected) word represented as sequence
+of symbols. Not that we can interpret the latter as the following:
+\begin{equation}
+ x: [0][0][0][0][0][1]
+\end{equation}
+
+Further this can be interpreted as a number from $\mathbb{N}$ as $x = 6$. If the variable
+$y$ would be free as well, we would get multiple tracks in symbols, particularly one per
+each variable resulting in the following satisfiable example:
+\begin{equation}
+ x:
+\end{equation}
+which can be interpreted as model $\{x \mapsto 6, y \mapsto 7\}$. This encoding is explained
+in more details in Section~\ref{theory:encoding}.
+
+\begin{Verbatim}
+[*] Overall State Space: 74
+[*] Explored Fixpoint Space: 168
+[!] Formula is \textbf{\textcolor{blue}{'SATISFIABLE'}}
+
+[*] Total elapsed time: 00:00:00.01
+\end{Verbatim}
+
+The last part of the output prints statistics of our decision procedure, like e.g. the
+time spent in each phase of the decision procedure, that can of course vary from formulae.
+The overall state space represents the number of generated unique terms 
+(see Section~\ref{opt:unique}), while the explored fixpoint space represents the computed
+fixpoint of terms with states pruned after generation through subsumption relation 
+(see Section~\ref{opt:sub}).
  
 %
 
