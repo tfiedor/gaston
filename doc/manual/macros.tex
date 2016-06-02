@@ -34,6 +34,16 @@
 \newcommand{\val}[0]{\texttt{VAL}\xspace}
 \newcommand{\unsat}[0]{\texttt{UNSAT}\xspace}
 
+% Tracks
+\newcommand{\trackindex}[1]{\mathit{#1}}
+\newcommand{\unitrack}[2]{{\begin{array}{rl} \scriptstyle #1:&\scriptstyle #2\end{array}}}
+\newcommand{\unitracknolab}[1]{{\begin{array}{rl} \scriptstyle #1\end{array}}}
+\newcommand{\unitracknolabwithindex}[2]{{\ensuremath{\overset{\trackindex{#2}}{\left[#1\right]}}}}
+\newcommand{\bintrack}[4]{{\resizebox{!}{3.5mm}{$\begin{array}{rl} #1:&#3\\ #2:&#4\end{array}$}}}
+\newcommand{\bintracknolab}[2]{{{\ensuremath{\left[\hspace{-2mm}\begin{array}{l} #1\\#2\end{array}\hspace{-2mm}\right]}}}}
+\newcommand{\bintracknolabwithindex}[3]{{{\ensuremath{\overset{\trackindex{#3}}{\left[\hspace{-2mm}\begin{array}{l} #1\\#2\end{array}\hspace{-2mm}\right]}}}}}
+\newcommand{\bintracklab}[2]{{{\ensuremath{\begin{array}{l} #1:\\#2:\end{array}}}}}
+
 \newcommand{\nonelementary}[0]{\textsc{NONELEMENTARY}\xspace}
 
 \newcommand*{\marginlabel}[1]{\mbox{}\marginpar{\raggedleft \textbf{(#1)}}\ignorespaces}

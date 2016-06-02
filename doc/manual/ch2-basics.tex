@@ -79,14 +79,16 @@ For unground formulae, \gaston prints the satisfiable and unsatisfying models
 example representation is the accepted (or rejected) word represented as sequence
 of symbols. Not that we can interpret the latter as the following:
 \begin{equation}
- x: [0][0][0][0][0][1]
+ \overset{\mathit{i:}}{x:} \unitracknolabwithindex{0}{0}\unitracknolabwithindex{0}{1}\unitracknolabwithindex{0}{2}\unitracknolabwithindex{0}{3}
+ \unitracknolabwithindex{0}{4}\unitracknolabwithindex{0}{5}\unitracknolabwithindex{1}{6}
 \end{equation}
 
 Further this can be interpreted as a number from $\mathbb{N}$ as $x = 6$. If the variable
 $y$ would be free as well, we would get multiple tracks in symbols, particularly one per
 each variable resulting in the following satisfiable example:
 \begin{equation}
- x:
+ \overset{\mathit{i:}}{\bintracklab{x}{y}}\bintracknolabwithindex{0}{0}{0}\bintracknolabwithindex{0}{0}{1}\bintracknolabwithindex{0}{0}{2}\bintracknolabwithindex{0}{0}{3}\bintracknolabwithindex{0}{0}{4}\bintracknolabwithindex{0}{0}{5}
+ \bintracknolabwithindex{1}{0}{6}\bintracknolabwithindex{0}{1}{7}
 \end{equation}
 which can be interpreted as model $\{x \mapsto 6, y \mapsto 7\}$. This encoding is explained
 in more details in Section~\ref{theory:encoding}.
