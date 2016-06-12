@@ -31,7 +31,8 @@ quantification, where the saturation part is omitted\footnote{note
 that for ground formulae one still needs to know the size of the
 universe in order to decide the formula}.
 
-\begin{table}[h!]
+\begin{savenotes}
+ \begin{table}[h!]
   \centering
     {\renewcommand{\arraystretch}{1.2}
   \begin{tabular}{l l l}
@@ -40,16 +41,23 @@ universe in order to decide the formula}.
     \hline
     \textbf{Universe} & $\mathbb{Z}$ & $\{0,\ldots,n-1\}$\\
     \textbf{Quantification} & Finite & Finite\\
+    \textbf{Reduction to other} & \checkmark\footnote{given a formula in \msl logic, we can transform it
+    to formula $\varphi'$ with additional free variable \$, such that $\rho \models \varphi$ iff $\varphi[\$ \mapsto
+    \{0,\ldots,n-1\}] \models \varphi'$ for some $n$} & $\times$\footnote{there is no known polynomial reduction $f$ such that
+    for all formulae $\varphi$ such that $\forall n. n \models f(\varphi)$ iff $\models\varphi$}\\
     \hline
   \end{tabular}}
   \caption{Brief comparison of WS1S and \msl logics}\label{tab:m2l-diff}
-\end{table}
+ \end{table}
+\end{savenotes}
 
 In terms of language we can say that there exists one-to-one 
 correspondence between formulae of \msl logic and regular 
 languages\footnote{note that this is different for WS1S, that in
 contrary corresponds to regular languages closed under concatenation
-with zero strings}.
+with zero strings}. However the notion of \msl seems weaker, as there is
+no way we can encode the Presburger Arithmetic in it, while this is 
+quite natural in the WS1S.
 
 The Table~\ref{tab:m2l-formulae} shows some of the formulae that
 have different meaning in the WS$1$S and \msl.
@@ -72,6 +80,30 @@ have different meaning in the WS$1$S and \msl.
   \caption{Formulae that have different meaning in the WS1S and
   \msl, for the universe of $k$ size}\label{tab:m2l-formulae}
 \end{table}
+
+	\begin{figure}[t]
+	  \footnotesize
+	  \begin{center}
+	  \begin{subfigure}[b]{1\textwidth}
+		\input{figs/aut_orig.tikz}
+        \caption{An original automaton $\automaton{\varphi}$ for formula $\varphi \equiv X = 1$}
+        \label{fig:aut_orig}
+      \end{subfigure}%
+      \\
+	  \begin{subfigure}[b]{0.5\textwidth}
+		\input{figs/aut_m2l.tikz}
+        \caption{An automaton $\automaton{\exists X.\varphi}$ in \msl logic}
+        \label{fig:aut_m2l}
+      \end{subfigure}%
+      \hfill
+	  \begin{subfigure}[b]{0.5\textwidth}
+		\input{figs/aut_ws1s.tikz}
+        \caption{An automaton $\automaton{\exists X.\varphi}$ in WS1S logic}
+        \label{fig:aut_ws1s}
+      \end{subfigure}%
+	  \end{center}
+	  \caption{Difference between \msl and WS1S in the existential quantification}\label{fig:ws1s_vs_m2l_aut}
+	\end{figure}
 
 	\subsection{Simulation of \msl in WS1S}
 	MONA~\cite{mona:m2l} first showed how to simulate \msl logic in

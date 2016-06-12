@@ -113,3 +113,43 @@ second-order-term ::= varname | (second-order-term)
 		only minimalistic informations
 	\item[\texttt{-oX}] Sets optimization level (deprecated)
 \end{itemize}
+
+\chapter{Benchmarks}
+
+This appendix sums the benchmarks that are used for evaluation of the tools for WS1S logic.
+Every benchmark is briefly described, and quantified with several measures\,---\,number
+of occurring variables (both bound and free), number of atomic formulae, and whether it is
+valid, satisfiable or unsatisfiable. Note that we do not present some of the other measures
+that are used in our experiments, like number of nodes in tree representation of formula, 
+number of fixpoint computations and others, as they can vary from the used optimizations
+and preprocessing steps.
+
+\section{STRAND: Structure and Data}
+
+This benchmark is obtained from the work of~\cite{strand1, strand2}. These formulae encode
+various invariants of the cycles of several chosen algorithms (e.g. insert, delete) over 
+various structures (e.g. linked lists). This benchmark is divided into two parts
+\strandbenchone and \strandbenchtwo. The first one is the initial attempt to use the
+WS1S for deciding the structural invariants, while the latter is the optimization of the 
+initial one by reducing the size of the formulae and introducing some of the advanced 
+constructs (e.g. predicates) that enabled faster decision procedure.
+
+\begin{table}
+  \caption{}\label{tab:bench-strand}
+  \begin{tabular}{l l r r r}
+  \hline
+  \textbf{Id} & \textbf{Name} & \textbf{Variables} & \textbf{Atoms} & \textbf{Answer} \\
+  \hline
+  \hline
+  \multicolumn{5}{*}{\strandbenchone}\\
+  \hline
+  \input{data\bench-strand-old}
+  \hline
+  \multicolumn{5}{*}{\strandbenchtwo}\\
+  \hline
+  \input{data\bench-strand-new}
+  \hline
+  \end{tabular}
+\end{table}
+
+
