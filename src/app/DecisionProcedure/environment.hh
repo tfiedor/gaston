@@ -180,6 +180,7 @@ public:
 /* >>> Printing Options <<< *
  ****************************/
 #define PRINT_PRETTY					true
+#define PRINT_DOT_BLACK_AND_WHITE		true
 
 /**
  * >>> Inlining Options <<< *
@@ -209,8 +210,8 @@ public:
 #define DEBUG_TERM_SUBSUMPTION 			false
 #define DEBUG_TERM_SUBSUMED_BY 			false
 #define DEBUG_TERM_CACHE_COMPARISON		false
-#define DEBUG_SYMBOL_CREATION			false
-#define DEBUG_CACHE_MEMBERS			    true
+#define DEBUG_SYMBOL_CREATION			true
+#define DEBUG_CACHE_MEMBERS			    false
 #define DEBUG_CACHE_BUCKETS				false
 #define DEBUG_CACHE_MEMBERS_HASH		true
 #define DEBUG_CONTINUATIONS 			false
@@ -234,14 +235,14 @@ public:
 /*
  * >>> Automata stats options
  *****************************/
-#define PRINT_STATS_PROJECTION			false
+#define PRINT_STATS_PROJECTION			true
 #define PRINT_STATS_QF_PROJECTION		false
 #define PRINT_STATS_PRODUCT			    false
-#define PRINT_STATS_TERNARY_PRODUCT		true
-#define PRINT_STATS_NARY_PRODUCT		true
+#define PRINT_STATS_TERNARY_PRODUCT		false
+#define PRINT_STATS_NARY_PRODUCT		false
 #define PRINT_STATS_NEGATION			false
 #define PRINT_STATS_BASE				false
-#define PRINT_STATS					    false
+#define PRINT_STATS					    true
 #define PRINT_IN_TIMBUK					true
 #define PRINT_DOT_LIMIT					20
 
@@ -340,7 +341,7 @@ public:
 #define OPT_SHUFFLE_HASHES					true    // < Shuffles the bits in the hashes
 #define OPT_ENUMERATED_SUBSUMPTION_TESTING  false   // < Partially enumerates the products
 #define OPT_USE_TERNARY_AUTOMATA			true    // < Will use ternary automata if possible
-#define OPT_USE_NARY_AUTOMATA				true    // < Will use nary automata if possible
+#define OPT_USE_NARY_AUTOMATA				false   // < Will use nary automata if possible
 #define OPT_PRUNE_WORKLIST					true	// < Will remove stuff from worklist during the pruning
 
 /* >>> Static Assertions <<< *

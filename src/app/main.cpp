@@ -97,14 +97,15 @@ void bdd_callback() {
 void PrintUsage() {
 	cout << "Usage: gaston [options] <filename>\n\n"
 		<< "Options:\n"
-		<< " -t, --time 		 Print elapsed time\n"
-		<< " -d, --dump-all		 Dump AST, symboltable, and code DAG\n"
-		<< " -ga, --print-aut	 Print automaton in graphviz\n"
+		<< " -t, --time          Print elapsed time\n"
+		<< " -d, --dump-all      Dump AST, symboltable, and code DAG\n"
+		<< " -ga, --print-aut    Print automaton in graphviz\n"
 		<< "     --no-automaton  Don't dump Automaton\n"
 		<< "     --test          Test specified problem [val, sat, unsat]\n"
 		<< "     --walk-aut      Does the experiment generating the special dot graph\n"
+		<< "     --serialize     Outputs the preprocessed file\n"
 		<< " -e, --expand-tagged Expand automata with given tag on first line of formula\n"
-		<< " -q, --quiet		 Quiet, don't print progress\n"
+		<< " -q, --quiet         Quiet, don't print progress\n"
 		<< " -oX                 Optimization level [1 = safe optimizations [default], 2 = heuristic]\n"
 		<< "Example: ./gaston -t -d foo.mona\n\n";
 }

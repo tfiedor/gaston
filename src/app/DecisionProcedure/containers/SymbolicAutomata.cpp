@@ -1600,9 +1600,11 @@ void SymbolicAutomaton::DumpProductHeader(std::ofstream & os, bool inComplement,
         os << "\u222A";
     }
     os << "\\n(" << this->_trueCounter << "\u22A8, " << this->_falseCounter << "\u22AD)\"";
+#   if (PRINT_DOT_BLACK_AND_WHITE == false)
     if(this->_trueCounter == 0 && this->_falseCounter != 0) {
         os << ",style=filled, fillcolor=red";
     }
+#   endif
     os << "];\n";
 }
 
@@ -1647,9 +1649,11 @@ void ComplementAutomaton::DumpToDot(std::ofstream & os, bool inComplement) {
     os << this->_factory.ToSimpleStats() << "\\n";
     os << "\u03B5 " << (inComplement ? "\u2209 " : "\u2208 ");
     os << "\u00AC\\n(" << this->_trueCounter << "\u22A8, " << this->_falseCounter << "\u22AD)\"";
+#   if (PRINT_DOT_BLACK_AND_WHITE == true)
     if(this->_trueCounter == 0 && this->_falseCounter != 0) {
         os << ",style=filled, fillcolor=red";
     }
+#   endif
     os << "];\n";
     os << "\t" << (uintptr_t) &*this << " -- " << (uintptr_t) (this->_aut.aut) << ";\n";
     this->_aut.aut->DumpToDot(os, !inComplement);
@@ -1664,9 +1668,11 @@ void ProjectionAutomaton::DumpToDot(std::ofstream & os, bool inComplement) {
         os << symbolTable.lookupSymbol(*id) << ",";
     }
     os << "\\n(" << this->_trueCounter << "\u22A8, " << this->_falseCounter << "\u22AD)\"";
+#   if (PRINT_DOT_BLACK_AND_WHITE == true)
     if(this->_trueCounter == 0 && this->_falseCounter != 0) {
         os << ",style=filled, fillcolor=red";
     }
+#   endif
     os << "];\n";
     os << "\t" << (uintptr_t) &*this << " -- " << (uintptr_t) (this->_aut.aut) << ";\n";
     this->_aut.aut->DumpToDot(os, inComplement);
@@ -1704,9 +1710,11 @@ void BaseAutomaton::DumpToDot(std::ofstream & os, bool inComplement) {
     os << this->_factory.ToSimpleStats() << "\\n";
     os << "\u03B5 " << (inComplement ? "\u2209 " : "\u2208 ") << utf8_substr(this->_form->ToString(), PRINT_DOT_LIMIT);
     os << "\\n(" << this->_trueCounter << "\u22A8, " << this->_falseCounter << "\u22AD)\"";
+#   if (PRINT_DOT_BLACK_AND_WHITE == true)
     if(this->_trueCounter == 0 && this->_falseCounter != 0) {
         os << ",style=filled, fillcolor=red";
     }
+#   endif
     if(this->_isRestriction) {
         os << ", shape=rect";
     }

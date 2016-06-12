@@ -246,6 +246,7 @@ void Checker::CloseUngroundFormula() {
                 }
                 BooleanUnfolder booleanUnfolder;
                 this->_rootRestriction = static_cast<ASTForm*>(restrictions->accept(booleanUnfolder));
+                this->_rootRestriction->is_restriction = true;
                 FixpointDetagger detagger;
                 this->_rootRestriction->accept(detagger);
                 break;
