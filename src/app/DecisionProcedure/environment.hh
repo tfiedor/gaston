@@ -57,18 +57,39 @@ class DagCompare;
  * GLOBAL ENUMERATIONS *
  ***********************/
 enum Decision {SATISFIABLE, UNSATISFIABLE, VALID, INVALID, UNKNOWN};
-enum AutType {SYMBOLIC_BASE, BINARY, TERNARY, NARY, INTERSECTION, TERNARY_INTERSECTION, NARY_INTERSECTION, UNION,
-	TERNARY_UNION, NARY_UNION, PROJECTION, ROOT_PROJECTION, BASE, COMPLEMENT};
+enum AutType {SYMBOLIC_BASE, ROOT_PROJECTION, BASE, COMPLEMENT,
+	BINARY, TERNARY, NARY,
+	INTERSECTION, TERNARY_INTERSECTION, NARY_INTERSECTION,
+	UNION, TERNARY_UNION, NARY_UNION,
+	IMPLICATION, TERNARY_IMPLICATION, NARY_IMPLICATION,
+	BIIMPLICATION, TERNARY_BIIMPLICATION, NARY_BIIMPLICATION,
+	PROJECTION};
 enum StatesSetType {E_INITIAL, E_FINAL};
 enum TermType {TERM_PRODUCT, TERM_TERNARY_PRODUCT, TERM_NARY_PRODUCT, TERM, TERM_EMPTY, TERM_BASE, TERM_FIXPOINT,
 	TERM_LIST, TERM_CONTINUATION};
-enum ProductType {E_INTERSECTION, E_UNION};
 enum FixpointTermSem {E_FIXTERM_FIXPOINT, E_FIXTERM_PRE};
 enum ComparisonType {E_BY_SAME_PTR, E_BY_DIFFERENT_TYPE, E_BY_STRUCTURE};
 enum UnfoldedInType {E_IN_SUBSUMPTION, E_IN_ISECT_NONEMPTY, E_IN_COMPARISON, E_IN_NOWHERE};
 enum SubsumptionResult {E_FALSE, E_TRUE, E_PARTIALLY, E_TRUE_BUT_WORKLIST};
 enum ExampleType {SATISFYING, UNSATISFYING};
 enum WorklistSearchType {E_BFS, E_DFS, E_UNGROUND_ROOT};
+
+enum class ProductType {E_INTERSECTION, E_UNION, E_IMPLICATION, E_BIIMPLICATION};
+static const char* ProductTypeColours[] = {"1;32", "1;33", "1;36", "1;37"};
+static const char* ProductTypeAutomataSymbols[] = {"\u2229", "\u222A", "\u2192", "\u2194"};
+static const char* ProductTypeTermSymbols[] = {"\u2293", "\u2294", "\u21FE", "\u21FF"};
+
+inline const char* ProductTypeToColour(ProductType type) {
+	return ProductTypeColours[static_cast<int>(type)];
+}
+
+inline const char* ProductTypeToAutomatonSymbol(ProductType type) {
+	return ProductTypeAutomataSymbols[static_cast<int>(type)];
+}
+
+inline const char* ProductTypeToTermSymbol(ProductType type) {
+	return ProductTypeTermSymbols[static_cast<int>(type)];
+}
 
 namespace Gaston {
 /***************************
@@ -296,7 +317,7 @@ public:
 
 /* >>> Optimizations <<< *
  *************************/
-#define OPT_USE_DAG							true    // < Instead of using the symbolic automata, will use the DAGified SA, there is probably issue with remapped cache
+#define OPT_USE_DAG							false   // < Instead of using the symbolic automata, will use the DAGified SA, there is probably issue with remapped cache
 #define OPT_SHUFFLE_FORMULA					true    // < Will run ShuffleVisitor before creation of automaton, which should ease the procedure as well
 #define OPT_DONT_CACHE_CONT					true	// < Do not cache terms containing continuations
 #define OPT_DONT_CACHE_UNFULL_FIXPOINTS 	false	// < Do not cache fixpoints that were not fully computed
@@ -343,6 +364,7 @@ public:
 #define OPT_USE_TERNARY_AUTOMATA			true    // < Will use ternary automata if possible
 #define OPT_USE_NARY_AUTOMATA				false   // < Will use nary automata if possible
 #define OPT_PRUNE_WORKLIST					true	// < Will remove stuff from worklist during the pruning
+#define OPT_BI_AND_IMPLICATION_SUPPORT		true	// < Will not restrict the syntax, by removing => and <=>
 
 /* >>> Static Assertions <<< *
  *****************************/

@@ -312,6 +312,42 @@ public:
 };
 
 /**
+ * Automaton corresponding to the formula: phi => psi
+ */
+class ImplicationAutomaton : public BinaryOpAutomaton {
+public:
+    NEVER_INLINE ImplicationAutomaton(SymbolicAutomaton_raw, SymbolicAutomaton_raw, Formula_ptr);
+};
+
+class TernaryImplicationAutomaton : public TernaryOpAutomaton {
+public:
+    NEVER_INLINE TernaryImplicationAutomaton(SymbolicAutomaton_raw, SymbolicAutomaton_raw, SymbolicAutomaton_raw, Formula_ptr);
+};
+
+class NaryImplicationAutomaton : public NaryOpAutomaton {
+public:
+    NEVER_INLINE NaryImplicationAutomaton(Formula_ptr, bool);
+};
+
+/**
+ * Automaton corresponding to the formula: phi <=> pis
+ */
+class BiimplicationAutomaton : public BinaryOpAutomaton {
+public:
+    NEVER_INLINE BiimplicationAutomaton(SymbolicAutomaton_raw, SymbolicAutomaton_raw, Formula_ptr);
+};
+
+class TernaryBiimplicationAutomaton : public TernaryOpAutomaton {
+public:
+    NEVER_INLINE TernaryBiimplicationAutomaton(SymbolicAutomaton_raw, SymbolicAutomaton_raw, SymbolicAutomaton_raw, Formula_ptr);
+};
+
+class NaryBiimplicationAutomaton : public NaryOpAutomaton {
+public:
+    NEVER_INLINE NaryBiimplicationAutomaton(Formula_ptr, bool);
+};
+
+/**
  * Automaton corresponding to the formulae: not phi
  */
 class ComplementAutomaton : public SymbolicAutomaton {

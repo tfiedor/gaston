@@ -283,7 +283,7 @@ BaseAutomaton::~BaseAutomaton() {
 IntersectionAutomaton::IntersectionAutomaton(SymbolicAutomaton_raw lhs, SymbolicAutomaton_raw rhs, Formula_ptr form)
         : BinaryOpAutomaton(lhs, rhs, form) {
     this->type = AutType::INTERSECTION;
-    this->_productType = E_INTERSECTION;
+    this->_productType = ProductType::E_INTERSECTION;
     this->_eval_result = [](bool a, bool b, bool underC) {
         // e in A cap B == e in A && e in B
         if(!underC) {return a && b;}
@@ -328,7 +328,7 @@ TernaryIntersectionAutomaton::TernaryIntersectionAutomaton(SymbolicAutomaton_raw
 
 NaryIntersectionAutomaton::NaryIntersectionAutomaton(Formula_ptr form, bool doComplement) : NaryOpAutomaton(form, doComplement) {
     this->type = AutType::NARY_INTERSECTION;
-    this->_productType = E_INTERSECTION;
+    this->_productType = ProductType::E_INTERSECTION;
     this->_eval_result = [](bool a, bool b, bool underC) {
         // e in A cap B == e in A && e in B
         if(!underC) {return a && b;}
@@ -351,7 +351,7 @@ NaryIntersectionAutomaton::NaryIntersectionAutomaton(Formula_ptr form, bool doCo
 UnionAutomaton::UnionAutomaton(SymbolicAutomaton_raw lhs, SymbolicAutomaton_raw rhs, Formula_ptr form)
         : BinaryOpAutomaton(lhs, rhs, form) {
     this->type = AutType::UNION;
-    this->_productType = E_UNION;
+    this->_productType = ProductType::E_UNION;
     this->_eval_result = [](bool a, bool b, bool underC) {
         // e in A cup B == e in A || e in B
         if(!underC) {return a || b;}
@@ -396,7 +396,7 @@ TernaryUnionAutomaton::TernaryUnionAutomaton(SymbolicAutomaton_raw lhs, Symbolic
 
 NaryUnionAutomaton::NaryUnionAutomaton(Formula_ptr form, bool doComplement) : NaryOpAutomaton(form, doComplement) {
     this->type = AutType::NARY_INTERSECTION;
-    this->_productType = E_INTERSECTION;
+    this->_productType = ProductType::E_UNION;
     this->_eval_result = [](bool a, bool b, bool underC) {
         // e in A cup B == e in A || e in B
         if(!underC) {return a || b;}
@@ -408,6 +408,99 @@ NaryUnionAutomaton::NaryUnionAutomaton(Formula_ptr form, bool doComplement) : Na
     };
     this->_early_val = [](bool underC) {
         return !underC;
+    };
+
+    this->_InitializeAutomaton();
+}
+
+// Derives of Implication
+ImplicationAutomaton::ImplicationAutomaton(SymbolicAutomaton_raw lhs, SymbolicAutomaton_raw rhs, Formula_ptr form)
+        : BinaryOpAutomaton(lhs, rhs, form) {
+    this->type == AutType::IMPLICATION;
+    this->_productType = ProductType::E_IMPLICATION;
+    this->_eval_result = [](bool a, bool b, bool underC) {
+        // e in ~A cup B == e in A => e in B
+        if(!underC) {return !a || b;}
+        // e not in ~A cup B == !e notin A && e notin B
+        else { return !a && b; }
+    };
+    this->_eval_early = [](bool a, bool underC) {
+        return (a == underC);
+    };
+    this->_early_val = [](bool underC) {
+        return !underC;
+    };
+
+    this->_InitializeAutomaton();
+}
+
+TernaryImplicationAutomaton::TernaryImplicationAutomaton(SymbolicAutomaton_raw lhs, SymbolicAutomaton_raw mhs, SymbolicAutomaton_raw rhs, Formula_ptr form)
+        : TernaryOpAutomaton(lhs, mhs, rhs, form) {
+    assert(false && "Ternary Implication is currently disabled as it is unclear how such automata should work");
+}
+
+NaryImplicationAutomaton::NaryImplicationAutomaton(Formula_ptr form, bool b)
+        : NaryOpAutomaton(form, b) {
+    assert(false && "Nary Implication is currently disabled as it is unclear how such automata should work");
+}
+
+// Derives of Biimplication
+BiimplicationAutomaton::BiimplicationAutomaton(SymbolicAutomaton_raw lhs, SymbolicAutomaton_raw rhs, Formula_ptr form)
+        : BinaryOpAutomaton(lhs, rhs, form) {
+    this->type = AutType::BIIMPLICATION;
+    this->_productType = ProductType::E_BIIMPLICATION;
+    this->_eval_result = [](bool a, bool b, bool underC) {
+        if(!underC) { return a == b;}
+        else {return (!a) == b;}
+    };
+    this->_eval_early = [](bool a, bool underC) {
+        assert(false && "Biimplication cannot be short circuited");
+        return false;
+    };
+    this->_early_val = [](bool underC) {
+        assert(false && "Biimplication does not have short circuit");
+        return false;
+    };
+
+    this->_InitializeAutomaton();
+}
+
+TernaryBiimplicationAutomaton::TernaryBiimplicationAutomaton(SymbolicAutomaton_raw lhs, SymbolicAutomaton_raw mhs, SymbolicAutomaton_raw rhs, Formula_ptr form)
+        : TernaryOpAutomaton(lhs, mhs, rhs, form) {
+    this->type =  AutType::TERNARY_BIIMPLICATION;
+    this->_productType = ProductType::E_BIIMPLICATION;
+    this->_eval_result = [](bool l, bool m, bool r, bool underC) {
+        // Fixme: I'm still little bit concerned whether this is true
+        if(!underC) { return l == m == r; }
+        else {return (l == (!m) == (!r)); }
+    };
+    this->_eval_early = [](bool l, bool m, bool underC) {
+        assert(false && "Biimplication cannot be short circuited");
+        return false;
+    };
+    this->_early_val = [](bool underC) {
+        assert(false && "Biimplication does not have short circuit");
+        return false;
+    };
+
+    this->_InitializeAutomaton();
+}
+
+NaryBiimplicationAutomaton::NaryBiimplicationAutomaton(Formula_ptr form, bool underC)
+        : NaryOpAutomaton(form, underC) {
+    this->type == AutType::NARY_BIIMPLICATION;
+    this->_productType = ProductType::E_BIIMPLICATION;
+    this->_eval_result = [](bool a, bool b, bool underC) {
+        if(!underC) { return a == b;}
+        else {return a == (!b);}
+    };
+    this->_eval_early = [](bool a, bool underC) {
+        assert(false && "Biimplication cannot be short circuited");
+        return false;
+    };
+    this->_early_val = [](bool a) {
+        assert(false && "Biimplication does not have short circuit");
+        return false;
     };
 
     this->_InitializeAutomaton();
@@ -936,7 +1029,7 @@ ResultType BinaryOpAutomaton::_IntersectNonEmptyCore(Symbol* symbol, Term* final
     // For intersection of automata we can return early, if left term was evaluated
     // as false, whereas for union of automata we can return early if left term
     // was true.
-    bool canGenerateContinuations = true;
+    bool canGenerateContinuations = this->_productType == ProductType::E_INTERSECTION|| this->_productType == ProductType::E_UNION;
 #   if (OPT_CONT_ONLY_WHILE_UNSAT == true)
     canGenerateContinuations = canGenerateContinuations &&
         (this->_productType == ProductType::E_INTERSECTION ?
@@ -1649,7 +1742,7 @@ void ComplementAutomaton::DumpToDot(std::ofstream & os, bool inComplement) {
     os << this->_factory.ToSimpleStats() << "\\n";
     os << "\u03B5 " << (inComplement ? "\u2209 " : "\u2208 ");
     os << "\u00AC\\n(" << this->_trueCounter << "\u22A8, " << this->_falseCounter << "\u22AD)\"";
-#   if (PRINT_DOT_BLACK_AND_WHITE == true)
+#   if (PRINT_DOT_BLACK_AND_WHITE == false)
     if(this->_trueCounter == 0 && this->_falseCounter != 0) {
         os << ",style=filled, fillcolor=red";
     }
@@ -1668,7 +1761,7 @@ void ProjectionAutomaton::DumpToDot(std::ofstream & os, bool inComplement) {
         os << symbolTable.lookupSymbol(*id) << ",";
     }
     os << "\\n(" << this->_trueCounter << "\u22A8, " << this->_falseCounter << "\u22AD)\"";
-#   if (PRINT_DOT_BLACK_AND_WHITE == true)
+#   if (PRINT_DOT_BLACK_AND_WHITE == false)
     if(this->_trueCounter == 0 && this->_falseCounter != 0) {
         os << ",style=filled, fillcolor=red";
     }
@@ -1710,7 +1803,7 @@ void BaseAutomaton::DumpToDot(std::ofstream & os, bool inComplement) {
     os << this->_factory.ToSimpleStats() << "\\n";
     os << "\u03B5 " << (inComplement ? "\u2209 " : "\u2208 ") << utf8_substr(this->_form->ToString(), PRINT_DOT_LIMIT);
     os << "\\n(" << this->_trueCounter << "\u22A8, " << this->_falseCounter << "\u22AD)\"";
-#   if (PRINT_DOT_BLACK_AND_WHITE == true)
+#   if (PRINT_DOT_BLACK_AND_WHITE == false)
     if(this->_trueCounter == 0 && this->_falseCounter != 0) {
         os << ",style=filled, fillcolor=red";
     }

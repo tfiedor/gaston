@@ -55,8 +55,6 @@ void FixpointGuide::SetAutomaton(SymLink* link) {
  * @param[in] form:         formula that guides the link
  */
 void FixpointGuide::_InitializeVars(ASTForm* form) {
-    std::cout << "Initializing FixpointGuide with ";
-    form->dump(); std::cout << "\n";
     if(form->kind == aAnd || form->kind == aOr) {
         ASTForm_ff* ff_form = static_cast<ASTForm_ff*>(form);
         this->_InitializeVars(ff_form->f1);
