@@ -1236,80 +1236,41 @@ void TermEmpty::_dumpCore(unsigned indent) {
 }
 
 void TermProduct::_dumpCore(unsigned indent) {
-    if(this->subtype == ProductType::E_INTERSECTION) {
-        std::cout << "\033[1;32m";
-    } else {
-        std::cout << "\033[1;33m";
-    }
-    std::cout << "{\033[0m";
+    const char* product_colour = ProductTypeToColour(this->subtype);
+    const char* product_symbol = ProductTypeToTermSymbol(this->subtype);
+
+    std::cout << "\033[" << product_colour << "{\033[0m";
     left->dump(indent);
-    if(this->subtype == ProductType::E_INTERSECTION) {
-        std::cout << "\033[1;32m \u2293 \033[0m";
-    } else {
-        //std::cout << " \u22C3 ";
-        std::cout << "\033[1;33m \u2294 \033[0m";
-    };
+    std::cout << "\033[" << product_colour << " " << product_symbol << " \033[0m";
     right->dump(indent);
-    if(this->subtype == ProductType::E_INTERSECTION) {
-        std::cout << "\033[1;32m";
-    } else {
-        std::cout << "\033[1;33m";
-    }
-    std::cout << "}\033[0m";
+    std::cout << "\033[" << product_colour << "}\033[0m";
 }
 
 void TermTernaryProduct::_dumpCore(unsigned int indent) {
-    if(this->subtype == ProductType::E_INTERSECTION) {
-        std::cout << "\033[1;32m";
-    } else {
-        std::cout << "\033[1;33m";
-    }
-    std::cout << "{\033[0m";
+    const char* product_colour = ProductTypeToColour(this->subtype);
+    const char* product_symbol = ProductTypeToTermSymbol(this->subtype);
+
+    std::cout << "\033[" << product_colour << "{\033[0m";
     left->dump(indent);
-    if(this->subtype == ProductType::E_INTERSECTION) {
-        std::cout << "\033[1;32m \u2293\u00B3 \033[0m";
-    } else {
-        std::cout << "\033[1;33m \u2294\u00B3 \033[0m";
-    };
+    std::cout << "\033[" << product_colour << " " << product_symbol << "\u00B3 \033[0m";
     middle->dump(indent);
-    if(this->subtype == ProductType::E_INTERSECTION) {
-        std::cout << "\033[1;32m \u2293\u00B3 \033[0m";
-    } else {
-        std::cout << "\033[1;33m \u2294\u00B3 \033[0m";
-    };
+    std::cout << "\033[" << product_colour << " " << product_symbol << "\u00B3 \033[0m";
     right->dump(indent);
-    if(this->subtype == ProductType::E_INTERSECTION) {
-        std::cout << "\033[1;32m";
-    } else {
-        std::cout << "\033[1;33m";
-    }
-    std::cout << "}\033[0m";
+    std::cout << "\033[" << product_colour << "}\033[0m";
 }
 
 void TermNaryProduct::_dumpCore(unsigned int indent) {
-    if(this->subtype == ProductType::E_INTERSECTION) {
-        std::cout << "\033[1;32m";
-    } else {
-        std::cout << "\033[1;33m";
-    }
-    std::cout << "{\033[0m";
+    const char* product_colour = ProductTypeToColour(this->subtype);
+    const char* product_symbol = ProductTypeToTermSymbol(this->subtype);
+
+    std::cout << "\033[" << product_colour << "{\033[0m";
     for (int i = 0; i < this->arity; ++i) {
         if(i != 0) {
-            if (this->subtype == ProductType::E_INTERSECTION) {
-                std::cout << "\033[1;32m \u2293\u207F \033[0m";
-            } else {
-                std::cout << "\033[1;33m \u2294\u207F \033[0m";
-            };
+            std::cout << "\033[" << product_colour << " " << product_symbol << "\u207F \033[0m";
         }
         this->terms[i]->dump(indent);
     }
-
-    if(this->subtype == ProductType::E_INTERSECTION) {
-        std::cout << "\033[1;32m";
-    } else {
-        std::cout << "\033[1;33m";
-    }
-    std::cout << "}\033[0m";
+    std::cout << "\033[" << product_colour << "}\033[0m";
 }
 
 void TermBaseSet::_dumpCore(unsigned indent) {

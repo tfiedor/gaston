@@ -1407,105 +1407,70 @@ void ProjectionAutomaton::_DumpExampleCore(ExampleType e) {
 }
 
 void BinaryOpAutomaton::DumpAutomaton() {
+    const char* product_colour = ProductTypeToColour(this->_productType);
+    const char* product_symbol = ProductTypeToAutomatonSymbol(this->_productType);
     #if (DEBUG_AUTOMATA_ADDRESSES == true)
         std::cout << "[" << this << "]";
     #endif
     if(this->_isRestriction) {
         std::cout << "\033[1;35m[\033[0m";
     }
-    if(this->type == AutType::INTERSECTION) {
-        std::cout << "\033[1;32m";
-    } else {
-        std::cout << "\033[1;33m";
-    }
-    std::cout << "(\033[0m";
+    std::cout << "\033[" << product_colour << "(\033[0m";
     this->_lhs_aut.aut->DumpAutomaton();
-    if(this->type == AutType::INTERSECTION) {
-        std::cout << "\033[1;32m \u2229\u00B2 \033[0m";
-    } else {
-        std::cout << "\033[1;33m \u222A\u00B2 \033[0m";
-    };
+    std::cout << "\033[" << product_colour << " " << product_symbol << "\u00B2 \033[0m";
     if(this->_rhs_aut.aut != nullptr) {
         this->_rhs_aut.aut->DumpAutomaton();
     } else {
         std::cout << "??";
     }
-    if(this->type == AutType::INTERSECTION) {
-        std::cout << "\033[1;32m";
-    } else {
-        std::cout << "\033[1;33m";
-    }
-    std::cout << ")\033[0m";
+    std::cout << "\033[" << product_colour << ")\033[0m";
     if(this->_isRestriction) {
         std::cout << "\033[1;35m]\033[0m";
     }
 }
 
 void TernaryOpAutomaton::DumpAutomaton() {
+    const char* product_colour = ProductTypeToColour(this->_productType);
+    const char* product_symbol = ProductTypeToAutomatonSymbol(this->_productType);
 #   if (DEBUG_AUTOMATA_ADDRESSES == true)
     std::cout << "[" << this << "]";
 #   endif
     if(this->_isRestriction) {
         std::cout << "\033[1;35m[\033[0m";
     }
-    if(this->_productType == ProductType::E_INTERSECTION) {
-        std::cout << "\033[1;32m";
-    } else {
-        std::cout << "\033[1;33m";
-    }
-    std::cout << "(\033[0m";
+    std::cout << "\033[" << product_colour << "(\033[0m";
     this->_lhs_aut.aut->DumpAutomaton();
-    if(this->_productType == ProductType::E_INTERSECTION) {
-        std::cout << "\033[1;32m \u2229\u00B3 \033[0m";
-    } else {
-        std::cout << "\033[1;33m \u222A\u00B3 \033[0m";
-    };
+    std::cout << "\033[" << product_colour << " " << product_symbol << "\u00B3 \033[0m";
     if(this->_mhs_aut.aut != nullptr) {
         this->_mhs_aut.aut->DumpAutomaton();
     } else {
         std::cout << "??";
     }
-    if(this->_productType == ProductType::E_INTERSECTION) {
-        std::cout << "\033[1;32m \u2229\u00B3 \033[0m";
-    } else {
-        std::cout << "\033[1;33m \u222A\u00B3 \033[0m";
-    };
+    std::cout << "\033[" << product_colour << " " << product_symbol << "\u00B3 \033[0m";
     if(this->_rhs_aut.aut != nullptr) {
         this->_rhs_aut.aut->DumpAutomaton();
     } else {
         std::cout << "??";
     }
-    if(this->_productType == ProductType::E_INTERSECTION) {
-        std::cout << "\033[1;32m";
-    } else {
-        std::cout << "\033[1;33m";
-    }
-    std::cout << ")\033[0m";
+    std::cout << "\033[" << product_colour << ")\033[0m";
     if(this->_isRestriction) {
         std::cout << "\033[1;35m]\033[0m";
     }
 }
 
 void NaryOpAutomaton::DumpAutomaton() {
+    const char* product_colour = ProductTypeToColour(this->_productType);
+    const char* product_symbol = ProductTypeToAutomatonSymbol(this->_productType);
 #   if (DEBUG_AUTOMATA_ADDRESSES == true)
     std::cout << "[" << this << "]";
 #   endif
     if(this->_isRestriction) {
         std::cout << "\033[1;35m[\033[0m";
     }
-    if(this->_productType == ProductType::E_INTERSECTION) {
-        std::cout << "\033[1;32m";
-    } else {
-        std::cout << "\033[1;33m";
-    }
-    std::cout << "(\033[0m";
+    std::cout << "\033[" << product_colour << "(\033[0m";
     for (int i = 0; i < this->_arity; ++i) {
         if(i != 0) {
-            if(this->_productType == ProductType::E_INTERSECTION) {
-                std::cout << "\033[1;32m \u2229\u207F \033[0m";
-            } else {
-                std::cout << "\033[1;33m \u222A\u207F \033[0m";
-            };
+            std::cout << "\033[" << product_colour << " " << product_symbol << "\u207F \033[0m";
         }
         if(this->_auts[i].aut != nullptr) {
             this->_auts[i].aut->DumpAutomaton();
@@ -1514,13 +1479,7 @@ void NaryOpAutomaton::DumpAutomaton() {
         }
     }
 
-
-    if(this->_productType == ProductType::E_INTERSECTION) {
-        std::cout << "\033[1;32m";
-    } else {
-        std::cout << "\033[1;33m";
-    }
-    std::cout << ")\033[0m";
+    std::cout << "\033[" << product_colour << ")\033[0m";
     if(this->_isRestriction) {
         std::cout << "\033[1;35m]\033[0m";
     }
@@ -1687,11 +1646,7 @@ void SymbolicAutomaton::DumpProductHeader(std::ofstream & os, bool inComplement,
     os << "\t" << (uintptr_t) &*this << "[label=\"";
     os << this->_factory.ToSimpleStats() << "\\n";
     os << "\u03B5 " << (inComplement ? "\u2209 " : "\u2208 ");
-    if(productType == ProductType::E_INTERSECTION) {
-        os << "\u2229";
-    } else {
-        os << "\u222A";
-    }
+    os << ProductTypeToAutomatonSymbol(productType);
     os << "\\n(" << this->_trueCounter << "\u22A8, " << this->_falseCounter << "\u22AD)\"";
 #   if (PRINT_DOT_BLACK_AND_WHITE == false)
     if(this->_trueCounter == 0 && this->_falseCounter != 0) {

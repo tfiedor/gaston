@@ -75,7 +75,7 @@ enum ExampleType {SATISFYING, UNSATISFYING};
 enum WorklistSearchType {E_BFS, E_DFS, E_UNGROUND_ROOT};
 
 enum class ProductType {E_INTERSECTION, E_UNION, E_IMPLICATION, E_BIIMPLICATION};
-static const char* ProductTypeColours[] = {"1;32", "1;33", "1;36", "1;37"};
+static const char* ProductTypeColours[] = {"1;32m", "1;33m", "1;36m", "1;37m"};
 static const char* ProductTypeAutomataSymbols[] = {"\u2229", "\u222A", "\u2192", "\u2194"};
 static const char* ProductTypeTermSymbols[] = {"\u2293", "\u2294", "\u21FE", "\u21FF"};
 
@@ -263,7 +263,7 @@ public:
 #define PRINT_STATS_NARY_PRODUCT		false
 #define PRINT_STATS_NEGATION			false
 #define PRINT_STATS_BASE				false
-#define PRINT_STATS					    true
+#define PRINT_STATS					    false
 #define PRINT_IN_TIMBUK					true
 #define PRINT_DOT_LIMIT					20
 
