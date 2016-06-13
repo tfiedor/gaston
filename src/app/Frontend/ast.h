@@ -1007,6 +1007,7 @@ public:
   void dump();
 	virtual std::string ToString(bool no_utf = false);
   ASTForm* clone() { return new ASTForm_In(this->t1->clone(), this->T2->clone(), this->pos); }
+	void detach() {this->t1 = nullptr; this->T2 = nullptr; }
   // Conversion of AST representation of formula to Automaton
   void toUnaryAutomaton(Automaton &aut, bool doComplement);
   SymbolicAutomaton* _toSymbolicAutomatonCore(bool doComplement);
@@ -1025,6 +1026,7 @@ public:
 	virtual std::string ToString(bool no_utf = false);
 
   ASTForm *clone() { return new ASTForm_Notin(this->t1->clone(), this->T2->clone(), this->pos); }
+	void detach() {this->t1 = nullptr; this->T2 = nullptr; }
 };
 
 class ASTForm_RootPred: public ASTForm {
@@ -1227,6 +1229,7 @@ public:
 	void detach() {this->f1 = nullptr; this->f2 = nullptr;}
 	virtual std::string ToString(bool no_utf = false);
   ASTForm* clone() { return new ASTForm_Biimpl(this->f1->clone(), this->f2->clone(), this->pos); }
+	SymbolicAutomaton* _toSymbolicAutomatonCore(bool doComplement);
 };
 
 class ASTForm_And: public ASTForm_ff {

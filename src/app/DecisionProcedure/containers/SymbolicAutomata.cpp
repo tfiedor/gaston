@@ -395,7 +395,7 @@ TernaryUnionAutomaton::TernaryUnionAutomaton(SymbolicAutomaton_raw lhs, Symbolic
 }
 
 NaryUnionAutomaton::NaryUnionAutomaton(Formula_ptr form, bool doComplement) : NaryOpAutomaton(form, doComplement) {
-    this->type = AutType::NARY_INTERSECTION;
+    this->type = AutType::NARY_UNION;
     this->_productType = ProductType::E_UNION;
     this->_eval_result = [](bool a, bool b, bool underC) {
         // e in A cup B == e in A || e in B

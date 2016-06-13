@@ -50,6 +50,5 @@ AST* BinaryReorderer::visit(ASTForm_Impl* form) {
  * @param[in] form:     traversed Biimpl node
  */
 AST* BinaryReorderer::visit(ASTForm_Biimpl* form) {
-    assert(false && "Biimplication should not be in reordered formula");
-    return form;
+    return binary_reorder<ASTForm_Biimpl>(form);
 }

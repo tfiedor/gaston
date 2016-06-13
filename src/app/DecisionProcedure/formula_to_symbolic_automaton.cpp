@@ -175,6 +175,10 @@ SymbolicAutomaton* ASTForm_Or::_toSymbolicAutomatonCore(bool doComplement) {
     return product_to_automaton<ASTForm_Or, UnionAutomaton, TernaryUnionAutomaton, NaryUnionAutomaton>(this, doComplement);
 }
 
+SymbolicAutomaton* ASTForm_Biimpl::_toSymbolicAutomatonCore(bool doComplement) {
+    return product_to_automaton<ASTForm_Biimpl, BiimplicationAutomaton, TernaryBiimplicationAutomaton, NaryBiimplicationAutomaton>(this, doComplement);
+}
+
 bool is_base_automaton(ASTForm* f) {
     return f->kind != aOr &&
            f->kind != aAnd &&

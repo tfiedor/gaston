@@ -17,6 +17,7 @@
 #include "../restricters/UniversalQuantifierRemover.h"
 #include "../decorators/OccuringVariableDecorator.h"
 #include "../../../Frontend/ast.h"
+#include "../../environment.hh"
 
 /**
  * @param[in] form:     traversed Ex0 node
@@ -262,6 +263,7 @@ ASTForm* FullAntiPrenexer::_pushNegationByOne(OuterQuantifier* form, bool byOne)
     ASTForm* result, *left, *right;
     ASTForm_And* andForm;
     ASTForm_Or* orForm;
+    ASTForm_ff* child_form;
 
     switch(not_form->f->kind) {
         case aAnd:
@@ -285,6 +287,25 @@ ASTForm* FullAntiPrenexer::_pushNegationByOne(OuterQuantifier* form, bool byOne)
             result->allVars = copy(orForm->allVars);
             orForm->detach();
             delete orForm;
+            break;
+        case aImpl:
+            // not (A => B) = A and not B
+            child_form = static_cast<ASTForm_ff*>(not_form->f);
+            left = child_form->f1;
+            right = new ASTForm_Not(child_form->f2, Pos());
+            right->allVars = copy(child_form->f2->allVars);
+            result = new ASTForm_And(left, right, Pos());
+            result->allVars = copy(child_form->allVars);
+            child_form->detach();
+            delete child_form;
+            break;
+        case aBiimpl:
+            // not (A <=> B) = (not A) <=> B
+            child_form = static_cast<ASTForm_ff*>(not_form->f);
+            right = new ASTForm_Not(child_form->f2, Pos());
+            right->allVars = copy(child_form->f2->allVars);
+            child_form->f2 = right;
+            result = child_form;
             break;
         case aNot:
             result = static_cast<ASTForm_Not*>(not_form->f)->f;
@@ -333,8 +354,13 @@ ASTForm* FullAntiPrenexer::existentialAntiPrenex(ASTForm *form, bool onlyByOne) 
             // Process And Rule
             return nonDistributiveRule<ExistClass, ASTForm_And>(exForm, false);
         case aImpl:
+            assert(false && "Implication is unsupported in Anti-Prenexing");
         case aBiimpl:
-            assert(false && "Implication and Biimplication is unsupported in Anti-Prenexing");
+#           if (ALT_NO_BI_PRENEXING == true)
+            return exForm;
+#           else
+            return nonDistributiveRule<ExistClass, ASTForm_Biimpl>(exForm, false);
+#           endif
         case aNot:
             return this->_pushNegationByOne<ExistClass>(exForm, onlyByOne);
         case aEx1:
@@ -377,8 +403,13 @@ ASTForm* FullAntiPrenexer::universalAntiPrenex(ASTForm *form, bool onlyByOne) {
             // Process And Rule
             return distributiveRule<ForallClass, ASTForm_And>(allForm, false);
         case aImpl:
+            assert(false && "Implication is unsupported in Anti-Prenexing");
         case aBiimpl:
-            assert(false && "Implication and Biimplication is unsupported in Anti-Prenexing");
+#           if (ALT_NO_BI_PRENEXING == true)
+            return allForm;
+#           else
+            return nonDistributiveRule<ForallClass, ASTForm_Biimpl>(allForm, false);
+#           endif
         case aNot:
            return this->_pushNegationByOne<ForallClass>(allForm, onlyByOne);
         case aAll1:

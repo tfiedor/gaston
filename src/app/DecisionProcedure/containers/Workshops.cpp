@@ -83,6 +83,8 @@ namespace Workshops {
             case AutType::BINARY:
             case AutType::INTERSECTION:
             case AutType::UNION:
+            case AutType::IMPLICATION:
+            case AutType::BIIMPLICATION:
                 this->_pCache = new ProductCache();
 #               if (OPT_EARLY_EVALUATION == true && MONA_FAIR_MODE == false)
                 this->_contCache = new FixpointCache();
@@ -91,11 +93,15 @@ namespace Workshops {
             case AutType::TERNARY:
             case AutType::TERNARY_INTERSECTION:
             case AutType::TERNARY_UNION:
+            case AutType::TERNARY_IMPLICATION:
+            case AutType::TERNARY_BIIMPLICATION:
                 this->_tpCache = new TernaryCache();
                 break;
             case AutType::NARY:
             case AutType::NARY_INTERSECTION:
             case AutType::NARY_UNION:
+            case AutType::NARY_IMPLICATION:
+            case AutType::NARY_BIIMPLICATION:
                 this->_npCache = new NaryCache();
                 break;
             case AutType::COMPLEMENT:

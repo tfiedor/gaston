@@ -21,10 +21,7 @@ public:
     void visit(ASTTerm* term) {};
     void visit(ASTUniv* univ) {};
 
-    void visit(ASTForm_And*);
-    void visit(ASTForm_Or*);
-    void visit(ASTForm_Impl*);
-    void visit(ASTForm_Biimpl*);
+    void visit(ASTForm_ff*);
 
     void visit(ASTForm_Not*);
     void visit(ASTForm_Ex1*);

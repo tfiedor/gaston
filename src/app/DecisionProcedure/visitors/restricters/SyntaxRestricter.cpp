@@ -9,6 +9,7 @@
  *****************************************************************************/
 #include "SyntaxRestricter.h"
 #include "../../../Frontend/ast.h"
+#include "../../environment.hh"
 
 /**
  * Transforms implication to restricted syntax as follows:
@@ -38,6 +39,9 @@ AST* SyntaxRestricter::visit(ASTForm_Impl* form) {
  * @param[in] form      traversed Biimpl node
  */
 AST* SyntaxRestricter::visit(ASTForm_Biimpl* form) {
+#   if (OPT_BI_AND_IMPLICATION_SUPPORT == true)
+    return form;
+#   else
     assert(form != nullptr);
 
     ASTForm_Not* notF = new ASTForm_Not(form->f1, form->f1->pos);
@@ -56,6 +60,7 @@ AST* SyntaxRestricter::visit(ASTForm_Biimpl* form) {
     delete form;
 
     return biimpl;
+#   endif
 }
 
 AST* SyntaxRestricter::visit(ASTForm_Export* form) {
