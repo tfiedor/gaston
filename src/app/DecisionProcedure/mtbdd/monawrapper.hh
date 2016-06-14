@@ -15,7 +15,6 @@
 #include <assert.h>
 #include <string>
 #include <boost/dynamic_bitset.hpp>
-#include <boost/functional/hash.hpp>
 
 extern VarToTrackMap varMap;
 
@@ -23,13 +22,9 @@ template<class Data>
 class MonaWrapper
 {
 private:
-    template<class T>
-    struct WrappedCompare;
-
     struct WrappedNode
     {
-
-        std::unordered_set<struct WrappedNode*, boost::hash<struct WrappedNode*>, WrappedCompare<struct WrappedNode*>> pred_[2];
+        std::unordered_set<struct WrappedNode *> pred_[2];
         unsigned node_;
         int var_;
 
@@ -39,24 +34,16 @@ private:
         }
     };
 
-    template<class Key>
-    struct WrappedCompare : public std::binary_function<Key, Key, bool> {
-        bool operator()(Key const& lhs, Key const& rhs) const {
-            return lhs->node_ == rhs->node_ && lhs->var_ == rhs->var_;
-        }
-    };
-
     using DataType = Data;
     using VectorType = VATA::Util::OrdVector<Data>;
     using WrappedNode = struct WrappedNode;
     using InternalNodesType = std::unordered_map<unsigned, WrappedNode *>;
-    using HashType = boost::hash<WrappedNode*>;
-    using SetType = std::unordered_set<WrappedNode*, HashType, WrappedCompare<WrappedNode*>>;
+    using SetType = std::unordered_set<WrappedNode *>;
     using CacheType = std::unordered_map<size_t, VectorType>;
 
 protected:
-    std::vector<WrappedNode*> roots_;
-    std::vector<WrappedNode*> leafNodes_;
+    std::vector<WrappedNode *> roots_;
+    std::vector<WrappedNode *> leafNodes_;
     InternalNodesType internalNodes_;
     DFA *dfa_;
     unsigned numVars_;
@@ -187,65 +174,66 @@ private:
         }
     }
 
-    VectorType RecPre(const SetType &nodes, int var)
+    VectorType RecPre(WrappedNode *root)
     {
-        --var;
-        if(var < 0)
-        {
-            return CreateResultSet(nodes);
-        }
-
+        SetType nodes({root});
         SetType res;
 
-        if(symbol_[var << 1] & symbol_[(var << 1) + 1])
+        int var = numVars_ - 1;
+        for(; -1 < var; --var)
         {
-            // don't care.
-            for(auto node: nodes)
+            if(symbol_[var << 1] & symbol_[(var << 1) + 1])
             {
-                assert(node != nullptr);
-                if(UnequalVars(node->var_, var))
+                // don't care.
+                for(auto node: nodes)
                 {
-                    res.insert(node);
-                }
-                else
-                {
-                    GetSuccessors(node->pred_[0], res, var - 1, 0);
-                    GetSuccessors(node->pred_[1], res, var - 1, 1);
-                    ResetFlags(node->var_);
-                }
-            }
-        }
-        else
-        {
-            // neni don't care.
-            for(auto node: nodes)
-            {
-                assert(node != nullptr);
-                if(GetVar(node->var_) == var)
-                {
-                    GetDontCareSucc(node->pred_[~symbol_[(var << 1)]], res, var - 1, ~symbol_[(var << 1)]);
-                    GetSuccessors(node->pred_[symbol_[(var << 1)]], res, var - 1, symbol_[(var << 1)]);
-                    ResetFlags(node->var_);
-                }
-                else    // don't care na vytvorenem uzlu.
-                {
-                    if(UnequalVars(node->var_, var - 1))
+                    assert(node != nullptr);
+                    if(UnequalVars(node->var_, var))
                     {
                         res.insert(node);
                     }
                     else
                     {
-                        if((symbol_[(var << 1)] && IsPredecessorHigh(node->var_)) ||
-                           (~symbol_[(var << 1)] && IsPredecessorLow(node->var_)))
-                            res.insert(node);
-
+                        GetSuccessors(node->pred_[0], res, var - 1, 0);
+                        GetSuccessors(node->pred_[1], res, var - 1, 1);
                         ResetFlags(node->var_);
                     }
                 }
             }
+            else
+            {
+                // neni don't care.
+                for(auto node: nodes)
+                {
+                    assert(node != nullptr);
+                    if(GetVar(node->var_) == var)
+                    {
+                        GetDontCareSucc(node->pred_[~symbol_[(var << 1)]], res, var - 1, ~symbol_[(var << 1)]);
+                        GetSuccessors(node->pred_[symbol_[(var << 1)]], res, var - 1, symbol_[(var << 1)]);
+                        ResetFlags(node->var_);
+                    }
+                    else    // don't care na vytvorenem uzlu.
+                    {
+                        if(UnequalVars(node->var_, var - 1))
+                        {
+                            res.insert(node);
+                        }
+                        else
+                        {
+                            if((symbol_[(var << 1)] && IsPredecessorHigh(node->var_)) ||
+                               (~symbol_[(var << 1)] && IsPredecessorLow(node->var_)))
+                                res.insert(node);
+
+                            ResetFlags(node->var_);
+                        }
+                    }
+                }
+            }
+
+            nodes = std::move(res);
         }
 
-        return RecPre(res, var);
+        return CreateResultSet(nodes);
     }
 
 public:
@@ -378,7 +366,8 @@ public:
             return VectorType();
 
         symbol_ = symbol;
-        return RecPre({roots_[state]}, numVars_);
+        //return RecPre({roots_[state]});
+        return RecPre(roots_[state]);
     }
 
     void ProcessDFA(DFA *dfa)

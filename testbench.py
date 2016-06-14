@@ -155,7 +155,7 @@ def run_mona(test, timeout, params=[]):
     '''
     Runs MONA with following arguments:
     '''
-    args = ('mona', '-s', '-t', '-q', '"{}"'.format(test))
+    args = ['mona', '-s', '-t', '-q', '"{}"'.format(test)]
     output, retcode = runProcess(args, timeout)
     if(retcode != 0):
         if(retcode == 124):
@@ -206,7 +206,7 @@ def runProcess(args, timeout, from_error=False):
         if timeout is None:
             proc = subprocess.Popen(" ".join(args), shell=True, stdout=subprocess.PIPE)
         else:
-            proc = subprocess.Popen(" ".join((timeout, ) + args), shell=True, stdout=subprocess.PIPE)
+            proc = subprocess.Popen(" ".join([timeout] + args), shell=True, stdout=subprocess.PIPE)
         output = proc.stdout.readlines()
         proc.wait()
         return (output, proc.returncode)
