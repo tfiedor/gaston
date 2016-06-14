@@ -147,10 +147,11 @@ def create_argument_parser():
     parser.add_argument('--message', '-m', default=None, help='additional message printed into testbench output')
     parser.add_argument('--csv-name', '-c', default=None, help='name of the output csv file')
     parser.add_argument('--repeat', '-r', action='store_true', help='repeat the last experiment with the exact same options')
+    parser.add_argument('--gaston-params', '-gp', action='append', default=[], help='feeds additional params to gaston')
     return parser
 
 
-def run_mona(test, timeout):
+def run_mona(test, timeout, params=[]):
     '''
     Runs MONA with following arguments:
     '''
@@ -178,11 +179,12 @@ def retcode_to_error(retcode):
         return dwina_error
 
 
-def run_gaston(test, timeout):
+def run_gaston(test, timeout, params=[]):
     '''
     Runs dWiNA with following arguments: --method=backward
     '''
-    args = ('./build/gaston', '--no-automaton', '"{}"'.format(test))
+    args = ['./build/gaston', '--no-automaton'] + params + ['"{}"'.format(test)]
+    print(args)
     output, retcode = runProcess(args, timeout)
     return parse_gaston_output(output, retcode_to_error(retcode))
 
@@ -442,8 +444,9 @@ if __name__ == '__main__':
                 method_name = "_".join(["run"] + bin.split('-'))
                 try:
                     method_call = getattr(sys.modules[__name__], method_name)
-                    data[benchmark][bin], rets[bin] = method_call(benchmark, options.timeout)
-                except Exception:
+                    data[benchmark][bin], rets[bin] = method_call(benchmark, options.timeout, options.gaston_params)
+                except Exception as e:
+                    print(e)
                     data[benchmark][bin], rets[bin] = subprocess_error, ""
 
             cases += 1

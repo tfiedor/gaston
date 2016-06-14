@@ -19,6 +19,7 @@
 #define _LANGUAGE_C_PLUS_PLUS
 
 // < System Headers >
+#include <cstdlib>
 #include <iostream>
 #include <fstream>
 #include <new>
@@ -97,16 +98,17 @@ void bdd_callback() {
 void PrintUsage() {
 	cout << "Usage: gaston [options] <filename>\n\n"
 		<< "Options:\n"
-		<< " -t, --time          Print elapsed time\n"
-		<< " -d, --dump-all      Dump AST, symboltable, and code DAG\n"
-		<< " -ga, --print-aut    Print automaton in graphviz\n"
-		<< "     --no-automaton  Don't dump Automaton\n"
-		<< "     --test          Test specified problem [val, sat, unsat]\n"
-		<< "     --walk-aut      Does the experiment generating the special dot graph\n"
-		<< "     --serialize     Outputs the preprocessed file\n"
-		<< " -e, --expand-tagged Expand automata with given tag on first line of formula\n"
-		<< " -q, --quiet         Quiet, don't print progress\n"
-		<< " -oX                 Optimization level [1 = safe optimizations [default], 2 = heuristic]\n"
+		<< " -t,  --time          Print elapsed time\n"
+		<< " -d,  --dump-all      Dump AST, symboltable, and code DAG\n"
+		<< " -ga, --print-aut     Print automaton in graphviz\n"
+		<< " -cfX                 Transform all formulae with lesser than X fixpoints into automaton\n"
+		<< "      --no-automaton  Don't dump Automaton\n"
+		<< "      --test          Test specified problem [val, sat, unsat]\n"
+		<< "      --walk-aut      Does the experiment generating the special dot graph\n"
+		<< "      --serialize     Outputs the preprocessed file\n"
+		<< " -e,  --expand-tagged Expand automata with given tag on first line of formula\n"
+		<< " -q,  --quiet         Quiet, don't print progress\n"
+		<< " -oX                  Optimization level [1 = safe optimizations [default], 2 = heuristic]\n"
 		<< "Example: ./gaston -t -d foo.mona\n\n";
 }
 
@@ -139,20 +141,24 @@ bool ParseArguments(int argc, char *argv[]) {
 				return false;
 			if (strcmp(argv[i], "--dump-all") == 0)
 				options.dump = true;
-			else if(strcmp(argv[i], "--time") == 0)
+			else if (strcmp(argv[i], "--time") == 0)
 				options.time = true;
-			else if(strcmp(argv[i], "--quiet") == 0)
+			else if (strcmp(argv[i], "--quiet") == 0)
 				options.printProgress = false;
-			else if(strcmp(argv[i], "-ga") == 0 || strcmp(argv[i], "--print-aut") == 0)
+			else if (strcmp(argv[i], "-ga") == 0 || strcmp(argv[i], "--print-aut") == 0)
 				options.graphvizDAG = true;
-			else if(strcmp(argv[i], "--walk-aut") == 0) {
+			else if (strcmp(argv[i], "--walk-aut") == 0) {
 				options.monaWalk = true;
 				//mona_callback = bdd_callback;
-			} else if(strcmp(argv[i], "--serialize") == 0) {
+			} else if (strcmp(argv[i], "--serialize") == 0) {
 				options.serializeMona = true;
-            } else if(strcmp(argv[i], "--expand-tagged") == 0)
+			} else if (strcmp(argv[i], "--expand-tagged") == 0)
 				options.expandTagged = true;
-			else if(strcmp(argv[i], "--no-automaton") == 0)
+			else if (argv[i][0] == '-' && argv[i][1] == 'c' && argv[i][2] == 'f') {
+				std::string fixLimitStr(argv[i]);
+				fixLimitStr = fixLimitStr.substr(3);
+				options.fixLimit = stoi(fixLimitStr);
+			} else if(strcmp(argv[i], "--no-automaton") == 0)
 				options.dontDumpAutomaton = true;
 			else if(strcmp(argv[i], "--test=val") == 0) {
 				options.test = TestType::VALIDITY;

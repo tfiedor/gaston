@@ -247,7 +247,7 @@ void Checker::CloseUngroundFormula() {
                 BooleanUnfolder booleanUnfolder;
                 this->_rootRestriction = static_cast<ASTForm*>(restrictions->accept(booleanUnfolder));
                 this->_rootRestriction->is_restriction = true;
-                FixpointDetagger detagger;
+                FixpointDetagger detagger(options.fixLimit);
                 this->_rootRestriction->accept(detagger);
                 break;
         }
@@ -313,7 +313,7 @@ void Checker::PreprocessFormula() {
     std::cout << "Atoms: " << tagger.atoms << "\n";
 #   endif
 
-    FixpointDetagger detagger;
+    FixpointDetagger detagger(options.fixLimit);
     (this->_monaAST->formula)->accept(detagger);
 
     if (!options.monaWalk) {

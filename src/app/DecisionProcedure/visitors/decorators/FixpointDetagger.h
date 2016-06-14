@@ -10,12 +10,12 @@
 
 class FixpointDetagger : public VoidVisitor {
 private:
-    const size_t _cFixpointThreshold = 0;     // < Everything with less than _cFixpointThreshold fixpoint computations will be converted to automaton
+    const size_t _cFixpointThreshold;    // < Everything with less than _cFixpointThreshold fixpoint computations will be converted to automaton
 
     template<class FixpointFormula>
     void _visitFixpointComputation(FixpointFormula*);
 public:
-    FixpointDetagger() : VoidVisitor(Traverse::PostOrder) {}
+    FixpointDetagger(size_t fixpoint_limit = 0) : VoidVisitor(Traverse::PostOrder), _cFixpointThreshold(fixpoint_limit) {}
 
     void visit(ASTForm* form);
     void visit(ASTTerm* term) {};
