@@ -261,6 +261,7 @@ public:
     NEVER_INLINE NaryOpAutomaton(Formula_ptr form, bool doComplement);
 
     // <<< PUBLIC API >>>
+    SymLink* GetLeft() { return &this->_auts[0]; }
     virtual Term* Pre(Symbol*, Term*, bool);
     virtual bool WasLastExampleValid();
     // Fixme: Lazy init?

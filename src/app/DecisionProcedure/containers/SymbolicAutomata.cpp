@@ -244,9 +244,14 @@ ProjectionAutomaton::ProjectionAutomaton(SymbolicAutomaton_raw aut, Formula_ptr 
     if(innerForm->kind == aAnd || innerForm->kind == aOr) {
         ASTForm_ff* ff_form = static_cast<ASTForm_ff*>(innerForm);
         if(ff_form->f1->is_restriction) {
-            if(aut->type == AutType::TERNARY_INTERSECTION || aut->type == AutType::TERNARY_UNION) {
-                TernaryOpAutomaton *ternaryOpAutomaton = static_cast<TernaryOpAutomaton*>(aut);
+            if (aut->type == AutType::TERNARY_INTERSECTION || aut->type == AutType::TERNARY_UNION ||
+                aut->type == AutType::TERNARY_BIIMPLICATION || aut->type == AutType::TERNARY_IMPLICATION) {
+                TernaryOpAutomaton *ternaryOpAutomaton = static_cast<TernaryOpAutomaton *>(aut);
                 this->_guide = new FixpointGuide(ternaryOpAutomaton->GetLeft());
+            } else if(aut->type == AutType::NARY_BIIMPLICATION || aut->type == AutType::NARY_IMPLICATION ||
+                      aut->type == AutType::NARY_INTERSECTION  || aut->type == AutType::NARY_UNION) {
+                NaryOpAutomaton *naryOpAutomaton = static_cast<NaryOpAutomaton*>(aut);
+                this->_guide = new FixpointGuide(naryOpAutomaton->GetLeft());
             } else {
                 BinaryOpAutomaton *binaryOpAutomaton = static_cast<BinaryOpAutomaton *>(aut);
                 this->_guide = new FixpointGuide(binaryOpAutomaton->GetLeft());
