@@ -14,6 +14,7 @@ import re
 import subprocess
 import sys
 import smtplib
+import time
 from email.mime.text import MIMEText
 from email.mime.base import MIMEBase
 from email.mime.multipart import MIMEMultipart
@@ -310,11 +311,12 @@ def notify(results, contents):
 
     msg.attach(attachment)
 
-    #s = smtplib.SMTP('kazi.fit.vutbr.cz')
-    s = smtplib.SMTP('localhost')
+    s = smtplib.SMTP('kazi.fit.vutbr.cz')
+    #s = smtplib.SMTP('localhost')
 
     s.sendmail(sender, [receiver], msg.as_string())
     s.quit()
+    time.sleep(1)
 
 def generateCSVname():
     '''
