@@ -491,7 +491,9 @@ public:
 class ASTForm_ff: public ASTForm {
 public:
   ASTForm_ff(ASTKind kind, ASTForm *ff1, ASTForm *ff2, Pos p) :
-		  ASTForm(kind, p), f1(ff1), f2(ff2) {}
+		  ASTForm(kind, p), f1(ff1), f2(ff2) {
+	  this->fixpoint_number = std::max(ff1->fixpoint_number, ff2->fixpoint_number);
+  }
   ~ASTForm_ff() {delete f1; delete f2;}
 
   VISITABLE();

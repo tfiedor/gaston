@@ -247,14 +247,14 @@ ProjectionAutomaton::ProjectionAutomaton(SymbolicAutomaton_raw aut, Formula_ptr 
             if (aut->type == AutType::TERNARY_INTERSECTION || aut->type == AutType::TERNARY_UNION ||
                 aut->type == AutType::TERNARY_BIIMPLICATION || aut->type == AutType::TERNARY_IMPLICATION) {
                 TernaryOpAutomaton *ternaryOpAutomaton = static_cast<TernaryOpAutomaton *>(aut);
-                this->_guide = new FixpointGuide(ternaryOpAutomaton->GetLeft());
+                this->_guide = new FixpointGuide(ternaryOpAutomaton->GetLeft(), ff_form->f2->fixpoint_number == 0);
             } else if(aut->type == AutType::NARY_BIIMPLICATION || aut->type == AutType::NARY_IMPLICATION ||
                       aut->type == AutType::NARY_INTERSECTION  || aut->type == AutType::NARY_UNION) {
                 NaryOpAutomaton *naryOpAutomaton = static_cast<NaryOpAutomaton*>(aut);
-                this->_guide = new FixpointGuide(naryOpAutomaton->GetLeft());
+                this->_guide = new FixpointGuide(naryOpAutomaton->GetLeft(), ff_form->f2->fixpoint_number == 0);
             } else {
                 BinaryOpAutomaton *binaryOpAutomaton = static_cast<BinaryOpAutomaton *>(aut);
-                this->_guide = new FixpointGuide(binaryOpAutomaton->GetLeft());
+                this->_guide = new FixpointGuide(binaryOpAutomaton->GetLeft(), ff_form->f2->fixpoint_number == 0);
             }
         } else {
             this->_guide = new FixpointGuide();
@@ -1650,6 +1650,7 @@ void SymbolicAutomaton::AutomatonToDot(std::string filename, SymbolicAutomaton *
 void SymbolicAutomaton::DumpProductHeader(std::ofstream & os, bool inComplement, ProductType productType) {
     os << "\t" << (uintptr_t) &*this << "[label=\"";
     os << this->_factory.ToSimpleStats() << "\\n";
+    os << this->_form->fixpoint_number << ": ";
     os << "\u03B5 " << (inComplement ? "\u2209 " : "\u2208 ");
     os << ProductTypeToAutomatonSymbol(productType);
     os << "\\n(" << this->_trueCounter << "\u22A8, " << this->_falseCounter << "\u22AD)\"";
@@ -1700,6 +1701,7 @@ void NaryOpAutomaton::DumpToDot(std::ofstream &os, bool inComplement) {
 void ComplementAutomaton::DumpToDot(std::ofstream & os, bool inComplement) {
     os << "\t" << (uintptr_t) &*this << "[label=\"";
     os << this->_factory.ToSimpleStats() << "\\n";
+    os << this->_form->fixpoint_number << ": ";
     os << "\u03B5 " << (inComplement ? "\u2209 " : "\u2208 ");
     os << "\u00AC\\n(" << this->_trueCounter << "\u22A8, " << this->_falseCounter << "\u22AD)\"";
 #   if (PRINT_DOT_BLACK_AND_WHITE == false)
@@ -1715,6 +1717,7 @@ void ComplementAutomaton::DumpToDot(std::ofstream & os, bool inComplement) {
 void ProjectionAutomaton::DumpToDot(std::ofstream & os, bool inComplement) {
     os << "\t" << (uintptr_t) &*this << "[label=\"";
     os << this->_factory.ToSimpleStats() << "\\n";
+    os << this->_form->fixpoint_number << ": ";
     os << "\u03B5 " << (inComplement ? "\u2209 " : "\u2208 ");
     os << "\u2203";
     for(auto id = this->projectedVars->begin(); id != this->projectedVars->end(); ++id) {
@@ -1761,6 +1764,7 @@ std::string utf8_substr(std::string originalString, int maxLength)
 void BaseAutomaton::DumpToDot(std::ofstream & os, bool inComplement) {
     os << "\t" << (uintptr_t) &*this << "[label=\"";
     os << this->_factory.ToSimpleStats() << "\\n";
+    os << this->_form->fixpoint_number << ": ";
     os << "\u03B5 " << (inComplement ? "\u2209 " : "\u2208 ") << utf8_substr(this->_form->ToString(), PRINT_DOT_LIMIT);
     os << "\\n(" << this->_trueCounter << "\u22A8, " << this->_falseCounter << "\u22AD)\"";
 #   if (PRINT_DOT_BLACK_AND_WHITE == false)

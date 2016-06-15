@@ -318,10 +318,10 @@ void Checker::PreprocessFormula() {
 
     if (!options.monaWalk) {
         SecondOrderRestricter restricter;
-        this->_monaAST->formula = static_cast<ASTForm *>((this->_monaAST->formula)->accept(restricter));
+        this->_monaAST->formula = static_cast<ASTForm*>((this->_monaAST->formula)->accept(restricter));
 
         QuantificationMerger quantificationMerger;
-        this->_monaAST->formula = static_cast<ASTForm *>((this->_monaAST->formula)->accept(quantificationMerger));
+        this->_monaAST->formula = static_cast<ASTForm*>((this->_monaAST->formula)->accept(quantificationMerger));
 
 #       if (OPT_EARLY_EVALUATION == true)
         UnderComplementDecorator underComplementDecorator;

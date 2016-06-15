@@ -31,7 +31,7 @@ std::ostream &operator<<(std::ostream &out, const FixpointGuide &rhs) {
  *
  * @param[in] link:         SymLink to automaton that is wrapped by fixpoint guide
  */
-FixpointGuide::FixpointGuide(SymLink *link) : _link(link) {
+FixpointGuide::FixpointGuide(SymLink *link, bool qf) : _link(link), _isQuantifierFree(qf) {
     this->_InitializeVars(link->aut->_form);
 }
 
@@ -44,6 +44,8 @@ void FixpointGuide::SetAutomaton(SymLink* link) {
     if(this->_link == nullptr) {
         this->_link = link;
         this->_InitializeVars(this->_link->aut->_form);
+    } else {
+        assert(false && "Trying to reinitialize Guide\n");
     }
 }
 
@@ -104,6 +106,8 @@ GuideTip FixpointGuide::GiveTip(Term* term, Symbol* symbol) {
 
         symbol = this->_link->ReMapSymbol(symbol);
         TermProduct *tp = static_cast<TermProduct *>(term);
+        // FIXME: FIX THIS SHIT
+        //assert(term->type == TermType::TERM_PRODUCT);
 
         if (static_cast<TermBaseSet *>(tp->left)->Intersects(static_cast<TermBaseSet *>(this->_link->aut->GetInitialStates()))) {
             // Restriction holds, we'll look back at link and if the right side did not progress, we will throw it away
@@ -116,4 +120,25 @@ GuideTip FixpointGuide::GiveTip(Term* term, Symbol* symbol) {
         }
     }
     return GuideTip::G_FRONT;
+}
+
+/**
+ * Returns tip what to do with the @p term. If the restriction on the left holds, we don't have to project
+ * everything away and simply push everything we can down, so simply project everything we can.
+ *
+ * @param[in] term:         term we are potentially adding to the worklist
+ * @return:                 tip what to do with the @p term
+ */
+GuideTip FixpointGuide::GiveTip(Term* term) {
+    if (this->_isQuantifierFree && this->_link != nullptr && term->type != TERM_EMPTY) {
+        //assert(term->type == TermType::TERM_PRODUCT);
+        TermProduct *tp = static_cast<TermProduct*>(term);
+        TermBaseSet* initial = static_cast<TermBaseSet*>(this->_link->aut->GetInitialStates());
+        TermBaseSet* states = static_cast<TermBaseSet*>(tp->left);
+        if (initial->Intersects(states)) {
+            return GuideTip::G_PROJECT_ALL;
+        }
+    }
+
+    return GuideTip::G_PROJECT;
 }

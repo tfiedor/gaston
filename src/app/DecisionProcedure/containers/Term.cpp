@@ -227,7 +227,6 @@ TermNaryProduct::TermNaryProduct(Term_ptr source, Symbol_ptr symbol, ProductType
 #   endif
 
     this->terms = new Term_ptr[arity];
-//    std::copy(terms, terms+arity, this->terms);
     this->_InitNaryProduct(pt, arity);
 }
 
@@ -358,43 +357,53 @@ TermFixpoint::TermFixpoint(Aut_ptr aut, Term_ptr startingTerm, Symbol* symbol, b
 #       if (DEBUG_RESTRICTION_DRIVEN_FIX == true)
         std::cout << "Created new fixpoint for '"; this->_aut->_form->dump(); std::cout << "'\n";
 #       endif
-        for (auto symbol : this->_symList) {
-#           if (OPT_WORKLIST_DRIVEN_BY_RESTRICTIONS == true)
-#           if (DEBUG_RESTRICTION_DRIVEN_FIX == true)
-            startingTerm->dump(); std::cout << " + " << (*symbol) << " -> ";
-#           endif
-            if(this->_guide != nullptr) {
-                switch (this->_guide->GiveTip(startingTerm, symbol)) {
-                    case GuideTip::G_FRONT:
-#                       if (DEBUG_RESTRICTION_DRIVEN_FIX == true)
-                        std::cout << "G_FRONT\n";
-#                       endif
-                        this->_worklist.insert(this->_worklist.cbegin(), std::make_pair(startingTerm, symbol));
-                        break;
-                    case GuideTip::G_BACK:
-#                       if (DEBUG_RESTRICTION_DRIVEN_FIX == true)
-                        std::cout << "G_BACK\n";
-#                       endif
-                        this->_worklist.push_back(std::make_pair(startingTerm, symbol));
-                        break;
-                    case GuideTip::G_THROW:
-#                       if (DEBUG_RESTRICTION_DRIVEN_FIX == true)
-                        std::cout << "G_THROW\n";
-#                       endif
-                        break;
-                    default:
-                        assert(false && "Unsupported guiding tip\n");
-                }
-            } else {
+#       if (OPT_WORKLIST_DRIVEN_BY_RESTRICTIONS == true)
+        GuideTip tip;
+        if(this->_guide == nullptr || (tip = this->_guide->GiveTip(startingTerm)) == GuideTip::G_PROJECT) {
+#       endif
+            for (auto symbol : this->_symList) {
+#               if (OPT_WORKLIST_DRIVEN_BY_RESTRICTIONS == true)
 #               if (DEBUG_RESTRICTION_DRIVEN_FIX == true)
-                std::cout << "insert\n";
+                startingTerm->dump(); std::cout << " + " << (*symbol) << " -> ";
 #               endif
+                if (this->_guide != nullptr) {
+                    switch (this->_guide->GiveTip(startingTerm, symbol)) {
+                        case GuideTip::G_FRONT:
+#                           if (DEBUG_RESTRICTION_DRIVEN_FIX == true)
+                            std::cout << "G_FRONT\n";
+#                          endif
+                            this->_worklist.insert(this->_worklist.cbegin(), std::make_pair(startingTerm, symbol));
+                            break;
+                        case GuideTip::G_BACK:
+#                           if (DEBUG_RESTRICTION_DRIVEN_FIX == true)
+                            std::cout << "G_BACK\n";
+#                           endif
+                            this->_worklist.push_back(std::make_pair(startingTerm, symbol));
+                            break;
+                        case GuideTip::G_THROW:
+#                           if (DEBUG_RESTRICTION_DRIVEN_FIX == true)
+                            std::cout << "G_THROW\n";
+#                           endif
+                            break;
+                        default:
+                            assert(false && "Unsupported guiding tip\n");
+                    }
+                } else {
+#                   if (DEBUG_RESTRICTION_DRIVEN_FIX == true)
+                    std::cout << "insert\n";
+#                   endif
+                    this->_worklist.insert(this->_worklist.cbegin(), std::make_pair(startingTerm, symbol));
+                }
+#               else
                 this->_worklist.insert(this->_worklist.cbegin(), std::make_pair(startingTerm, symbol));
+#               endif
             }
-#           else
-            this->_worklist.insert(this->_worklist.cbegin(), std::make_pair(startingTerm, symbol));
-#           endif
+#       if (OPT_WORKLIST_DRIVEN_BY_RESTRICTIONS == true)
+        } else {
+            assert(tip == GuideTip::G_PROJECT_ALL);
+            this->_worklist.insert(this->_worklist.cbegin(), std::make_pair(startingTerm, this->_projectedSymbol));
         }
+#       endif
         assert(this->_worklist.size() > 0 || startingTerm->type == TERM_EMPTY);
 #   if (OPT_NO_SATURATION_FOR_M2L == true)
     }
@@ -1571,49 +1580,59 @@ void TermFixpoint::ComputeNextFixpoint() {
 #   if (DEBUG_RESTRICTION_DRIVEN_FIX == true)
     std::cout << "ComputeNextFixpoint()\n";
 #   endif
-    for(auto& symbol : _symList) {
-#       if (OPT_WORKLIST_DRIVEN_BY_RESTRICTIONS == true)
-#       if (DEBUG_RESTRICTION_DRIVEN_FIX == true)
-        result.first->dump(); std::cout << " + " << (*symbol) << " -> ";
-#       endif
-        if(this->_guide != nullptr) {
-            bool break_from_for = false;
-            switch(this->_guide->GiveTip(result.first, symbol)) {
-                case GuideTip::G_FRONT:
-#                   if (DEBUG_RESTRICTION_DRIVEN_FIX == true)
-                    std::cout << "G_FRONT\n";
-#                   endif
-                    _worklist.insert(_worklist.cbegin(), std::make_pair(result.first, symbol));
-                    break;
-                case GuideTip::G_BACK:
-#                   if (DEBUG_RESTRICTION_DRIVEN_FIX == true)
-                    std::cout << "G_BACK\n";
-#                   endif
-                    _worklist.push_back(std::make_pair(result.first, symbol));
-                    break;
-                case GuideTip::G_THROW:
-#                   if (DEBUG_RESTRICTION_DRIVEN_FIX == true)
-                    std::cout << "G_THROW\n";
-#                   endif
-                    break;
-                case GuideTip::G_PROJECT:
-                    _worklist.insert(_worklist.cbegin(), std::make_pair(result.first, symbol));
-                    break;
-                default:
-                    assert(false && "Unsupported guide tip");
-            }
-        } else {
+#   if (OPT_WORKLIST_DRIVEN_BY_RESTRICTIONS == true)
+    GuideTip tip;
+    if (this->_guide == nullptr || (tip = this->_guide->GiveTip(result.first)) == GuideTip::G_PROJECT) {
+#   endif
+        for (auto &symbol : _symList) {
+#           if (OPT_WORKLIST_DRIVEN_BY_RESTRICTIONS == true)
 #           if (DEBUG_RESTRICTION_DRIVEN_FIX == true)
-            std::cout << "insert\n";
+            result.first->dump(); std::cout << " + " << (*symbol) << " -> ";
 #           endif
+            if (this->_guide != nullptr) {
+                bool break_from_for = false;
+                switch (this->_guide->GiveTip(result.first, symbol)) {
+                    case GuideTip::G_FRONT:
+#                       if (DEBUG_RESTRICTION_DRIVEN_FIX == true)
+                        std::cout << "G_FRONT\n";
+#                       endif
+                        _worklist.insert(_worklist.cbegin(), std::make_pair(result.first, symbol));
+                        break;
+                    case GuideTip::G_BACK:
+#                       if (DEBUG_RESTRICTION_DRIVEN_FIX == true)
+                        std::cout << "G_BACK\n";
+#                       endif
+                        _worklist.push_back(std::make_pair(result.first, symbol));
+                        break;
+                    case GuideTip::G_THROW:
+#                       if (DEBUG_RESTRICTION_DRIVEN_FIX == true)
+                        std::cout << "G_THROW\n";
+#                       endif
+                        break;
+                    case GuideTip::G_PROJECT:
+                        _worklist.insert(_worklist.cbegin(), std::make_pair(result.first, symbol));
+                        break;
+                    default:
+                        assert(false && "Unsupported guide tip");
+                }
+            } else {
+#               if (DEBUG_RESTRICTION_DRIVEN_FIX == true)
+                std::cout << "insert\n";
+#               endif
+                _worklist.insert(_worklist.cbegin(), std::make_pair(result.first, symbol));
+            }
+#           elif (OPT_FIXPOINT_BFS_SEARCH == true)
+            _worklist.push_back(std::make_pair(result.first, symbol));
+#          else
             _worklist.insert(_worklist.cbegin(), std::make_pair(result.first, symbol));
+#           endif
         }
-#       elif (OPT_FIXPOINT_BFS_SEARCH == true)
-        _worklist.push_back(std::make_pair(result.first, symbol));
-#       else
-        _worklist.insert(_worklist.cbegin(), std::make_pair(result.first, symbol));
-#       endif
+#   if (OPT_WORKLIST_DRIVEN_BY_RESTRICTIONS == true)
+    } else {
+        assert(tip == GuideTip::G_PROJECT_ALL);
+        _worklist.insert(_worklist.cbegin(), std::make_pair(result.first, this->_projectedSymbol));
     }
+#   endif
 }
 
 /**
@@ -1684,8 +1703,10 @@ void TermFixpoint::_InitializeSymbols(Workshops::SymbolWorkshop* workshop, Gasto
 #   if (DEBUG_FIXPOINT_SYMBOLS_INIT == true)
     std::cout << "[F] Initializing symbols of '"; this->dump(); std::cout << "\n";
 #   endif
+    this->_projectedSymbol = startingSymbol;
     for(auto var = vars->begin(); var != vars->end(); ++var) {
         // Pop symbol;
+        this->_projectedSymbol = workshop->CreateSymbol(this->_projectedSymbol, varMap[(*var)], 'X');
         if(*var == allPosVar)
             continue;
         for(auto i = symNum; i != 0; --i) {

@@ -523,6 +523,7 @@ protected:
     WorklistType _worklist;                 // [8B] << Worklist of the fixpoint
     Symbols _symList;                       // [8B] << List of symbols
     size_t _iteratorNumber = 0;             // [4-8B] << How many iterators are pointing to fixpoint
+    Symbol_ptr _projectedSymbol;            // [4B] << Source symbol with projected vars
     Aut_ptr _aut;                           // [4B] << Source automaton
     Term_ptr _sourceTerm;                   // [4B] << Source term of the fixpoint
     Symbol_ptr _sourceSymbol;               // [4B] << Source symbol before breaking to little symboiles
