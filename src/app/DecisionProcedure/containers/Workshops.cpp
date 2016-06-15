@@ -120,6 +120,7 @@ namespace Workshops {
 
     TermEmpty* TermWorkshop::_empty = nullptr;
     TermEmpty* TermWorkshop::_emptyComplement = nullptr;
+    unsigned long TermWorkshop::monaAutomataStates = 0;
 
     TermEmpty* TermWorkshop::CreateEmpty() {
         if(TermWorkshop::_empty == nullptr) {
@@ -508,6 +509,7 @@ namespace Workshops {
             }
         }
 
+        // Fixme: This is shitty, maybe making this different than 0u, 'T' would help
         auto symbolKey = std::make_tuple(src, static_cast<VarType>(0u), 'T');
         Symbol* sPtr;
         if(!this->_trimmedSymbolCache->retrieveFromCache(symbolKey, sPtr)) {
@@ -572,7 +574,7 @@ namespace Workshops {
 
     Symbol* SymbolWorkshop::CreateRemappedSymbol(Symbol* str, std::map<unsigned int, unsigned int>*& map, size_t tag) {
         // There should be Map of Ptr -> Ptr
-        //auto symbolKey = std::make_tuple(str, static_cast<VarType>(0u), 'R');
+        // Fixme: this could be optimized to something more sufficient, like removing the 'R' part?
         auto symbolKey = std::make_tuple(str, tag, 'R');
         Symbol* symPtr;
         if(!this->_remappedSymbolCache->retrieveFromCache(symbolKey, symPtr)) {

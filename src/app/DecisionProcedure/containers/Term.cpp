@@ -649,13 +649,29 @@ SubsumptionResult TermNaryProduct::_IsSubsumedCore(Term *t, int limit, bool b) {
     return E_TRUE;
 }
 
+/*
+ * Efficient integer comparison taken from: http://stackoverflow.com/a/10997428
+ */
+inline int compare_integers (int a, int b) {
+    __asm__ __volatile__ (
+    "sub %1, %0 \n\t"
+            "jno 1f \n\t"
+            "cmc \n\t"
+            "rcr %0 \n\t"
+            "1: "
+    : "+r"(a)
+    : "r"(b)
+    : "cc");
+    return a;
+}
+
 SubsumptionResult TermBaseSet::_IsSubsumedCore(Term *term, int limit, bool unfoldAll) {
     assert(term->type == TERM_BASE);
 
     // Test component-wise, not very efficient though
     // TODO: Change to bit-vectors if possible
     TermBaseSet *t = static_cast<TermBaseSet*>(term);
-    if(t->states.size() < this->states.size()) {
+    if(t->stateSpace < this->stateSpace) {
         return E_FALSE;
     } else {
         // TODO: Maybe we could exploit that we have ordered vectors
@@ -667,9 +683,7 @@ SubsumptionResult TermBaseSet::_IsSubsumedCore(Term *term, int limit, bool unfol
             if(*it == *tit) {
                 ++it;
                 ++tit;
-            } else if(*it > *tit) {
-                ++tit;
-            } else {
+            } else if (*it < *(tit++)) {
                 // *it < *tit
                 return E_FALSE;
             }

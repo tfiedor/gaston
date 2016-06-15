@@ -363,7 +363,7 @@ public:
 #define OPT_SHUFFLE_HASHES					true    // < Shuffles the bits in the hashes
 #define OPT_ENUMERATED_SUBSUMPTION_TESTING  false   // < Partially enumerates the products
 #define OPT_USE_TERNARY_AUTOMATA			true    // < Will use ternary automata if possible
-#define OPT_USE_NARY_AUTOMATA				false   // < Will use nary automata if possible
+#define OPT_USE_NARY_AUTOMATA				true	// < Will use nary automata if possible
 #define OPT_PRUNE_WORKLIST					true	// < Will remove stuff from worklist during the pruning
 #define OPT_BI_AND_IMPLICATION_SUPPORT		true	// < Will not restrict the syntax, by removing => and <=>
 

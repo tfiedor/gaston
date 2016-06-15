@@ -5,9 +5,10 @@
 #include <csignal>
 #include "SymbolicChecker.h"
 #include "../containers/Term.h"
+#include "../containers/Workshops.h"
+#include "../environment.hh"
 #include "../../Frontend/timer.h"
 #include "../../Frontend/env.h"
-#include "../environment.hh"
 
 extern Timer timer_conversion, timer_mona, timer_base, timer_automaton, timer_preprocess, timer_closure, timer_parse;
 extern Ident lastPosVar, allPosVar;
@@ -312,6 +313,7 @@ bool SymbolicChecker::Run() {
     OUTPUT_MEASURES(TermContinuation)
 #   endif
 #   undef OUTPUT_MEASURES
+    std::cout << "[*] Mona State Space: " << (Workshops::TermWorkshop::monaAutomataStates) << "\n";
     std::cout << "[*] Overall State Space: " << (TermProduct::instances + TermBaseSet::instances + TermFixpoint::instances
                                                  + TermList::instances + TermContinuation::instances + TermNaryProduct::instances
                                                  + TermTernaryProduct::instances) << "\n";

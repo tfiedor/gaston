@@ -193,6 +193,8 @@ namespace Workshops {
         inline static BinaryCache<A, B, C, D, E, F>* _cleanCache(BinaryCache<A, B, C, D, E, F>*, bool noMemberDelete = false);
 
     public:
+        static unsigned long monaAutomataStates;
+
         // <<< CONSTRUCTORS >>>
         explicit TermWorkshop(SymbolicAutomaton*);
         ~TermWorkshop();

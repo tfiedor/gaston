@@ -68,6 +68,7 @@ measures = {
             'symbols': Measure("symbols" + whatever_regex + space_regex, space_default, int, False),
             'time': Measure("total elapsed time" + whatever_regex + time_regex, time_default, parse_total_time, False),
             'space': Measure("explored fixpoint space" + whatever_regex + space_regex, space_default, int, False),
+            'space-mona': Measure("mona state space" + whatever_regex + space_regex, space_default, int, False),
             'space-all': Measure("overall state space" + whatever_regex + space_regex, space_default, int, False),
             'space-fix': Measure("fixpoints" + whatever_regex + space_regex, space_default, int, False),
             'space-base': Measure("bases" + whatever_regex + space_regex, space_default, int, False),
@@ -113,7 +114,7 @@ measures = {
 }
 
 csv_keys = {
-    'gaston': ['ret', 'time', 'time-pre', 'space-all', 'space', 'space-base', 'space-prod', 'space-ternary', 'space-fix'],
+    'gaston': ['ret', 'time', 'space-all', 'space', 'space-mona', 'space-base'],
     'mona': ['time', 'space', 'space-min']
 }
 

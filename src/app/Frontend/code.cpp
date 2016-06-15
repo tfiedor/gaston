@@ -26,10 +26,9 @@
 #include "symboltable.h"
 #include "env.h"
 #include "lib.h"
+#include "../DecisionProcedure/containers/Workshops.h"
 
 using std::cout;
-
-
 
 extern "C" {
 #include "mem.h"
@@ -108,6 +107,8 @@ VarCode::DFATranslate()
     code->mark = true;
     invariant(code->dfa);
     codeTable->print_progress();
+    // Add aggregation of mona states
+    Workshops::TermWorkshop::monaAutomataStates += code->dfa->ns;
   }
 
   DFA *a = code->dfa;
