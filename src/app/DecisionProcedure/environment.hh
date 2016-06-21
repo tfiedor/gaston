@@ -367,6 +367,7 @@ public:
 #define OPT_USE_NARY_AUTOMATA				true	// < Will use nary automata if possible
 #define OPT_PRUNE_WORKLIST					true	// < Will remove stuff from worklist during the pruning
 #define OPT_BI_AND_IMPLICATION_SUPPORT		true	// < Will not restrict the syntax, by removing => and <=>
+#define OPT_USE_BOOST_POOL_FOR_ALLOC		true	// < Will use boost::object_pool<> for allocation
 
 /* >>> Static Assertions <<< *
  *****************************/

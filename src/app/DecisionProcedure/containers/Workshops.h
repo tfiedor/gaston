@@ -38,18 +38,21 @@
 #define WSKS_WORKSHOPS_H
 
 
-#include <boost/functional/hash.hpp>
 #include <unordered_map>
 #include <functional>
 #include <tuple>
+#include <boost/functional/hash.hpp>
+#include <boost/pool/object_pool.hpp>
+#include "SymbolicCache.hh"
 #include "../environment.hh"
 #include "../../Frontend/ident.h"
-#include "SymbolicCache.hh"
 
 // <<< FORWARD DECLARATION >>>
 class TermEmpty;
 class TermBaseSet;
 class TermProduct;
+class TermTernaryProduct;
+class TermNaryProduct;
 class TermFixpoint;
 class TermList;
 class TermContinuation;
@@ -187,6 +190,14 @@ namespace Workshops {
         static TermEmpty *_emptyComplement;
 
         SymbolicAutomaton* _aut; // ProjectionAutomaton for Fixpoints
+
+#       if (OPT_USE_BOOST_POOL_FOR_ALLOC == true)
+        static boost::object_pool<TermFixpoint> _fixpointPool;
+        static boost::object_pool<TermProduct> _productPool;
+        static boost::object_pool<TermTernaryProduct> _ternaryProductPool;
+        static boost::object_pool<TermNaryProduct> _naryProductPool;
+        static boost::object_pool<TermBaseSet> _basePool;
+#       endif
     private:
         // <<< PRIVATE FUNCTIONS >>>
         template<class A, class B, class C, class D, void (*E)(const A&), void (*F)(B&)>
@@ -230,6 +241,9 @@ namespace Workshops {
         std::vector<Symbol*> _remappedSymbols;
         Symbol* _CreateProjectedSymbol(Symbol*, VarType, ValType);
 
+#       if (OPT_USE_BOOST_POOL_FOR_ALLOC == true)
+        static boost::object_pool<Symbol> _pool;
+#       endif
     public:
         static Symbol* _zeroSymbol;
 

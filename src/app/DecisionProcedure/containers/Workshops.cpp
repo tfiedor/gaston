@@ -25,13 +25,13 @@ namespace Workshops {
     }
 
     NEVER_INLINE TermWorkshop::~TermWorkshop() {
-        this->_bCache = TermWorkshop::_cleanCache(this->_bCache);
+        this->_bCache = TermWorkshop::_cleanCache(this->_bCache, OPT_USE_BOOST_POOL_FOR_ALLOC);
         this->_ubCache = TermWorkshop::_cleanCache(this->_ubCache, true);
-        this->_npCache = TermWorkshop::_cleanCache(this->_npCache);
-        this->_fpCache = TermWorkshop::_cleanCache(this->_fpCache);
-        this->_fppCache = TermWorkshop::_cleanCache(this->_fppCache);
-        this->_pCache = TermWorkshop::_cleanCache(this->_pCache);
-        this->_tpCache = TermWorkshop::_cleanCache(this->_tpCache);
+        this->_fpCache = TermWorkshop::_cleanCache(this->_fpCache, OPT_USE_BOOST_POOL_FOR_ALLOC);
+        this->_fppCache = TermWorkshop::_cleanCache(this->_fppCache, OPT_USE_BOOST_POOL_FOR_ALLOC);
+        this->_pCache = TermWorkshop::_cleanCache(this->_pCache, OPT_USE_BOOST_POOL_FOR_ALLOC);
+        this->_tpCache = TermWorkshop::_cleanCache(this->_tpCache, OPT_USE_BOOST_POOL_FOR_ALLOC);
+        this->_npCache = TermWorkshop::_cleanCache(this->_npCache, OPT_USE_BOOST_POOL_FOR_ALLOC);
         this->_lCache = TermWorkshop::_cleanCache(this->_lCache);
         this->_contCache = TermWorkshop::_cleanCache(this->_contCache);
         this->_compCache = TermWorkshop::_cleanCache(this->_compCache, true);
@@ -121,6 +121,13 @@ namespace Workshops {
     TermEmpty* TermWorkshop::_empty = nullptr;
     TermEmpty* TermWorkshop::_emptyComplement = nullptr;
     unsigned long TermWorkshop::monaAutomataStates = 0;
+#   if (OPT_USE_BOOST_POOL_FOR_ALLOC == true)
+    boost::object_pool<TermFixpoint> TermWorkshop::_fixpointPool;
+    boost::object_pool<TermProduct> TermWorkshop::_productPool;
+    boost::object_pool<TermTernaryProduct> TermWorkshop::_ternaryProductPool;
+    boost::object_pool<TermNaryProduct> TermWorkshop::_naryProductPool;
+    boost::object_pool<TermBaseSet> TermWorkshop::_basePool;
+#   endif
 
     TermEmpty* TermWorkshop::CreateEmpty() {
         if(TermWorkshop::_empty == nullptr) {
@@ -161,7 +168,11 @@ namespace Workshops {
                 std::cout << "[*] Creating BaseSet: ";
                 #endif
                 // The object was not created yet, so we create it and store it in cache
+#               if (OPT_USE_BOOST_POOL_FOR_ALLOC == true)
+                termPtr = TermWorkshop::_basePool.construct(states, offset, stateno);
+#               else
                 termPtr = new TermBaseSet(std::move(states), offset, stateno);
+#               endif
                 this->_bCache->StoreIn(states, termPtr);
             }
             assert(termPtr != nullptr);
@@ -199,7 +210,11 @@ namespace Workshops {
         Term* termPtr = nullptr;
         auto ternaryKey = std::make_tuple(lhs, mhs, rhs);
         if(!this->_tpCache->retrieveFromCache(ternaryKey, termPtr)) {
+#           if (OPT_USE_BOOST_POOL_FOR_ALLOC == true)
+            termPtr = TermWorkshop::_ternaryProductPool.construct(std::make_tuple(lhs, mhs, rhs), type);
+#           else
             termPtr = new TermTernaryProduct(lhs, mhs, rhs, type);
+#           endif
             this->_tpCache->StoreIn(ternaryKey, termPtr);
         }
         assert(termPtr != nullptr);
@@ -210,7 +225,11 @@ namespace Workshops {
     }
 
     Term* TermWorkshop::CreateNaryProduct(Term_ptr const& base, Symbol* symbol, size_t arity, ProductType pt) {
+#       if (OPT_USE_BOOST_POOL_FOR_ALLOC == true)
+        return TermWorkshop::_naryProductPool.construct(base, symbol, std::make_pair(pt, arity));
+#       else
         return new TermNaryProduct(base, symbol, pt, arity);
+#       endif
     }
 
     Term* TermWorkshop::CreateNaryProduct(Term_ptr* const& terms, size_t arity, ProductType pt) {
@@ -220,7 +239,11 @@ namespace Workshops {
         Term* termPtr = nullptr;
         auto naryKey = std::make_pair(terms, arity);
         if(!this->_npCache->retrieveFromCache(naryKey, termPtr)) {
+#           if (OPT_USE_BOOST_POOL_FOR_ALLOC == true)
+            termPtr = TermWorkshop::_naryProductPool.construct(terms, pt, arity);
+#           else
             termPtr = new TermNaryProduct(terms, pt, arity);
+#           endif
             this->_npCache->StoreIn(naryKey, termPtr);
         }
         assert(termPtr != nullptr);
@@ -235,7 +258,11 @@ namespace Workshops {
     }
 
     Term* TermWorkshop::CreateBaseNaryProduct(SymLink* symlinks, size_t arity, StatesSetType st, ProductType pt) {
+#       if (OPT_USE_BOOST_POOL_FOR_ALLOC == true)
+        return TermWorkshop::_naryProductPool.construct(symlinks, st, std::make_pair(pt, arity));
+#       else
         return new TermNaryProduct(symlinks, st, pt, arity);
+#       endif
     }
 
     /**
@@ -261,7 +288,11 @@ namespace Workshops {
             std::cout << "from ["<< lptr << "] + [" << rptr << "] to ";
 #           endif
             // The object was not created yet, so we create it and store it in cache
+#           if (OPT_USE_BOOST_POOL_FOR_ALLOC == true)
+            termPtr = TermWorkshop::_productPool.construct(lptr, rptr, type);
+#           else
             termPtr = new TermProduct(lptr, rptr, type);
+#           endif
             this->_pCache->StoreIn(productKey, termPtr);
         }
         assert(termPtr != nullptr);
@@ -311,7 +342,11 @@ namespace Workshops {
                 std::cout << "[*] Creating Fixpoint: ";
                 std::cout << "from [" << source << "] to ";
                 #endif
+#               if (OPT_USE_BOOST_POOL_FOR_ALLOC == true)
+                termPtr = TermWorkshop::_fixpointPool.construct(this->_aut, std::make_tuple(source, symbol, inCompl, initValue, search));
+#               else
                 termPtr = new TermFixpoint(this->_aut, source, symbol, inCompl, initValue, search);
+#               endif
                 this->_fpCache->StoreIn(fixpointKey, termPtr);
             }
             assert(termPtr != nullptr);
@@ -336,7 +371,11 @@ namespace Workshops {
                 std::cout << "[*] Creating FixpointPre: ";
                 std::cout << "from [" << source << "] to ";
                 #endif
+#               if (OPT_USE_BOOST_POOL_FOR_ALLOC == true)
+                termPtr = TermWorkshop::_fixpointPool.construct(this->_aut, std::make_pair(source, symbolKey), inCompl);
+#               else
                 termPtr = new TermFixpoint(this->_aut, source, symbolKey, inCompl);
+#               endif
                 this->_fppCache->StoreIn(fixpointKey, termPtr);
             }
             assert(termPtr != nullptr);
@@ -456,6 +495,8 @@ namespace Workshops {
     }
 
     NEVER_INLINE SymbolWorkshop::~SymbolWorkshop() {
+#       if (OPT_USE_BOOST_POOL_FOR_ALLOC == false)
+        // Only nonpool implementation needs to take care of deallocation
         if(_zeroSymbol != nullptr) {
             delete SymbolWorkshop::_zeroSymbol;
             SymbolWorkshop::_zeroSymbol = nullptr;
@@ -469,15 +510,23 @@ namespace Workshops {
         for(auto symb : this->_trimmedSymbols) {
             delete symb;
         }
+#       endif
         delete this->_trimmedSymbolCache;
         delete this->_symbolCache;
     }
 
     Symbol* SymbolWorkshop::_zeroSymbol = nullptr;
+#   if (OPT_USE_BOOST_POOL_FOR_ALLOC == true)
+    boost::object_pool<Symbol> SymbolWorkshop::_pool;
+#   endif
 
     Symbol* SymbolWorkshop::CreateZeroSymbol() {
         if(_zeroSymbol == nullptr) {
-            SymbolWorkshop::_zeroSymbol = new ZeroSymbol();
+#           if (OPT_USE_BOOST_POOL_FOR_ALLOC == true)
+            SymbolWorkshop::_zeroSymbol = SymbolWorkshop::_pool.construct();
+#           else
+            SymbolWorkshop::_zeroSymbol = new Symbol();
+#           endif
         }
         return SymbolWorkshop::_zeroSymbol;
     }
@@ -513,7 +562,11 @@ namespace Workshops {
         auto symbolKey = std::make_tuple(src, static_cast<VarType>(0u), 'T');
         Symbol* sPtr;
         if(!this->_trimmedSymbolCache->retrieveFromCache(symbolKey, sPtr)) {
-            sPtr = new ZeroSymbol(src->GetTrackMask());
+#           if (OPT_USE_BOOST_POOL_FOR_ALLOC == true)
+            sPtr = SymbolWorkshop::_pool.construct(src->GetTrackMask());
+#           else
+            sPtr = new Symbol(src->GetTrackMask());
+#           endif
             auto it = varList->begin();
             auto end = varList->end();
             auto varNum = varMap.TrackLength();
@@ -530,7 +583,9 @@ namespace Workshops {
                 if(*(*item) == *sPtr) {
                     Symbol* uniqPtr = (*item);
                     this->_trimmedSymbolCache->StoreIn(symbolKey, uniqPtr);
+#                   if (OPT_USE_BOOST_POOL_FOR_ALLOC == false)
                     delete sPtr;
+#                   endif
                     return uniqPtr;
                 }
             }
@@ -546,7 +601,11 @@ namespace Workshops {
         auto symbolKey = std::make_tuple(src, var, val);
         Symbol* symPtr;
         if(!this->_symbolCache->retrieveFromCache(symbolKey, symPtr)) {
-            symPtr  = new ZeroSymbol(src->GetTrackMask(), var, val);
+#           if (OPT_USE_BOOST_POOL_FOR_ALLOC == true)
+            symPtr = SymbolWorkshop::_pool.construct(src->GetTrackMask(), var, val);
+#           else
+            symPtr  = new Symbol(src->GetTrackMask(), var, val);
+#           endif
             this->_symbolCache->StoreIn(symbolKey, symPtr);
         }
         return symPtr;
@@ -578,13 +637,20 @@ namespace Workshops {
         auto symbolKey = std::make_tuple(str, tag, 'R');
         Symbol* symPtr;
         if(!this->_remappedSymbolCache->retrieveFromCache(symbolKey, symPtr)) {
+#           if (OPT_USE_BOOST_POOL_FOR_ALLOC == true)
+            symPtr = SymbolWorkshop::_pool.construct(str, map);
+#           else
             symPtr = new Symbol(str, map);
+#           endif
+
 #           if (OPT_UNIQUE_REMAPPED_SYMBOLS == true)
             for(auto item = this->_remappedSymbols.begin(); item != this->_remappedSymbols.end(); ++item) {
                 if(*(*item) == *symPtr) {
                     Symbol* uniqPtr = (*item);
                     this->_remappedSymbolCache->StoreIn(symbolKey, uniqPtr);
+#                   if (OPT_USE_BOOST_POOL_FOR_ALLOC == false)
                     delete symPtr;
+#                   endif
                     return uniqPtr;
                 }
             }

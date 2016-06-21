@@ -73,7 +73,7 @@ using Aut_ptr = SymbolicAutomaton*;
 
 using WorklistItemType = std::pair<Term_ptr, SymbolType*>;
 using WorklistType = std::list<WorklistItemType>;
-using Symbols = std::list<SymbolType*>;
+using Symbols = std::vector<SymbolType*>;
 
 
 class Term {
@@ -214,6 +214,9 @@ public:
 
     // <<< CONSTRUCTORS >>>
     NEVER_INLINE TermTernaryProduct(Term_ptr, Term_ptr, Term_ptr, ProductType);
+    NEVER_INLINE TermTernaryProduct(std::tuple<Term_ptr, Term_ptr, Term_ptr> productTripple, ProductType type) :
+        TermTernaryProduct(std::get<0>(productTripple), std::get<1>(productTripple), std::get<2>(productTripple), type)
+            {}
     NEVER_INLINE ~TermTernaryProduct();
 
     // <<< PUBLIC API >>>
@@ -246,6 +249,10 @@ public:
     NEVER_INLINE TermNaryProduct(Term_ptr*, ProductType, size_t);
     NEVER_INLINE TermNaryProduct(SymLink*, StatesSetType, ProductType, size_t); // NaryBase
     NEVER_INLINE TermNaryProduct(Term_ptr, Symbol_ptr, ProductType, size_t); // NaryPre
+    NEVER_INLINE TermNaryProduct(SymLink* links, StatesSetType type, std::pair<ProductType, size_t> config) :
+        TermNaryProduct(links, type, config.first, config.second) {}
+    NEVER_INLINE TermNaryProduct(Term_ptr base, Symbol_ptr symbol, std::pair<ProductType, size_t> config) :
+        TermNaryProduct(base, symbol, config.first, config.second) {}
     NEVER_INLINE ~TermNaryProduct();
 
     // <<< PUBLIC API >>>
@@ -279,6 +286,8 @@ public:
 
     // <<< CONSTRUCTORS >>>
     NEVER_INLINE TermBaseSet(VATA::Util::OrdVector<size_t> &&, unsigned int, unsigned int);
+    NEVER_INLINE TermBaseSet(VATA::Util::OrdVector<size_t> &states, unsigned int i, unsigned int j)
+        : TermBaseSet(std::move(states), i, j) {}
     NEVER_INLINE ~TermBaseSet();
 
     // <<< PUBLIC API >>>
@@ -548,6 +557,11 @@ public:
     // <<< CONSTRUCTORS >>>
     NEVER_INLINE TermFixpoint(Aut_ptr aut, Term_ptr startingTerm, Symbol* startingSymbol, bool inComplement, bool initbValue, WorklistSearchType search);
     NEVER_INLINE TermFixpoint(Aut_ptr aut, Term_ptr sourceTerm, Symbol* startingSymbol, bool inComplement);
+    NEVER_INLINE TermFixpoint(Aut_ptr aut, std::pair<Term_ptr, Symbol*> startingPair, bool inComplement) :
+        TermFixpoint(aut, startingPair.first, startingPair.second, inComplement) {}
+    NEVER_INLINE TermFixpoint(Aut_ptr aut, std::tuple<Term_ptr, Symbol*, bool, bool, WorklistSearchType> initTuple) :
+        TermFixpoint(aut, std::get<0>(initTuple), std::get<1>(initTuple), std::get<2>(initTuple), std::get<3>(initTuple),
+            std::get<4>(initTuple)) {}
     NEVER_INLINE ~TermFixpoint();
 
     // <<< PUBLIC API >>>

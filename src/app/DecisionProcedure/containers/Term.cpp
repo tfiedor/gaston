@@ -1694,6 +1694,7 @@ void TermFixpoint::_InitializeSymbols(Workshops::SymbolWorkshop* workshop, Gasto
     // The input symbol is first trimmed, then if the AllPosition Variable exist, we generate only the trimmed stuff
     // TODO: Maybe for Fixpoint Pre this should be done? But nevertheless this will happen at topmost
     // Reserve symbols for at least 2^|freeVars|
+    this->_symList.reserve(2 << vars->size());
     Symbol* trimmed = workshop->CreateTrimmedSymbol(startingSymbol, freeVars);
     if (allPosVar != -1) {
         trimmed = workshop->CreateSymbol(trimmed, varMap[allPosVar], '1');
@@ -1710,14 +1711,12 @@ void TermFixpoint::_InitializeSymbols(Workshops::SymbolWorkshop* workshop, Gasto
         this->_projectedSymbol = workshop->CreateSymbol(this->_projectedSymbol, varMap[(*var)], 'X');
         if(*var == allPosVar)
             continue;
-        for(auto i = symNum; i != 0; --i) {
-            Symbol* symF = this->_symList.front();
-            this->_symList.pop_front();
+        int i = 0;
+        for(auto it = this->_symList.begin(); i < symNum; ++it, ++i) {
+            Symbol* symF = *it;
             // #SYMBOL_CREATION
-            this->_symList.push_back(workshop->CreateSymbol(symF, varMap[(*var)], '0'));
             this->_symList.push_back(workshop->CreateSymbol(symF, varMap[(*var)], '1'));
         }
-
         symNum <<= 1;// times 2
     }
 #   if (DEBUG_FIXPOINT_SYMBOLS_INIT == true)
