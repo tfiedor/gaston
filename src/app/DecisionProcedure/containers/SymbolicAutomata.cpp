@@ -554,6 +554,7 @@ ResultType SymbolicAutomaton::IntersectNonEmpty(Symbol* symbol, Term* stateAppro
     }
 
     // If we have continuation, we have to unwind it
+#   if (OPT_EARLY_EVALUATION == true)
     if(stateApproximation->type == TERM_CONTINUATION) {
 #       if (MEASURE_CONTINUATION_EVALUATION == true || MEASURE_ALL == true)
         ++this->_contUnfoldingCounter;
@@ -561,6 +562,8 @@ ResultType SymbolicAutomaton::IntersectNonEmpty(Symbol* symbol, Term* stateAppro
         TermContinuation* continuation = reinterpret_cast<TermContinuation*>(stateApproximation);
         stateApproximation = continuation->unfoldContinuation(UnfoldedInType::E_IN_ISECT_NONEMPTY);
     }
+#   endif
+
     assert(stateApproximation != nullptr);
     assert(stateApproximation->type != TERM_CONTINUATION);
 

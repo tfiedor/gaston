@@ -1693,6 +1693,7 @@ void TermFixpoint::_InitializeAggregateFunction(bool inComplement) {
 void TermFixpoint::_InitializeSymbols(Workshops::SymbolWorkshop* workshop, Gaston::VarList* freeVars, IdentList* vars, Symbol *startingSymbol) {
     // The input symbol is first trimmed, then if the AllPosition Variable exist, we generate only the trimmed stuff
     // TODO: Maybe for Fixpoint Pre this should be done? But nevertheless this will happen at topmost
+    // Reserve symbols for at least 2^|freeVars|
     Symbol* trimmed = workshop->CreateTrimmedSymbol(startingSymbol, freeVars);
     if (allPosVar != -1) {
         trimmed = workshop->CreateSymbol(trimmed, varMap[allPosVar], '1');
@@ -1952,8 +1953,10 @@ bool Term::operator==(const Term &t) {
     if(&t == nullptr) {
         return false;
     }
+
     Term* tt = const_cast<Term*>(&t);
     Term* tthis = this;
+#   if (OPT_EARLY_EVALUATION == true)
     if(tt->type == TERM_CONTINUATION) {
         TermContinuation* ttCont = static_cast<TermContinuation*>(tt);
         tt = ttCont->unfoldContinuation(UnfoldedInType::E_IN_COMPARISON);
@@ -1962,6 +1965,7 @@ bool Term::operator==(const Term &t) {
         TermContinuation* thisCont = static_cast<TermContinuation*>(this);
         tthis = thisCont->unfoldContinuation(UnfoldedInType::E_IN_COMPARISON);
     }
+#   endif
 
     assert(tthis->_inComplement == tt->_inComplement);
     if(tthis == tt) {
@@ -2092,7 +2096,7 @@ bool TermList::_eqCore(const Term &t) {
 unsigned int TermFixpoint::ValidMemberSize() const {
     unsigned int members = 0;
     for(auto& item : this->_fixpoint) {
-        members += ((item.second && item.first != nullptr) ? 1 : 0);
+        members += (item.second && item.first != nullptr);
     }
     return members;
 }
