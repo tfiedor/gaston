@@ -65,7 +65,6 @@ ZeroSymbol::ZeroSymbol() : _trackMask(varMap.TrackLength() << 1) {
 #   if (MEASURE_SYMBOLS == true)
     ++ZeroSymbol::instances;
 #   endif
-    this->_bdd = nullptr;
 }
 
 /**
@@ -78,7 +77,6 @@ ZeroSymbol::ZeroSymbol(BitMask const& track) {
     ++ZeroSymbol::instances;
 #   endif
     this->_trackMask = track;
-    this->_bdd = nullptr;
 }
 
 /**
@@ -95,7 +93,6 @@ ZeroSymbol::ZeroSymbol(BitMask const& track, VarType var, VarValue val) {
 #   endif
     this->_trackMask = track;
     this->_SetValueAt(var, ZeroSymbol::charToAsgn(val));
-    this->_bdd = nullptr;
 }
 
 ZeroSymbol::ZeroSymbol(ZeroSymbol* src, std::map<unsigned int, unsigned int>* map)  : _trackMask(varMap.TrackLength() << 1) {
@@ -106,14 +103,9 @@ ZeroSymbol::ZeroSymbol(ZeroSymbol* src, std::map<unsigned int, unsigned int>* ma
         unsigned int to = it->second;
         this->_SetValueAt(to, src->GetSymbolAt(from));
     }
-    this->_bdd = nullptr;
 }
 
 ZeroSymbol::~ZeroSymbol() {
-    if(this->_bdd != nullptr) {
-        delete this->_bdd;
-        this->_bdd = nullptr;
-    }
     this->_trackMask.clear();
 }
 
@@ -239,25 +231,11 @@ TrackType ZeroSymbol::constructZeroTrack() {
 
 // <<< PUBLIC API >>>
 /**
- * Returns the MTBDD. If it is not initialized, creates a new MTBDD and return it.
- */
-BaseAutomatonMTBDD* ZeroSymbol::GetMTBDD() {
-    if(this->_bdd == nullptr) {
-        this->_bdd = new BaseAutomatonMTBDD(TrackType(this->ToString()), BaseAutomatonStateSet(StateTuple({0})), BaseAutomatonStateSet(StateTuple({})));
-    }
-
-    // Initialization was successful
-    assert(this->_bdd != nullptr && "MTBDD for base automaton was not initialized\n");
-    return this->_bdd;
-}
-
-/**
  * Project the variable away, by setting it to don't care X
  *
  * @param[in] var:  track index of variable that is projected away
  */
 void ZeroSymbol::ProjectVar(VarType var) {
-    assert(this->_bdd == nullptr);
     this->_SetDontCareAt(var);
 }
 

@@ -31,7 +31,6 @@ namespace Gaston {
 class ZeroSymbol {
 protected:
     // <<< PRIVATE MEMBERS >>>
-    BaseAutomatonMTBDD* _bdd;
     BitMask _trackMask;
 
     // <<< PRIVATE METHODS >>>
