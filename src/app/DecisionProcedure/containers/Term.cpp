@@ -84,7 +84,6 @@ TermEmpty::TermEmpty(bool inComplement) {
     this->type = TERM_EMPTY;
 
     // Initialization of state space
-    this->stateSpace = 0;
     this->stateSpaceApprox = 0;
 
     #if (DEBUG_TERM_CREATION == true)
@@ -116,11 +115,6 @@ TermProduct::TermProduct(Term_ptr lhs, Term_ptr rhs, ProductType pt) : left(lhs)
     this->subtype = pt;
 
     // Initialization of state space
-    if(this->left->stateSpace != 0 && this->right != nullptr &&  this->right->stateSpace != 0) {
-        this->stateSpace = this->left->stateSpace + this->right->stateSpace +1;
-    } else {
-        this->stateSpace = 0;
-    }
     this->stateSpaceApprox = this->left->stateSpaceApprox + (this->right != nullptr ? this->right->stateSpaceApprox : 0) + 1;
 #   if (OPT_ENUMERATED_SUBSUMPTION_TESTING == true)
     this->enumerator = new ProductEnumerator(this);
@@ -150,11 +144,6 @@ TermTernaryProduct::TermTernaryProduct(Term_ptr lhs, Term_ptr mhs, Term_ptr rhs,
     this->subtype = pt;
 
     // Initialization of state space
-    if(this->left->stateSpace != 0 && this->middle->stateSpace != 0 && this->right->stateSpace != 0) {
-        this->stateSpace = this->left->stateSpace + this->middle->stateSpace + this->right->stateSpace + 1;
-    } else {
-        this->stateSpace = 0;
-    }
     this->stateSpaceApprox = this->left->stateSpaceApprox + this->right->stateSpaceApprox + this->middle->stateSpaceApprox + 1;
     // Fixme: Add enumerator
 
@@ -178,17 +167,6 @@ void TermNaryProduct::_InitNaryProduct(ProductType pt, size_t arity) {
     this->_inComplement = false;
     this->type = TermType::TERM_NARY_PRODUCT;
     this->subtype = pt;
-
-    bool null_state_space = false;
-    this->stateSpace = 0;
-    for (int i = 0; i < this->arity; ++i) {
-        if(this->terms[i]->stateSpace == 0) {
-            null_state_space = true;
-            break;
-        } else {
-            this->stateSpace += this->terms[i]->stateSpace;
-        }
-    }
 
     this->stateSpaceApprox = 0;
     for (int j = 0; j < this->arity; ++j) {
@@ -250,8 +228,7 @@ TermBaseSet::TermBaseSet(VATA::Util::OrdVector<size_t> && s, unsigned int offset
 
     // Initialization of state space
     this->_inComplement = false;
-    this->stateSpace = this->states.size();
-    this->stateSpaceApprox = this->stateSpace;
+    this->stateSpaceApprox = this->states.size();
 
     #if (DEBUG_TERM_CREATION == true)
     std::cout << "TermBaseSet::";
@@ -280,7 +257,6 @@ TermContinuation::TermContinuation(SymLink* a, SymbolicAutomaton* init, Term* t,
     this->type = TERM_CONTINUATION;
 
     // Initialization of state space
-    this->stateSpace = 0;
     this->stateSpaceApprox = (t == nullptr ? 0 : t->stateSpaceApprox);
 
     #if (DEBUG_CONTINUATIONS == true)
@@ -300,9 +276,6 @@ TermList::TermList(Term_ptr first, bool isCompl) {
     this->type = TERM_LIST;
 
     // Initialization of state space
-    if(first->stateSpace) {
-        this->stateSpace = first->stateSpace + 1;
-    }
     this->stateSpaceApprox = first->stateSpaceApprox;
 
     this->list.push_back(first);
@@ -341,7 +314,6 @@ TermFixpoint::TermFixpoint(Aut_ptr aut, Term_ptr startingTerm, Symbol* symbol, b
     this->_searchType = search;
 
     // Initialize the state space
-    this->stateSpace = 0;
     this->stateSpaceApprox = startingTerm->stateSpaceApprox;
 
     // Initialize the fixpoint as [nullptr, startingTerm]
@@ -428,7 +400,6 @@ TermFixpoint::TermFixpoint(Aut_ptr aut, Term_ptr sourceTerm, Symbol* symbol, boo
     assert(sourceTerm->type == TERM_FIXPOINT);
 
     // Initialize the state space
-    this->stateSpace = 0;
     this->stateSpaceApprox = sourceTerm->stateSpaceApprox;
 
     // Initialize the aggregate function
@@ -453,7 +424,9 @@ TermFixpoint::TermFixpoint(Aut_ptr aut, Term_ptr sourceTerm, Symbol* symbol, boo
 
 TermFixpoint::~TermFixpoint() {
     this->_fixpoint.clear();
+#   if (OPT_EARLY_EVALUATION == true)
     this->_postponed.clear();
+#   endif
     this->_worklist.clear();
 }
 
@@ -680,7 +653,7 @@ SubsumptionResult TermBaseSet::_IsSubsumedCore(Term *term, int limit, bool unfol
     // Test component-wise, not very efficient though
     // TODO: Change to bit-vectors if possible
     TermBaseSet *t = static_cast<TermBaseSet*>(term);
-    if(t->stateSpace < this->stateSpace) {
+    if(t->stateSpaceApprox < this->stateSpaceApprox) {
         return E_FALSE;
     } else {
         // TODO: Maybe we could exploit that we have ordered vectors
@@ -1020,11 +993,13 @@ SubsumptionResult TermFixpoint::IsSubsumedBy(FixpointType& fixpoint, WorklistTyp
  */
 SubsumptionResult Term::Subsumes(TermEnumerator* enumerator) {
     SubsumptionResult result;
+#   if (OPT_ENUMERATED_SUBSUMPTION_TESTING == true)
     if(!this->_subsumesCache.retrieveFromCache(enumerator, result)) {
         result = this->_SubsumesCore(enumerator);
         if(result != E_FALSE)
             this->_subsumesCache.StoreIn(enumerator, result);
     }
+#   endif
     return result;
 }
 
@@ -1118,11 +1093,7 @@ bool TermFixpoint::IsEmpty() {
  * Measures the state space as number of states
  */
 unsigned int Term::MeasureStateSpace() {
-    if(this->stateSpace != 0) {
-        return this->stateSpace;
-    } else {
-        return this->_MeasureStateSpaceCore();
-    }
+    return this->_MeasureStateSpaceCore();
 }
 
 unsigned int TermEmpty::_MeasureStateSpaceCore() {
@@ -1142,10 +1113,11 @@ unsigned int TermNaryProduct::_MeasureStateSpaceCore() {
     for (int i = 0; i < this->arity; ++i) {
         state_space += this->terms[i]->MeasureStateSpace();
     }
+    return state_space + 1;
 }
 
 unsigned int TermBaseSet::_MeasureStateSpaceCore() {
-    return this->stateSpace;
+    return this->stateSpaceApprox;
 }
 
 unsigned int TermContinuation::_MeasureStateSpaceCore() {
@@ -1384,6 +1356,7 @@ bool TermBaseSet::Intersects(TermBaseSet* rhs) {
  *
  */
 bool TermFixpoint::_processOnePostponed() {
+#   if (OPT_EARLY_EVALUATION == true)
     assert(!this->_postponed.empty());
 
     std::pair<Term_ptr, Term_ptr> postponedPair;
@@ -1447,6 +1420,9 @@ bool TermFixpoint::_processOnePostponed() {
         assert(result != E_PARTIALLY);
         return false;
     }
+#   else
+    return false;
+#   endif
 }
 
 SubsumptionResult TermFixpoint::_fixpointTest(Term_ptr const &term) {
@@ -1518,7 +1494,9 @@ SubsumptionResult TermFixpoint::_testIfSubsumes(Term_ptr const& term) {
 
         if(result == E_PARTIALLY) {
             assert(subsumedByTerm != nullptr);
+#           if (OPT_EARLY_EVALUATION == true)
             this->_postponed.insert(this->_postponed.begin(), std::make_pair(term, subsumedByTerm));
+#           endif
             #if (MEASURE_POSTPONED == true)
             ++TermFixpoint::postponedTerms;
             #endif

@@ -82,15 +82,16 @@ class Term {
     // <<< MEMBERS >>>
 protected:
     TermCache _isSubsumedCache;         // [36B] << Cache for results of subsumption
+#   if (OPT_ENUMERATED_SUBSUMPTION_TESTING == true)
     EnumSubsumesCache _subsumesCache;   // [36B] << Cache for results of subsumes
+#   endif
 public:
-    struct {                        // [12B] << Link for counterexamples
+    struct {                        // [12B*2] << Link for counterexamples
         Term* succ;
         Symbol* symbol;
         size_t len;
     } link, last_link;
 public:
-    size_t stateSpace = 0;          // [4-8B] << Exact size of the state space, 0 if unknown
     size_t stateSpaceApprox = 0;    // [4-8B] << Approximation of the state space, used for heuristics
     TermType type;                  // [4B] << Type of the term
 protected:
@@ -426,6 +427,7 @@ public:
                     // we need to unfold the fixpoint
                     if (_termFixpoint._worklist.empty()) {
                         // nothing to fold?
+#                       if (OPT_EARLY_EVALUATION == true)
                         if(_termFixpoint._postponed.empty()) {
                             // Nothing postponed, we are done
                             return this->_Invalidate();
@@ -437,6 +439,9 @@ public:
                                 return this->_Invalidate();
                             }
                         }
+#                       else
+                        return this->_Invalidate();
+#                       endif
                     } else {
                         _termFixpoint.ComputeNextFixpoint();
                         return this->GetNext();
@@ -496,6 +501,7 @@ public:
                             return this->GetNext();
                         } else {
                             // we are complete?
+#                           if (OPT_EARLY_EVALUATION == true)
                             if(_termFixpoint._postponed.empty()) {
                                 return this->_Invalidate();
                             } else {
@@ -505,6 +511,9 @@ public:
                                     return this->_Invalidate();
                                 }
                             }
+#                           else
+                            return this->_Invalidate();
+#                           endif
                         }
                     } else {
                         _termFixpoint.ComputeNextPre();
@@ -527,7 +536,9 @@ protected:
     TermCache _subsumedByCache;             // [36B] << Caching of the subsumption testing
     std::shared_ptr<iterator> _sourceIt;    // [8B] << Source iterator of the pre fixpoint
     FixpointType _fixpoint;                 // [8B] << Fixpoint structure of terms
+#   if (OPT_EARLY_EVALUATION == true)
     TermListType _postponed;                // [8B] << Worklist with postponed terms
+#   endif
     WorklistType _worklist;                 // [8B] << Worklist of the fixpoint
     Symbols _symList;                       // [8B] << List of symbols
     size_t _iteratorNumber = 0;             // [4-8B] << How many iterators are pointing to fixpoint
