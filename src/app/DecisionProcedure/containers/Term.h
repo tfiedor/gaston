@@ -81,7 +81,7 @@ class Term {
 
     // <<< MEMBERS >>>
 protected:
-    TermCache _isSubsumedCache;         // [36B] << Cache for results of subsumption
+    TermCache _isSubsumedCache;         // [64B] << Cache for results of subsumption
 #   if (OPT_ENUMERATED_SUBSUMPTION_TESTING == true)
     EnumSubsumesCache _subsumesCache;   // [36B] << Cache for results of subsumes
 #   endif
@@ -90,7 +90,7 @@ public:
         Term* succ;
         Symbol* symbol;
         size_t len;
-    } link, last_link;
+    } link;
 public:
     size_t stateSpaceApprox = 0;    // [4-8B] << Approximation of the state space, used for heuristics
     TermType type;                  // [4B] << Type of the term
@@ -173,10 +173,10 @@ private:
 class TermProduct : public Term {
 public:
     // <<< PUBLIC MEMBERS >>>
-    Term_ptr left;                              // [4B] << Left member of the product
-    Term_ptr right;                             // [4B] << Right member of the product
+    Term_ptr left;                              // [8B] << Left member of the product
+    Term_ptr right;                             // [8B] << Right member of the product
+    ProductEnumerator* enumerator = nullptr;    // [8B] << Enumerator through the terms
     ProductType subtype;                        // [4B] << Product type (Union, Intersection)
-    ProductEnumerator* enumerator = nullptr;    // [4B] << Enumerator through the terms
 
     // See #L29
     TERM_MEASURELIST(DEFINE_STATIC_MEASURE)
@@ -238,9 +238,9 @@ class TermNaryProduct : public Term {
 public:
     // <<< PUBLIC MEMBERS >>>
     size_t arity;
-    ProductType subtype;
     Term_ptr* terms;
     size_t* access_vector;
+    ProductType subtype;
     // Fixme: add iterator
 
     // See #L29
@@ -548,9 +548,8 @@ protected:
     Symbol_ptr _sourceSymbol;               // [4B] << Source symbol before breaking to little symboiles
     Term_ptr _satTerm = nullptr;            // [4B] << Satisfiable term of the fixpoint computation
     Term_ptr _unsatTerm = nullptr;          // [4B] << Unsatisfiable term of the fixpoint computation
-    bool (*_aggregate_result)(bool, bool);  // [4B] << Agregation function for fixpoint boolean results
-    WorklistSearchType _searchType;         // [4B] << Search type for Worklist
     FixpointGuide* _guide = nullptr;        // [4B] << Guide for fixpoints
+    WorklistSearchType _searchType;         // [4B] << Search type for Worklist
     bool _bValue;                           // [1B] << Boolean value of the fixpoint testing
     bool _updated = false;                  // [1B] << Flag if the fixpoint was updated during the last unique check
     bool _shortBoolValue;                   // [1B] << Value that leads to early termination fo the fixpoint
@@ -607,6 +606,7 @@ protected:
     bool _processOnePostponed();
     void _updateExamples(ResultType&);
     void _InitializeAggregateFunction(bool inComplement);
+    bool _AggregateResult(bool, bool);
     void _InitializeSymbols(Workshops::SymbolWorkshop* form, Gaston::VarList*, IdentList*, Symbol*);
     SubsumptionResult _IsSubsumedCore(Term* t, int limit, bool b = false);
     SubsumptionResult _fixpointTest(Term_ptr const& term);

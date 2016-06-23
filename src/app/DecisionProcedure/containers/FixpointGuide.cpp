@@ -108,16 +108,6 @@ GuideTip FixpointGuide::GiveTip(Term* term, Symbol* symbol) {
         TermProduct *tp = static_cast<TermProduct *>(term);
         // FIXME: FIX THIS SHIT
         //assert(term->type == TermType::TERM_PRODUCT);
-
-        if (static_cast<TermBaseSet *>(tp->left)->Intersects(static_cast<TermBaseSet *>(this->_link->aut->GetInitialStates()))) {
-            // Restriction holds, we'll look back at link and if the right side did not progress, we will throw it away
-            if (tp->last_link.succ != nullptr) {
-                TermProduct *tpp = static_cast<TermProduct *>(tp->last_link.succ);
-                if (tpp->right == tp->right && tp->last_link.symbol == symbol) {
-                    return GuideTip::G_BACK;
-                }
-            }
-        }
     }
     return GuideTip::G_FRONT;
 }

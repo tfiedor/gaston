@@ -73,7 +73,7 @@ size_t TermBaseSet::maxBaseSize = 0;
 extern Ident lastPosVar, allPosVar;
 
 // <<< TERM CONSTRUCTORS AND DESTRUCTORS >>>
-Term::Term(): link{ nullptr, nullptr, 0}, last_link{nullptr, nullptr, 0} {}
+Term::Term(): link{ nullptr, nullptr, 0} {}
 Term::~Term() {}
 
 TermEmpty::TermEmpty(bool inComplement) {
@@ -324,7 +324,7 @@ TermFixpoint::TermFixpoint(Aut_ptr aut, Term_ptr startingTerm, Symbol* symbol, b
     // Push symbols to worklist
     if (static_cast<ProjectionAutomaton*>(aut)->IsRoot() || allPosVar == -1) {
 #   endif
-        this->_InitializeSymbols(aut->symbolFactory, aut->GetFreeVars(),
+        this->_InitializeSymbols(&aut->symbolFactory, aut->GetFreeVars(),
                                      static_cast<ProjectionAutomaton *>(aut)->projectedVars, symbol);
 #       if (DEBUG_RESTRICTION_DRIVEN_FIX == true)
         std::cout << "Created new fixpoint for '"; this->_aut->_form->dump(); std::cout << "'\n";
@@ -412,7 +412,7 @@ TermFixpoint::TermFixpoint(Aut_ptr aut, Term_ptr sourceTerm, Symbol* symbol, boo
     // Initialize the fixpoint
     this->_fixpoint.push_front(std::make_pair(nullptr, true));
     // Push things into worklist
-    this->_InitializeSymbols(aut->symbolFactory, aut->GetFreeVars(), static_cast<ProjectionAutomaton*>(aut)->projectedVars, symbol);
+    this->_InitializeSymbols(&aut->symbolFactory, aut->GetFreeVars(), static_cast<ProjectionAutomaton*>(aut)->projectedVars, symbol);
 
     #if (DEBUG_TERM_CREATION == true)
     std::cout << "[" << this << "]";
@@ -440,9 +440,6 @@ void Term::SetSuccessor(Term* succ, Symbol* symb) {
         this->link.symbol = symb;
         this->link.len = succ->link.len + 1;
     }
-    this->last_link.succ = succ;
-    this->last_link.symbol = symb;
-    this->last_link.len = succ->last_link.len + 1;
 }
 
 /**
@@ -1553,7 +1550,7 @@ void TermFixpoint::ComputeNextFixpoint() {
     }
     _updated = true;
     // Aggregate the result of the fixpoint computation
-    _bValue = this->_aggregate_result(_bValue,result.second);
+    _bValue = this->_AggregateResult(_bValue,result.second);
     // Push new symbols from _symList
 #   if (DEBUG_RESTRICTION_DRIVEN_FIX == true)
     std::cout << "ComputeNextFixpoint()\n";
@@ -1640,7 +1637,7 @@ void TermFixpoint::ComputeNextPre() {
         _fixpoint.push_back(std::make_pair(result.first, true));
     }
     _updated = true;
-    _bValue = this->_aggregate_result(_bValue,result.second);
+    _bValue = this->_AggregateResult(_bValue,result.second);
 }
 
 /**
@@ -1653,12 +1650,14 @@ void TermFixpoint::ComputeNextPre() {
  */
 void TermFixpoint::_InitializeAggregateFunction(bool inComplement) {
     if(!inComplement) {
-        this->_aggregate_result = [](bool a, bool b) {return a || b;};
         this->_shortBoolValue = true;
     } else {
-        this->_aggregate_result = [](bool a, bool b) {return a && b;};
         this->_shortBoolValue = false;
     }
+}
+
+bool TermFixpoint::_AggregateResult(bool a, bool b) {
+    return (this->_inComplement) ? (a && b) : (a || b);
 }
 
 /**

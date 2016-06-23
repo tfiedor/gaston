@@ -58,6 +58,24 @@ public:
     friend class SymbolicChecker;
     friend struct SymLink;
 
+    using TermWorkshop  = Workshops::TermWorkshop;
+
+
+
+    // <<< PUBLIC MEMBERS >>>
+    static StateType stateCnt;
+    static DagNodeCache* dagNodeCache;
+    static DagNodeCache* dagNegNodeCache;
+
+protected:
+    // <<< PRIVATE MEMBERS >>>
+    TermWorkshop _factory;          // Creates terms
+    ResultCache _resCache;          // Caches (states, symbol) = (fixpoint, bool)
+    SubsumptionCache _subCache;     // Caches (term, term) = bool
+    VarList _freeVars;
+
+public:
+    SymbolWorkshop symbolFactory;
     struct SymbolicAutomatonStats {
         unsigned int height = 0;
         unsigned int fixpoint_computations = 0;
@@ -67,28 +85,30 @@ public:
         unsigned int max_refs;
     } stats;
 
-    // <<< PUBLIC MEMBERS >>>
-    static StateType stateCnt;
-    AutType type;
-    using TermWorkshop  = Workshops::TermWorkshop;
-    SymbolWorkshop* symbolFactory;
-    static DagNodeCache* dagNodeCache;
-    static DagNodeCache* dagNegNodeCache;
     Formula_ptr _form;
 protected:
-    // <<< PRIVATE MEMBERS >>>
-    Term_ptr _initialStates = nullptr;
-    Term_ptr _finalStates = nullptr;
-    TermWorkshop _factory;          // Creates terms
-    ResultCache _resCache;          // Caches (states, symbol) = (fixpoint, bool)
-    SubsumptionCache _subCache;     // Caches (term, term) = bool
-    VarList _freeVars;
     Term_ptr _satExample = nullptr;
     Term_ptr _unsatExample = nullptr;
+    Term_ptr _initialStates = nullptr;
+    Term_ptr _finalStates = nullptr;
+
 #   if (MEASURE_SUBAUTOMATA_TIMING == true)
     ChronoTimer timer;
 #   endif
     unsigned int _refs;
+
+    // <<< MEASURES >>>
+    unsigned int _falseCounter = 0;
+    unsigned int _trueCounter = 0;
+    unsigned int _contUnfoldingCounter = 0;
+    unsigned int _contCreationCounter = 0;
+    unsigned int _projectIterationCounter = 0;
+    unsigned int _projectSymbolEvaluationCounter = 0;
+
+public:
+    AutType type;
+
+protected:
     bool marked = false;
     bool _isRestriction = false;
     bool _lastResult;
@@ -99,14 +119,6 @@ protected:
     virtual void _InitializeFinalStates() = 0;
     virtual ResultType _IntersectNonEmptyCore(Symbol*, Term*, bool) = 0;
     virtual void _DumpExampleCore(ExampleType) = 0;
-
-    // <<< MEASURES >>>
-    unsigned int _falseCounter = 0;
-    unsigned int _trueCounter = 0;
-    unsigned int _contUnfoldingCounter = 0;
-    unsigned int _contCreationCounter = 0;
-    unsigned int _projectIterationCounter = 0;
-    unsigned int _projectSymbolEvaluationCounter = 0;
 
 public:
     // <<< CONSTRUCTORS >>>

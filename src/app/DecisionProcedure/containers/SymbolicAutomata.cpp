@@ -72,7 +72,7 @@ void SymLink::InitializeSymLink(ASTForm* form) {
 
 ZeroSymbol* SymLink::ReMapSymbol(ZeroSymbol* symbol) {
     if(this->remap && symbol != nullptr) {
-        return this->aut->symbolFactory->CreateRemappedSymbol(symbol, this->varRemap, this->remap_tag);
+        return this->aut->symbolFactory.CreateRemappedSymbol(symbol, this->varRemap, this->remap_tag);
     } else {
         return symbol;
     }
@@ -84,7 +84,6 @@ SymbolicAutomaton::SymbolicAutomaton(Formula_ptr form) :
         _unsatExample(nullptr), _refs(0) {
     type = AutType::SYMBOLIC_BASE;
 
-    this->symbolFactory = new Workshops::SymbolWorkshop();
     IdentList free, bound;
     this->_form->freeVars(&free, &bound);
     IdentList* allVars;
@@ -100,7 +99,6 @@ SymbolicAutomaton::SymbolicAutomaton(Formula_ptr form) :
 }
 
 SymbolicAutomaton::~SymbolicAutomaton() {
-    delete this->symbolFactory;
 }
 
 BinaryOpAutomaton::BinaryOpAutomaton(SymbolicAutomaton_raw lhs, SymbolicAutomaton_raw rhs, Formula_ptr form)
@@ -550,7 +548,7 @@ ResultType SymbolicAutomaton::IntersectNonEmpty(Symbol* symbol, Term* stateAppro
 
     // Trim the variables that are not occuring in the formula away
     if(symbol != nullptr) {
-        symbol = this->symbolFactory->CreateTrimmedSymbol(symbol, &this->_freeVars);
+        symbol = this->symbolFactory.CreateTrimmedSymbol(symbol, &this->_freeVars);
     }
 
     // If we have continuation, we have to unwind it
@@ -1856,7 +1854,7 @@ void BinaryOpAutomaton::DumpComputationStats() {
         this->_factory.Dump();
 #       endif
 #       if (DEBUG_SYMBOL_CREATION == true)
-        this->symbolFactory->Dump();
+        this->symbolFactory.Dump();
 #       endif
         print_stat("True Hits", this->_trueCounter);
         print_stat("False Hits", this->_falseCounter);
@@ -1890,7 +1888,7 @@ void TernaryOpAutomaton::DumpComputationStats() {
     this->_factory.Dump();
 #       endif
 #       if (DEBUG_SYMBOL_CREATION == true)
-    this->symbolFactory->Dump();
+    this->symbolFactory.Dump();
 #       endif
     print_stat("True Hits", this->_trueCounter);
     print_stat("False Hits", this->_falseCounter);
@@ -1927,7 +1925,7 @@ void NaryOpAutomaton::DumpComputationStats() {
     this->_factory.Dump();
 #       endif
 #       if (DEBUG_SYMBOL_CREATION == true)
-    this->symbolFactory->Dump();
+    this->symbolFactory.Dump();
 #       endif
     print_stat("True Hits", this->_trueCounter);
     print_stat("False Hits", this->_falseCounter);
@@ -1965,7 +1963,7 @@ void ProjectionAutomaton::DumpComputationStats() {
                 this->_factory.Dump();
 #           endif
 #           if (DEBUG_SYMBOL_CREATION == true)
-                this->symbolFactory->Dump();
+                this->symbolFactory.Dump();
 #           endif
 #           if (MEASURE_PROJECTION == true)
                 print_stat("Fixpoint Nexts", this->fixpointNext);
@@ -2004,7 +2002,7 @@ void ComplementAutomaton::DumpComputationStats() {
         this->_factory.Dump();
 #       endif
 #       if (DEBUG_SYMBOL_CREATION == true)
-        this->symbolFactory->Dump();
+        this->symbolFactory.Dump();
 #       endif
         print_stat("True Hits", this->_trueCounter);
         print_stat("False Hits", this->_falseCounter);
@@ -2034,7 +2032,7 @@ void BaseAutomaton::DumpComputationStats() {
         this->_factory.Dump();
 #       endif
 #       if (DEBUG_SYMBOL_CREATION == true)
-        this->symbolFactory->Dump();
+        this->symbolFactory.Dump();
 #       endif
         print_stat("True Hits", this->_trueCounter);
         print_stat("False Hits", this->_falseCounter);
