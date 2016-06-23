@@ -174,9 +174,61 @@ private:
         }
     }
 
-    VectorType RecPre(WrappedNode *root)
+    void RecPre(WrappedNode *node, VectorType &res)
     {
-        SetType nodes({root});
+        //std::cout << "node->var_: " << node->var_ << std::endl;
+        if(node->var_ < 0)
+        {
+            res.insert(node->node_);
+            return;
+        }
+
+        int var = GetVar(node->var_);
+
+
+        if(symbol_[var << 1] && symbol_[(var << 1) + 1])
+        {
+            for(auto nnode: node->pred_[~symbol_[(var << 1)]])
+            {
+                if(UnequalVars(nnode->var_, var - 1) && nnode->var_ > -2)
+                {
+                    if(~symbol_[(var << 1)] == symbol_[(GetVar(nnode->var_ + 1) << 1)] ||
+                        symbol_[(GetVar(nnode->var_ + 1) << 1) + 1])
+                        RecPre(nnode, res);
+                }
+                else
+                {
+                    RecPre(nnode, res);
+                }
+            }
+        }
+        else
+        {
+            for(auto nnode: node->pred_[~symbol_[(var << 1)]])
+                if(UnequalVars(nnode->var_, var - 1) && nnode->var_ > -2)
+                    if((~symbol_[(var << 1)] == symbol_[(GetVar(nnode->var_ + 1) << 1)]) ||
+                       symbol_[(GetVar(nnode->var_ + 1) << 1) + 1])
+                        RecPre(nnode, res);
+        }
+
+        for(auto nnode: node->pred_[symbol_[(var << 1)]])
+        {
+            if(UnequalVars(nnode->var_, var - 1) && nnode->var_ > -2)
+            {
+                if(symbol_[(var << 1)] == symbol_[(GetVar(nnode->var_ + 1) << 1)] ||
+                   symbol_[(GetVar(nnode->var_ + 1) << 1) + 1])
+                    RecPre(nnode, res);
+            }
+            else
+            {
+                RecPre(nnode, res);
+            }
+        }
+    }
+
+    VectorType RecPre(SetType& nodes)
+    {
+        //SetType nodes({root});
         SetType res;
 
         int var = numVars_ - 1;
@@ -202,7 +254,7 @@ private:
             }
             else
             {
-                // neni don't care.
+                // not don't care.
                 for(auto node: nodes)
                 {
                     assert(node != nullptr);
@@ -366,8 +418,42 @@ public:
             return VectorType();
 
         symbol_ = symbol;
-        //return RecPre({roots_[state]});
-        return RecPre(roots_[state]);
+        /*std::cout << "symbol: " << symbol << std::endl;
+        std::cout << "state: " << state << std::endl;*/
+        VectorType res2;
+        RecPre(roots_[state], res2);
+        /*std::cout << "nodes2: ";
+        for(auto node: res2)
+            std::cout << node << " ";
+        std::cout << std::endl << std::endl;*/
+        /*VectorType res = RecPre({roots_[state]});
+
+        std::cout << "nodes1: ";
+        for(auto node: res)
+            std::cout << node << " ";
+        std::cout << std::endl << std::endl;*/
+
+        return res2;
+        //return RecPre(roots_[state]);
+    }
+
+    VectorType Pre(VATA::Util::OrdVector<size_t> &states, const boost::dynamic_bitset<> &symbol)
+    {
+        assert(dfa_ != nullptr);
+        SetType nodes;
+
+        for(auto state: states)
+        {
+            assert(roots_.size() > state);
+            if(roots_[state] != nullptr)
+                nodes.insert(roots_[state]);
+        }
+
+        if(nodes.empty())
+            return VectorType();
+
+        symbol_ = symbol;
+        return RecPre(nodes);
     }
 
     void ProcessDFA(DFA *dfa)

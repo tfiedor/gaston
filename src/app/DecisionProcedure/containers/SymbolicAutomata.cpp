@@ -968,6 +968,9 @@ Term* BaseAutomaton::Pre(Symbol* symbol, Term* finalApproximation, bool underCom
 
     // Reinterpret the approximation as base states
     TermBaseSet* baseSet = reinterpret_cast<TermBaseSet*>(finalApproximation);
+#   if (OPT_USE_SET_PRE == true)
+    return this->_factory.CreateBaseSet(this->_autWrapper.Pre(baseSet->states, symbol->GetTrackMask()), this->_stateOffset, this->_stateSpace);
+#   else
     Term_ptr preState = nullptr;
     Term_ptr  accumulatedState = nullptr;
 
@@ -999,6 +1002,7 @@ Term* BaseAutomaton::Pre(Symbol* symbol, Term* finalApproximation, bool underCom
     #endif
 
     return accumulatedState;
+#   endif
 }
 
 /**
