@@ -1657,7 +1657,7 @@ void TermFixpoint::_InitializeAggregateFunction(bool inComplement) {
 }
 
 bool TermFixpoint::_AggregateResult(bool a, bool b) {
-    return (this->_inComplement) ? (a && b) : (a || b);
+    return (this->_nonMembershipTesting) ? (a && b) : (a || b);
 }
 
 /**
