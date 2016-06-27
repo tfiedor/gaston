@@ -73,14 +73,14 @@ size_t TermBaseSet::maxBaseSize = 0;
 extern Ident lastPosVar, allPosVar;
 
 // <<< TERM CONSTRUCTORS AND DESTRUCTORS >>>
-Term::Term() {
+Term::Term(Aut_ptr aut) : _aut(aut) {
     this->link = new link_t(nullptr, nullptr, 0);
 }
 Term::~Term() {
     delete this->link;
 }
 
-TermEmpty::TermEmpty(bool inComplement) {
+TermEmpty::TermEmpty(Aut_ptr aut, bool inComplement) : Term(aut) {
     #if (MEASURE_STATE_SPACE == true)
     ++TermEmpty::instances;
     #endif
@@ -111,7 +111,7 @@ TermEmpty::TermEmpty(bool inComplement) {
     * @param[in] lhs:  left operand of term intersection
     * @param[in] rhs:  right operand of term intersection
     */
-TermProduct::TermProduct(Term_ptr lhs, Term_ptr rhs, ProductType pt) : left(lhs), right(rhs) {
+TermProduct::TermProduct(Aut_ptr aut, Term_ptr lhs, Term_ptr rhs, ProductType pt) : Term(aut), left(lhs), right(rhs) {
     #if (MEASURE_STATE_SPACE == true)
     ++TermProduct::instances;
     #endif
@@ -138,8 +138,8 @@ TermProduct::~TermProduct() {
     }
 }
 
-TermTernaryProduct::TermTernaryProduct(Term_ptr lhs, Term_ptr mhs, Term_ptr rhs, ProductType pt)
-    : left(lhs), middle(mhs), right(rhs) {
+TermTernaryProduct::TermTernaryProduct(Aut_ptr aut, Term_ptr lhs, Term_ptr mhs, Term_ptr rhs, ProductType pt)
+    : Term(aut), left(lhs), middle(mhs), right(rhs) {
 #   if(MEASURE_STATE_SPACE == true)
     ++TermTernaryProduct::instances;
 #   endif
@@ -184,13 +184,13 @@ void TermNaryProduct::_InitNaryProduct(ProductType pt, size_t arity) {
 #   endif
 }
 
-TermNaryProduct::TermNaryProduct(Term_ptr* terms, ProductType pt, size_t arity) {
+TermNaryProduct::TermNaryProduct(Aut_ptr aut, Term_ptr* terms, ProductType pt, size_t arity) : Term(aut) {
     this->terms = new Term_ptr[arity];
     std::copy(terms, terms+arity, this->terms);
     this->_InitNaryProduct(pt, arity);
 }
 
-TermNaryProduct::TermNaryProduct(SymLink* auts, StatesSetType st, ProductType pt, size_t arity) {
+TermNaryProduct::TermNaryProduct(Aut_ptr aut, SymLink* auts, StatesSetType st, ProductType pt, size_t arity) : Term(aut) {
     // Fixme: add link to auts
     this->terms = new Term_ptr[arity];
     for(auto i = 0; i < arity; ++i) {
@@ -202,7 +202,7 @@ TermNaryProduct::TermNaryProduct(SymLink* auts, StatesSetType st, ProductType pt
     this->_InitNaryProduct(pt, arity);
 }
 
-TermNaryProduct::TermNaryProduct(Term_ptr source, Symbol_ptr symbol, ProductType pt, size_t arity) {
+TermNaryProduct::TermNaryProduct(Aut_ptr aut, Term_ptr source, Symbol_ptr symbol, ProductType pt, size_t arity) : Term(aut) {
 #   if (MEASURE_STATE_SPACE == true)
     ++TermNaryProduct::instances;
 #   endif
@@ -216,7 +216,7 @@ TermNaryProduct::~TermNaryProduct() {
     delete[] this->terms;
 }
 
-TermBaseSet::TermBaseSet(VATA::Util::OrdVector<size_t> && s, unsigned int offset, unsigned int stateNo) : states(std::move(s)) {
+TermBaseSet::TermBaseSet(Aut_ptr aut, VATA::Util::OrdVector<size_t> && s) : Term(aut), states(std::move(s)) {
     #if (MEASURE_STATE_SPACE == true)
     ++TermBaseSet::instances;
     #endif
@@ -243,8 +243,8 @@ TermBaseSet::~TermBaseSet() {
     this->states.clear();
 }
 
-TermContinuation::TermContinuation(SymLink* a, SymbolicAutomaton* init, Term* t, SymbolType* s, bool b, bool lazy)
-        : aut(a), initAut(init), term(t), symbol(s), underComplement(b), lazyEval(lazy) {
+TermContinuation::TermContinuation(Aut_ptr aut, SymLink* a, SymbolicAutomaton* init, Term* t, SymbolType* s, bool b, bool lazy)
+        : Term(aut), aut(a), initAut(init), term(t), symbol(s), underComplement(b), lazyEval(lazy) {
     #if (DEBUG_TERM_CREATION == true)
     std::cout << "[" << this << "]";
     std::cout << "TermContinuation::";
@@ -269,7 +269,7 @@ TermContinuation::TermContinuation(SymLink* a, SymbolicAutomaton* init, Term* t,
     SET_VALUE_NON_MEMBERSHIP_TESTING(this, b);
 }
 
-TermList::TermList(Term_ptr first, bool isCompl) {
+TermList::TermList(Aut_ptr aut, Term_ptr first, bool isCompl) : Term(aut) {
     #if (MEASURE_STATE_SPACE == true)
     ++TermList::instances;
     #endif
@@ -291,7 +291,7 @@ TermList::TermList(Term_ptr first, bool isCompl) {
 }
 
 TermFixpoint::TermFixpoint(Aut_ptr aut, Term_ptr startingTerm, Symbol* symbol, bool inComplement, bool initbValue, WorklistSearchType search = WorklistSearchType::E_DFS)
-        : _sourceTerm(nullptr), _sourceSymbol(symbol), _sourceIt(nullptr), _aut(static_cast<ProjectionAutomaton*>(aut)->GetBase()),
+        : Term(aut), _sourceTerm(nullptr), _sourceSymbol(symbol), _sourceIt(nullptr), _baseAut(static_cast<ProjectionAutomaton*>(aut)->GetBase()),
           _guide(static_cast<ProjectionAutomaton*>(aut)->GetGuide()), _bValue(initbValue) {
     #if (MEASURE_STATE_SPACE == true)
     ++TermFixpoint::instances;
@@ -326,7 +326,7 @@ TermFixpoint::TermFixpoint(Aut_ptr aut, Term_ptr startingTerm, Symbol* symbol, b
         this->_InitializeSymbols(&aut->symbolFactory, aut->GetFreeVars(),
                                      static_cast<ProjectionAutomaton *>(aut)->projectedVars, symbol);
 #       if (DEBUG_RESTRICTION_DRIVEN_FIX == true)
-        std::cout << "Created new fixpoint for '"; this->_aut->_form->dump(); std::cout << "'\n";
+        std::cout << "Created new fixpoint for '"; this->_baseAut->_form->dump(); std::cout << "'\n";
 #       endif
 #       if (OPT_WORKLIST_DRIVEN_BY_RESTRICTIONS == true)
         GuideTip tip;
@@ -389,9 +389,9 @@ TermFixpoint::TermFixpoint(Aut_ptr aut, Term_ptr startingTerm, Symbol* symbol, b
 }
 
 TermFixpoint::TermFixpoint(Aut_ptr aut, Term_ptr sourceTerm, Symbol* symbol, bool inComplement)
-        : _sourceTerm(sourceTerm), _sourceSymbol(symbol), _sourceIt(static_cast<TermFixpoint*>(sourceTerm)->GetIteratorDynamic()),
+        : Term(aut), _sourceTerm(sourceTerm), _sourceSymbol(symbol), _sourceIt(static_cast<TermFixpoint*>(sourceTerm)->GetIteratorDynamic()),
           _guide(static_cast<ProjectionAutomaton*>(aut)->GetGuide()),
-          _aut(static_cast<ProjectionAutomaton*>(aut)->GetBase()), _worklist(), _bValue(inComplement) {
+          _baseAut(static_cast<ProjectionAutomaton*>(aut)->GetBase()), _worklist(), _bValue(inComplement) {
     #if (MEASURE_STATE_SPACE == true)
     ++TermFixpoint::instances;
     ++TermFixpoint::preInstances;
@@ -496,7 +496,8 @@ SubsumptionResult Term::IsSubsumed(Term *t, int limit, bool unfoldAll) {
     // Else if it is not continuation we first look into cache and then recompute if needed
     SubsumptionResult result;
 #   if (OPT_CACHE_SUBSUMES == true)
-    if(this->type != TERM_FIXPOINT || !this->_isSubsumedCache.retrieveFromCache(t, result)) {
+    auto key = std::make_pair(&(*this), t);
+    if(this->type == TERM_EMPTY || !this->_aut->_subCache.retrieveFromCache(key, result)) {
 #   endif
         if (GET_IN_COMPLEMENT(this)) {
             if(this->type == TERM_EMPTY) {
@@ -512,8 +513,8 @@ SubsumptionResult Term::IsSubsumed(Term *t, int limit, bool unfoldAll) {
             }
         }
 #   if (OPT_CACHE_SUBSUMES == true)
-        if(result == E_TRUE)
-            this->_isSubsumedCache.StoreIn(t, result);
+        if(result == E_TRUE && !this->type == TERM_EMPTY)
+            this->_aut->_subCache.StoreIn(key, result);
     }
 #   endif
     assert(!unfoldAll || result != E_PARTIALLY);
@@ -652,15 +653,15 @@ SubsumptionResult TermBaseSet::_IsSubsumedCore(Term *term, int limit, bool unfol
         return E_FALSE;
     } else {
         // TODO: Maybe we could exploit that we have ordered vectors
-        auto it = this->states.begin();
-        auto end = this->states.end();
-        auto tit = t->states.begin();
-        auto tend = t->states.end();
+        auto it = this->states.rbegin();
+        auto end = this->states.rend();
+        auto tit = t->states.rbegin();
+        auto tend = t->states.rend();
         while(it != end && tit != tend) {
             if(*it == *tit) {
                 ++it;
                 ++tit;
-            } else if (*it < *(tit++)) {
+            } else if (*it > *(tit++)) {
                 // *it < *tit
                 return E_FALSE;
             }
@@ -1536,7 +1537,7 @@ void TermFixpoint::ComputeNextFixpoint() {
     WorklistItemType item = this->_popFromWorklist();
 
     // Compute the results
-    ResultType result = _aut->IntersectNonEmpty(item.second, item.first, GET_NON_MEMBERSHIP_TESTING(this));
+    ResultType result = this->_baseAut->IntersectNonEmpty(item.second, item.first, GET_NON_MEMBERSHIP_TESTING(this));
     this->_updateExamples(result);
 
     // If it is subsumed by fixpoint, we don't add it
@@ -1624,7 +1625,7 @@ void TermFixpoint::ComputeNextPre() {
     WorklistItemType item = this->_popFromWorklist();
 
     // Compute the results
-    ResultType result = _aut->IntersectNonEmpty(item.second, item.first, GET_NON_MEMBERSHIP_TESTING(this));
+    ResultType result = this->_baseAut->IntersectNonEmpty(item.second, item.first, GET_NON_MEMBERSHIP_TESTING(this));
     this->_updateExamples(result);
 
     // If it is subsumed we return
@@ -1723,7 +1724,7 @@ void TermFixpoint::_updateExamples(ResultType& result) {
                 this->_satTerm = result.first;
             }
         } else {
-            if (this->_unsatTerm == nullptr && this->_aut->WasLastExampleValid()) {
+            if (this->_unsatTerm == nullptr && this->_baseAut->WasLastExampleValid()) {
                 this->_unsatTerm = result.first;
             }
         }

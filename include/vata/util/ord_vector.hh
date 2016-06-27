@@ -61,6 +61,7 @@ public:   // Public data types
 
 	typedef typename VectorType::iterator iterator;
 	typedef typename VectorType::const_iterator const_iterator;
+	typedef typename VectorType::reverse_iterator reverse_iterator;
 	typedef typename VectorType::const_reference const_reference;
 
 private:  // Private data members
@@ -341,6 +342,14 @@ public:   // Public methods
 		//assert(vectorIsSorted());
 
 		return vec_.end();
+	}
+
+	inline reverse_iterator rbegin() {
+		return vec_.rbegin();
+	}
+
+	inline reverse_iterator rend() {
+		return vec_.rend();
 	}
 
 

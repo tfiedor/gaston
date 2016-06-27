@@ -131,7 +131,7 @@ namespace Workshops {
 
     TermEmpty* TermWorkshop::CreateEmpty() {
         if(TermWorkshop::_empty == nullptr) {
-            TermWorkshop::_empty = new TermEmpty();
+            TermWorkshop::_empty = new TermEmpty(nullptr);
         }
         assert(TermWorkshop::_empty != nullptr);
         return TermWorkshop::_empty;
@@ -139,7 +139,7 @@ namespace Workshops {
 
     TermEmpty* TermWorkshop::CreateComplementedEmpty() {
         if(TermWorkshop::_emptyComplement == nullptr) {
-            TermWorkshop::_emptyComplement = new TermEmpty(true);
+            TermWorkshop::_emptyComplement = new TermEmpty(nullptr, true);
         }
         assert(TermWorkshop::_emptyComplement != nullptr);
         return TermWorkshop::_emptyComplement;
@@ -169,9 +169,9 @@ namespace Workshops {
                 #endif
                 // The object was not created yet, so we create it and store it in cache
 #               if (OPT_USE_BOOST_POOL_FOR_ALLOC == true)
-                termPtr = TermWorkshop::_basePool.construct(states, offset, stateno);
+                termPtr = TermWorkshop::_basePool.construct(this->_aut, states);
 #               else
-                termPtr = new TermBaseSet(std::move(states), offset, stateno);
+                termPtr = new TermBaseSet(this->_aut, std::move(states));
 #               endif
                 this->_bCache->StoreIn(states, termPtr);
             }
@@ -211,9 +211,9 @@ namespace Workshops {
         auto ternaryKey = std::make_tuple(lhs, mhs, rhs);
         if(!this->_tpCache->retrieveFromCache(ternaryKey, termPtr)) {
 #           if (OPT_USE_BOOST_POOL_FOR_ALLOC == true)
-            termPtr = TermWorkshop::_ternaryProductPool.construct(std::make_tuple(lhs, mhs, rhs), type);
+            termPtr = TermWorkshop::_ternaryProductPool.construct(this->_aut, std::make_tuple(lhs, mhs, rhs), type);
 #           else
-            termPtr = new TermTernaryProduct(lhs, mhs, rhs, type);
+            termPtr = new TermTernaryProduct(this->_aut, lhs, mhs, rhs, type);
 #           endif
             this->_tpCache->StoreIn(ternaryKey, termPtr);
         }
@@ -226,9 +226,9 @@ namespace Workshops {
 
     Term* TermWorkshop::CreateNaryProduct(Term_ptr const& base, Symbol* symbol, size_t arity, ProductType pt) {
 #       if (OPT_USE_BOOST_POOL_FOR_ALLOC == true)
-        return TermWorkshop::_naryProductPool.construct(base, symbol, std::make_pair(pt, arity));
+        return TermWorkshop::_naryProductPool.construct(this->_aut, std::make_pair(base, symbol), std::make_pair(pt, arity));
 #       else
-        return new TermNaryProduct(base, symbol, pt, arity);
+        return new TermNaryProduct(this->_aut, base, symbol, pt, arity);
 #       endif
     }
 
@@ -240,16 +240,16 @@ namespace Workshops {
         auto naryKey = std::make_pair(terms, arity);
         if(!this->_npCache->retrieveFromCache(naryKey, termPtr)) {
 #           if (OPT_USE_BOOST_POOL_FOR_ALLOC == true)
-            termPtr = TermWorkshop::_naryProductPool.construct(terms, pt, arity);
+            termPtr = TermWorkshop::_naryProductPool.construct(this->_aut, terms, std::make_pair(pt, arity));
 #           else
-            termPtr = new TermNaryProduct(terms, pt, arity);
+            termPtr = new TermNaryProduct(this->_aut, terms, pt, arity);
 #           endif
             this->_npCache->StoreIn(naryKey, termPtr);
         }
         assert(termPtr != nullptr);
         return termPtr;
 #       else
-        return new TermNaryProduct(terms, pt, arity);
+        return new TermNaryProduct(this->_aut, terms, pt, arity);
 #       endif
     }
 
@@ -259,9 +259,9 @@ namespace Workshops {
 
     Term* TermWorkshop::CreateBaseNaryProduct(SymLink* symlinks, size_t arity, StatesSetType st, ProductType pt) {
 #       if (OPT_USE_BOOST_POOL_FOR_ALLOC == true)
-        return TermWorkshop::_naryProductPool.construct(symlinks, st, std::make_pair(pt, arity));
+        return TermWorkshop::_naryProductPool.construct(this->_aut, symlinks, std::make_tuple(st, pt, arity));
 #       else
-        return new TermNaryProduct(symlinks, st, pt, arity);
+        return new TermNaryProduct(this->_aut, symlinks, st, pt, arity);
 #       endif
     }
 
@@ -289,16 +289,16 @@ namespace Workshops {
 #           endif
             // The object was not created yet, so we create it and store it in cache
 #           if (OPT_USE_BOOST_POOL_FOR_ALLOC == true)
-            termPtr = TermWorkshop::_productPool.construct(lptr, rptr, type);
+            termPtr = TermWorkshop::_productPool.construct(this->_aut, std::make_pair(lptr, rptr), type);
 #           else
-            termPtr = new TermProduct(lptr, rptr, type);
+            termPtr = new TermProduct(this->_aut, lptr, rptr, type);
 #           endif
             this->_pCache->StoreIn(productKey, termPtr);
         }
         assert(termPtr != nullptr);
         return reinterpret_cast<TermProduct*>(termPtr);
 #       else
-        return new TermProduct(lptr, rptr, type);
+        return new TermProduct(this->_aut, lptr, rptr, type);
 #       endif
     }
 
@@ -321,13 +321,13 @@ namespace Workshops {
                 std::cout << "[*] Creating List: ";
                 std::cout << "from ["<< startTerm << "] to ";
                 #endif
-                termPtr = new TermList(startTerm, inComplement);
+                termPtr = new TermList(this->_aut, startTerm, inComplement);
                 this->_lCache->StoreIn(productKey, termPtr);
             }
             assert(termPtr != nullptr);
             return reinterpret_cast<TermList*>(termPtr);
         #else
-            return new TermList(startTerm, inComplement);
+            return new TermList(this->_aut, startTerm, inComplement);
         #endif
     }
 
@@ -421,7 +421,7 @@ namespace Workshops {
                 std::cout << "[*] Creating Continuation: ";
                 std::cout << "from [" << term << "] + " << *symbol << " to ";
                 #endif
-                termPtr = new TermContinuation(aut, init, term, symbol, underComplement, createLazy);
+                termPtr = new TermContinuation(this->_aut, aut, init, term, symbol, underComplement, createLazy);
                 this->_contCache->StoreIn(contKey, termPtr);
             }
             assert(termPtr != nullptr);
@@ -429,7 +429,7 @@ namespace Workshops {
             Term* unfoldedPtr = static_cast<TermContinuation*>(termPtr)->GetUnfoldedTerm();
             return (unfoldedPtr == nullptr ? termPtr : unfoldedPtr);
         #else
-            return new TermContinuation(aut, term, symbol, underComplement);
+            return new TermContinuation(this->_aut, aut, term, symbol, underComplement);
         #endif
     }
 
