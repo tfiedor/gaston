@@ -80,7 +80,9 @@ TermEmpty::TermEmpty(bool inComplement) {
     #if (MEASURE_STATE_SPACE == true)
     ++TermEmpty::instances;
     #endif
-    this->_inComplement = inComplement;
+    if(inComplement) {
+        SET_IN_COMPLEMENT(this);
+    }
     this->type = TERM_EMPTY;
 
     // Initialization of state space
@@ -110,9 +112,8 @@ TermProduct::TermProduct(Term_ptr lhs, Term_ptr rhs, ProductType pt) : left(lhs)
     ++TermProduct::instances;
     #endif
 
-    this->_inComplement = false;
     this->type = TermType::TERM_PRODUCT;
-    this->subtype = pt;
+    SET_PRODUCT_SUBTYPE(this, pt);
 
     // Initialization of state space
     this->stateSpaceApprox = this->left->stateSpaceApprox + (this->right != nullptr ? this->right->stateSpaceApprox : 0) + 1;
@@ -139,9 +140,8 @@ TermTernaryProduct::TermTernaryProduct(Term_ptr lhs, Term_ptr mhs, Term_ptr rhs,
     ++TermTernaryProduct::instances;
 #   endif
 
-    this->_inComplement = false;
     this->type = TermType::TERM_TERNARY_PRODUCT;
-    this->subtype = pt;
+    SET_PRODUCT_SUBTYPE(this, pt);
 
     // Initialization of state space
     this->stateSpaceApprox = this->left->stateSpaceApprox + this->right->stateSpaceApprox + this->middle->stateSpaceApprox + 1;
@@ -164,9 +164,8 @@ void TermNaryProduct::_InitNaryProduct(ProductType pt, size_t arity) {
 #   endif
     this->arity = arity;
     this->access_vector = new size_t[this->arity];
-    this->_inComplement = false;
     this->type = TermType::TERM_NARY_PRODUCT;
-    this->subtype = pt;
+    SET_PRODUCT_SUBTYPE(this, pt);
 
     this->stateSpaceApprox = 0;
     for (int j = 0; j < this->arity; ++j) {
@@ -227,7 +226,6 @@ TermBaseSet::TermBaseSet(VATA::Util::OrdVector<size_t> && s, unsigned int offset
     assert(s.size() > 0);
 
     // Initialization of state space
-    this->_inComplement = false;
     this->stateSpaceApprox = this->states.size();
 
     #if (DEBUG_TERM_CREATION == true)
@@ -264,8 +262,7 @@ TermContinuation::TermContinuation(SymLink* a, SymbolicAutomaton* init, Term* t,
     t->dump();
     std::cout << "]\n";
     #endif
-    this->_nonMembershipTesting = b;
-    this->_inComplement = false;
+    SET_VALUE_NON_MEMBERSHIP_TESTING(this, b);
 }
 
 TermList::TermList(Term_ptr first, bool isCompl) {
@@ -279,8 +276,7 @@ TermList::TermList(Term_ptr first, bool isCompl) {
     this->stateSpaceApprox = first->stateSpaceApprox;
 
     this->list.push_back(first);
-    this->_nonMembershipTesting = isCompl;
-    this->_inComplement = false;
+    SET_VALUE_NON_MEMBERSHIP_TESTING(this, isCompl);
 
     #if (DEBUG_TERM_CREATION == true)
     std::cout << "[" << this << "]";
@@ -308,8 +304,7 @@ TermFixpoint::TermFixpoint(Aut_ptr aut, Term_ptr startingTerm, Symbol* symbol, b
 
     // Initialize the aggregate function
     this->_InitializeAggregateFunction(inComplement);
-    this->_nonMembershipTesting = inComplement;
-    this->_inComplement = false;
+    SET_VALUE_NON_MEMBERSHIP_TESTING(this, inComplement);
     this->type = TERM_FIXPOINT;
     this->_searchType = search;
 
@@ -406,8 +401,7 @@ TermFixpoint::TermFixpoint(Aut_ptr aut, Term_ptr sourceTerm, Symbol* symbol, boo
     this->_InitializeAggregateFunction(inComplement);
     this->type = TERM_FIXPOINT;
     this->_searchType = WorklistSearchType::E_DFS;
-    this->_nonMembershipTesting = inComplement;
-    this->_inComplement = false;
+    SET_VALUE_NON_MEMBERSHIP_TESTING(this, inComplement);
 
     // Initialize the fixpoint
     this->_fixpoint.push_front(std::make_pair(nullptr, true));
@@ -431,7 +425,7 @@ TermFixpoint::~TermFixpoint() {
 }
 
 void Term::Complement() {
-    this->_inComplement = !this->_inComplement;
+    FLIP_IN_COMPLEMENT(this);
 }
 
 void Term::SetSuccessor(Term* succ, Symbol* symb) {
@@ -489,7 +483,7 @@ SubsumptionResult Term::IsSubsumed(Term *t, int limit, bool unfoldAll) {
         return unfoldedContinuation->IsSubsumed(t, limit, unfoldAll);
     }
 #   endif
-    assert(this->_inComplement == t->_inComplement);
+    assert(GET_IN_COMPLEMENT(this) == GET_IN_COMPLEMENT(t));
     assert(this->type != TERM_CONTINUATION && t->type != TERM_CONTINUATION);
 #   if (OPT_PARTIALLY_LIMITED_SUBSUMPTION > 0)
     --limit;
@@ -500,7 +494,7 @@ SubsumptionResult Term::IsSubsumed(Term *t, int limit, bool unfoldAll) {
 #   if (OPT_CACHE_SUBSUMES == true)
     if(this->type != TERM_FIXPOINT || !this->_isSubsumedCache.retrieveFromCache(t, result)) {
 #   endif
-        if (this->_inComplement) {
+        if (GET_IN_COMPLEMENT(this)) {
             if(this->type == TERM_EMPTY) {
                 result = (t->type == TERM_EMPTY ? E_TRUE : E_FALSE);
             } else {
@@ -530,7 +524,7 @@ SubsumptionResult Term::IsSubsumed(Term *t, int limit, bool unfoldAll) {
 
 SubsumptionResult TermEmpty::_IsSubsumedCore(Term *t, int limit, bool unfoldAll) {
     // Empty term is subsumed by everything (probably)
-    return (this->_inComplement) ? (t->type == TERM_EMPTY ? E_TRUE : E_FALSE) : E_TRUE;
+    return (GET_IN_COMPLEMENT(this)) ? (t->type == TERM_EMPTY ? E_TRUE : E_FALSE) : E_TRUE;
 }
 
 SubsumptionResult TermProduct::_IsSubsumedCore(Term *t, int limit, bool unfoldAll) {
@@ -767,7 +761,7 @@ SubsumptionResult TermFixpoint::_IsSubsumedCore(Term *t, int limit, bool unfoldA
 SubsumptionResult TermEmpty::IsSubsumedBy(FixpointType& fixpoint, WorklistType& worklist, Term*& biggerTerm, bool no_prune) {
     // Empty term is subsumed by everything
     // Fixme: Complemented fixpoint should subsume everything right?
-    return ( ( (fixpoint.size() == 1 && fixpoint.front().first == nullptr) || this->_inComplement) ? E_FALSE : E_TRUE);
+    return ( ( (fixpoint.size() == 1 && fixpoint.front().first == nullptr) || GET_IN_COMPLEMENT(this)) ? E_FALSE : E_TRUE);
 }
 
 void prune_worklist(WorklistType& worklist, Term*& item) {
@@ -1040,7 +1034,7 @@ SubsumptionResult TermBaseSet::_SubsumesCore(TermEnumerator* enumerator) {
  * Tests the emptiness of Term
  */
 bool TermEmpty::IsEmpty() {
-    return !this->_inComplement;
+    return !GET_IN_COMPLEMENT(this);
 }
 
 bool TermProduct::IsEmpty() {
@@ -1193,6 +1187,10 @@ namespace Gaston {
         std::cout << "(" << s.first << ", " << (*s.second) << ")";
     }
 
+    void dumpSetPreKey(std::pair<VATA::Util::OrdVector<size_t>, Symbol_ptr> const& s) {
+        std::cout << "(" << s.first << ", " << (*s.second) << ")";
+    }
+
     void dumpPreData(Term_ptr& s) {
         std::cout << (*s);
     }
@@ -1214,11 +1212,11 @@ void Term::dump(unsigned indent) {
     #if (DEBUG_TERM_UNIQUENESS == true)
     std::cout << "[" << this << "]";
     #endif
-    if(this->_inComplement) {
+    if(GET_IN_COMPLEMENT(this)) {
         std::cout << "\033[1;31m{\033[0m";
     }
     this->_dumpCore(indent);
-    if(this->_inComplement) {
+    if(GET_IN_COMPLEMENT(this)) {
         std::cout << "\033[1;31m}\033[0m";
     }
 }
@@ -1228,8 +1226,8 @@ void TermEmpty::_dumpCore(unsigned indent) {
 }
 
 void TermProduct::_dumpCore(unsigned indent) {
-    const char* product_colour = ProductTypeToColour(this->subtype);
-    const char* product_symbol = ProductTypeToTermSymbol(this->subtype);
+    const char* product_colour = ProductTypeToColour(GET_PRODUCT_SUBTYPE(this));
+    const char* product_symbol = ProductTypeToTermSymbol(GET_PRODUCT_SUBTYPE(this));
 
     std::cout << "\033[" << product_colour << "{\033[0m";
     left->dump(indent);
@@ -1239,8 +1237,8 @@ void TermProduct::_dumpCore(unsigned indent) {
 }
 
 void TermTernaryProduct::_dumpCore(unsigned int indent) {
-    const char* product_colour = ProductTypeToColour(this->subtype);
-    const char* product_symbol = ProductTypeToTermSymbol(this->subtype);
+    const char* product_colour = ProductTypeToColour(GET_PRODUCT_SUBTYPE(this));
+    const char* product_symbol = ProductTypeToTermSymbol(GET_PRODUCT_SUBTYPE(this));
 
     std::cout << "\033[" << product_colour << "{\033[0m";
     left->dump(indent);
@@ -1252,8 +1250,8 @@ void TermTernaryProduct::_dumpCore(unsigned int indent) {
 }
 
 void TermNaryProduct::_dumpCore(unsigned int indent) {
-    const char* product_colour = ProductTypeToColour(this->subtype);
-    const char* product_symbol = ProductTypeToTermSymbol(this->subtype);
+    const char* product_colour = ProductTypeToColour(GET_PRODUCT_SUBTYPE(this));
+    const char* product_symbol = ProductTypeToTermSymbol(GET_PRODUCT_SUBTYPE(this));
 
     std::cout << "\033[" << product_colour << "{\033[0m";
     for (int i = 0; i < this->arity; ++i) {
@@ -1534,7 +1532,7 @@ void TermFixpoint::ComputeNextFixpoint() {
     WorklistItemType item = this->_popFromWorklist();
 
     // Compute the results
-    ResultType result = _aut->IntersectNonEmpty(item.second, item.first, this->_nonMembershipTesting);
+    ResultType result = _aut->IntersectNonEmpty(item.second, item.first, GET_NON_MEMBERSHIP_TESTING(this));
     this->_updateExamples(result);
 
     // If it is subsumed by fixpoint, we don't add it
@@ -1622,7 +1620,7 @@ void TermFixpoint::ComputeNextPre() {
     WorklistItemType item = this->_popFromWorklist();
 
     // Compute the results
-    ResultType result = _aut->IntersectNonEmpty(item.second, item.first, this->_nonMembershipTesting);
+    ResultType result = _aut->IntersectNonEmpty(item.second, item.first, GET_NON_MEMBERSHIP_TESTING(this));
     this->_updateExamples(result);
 
     // If it is subsumed we return
@@ -1657,7 +1655,7 @@ void TermFixpoint::_InitializeAggregateFunction(bool inComplement) {
 }
 
 bool TermFixpoint::_AggregateResult(bool a, bool b) {
-    return (this->_nonMembershipTesting) ? (a && b) : (a || b);
+    return (GET_NON_MEMBERSHIP_TESTING(this)) ? (a && b) : (a || b);
 }
 
 /**
@@ -1943,7 +1941,7 @@ bool Term::operator==(const Term &t) {
     }
 #   endif
 
-    assert(tthis->_inComplement == tt->_inComplement);
+    assert(GET_IN_COMPLEMENT(tthis) == GET_IN_COMPLEMENT(tt));
     if(tthis == tt) {
         // Same thing
         #if (MEASURE_COMPARISONS == true)

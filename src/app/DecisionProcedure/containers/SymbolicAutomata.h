@@ -465,7 +465,11 @@ protected:
     MonaWrapper<size_t> _autWrapper;                // Wrapper of mona automaton
     unsigned int _stateSpace = 0;               // Number of states in automaton
     unsigned int _stateOffset = 0;              // Offset of states used for mask
+#   if (OPT_USE_SET_PRE == true)
+    SetPreCache _setCache;
+#   else
     PreCache _preCache;
+#   endif
 
     /// <<< PRIVATE FUNCTIONS >>>
     virtual void _InitializeAutomaton();

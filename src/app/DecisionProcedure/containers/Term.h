@@ -75,6 +75,16 @@ using WorklistItemType = std::pair<Term_ptr, SymbolType*>;
 using WorklistType = std::list<WorklistItemType>;
 using Symbols = std::vector<SymbolType*>;
 
+// <<< MACROS FOR ACCESS OF FLAGS >>>
+#   define GET_IN_COMPLEMENT(term) (term->_flags & (1 << 1))
+#   define SET_IN_COMPLEMENT(term) (term->_flags |= (1 << 1))
+#   define FLIP_IN_COMPLEMENT(term) (term->_flags ^= (1 << 1))
+#   define GET_NON_MEMBERSHIP_TESTING(term) (term->_flags & 1)
+#   define SET_NON_MEMBERSHIP_TESTING(term) (term->_flags |= 1)
+#   define SET_VALUE_NON_MEMBERSHIP_TESTING(term, val) (term->_flags |= val)
+#   define FLIP_NON_MEMBERSHIP_TESTING(term) (term->_flags ^= 1)
+#   define GET_PRODUCT_SUBTYPE(term) (term->_flags & (0b11 << 2) >> 2)
+#   define SET_PRODUCT_SUBTYPE(term, pt) (term->_flags |= (static_cast<int>(pt)) << 2) // Note that we assign only once, so this should be ok
 
 class Term {
     friend class Workshops::TermWorkshop;
@@ -86,7 +96,7 @@ protected:
     EnumSubsumesCache _subsumesCache;   // [36B] << Cache for results of subsumes
 #   endif
 public:
-    struct {                        // [12B*2] << Link for counterexamples
+    struct {                        // [8B*3] << Link for counterexamples
         Term* succ;
         Symbol* symbol;
         size_t len;
@@ -95,10 +105,8 @@ public:
     size_t stateSpaceApprox = 0;    // [4-8B] << Approximation of the state space, used for heuristics
     TermType type;                  // [4B] << Type of the term
 protected:
-    bool _nonMembershipTesting;     // [1B] << We are testing the nonmembership for this term
-    bool _inComplement;             // [1B] << Term is complemented
+    char _flags = 0;                // [1B] << Flags with 0: nonMembership, 1: inComplement, 2-3: subtype
 public:
-
     NEVER_INLINE Term();
     virtual NEVER_INLINE ~Term();
 
@@ -112,7 +120,7 @@ public:
     virtual SubsumptionResult Subsumes(TermEnumerator*);
     virtual bool IsEmpty() = 0;
     virtual void Complement();
-    virtual bool InComplement() {return this->_inComplement;}
+    virtual bool InComplement() {return GET_IN_COMPLEMENT(this);}
     bool operator==(const Term &t);
     bool IsNotComputed();
     void SetSuccessor(Term*, Symbol*);
@@ -176,7 +184,6 @@ public:
     Term_ptr left;                              // [8B] << Left member of the product
     Term_ptr right;                             // [8B] << Right member of the product
     ProductEnumerator* enumerator = nullptr;    // [8B] << Enumerator through the terms
-    ProductType subtype;                        // [4B] << Product type (Union, Intersection)
 
     // See #L29
     TERM_MEASURELIST(DEFINE_STATIC_MEASURE)
@@ -207,7 +214,6 @@ public:
     Term_ptr left;
     Term_ptr middle;
     Term_ptr right;
-    ProductType subtype;
     // Fixme: add enumerator
 
     // See #L29
@@ -240,7 +246,6 @@ public:
     size_t arity;
     Term_ptr* terms;
     size_t* access_vector;
-    ProductType subtype;
     // Fixme: add iterator
 
     // See #L29

@@ -79,16 +79,16 @@ static const char* ProductTypeColours[] = {"1;32m", "1;33m", "1;36m", "1;37m"};
 static const char* ProductTypeAutomataSymbols[] = {"\u2229", "\u222A", "\u2192", "\u2194"};
 static const char* ProductTypeTermSymbols[] = {"\u2293", "\u2294", "\u21FE", "\u21FF"};
 
-inline const char* ProductTypeToColour(ProductType type) {
-	return ProductTypeColours[static_cast<int>(type)];
+inline const char* ProductTypeToColour(int type) {
+	return ProductTypeColours[type];
 }
 
 inline const char* ProductTypeToAutomatonSymbol(ProductType type) {
 	return ProductTypeAutomataSymbols[static_cast<int>(type)];
 }
 
-inline const char* ProductTypeToTermSymbol(ProductType type) {
-	return ProductTypeTermSymbols[static_cast<int>(type)];
+inline const char* ProductTypeToTermSymbol(int type) {
+	return ProductTypeTermSymbols[type];
 }
 
 namespace Gaston {
@@ -124,6 +124,7 @@ namespace Gaston {
 	void dumpTermKey(Term_ptr const& s);
 	void dumpSubsumptionKey(std::pair<Term_ptr, Term_ptr> const& s);
 	void dumpSubsumptionData(SubsumptionResult& s);
+	void dumpSetPreKey(std::pair<VarList, Symbol_ptr> const& s);
 	void dumpPreKey(std::pair<size_t, Symbol_ptr> const& s);
 	void dumpPreData(Term_ptr& s);
 	void dumpDagKey(Formula_ptr const& s);
@@ -154,6 +155,11 @@ namespace Gaston {
 
 	using PreKey				 = std::pair<StateType, Symbol_ptr>;
 	using PreCache				 = BinaryCache<PreKey, Term_ptr, PreHashType, PrePairCompare<PreKey>, dumpPreKey, dumpPreData>;
+	using SetPreKey				 = std::pair<VarList, Symbol_ptr>;
+	using SetPreHash			 = boost::hash<SetPreKey>;
+	using SetPreCompare			 = std::equal_to<SetPreKey>;
+	using SetPreCache			 = BinaryCache<SetPreKey, Term_ptr, SetPreHash, SetPreCompare, dumpSetPreKey, dumpPreData>;
+
 }
 
 /*************************

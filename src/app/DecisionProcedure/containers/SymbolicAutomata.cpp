@@ -969,7 +969,13 @@ Term* BaseAutomaton::Pre(Symbol* symbol, Term* finalApproximation, bool underCom
     // Reinterpret the approximation as base states
     TermBaseSet* baseSet = reinterpret_cast<TermBaseSet*>(finalApproximation);
 #   if (OPT_USE_SET_PRE == true)
-    return this->_factory.CreateBaseSet(this->_autWrapper.Pre(baseSet->states, symbol->GetTrackMask()), this->_stateOffset, this->_stateSpace);
+    Term_ptr accumulatedState = nullptr;
+    auto key = std::make_pair(baseSet->states, symbol);
+    if(!this->_setCache.retrieveFromCache(key, accumulatedState)) {
+        accumulatedState = this->_factory.CreateBaseSet(this->_autWrapper.Pre(baseSet->states, symbol->GetTrackMask()), this->_stateOffset, this->_stateSpace);
+        this->_setCache.StoreIn(key, accumulatedState);
+    }
+    return accumulatedState;
 #   else
     Term_ptr preState = nullptr;
     Term_ptr  accumulatedState = nullptr;
@@ -1417,7 +1423,7 @@ void ProjectionAutomaton::_DumpExampleCore(ExampleType e) {
 }
 
 void BinaryOpAutomaton::DumpAutomaton() {
-    const char* product_colour = ProductTypeToColour(this->_productType);
+    const char* product_colour = ProductTypeToColour(static_cast<int>(this->_productType));
     const char* product_symbol = ProductTypeToAutomatonSymbol(this->_productType);
     #if (DEBUG_AUTOMATA_ADDRESSES == true)
         std::cout << "[" << this << "]";
@@ -1440,7 +1446,7 @@ void BinaryOpAutomaton::DumpAutomaton() {
 }
 
 void TernaryOpAutomaton::DumpAutomaton() {
-    const char* product_colour = ProductTypeToColour(this->_productType);
+    const char* product_colour = ProductTypeToColour(static_cast<int>(this->_productType));
     const char* product_symbol = ProductTypeToAutomatonSymbol(this->_productType);
 #   if (DEBUG_AUTOMATA_ADDRESSES == true)
     std::cout << "[" << this << "]";
@@ -1469,7 +1475,7 @@ void TernaryOpAutomaton::DumpAutomaton() {
 }
 
 void NaryOpAutomaton::DumpAutomaton() {
-    const char* product_colour = ProductTypeToColour(this->_productType);
+    const char* product_colour = ProductTypeToColour(static_cast<int>(this->_productType));
     const char* product_symbol = ProductTypeToAutomatonSymbol(this->_productType);
 #   if (DEBUG_AUTOMATA_ADDRESSES == true)
     std::cout << "[" << this << "]";
