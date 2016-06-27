@@ -688,12 +688,12 @@ ResultType RootProjectionAutomaton::IntersectNonEmpty(Symbol* symbol, Term* fina
 
         fixpoint->RemoveSubsumed();
 #       if (DEBUG_EXAMPLE_PATHS == true)
-        if(fixpointTerm != nullptr && fixpointTerm->link.len > maxPath) {
+        if(fixpointTerm != nullptr && fixpointTerm->link->len > maxPath) {
             std::cout << "[*] Finished exploring examples of length '" << maxPath << "': ";
             timer_paths.stop();
             timer_paths.print();
             timer_paths.start();
-            maxPath = fixpointTerm->link.len;
+            maxPath = fixpointTerm->link->len;
 #           if (DEBUG_MAX_SEARCH_PATH > 0)
             if(maxPath > DEBUG_MAX_SEARCH_PATH) {
                 std::cout << "[!] Maximal search depth reached!\n";
@@ -710,8 +710,8 @@ ResultType RootProjectionAutomaton::IntersectNonEmpty(Symbol* symbol, Term* fina
         else
             std::cout << "nullptr";
         std::cout << " + ";
-        if(fixpointTerm != nullptr && fixpointTerm->link.symbol != nullptr) {
-            std::cout << (*fixpointTerm->link.symbol);
+        if(fixpointTerm != nullptr && fixpointTerm->link->symbol != nullptr) {
+            std::cout << (*fixpointTerm->link->symbol);
         } else {
             std::cout << "''";
         }
@@ -1402,12 +1402,12 @@ void ProjectionAutomaton::_DumpExampleCore(ExampleType e) {
     this->projectedVars->sort();
     int max_len = max_varname_lenght(this->projectedVars, varNo);
 
-    while(example != nullptr && example->link.succ != nullptr && example != example->link.succ) {
+    while(example != nullptr && example->link->succ != nullptr && example != example->link->succ) {
     //                                                           ^--- not sure this is right
         for(size_t i = 0; i < varNo; ++i) {
-            examples[i] += example->link.symbol->GetSymbolAt(varMap[this->projectedVars->get(i)]);
+            examples[i] += example->link->symbol->GetSymbolAt(varMap[this->projectedVars->get(i)]);
         }
-        example = example->link.succ;
+        example = example->link->succ;
     }
 
     for(size_t i = 0; i < varNo; ++i) {

@@ -96,12 +96,15 @@ protected:
     EnumSubsumesCache _subsumesCache;   // [36B] << Cache for results of subsumes
 #   endif
 public:
-    struct {                        // [8B*3] << Link for counterexamples
+    struct link_t {                        // [8B*3] << Link for counterexamples
         Term* succ;
         Symbol* symbol;
         size_t len;
-    } link;
-public:
+
+        link_t(Term* s, Symbol* sym, size_t l) : succ(s), symbol(sym), len(l) {}
+    };
+
+    link_t* link;
     size_t stateSpaceApprox = 0;    // [4-8B] << Approximation of the state space, used for heuristics
     TermType type;                  // [4B] << Type of the term
 protected:

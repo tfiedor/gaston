@@ -177,9 +177,9 @@ void SymbolicChecker::Decide() {
 
 int count_example_len(Term* t) {
     int len = 0;
-    while(t->link.succ != nullptr && t->link.succ != t) {
+    while(t->link->succ != nullptr && t->link->succ != t) {
         ++len;
-        t = t->link.succ;
+        t = t->link->succ;
     }
     return len;
 }

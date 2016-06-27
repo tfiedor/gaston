@@ -73,8 +73,12 @@ size_t TermBaseSet::maxBaseSize = 0;
 extern Ident lastPosVar, allPosVar;
 
 // <<< TERM CONSTRUCTORS AND DESTRUCTORS >>>
-Term::Term(): link{ nullptr, nullptr, 0} {}
-Term::~Term() {}
+Term::Term() {
+    this->link = new link_t(nullptr, nullptr, 0);
+}
+Term::~Term() {
+    delete this->link;
+}
 
 TermEmpty::TermEmpty(bool inComplement) {
     #if (MEASURE_STATE_SPACE == true)
@@ -429,10 +433,10 @@ void Term::Complement() {
 }
 
 void Term::SetSuccessor(Term* succ, Symbol* symb) {
-    if(this->link.succ == nullptr) {
-        this->link.succ = succ;
-        this->link.symbol = symb;
-        this->link.len = succ->link.len + 1;
+    if(this->link->succ == nullptr) {
+        this->link->succ = succ;
+        this->link->symbol = symb;
+        this->link->len = succ->link->len + 1;
     }
 }
 
@@ -1711,7 +1715,7 @@ bool TermFixpoint::GetResult() {
 void TermFixpoint::_updateExamples(ResultType& result) {
     if(this->_searchType == E_UNGROUND_ROOT) {
 #   if (ALT_SKIP_EMPTY_UNIVERSE == true)
-        if (result.first->link.symbol == nullptr)
+        if (result.first->link->symbol == nullptr)
             return;
 #   endif
         if (result.second) {

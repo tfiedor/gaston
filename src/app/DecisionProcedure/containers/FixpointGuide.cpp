@@ -87,10 +87,10 @@ GuideTip FixpointGuide::GiveTip(Term* term, Symbol* symbol) {
     if(term->type == TERM_EMPTY) {
         return GuideTip::G_THROW;
     // The 0* chains are removed from the queue, so every zero string is not gonna be computed
-    } else if(term->link.succ == nullptr && symbol->IsZeroString()) {
+    } else if(term->link->succ == nullptr && symbol->IsZeroString()) {
         return GuideTip::G_THROW;
     // This tries to enforce to subtract the '1' so the FirstOrder constraint holds
-    } else if(this->_vars.size() > 0 && term->link.succ == nullptr) {
+    } else if(this->_vars.size() > 0 && term->link->succ == nullptr) {
         symbol = this->_link->ReMapSymbol(symbol);
         // Fixme: i think this is maybe fishy, as there is DAG, but further at top, there is remapping
         for(auto var : this->_vars) {
