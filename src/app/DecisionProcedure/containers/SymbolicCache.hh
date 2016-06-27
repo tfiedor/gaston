@@ -217,6 +217,7 @@ template<class Key, class CacheData, class KeyHash, class KeyCompare, void (*Key
 class BinaryCache {
 //	                                     this could be done better ---^----------------------------^
 private:
+#	define LAST_QUERIES_SIZE 3
 	// < Typedefs >
 #   if (OPT_USE_DENSE_HASHMAP == true)
 	typedef google::dense_hash_map<Key, CacheData, KeyHash, KeyCompare> KeyToValueMap;
@@ -231,12 +232,19 @@ private:
 	unsigned int cacheHits = 0;
 	unsigned int cacheMisses = 0;
 
+#	if (OPT_CACHE_LAST_QUERIES == true)
+	Key _lastKey[LAST_QUERIES_SIZE];
+	CacheData _lastData[LAST_QUERIES_SIZE];
+	int pos = 0;
+	int size = 0;
+#	endif
 public:
 	BinaryCache() {
 #       if (OPT_USE_DENSE_HASHMAP == true)
 		this->_cache.set_empty_key(Key());
 #       endif
         this->_cache.max_load_factor(0.25);
+
 	}
 	// < Public Methods >
 	/**
@@ -258,6 +266,12 @@ public:
 #       if (OPT_USE_DENSE_HASHMAP == true)
 		this->_cache.insert(std::make_pair(key, data));
 #       else
+#		if (OPT_CACHE_LAST_QUERIES == true)
+        this->pos = (this->pos + 1) % LAST_QUERIES_SIZE;
+		this->_lastData[this->pos] = data;
+		this->_lastKey[this->pos] = key;
+		this->size = std::min(this->size+1, LAST_QUERIES_SIZE);
+#		endif
 		this->_cache.emplace(key, data);
 #       endif
 	}
@@ -268,6 +282,18 @@ public:
 	 * @return true if found;
 	 */
 	bool retrieveFromCache(const Key& key, CacheData& data) {
+#		if (OPT_CACHE_LAST_QUERIES == true)
+		// Check the last queries first
+		for(size_t i = this->pos, j = 0; j < this->size; ++j) {
+			if(this->_lastKey[i] == key) {
+				++cacheHits;
+				data = this->_lastData[i];
+				return true;
+			}
+			i = (i == 0) ? LAST_QUERIES_SIZE - 1 : i - 1;
+		}
+#		endif
+
 		auto search = this->_cache.find(key);
 		if (search == this->_cache.end()) {
 			++cacheMisses;
