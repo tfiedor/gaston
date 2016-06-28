@@ -20,6 +20,8 @@ void FixpointDetagger::visit(ASTForm_ff *form) {
     if(form->fixpoint_number <= this->_cFixpointThreshold) {
         if(form->f1->is_restriction) {
             form->tag = 1;
+        } else {
+            form->tag = 0;
         }
     }
 #   endif
