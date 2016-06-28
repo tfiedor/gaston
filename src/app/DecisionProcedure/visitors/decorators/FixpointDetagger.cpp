@@ -18,7 +18,9 @@ void FixpointDetagger::visit(ASTForm_ff *form) {
 
 #   if(OPT_EXTRACT_MORE_AUTOMATA == true && OPT_CREATE_QF_AUTOMATON == true && MONA_FAIR_MODE == false)
     if(form->fixpoint_number <= this->_cFixpointThreshold) {
-        form->tag = 0;
+        if(form->f1->is_restriction) {
+            form->tag = 1;
+        }
     }
 #   endif
 }

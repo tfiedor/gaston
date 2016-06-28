@@ -32,6 +32,7 @@
 #include "../visitors/decorators/UnderComplementDecorator.h"
 #include "../visitors/decorators/Tagger.h"
 #include "../visitors/decorators/FixpointDetagger.h"
+#include "../visitors/decorators/InverseFixpointDetagger.h"
 #include "../visitors/decorators/OccuringVariableDecorator.h"
 
 extern PredicateLib predicateLib;
@@ -307,15 +308,6 @@ void Checker::PreprocessFormula() {
     this->_monaAST->formula = static_cast<ASTForm *>(this->_monaAST->formula->accept(shuffleVisitor));
 #   endif
 
-    Tagger tagger(tags);
-    (this->_monaAST->formula)->accept(tagger);
-#   if (MEASURE_ATOMS == true)
-    std::cout << "Atoms: " << tagger.atoms << "\n";
-#   endif
-
-    FixpointDetagger detagger(options.fixLimit);
-    (this->_monaAST->formula)->accept(detagger);
-
     if (!options.monaWalk) {
         SecondOrderRestricter restricter;
         this->_monaAST->formula = static_cast<ASTForm*>((this->_monaAST->formula)->accept(restricter));
@@ -330,6 +322,21 @@ void Checker::PreprocessFormula() {
         ContinuationSwitcher continuationSwitcher;
         (this->_monaAST->formula)->accept(continuationSwitcher);
 #       endif
+    }
+
+    Tagger tagger(tags);
+    (this->_monaAST->formula)->accept(tagger);
+#   if (MEASURE_ATOMS == true)
+    std::cout << "Atoms: " << tagger.atoms << "\n";
+#   endif
+
+    if(options.inverseFixLimit != -1) {
+        // FixpointDetagging Inverse Mode;
+        InverseFixpointDetagger inverseDetagger(options.inverseFixLimit);
+        (this->_monaAST->formula)->accept(inverseDetagger);
+    } else {
+        FixpointDetagger detagger(options.fixLimit);
+        (this->_monaAST->formula)->accept(detagger);
     }
 
     if(options.graphvizDAG) {

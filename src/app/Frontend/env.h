@@ -41,7 +41,7 @@ public:
     inheritedAcceptance(false), unrestrict(false),
     monaWalk(false),expandTagged(false),
     alternativeM2LStr(false), test(EVERYTHING), reorder(HEURISTIC), optimize(0),
-    useMonaDFA(false), serializeMona(false), fixLimit(0) {}
+    useMonaDFA(false), serializeMona(false), fixLimit(-1), inverseFixLimit(-1) {}
 
   bool useMonaDFA;
   bool noExpnf;
@@ -75,7 +75,8 @@ public:
   ReorderMode reorder;
   unsigned optimize;
     bool serializeMona;
-    unsigned fixLimit;
+    int fixLimit;
+    int inverseFixLimit;
 };
 
 #endif

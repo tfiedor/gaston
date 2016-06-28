@@ -102,6 +102,7 @@ void PrintUsage() {
 		<< " -d,  --dump-all      Dump AST, symboltable, and code DAG\n"
 		<< " -ga, --print-aut     Print automaton in graphviz\n"
 		<< " -cfX                 Transform all formulae with lesser than X fixpoints into automaton\n"
+		<< " -icfX                Transform all formulae with greater than X fixpoints from the root\n"
 		<< "      --no-automaton  Don't dump Automaton\n"
 		<< "      --test          Test specified problem [val, sat, unsat]\n"
 		<< "      --walk-aut      Does the experiment generating the special dot graph\n"
@@ -158,6 +159,10 @@ bool ParseArguments(int argc, char *argv[]) {
 				std::string fixLimitStr(argv[i]);
 				fixLimitStr = fixLimitStr.substr(3);
 				options.fixLimit = stoi(fixLimitStr);
+			} else if(argv[i][0] == '-' && argv[i][1] == 'i' && argv[i][2] == 'c' && argv[i][3] == 'f') {
+				std::string ifixLimitStr(argv[i]);
+				ifixLimitStr = ifixLimitStr.substr(4);
+				options.inverseFixLimit = stoi(ifixLimitStr);
 			} else if(strcmp(argv[i], "--no-automaton") == 0)
 				options.dontDumpAutomaton = true;
 			else if(strcmp(argv[i], "--test=val") == 0) {
@@ -190,6 +195,10 @@ bool ParseArguments(int argc, char *argv[]) {
 		}
 	}
 
+	if(options.inverseFixLimit > 0 && options.fixLimit > 0) {
+		std::cerr << "Incorrect combination of '-cfX' and '-icfX' options\n";
+		return false;
+	}
 	inputFileName = argv[argc-1];
 	return true;
 }

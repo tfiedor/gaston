@@ -148,6 +148,7 @@ public:
     virtual void DumpProductHeader(std::ofstream&, bool, ProductType);
     virtual void DumpToDot(std::ofstream&, bool) = 0;
     static void AutomatonToDot(std::string, SymbolicAutomaton*, bool);
+    static void GastonInfoToDot(std::ofstream&);
 protected:
     NEVER_INLINE virtual ~SymbolicAutomaton();
 };

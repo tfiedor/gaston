@@ -77,10 +77,8 @@ AST* SecondOrderRestricter::_firstOrderRestrict(FirstOrderQuantification* form) 
         assert(symbolTable.lookupType(it) == MonaTypeTag::Varname1);
         BinaryFormula* binopForm = reinterpret_cast<BinaryFormula*>(SecondOrderRestricter::RestrictFormula<BinaryFormula, ASTTerm1_Var1>(it, restrictedFormula));
         restrictedFormula = new SecondOrderQuantification(nullptr, new IdentList(it), binopForm, Pos());
-        restrictedFormula->fixpoint_number = form->fixpoint_number;
+        restrictedFormula->fixpoint_number = binopForm->fixpoint_number+1;
     }
-
-    restrictedFormula->fixpoint_number = form->fixpoint_number;
 
     // Free the previous form
     form->detach();
@@ -102,9 +100,8 @@ AST* SecondOrderRestricter::_secondOrderRestrict(SecondOrderQuantification *form
         ASTForm* binopForm = restrictedFormula;
         binopForm = reinterpret_cast<BinaryFormula*>(SecondOrderRestricter::RestrictFormula<BinaryFormula, ASTTerm2_Var2>(it, binopForm));
         restrictedFormula = new SecondOrderQuantification(nullptr, new IdentList(it), binopForm, form->pos);
+        restrictedFormula->fixpoint_number = binopForm->fixpoint_number+1;
     }
-
-    restrictedFormula->fixpoint_number = form->fixpoint_number;
 
     form->detach();
     delete form;

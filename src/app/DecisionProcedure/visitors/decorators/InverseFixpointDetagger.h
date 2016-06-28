@@ -1,22 +1,21 @@
 //
-// Created by Raph on 29/01/2016.
+// Created by Raph on 28/06/2016.
 //
 
-#ifndef WSKS_FIXPOINTDETAGGER_H
-#define WSKS_FIXPOINTDETAGGER_H
+#ifndef WSKS_INVERSEFIXPOINTDETAGGER_H
+#define WSKS_INVERSEFIXPOINTDETAGGER_H
 
 #include "../../../Frontend/ast.h"
 #include "../../../Frontend/ast_visitor.h"
 
-class FixpointDetagger : public VoidVisitor {
+class InverseFixpointDetagger : public VoidVisitor {
 private:
     const size_t _cFixpointThreshold;    // < Everything with less than _cFixpointThreshold fixpoint computations will be converted to automaton
 
     template<class FixpointFormula>
     void _visitFixpointComputation(FixpointFormula*);
 public:
-    FixpointDetagger(size_t fixpoint_limit = 0) :
-            VoidVisitor(Traverse::PostOrder), _cFixpointThreshold(fixpoint_limit) {}
+    InverseFixpointDetagger(size_t fixpointLimit = 0) : VoidVisitor(Traverse::PreOrder), _cFixpointThreshold(fixpointLimit) {}
 
     void visit(ASTForm* form);
     void visit(ASTTerm* term) {};
@@ -32,4 +31,4 @@ public:
 };
 
 
-#endif //WSKS_FIXPOINTDETAGGER_H
+#endif //WSKS_INVERSEFIXPOINTDETAGGER_H

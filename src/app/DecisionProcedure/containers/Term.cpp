@@ -652,21 +652,7 @@ SubsumptionResult TermBaseSet::_IsSubsumedCore(Term *term, int limit, bool unfol
     if(t->stateSpaceApprox < this->stateSpaceApprox) {
         return E_FALSE;
     } else {
-        // TODO: Maybe we could exploit that we have ordered vectors
-        auto it = this->states.rbegin();
-        auto end = this->states.rend();
-        auto tit = t->states.rbegin();
-        auto tend = t->states.rend();
-        while(it != end && tit != tend) {
-            if(*it == *tit) {
-                ++it;
-                ++tit;
-            } else if (*it > *(tit++)) {
-                // *it < *tit
-                return E_FALSE;
-            }
-        }
-        return (it == end) ? E_TRUE : E_FALSE;
+        return this->states.IsSubsetOf(t->states) ? E_TRUE : E_FALSE;
     }
 }
 

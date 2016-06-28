@@ -1648,12 +1648,37 @@ void LessEqAutomaton::DumpAutomaton() {
     #endif
 }
 
+void print_gaston_optimization_to_dot(std::ofstream& os, std::string opt, bool ison) {
+    os << "\t\t\t<tr>";
+    os << "<td>" << opt << "</td>";
+    os << "<td" << (ison ? ">ON" : " bgcolor=\"grey\"><font color=\"white\">OFF</font>") << "</td>";
+    os << "</tr>\n";
+}
+
+void SymbolicAutomaton::GastonInfoToDot(std::ofstream& os) {
+    os << "\tsubgraph clusterGastonInfo {\n";
+    os << "\t\tlabel=\"Gaston Parameters\";\n";
+    os << "\t\trankdir=\"LR\";\n";
+    os << "\t\tranksep=0.1;\n";
+    // Output stuff
+    os << "\t\topts [shape=plaintext label=<<table border=\"0\" cellborder=\"1\" cellspacing=\"1\" cellpadding=\"5\">\n";
+    print_gaston_optimization_to_dot(os, "DAG", OPT_USE_DAG);
+    print_gaston_optimization_to_dot(os, "AntiPrenexing", OPT_ANTIPRENEXING);
+    print_gaston_optimization_to_dot(os, "SubformulaeConversion", OPT_CREATE_QF_AUTOMATON);
+    print_gaston_optimization_to_dot(os, "TernaryProducts", OPT_USE_TERNARY_AUTOMATA);
+    print_gaston_optimization_to_dot(os, "NaryProducts", OPT_USE_NARY_AUTOMATA);
+    print_gaston_optimization_to_dot(os, "Continuations", OPT_EARLY_EVALUATION);
+    os << "\t\t</table>>];\n";
+    os << "\t}\n";
+}
+
 void SymbolicAutomaton::AutomatonToDot(std::string filename, SymbolicAutomaton *aut, bool inComplement) {
     std::ofstream os;
     os.open(filename);
     // TODO: Add exception handling
     os << "strict graph aut {\n";
     aut->DumpToDot(os, inComplement);
+    SymbolicAutomaton::GastonInfoToDot(os);
     os << "}\n";
     os.close();
 }
@@ -1661,6 +1686,7 @@ void SymbolicAutomaton::AutomatonToDot(std::string filename, SymbolicAutomaton *
 void SymbolicAutomaton::DumpProductHeader(std::ofstream & os, bool inComplement, ProductType productType) {
     os << "\t" << (uintptr_t) &*this << "[label=\"";
     os << this->_factory.ToSimpleStats() << "\\n";
+    os << this->_form->fixpoints_from_root << ", ";
     os << this->_form->fixpoint_number << ": ";
     os << "\u03B5 " << (inComplement ? "\u2209 " : "\u2208 ");
     os << ProductTypeToAutomatonSymbol(productType);

@@ -124,6 +124,7 @@ public:
 
 	size_t tag = 1;
 	size_t fixpoint_number = 0;
+	size_t fixpoints_from_root = 0;
 	size_t height = 1;
 	size_t dag_height = 1;
 	size_t size = 1;
