@@ -328,6 +328,11 @@ void Checker::PreprocessFormula() {
     (this->_monaAST->formula)->accept(tagger);
 #   if (MEASURE_ATOMS == true)
     std::cout << "Atoms: " << tagger.atoms << "\n";
+    std::cout << "Products: " << tagger.products << "\n";
+    std::cout << "Unions: " << tagger.unions << "\n";
+    std::cout << "Implications: " << tagger.implications << "\n";
+    std::cout << "Biimplications: " << tagger.biimplications << "\n";
+    std::cout << "Negations: " << tagger.complements << "\n";
 #   endif
 
     if(options.inverseFixLimit != -1) {
@@ -345,6 +350,12 @@ void Checker::PreprocessFormula() {
         DotWalker dw_visitor(dotFileName);
         (this->_monaAST->formula)->accept(dw_visitor);
     }
+
+#   if (MEASURE_AUTOMATA_METRICS == true)
+    std::cout << "Height: " << this->_monaAST->formula->height << "\n";
+    std::cout << "Size: " << this->_monaAST->formula->size << "\n";
+    std::cout << "Fixpoints: " << this->_monaAST->formula->fixpoint_number << "\n";
+#   endif
 
     this->_stopTimer(timer_preprocess, "Preprocess");
 

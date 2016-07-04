@@ -2165,6 +2165,25 @@ bool ASTTerm2_Empty::StructuralCompare(AST* form) {
     return this->kind == form->kind;
 }
 
+bool ASTTerm2_Set::StructuralCompare(AST* form) {
+    assert(form != nullptr);
+    if(this->kind != form->kind) {
+        return false;
+    } else {
+        ASTTerm2_Set* fform = static_cast<ASTTerm2_Set*>(form);
+        if (this->elements->size() != fform->elements->size()) {
+            return false;
+        } else {
+            for(auto it = this->elements->begin(), tit = fform->elements->begin(); it != this->elements->end(); ++it, ++tit) {
+                if(!(*it)->StructuralCompare(*tit)) {
+                    return false;
+                }
+            }
+            return true;
+        }
+    }
+}
+
 // Remapping
 void ASTTerm1_n::ConstructMapping(AST* form, std::map<unsigned int, unsigned int>& map) {
     assert(this->kind == form->kind);
@@ -2274,7 +2293,17 @@ void ASTForm_FirstOrder::ConstructMapping(AST* form, std::map<unsigned int, unsi
     this->t->ConstructMapping(static_cast<ASTForm_FirstOrder*>(form)->t, map);
 }
 
+void ASTTerm2_Set::ConstructMapping(AST* form, std::map<unsigned int, unsigned int> & map) {
+   assert(this->kind == form->kind);
+}
+
 void ASTForm_Not::ConstructMapping(AST* form, std::map<unsigned int, unsigned int>& map) {
+    if(this->kind != form->kind) {
+        this->dump();
+        std::cout << " vs ";
+        form->dump();
+        std::cout << "\n";
+    }
     assert(this->kind == form->kind);
     this->f->ConstructMapping(static_cast<ASTForm_Not*>(form)->f, map);
 }

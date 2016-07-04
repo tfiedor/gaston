@@ -115,7 +115,7 @@ measures = {
 }
 
 csv_keys = {
-    'gaston': ['ret', 'time', 'space-all', 'space', 'space-mona', 'space-base'],
+    'gaston': ['ret', 'time', 'space-all', 'space', 'space-mona', 'space-base', 'aut-height'],
     'mona': ['time', 'space', 'space-min']
 }
 
@@ -186,7 +186,6 @@ def run_gaston(test, timeout, params=[]):
     Runs dWiNA with following arguments: --method=backward
     '''
     args = ['./build/gaston', '--no-automaton'] + params + ['"{}"'.format(test)]
-    print(args)
     output, retcode = runProcess(args, timeout)
     return parse_gaston_output(output, retcode_to_error(retcode))
 

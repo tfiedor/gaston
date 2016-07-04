@@ -84,7 +84,6 @@ int SymbolicChecker::_DecideCore(bool isValid) {
         }
     } else if(this->_isGround) {
         // Ground formula is valid if epsilon is in its language
-        assert(options.test == TestType::EVERYTHING);
         if (isValid) {
             return Decision::VALID;
             // Else it is unsatisfiable
@@ -92,6 +91,7 @@ int SymbolicChecker::_DecideCore(bool isValid) {
             return Decision::UNSATISFIABLE;
         }
     } else {
+        assert(options.test == TestType::EVERYTHING);
         // Formula is unsatisfiable if there is no satisfying example
         if(this->_automaton->_satExample == nullptr) {
             return Decision::UNSATISFIABLE;

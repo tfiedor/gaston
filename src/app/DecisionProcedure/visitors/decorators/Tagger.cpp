@@ -15,22 +15,27 @@ void Tagger::_tagFormula(ASTForm *form) {
 }
 
 void Tagger::visit(ASTForm_And *form) {
+	++this->products;
 	this->_tagFormula(form);
 }
 
 void Tagger::visit(ASTForm_Or *form) {
+	++this->unions;
 	this->_tagFormula(form);
 }
 
 void Tagger::visit(ASTForm_Impl *form) {
+	++this->implications;
 	this->_tagFormula(form);
 }
 
 void Tagger::visit(ASTForm_Biimpl *form) {
+	++this->biimplications;
 	this->_tagFormula(form);
 }
 
 void Tagger::visit(ASTForm_Not *form) {
+	++this->complements;
 	this->_tagFormula(form);
 }
 

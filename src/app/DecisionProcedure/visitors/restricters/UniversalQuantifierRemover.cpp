@@ -11,6 +11,43 @@
 #include "../../../Frontend/ast.h"
 
 /**
+ *  not AllX. phi -> ExX. not phi
+ *
+ *  @param[in]  form  form to be negated
+ */
+template<class Universal, class Existential>
+AST* UniversalQuantifierRemover::_negateQuantifier(ASTForm_Not* form) {
+    Universal* universal = static_cast<Universal*>(form->f);
+    ASTForm_Not* negPhi = new ASTForm_Not(universal->f, universal->f->pos);
+    return new Existential(universal->ul, universal->vl, negPhi, form->pos);
+}
+
+template<>
+AST* UniversalQuantifierRemover::_negateQuantifier<ASTForm_All0, ASTForm_Ex0>(ASTForm_Not* form) {
+    ASTForm_All0* universal = static_cast<ASTForm_All0*>(form->f);
+    ASTForm_Not* negPhi = new ASTForm_Not(universal->f, universal->f->pos);
+    return new ASTForm_Ex0(universal->vl, negPhi, form->pos);
+}
+
+/**
+ * This is to not recieve the bloody double negation
+ *
+ * @param[in]  form  traversed node
+ */
+AST* UniversalQuantifierRemover::visit(ASTForm_Not *form) {
+    switch(form->f->kind) {
+        case aAll0:
+            return this->_negateQuantifier<ASTForm_All0, ASTForm_Ex0>(form);
+        case aAll1:
+            return this->_negateQuantifier<ASTForm_All1, ASTForm_Ex1>(form);
+        case aAll2:
+            return this->_negateQuantifier<ASTForm_All2, ASTForm_Ex2>(form);
+        default:
+            return form;
+    }
+}
+
+/**
  * Removes the universal quantifier as follows:
  *  All0 x. phi -> not Ex0 x. not phi
  *

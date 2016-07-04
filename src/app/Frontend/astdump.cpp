@@ -205,24 +205,48 @@ ASTTerm1_PlusModulo::dump()
   cout << "PlusModulo1("; t1->dump(); cout << ","  << n << ",";
   t2->dump(); cout << ")";
 }
-    
+
+std::string ASTTerm1_PlusModulo::ToString(bool no_utf) {
+  if(no_utf) {
+    return "(" + t1->ToString(no_utf) + " + " + std::to_string(n) + " % " + t2->ToString(no_utf) + ")";
+  } else {
+    return ("(" + t1->ToString(no_utf) + " +\u00B9 " + std::to_string(n) + " %\u00B9 " + t2->ToString(no_utf) + ")");
+  }
+}
+
 void 
 ASTTerm1_MinusModulo::dump()
 {
   cout << "MinusModulo1("; t1->dump(); cout << "," << n << ",";
   t2->dump(); cout << ")";
 }
-    
+
+std::string ASTTerm1_MinusModulo::ToString(bool no_utf) {
+  if(no_utf) {
+    return ("(" + t1->ToString(no_utf) + " - " + std::to_string(n) + " % " + t2->ToString(no_utf) + ")");
+  } else {
+    return ("(" + t1->ToString(no_utf) + " -\u00B9 " + std::to_string(n) + " %\u00B9 " + t2->ToString(no_utf) + ")");
+  }
+}
+
 void 
 ASTTerm1_Min::dump()
 {
   cout << "Min("; T->dump(); cout << ")";
 }
-    
+
+std::string ASTTerm1_Min::ToString(bool no_utf) {
+  return ("(Min " + T->ToString(no_utf) + ")");
+}
+
 void 
 ASTTerm1_Max::dump()
 {
   cout << "Max("; T->dump(); cout << ")";
+}
+
+std::string ASTTerm1_Max::ToString(bool no_utf) {
+  return ("(Max " + T->ToString(no_utf) + ")");
 }
     
 void 
@@ -297,11 +321,27 @@ ASTTerm2_Union::dump()
 {
   cout << "Union("; T1->dump(); cout << ","; T2->dump(); cout << ")";
 }
-    
+
+std::string ASTTerm2_Union::ToString(bool no_utf) {
+  if(no_utf) {
+    return "(" + T1->ToString(no_utf) + " union " + T2->ToString(no_utf) + ")";
+  } else {
+    return "(" + T1->ToString(no_utf) + " \u222A " + T2->ToString(no_utf) + ")";
+  }
+}
+
 void 
 ASTTerm2_Inter::dump()
 {
   cout << "Inter("; T1->dump(); cout << ","; T2->dump(); cout << ")";
+}
+
+std::string ASTTerm2_Inter::ToString(bool no_utf) {
+  if(no_utf) {
+    return ("(" + T1->ToString(no_utf) + " inter " + T2->ToString(no_utf) + ")");
+  } else {
+    return ("(" + T1->ToString(no_utf) + " \u2229" + T2->ToString(no_utf) + ")");
+  }
 }
     
 void 
@@ -309,7 +349,11 @@ ASTTerm2_Setminus::dump()
 {
   cout << "Setminus("; T1->dump(); cout << ","; T2->dump(); cout << ")";
 }
-    
+
+std::string ASTTerm2_Setminus::ToString(bool no_utf) {
+  return ("(" + T1->ToString(no_utf) + " \\ " + T2->ToString(no_utf) + ")");
+}
+
 void 
 ASTTerm2_Set::dump()
 {
@@ -322,7 +366,20 @@ ASTTerm2_Set::dump()
   }
   cout << ")";
 }
-    
+
+std::string ASTTerm2_Set::ToString(bool no_utf) {
+  std::string str("");
+  str += "{";
+  ASTList::iterator i;
+  for (i = elements->begin(); i != elements->end();) {
+    str += (*i)->ToString(no_utf);
+    if (++i != elements->end())
+      str += ", ";
+  }
+  str += "}";
+  return str;
+}
+
 void 
 ASTTerm2_Plus::dump()
 {
@@ -365,11 +422,19 @@ ASTTerm2_Interval::dump()
 {
   cout << "Interval("; t1->dump(); cout << ","; t2->dump(); cout << ")";
 }
+
+std::string ASTTerm2_Interval::ToString(bool no_utf) {
+  return (t1->ToString(no_utf) + ",...," + t2->ToString(no_utf));
+}
     
 void 
 ASTTerm2_PresbConst::dump()
 {
   cout << "PresbConst(" << value << ")"; 
+}
+
+std::string ASTTerm2_PresbConst::ToString(bool no_utf) {
+  return "pconst(" + std::to_string(this->value) + ")";
 }
 
 void 

@@ -11,6 +11,12 @@
 class Tagger : public VoidVisitor{
 public:
     size_t atoms = 0;
+    size_t products = 0;
+    size_t complements = 0;
+    size_t unions = 0;
+    size_t implications = 0;
+    size_t biimplications = 0;
+    size_t max_height = 0;
 private:
     using TagList = std::list<size_t>;
     using TagIterator = std::list<size_t>::iterator;

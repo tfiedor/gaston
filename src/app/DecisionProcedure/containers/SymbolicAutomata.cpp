@@ -250,9 +250,12 @@ ProjectionAutomaton::ProjectionAutomaton(SymbolicAutomaton_raw aut, Formula_ptr 
                       aut->type == AutType::NARY_INTERSECTION  || aut->type == AutType::NARY_UNION) {
                 NaryOpAutomaton *naryOpAutomaton = static_cast<NaryOpAutomaton*>(aut);
                 this->_guide = new FixpointGuide(naryOpAutomaton->GetLeft(), ff_form->f2->fixpoint_number == 0);
-            } else {
+            } else if(aut->type == AutType::BIIMPLICATION || aut->type == AutType::IMPLICATION ||
+                      aut->type == AutType::INTERSECTION  || aut->type == AutType::UNION) {
                 BinaryOpAutomaton *binaryOpAutomaton = static_cast<BinaryOpAutomaton *>(aut);
                 this->_guide = new FixpointGuide(binaryOpAutomaton->GetLeft(), ff_form->f2->fixpoint_number == 0);
+            } else {
+                this->_guide = new FixpointGuide();
             }
         } else {
             this->_guide = new FixpointGuide();

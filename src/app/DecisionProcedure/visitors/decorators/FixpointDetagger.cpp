@@ -29,7 +29,7 @@ void FixpointDetagger::visit(ASTForm_ff *form) {
 
 void FixpointDetagger::visit(ASTForm_Not *form) {
     form->fixpoint_number = form->f->fixpoint_number;
-    form->height = form->height + 1;
+    form->height = form->f->height + 1;
     form->size = form->f->size + 1;
 
     if(form->f->tag == 0)  {
@@ -41,7 +41,7 @@ void FixpointDetagger::visit(ASTForm_Not *form) {
 template<class FixpointFormula>
 void FixpointDetagger::_visitFixpointComputation(FixpointFormula *form) {
     form->fixpoint_number = form->f->fixpoint_number + 1;
-    form->height = form->height + 1;
+    form->height = form->f->height + 1;
     form->size = form->f->size + 1;
 
 #   if(OPT_EXTRACT_MORE_AUTOMATA == true)

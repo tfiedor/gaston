@@ -667,6 +667,7 @@ public:
   ASTTermCode *makeCode(SubstCode *subst = NULL);
   VarCode unfold(int v1, int v2, int n, int v3, SubstCode *subst, Pos pos);
   void dump();
+	virtual std::string ToString(bool no_utf = false);
 };
 
 class ASTTerm1_MinusModulo: public ASTTerm1_tnt {
@@ -679,6 +680,7 @@ public:
   ASTTermCode *makeCode(SubstCode *subst = NULL);
   VarCode unfold(int v1, int v2, int n, int v3, SubstCode *subst, Pos pos);
   void dump();
+	virtual std::string ToString(bool no_utf = false);
 };
 
 class ASTTerm1_Min: public ASTTerm1_T {
@@ -690,6 +692,7 @@ public:
 
   ASTTermCode *makeCode(SubstCode *subst = NULL);
   void dump();
+	virtual std::string ToString(bool no_utf = false);
 };
 
 class ASTTerm1_Max: public ASTTerm1_T {
@@ -701,6 +704,7 @@ public:
 
   ASTTermCode *makeCode(SubstCode *subst = NULL);
   void dump();
+	virtual std::string ToString(bool no_utf = false);
 };
 
 class ASTTerm1_TreeRoot: public ASTTerm1_T {
@@ -811,6 +815,7 @@ public:
   ASTTermCode *makeCode(SubstCode *subst = NULL);
 	virtual ASTTerm2* clone() { return new ASTTerm2_Union(this->T1->clone(), this->T2->clone(), Pos()); }
   void dump();
+	virtual std::string ToString(bool no_utf = false);
 };
 
 class ASTTerm2_Inter: public ASTTerm2_TT {
@@ -823,6 +828,7 @@ public:
   ASTTermCode *makeCode(SubstCode *subst = NULL);
 	virtual ASTTerm2* clone() { return new ASTTerm2_Inter(this->T1->clone(), this->T2->clone(), Pos()); }
   void dump();
+	virtual std::string ToString(bool no_utf = false);
 };
 
 class ASTTerm2_Setminus: public ASTTerm2_TT {
@@ -835,6 +841,7 @@ public:
   ASTTermCode *makeCode(SubstCode *subst = NULL);
 	virtual ASTTerm2* clone() { return new ASTTerm2_Setminus(this->T1->clone(), this->T2->clone(), Pos()); }
   void dump();
+	virtual std::string ToString(bool no_utf = false);
 };
 
 class ASTTerm2_Set: public ASTTerm2 {
@@ -847,7 +854,10 @@ public:
 
   void freeVars(IdentList*, IdentList*);
   ASTTermCode *makeCode(SubstCode *subst = NULL);
+	virtual void ConstructMapping(AST*, std::map<unsigned int, unsigned int>&);
+	virtual bool StructuralCompare(AST*);
   void dump();
+	virtual std::string ToString(bool no_utf = false);
 
 public:
   ASTList *elements;
@@ -892,6 +902,7 @@ public:
   void freeVars(IdentList*, IdentList*);
   ASTTermCode *makeCode(SubstCode *subst = NULL);
   void dump();
+	virtual std::string ToString(bool no_utf = false);
 
 protected:
   ASTTerm1 *t1;
@@ -907,6 +918,7 @@ public:
 
   ASTTermCode *makeCode(SubstCode *subst = NULL);
   void dump();
+	virtual std::string ToString(bool no_utf = false);
 
 protected:
   int value;

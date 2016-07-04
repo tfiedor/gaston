@@ -16,11 +16,16 @@
 
 class UniversalQuantifierRemover : public TransformerVisitor {
 public:
-    UniversalQuantifierRemover() : TransformerVisitor(Traverse::PostOrder) {}
+    UniversalQuantifierRemover() : TransformerVisitor(Traverse::PreOrder) {}
 
+    AST* visit(ASTForm_Not* form);
     AST* visit(ASTForm_All0* form);
     AST* visit(ASTForm_All1* form);
     AST* visit(ASTForm_All2* form);
+
+private:
+    template<class Universal, class Existential>
+    AST* _negateQuantifier(ASTForm_Not*);
 };
 
 

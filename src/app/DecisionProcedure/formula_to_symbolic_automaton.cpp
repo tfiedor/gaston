@@ -5,6 +5,7 @@
 #include "../Frontend/ast.h"
 #include "../Frontend/timer.h"
 #include "../Frontend/offsets.h"
+#include "../Frontend/env.h"
 #include "../DecisionProcedure/containers/SymbolicAutomata.h"
 #include "../DecisionProcedure/environment.hh"
 #include "../DecisionProcedure/automata.hh"
@@ -14,6 +15,7 @@
 extern Timer timer_base;
 extern VarToTrackMap varMap;
 extern Offsets offsets;
+extern Options options;
 
 template<class TemplatedAutomaton>
 SymbolicAutomaton* baseToSymbolicAutomaton(ASTForm* form, bool doComplement) {
@@ -49,12 +51,12 @@ SymbolicAutomaton* ASTForm::toSymbolicAutomaton(bool doComplement) {
         if(!cache->retrieveFromCache(key, this->sfa)) {
             // If yes, return the automaton (the mapping will be constructed internally)
 #       endif
-            if (this->tag == 0) {
+            if(this->tag == 0) {
                 // It was tagged to be constructed by MONA
                 this->sfa = baseToSymbolicAutomaton<GenericBaseAutomaton>(this, doComplement);
             } else {
 #               if (OPT_CREATE_QF_AUTOMATON == TRUE)
-                assert(this->fixpoint_number > 0 || this->tag == 1);
+                assert(this->fixpoint_number > 0 || this->tag == 1 || options.inverseFixLimit != -1);
 #               endif
                 this->sfa = this->_toSymbolicAutomatonCore(doComplement);
             }
@@ -114,11 +116,29 @@ SymbolicAutomaton* ASTForm_Sub::_toSymbolicAutomatonCore(bool doComplement) {
     return baseToSymbolicAutomaton<SubAutomaton>(this, doComplement);
 }
 
+template<class FormClass>
+bool has_consecutive_products(FormClass* form) {
+    ASTKind k = form->kind;
+    if(form->f1->kind == k && form->f1->fixpoint_number > 0) {
+        FormClass* f1_form = static_cast<FormClass*>(form->f1);
+        return    (   form->f2->kind == k &&    form->f2->fixpoint_number > 0)
+               || (f1_form->f1->kind == k && f1_form->f1->fixpoint_number > 0)
+               || (f1_form->f2->kind == k && f1_form->f2->fixpoint_number > 0);
+    } else if(form->f2->kind == k) {
+        assert(form->f1->kind != k || form->f1->fixpoint_number == 0);
+        FormClass* f2_form = static_cast<FormClass*>(form->f2);
+        return    (f2_form->f1->kind == k && f2_form->f1->fixpoint_number > 0)
+               || (f2_form->f2->kind == k && f2_form->f2->fixpoint_number > 0);
+    } else {
+        return false;
+    }
+}
+
 template<class FormClass, class BinaryProduct, class TernaryProduct, class NaryProduct>
 SymbolicAutomaton* product_to_automaton(FormClass* form, bool doComplement) {
     ASTKind k = form->kind;
 #   if (OPT_USE_NARY_AUTOMATA == true)
-    if(form->f1->kind == k && form->f2->kind == k) {
+    if(has_consecutive_products<FormClass>(form)) {
 #   else
     if(false) {
 #   endif
@@ -182,7 +202,8 @@ SymbolicAutomaton* ASTForm_Biimpl::_toSymbolicAutomatonCore(bool doComplement) {
 bool is_base_automaton(ASTForm* f) {
     return f->kind != aOr &&
            f->kind != aAnd &&
-           f->kind != aEx2;
+           f->kind != aEx2 &&
+           f->kind != aNot;
 }
 
 SymbolicAutomaton* ASTForm_Not::_toSymbolicAutomatonCore(bool doComplement) {

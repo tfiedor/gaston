@@ -112,6 +112,25 @@ GuideTip FixpointGuide::GiveTip(Term* term, Symbol* symbol) {
     return GuideTip::G_FRONT;
 }
 
+TermBaseSet* get_base_states(Term* term) {
+    assert(term != nullptr);
+    if(term->type == TermType::TERM_PRODUCT) {
+        TermProduct *tp = static_cast<TermProduct *>(term);
+        assert(tp->left->type == TermType::TERM_BASE);
+        return static_cast<TermBaseSet *>(tp->left);
+    } else if(term->type == TermType::TERM_TERNARY_PRODUCT) {
+        TermTernaryProduct *ttp = static_cast<TermTernaryProduct *>(term);
+        assert(ttp->left->type == TermType::TERM_BASE);
+        return static_cast<TermBaseSet *>(ttp->left);
+    } else if(term->type == TermType::TERM_NARY_PRODUCT) {
+        TermNaryProduct *tnp = static_cast<TermNaryProduct *>(term);
+        assert(tnp->terms[0]->type == TermType::TERM_BASE);
+        return static_cast<TermBaseSet *>(tnp->terms[0]);
+    } else {
+        assert(false && "We have something different than Product for giving tip");
+    }
+}
+
 /**
  * Returns tip what to do with the @p term. If the restriction on the left holds, we don't have to project
  * everything away and simply push everything we can down, so simply project everything we can.
@@ -120,12 +139,11 @@ GuideTip FixpointGuide::GiveTip(Term* term, Symbol* symbol) {
  * @return:                 tip what to do with the @p term
  */
 GuideTip FixpointGuide::GiveTip(Term* term) {
-    if (this->_isQuantifierFree && this->_link != nullptr && term->type != TERM_EMPTY) {
-        //assert(term->type == TermType::TERM_PRODUCT);
-        TermProduct *tp = static_cast<TermProduct*>(term);
+    assert(term != nullptr);
+
+    if (this->_isQuantifierFree && this->_link != nullptr && this->_link->aut->type == AutType::BASE && term->type != TERM_EMPTY) {
         TermBaseSet* initial = static_cast<TermBaseSet*>(this->_link->aut->GetInitialStates());
-        TermBaseSet* states = static_cast<TermBaseSet*>(tp->left);
-        if (initial->Intersects(states)) {
+        if (initial->Intersects(get_base_states(term))) {
             return GuideTip::G_PROJECT_ALL;
         }
     }
