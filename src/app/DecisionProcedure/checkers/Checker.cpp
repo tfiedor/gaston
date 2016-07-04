@@ -371,6 +371,7 @@ void Checker::PreprocessFormula() {
 void Checker::CreateAutomataSizeEstimations() {
     std::string monaDot(inputFileName);
     monaDot += "-walk.dot";
-    MonaAutomataDotWalker monaWalker(monaDot, true);
+    MonaAutomataDotWalker monaWalker(monaDot);
     (this->_monaAST->formula)->accept(monaWalker);
+    monaWalker.PrintResult();
 }

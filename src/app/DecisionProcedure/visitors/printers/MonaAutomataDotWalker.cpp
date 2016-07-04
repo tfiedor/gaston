@@ -54,6 +54,15 @@ TimeType MonaAutomataDotWalker::_constructAutomaton(ASTForm* form) {
         monaAutomaton = nullptr;
         /*dfaFree(temp);
         temp = nullptr;*/
+
+        if(minimizedStates > this->_maximum.first) {
+            this->_maximum.first = minimizedStates;
+        }
+
+        if(monaStates > this->_maximum.second) {
+            this->_maximum.second = monaStates;
+        }
+
         return std::make_pair(minimizedStates, monaStates);
     } catch (std::exception &e) {
         if(monaAutomaton != nullptr) {
@@ -65,42 +74,42 @@ TimeType MonaAutomataDotWalker::_constructAutomaton(ASTForm* form) {
 
 void MonaAutomataDotWalker::visit(ASTForm_And* form) {
     TimeType automatonSize = this->_constructAutomaton(form);
-    this->_dotFile << "\t" << (uintptr_t) form << " [label=\"[" << (std::to_string(form->tag)) << "] \u2227\\n" << std::to_string(automatonSize.first) << "/" << std::to_string(automatonSize.second) << "\"];\n";
+    this->_dotFile << "\t" << (uintptr_t) form << " [label=\"[" << (std::to_string(form->tag)) << ":" << form->dag_height << "] \u2227\\n" << std::to_string(automatonSize.first) << "/" << std::to_string(automatonSize.second) << "\"];\n";
     this->_dotFile << "\t" << (uintptr_t) form << " -- " << (uintptr_t) form->f1 << ";\n";
     this->_dotFile << "\t" << (uintptr_t) form << " -- " << (uintptr_t) form->f2 << ";\n";
 }
 
 void MonaAutomataDotWalker::visit(ASTForm_Or* form) {
     TimeType automatonSize = this->_constructAutomaton(form);
-    this->_dotFile << "\t" << (uintptr_t) form << " [label=\"[" << (std::to_string(form->tag)) << "] \u2228\\n" << std::to_string(automatonSize.first) << "/" << std::to_string(automatonSize.second) << "\"];\n";
+    this->_dotFile << "\t" << (uintptr_t) form << " [label=\"[" << (std::to_string(form->tag)) << ":" << form->dag_height << "] \u2228\\n" << std::to_string(automatonSize.first) << "/" << std::to_string(automatonSize.second) << "\"];\n";
     this->_dotFile << "\t" << (uintptr_t) form << " -- " << (uintptr_t) form->f1 << ";\n";
     this->_dotFile << "\t" << (uintptr_t) form << " -- " << (uintptr_t) form->f2 << ";\n";
 }
 
 void MonaAutomataDotWalker::visit(ASTForm_Impl* form) {
     TimeType automatonSize = this->_constructAutomaton(form);
-    this->_dotFile << "\t" << (uintptr_t) form << " [label=\"[" << (std::to_string(form->tag)) << "] \u21D2\\n" << std::to_string(automatonSize.first) << "/" << std::to_string(automatonSize.second) << "\"];\n";
+    this->_dotFile << "\t" << (uintptr_t) form << " [label=\"[" << (std::to_string(form->tag)) << ":" << form->dag_height << "] \u21D2\\n" << std::to_string(automatonSize.first) << "/" << std::to_string(automatonSize.second) << "\"];\n";
     this->_dotFile << "\t" << (uintptr_t) form << " -- " << (uintptr_t) form->f1 << ";\n";
     this->_dotFile << "\t" << (uintptr_t) form << " -- " << (uintptr_t) form->f2 << ";\n";
 }
 
 void MonaAutomataDotWalker::visit(ASTForm_Biimpl* form) {
     TimeType automatonSize = this->_constructAutomaton(form);
-    this->_dotFile << "\t" << (uintptr_t) form << " [label=\"[" << (std::to_string(form->tag)) << "] \u21D4\\n" << std::to_string(automatonSize.first) << "/" << std::to_string(automatonSize.second) << "\"];\n";
+    this->_dotFile << "\t" << (uintptr_t) form << " [label=\"[" << (std::to_string(form->tag)) << ":" << form->dag_height << "] \u21D4\\n" << std::to_string(automatonSize.first) << "/" << std::to_string(automatonSize.second) << "\"];\n";
     this->_dotFile << "\t" << (uintptr_t) form << " -- " << (uintptr_t) form->f1 << ";\n";
     this->_dotFile << "\t" << (uintptr_t) form << " -- " << (uintptr_t) form->f2 << ";\n";
 }
 
 void MonaAutomataDotWalker::visit(ASTForm_Not* form) {
     TimeType automatonSize = this->_constructAutomaton(form);
-    this->_dotFile << "\t" << (uintptr_t) form << " [label=\"[" << (std::to_string(form->tag)) << "] \u00AC\\n" << std::to_string(automatonSize.first) << "/" << std::to_string(automatonSize.second) << "\"];\n";
+    this->_dotFile << "\t" << (uintptr_t) form << " [label=\"[" << (std::to_string(form->tag)) << ":" << form->dag_height << "] \u00AC\\n" << std::to_string(automatonSize.first) << "/" << std::to_string(automatonSize.second) << "\"];\n";
     this->_dotFile << "\t" << (uintptr_t) form << " -- " << (uintptr_t) form->f << ";\n";
 }
 
 template<class ExistClass>
 void MonaAutomataDotWalker::_existsToDot(ExistClass* form) {
     TimeType automatonSize = this->_constructAutomaton(form);
-    this->_dotFile << "\t" << (uintptr_t) form << " [label=\"[" << (std::to_string(form->tag)) << "] \u2203";
+    this->_dotFile << "\t" << (uintptr_t) form << " [label=\"[" << (std::to_string(form->tag)) << ":" << form->dag_height << "] \u2203";
     for(auto it = form->vl->begin(); it != form->vl->end(); ++it) {
         this->_dotFile << (*it) << ", ";
     }
@@ -118,7 +127,7 @@ void MonaAutomataDotWalker::visit(ASTForm_Ex2* form) {
 template<class ForallClass>
 void MonaAutomataDotWalker::_forallToDot(ForallClass* form) {
     TimeType automatonSize = this->_constructAutomaton(form);
-    this->_dotFile << "\t" << (uintptr_t) form << " [label=\"[" << (std::to_string(form->tag)) << "] \u2200";
+    this->_dotFile << "\t" << (uintptr_t) form << " [label=\"[" << (std::to_string(form->tag)) << ":" << form->dag_height << "] \u2200";
     for(auto it = form->vl->begin(); it != form->vl->end(); ++it) {
         this->_dotFile << (*it) << ", ";
     }
@@ -136,7 +145,7 @@ void MonaAutomataDotWalker::visit(ASTForm_All2* form) {
 
 void MonaAutomataDotWalker::_atomicToDot(ASTForm* form) {
     TimeType automatonSize = this->_constructAutomaton(form);
-    this->_dotFile << "\t" << (uintptr_t) form << " [label=\"[" << (std::to_string(form->tag)) << "] " << form->ToString() << "\\n" << std::to_string(automatonSize.first) << "/" << std::to_string(automatonSize.second) << "\"];\n";
+    this->_dotFile << "\t" << (uintptr_t) form << " [label=\"[" << (std::to_string(form->tag)) <<  ":" << form->dag_height << "] " << form->ToString() << "\\n" << std::to_string(automatonSize.first) << "/" << std::to_string(automatonSize.second) << "\"];\n";
 }
 
 

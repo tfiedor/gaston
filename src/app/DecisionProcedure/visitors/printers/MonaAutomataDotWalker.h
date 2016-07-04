@@ -14,9 +14,12 @@ class MonaAutomataDotWalker : public DotWalker {
     const unsigned int _threshold = 10;
     unsigned int _counter = 0;
     bool _print_intermediate;
+    TimeType _maximum;
 public:
-    explicit MonaAutomataDotWalker(std::string filename) : DotWalker(filename), _print_intermediate(false) {}
-    MonaAutomataDotWalker(std::string filename, bool print_intermediate) : DotWalker(filename), _print_intermediate(print_intermediate) {
+    explicit MonaAutomataDotWalker(std::string filename)
+            : DotWalker(filename), _print_intermediate(false), _maximum(0, 0) {}
+    MonaAutomataDotWalker(std::string filename, bool print_intermediate)
+            : DotWalker(filename), _print_intermediate(print_intermediate), _maximum(0, 0) {
 
     }
 
@@ -46,6 +49,10 @@ public:
     void visit(ASTForm_NotEqual2* form);
     void visit(ASTForm_Less* form);
     void visit(ASTForm_LessEq* form);
+
+    void PrintResult() {
+        std::cout << "Maximal MONA automata: " << this->_maximum.first << "/" << this->_maximum.second << "\n";
+    }
 
 private:
     TimeType _constructAutomaton(ASTForm*);

@@ -19,6 +19,8 @@ public:
 
     virtual AST* visit(ASTForm_Ex2* form);
     virtual AST* visit(ASTForm_Ex1* form);
+    virtual AST* visit(ASTForm_All2* form);
+    virtual AST* visit(ASTForm_All1* form);
     virtual AST* visit(ASTForm_Not* form);
     virtual AST* visit(ASTForm_And* form);
     virtual AST* visit(ASTForm_Or* form);
@@ -27,11 +29,13 @@ public:
     virtual AST* visit(ASTForm_FirstOrder* form) { return static_cast<AST*>(form); }
 
 private:
+    template<class QuantifierClass>
+    AST* _visitQuantifier(QuantifierClass* form);
     template<class BinopClass>
     AST* _visitBinary(BinopClass* form);
     void _CollectLeaves(AST*, ASTKind, LeafBuffer&);
-    void _AddFormToBuffer(AST*, LeafBuffer&);
-    void _AddToBuffer(AST*, LeafBuffer&);
+    void _AddFormToBuffer(AST*&, LeafBuffer&);
+    void _AddToBuffer(AST*&, LeafBuffer&);
 };
 
 

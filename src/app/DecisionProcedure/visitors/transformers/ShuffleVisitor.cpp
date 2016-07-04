@@ -6,19 +6,28 @@
 #include "../../../Frontend/ast.h"
 #include "../../../Frontend/ast_visitor.h"
 
-AST* ShuffleVisitor::visit(ASTForm_Ex1 *form) {
+template<class QuantifierClass>
+AST* ShuffleVisitor::_visitQuantifier(QuantifierClass *form) {
     auto result = form->f->accept(*this);
     form->f = reinterpret_cast<ASTForm*>(result);
-    assert(form->f->dag_height > 0);
     form->dag_height = form->f->dag_height + 1;
     return form;
 }
 
+AST* ShuffleVisitor::visit(ASTForm_Ex1 *form) {
+    return this->_visitQuantifier<ASTForm_Ex1>(form);
+}
+
 AST* ShuffleVisitor::visit(ASTForm_Ex2 *form) {
-    auto result = form->f->accept(*this);
-    form->f = reinterpret_cast<ASTForm*>(result);
-    form->dag_height = form->f->dag_height + 1;
-    return form;
+    return this->_visitQuantifier<ASTForm_Ex2>(form);
+}
+
+AST* ShuffleVisitor::visit(ASTForm_All1 *form) {
+    return this->_visitQuantifier<ASTForm_All1>(form);
+}
+
+AST* ShuffleVisitor::visit(ASTForm_All2* form) {
+    return this->_visitQuantifier<ASTForm_All2>(form);
 }
 
 AST* ShuffleVisitor::visit(ASTForm_Not *form) {
@@ -48,8 +57,8 @@ template<class BinopClass>
 AST* ShuffleVisitor::_visitBinary(BinopClass*  form) {
     // No need to shuffle
     if(form->f1->kind != form->kind && form->f2->kind != form->kind) {
-        form->f1->accept(*this);
-        form->f2->accept(*this);
+        form->f1 = reinterpret_cast<ASTForm*>(form->f1->accept(*this));
+        form->f2 = reinterpret_cast<ASTForm*>(form->f2->accept(*this));
         form->dag_height = std::max(form->f1->dag_height, form->f2->dag_height) + 1;
         return form;
     }
@@ -89,14 +98,14 @@ void ShuffleVisitor::_CollectLeaves(AST* form, ASTKind kind, LeafBuffer&leaves) 
     }
 }
 
-void ShuffleVisitor::_AddFormToBuffer(AST* form, LeafBuffer& leaves) {
+void ShuffleVisitor::_AddFormToBuffer(AST*&form, LeafBuffer& leaves) {
     auto result = static_cast<ASTForm*>(form)->accept(*this);
     this->_AddToBuffer(result, leaves);
 }
 
-void ShuffleVisitor::_AddToBuffer(AST* result, LeafBuffer& leaves) {
+void ShuffleVisitor::_AddToBuffer(AST*& result, LeafBuffer& leaves) {
     for(auto it = leaves.begin(); it != leaves.end(); ++it) {
-        if((*it)->dag_height <= result->dag_height) {
+        if((*it)->dag_height < result->dag_height) {
             leaves.insert(it, result);
             return;
         }
