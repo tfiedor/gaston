@@ -105,7 +105,7 @@ void ShuffleVisitor::_AddFormToBuffer(AST*&form, LeafBuffer& leaves) {
 
 void ShuffleVisitor::_AddToBuffer(AST*& result, LeafBuffer& leaves) {
     for(auto it = leaves.begin(); it != leaves.end(); ++it) {
-        if((*it)->dag_height < result->dag_height) {
+        if((*it)->dag_height <= result->dag_height) {
             leaves.insert(it, result);
             return;
         }
