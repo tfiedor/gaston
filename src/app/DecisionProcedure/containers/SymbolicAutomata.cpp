@@ -18,6 +18,7 @@
 #include "SymbolicAutomata.h"
 #include "Term.h"
 #include "../environment.hh"
+#include "../checkers/Checker.h"
 #include "../containers/VarToTrackMap.hh"
 #include "../containers/Workshops.h"
 #include "../utils/Timer.h"
@@ -1663,7 +1664,8 @@ void SymbolicAutomaton::GastonInfoToDot(std::ofstream& os) {
     os << "\t\tlabel=\"Gaston Parameters\";\n";
     os << "\t\trankdir=\"LR\";\n";
     os << "\t\tranksep=0.1;\n";
-    // Output stuff
+
+    // Output info about optimizations
     os << "\t\topts [shape=plaintext label=<<table border=\"0\" cellborder=\"1\" cellspacing=\"1\" cellpadding=\"5\">\n";
     print_gaston_optimization_to_dot(os, "DAG", OPT_USE_DAG);
     print_gaston_optimization_to_dot(os, "AntiPrenexing", OPT_ANTIPRENEXING);
@@ -1672,6 +1674,20 @@ void SymbolicAutomaton::GastonInfoToDot(std::ofstream& os) {
     print_gaston_optimization_to_dot(os, "NaryProducts", OPT_USE_NARY_AUTOMATA);
     print_gaston_optimization_to_dot(os, "Continuations", OPT_EARLY_EVALUATION);
     os << "\t\t</table>>];\n";
+
+    // Output info about filter phases
+    os << "\t\tfilters [shape=plaintext label=<<table border=\"0\" cellborder=\"1\" cellspacing=\"1\" cellpadding=\"5\">\n";
+#   define PRINT_FILTER_INFO(filter) \
+        os << "\t\t\t<tr>"; \
+        os << "<td>" << #filter << "</td>"; \
+        os << "</tr>\n";
+    FILTER_LIST(PRINT_FILTER_INFO)
+    if(OPT_SHUFFLE_FORMULA) {
+        PRINT_FILTER_INFO(ShuffleVisitor)
+    }
+#   undef PRINT_FILTER_INFO
+    os << "\t\t</table>>];\n";
+
     os << "\t}\n";
 }
 

@@ -170,7 +170,7 @@ void Checker::LoadFormulaFromFile() {
 }
 
 /**
- * Closes the prefix of the unground @p formula according tot he list of @p freeVars
+ * Closes the prefix of the unground @p formula according to the list of @p freeVars
  *
  * @param[in] freeVars:     list of free variables
  * @param[in] formula:      formula we are closing
@@ -219,7 +219,6 @@ void Checker::CloseUngroundFormula() {
     IdentList freeVars, bound;
     (this->_monaAST->formula)->freeVars(&freeVars, &bound);
 
-    //this->_isGround = freeVars.empty() || (freeVars.size() == 1 && *freeVars.begin() == allPosVar);
     this->_isGround = freeVars.empty();
     if(!this->_isGround && !(freeVars.size() == 1 && *freeVars.begin() == allPosVar)) {
         switch(options.test) {
@@ -293,7 +292,7 @@ void Checker::PreprocessFormula() {
     FILTER_LIST(CALL_FILTER)
 #undef CALL_FILTER
 
-    std::list <size_t> tags;
+    std::list<size_t> tags;
     std::string stringTag("");
     readTags(inputFileName, stringTag);
     parseTags(stringTag, tags);
