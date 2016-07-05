@@ -10,6 +10,7 @@
 #include <iostream>
 #include "../../../Frontend/ast.h"
 #include "../../../Frontend/ast_visitor.h"
+#include "../../../Frontend/symboltable.h"
 
 class MonaSerializer {
 public:
@@ -18,6 +19,9 @@ public:
 
 private:
     std::ofstream _monaFile;
+    void _serializeFreeVariable(Ident, MonaTypeTag);
+    void _serializeAsFree(Ident, MonaTypeTag);
+    void _serializeAsBound(Ident, MonaTypeTag, std::string);
 };
 
 #endif //WSKS_MONASERIALIZER_H

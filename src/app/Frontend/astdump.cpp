@@ -736,7 +736,7 @@ ASTForm_Not::dump()
 
 std::string ASTForm_Not::ToString(bool no_utf) {
   if(no_utf) {
-    return "~" + f->ToString(no_utf);
+    return "~(" + f->ToString(no_utf) + ")";
   } else {
     return ("(\u00AC " + f->ToString(no_utf) + ")");
   }

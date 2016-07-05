@@ -293,11 +293,6 @@ void Checker::PreprocessFormula() {
     FILTER_LIST(CALL_FILTER)
 #undef CALL_FILTER
 
-    if (options.serializeMona) {
-        std::string path(inputFileName);
-        MonaSerializer serializer(path.substr(0, path.find_last_of(".")) + "_serialized.mona", this->_monaAST->formula);
-    }
-
     std::list <size_t> tags;
     std::string stringTag("");
     readTags(inputFileName, stringTag);
@@ -307,6 +302,11 @@ void Checker::PreprocessFormula() {
     ShuffleVisitor shuffleVisitor;
     this->_monaAST->formula = static_cast<ASTForm *>(this->_monaAST->formula->accept(shuffleVisitor));
 #   endif
+
+    if (options.serializeMona) {
+        std::string path(inputFileName);
+        MonaSerializer serializer(path.substr(0, path.find_last_of(".")) + "_serialized.mona", this->_monaAST->formula);
+    }
 
     if (!options.monaWalk) {
         SecondOrderRestricter restricter;
