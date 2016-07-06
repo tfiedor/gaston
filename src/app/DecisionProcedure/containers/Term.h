@@ -115,11 +115,12 @@ public:
 
     // See #L29
     TERM_MEASURELIST(DEFINE_STATIC_MEASURE)
+    static size_t partial_subsumption_hits;
 
 public:
     // <<< PUBLIC API >>>
     virtual SubsumptionResult IsSubsumedBy(FixpointType& fixpoint, WorklistType& worklist, Term*&, bool no_prune = false) = 0;
-    virtual SubsumptionResult IsSubsumed(Term* t, int limit, bool b = false);
+    virtual SubsumptionResult IsSubsumed(Term* t, int limit, Term** new_term = nullptr, bool b = false);
     virtual SubsumptionResult Subsumes(TermEnumerator*);
     virtual bool IsEmpty() = 0;
     virtual void Complement();
@@ -142,7 +143,7 @@ public:
 protected:
     // <<< PRIVATE FUNCTIONS >>>
     virtual unsigned int _MeasureStateSpaceCore() = 0;
-    virtual SubsumptionResult _IsSubsumedCore(Term* t, int limit, bool b = false) = 0;
+    virtual SubsumptionResult _IsSubsumedCore(Term* t, int limit, Term** new_term = nullptr, bool b = false) = 0;
     virtual void _dumpCore(unsigned indent = 0) = 0;
     virtual bool _eqCore(const Term&) = 0;
     virtual SubsumptionResult _SubsumesCore(TermEnumerator*);
@@ -174,7 +175,7 @@ private:
 
     // <<< PRIVATE FUNCTIONS >>>
     unsigned int _MeasureStateSpaceCore();
-    SubsumptionResult _IsSubsumedCore(Term* t, int limit, bool b = false);
+    SubsumptionResult _IsSubsumedCore(Term* t, int limit, Term** new_term = nullptr, bool b = false);
 };
 
 /**
@@ -209,7 +210,7 @@ private:
 private:
     // <<< PRIVATE FUNCTIONS >>>
     unsigned int _MeasureStateSpaceCore();
-    SubsumptionResult _IsSubsumedCore(Term* t, int limit, bool b = false);
+    SubsumptionResult _IsSubsumedCore(Term* t, int limit, Term** new_term = nullptr, bool b = false);
     SubsumptionResult _SubsumesCore(TermEnumerator*);
 };
 
@@ -242,7 +243,7 @@ private:
 
     // <<< PRIVATE FUNCTIONS >>>
     unsigned int _MeasureStateSpaceCore();
-    SubsumptionResult _IsSubsumedCore(Term* t, int limit, bool b = false);
+    SubsumptionResult _IsSubsumedCore(Term* t, int limit, Term** new_term = nullptr, bool b = false);
 };
 
 class TermNaryProduct : public Term {
@@ -281,7 +282,7 @@ private:
 
     // <<< PRIVATE FUNCTIONS >>>
     unsigned int _MeasureStateSpaceCore();
-    SubsumptionResult _IsSubsumedCore(Term* t, int limit, bool b = false);
+    SubsumptionResult _IsSubsumedCore(Term* t, int limit, Term** new_term = nullptr, bool b = false);
 };
 
 /**
@@ -316,7 +317,7 @@ private:
 private:
     // <<< PRIVATE FUNCTIONS >>>
     unsigned int _MeasureStateSpaceCore();
-    SubsumptionResult _IsSubsumedCore(Term* t, int limit, bool b = false);
+    SubsumptionResult _IsSubsumedCore(Term* t, int limit, Term** newTerm = nullptr, bool b = false);
     SubsumptionResult _SubsumesCore(TermEnumerator*);
 };
 
@@ -365,7 +366,7 @@ protected:
     // <<< PRIVATE FUNCTIONS >>>
     unsigned int _MeasureStateSpaceCore();
     bool _eqCore(const Term&);
-    SubsumptionResult _IsSubsumedCore(Term* t, int limit, bool b = false);
+    SubsumptionResult _IsSubsumedCore(Term* t, int limit, Term** new_term = nullptr, bool b = false);
 };
 
 /**
@@ -393,7 +394,7 @@ private:
 private:
     // <<< PRIVATE FUNCTIONS >>>
     unsigned int _MeasureStateSpaceCore();
-    SubsumptionResult _IsSubsumedCore(Term* t, int limit, bool b = false);
+    SubsumptionResult _IsSubsumedCore(Term* t, int limit, Term** new_term = nullptr, bool b = false);
     bool _eqCore(const Term&);
 };
 
@@ -627,12 +628,12 @@ protected:
     void _InitializeAggregateFunction(bool inComplement);
     bool _AggregateResult(bool, bool);
     void _InitializeSymbols(Workshops::SymbolWorkshop* form, Gaston::VarList*, IdentList*, Symbol*);
-    SubsumptionResult _IsSubsumedCore(Term* t, int limit, bool b = false);
-    SubsumptionResult _fixpointTest(Term_ptr const& term);
-    SubsumptionResult _testIfSubsumes(Term_ptr const& term);
-    SubsumptionResult _testIfIn(Term_ptr const& term);
-    SubsumptionResult _testIfBiggerExists(Term_ptr const& term);
-    SubsumptionResult _testIfSmallerExists(Term_ptr const& term);
+    SubsumptionResult _IsSubsumedCore(Term* t, int limit, Term** new_term = nullptr, bool b = false);
+    std::pair<SubsumptionResult, Term_ptr> _fixpointTest(Term_ptr const& term);
+    std::pair<SubsumptionResult, Term_ptr> _testIfSubsumes(Term_ptr const& term);
+    std::pair<SubsumptionResult, Term_ptr> _testIfIn(Term_ptr const& term);
+    std::pair<SubsumptionResult, Term_ptr> _testIfBiggerExists(Term_ptr const& term);
+    std::pair<SubsumptionResult, Term_ptr> _testIfSmallerExists(Term_ptr const& term);
     bool _eqCore(const Term&);
     unsigned int _MeasureStateSpaceCore();
     WorklistItemType _popFromWorklist();

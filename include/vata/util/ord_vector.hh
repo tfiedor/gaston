@@ -426,6 +426,30 @@ public:   // Public methods
 			this->cbegin(), this->cend());
 	}
 
+	bool SetDifference(const OrdVector& bigger, OrdVector& result) const {
+		auto tit = this->begin();
+		auto bit = bigger.begin();
+		auto tend = this->end();
+		auto bend = bigger.end();
+
+		while(tit != tend && bit != bend) {
+			if(*tit == *bit) {
+				++tit;
+				++bit;
+			} else if(*tit > *bit) {
+				++bit;
+			} else {
+				result.insert(*(tit++));
+			}
+		}
+
+		while(tit != tend) {
+			result.insert(*(tit++));
+		}
+
+		return result.size() != 0;
+	}
+
 	bool HaveEmptyIntersection(const OrdVector& rhs) const
 	{
 		// Assertions

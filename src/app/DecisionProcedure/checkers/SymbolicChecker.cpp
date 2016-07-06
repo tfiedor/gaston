@@ -256,6 +256,7 @@ bool SymbolicChecker::Run() {
     std::cout << "\n";
 #   endif
 
+    std::cout << "\t\u2218 Partial Subsumption Hits: " << Term::partial_subsumption_hits << "\n";
 #   if (MEASURE_STATE_SPACE == true)
 #   define OUTPUT_MEASURES(TermType) \
         std::cout << "\t\t\u2218 prunnable: " << TermType::prunable << "\n"; \

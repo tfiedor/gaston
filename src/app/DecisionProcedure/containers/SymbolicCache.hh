@@ -137,6 +137,22 @@ struct DagHashType {
 	}
 };
 
+struct TermHash {
+	size_t operator()(Gaston::Term_raw const& t) const {
+#		if (OPT_SHUFFLE_HASHES == true)
+    	return hash64shift(boost::hash_value(t));
+#		else
+    	return boost::hash_value(t);
+#		endif
+	}
+};
+
+struct TermCompare : public std::binary_function<Gaston::Term_raw, Gaston::Term_raw, bool> {
+	bool operator()(Gaston::Term_raw const& lhs, Gaston::Term_raw const& rhs) const {
+		return (lhs == rhs);
+	}
+};
+
 template<class Key>
 struct PairCompare : public std::binary_function<Key, Key, bool>
 {

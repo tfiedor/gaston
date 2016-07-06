@@ -69,11 +69,11 @@ public:
 
 protected:
     // <<< PRIVATE MEMBERS >>>
-    TermWorkshop _factory;          // Creates terms
     ResultCache _resCache;          // Caches (states, symbol) = (fixpoint, bool)
     VarList _freeVars;
 
 public:
+    TermWorkshop _factory;          // Creates terms
     SubsumptionCache _subCache;     // Caches (term, term) = bool
     SymbolWorkshop symbolFactory;
     struct SymbolicAutomatonStats {

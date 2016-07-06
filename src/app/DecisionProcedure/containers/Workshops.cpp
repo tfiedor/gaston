@@ -187,9 +187,9 @@ namespace Workshops {
             return rhs;
         } else if(lhs == rhs) {
             return lhs;
-        } else if(lhs->IsSubsumed(rhs, OPT_PARTIALLY_LIMITED_SUBSUMPTION, false)) {
+        } else if(lhs->IsSubsumed(rhs, OPT_PARTIALLY_LIMITED_SUBSUMPTION, nullptr, false)) {
             return rhs;
-        } else if(rhs->IsSubsumed(lhs, OPT_PARTIALLY_LIMITED_SUBSUMPTION, false)) {
+        } else if(rhs->IsSubsumed(lhs, OPT_PARTIALLY_LIMITED_SUBSUMPTION, nullptr, false)) {
             return lhs;
         } else {
             Term_ptr result;

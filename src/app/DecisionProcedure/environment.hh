@@ -45,6 +45,8 @@ template<class A>
 class PairCompare;
 template<class A>
 class PrePairCompare;
+class TermCompare;
+class TermHash;
 
 struct ResultHashType;
 struct SubsumptionHashType;
@@ -91,6 +93,19 @@ inline const char* ProductTypeToTermSymbol(int type) {
 	return ProductTypeTermSymbols[type];
 }
 
+inline ProductType IntToProductType(int type) {
+	switch(type) {
+		case 0:
+			return ProductType::E_INTERSECTION;
+		case 1:
+			return ProductType::E_UNION;
+		case 2:
+			return ProductType::E_IMPLICATION;
+		case 3:
+			return ProductType::E_BIIMPLICATION;
+	}
+}
+
 namespace Gaston {
 /***************************
  * GLOBAL USING DIRECTIVES *
@@ -131,8 +146,6 @@ namespace Gaston {
 	void dumpDagData(SymbolicAutomaton*& s);
 	void dumpEnumKey(TermEnumerator* const& s);
 
-	using TermHash 				 = boost::hash<Term_raw>;
-	using TermCompare			 = std::equal_to<Term_raw>;
 	using TermCache				 = BinaryCache<Term_raw, SubsumptionResult, TermHash, TermCompare, dumpTermKey, dumpSubsumptionData>;
 	using ResultKey				 = std::pair<Term_raw, Symbol_ptr>;
 	using ResultCache            = BinaryCache<ResultKey, ResultType, ResultHashType, PairCompare<ResultKey>, dumpResultKey, dumpResultData>;
@@ -369,13 +382,14 @@ public:
 #define OPT_THROW_CLASSIC_FIRST_ORDER_REP	true	// < Will interpret first orders on fixpoints as having only one one
 #define OPT_SHUFFLE_HASHES					true    // < Shuffles the bits in the hashes
 #define OPT_ENUMERATED_SUBSUMPTION_TESTING  false   // < Partially enumerates the products
-#define OPT_USE_TERNARY_AUTOMATA			true    // < Will use ternary automata if possible
-#define OPT_USE_NARY_AUTOMATA				true    // < Will use nary automata if possible
+#define OPT_USE_TERNARY_AUTOMATA			false   // < Will use ternary automata if possible
+#define OPT_USE_NARY_AUTOMATA				false   // < Will use nary automata if possible
 #define OPT_PRUNE_WORKLIST					true	// < Will remove stuff from worklist during the pruning
 #define OPT_BI_AND_IMPLICATION_SUPPORT		true	// < Will not restrict the syntax, by removing => and <=>
 #define OPT_USE_BOOST_POOL_FOR_ALLOC		true    // < (+) Will use boost::object_pool<> for allocation
 #define OPT_USE_SET_PRE						false   // < Will use the set implementation of pre
 #define OPT_CACHE_LAST_QUERIES				false	// < Will cache the last entries in the cache and do the quick lookup
+#define OPT_SUBSUMPTION_INTERSECTION		true	// < Will create partial intersections for the products with bases
 
 /* >>> Static Assertions <<< *
  *****************************/

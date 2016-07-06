@@ -66,6 +66,7 @@ size_t TermFixpoint::postponedProcessed = 0;
 size_t TermContinuation::continuationUnfolding = 0;
 size_t TermContinuation::unfoldInSubsumption = 0;
 size_t TermContinuation::unfoldInIsectNonempty = 0;
+size_t Term::partial_subsumption_hits = 0;
 #if (MEASURE_BASE_SIZE == true)
 size_t TermBaseSet::maxBaseSize = 0;
 #endif
@@ -464,7 +465,7 @@ bool Term::IsNotComputed() {
  * @param[in] t:    term we are testing subsumption against
  * @return:         true if this is subsumed by @p t
  */
-SubsumptionResult Term::IsSubsumed(Term *t, int limit, bool unfoldAll) {
+SubsumptionResult Term::IsSubsumed(Term *t, int limit, Term** new_term, bool unfoldAll) {
     if(this == t) {
         return E_TRUE;
     }
@@ -496,25 +497,28 @@ SubsumptionResult Term::IsSubsumed(Term *t, int limit, bool unfoldAll) {
     // Else if it is not continuation we first look into cache and then recompute if needed
     SubsumptionResult result;
 #   if (OPT_CACHE_SUBSUMES == true)
-    auto key = std::make_pair(&(*this), t);
+    //auto key = std::make_pair(&(*this), t);
+    auto key = std::make_pair(static_cast<Term_ptr>(this), t);
     if(this->type == TERM_EMPTY || !this->_aut->_subCache.retrieveFromCache(key, result)) {
 #   endif
         if (GET_IN_COMPLEMENT(this)) {
             if(this->type == TERM_EMPTY) {
                 result = (t->type == TERM_EMPTY ? E_TRUE : E_FALSE);
             } else {
-                result = t->_IsSubsumedCore(this, limit, unfoldAll);
+                result = t->_IsSubsumedCore(this, limit, new_term, unfoldAll);
             }
         } else {
             if(t->type == TERM_EMPTY) {
                 result = (this->type == TERM_EMPTY ? E_TRUE : E_FALSE);
             } else {
-                result = this->_IsSubsumedCore(t, limit, unfoldAll);
+                result = this->_IsSubsumedCore(t, limit, new_term, unfoldAll);
             }
         }
 #   if (OPT_CACHE_SUBSUMES == true)
-        if(result == E_TRUE && !this->type == TERM_EMPTY)
-            this->_aut->_subCache.StoreIn(key, result);
+        if((result == E_TRUE || result == E_PARTIALLY) && this->type != TERM_EMPTY) {
+            // Note: Partially subsumed stuff is considered as True, as it was partitioned already
+            this->_aut->_subCache.StoreIn(key, E_TRUE);
+        }
     }
 #   endif
     assert(!unfoldAll || result != E_PARTIALLY);
@@ -527,12 +531,12 @@ SubsumptionResult Term::IsSubsumed(Term *t, int limit, bool unfoldAll) {
     return result;
 }
 
-SubsumptionResult TermEmpty::_IsSubsumedCore(Term *t, int limit, bool unfoldAll) {
+SubsumptionResult TermEmpty::_IsSubsumedCore(Term *t, int limit, Term** new_term, bool unfoldAll) {
     // Empty term is subsumed by everything (probably)
     return (GET_IN_COMPLEMENT(this)) ? (t->type == TERM_EMPTY ? E_TRUE : E_FALSE) : E_TRUE;
 }
 
-SubsumptionResult TermProduct::_IsSubsumedCore(Term *t, int limit, bool unfoldAll) {
+SubsumptionResult TermProduct::_IsSubsumedCore(Term *t, int limit, Term** new_term, bool unfoldAll) {
     assert(t->type == TERM_PRODUCT);
 
     // Retype and test the subsumption component-wise
@@ -542,14 +546,27 @@ SubsumptionResult TermProduct::_IsSubsumedCore(Term *t, int limit, bool unfoldAl
     Term *rhsl = rhs->left;
     Term *rhsr = rhs->right;
 
+    // We are doing the partial testing
+    if(lhsl->type == TermType::TERM_BASE && new_term != nullptr && lhsr == rhsr) {
+        SubsumptionResult base_result = lhsl->IsSubsumed(rhsl, limit, new_term, unfoldAll);
+        if(base_result == E_PARTIALLY) {
+            assert(new_term != nullptr);
+            *new_term = this->_aut->_factory.CreateProduct(*new_term, lhsr, IntToProductType(GET_PRODUCT_SUBTYPE(this)));
+            ++Term::partial_subsumption_hits;
+            return E_PARTIALLY;
+        } else {
+            return base_result;
+        }
+    }
+
     if(!unfoldAll && (lhsr->IsNotComputed() && rhsr->IsNotComputed())) {
         #if (OPT_EARLY_PARTIAL_SUB == true)
         if(lhsr->type == TERM_CONTINUATION && rhsr->type == TERM_CONTINUATION) {
-            return (lhsl->IsSubsumed(rhsl, limit, unfoldAll) == E_FALSE ? E_FALSE : E_PARTIALLY);
+            return (lhsl->IsSubsumed(rhsl, limit, nullptr, unfoldAll) == E_FALSE ? E_FALSE : E_PARTIALLY);
         } else {
-            SubsumptionResult leftIsSubsumed = lhsl->IsSubsumed(rhsl, limit, unfoldAll);
+            SubsumptionResult leftIsSubsumed = lhsl->IsSubsumed(rhsl, limit, nullptr, unfoldAll);
             if(leftIsSubsumed == E_TRUE) {
-                return lhsr->IsSubsumed(rhsr, limit, unfoldAll);
+                return lhsr->IsSubsumed(rhsr, limit, nullptr, unfoldAll);
             } else {
                 return leftIsSubsumed;
             }
@@ -558,31 +575,31 @@ SubsumptionResult TermProduct::_IsSubsumedCore(Term *t, int limit, bool unfoldAl
         return (lhsl->IsSubsumed(rhsl, limit) != E_FALSE && lhsr->IsSubsumed(rhsr, limit) != E_FALSE) ? E_TRUE : E_FALSE;
         #endif
     } if(!unfoldAll && lhsl == rhsl) {
-        return lhsr->IsSubsumed(rhsr, limit, unfoldAll);
+        return lhsr->IsSubsumed(rhsr, limit, nullptr, unfoldAll);
     } else if(!unfoldAll && lhsr == rhsr) {
-        return lhsl->IsSubsumed(rhsl, limit, unfoldAll);
+        return lhsl->IsSubsumed(rhsl, limit, nullptr, unfoldAll);
     } else {
         if(lhsl->stateSpaceApprox < lhsr->stateSpaceApprox || unfoldAll) {
-            return (lhsl->IsSubsumed(rhsl, limit, unfoldAll) != E_FALSE && lhsr->IsSubsumed(rhsr, limit, unfoldAll) != E_FALSE) ? E_TRUE : E_FALSE;
+            return (lhsl->IsSubsumed(rhsl, limit, nullptr, unfoldAll) != E_FALSE && lhsr->IsSubsumed(rhsr, limit, nullptr, unfoldAll) != E_FALSE) ? E_TRUE : E_FALSE;
         } else {
-            return (lhsr->IsSubsumed(rhsr, limit, unfoldAll) != E_FALSE && lhsl->IsSubsumed(rhsl, limit, unfoldAll) != E_FALSE) ? E_TRUE : E_FALSE;
+            return (lhsr->IsSubsumed(rhsr, limit, nullptr, unfoldAll) != E_FALSE && lhsl->IsSubsumed(rhsl, limit, nullptr, unfoldAll) != E_FALSE) ? E_TRUE : E_FALSE;
         }
     }
 }
 
 SubsumptionResult _ternary_subsumption_test(Term* f1, Term* f2, Term* s1, Term* s2, Term* l1, Term* l2, size_t approx_max, int limit, bool unfoldAll) {
-    if(f1->IsSubsumed(f2, limit, unfoldAll) != E_FALSE) {
+    if(f1->IsSubsumed(f2, limit, nullptr, unfoldAll) != E_FALSE) {
         if(s1->stateSpaceApprox == approx_max) {
-            return (l1->IsSubsumed(l2, limit, unfoldAll) != E_FALSE && s1->IsSubsumed(s2, limit, unfoldAll) != E_FALSE) ? E_TRUE : E_FALSE;
+            return (l1->IsSubsumed(l2, limit, nullptr, unfoldAll) != E_FALSE && s1->IsSubsumed(s2, limit, nullptr, unfoldAll) != E_FALSE) ? E_TRUE : E_FALSE;
         } else {
-            return (s1->IsSubsumed(s2, limit, unfoldAll) != E_FALSE && l1->IsSubsumed(l2, limit, unfoldAll) != E_FALSE) ? E_TRUE : E_FALSE;
+            return (s1->IsSubsumed(s2, limit, nullptr, unfoldAll) != E_FALSE && l1->IsSubsumed(l2, limit, nullptr, unfoldAll) != E_FALSE) ? E_TRUE : E_FALSE;
         }
     } else {
         return E_FALSE;
     }
 }
 
-SubsumptionResult TermTernaryProduct::_IsSubsumedCore(Term *t, int limit, bool unfoldAll) {
+SubsumptionResult TermTernaryProduct::_IsSubsumedCore(Term *t, int limit, Term** new_term, bool unfoldAll) {
     assert(t->type == TERM_TERNARY_PRODUCT);
 
     // Retype and test the subsumption component-wise
@@ -605,7 +622,7 @@ SubsumptionResult TermTernaryProduct::_IsSubsumedCore(Term *t, int limit, bool u
     }
 }
 
-SubsumptionResult TermNaryProduct::_IsSubsumedCore(Term *t, int limit, bool b) {
+SubsumptionResult TermNaryProduct::_IsSubsumedCore(Term *t, int limit, Term** new_term, bool b) {
     assert(t->type == TERM_NARY_PRODUCT);
 
     // Retype and test the subsumption component-wise
@@ -613,7 +630,7 @@ SubsumptionResult TermNaryProduct::_IsSubsumedCore(Term *t, int limit, bool b) {
     assert(this->arity == rhs->arity);
     for (int i = 0; i < this->arity; ++i) {
         assert(this->access_vector[i] < this->arity);
-        if(this->terms[this->access_vector[i]]->IsSubsumed(rhs->terms[this->access_vector[i]], limit, b) == E_FALSE) {
+        if(this->terms[this->access_vector[i]]->IsSubsumed(rhs->terms[this->access_vector[i]], limit, nullptr, b) == E_FALSE) {
             if(i != 0) {
                 // Propagate the values towards 0 index
                 this->access_vector[i] ^= this->access_vector[i-1];
@@ -643,27 +660,52 @@ inline int compare_integers (int a, int b) {
     return a;
 }
 
-SubsumptionResult TermBaseSet::_IsSubsumedCore(Term *term, int limit, bool unfoldAll) {
+SubsumptionResult TermBaseSet::_IsSubsumedCore(Term *term, int limit, Term** new_term, bool unfoldAll) {
     assert(term->type == TERM_BASE);
+    TermBaseSet *t = static_cast<TermBaseSet*>(term);
 
+#   if (OPT_SUBSUMPTION_INTERSECTION == true)
+    // Fixme: Create TermBaseSet
+    if(new_term != nullptr) {
+        TermBaseSetStates diff;
+        bool is_nonempty_diff = this->states.SetDifference(t->states, diff);
+        *new_term = nullptr;
+        if(is_nonempty_diff) {
+            if(diff.size() == this->states.size()) {
+                return E_FALSE;
+            } else {
+                *new_term = this->_aut->_factory.CreateBaseSet(std::move(diff), 0, 0);
+                return E_PARTIALLY;
+            }
+        } else {
+            return E_TRUE;
+        }
+    } else {
+        if(t->stateSpaceApprox < this->stateSpaceApprox) {
+            return E_FALSE;
+        } else {
+            return this->states.IsSubsetOf(t->states) ? E_TRUE : E_FALSE;
+        }
+    }
+#   else
     // Test component-wise, not very efficient though
     // TODO: Change to bit-vectors if possible
-    TermBaseSet *t = static_cast<TermBaseSet*>(term);
     if(t->stateSpaceApprox < this->stateSpaceApprox) {
         return E_FALSE;
     } else {
         return this->states.IsSubsetOf(t->states) ? E_TRUE : E_FALSE;
     }
+#   endif
 }
 
-SubsumptionResult TermContinuation::_IsSubsumedCore(Term *t, int limit, bool unfoldAll) {
+SubsumptionResult TermContinuation::_IsSubsumedCore(Term *t, int limit, Term** new_term, bool unfoldAll) {
     // TODO: How to do this smartly?
     // TODO: Maybe if we have {} we can answer sooner, without unpacking
     assert(false);
     return E_FALSE;
 }
 
-SubsumptionResult TermList::_IsSubsumedCore(Term *t, int limit, bool unfoldAll) {
+SubsumptionResult TermList::_IsSubsumedCore(Term *t, int limit, Term** new_term, bool unfoldAll) {
     assert(t->type == TERM_LIST);
 
     // Reinterpret
@@ -672,7 +714,7 @@ SubsumptionResult TermList::_IsSubsumedCore(Term *t, int limit, bool unfoldAll) 
     for(auto& item : this->list) {
         bool subsumes = false;
         for(auto& tt_item : tt->list) {
-            if(item->IsSubsumed(tt_item, limit, unfoldAll)) {
+            if(item->IsSubsumed(tt_item, limit, nullptr, unfoldAll)) {
                 subsumes = true;
                 break;
             }
@@ -683,7 +725,7 @@ SubsumptionResult TermList::_IsSubsumedCore(Term *t, int limit, bool unfoldAll) 
     return E_TRUE;
 }
 
-SubsumptionResult TermFixpoint::_IsSubsumedCore(Term *t, int limit, bool unfoldAll) {
+SubsumptionResult TermFixpoint::_IsSubsumedCore(Term *t, int limit, Term** new_term, bool unfoldAll) {
     assert(t->type == TERM_FIXPOINT);
 
     // Reinterpret
@@ -700,7 +742,7 @@ SubsumptionResult TermFixpoint::_IsSubsumedCore(Term *t, int limit, bool unfoldA
 #   if (OPT_SHORTTEST_FIXPOINT_SUB == true)
     // Will tests only generators and symbols
     if(are_source_symbols_same && this->_sourceTerm != nullptr && tt->_sourceTerm != nullptr) {
-        return this->_sourceTerm->IsSubsumed(tt->_sourceTerm, limit, unfoldAll);
+        return this->_sourceTerm->IsSubsumed(tt->_sourceTerm, limit, nullptr, unfoldAll);
     }
 #   endif
 
@@ -784,17 +826,24 @@ SubsumptionResult TermProduct::IsSubsumedBy(FixpointType& fixpoint, WorklistType
     }
 
     // For each item in fixpoint
+    Term* tested_term = this;
+    Term* new_term = nullptr;
     for(auto& item : fixpoint) {
         // Nullptr is skipped
         if(item.first == nullptr || !item.second) continue;
 
         // Test the subsumption
-        if(this->IsSubsumed(item.first, OPT_PARTIALLY_LIMITED_SUBSUMPTION)) {
-            return E_TRUE ;
+        SubsumptionResult result = tested_term->IsSubsumed(item.first, OPT_PARTIALLY_LIMITED_SUBSUMPTION, &new_term);
+        if(result == SubsumptionResult::E_TRUE) {
+            return E_TRUE;
+        } else if(result == SubsumptionResult::E_PARTIALLY) {
+            assert(new_term != tested_term);
+            assert(new_term != nullptr);
+            tested_term = new_term;
         }
 
         if(!no_prune) {
-            if (item.first->IsSubsumed(this, OPT_PARTIALLY_LIMITED_SUBSUMPTION)) {
+            if (item.first->IsSubsumed(tested_term, OPT_PARTIALLY_LIMITED_SUBSUMPTION)) {
 #               if (OPT_PRUNE_WORKLIST == true)
                 prune_worklist(worklist, item.first);
 #               endif
@@ -823,7 +872,15 @@ SubsumptionResult TermProduct::IsSubsumedBy(FixpointType& fixpoint, WorklistType
     }
     return E_TRUE;
 #   else
-    return E_FALSE;
+    if(tested_term->IsEmpty()) {
+        return E_TRUE;
+    } else if(tested_term == this) {
+        return E_FALSE;
+    } else {
+        assert(new_term != nullptr);
+        biggerTerm = tested_term;
+        return E_PARTIALLY;
+    }
 #   endif
 }
 
@@ -882,17 +939,29 @@ SubsumptionResult TermBaseSet::IsSubsumedBy(FixpointType& fixpoint, WorklistType
         return E_TRUE;
     }
     // For each item in fixpoint
+    Term* tested_term = this;
+    Term* new_term = nullptr;
     for(auto& item : fixpoint) {
         // Nullptr is skipped
         if(item.first == nullptr || !item.second) continue;
 
         // Test the subsumption
-        if(this->IsSubsumed(item.first, OPT_PARTIALLY_LIMITED_SUBSUMPTION)) {
-            return E_TRUE;
+        SubsumptionResult result = tested_term->IsSubsumed(item.first, OPT_PARTIALLY_LIMITED_SUBSUMPTION, &new_term);
+        switch(result) {
+            case SubsumptionResult::E_TRUE:
+                return E_TRUE;
+            case SubsumptionResult::E_FALSE:
+                break;
+            case SubsumptionResult::E_PARTIALLY:
+                assert(new_term != nullptr);
+                tested_term = new_term;
+                break;
+            default:
+                assert(false && "Unsupported subsumption returned");
         }
 
         if(!no_prune) {
-            if (item.first->IsSubsumed(this, OPT_PARTIALLY_LIMITED_SUBSUMPTION)) {
+            if (item.first->IsSubsumed(tested_term, OPT_PARTIALLY_LIMITED_SUBSUMPTION)) {
 #               if (OPT_PRUNE_WORKLIST == true)
                 prune_worklist(worklist, item.first);
 #               endif
@@ -901,7 +970,15 @@ SubsumptionResult TermBaseSet::IsSubsumedBy(FixpointType& fixpoint, WorklistType
         }
     }
 
-    return E_FALSE;
+    if(tested_term->IsEmpty()) {
+        return E_TRUE;
+    } else if(tested_term == this) {
+        return E_FALSE;
+    } else {
+        assert(new_term != nullptr);
+        biggerTerm = new_term;
+        return E_PARTIALLY;
+    }
 }
 
 SubsumptionResult TermContinuation::IsSubsumedBy(FixpointType& fixpoint, WorklistType& worklist, Term*& biggerTerm, bool no_prune) {
@@ -988,7 +1065,7 @@ SubsumptionResult Term::Subsumes(TermEnumerator* enumerator) {
 SubsumptionResult Term::_SubsumesCore(TermEnumerator* enumerator) {
     assert(enumerator->type == ENUM_GENERIC);
     GenericEnumerator* genericEnumerator = static_cast<GenericEnumerator*>(enumerator);
-    auto result = genericEnumerator->GetItem()->IsSubsumed(this, OPT_PARTIALLY_LIMITED_SUBSUMPTION, false);
+    auto result = genericEnumerator->GetItem()->IsSubsumed(this, OPT_PARTIALLY_LIMITED_SUBSUMPTION, nullptr, false);
     return result;
 }
 
@@ -1411,7 +1488,7 @@ bool TermFixpoint::_processOnePostponed() {
 #   endif
 }
 
-SubsumptionResult TermFixpoint::_fixpointTest(Term_ptr const &term) {
+std::pair<SubsumptionResult, Term_ptr> TermFixpoint::_fixpointTest(Term_ptr const &term) {
     if(this->_searchType == WorklistSearchType::E_UNGROUND_ROOT) {
         // Fixme: Not sure if this is really correct, but somehow I still feel that the Root search is special and
         //   subsumption is maybe not enough? But maybe this simply does not work for fixpoints of negated thing.
@@ -1430,34 +1507,34 @@ SubsumptionResult TermFixpoint::_fixpointTest(Term_ptr const &term) {
     }
 }
 
-SubsumptionResult TermFixpoint::_testIfBiggerExists(Term_ptr const &term) {
+std::pair<SubsumptionResult, Term_ptr >TermFixpoint::_testIfBiggerExists(Term_ptr const &term) {
     return (std::find_if(this->_fixpoint.begin(), this->_fixpoint.end(), [&term](FixpointMember const& member) {
         if(!member.second || member.first == nullptr) {
             return false;
         } else {
-            return term->IsSubsumed(member.first, OPT_PARTIALLY_LIMITED_SUBSUMPTION, false) != E_FALSE;
+            return term->IsSubsumed(member.first, OPT_PARTIALLY_LIMITED_SUBSUMPTION, nullptr, false) != E_FALSE;
         }
-    }) == this->_fixpoint.end() ? E_FALSE : E_TRUE);
+    }) == this->_fixpoint.end() ? std::make_pair(E_FALSE, term) : std::make_pair(E_TRUE, term));
 }
 
-SubsumptionResult TermFixpoint::_testIfSmallerExists(Term_ptr const &term) {
+std::pair<SubsumptionResult, Term_ptr> TermFixpoint::_testIfSmallerExists(Term_ptr const &term) {
     return (std::find_if(this->_fixpoint.begin(), this->_fixpoint.end(), [&term](FixpointMember const& member) {
         if(!member.second || member.first == nullptr) {
             return false;
         } else {
-            return member.first->IsSubsumed(term, OPT_PARTIALLY_LIMITED_SUBSUMPTION, false) != E_FALSE;
+            return member.first->IsSubsumed(term, OPT_PARTIALLY_LIMITED_SUBSUMPTION, nullptr, false) != E_FALSE;
         }
-    }) == this->_fixpoint.end() ? E_FALSE : E_TRUE);
+    }) == this->_fixpoint.end() ? std::make_pair(E_FALSE, term) : std::make_pair(E_TRUE, term));
 }
 
-SubsumptionResult TermFixpoint::_testIfIn(Term_ptr const &term) {
+std::pair<SubsumptionResult, Term_ptr> TermFixpoint::_testIfIn(Term_ptr const &term) {
     return (std::find_if(this->_fixpoint.begin(), this->_fixpoint.end(), [&term](FixpointMember const& member){
         if(member.second) {
             return member.first == term;
         } else {
             return false;
         }
-    }) == this->_fixpoint.end() ? E_FALSE : E_TRUE);
+    }) == this->_fixpoint.end() ? std::make_pair(E_FALSE, term) : std::make_pair(E_TRUE, term));
 }
 
 /**
@@ -1468,7 +1545,7 @@ SubsumptionResult TermFixpoint::_testIfIn(Term_ptr const &term) {
  * @param[in] term:     term we are testing subsumption for
  * @return:             true if term is subsumed by fixpoint
  */
-SubsumptionResult TermFixpoint::_testIfSubsumes(Term_ptr const& term) {
+std::pair<SubsumptionResult, Term_ptr> TermFixpoint::_testIfSubsumes(Term_ptr const& term) {
     #if (OPT_CACHE_SUBSUMED_BY == true)
     SubsumptionResult result;
     Term* key = term, *subsumedByTerm;
@@ -1480,7 +1557,9 @@ SubsumptionResult TermFixpoint::_testIfSubsumes(Term_ptr const& term) {
 
         if(result == E_PARTIALLY) {
             assert(subsumedByTerm != nullptr);
-#           if (OPT_EARLY_EVALUATION == true)
+#           if (OPT_SUBSUMPTION_INTERSECTION == true)
+            return std::make_pair(E_FALSE, subsumedByTerm);
+#           elif (OPT_EARLY_EVALUATION == true)
             this->_postponed.insert(this->_postponed.begin(), std::make_pair(term, subsumedByTerm));
 #           endif
             #if (MEASURE_POSTPONED == true)
@@ -1493,9 +1572,9 @@ SubsumptionResult TermFixpoint::_testIfSubsumes(Term_ptr const& term) {
         ++TermFixpoint::subsumedByHits;
     }
     #endif
-    return result;
+    return std::make_pair(result, term);
     #else
-    return term->IsSubsumedBy(this->_fixpoint);
+    return std::make_pair(term->IsSubsumedBy(this->_fixpoint, this->_worklist, subsumedByTerm), term);
     #endif
 }
 
@@ -1527,15 +1606,16 @@ void TermFixpoint::ComputeNextFixpoint() {
     this->_updateExamples(result);
 
     // If it is subsumed by fixpoint, we don't add it
-    if(this->_fixpointTest(result.first) != E_FALSE) {
+    auto fix_result = this->_fixpointTest(result.first);
+    if(fix_result.first != E_FALSE) {
         return;
     }
 
     // Push new term to fixpoint
     if(result.second == this->_shortBoolValue && _iteratorNumber == 0) {
-        _fixpoint.push_front(std::make_pair(result.first, true));
+        _fixpoint.push_front(std::make_pair(fix_result.second, true));
     } else {
-        _fixpoint.push_back(std::make_pair(result.first, true));
+        _fixpoint.push_back(std::make_pair(fix_result.second, true));
     }
     _updated = true;
     // Aggregate the result of the fixpoint computation
@@ -1615,15 +1695,16 @@ void TermFixpoint::ComputeNextPre() {
     this->_updateExamples(result);
 
     // If it is subsumed we return
-    if(this->_fixpointTest(result.first) != E_FALSE) {
+    auto fix_result = this->_fixpointTest(result.first);
+    if(fix_result.first != E_FALSE) {
         return;
     }
 
     // Push the computed thing and aggregate the result
     if(result.second == this->_shortBoolValue && _iteratorNumber == 0) {
-        _fixpoint.push_front(std::make_pair(result.first, true));
+        _fixpoint.push_front(std::make_pair(fix_result.second, true));
     } else {
-        _fixpoint.push_back(std::make_pair(result.first, true));
+        _fixpoint.push_back(std::make_pair(fix_result.second, true));
     }
     _updated = true;
     _bValue = this->_AggregateResult(_bValue,result.second);
