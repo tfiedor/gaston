@@ -128,6 +128,7 @@ public:
     bool operator==(const Term &t);
     bool IsNotComputed();
     void SetSuccessor(Term*, Symbol*);
+    void SetSameSuccesorAs(Term*);
 
     // <<< MEASURING FUNCTIONS >>>
     virtual unsigned int MeasureStateSpace();

@@ -139,6 +139,7 @@ namespace Gaston {
 	void dumpTermKey(Term_ptr const& s);
 	void dumpSubsumptionKey(std::pair<Term_ptr, Term_ptr> const& s);
 	void dumpSubsumptionData(SubsumptionResult& s);
+	void dumpSubsumptionPairData(std::pair<SubsumptionResult, Term_ptr>&s);
 	void dumpSetPreKey(std::pair<VarList, Symbol_ptr> const& s);
 	void dumpPreKey(std::pair<size_t, Symbol_ptr> const& s);
 	void dumpPreData(Term_ptr& s);
@@ -150,7 +151,8 @@ namespace Gaston {
 	using ResultKey				 = std::pair<Term_raw, Symbol_ptr>;
 	using ResultCache            = BinaryCache<ResultKey, ResultType, ResultHashType, PairCompare<ResultKey>, dumpResultKey, dumpResultData>;
 	using SubsumptionKey		 = std::pair<Term_raw, Term_raw>;
-	using SubsumptionCache       = BinaryCache<SubsumptionKey, SubsumptionResult, SubsumptionHashType, PairCompare<SubsumptionKey>, dumpSubsumptionKey, dumpSubsumptionData>;
+	using SubsumptionResultPair  = std::pair<SubsumptionResult, Term_raw>;
+	using SubsumptionCache       = BinaryCache<SubsumptionKey, SubsumptionResultPair, SubsumptionHashType, PairCompare<SubsumptionKey>, dumpSubsumptionKey, dumpSubsumptionPairData>;
 	using DagKey				 = Formula_ptr;
 	using DagData				 = SymbolicAutomaton*;
 	using DagNodeCache			 = BinaryCache<DagKey, DagData, DagHashType, DagCompare<DagKey>, dumpDagKey, dumpDagData>;
