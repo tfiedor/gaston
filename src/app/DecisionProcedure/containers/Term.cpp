@@ -535,16 +535,23 @@ SubsumptionResult Term::IsSubsumed(Term *t, int limit, Term** new_term, bool unf
             }
         }
 #   if (OPT_CACHE_SUBSUMES == true)
-        if((result.first == E_TRUE || (result.first == E_PARTIALLY && new_term != nullptr)) && this->type != TERM_EMPTY) {
+        if((result.first == E_TRUE || result.first == E_PARTIALLY) && this->type != TERM_EMPTY) {
             if(result.first == E_PARTIALLY) {
                 assert(*new_term != nullptr);
                 result.second = *new_term;
             }
             this->_aut->_subCache.StoreIn(key, result);
         }
-    } else if(new_term != nullptr && result.first == E_PARTIALLY) {
+    }
+
+    if(result.first == E_PARTIALLY) {
         assert(result.second != nullptr);
-        *new_term = result.second;
+        if(new_term != nullptr) {
+            *new_term = result.second;
+        } else {
+            // We did not chose the partial stuff
+            return E_FALSE;
+        }
     }
 #   endif
     assert(!unfoldAll || result.first != E_PARTIALLY);
@@ -574,34 +581,33 @@ SubsumptionResult TermProduct::_IsSubsumedCore(Term *t, int limit, Term** new_te
     Term *rhsr = rhs->right;
 
     // We are doing the partial testing
+#   if (OPT_SUBSUMPTION_INTERSECTION == true)
     if(lhsl->type == TermType::TERM_BASE && new_term != nullptr) {
         Term* inner_new_term = nullptr;
         SubsumptionResult result;
 
-        // Fixme: There is some shit going on...
-        if((result = lhsr->IsSubsumed(rhsr, limit, &inner_new_term, unfoldAll)) == E_FALSE) {
-
+        if((result = lhsl->IsSubsumed(rhsl, limit, &inner_new_term, unfoldAll)) == E_FALSE) {
             return E_FALSE;
         } else if(result == E_TRUE) {
             assert(inner_new_term == nullptr);
-            inner_new_term = lhsr;
+            inner_new_term = lhsl;
         } else {
             assert(inner_new_term != nullptr);
             assert(result == E_PARTIALLY);
         }
 
-        SubsumptionResult base_result = lhsl->IsSubsumed(rhsl, limit, new_term, unfoldAll);
+        SubsumptionResult base_result = lhsr->IsSubsumed(rhsr, limit, new_term, unfoldAll);
         if(base_result == E_PARTIALLY) {
             assert(new_term != nullptr);
             assert(result != E_FALSE);
-            *new_term = this->_aut->_factory.CreateProduct(*new_term, inner_new_term, IntToProductType(GET_PRODUCT_SUBTYPE(this)));
+            *new_term = this->_aut->_factory.CreateProduct(inner_new_term, *new_term, IntToProductType(GET_PRODUCT_SUBTYPE(this)));
             (*new_term)->SetSameSuccesorAs(this);
             ++Term::partial_subsumption_hits;
             return E_PARTIALLY;
         } else {
             if (result == E_PARTIALLY && base_result != E_FALSE) {
                 assert(base_result == E_TRUE);
-                *new_term = this->_aut->_factory.CreateProduct(lhsl, inner_new_term, IntToProductType(GET_PRODUCT_SUBTYPE(this)));
+                *new_term = this->_aut->_factory.CreateProduct(inner_new_term, lhsr, IntToProductType(GET_PRODUCT_SUBTYPE(this)));
                 (*new_term)->SetSameSuccesorAs(this);
                 ++Term::partial_subsumption_hits;
                 return E_PARTIALLY;
@@ -613,6 +619,7 @@ SubsumptionResult TermProduct::_IsSubsumedCore(Term *t, int limit, Term** new_te
             }
         }
     }
+#   endif
 
     if(!unfoldAll && (lhsr->IsNotComputed() && rhsr->IsNotComputed())) {
         #if (OPT_EARLY_PARTIAL_SUB == true)
@@ -665,6 +672,57 @@ SubsumptionResult TermTernaryProduct::_IsSubsumedCore(Term *t, int limit, Term**
     Term *rhsl = rhs->left;
     Term *rhsm = rhs->middle;
     Term *rhsr = rhs->right;
+
+#   if (OPT_SUBSUMPTION_INTERSECTION == true)
+    if(lhsl->type == TermType::TERM_BASE && new_term != nullptr) {
+        Term* inner_new_term = nullptr;
+        SubsumptionResult left_result;
+        if((left_result = lhsl->IsSubsumed(rhsl, limit, &inner_new_term, unfoldAll)) == E_FALSE) {
+            return E_FALSE;
+        } else if(left_result == E_TRUE) {
+            assert(inner_new_term == nullptr);
+            inner_new_term = lhsl;
+        } else {
+            assert(inner_new_term != nullptr);
+            assert(left_result == E_PARTIALLY);
+        }
+
+        Term* middle_new_term = nullptr;
+        SubsumptionResult middle_result;
+        if((middle_result = lhsm->IsSubsumed(rhsm, limit, &middle_new_term, unfoldAll)) == E_FALSE) {
+            return E_FALSE;
+        } else if(middle_result == E_TRUE) {
+            assert(middle_new_term == nullptr);
+            middle_new_term = lhsm;
+        } else {
+            assert(middle_new_term != nullptr);
+            assert(middle_result == E_PARTIALLY);
+        }
+
+        Term* right_new_term = nullptr;
+        SubsumptionResult right_result;
+        if((right_result = lhsr->IsSubsumed(rhsr, limit, &right_new_term, unfoldAll)) == E_FALSE) {
+            return E_FALSE;
+        } else if(right_result == E_TRUE) {
+            assert(right_new_term == nullptr);
+            if(left_result == E_TRUE && middle_result == E_TRUE) {
+                *new_term = nullptr;
+                return E_TRUE;
+            } else {
+                assert(left_result == E_PARTIALLY || middle_result == E_PARTIALLY);
+                ++Term::partial_subsumption_hits;
+                *new_term = this->_aut->_factory.CreateTernaryProduct(inner_new_term, middle_new_term, lhsr, IntToProductType(GET_PRODUCT_SUBTYPE(this)));
+                (*new_term)->SetSameSuccesorAs(this);
+                return E_PARTIALLY;
+            }
+        } else {
+            ++Term::partial_subsumption_hits;
+            *new_term = this->_aut->_factory.CreateTernaryProduct(inner_new_term, middle_new_term, right_new_term, IntToProductType(GET_PRODUCT_SUBTYPE(this)));
+            (*new_term)->SetSameSuccesorAs(this);
+            return E_PARTIALLY;
+        }
+    }
+#   endif
 
     size_t approx_max = std::max({lhsl->stateSpaceApprox, lhsm->stateSpaceApprox, lhsr->stateSpaceApprox});
     size_t approx_min = std::min({lhsl->stateSpaceApprox, lhsm->stateSpaceApprox, lhsr->stateSpaceApprox});
@@ -721,7 +779,7 @@ SubsumptionResult TermBaseSet::_IsSubsumedCore(Term *term, int limit, Term** new
 
 #   if (OPT_SUBSUMPTION_INTERSECTION == true)
     // Fixme: Create TermBaseSet
-    if(new_term != nullptr && !this->_aut->_form->is_restriction) {
+    if(new_term != nullptr) {
         TermBaseSetStates diff;
         bool is_nonempty_diff = this->states.SetDifference(t->states, diff);
         *new_term = nullptr;
@@ -884,13 +942,20 @@ SubsumptionResult TermProduct::IsSubsumedBy(FixpointType& fixpoint, WorklistType
     // For each item in fixpoint
     Term* tested_term = this;
     Term* new_term = nullptr;
+    size_t valid_members = 0;
+    for(auto &item : fixpoint) {
+        if(item.first == nullptr || !item.second)
+            continue;
+        valid_members += 1;
+    }
+
     for(auto& item : fixpoint) {
         // Nullptr is skipped
         if(item.first == nullptr || !item.second) continue;
 
         // Test the subsumption
         SubsumptionResult result;
-        if(!no_prune) {
+        if(!no_prune && valid_members > 1) {
             result = tested_term->IsSubsumed(item.first, OPT_PARTIALLY_LIMITED_SUBSUMPTION, &new_term);
         } else {
             result = tested_term->IsSubsumed(item.first, OPT_PARTIALLY_LIMITED_SUBSUMPTION, nullptr);
@@ -954,15 +1019,35 @@ SubsumptionResult TermTernaryProduct::IsSubsumedBy(FixpointType& fixpoint, Workl
         return E_TRUE;
     }
 
+    Term* tested_term = this;
+    Term* new_term = nullptr;
+    size_t valid_members = 0;
+    for(auto &item : fixpoint) {
+        if(item.first == nullptr || !item.second)
+            continue;
+        valid_members += 1;
+    }
+
     for(auto& item : fixpoint) {
         if(item.first == nullptr || !item.second) continue;
 
-        if(this->IsSubsumed(item.first, OPT_PARTIALLY_LIMITED_SUBSUMPTION) != E_FALSE) {
+        SubsumptionResult result;
+        if(!no_prune && valid_members > 1) {
+            result = tested_term->IsSubsumed(item.first, OPT_PARTIALLY_LIMITED_SUBSUMPTION, &new_term);
+        } else {
+            result = tested_term->IsSubsumed(item.first, OPT_PARTIALLY_LIMITED_SUBSUMPTION, nullptr);
+        }
+
+        if(result == E_TRUE) {
             return E_TRUE;
+        } else if(result == E_PARTIALLY && !no_prune) {
+            assert(new_term != nullptr);
+            assert(new_term != tested_term);
+            tested_term = new_term;
         }
 
         if(!no_prune) {
-            if(item.first->IsSubsumed(this, OPT_PARTIALLY_LIMITED_SUBSUMPTION) != E_FALSE) {
+            if(item.first->IsSubsumed(tested_term, OPT_PARTIALLY_LIMITED_SUBSUMPTION) != E_FALSE) {
 #               if (OPT_PRUNE_WORKLIST == true)
                 prune_worklist(worklist, item.first);
 #               endif
@@ -1006,13 +1091,20 @@ SubsumptionResult TermBaseSet::IsSubsumedBy(FixpointType& fixpoint, WorklistType
     // For each item in fixpoint
     Term* tested_term = this;
     Term* new_term = nullptr;
+    size_t valid_members = 0;
+    for(auto &item : fixpoint) {
+        if(item.first == nullptr || !item.second)
+            continue;
+        valid_members += 1;
+    }
+
     for(auto& item : fixpoint) {
         // Nullptr is skipped
         if(item.first == nullptr || !item.second) continue;
 
         // Test the subsumption
         SubsumptionResult result;
-        if(!no_prune) {
+        if(!no_prune && valid_members > 1) {
             result = tested_term->IsSubsumed(item.first, OPT_PARTIALLY_LIMITED_SUBSUMPTION, &new_term);
         } else {
             result = tested_term->IsSubsumed(item.first, OPT_PARTIALLY_LIMITED_SUBSUMPTION, nullptr);
