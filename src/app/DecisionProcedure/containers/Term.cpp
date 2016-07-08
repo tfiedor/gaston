@@ -785,9 +785,9 @@ SubsumptionResult TermNaryProduct::_IsSubsumedCore(Term *t, int limit, Term** ne
         if(this->terms[this->access_vector[i]]->IsSubsumed(rhs->terms[this->access_vector[i]], limit, nullptr, b) == E_FALSE) {
             if(i != 0) {
                 // Propagate the values towards 0 index
-                this->access_vector[i] ^= this->access_vector[i-1];
-                this->access_vector[i-1] ^= this->access_vector[i];
-                this->access_vector[i] ^= this->access_vector[i-1];
+                this->access_vector[i] ^= this->access_vector[0];
+                this->access_vector[0] ^= this->access_vector[i];
+                this->access_vector[i] ^= this->access_vector[0];
             }
             return E_FALSE;
         }
@@ -1918,6 +1918,10 @@ void TermFixpoint::ComputeNextFixpoint() {
         _worklist.insert(_worklist.cbegin(), std::make_pair(fix_result.second, this->_projectedSymbol));
     }
 #   endif
+
+    if(this->_aut->stats.max_symbol_path_len < fix_result.second->link->len) {
+        this->_aut->stats.max_symbol_path_len = fix_result.second->link->len;
+    }
 }
 
 /**
@@ -1948,6 +1952,11 @@ void TermFixpoint::ComputeNextPre() {
     } else {
         _fixpoint.push_back(std::make_pair(fix_result.second, true));
     }
+
+    if(this->_aut->stats.max_symbol_path_len < fix_result.second->link->len) {
+        this->_aut->stats.max_symbol_path_len = fix_result.second->link->len;
+    }
+
     _updated = true;
     _bValue = this->_AggregateResult(_bValue,result.second);
 }

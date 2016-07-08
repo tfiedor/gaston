@@ -30,6 +30,7 @@ extern VarToTrackMap varMap;
 extern SymbolTable symbolTable;
 extern Ident lastPosVar, allPosVar;
 extern Options options;
+extern char *inputFileName;
 
 StateType SymbolicAutomaton::stateCnt = 0;
 // Fixme: Delete this shit
@@ -1661,7 +1662,7 @@ void print_gaston_optimization_to_dot(std::ofstream& os, std::string opt, bool i
 
 void SymbolicAutomaton::GastonInfoToDot(std::ofstream& os) {
     os << "\tsubgraph clusterGastonInfo {\n";
-    os << "\t\tlabel=\"Gaston Parameters\";\n";
+    os << "\t\tlabel=\"Gaston Parameters\\n[" << inputFileName << "]\";\n";
     os << "\t\trankdir=\"LR\";\n";
     os << "\t\tranksep=0.1;\n";
 
@@ -1773,7 +1774,7 @@ void ComplementAutomaton::DumpToDot(std::ofstream & os, bool inComplement) {
 void ProjectionAutomaton::DumpToDot(std::ofstream & os, bool inComplement) {
     os << "\t" << (uintptr_t) &*this << "[label=\"";
     os << this->_factory.ToSimpleStats() << "\\n";
-    os << this->_form->fixpoint_number << ": ";
+    os << this->_form->fixpoint_number << ", " << this->stats.max_symbol_path_len << ": ";
     os << "\u03B5 " << (inComplement ? "\u2209 " : "\u2208 ");
     os << "\u2203";
     for(auto id = this->projectedVars->begin(); id != this->projectedVars->end(); ++id) {

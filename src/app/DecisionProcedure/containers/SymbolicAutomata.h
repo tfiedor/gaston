@@ -83,6 +83,7 @@ public:
         unsigned int nodes = 0;
         unsigned int real_nodes = 0;
         unsigned int max_refs;
+        unsigned int max_symbol_path_len = 0;
     } stats;
 
     Formula_ptr _form;

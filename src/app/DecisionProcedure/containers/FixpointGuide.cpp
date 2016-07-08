@@ -99,19 +99,19 @@ GuideTip FixpointGuide::GiveTip(Term* term, Symbol* symbol) {
             }
         }
     // Guide for first order variables
-    } else if(this->_link != nullptr && this->_link->aut->_form->kind == aFirstOrder && symbol != nullptr) {
-        assert(this->_link->aut != nullptr);
-        assert(this->_link->aut->type == AutType::BASE);
-        ASTForm_FirstOrder *fo = static_cast<ASTForm_FirstOrder *>(this->_link->aut->_form);
-
-        symbol = this->_link->ReMapSymbol(symbol);
-        TermProduct *tp = static_cast<TermProduct *>(term);
-        // FIXME: FIX THIS SHIT
-        //assert(term->type == TermType::TERM_PRODUCT);
     }
+
     return GuideTip::G_FRONT;
 }
 
+/**
+ * @brief Return the base state term from the product
+ *
+ * According to the type of the product (i.e. Ternary, Nary, Binary),
+ * returns the part of the product, that is of BASE type
+ *
+ * @param[in] term           product term
+ */
 TermBaseSet* get_base_states(Term* term) {
     assert(term != nullptr);
     if(term->type == TermType::TERM_PRODUCT) {
@@ -140,6 +140,7 @@ TermBaseSet* get_base_states(Term* term) {
  */
 GuideTip FixpointGuide::GiveTip(Term* term) {
     assert(term != nullptr);
+    assert(term->type != TermType::TERM_EMPTY);
     if (this->_isQuantifierFree && this->_link != nullptr && this->_link->aut->type == AutType::BASE && term->type != TERM_EMPTY) {
         TermBaseSet* initial = static_cast<TermBaseSet*>(this->_link->aut->GetInitialStates());
         if (initial->Intersects(get_base_states(term))) {
