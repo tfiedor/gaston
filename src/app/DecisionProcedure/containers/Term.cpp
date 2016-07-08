@@ -688,7 +688,7 @@ SubsumptionResult TermTernaryProduct::_IsSubsumedCore(Term *t, int limit, Term**
         }
 
         Term* middle_new_term = nullptr;
-        SubsumptionResult middle_result;
+        SubsumptionResult middle_result = E_TRUE;
         if((middle_result = lhsm->IsSubsumed(rhsm, limit, &middle_new_term, unfoldAll)) == E_FALSE) {
             return E_FALSE;
         } else if(middle_result == E_TRUE) {
@@ -737,10 +737,49 @@ SubsumptionResult TermTernaryProduct::_IsSubsumedCore(Term *t, int limit, Term**
 
 SubsumptionResult TermNaryProduct::_IsSubsumedCore(Term *t, int limit, Term** new_term, bool b) {
     assert(t->type == TERM_NARY_PRODUCT);
-
-    // Retype and test the subsumption component-wise
     TermNaryProduct *rhs = static_cast<TermNaryProduct*>(t);
     assert(this->arity == rhs->arity);
+
+#   if (OPT_SUBSUMPTION_INTERSECTION == true)
+    if(this->terms[0]->type == TermType::TERM_BASE && new_term != nullptr) {
+        Term_ptr inner_term = nullptr;
+        Term_ptr* new_terms = new Term_ptr[this->arity];
+        bool terms_were_partitioned = false;
+        SubsumptionResult result;
+
+        for (int i = 0; i < this->arity; ++i) {
+            if(this->terms[i] == rhs->terms[i]) {
+                result = E_TRUE;
+            } else {
+                result = this->terms[i]->IsSubsumed(rhs->terms[i], limit, &inner_term, b);
+            }
+            if(result == E_FALSE) {
+                delete[] new_terms;
+                return E_FALSE;
+            } else if(result == E_TRUE) {
+                new_terms[i] = this->terms[i];
+            } else {
+                assert(result == E_PARTIALLY);
+                new_terms[i] = inner_term;
+                terms_were_partitioned = true;
+            }
+        }
+
+        if(terms_were_partitioned) {
+            ++Term::partial_subsumption_hits;
+            *new_term = this->_aut->_factory.CreateNaryProduct(new_terms, this->arity, IntToProductType(GET_PRODUCT_SUBTYPE(this)));
+            (*new_term)->SetSameSuccesorAs(this);
+            delete[] new_terms;
+            return E_PARTIALLY;
+        } else {
+            delete[] new_terms;
+            *new_term = nullptr;
+            return E_TRUE;
+        }
+    }
+#   endif
+
+    // Retype and test the subsumption component-wise
     for (int i = 0; i < this->arity; ++i) {
         assert(this->access_vector[i] < this->arity);
         if(this->terms[this->access_vector[i]]->IsSubsumed(rhs->terms[this->access_vector[i]], limit, nullptr, b) == E_FALSE) {
@@ -1064,11 +1103,31 @@ SubsumptionResult TermNaryProduct::IsSubsumedBy(FixpointType& fixpoint, Worklist
         return E_TRUE;
     }
 
+    Term* tested_term = this;
+    Term* new_term = nullptr;
+    size_t valid_members = 0;
+    for(auto &item : fixpoint) {
+        if(item.first == nullptr || !item.second)
+            continue;
+        valid_members += 1;
+    }
+
     for(auto& item : fixpoint) {
         if(item.first == nullptr || !item.second) continue;
 
-        if(this->IsSubsumed(item.first, OPT_PARTIALLY_LIMITED_SUBSUMPTION)) {
+        SubsumptionResult result;
+        if(!no_prune && valid_members > 1) {
+            result = tested_term->IsSubsumed(item.first, OPT_PARTIALLY_LIMITED_SUBSUMPTION, &new_term);
+        } else {
+            result = tested_term->IsSubsumed(item.first, OPT_PARTIALLY_LIMITED_SUBSUMPTION, nullptr);
+        }
+
+        if(result == E_TRUE) {
             return E_TRUE;
+        } else if(result == E_PARTIALLY && !no_prune) {
+            assert(new_term != nullptr);
+            assert(new_term != tested_term);
+            tested_term = new_term;
         }
 
         if(!no_prune) {
