@@ -311,6 +311,7 @@ namespace Workshops {
      * @return: unique pointer
      */
     TermList* TermWorkshop::CreateList(Term_ptr const& startTerm, bool inComplement) {
+        assert(startTerm->type != TERM_EMPTY);
         #if (OPT_GENERATE_UNIQUE_TERMS == true && UNIQUE_LISTS == true)
             assert(this->_lCache != nullptr);
 

@@ -140,8 +140,9 @@ TermBaseSet* get_base_states(Term* term) {
  */
 GuideTip FixpointGuide::GiveTip(Term* term) {
     assert(term != nullptr);
-    assert(term->type != TermType::TERM_EMPTY);
-    if (this->_isQuantifierFree && this->_link != nullptr && this->_link->aut->type == AutType::BASE && term->type != TERM_EMPTY) {
+    if(term->type == TermType::TERM_EMPTY) {
+        return GuideTip::G_THROW;
+    } else if (this->_isQuantifierFree && this->_link != nullptr && this->_link->aut->type == AutType::BASE && term->type != TERM_EMPTY) {
         TermBaseSet* initial = static_cast<TermBaseSet*>(this->_link->aut->GetInitialStates());
         if (initial->Intersects(get_base_states(term))) {
             return GuideTip::G_PROJECT_ALL;

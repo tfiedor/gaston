@@ -44,7 +44,6 @@ SymbolicAutomaton* ASTForm::toSymbolicAutomaton(bool doComplement) {
     // automaton and return the thing.
     if(this->sfa == nullptr) {
 #       if (OPT_USE_DAG == true)
-        bool isComplemented;
         DagNodeCache* cache = (doComplement ? SymbolicAutomaton::dagNegNodeCache : SymbolicAutomaton::dagNodeCache);
         auto key = this;
         // First look into the dag, if there is already something structurally similar

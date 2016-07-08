@@ -60,8 +60,6 @@ public:
 
     using TermWorkshop  = Workshops::TermWorkshop;
 
-
-
     // <<< PUBLIC MEMBERS >>>
     static StateType stateCnt;
     static DagNodeCache* dagNodeCache;

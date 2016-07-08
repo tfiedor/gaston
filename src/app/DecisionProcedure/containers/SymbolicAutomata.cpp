@@ -668,6 +668,9 @@ ResultType RootProjectionAutomaton::IntersectNonEmpty(Symbol* symbol, Term* fina
 
     // Evaluate the initial unfolding of epsilon
     ResultType result = this->_aut.aut->IntersectNonEmpty(this->_aut.ReMapSymbol(symbol), projectionApproximation->list[0], underComplement);
+    if(result.first->type == TermType::TERM_EMPTY) {
+        return result;
+    }
 
     // Create a new fixpoint term and iterator on it
     TermFixpoint* fixpoint = this->_factory.CreateFixpoint(result.first, SymbolWorkshop::CreateZeroSymbol(), underComplement, result.second, WorklistSearchType::E_UNGROUND_ROOT);
@@ -1199,6 +1202,10 @@ ResultType ProjectionAutomaton::_IntersectNonEmptyCore(Symbol* symbol, Term* fin
 
         // Evaluate the initial unfolding of epsilon
         ResultType result = this->_aut.aut->IntersectNonEmpty(this->_aut.ReMapSymbol(symbol), projectionApproximation->list[0], underComplement);
+        if(result.first->type == TERM_EMPTY) {
+            // Prune the empty starting term
+            return result;
+        }
 
         // Create a new fixpoint term and iterator on it
         #if (DEBUG_NO_WORKSHOPS == true)
