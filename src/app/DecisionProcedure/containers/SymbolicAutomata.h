@@ -159,8 +159,8 @@ struct SymLink {
     size_t remap_tag;
     static size_t remap_number;
 
-    SymLink() : aut(nullptr), remap(false), varRemap(nullptr) {}
-    explicit SymLink(SymbolicAutomaton* s) : aut(s), remap(false), varRemap(nullptr) {}
+    SymLink() : aut(nullptr), remap(false), varRemap(nullptr), remap_tag(0) {}
+    explicit SymLink(SymbolicAutomaton* s) : aut(s), remap(false), varRemap(nullptr), remap_tag(0) {}
     ~SymLink() {
         if(varRemap != nullptr) {
             delete varRemap;

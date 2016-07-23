@@ -33,7 +33,6 @@ extern Options options;
 extern char *inputFileName;
 
 StateType SymbolicAutomaton::stateCnt = 0;
-// Fixme: Delete this shit
 DagNodeCache* SymbolicAutomaton::dagNodeCache = new DagNodeCache();
 DagNodeCache* SymbolicAutomaton::dagNegNodeCache = new DagNodeCache();
 
@@ -86,6 +85,7 @@ SymbolicAutomaton::SymbolicAutomaton(Formula_ptr form) :
         _unsatExample(nullptr), _refs(0) {
     type = AutType::SYMBOLIC_BASE;
 
+    // Fixme: isn't allVars the same as formula->allVars?
     IdentList free, bound;
     this->_form->freeVars(&free, &bound);
     IdentList* allVars;
@@ -130,6 +130,7 @@ TernaryOpAutomaton::TernaryOpAutomaton(SymbolicAutomaton_raw lhs, SymbolicAutoma
     // Fixme: Add lazy init
     type = AutType::TERNARY;
 
+    // Fixme: Refactor: Move to other function?
     ASTForm* left, *middle, *right;
     ASTKind k = form->kind;
     ASTForm_ff* ff_form = static_cast<ASTForm_ff*>(form);
@@ -240,6 +241,7 @@ ProjectionAutomaton::ProjectionAutomaton(SymbolicAutomaton_raw aut, Formula_ptr 
     this->_aut.InitializeSymLink(reinterpret_cast<ASTForm_q*>(this->_form)->f);
 
     // Initialize the guide
+    // Fixme: Refactor: This is mess!!!
     ASTForm* innerForm = static_cast<ASTForm_q*>(this->_form)->f;
     if(innerForm->kind == aAnd || innerForm->kind == aOr) {
         ASTForm_ff* ff_form = static_cast<ASTForm_ff*>(innerForm);
@@ -277,7 +279,7 @@ ProjectionAutomaton::~ProjectionAutomaton() {
 RootProjectionAutomaton::RootProjectionAutomaton(SymbolicAutomaton* aut, Formula_ptr form)
         : ProjectionAutomaton(aut, form, true) {}
 
-BaseAutomaton::BaseAutomaton(BaseAutomatonType* aut, size_t vars, Formula_ptr form, bool emptyTracks) : SymbolicAutomaton(form), _autWrapper(dfaCopy(aut), emptyTracks, vars) {
+BaseAutomaton::BaseAutomaton(BaseAutomatonType* aut, size_t vars, Formula_ptr form, bool emptyTracks) : SymbolicAutomaton(form), _autWrapper(dfaCopy(aut), emptyTracks, form->is_restriction, vars) {
     type = AutType::BASE;
     this->_InitializeAutomaton();
     this->_stateSpace = vars;
@@ -565,7 +567,6 @@ ResultType SymbolicAutomaton::IntersectNonEmpty(Symbol* symbol, Term* stateAppro
         TermContinuation* continuation = reinterpret_cast<TermContinuation*>(stateApproximation);
         stateApproximation = continuation->unfoldContinuation(UnfoldedInType::E_IN_ISECT_NONEMPTY);
     }
-#   endif
 
     assert(stateApproximation != nullptr);
     assert(stateApproximation->type != TERM_CONTINUATION);
@@ -579,6 +580,7 @@ ResultType SymbolicAutomaton::IntersectNonEmpty(Symbol* symbol, Term* stateAppro
 #       endif
         return std::make_pair(stateApproximation, res);
     }
+#   endif
 
 #   if (OPT_CACHE_RESULTS == true)
     // Look up in cache, if in cache, return the result
@@ -600,7 +602,6 @@ ResultType SymbolicAutomaton::IntersectNonEmpty(Symbol* symbol, Term* stateAppro
         }
         return result;
     }
-    //}
 #   endif
 
     // Call the core function
@@ -611,7 +612,7 @@ ResultType SymbolicAutomaton::IntersectNonEmpty(Symbol* symbol, Term* stateAppro
 
     // Cache Results
 #   if (OPT_CACHE_RESULTS == true)
-#       if (OPT_DONT_CACHE_CONT == true)
+#       if (OPT_DONT_CACHE_CONT == true && OPT_EARLY_EVALUATION == true)
         if(stateApproximation->type == TERM_PRODUCT) {
             // If either side is not fully computed, we do not cache it
             TermProduct* tProduct = reinterpret_cast<TermProduct*>(stateApproximation);
@@ -1012,7 +1013,7 @@ Term* BaseAutomaton::Pre(Symbol* symbol, Term* finalApproximation, bool underCom
     }
 
     #if (DEBUG_PRE == true)
-    std::cout << "= " << states << "\n";
+        std::cout << "= "; accumulatedState->dump(); std::cout << "\n";
     #endif
 
     return accumulatedState;

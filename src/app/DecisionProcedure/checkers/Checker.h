@@ -62,10 +62,10 @@ public:
 	virtual bool Run() = 0;
 protected:
     // <<< PRIVATE MEMBERS >>>
-    MonaAST* _monaAST;
+    MonaAST* _monaAST = nullptr;
 	ASTForm* _rootRestriction = nullptr;
-	bool _printProgress;
-	bool _isGround;
+	bool _printProgress = false;
+	bool _isGround = false;
 	bool _terminatedBySignal = false;
 
 	// <<< PRIVATE METHODS >>>

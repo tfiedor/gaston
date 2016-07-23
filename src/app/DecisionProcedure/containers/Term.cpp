@@ -24,7 +24,7 @@ extern Ident allPosVar;
 namespace Gaston {
     size_t hash_value(Term* s) {
 #       if (OPT_TERM_HASH_BY_APPROX == true)
-        if (s->type == TERM_CONTINUATION) {
+        if (s->type == TERM_CONTINUATION && OPT_EARLY_EVALUATION) {
             // Todo: this is never hit fuck
             TermContinuation *sCont = static_cast<TermContinuation *>(s);
             if (sCont->IsUnfolded()) {
@@ -81,10 +81,16 @@ Term::~Term() {
     delete this->link;
 }
 
+/**
+ * @brief Constructor of the empty or complemented empty term
+ *
+ * @param[in]  aut  link to the automaton that created the empty (note: empty terms are unique through whole program!)
+ * @param[in]  inComplement  whether the term is complemented
+ */
 TermEmpty::TermEmpty(Aut_ptr aut, bool inComplement) : Term(aut) {
-    #if (MEASURE_STATE_SPACE == true)
+#   if (MEASURE_STATE_SPACE == true)
     ++TermEmpty::instances;
-    #endif
+#   endif
     if(inComplement) {
         SET_IN_COMPLEMENT(this);
     }
@@ -93,35 +99,36 @@ TermEmpty::TermEmpty(Aut_ptr aut, bool inComplement) : Term(aut) {
     // Initialization of state space
     this->stateSpaceApprox = 0;
 
-    #if (DEBUG_TERM_CREATION == true)
+#   if (DEBUG_TERM_CREATION == true)
     std::cout << "[" << this << "]";
     std::cout << "TermEmpty::";
     this->dump();
     std::cout << "\n";
-    #endif
+#   endif
 }
 
-/*Term::~Term() {
-    this->_isSubsumedCache.clear();
-    }*/
-
 /**
-    * Constructor of Term Product---construct intersecting product of
-    * @p lhs and @p rhs
-    *
-    * @param[in] lhs:  left operand of term intersection
-    * @param[in] rhs:  right operand of term intersection
-    */
+ * @brief Constructor of the product of terms @p lhs and @p rhs
+ *
+ * Creates a classic binary product of @p pt type of the pair @p lhs and @rhs
+ *
+ * @param[in]  aut  link to the automaton that created the product
+ * @param[in]  lhs  left operand of the binary product
+ * @param[in]  rhs  right operand of the binary product
+ * @param[in]  pt   product type
+ */
 TermProduct::TermProduct(Aut_ptr aut, Term_ptr lhs, Term_ptr rhs, ProductType pt) : Term(aut), left(lhs), right(rhs) {
-    #if (MEASURE_STATE_SPACE == true)
+#   if (MEASURE_STATE_SPACE == true)
     ++TermProduct::instances;
-    #endif
+#   endif
 
     this->type = TermType::TERM_PRODUCT;
     SET_PRODUCT_SUBTYPE(this, pt);
 
     // Initialization of state space
     this->stateSpaceApprox = this->left->stateSpaceApprox + (this->right != nullptr ? this->right->stateSpaceApprox : 0) + 1;
+
+    // Initialization of the enumerator
 #   if (OPT_ENUMERATED_SUBSUMPTION_TESTING == true)
     this->enumerator = new ProductEnumerator(this);
 #   endif
@@ -134,11 +141,24 @@ TermProduct::TermProduct(Aut_ptr aut, Term_ptr lhs, Term_ptr rhs, ProductType pt
 }
 
 TermProduct::~TermProduct() {
+#   if (OPT_ENUMERATED_SUBSUMPTION_TESTING == true)
     if(this->enumerator != nullptr) {
         delete this->enumerator;
     }
+#   endif
 }
 
+/**
+ * @brief Constructor of the ternary product of terms @p lhs @p mhs @rhs of @pt type
+ *
+ * Creates a ternary product of @p pt type of the triple @p lhs @mhs and @rhs
+ *
+ * @param[in]  aut  link to the automaton that created the product
+ * @param[in]  lhs  left operand of the ternary product
+ * @param[in]  mhs  middle operand of the ternary product
+ * @param[in]  rhs  right operand of the ternary product
+ * @param[in]  pt   product type
+ */
 TermTernaryProduct::TermTernaryProduct(Aut_ptr aut, Term_ptr lhs, Term_ptr mhs, Term_ptr rhs, ProductType pt)
     : Term(aut), left(lhs), middle(mhs), right(rhs) {
 #   if(MEASURE_STATE_SPACE == true)
@@ -159,22 +179,29 @@ TermTernaryProduct::TermTernaryProduct(Aut_ptr aut, Term_ptr lhs, Term_ptr mhs, 
 #   endif
 }
 
-TermTernaryProduct::~TermTernaryProduct() {
-
-}
-
+/**
+ * @brief Initialization function for the Nary product
+ *
+ * Initializes the type, arity, access vector and state space approximation for the Nary product
+ *
+ * @param[in]  pt  product type
+ * @param[in]  arity  arity of the product
+ */
 void TermNaryProduct::_InitNaryProduct(ProductType pt, size_t arity) {
 #   if (MEASURE_STATE_SPACE == true)
     ++TermNaryProduct::instances;
 #   endif
+
     this->arity = arity;
     this->access_vector = new size_t[this->arity];
     this->type = TermType::TERM_NARY_PRODUCT;
     SET_PRODUCT_SUBTYPE(this, pt);
 
+    // Initialization of the access vector and the state space approx
     this->stateSpaceApprox = 0;
-    for (int j = 0; j < this->arity; ++j) {
-        this->access_vector[j] = static_cast<size_t>(j);
+    for (size_t j = 0; j < this->arity; ++j) {
+        // Fixme: Is this used anywhere?
+        this->access_vector[j] = j;
         this->stateSpaceApprox += this->terms[j]->stateSpaceApprox;
     }
 
@@ -185,13 +212,43 @@ void TermNaryProduct::_InitNaryProduct(ProductType pt, size_t arity) {
 #   endif
 }
 
+/**
+ * @brief Constructor of the Nary product of @p pt type
+ *
+ * Creates a Nary product of the @p pt type of @p terms
+ *
+ * @param[in]  aut  link to the automaton that created the nary product
+ * @param[in]  terms  terms of the product (note: on index [0] is the quantifier free part of the product)
+ * @param[in]  pt  product type
+ * @param[in]  arity  arity of the product
+ */
 TermNaryProduct::TermNaryProduct(Aut_ptr aut, Term_ptr* terms, ProductType pt, size_t arity) : Term(aut) {
+#   if (MEASURE_STATE_SPACE == true)
+    ++TermNaryProduct::instances;
+#   endif
+
     this->terms = new Term_ptr[arity];
     std::copy(terms, terms+arity, this->terms);
     this->_InitNaryProduct(pt, arity);
 }
 
+/**
+ * @brief Constructor of the Nary product of @p pt type from the list of automata
+ *
+ * Creates a Nary product of the @p pt type either from the initial states of the @p auts
+ * or from the final states of the @p auts.
+ *
+ * @param[in]  aut  link to the automaton that created the nary product
+ * @param[in]  auts  links to the automata of outlying terms
+ * @param[in]  st  state set type (either final or initial)
+ * @param[in]  pt  product type
+ * @param[in]  arity  arity of the Nary product
+ */
 TermNaryProduct::TermNaryProduct(Aut_ptr aut, SymLink* auts, StatesSetType st, ProductType pt, size_t arity) : Term(aut) {
+#   if (MEASURE_STATE_SPACE == true)
+    ++TermNaryProduct::instances;
+#   endif
+
     // Fixme: add link to auts
     this->terms = new Term_ptr[arity];
     for(auto i = 0; i < arity; ++i) {
@@ -203,6 +260,18 @@ TermNaryProduct::TermNaryProduct(Aut_ptr aut, SymLink* auts, StatesSetType st, P
     this->_InitNaryProduct(pt, arity);
 }
 
+/**
+ * @brief Constructor of the Nary product represented as fixpoint style of type @p pt
+ *
+ * Creates a Nary product that has backlink to its @p source and behaves like bounded fixpoint, i.e.
+ * its members are computed by demand instead of fully everytime
+ *
+ * @param[in]  aut  link to the automaton that created the nary product
+ * @param[in]  source  source term of the product
+ * @param[in]  symbol  symbol we are subtracting from the source
+ * @param[in]  pt  product type
+ * @param[in]  arity  arity of the Nary product
+ */
 TermNaryProduct::TermNaryProduct(Aut_ptr aut, Term_ptr source, Symbol_ptr symbol, ProductType pt, size_t arity) : Term(aut) {
 #   if (MEASURE_STATE_SPACE == true)
     ++TermNaryProduct::instances;
@@ -217,10 +286,18 @@ TermNaryProduct::~TermNaryProduct() {
     delete[] this->terms;
 }
 
-TermBaseSet::TermBaseSet(Aut_ptr aut, VATA::Util::OrdVector<size_t> && s) : Term(aut), states(std::move(s)) {
-    #if (MEASURE_STATE_SPACE == true)
+/**
+ * @brief Constructor of the Base set of atomic states
+ *
+ * Creates a Base set as a set of atomic states
+ *
+ * @param[in]  aut  link to the automaton that created the base set
+ * @param[in]  s  set of states that we are wrapping
+ */
+TermBaseSet::TermBaseSet(Aut_ptr aut, BaseAutomatonStateSet && s) : Term(aut), states(std::move(s)) {
+#   if (MEASURE_STATE_SPACE == true)
     ++TermBaseSet::instances;
-    #endif
+#   endif
 #   if (MEASURE_BASE_SIZE == true)
     size_t size = s.size();
     if(size > TermBaseSet::maxBaseSize) {
@@ -228,75 +305,116 @@ TermBaseSet::TermBaseSet(Aut_ptr aut, VATA::Util::OrdVector<size_t> && s) : Term
     }
 #   endif
     type = TERM_BASE;
-    assert(s.size() > 0);
+    assert(s.size() > 0 && "Trying to create 'TermBaseSet' without any states");
 
     // Initialization of state space
     this->stateSpaceApprox = this->states.size();
 
-    #if (DEBUG_TERM_CREATION == true)
+#   if (DEBUG_TERM_CREATION == true)
     std::cout << "TermBaseSet::";
     this->dump();
     std::cout << "\n";
-    #endif
+#   endif
 }
 
 TermBaseSet::~TermBaseSet() {
     this->states.clear();
 }
 
+/**
+ * @brief Constructor of the Continuation, i.e. the postponing of the computations
+ *
+ * Creates a Continuation, i.e. the postponing of the computations---the subtracting
+ * of the symbol @p s from the term @p t
+ *
+ * @param[in]  aut  link to the automaton that created the base set
+ * @param[in]  a  link to the automaton
+ * @param[in]  init  automaton used for lazy initialization of the continuation
+ * @param[in]  t  term we are postponing the computation on
+ * @param[in]  s  symbol we are subtracting from the term @p t
+ * @param[in]  b  whether the term is under complement
+ * @param[in]  lazy  whether this should be lazy evaluated
+ */
 TermContinuation::TermContinuation(Aut_ptr aut, SymLink* a, SymbolicAutomaton* init, Term* t, SymbolType* s, bool b, bool lazy)
         : Term(aut), aut(a), initAut(init), term(t), symbol(s), underComplement(b), lazyEval(lazy) {
-    #if (DEBUG_TERM_CREATION == true)
+#   if (DEBUG_TERM_CREATION == true)
     std::cout << "[" << this << "]";
     std::cout << "TermContinuation::";
     this->dump();
     std::cout << "\n";
-    #endif
-    #if (MEASURE_STATE_SPACE == true)
+#   endif
+#   if (MEASURE_STATE_SPACE == true)
     ++TermContinuation::instances;
-    #endif
+#   endif
     assert(t != nullptr || lazyEval);
-
     this->type = TERM_CONTINUATION;
 
     // Initialization of state space
     this->stateSpaceApprox = (t == nullptr ? 0 : t->stateSpaceApprox);
 
-    #if (DEBUG_CONTINUATIONS == true)
+#   if (DEBUG_CONTINUATIONS == true)
     std::cout << "Postponing computation as [";
     t->dump();
     std::cout << "]\n";
-    #endif
+#   endif
     SET_VALUE_NON_MEMBERSHIP_TESTING(this, b);
 }
 
-TermList::TermList(Aut_ptr aut, Term_ptr first, bool isCompl) : Term(aut) {
-    #if (MEASURE_STATE_SPACE == true)
+/**
+ * @brief Constructor of the List of terms
+ *
+ * Creates a List of terms, note: this is used only for the initialization
+ * of the initial and final states of the fixpoints.
+ *
+ * @param[in]  aut  link to the automaton that created the list
+ * @param[in]  first  the term we are pushing to the list
+ * @param[in]  isCompl  if the term is complemented
+ */
+TermList::TermList(Aut_ptr aut, Term_ptr first, bool isCompl) : Term(aut), list{first} {
+#   if (MEASURE_STATE_SPACE == true)
     ++TermList::instances;
-    #endif
+#   endif
 
     this->type = TERM_LIST;
 
     // Initialization of state space
     this->stateSpaceApprox = first->stateSpaceApprox;
-
-    this->list.push_back(first);
     SET_VALUE_NON_MEMBERSHIP_TESTING(this, isCompl);
 
-    #if (DEBUG_TERM_CREATION == true)
+#   if (DEBUG_TERM_CREATION == true)
     std::cout << "[" << this << "]";
     std::cout << "TermList::";
     this->dump();
     std::cout << "\n";
-    #endif
+#   endif
 }
 
+/**
+ * @brief Constructor of the Fixpoint computation
+ *
+ * Creates a computation for the fixpoint of terms, the base case, i.e. the saturation
+ * part of the projection.
+ *
+ * @param[in]  aut  link to the automaton that created the fixpoint
+ * @param[in]  startingTerm  the term corresponding to the testing of the epsilon in the automaton of fixpoint
+ * @param[in]  symbol  symbol that initializes the fixpoint (usually the zero symbol)
+ * @param[in]  inComplement  whether we are computing the complement
+ * @param[in]  initbValue  initial boolean value
+ * @param[in]  search  type of the fixpoint search (either DFS or BFS or some other)
+ */
 TermFixpoint::TermFixpoint(Aut_ptr aut, Term_ptr startingTerm, Symbol* symbol, bool inComplement, bool initbValue, WorklistSearchType search = WorklistSearchType::E_DFS)
-        : Term(aut), _sourceTerm(nullptr), _sourceSymbol(symbol), _sourceIt(nullptr), _baseAut(static_cast<ProjectionAutomaton*>(aut)->GetBase()),
-          _guide(static_cast<ProjectionAutomaton*>(aut)->GetGuide()), _bValue(initbValue) {
-    #if (MEASURE_STATE_SPACE == true)
+        : Term(aut),
+          _fixpoint{std::make_pair(nullptr, true), std::make_pair(startingTerm, true)},
+          _sourceTerm(nullptr),
+          _sourceSymbol(symbol),
+          _sourceIt(nullptr),
+          _baseAut(static_cast<ProjectionAutomaton*>(aut)->GetBase()),
+          _guide(static_cast<ProjectionAutomaton*>(aut)->GetGuide()),
+          _searchType(search),
+          _bValue(initbValue) {
+#   if (MEASURE_STATE_SPACE == true)
     ++TermFixpoint::instances;
-    #endif
+#   endif
 
 #   if (ALT_SKIP_EMPTY_UNIVERSE == false)
     // Initialize the (counter)examples
@@ -311,59 +429,35 @@ TermFixpoint::TermFixpoint(Aut_ptr aut, Term_ptr startingTerm, Symbol* symbol, b
     this->_InitializeAggregateFunction(inComplement);
     SET_VALUE_NON_MEMBERSHIP_TESTING(this, inComplement);
     this->type = TERM_FIXPOINT;
-    this->_searchType = search;
 
     // Initialize the state space
     this->stateSpaceApprox = startingTerm->stateSpaceApprox;
 
-    // Initialize the fixpoint as [nullptr, startingTerm]
-    this->_fixpoint.push_front(std::make_pair(startingTerm, true));
-    this->_fixpoint.push_front(std::make_pair(nullptr, true));
-
-#   if (OPT_NO_SATURATION_FOR_M2L == true)
     // Push symbols to worklist
     if (static_cast<ProjectionAutomaton*>(aut)->IsRoot() || allPosVar == -1) {
-#   endif
+        // Fixme: Consider extracting this to different function
         this->_InitializeSymbols(&aut->symbolFactory, aut->GetFreeVars(),
                                      static_cast<ProjectionAutomaton *>(aut)->projectedVars, symbol);
-#       if (DEBUG_RESTRICTION_DRIVEN_FIX == true)
-        std::cout << "Created new fixpoint for '"; this->_baseAut->_form->dump(); std::cout << "'\n";
-#       endif
 #       if (OPT_WORKLIST_DRIVEN_BY_RESTRICTIONS == true)
         GuideTip tip;
         if(this->_guide == nullptr || (tip = this->_guide->GiveTip(startingTerm)) == GuideTip::G_PROJECT) {
 #       endif
             for (auto symbol : this->_symList) {
 #               if (OPT_WORKLIST_DRIVEN_BY_RESTRICTIONS == true)
-#               if (DEBUG_RESTRICTION_DRIVEN_FIX == true)
-                startingTerm->dump(); std::cout << " + " << (*symbol) << " -> ";
-#               endif
                 if (this->_guide != nullptr) {
                     switch (this->_guide->GiveTip(startingTerm, symbol)) {
                         case GuideTip::G_FRONT:
-#                           if (DEBUG_RESTRICTION_DRIVEN_FIX == true)
-                            std::cout << "G_FRONT\n";
-#                          endif
                             this->_worklist.insert(this->_worklist.cbegin(), std::make_pair(startingTerm, symbol));
                             break;
                         case GuideTip::G_BACK:
-#                           if (DEBUG_RESTRICTION_DRIVEN_FIX == true)
-                            std::cout << "G_BACK\n";
-#                           endif
                             this->_worklist.push_back(std::make_pair(startingTerm, symbol));
                             break;
                         case GuideTip::G_THROW:
-#                           if (DEBUG_RESTRICTION_DRIVEN_FIX == true)
-                            std::cout << "G_THROW\n";
-#                           endif
                             break;
                         default:
                             assert(false && "Unsupported guiding tip\n");
                     }
                 } else {
-#                   if (DEBUG_RESTRICTION_DRIVEN_FIX == true)
-                    std::cout << "insert\n";
-#                   endif
                     this->_worklist.insert(this->_worklist.cbegin(), std::make_pair(startingTerm, symbol));
                 }
 #               else
@@ -377,9 +471,7 @@ TermFixpoint::TermFixpoint(Aut_ptr aut, Term_ptr startingTerm, Symbol* symbol, b
         }
 #       endif
         assert(this->_worklist.size() > 0 || startingTerm->type == TERM_EMPTY);
-#   if (OPT_NO_SATURATION_FOR_M2L == true)
     }
-#   endif
 
 #   if (DEBUG_TERM_CREATION == true)
     std::cout << "[" << this << "]";
@@ -389,15 +481,33 @@ TermFixpoint::TermFixpoint(Aut_ptr aut, Term_ptr startingTerm, Symbol* symbol, b
 #   endif
 }
 
+/**
+ * @brief Constructor of the Pre Fixpoint computation
+ *
+ * Creates a computation for the fixpoint of terms, the pre case, i.e. the subtraction
+ * of symbols from the already (partly) computed fixpoints.
+ *
+ * @param[in]  aut  link to the automaton that created the fixpoint
+ * @param[in]  sourceTerm  source fixpoint we are subtracting @p symbol from
+ * @param[in]  symbol  source symbol we are subtracting (the projected set)
+ * @param[in]  inComplement  whether we are computing in complement
+ */
 TermFixpoint::TermFixpoint(Aut_ptr aut, Term_ptr sourceTerm, Symbol* symbol, bool inComplement)
-        : Term(aut), _sourceTerm(sourceTerm), _sourceSymbol(symbol), _sourceIt(static_cast<TermFixpoint*>(sourceTerm)->GetIteratorDynamic()),
+        : Term(aut),
+          _fixpoint{std::make_pair(nullptr, true)},
+          _sourceTerm(sourceTerm),
+          _sourceSymbol(symbol),
+          _sourceIt(static_cast<TermFixpoint*>(sourceTerm)->GetIteratorDynamic()),
           _guide(static_cast<ProjectionAutomaton*>(aut)->GetGuide()),
-          _baseAut(static_cast<ProjectionAutomaton*>(aut)->GetBase()), _worklist(), _bValue(inComplement) {
-    #if (MEASURE_STATE_SPACE == true)
+          _baseAut(static_cast<ProjectionAutomaton*>(aut)->GetBase()),
+          _worklist(),
+          _searchType(WorklistSearchType::E_DFS),
+          _bValue(inComplement) {
+#   if (MEASURE_STATE_SPACE == true)
     ++TermFixpoint::instances;
     ++TermFixpoint::preInstances;
-    #endif
-    assert(sourceTerm->type == TERM_FIXPOINT);
+#   endif
+    assert(sourceTerm->type == TERM_FIXPOINT && "Computing Pre fixpoint of something different than fixpoint");
 
     // Initialize the state space
     this->stateSpaceApprox = sourceTerm->stateSpaceApprox;
@@ -405,20 +515,17 @@ TermFixpoint::TermFixpoint(Aut_ptr aut, Term_ptr sourceTerm, Symbol* symbol, boo
     // Initialize the aggregate function
     this->_InitializeAggregateFunction(inComplement);
     this->type = TERM_FIXPOINT;
-    this->_searchType = WorklistSearchType::E_DFS;
     SET_VALUE_NON_MEMBERSHIP_TESTING(this, inComplement);
 
-    // Initialize the fixpoint
-    this->_fixpoint.push_front(std::make_pair(nullptr, true));
     // Push things into worklist
     this->_InitializeSymbols(&aut->symbolFactory, aut->GetFreeVars(), static_cast<ProjectionAutomaton*>(aut)->projectedVars, symbol);
 
-    #if (DEBUG_TERM_CREATION == true)
+#   if (DEBUG_TERM_CREATION == true)
     std::cout << "[" << this << "]";
     std::cout << "TermFixpointPre::";
     this->dump();
     std::cout << "\n";
-    #endif
+#   endif
 }
 
 TermFixpoint::~TermFixpoint() {
@@ -434,7 +541,7 @@ void Term::Complement() {
 }
 
 /**
- * Sets the same link as for the @p term. If there is already some linked formed, we let it be.
+ * Sets the same link as for the @p term. If there is already some link formed, we let it be.
  *
  * @param[in]  term  term we are aliasing link with
  */
@@ -480,10 +587,20 @@ bool Term::IsNotComputed() {
 }
 
 /**
- * Tests the Term subsumption
+ * @brief Main function for the subsumption testing of two terms
  *
- * @param[in] t:    term we are testing subsumption against
- * @return:         true if this is subsumed by @p t
+ * Tests whether this term is subsumed by the term @p t. This subsumption can be partly
+ * limited with the @p limit parameter, that can be set by the OPT_PARTIALLY_LIMITED_SUBSUMPTION
+ * define. Moreover, if there are continations, we can limit their unfoldings by the @p unfoldAll
+ * parameter. From newer versions partial subsumptions are supported and can return the different
+ * term through the @p new_term.
+ *
+ * @param[in]  t  term we are testing subsumption from
+ * @param[in]  limit  limitation of the subsumption nesting
+ * @param[in]  new_term  returned different term, e.g. for partial subsumption with set difference
+ *   logic (for base sets)
+ * @param[in]  unfoldAll  whether everything should be unfolded as we go
+ * @return:  whether this term is subsumed by @p t and how (full, not, partial, etc.)
  */
 SubsumptionResult Term::IsSubsumed(Term *t, int limit, Term** new_term, bool unfoldAll) {
     if(this == t) {
@@ -508,8 +625,10 @@ SubsumptionResult Term::IsSubsumed(Term *t, int limit, Term** new_term, bool unf
         return unfoldedContinuation->IsSubsumed(t, limit, unfoldAll);
     }
 #   endif
+
     assert(GET_IN_COMPLEMENT(this) == GET_IN_COMPLEMENT(t));
     assert(this->type != TERM_CONTINUATION && t->type != TERM_CONTINUATION);
+
 #   if (OPT_PARTIALLY_LIMITED_SUBSUMPTION > 0)
     --limit;
 #   endif
@@ -621,7 +740,7 @@ SubsumptionResult TermProduct::_IsSubsumedCore(Term *t, int limit, Term** new_te
     }
 #   endif
 
-    if(!unfoldAll && (lhsr->IsNotComputed() && rhsr->IsNotComputed())) {
+    if(OPT_EARLY_EVALUATION && !unfoldAll && (lhsr->IsNotComputed() && rhsr->IsNotComputed())) {
         #if (OPT_EARLY_PARTIAL_SUB == true)
         if(lhsr->type == TERM_CONTINUATION && rhsr->type == TERM_CONTINUATION) {
             return (lhsl->IsSubsumed(rhsl, limit, nullptr, unfoldAll) == E_FALSE ? E_FALSE : E_PARTIALLY);
@@ -852,8 +971,6 @@ SubsumptionResult TermBaseSet::_IsSubsumedCore(Term *term, int limit, Term** new
 }
 
 SubsumptionResult TermContinuation::_IsSubsumedCore(Term *t, int limit, Term** new_term, bool unfoldAll) {
-    // TODO: How to do this smartly?
-    // TODO: Maybe if we have {} we can answer sooner, without unpacking
     assert(false);
     return E_FALSE;
 }
@@ -887,7 +1004,7 @@ SubsumptionResult TermFixpoint::_IsSubsumedCore(Term *t, int limit, Term** new_t
 #   if (OPT_UNFOLD_FIX_DURING_SUB == false)
     bool are_source_symbols_same = TermFixpoint::_compareSymbols(*this, *tt);
     // Worklists surely differ
-    if(!are_source_symbols_same && (this->_worklist.size() != 0/* || tt->_worklist.size() != 0*/) ) {
+    if(!are_source_symbols_same && (this->_worklist.size() != 0) ) {
         return E_FALSE;
     }
 #   endif
@@ -1009,7 +1126,7 @@ SubsumptionResult TermProduct::IsSubsumedBy(FixpointType& fixpoint, WorklistType
         }
 
         if(!no_prune) {
-            if (item.first->IsSubsumed(tested_term, OPT_PARTIALLY_LIMITED_SUBSUMPTION)) {
+            if (item.first->IsSubsumed(this, OPT_PARTIALLY_LIMITED_SUBSUMPTION)) {
 #               if (OPT_PRUNE_WORKLIST == true)
                 prune_worklist(worklist, item.first);
 #               endif
@@ -1061,6 +1178,7 @@ SubsumptionResult TermTernaryProduct::IsSubsumedBy(FixpointType& fixpoint, Workl
     Term* tested_term = this;
     Term* new_term = nullptr;
     size_t valid_members = 0;
+    // Fixme: this should be extracted
     for(auto &item : fixpoint) {
         if(item.first == nullptr || !item.second)
             continue;
@@ -1086,7 +1204,7 @@ SubsumptionResult TermTernaryProduct::IsSubsumedBy(FixpointType& fixpoint, Workl
         }
 
         if(!no_prune) {
-            if(item.first->IsSubsumed(tested_term, OPT_PARTIALLY_LIMITED_SUBSUMPTION) != E_FALSE) {
+            if(item.first->IsSubsumed(this, OPT_PARTIALLY_LIMITED_SUBSUMPTION) != E_FALSE) {
 #               if (OPT_PRUNE_WORKLIST == true)
                 prune_worklist(worklist, item.first);
 #               endif
@@ -1140,6 +1258,7 @@ SubsumptionResult TermNaryProduct::IsSubsumedBy(FixpointType& fixpoint, Worklist
         }
     }
 
+    assert(!tested_term->IsEmpty());
     return E_FALSE;
 }
 
@@ -1272,7 +1391,7 @@ SubsumptionResult TermFixpoint::IsSubsumedBy(FixpointType& fixpoint, WorklistTyp
  * Tests if the single element is subsumed by the term
  */
 SubsumptionResult Term::Subsumes(TermEnumerator* enumerator) {
-    SubsumptionResult result;
+    SubsumptionResult result = E_FALSE;
 #   if (OPT_ENUMERATED_SUBSUMPTION_TESTING == true)
     if(!this->_subsumesCache.retrieveFromCache(enumerator, result)) {
         result = this->_SubsumesCore(enumerator);
@@ -1643,6 +1762,10 @@ void TermFixpoint::_dumpCore(unsigned indent) {
 // <<< ADDITIONAL TERMBASESET FUNCTIONS >>>
 
 bool TermBaseSet::Intersects(TermBaseSet* rhs) {
+    if(this == rhs) {
+        return true;
+    }
+
     for (auto lhs_state : this->states) {
         for(auto& rhs_state : rhs->states) {
             if(lhs_state == rhs_state) {

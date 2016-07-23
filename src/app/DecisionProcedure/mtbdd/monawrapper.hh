@@ -7,6 +7,7 @@
 
 #include "ondriks_mtbdd.hh"
 #include "../containers/VarToTrackMap.hh"
+#include "../environment.hh"
 
 #include <vector>
 #include <unordered_map>
@@ -49,6 +50,8 @@ protected:
     unsigned numVars_;
     size_t initialState_;
     boost::dynamic_bitset<> symbol_;
+    unsigned exploredState_;
+    bool isRestriction_ = false;
 
 private:
     inline WrappedNode *spawnNode(unsigned addr, WrappedNode &pred, bool edge)
@@ -289,7 +292,8 @@ private:
     }
 
 public:
-    MonaWrapper(DFA *dfa, bool emptyTracks, unsigned numVars = 0): dfa_(dfa), numVars_(numVars), initialState_(emptyTracks ? 0 : 1)
+    MonaWrapper(DFA *dfa, bool emptyTracks, bool is_restriction, unsigned numVars = 0)
+            : dfa_(dfa), numVars_(numVars), initialState_(emptyTracks ? 0 : 1), isRestriction_(is_restriction)
     {
         roots_.resize(dfa->ns, nullptr);
         leafNodes_.resize(dfa->ns, nullptr);
@@ -418,23 +422,12 @@ public:
             return VectorType();
 
         symbol_ = symbol;
-        /*std::cout << "symbol: " << symbol << std::endl;
-        std::cout << "state: " << state << std::endl;*/
+        exploredState_ = state;
+
         VectorType res2;
         RecPre(roots_[state], res2);
-        /*std::cout << "nodes2: ";
-        for(auto node: res2)
-            std::cout << node << " ";
-        std::cout << std::endl << std::endl;*/
-        /*VectorType res = RecPre({roots_[state]});
-
-        std::cout << "nodes1: ";
-        for(auto node: res)
-            std::cout << node << " ";
-        std::cout << std::endl << std::endl;*/
 
         return res2;
-        //return RecPre(roots_[state]);
     }
 
     VectorType Pre(VATA::Util::OrdVector<size_t> &states, const boost::dynamic_bitset<> &symbol)
@@ -471,7 +464,7 @@ public:
         }
     }
 
-    size_t GetInitialState() {
+    inline size_t GetInitialState() {
         return this->initialState_;
     }
 };

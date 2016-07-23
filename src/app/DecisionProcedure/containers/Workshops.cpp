@@ -491,7 +491,7 @@ namespace Workshops {
 
     NEVER_INLINE SymbolWorkshop::SymbolWorkshop() {
         this->_symbolCache = new SymbolCache();
-        this->_trimmedSymbolCache = new SymbolCache();
+        this->_trimmedSymbolCache = new SimpleSymbolCache();
         this->_remappedSymbolCache = new SymbolCache();
     }
 
@@ -534,24 +534,22 @@ namespace Workshops {
 
     Symbol* SymbolWorkshop::CreateTrimmedSymbol(Symbol* src, Gaston::VarList* varList) {
         // Fixme: Refactor
+        size_t varNum = varMap.TrackLength();
         // There are no symbols to trim, so we avoid the useless copy
-        if(varList->size() == varMap.TrackLength()) {
+        if(varList->size() == varNum) {
             return src;
         // Check if maybe everything was trimmed?
         } else {
             bool allTrimmed = true;
             auto it = varList->begin();
             auto end = varList->end();
-            auto varNum = varMap.TrackLength();
             // For each var, if it is not present in the free vars, we project it away
             for (size_t var = 0; var < varNum; ++var) {
                 if (it != end && var == *it) {
                     ++it;
-                } else {
-                    if(!src->IsDontCareAt(var)) {
-                        allTrimmed = false;
-                        break;
-                    }
+                } else if(!src->IsDontCareAt(var)) {
+                    allTrimmed = false;
+                    break;
                 }
             }
             if(allTrimmed) {
@@ -559,8 +557,7 @@ namespace Workshops {
             }
         }
 
-        // Fixme: This is shitty, maybe making this different than 0u, 'T' would help
-        auto symbolKey = std::make_tuple(src, static_cast<VarType>(0u), 'T');
+        auto symbolKey = src;
         Symbol* sPtr;
         if(!this->_trimmedSymbolCache->retrieveFromCache(symbolKey, sPtr)) {
 #           if (OPT_USE_BOOST_POOL_FOR_ALLOC == true)
@@ -570,7 +567,6 @@ namespace Workshops {
 #           endif
             auto it = varList->begin();
             auto end = varList->end();
-            auto varNum = varMap.TrackLength();
             // For each var, if it is not present in the free vars, we project it away
             for (size_t var = 0; var < varNum; ++var) {
                 if (it != end && var == *it) {
@@ -591,7 +587,7 @@ namespace Workshops {
                 }
             }
 #           endif
-            this->_trimmedSymbols.push_back(sPtr);
+            this->_trimmedSymbols.insert(this->_trimmedSymbols.begin(), sPtr);
             this->_trimmedSymbolCache->StoreIn(symbolKey, sPtr);
         }
         return sPtr;
@@ -655,7 +651,7 @@ namespace Workshops {
                     return uniqPtr;
                 }
             }
-            this->_remappedSymbols.push_back(symPtr);
+            this->_remappedSymbols.insert(this->_remappedSymbols.begin(), symPtr);
 #           endif
             this->_remappedSymbolCache->StoreIn(symbolKey, symPtr);
         }
@@ -665,6 +661,16 @@ namespace Workshops {
     void SymbolWorkshop::Dump() {
         std::cout << "  \u2218 SymbolWorkshop stats -> ";
         this->_symbolCache->dumpStats();
+    }
+
+    template<class KeyType>
+    void dumpDefaultKey(KeyType const& key) {
+        std::cout << (key);
+    }
+
+    template<class DataType>
+    void dumpDefaultData(DataType& data) {
+        std::cout << (data);
     }
 
     void dumpSymbolKey(SymbolKey const&s) {

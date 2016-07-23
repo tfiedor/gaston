@@ -19,16 +19,15 @@
 #include <vector>
 #include <list>
 #include <algorithm>
-#include "../utils/Symbol.h"
+#include "../environment.hh"
 #include "../mtbdd/ondriks_mtbdd.hh"
+#include "../utils/Symbol.h"
 #include "../containers/SymbolicAutomata.h"
 #include "../containers/FixpointGuide.h"
 #include "../containers/TermEnumerator.h"
-#include "../environment.hh"
 #include "../containers/Workshops.h"
 
 // <<< MACROS >>>
-
 #define TERM_TYPELIST(code, var) \
     code(Term, var)              \
     code(TermEmpty, var)        \
@@ -231,7 +230,7 @@ public:
     NEVER_INLINE TermTernaryProduct(Aut_ptr aut, std::tuple<Term_ptr, Term_ptr, Term_ptr> productTripple, ProductType type) :
         TermTernaryProduct(aut, std::get<0>(productTripple), std::get<1>(productTripple), std::get<2>(productTripple), type)
             {}
-    NEVER_INLINE ~TermTernaryProduct();
+    NEVER_INLINE ~TermTernaryProduct() {}
 
     // <<< PUBLIC API >>>
     SubsumptionResult IsSubsumedBy(FixpointType&, WorklistType& worklist, Term*&, bool no_prune = false);

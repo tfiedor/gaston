@@ -65,12 +65,14 @@ namespace Workshops {
 
     using SymbolList        = Gaston::SymbolList;
     using Symbol            = Gaston::Symbol;
+    using Symbol_ptr        = Symbol*;
     using VarType           = Gaston::VarType;
     using ValType           = Gaston::VarValue;
 
     using CacheData         = Term*;
     using SymbolKey         = std::tuple<Symbol*, VarType, ValType>;
     using SymbolHash        = boost::hash<SymbolKey>;
+    using SimpleSymbolComp  = std::equal_to<Symbol*>;
     using SymbolCompare     = std::equal_to<SymbolKey>;
     using BaseKey           = VATA::Util::OrdVector<size_t>;
     using BaseHash          = boost::hash<BaseKey>;
@@ -104,6 +106,16 @@ namespace Workshops {
     void dumpSymbolKey(SymbolKey const&);
     void dumpSymbolData(Symbol* &);
     void dumpNaryKey(NaryKey const&);
+    template<class Key>
+    void dumpDefaultKey(Key const&);
+    template<class Data>
+    void dumpDefaultData(Data&);
+
+    struct SimpleSymbolHash {
+        size_t operator()(Symbol* const& s) const {
+            return Gaston::hash_value_no_ptr(s);
+        }
+    };
 
     struct SymbolKeyHashType {
         size_t operator()(std::tuple<Symbol*, VarType, ValType> const& set) const {
@@ -164,6 +176,7 @@ namespace Workshops {
     };
 
     using SymbolCache       = BinaryCache<SymbolKey, Symbol*, SymbolKeyHashType, SymbolKeyCompare<SymbolKey>, dumpSymbolKey, dumpSymbolData>;
+    using SimpleSymbolCache = BinaryCache<Symbol_ptr, Symbol_ptr, SimpleSymbolHash, SimpleSymbolComp, dumpDefaultKey, dumpDefaultData>;
     using BaseCache         = BinaryCache<BaseKey, CacheData, BaseHash, BaseCompare, dumpBaseKey, dumpCacheData>;
     using ProductCache      = BinaryCache<ProductKey, CacheData, ProductHash, ProductCompare, dumpProductKey, dumpCacheData>;
     using TernaryCache      = BinaryCache<TernaryKey, CacheData, TernaryKeyHashType, TernaryKeyCompare<TernaryKey>, dumpTernaryKey, dumpCacheData>;
@@ -235,10 +248,10 @@ namespace Workshops {
     class SymbolWorkshop {
     private:
         SymbolCache* _symbolCache = nullptr;
-        SymbolCache* _trimmedSymbolCache = nullptr;
+        SimpleSymbolCache* _trimmedSymbolCache = nullptr;
         SymbolCache* _remappedSymbolCache = nullptr;
-        std::vector<Symbol*> _trimmedSymbols;
-        std::vector<Symbol*> _remappedSymbols;
+        std::list<Symbol*> _trimmedSymbols;
+        std::list<Symbol*> _remappedSymbols;
         Symbol* _CreateProjectedSymbol(Symbol*, VarType, ValType);
 
 #       if (OPT_USE_BOOST_POOL_FOR_ALLOC == true)

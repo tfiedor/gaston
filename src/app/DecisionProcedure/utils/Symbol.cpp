@@ -126,7 +126,7 @@ void ZeroSymbol::_SetOneAt(VarType var) {
 }
 
 bool ZeroSymbol::IsDontCareAt(VarType var) {
-    return this->_trackMask.test(2*var+1) && this->_trackMask.test(2*var);
+    return this->_trackMask.test(2*var+1);
 }
 
 bool ZeroSymbol::IsZeroString() const {
