@@ -82,7 +82,7 @@ using Symbols = std::vector<SymbolType*>;
 #   define SET_NON_MEMBERSHIP_TESTING(term) (term->_flags |= 1)
 #   define SET_VALUE_NON_MEMBERSHIP_TESTING(term, val) (term->_flags |= val)
 #   define FLIP_NON_MEMBERSHIP_TESTING(term) (term->_flags ^= 1)
-#   define GET_PRODUCT_SUBTYPE(term) (term->_flags & (0b11 << 2) >> 2)
+#   define GET_PRODUCT_SUBTYPE(term) ( (term->_flags & (0b11 << 2)) >> 2)
 #   define SET_PRODUCT_SUBTYPE(term, pt) (term->_flags |= (static_cast<int>(pt)) << 2) // Note that we assign only once, so this should be ok
 
 class Term {
@@ -142,6 +142,8 @@ public:
     virtual void dump(unsigned indent = 0);
 protected:
     // <<< PRIVATE FUNCTIONS >>>
+    SubsumptionResult _ProductIsSubsumedBy(FixpointType&, WorklistType&, Term*&, bool no_prune = false);
+
     virtual unsigned int _MeasureStateSpaceCore() = 0;
     virtual SubsumptionResult _IsSubsumedCore(Term* t, int limit, Term** new_term = nullptr, bool b = false) = 0;
     virtual void _dumpCore(unsigned indent = 0) = 0;

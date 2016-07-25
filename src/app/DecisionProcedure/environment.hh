@@ -393,6 +393,7 @@ public:
 #define OPT_CACHE_LAST_QUERIES				false	// < Will cache the last entries in the cache and do the quick lookup
 #define OPT_SUBSUMPTION_INTERSECTION		true	// < Will create partial intersections for the products with bases
 #define OPT_PRUNE_BASE_SELFLOOPS_IN_PRE     true    // < Will prune away selfloops in wrapper pre
+#define OPT_PARTIAL_PRUNE_FIXPOINTS         false   // < Will use the partial subsumption on fixpoint members
 
 /* >>> Static Assertions <<< *
  *****************************/

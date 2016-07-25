@@ -362,18 +362,23 @@ namespace Workshops {
             // Project the symbol as key
             assert(this->_fppCache != nullptr);
             assert(source != nullptr);
+            Term_ptr unique_source = source;
+            if(source->type == TERM_FIXPOINT) {
+                TermFixpoint* fp = static_cast<TermFixpoint*>(source);
+                unique_source = this->GetUniqueFixpoint(fp);
+            }
 
             Term* termPtr = nullptr;
             Symbol* symbolKey = symbol;
 
-            auto fixpointKey = std::make_pair(source, symbol);
+            auto fixpointKey = std::make_pair(unique_source, symbol);
             if(!this->_fppCache->retrieveFromCache(fixpointKey, termPtr)) {
                 #if (DEBUG_WORKSHOPS == true && DEBUG_TERM_CREATION == true)
                 std::cout << "[*] Creating FixpointPre: ";
                 std::cout << "from [" << source << "] to ";
                 #endif
 #               if (OPT_USE_BOOST_POOL_FOR_ALLOC == true)
-                termPtr = TermWorkshop::_fixpointPool.construct(this->_aut, std::make_pair(source, symbolKey), inCompl);
+                termPtr = TermWorkshop::_fixpointPool.construct(this->_aut, std::make_pair(unique_source, symbolKey), inCompl);
 #               else
                 termPtr = new TermFixpoint(this->_aut, source, symbolKey, inCompl);
 #               endif
@@ -398,7 +403,10 @@ namespace Workshops {
         assert(this->_compCache != nullptr);
         Term* termPtr = nullptr;
 
+        //std::cout << "Getting unique fixpoint for: "; fixpoint->dump(); std::cout << "\n";
+
         if(!fixpoint->TestAndSetUpdate()) {
+            //std::cout << "Fixpoint was not updated\n";
             return fixpoint;
         }
 
@@ -408,6 +416,7 @@ namespace Workshops {
             this->_compCache->StoreIn(compKey, termPtr);
         }
         assert(termPtr != nullptr);
+        //std::cout << "Returning: "; termPtr->dump(); std::cout << "\n";
         return reinterpret_cast<TermFixpoint*>(termPtr);
     }
 
