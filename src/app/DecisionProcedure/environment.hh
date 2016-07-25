@@ -72,7 +72,7 @@ enum TermType {TERM_PRODUCT, TERM_TERNARY_PRODUCT, TERM_NARY_PRODUCT, TERM, TERM
 enum FixpointTermSem {E_FIXTERM_FIXPOINT, E_FIXTERM_PRE};
 enum ComparisonType {E_BY_SAME_PTR, E_BY_DIFFERENT_TYPE, E_BY_STRUCTURE};
 enum UnfoldedInType {E_IN_SUBSUMPTION, E_IN_ISECT_NONEMPTY, E_IN_COMPARISON, E_IN_NOWHERE};
-enum SubsumptionResult {E_FALSE, E_TRUE, E_PARTIALLY, E_TRUE_BUT_WORKLIST};
+enum SubsumptionResult {E_FALSE, E_TRUE, E_PARTIALLY, E_DISJUNCTIVE, E_TRUE_BUT_WORKLIST};
 enum ExampleType {SATISFYING, UNSATISFYING};
 enum WorklistSearchType {E_BFS, E_DFS, E_UNGROUND_ROOT};
 
@@ -393,7 +393,7 @@ public:
 #define OPT_CACHE_LAST_QUERIES				false	// < Will cache the last entries in the cache and do the quick lookup
 #define OPT_SUBSUMPTION_INTERSECTION		true	// < Will create partial intersections for the products with bases
 #define OPT_PRUNE_BASE_SELFLOOPS_IN_PRE     true    // < Will prune away selfloops in wrapper pre
-#define OPT_PARTIAL_PRUNE_FIXPOINTS         false   // < Will use the partial subsumption on fixpoint members
+#define OPT_PARTIAL_PRUNE_FIXPOINTS         true    // < Will use the partial subsumption on fixpoint members
 
 /* >>> Static Assertions <<< *
  *****************************/

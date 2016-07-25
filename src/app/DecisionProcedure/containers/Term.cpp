@@ -1180,9 +1180,9 @@ SubsumptionResult Term::_ProductIsSubsumedBy(FixpointType& fixpoint, WorklistTyp
             SubsumptionResult inner_result;
             new_term == nullptr;
 #           if (OPT_PARTIAL_PRUNE_FIXPOINTS == true)
-            if( (inner_result = item.first->IsSubsumed(this, OPT_PARTIALLY_LIMITED_SUBSUMPTION, nullptr)) == E_TRUE) {
-#           else
             if( (inner_result = item.first->IsSubsumed(this, OPT_PARTIALLY_LIMITED_SUBSUMPTION, &new_term)) == E_TRUE) {
+#           else
+            if( (inner_result = item.first->IsSubsumed(this, OPT_PARTIALLY_LIMITED_SUBSUMPTION, nullptr)) == E_TRUE) {
 #           endif
                 assert(!(valid_members == 1 && result == E_PARTIALLY));
 #               if (OPT_PRUNE_WORKLIST == true)

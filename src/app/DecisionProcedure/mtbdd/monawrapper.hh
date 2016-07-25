@@ -237,7 +237,8 @@ private:
         int var = numVars_ - 1;
         for(; -1 < var; --var)
         {
-            if(symbol_[var << 1] & symbol_[(var << 1) + 1])
+            if(/*symbol_[var << 1] &*/ symbol_[(var << 1) + 1])
+            // ^-- this is excessive, since only testing 2n+1 bit is enough to determine if don't care
             {
                 // don't care.
                 for(auto node: nodes)
