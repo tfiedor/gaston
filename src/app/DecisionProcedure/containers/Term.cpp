@@ -436,7 +436,7 @@ TermFixpoint::TermFixpoint(Aut_ptr aut, Term_ptr startingTerm, Symbol* symbol, b
     // Push symbols to worklist
     if (static_cast<ProjectionAutomaton*>(aut)->IsRoot() || allPosVar == -1) {
         // Fixme: Consider extracting this to different function
-        this->_InitializeSymbols(&aut->symbolFactory, aut->GetFreeVars(),
+        this->_InitializeSymbols(&aut->symbolFactory, aut->GetNonOccuringVars(),
                                      static_cast<ProjectionAutomaton *>(aut)->projectedVars, symbol);
 #       if (OPT_WORKLIST_DRIVEN_BY_RESTRICTIONS == true)
         GuideTip tip;
@@ -518,7 +518,7 @@ TermFixpoint::TermFixpoint(Aut_ptr aut, Term_ptr sourceTerm, Symbol* symbol, boo
     SET_VALUE_NON_MEMBERSHIP_TESTING(this, inComplement);
 
     // Push things into worklist
-    this->_InitializeSymbols(&aut->symbolFactory, aut->GetFreeVars(), static_cast<ProjectionAutomaton*>(aut)->projectedVars, symbol);
+    this->_InitializeSymbols(&aut->symbolFactory, aut->GetNonOccuringVars(), static_cast<ProjectionAutomaton*>(aut)->projectedVars, symbol);
 
 #   if (DEBUG_TERM_CREATION == true)
     std::cout << "[" << this << "]";
@@ -950,7 +950,6 @@ SubsumptionResult TermBaseSet::_IsSubsumedCore(Term *term, int limit, Term** new
     TermBaseSet *t = static_cast<TermBaseSet*>(term);
 
 #   if (OPT_SUBSUMPTION_INTERSECTION == true)
-    // Fixme: Create TermBaseSet
     if(new_term != nullptr) {
         TermBaseSetStates diff;
         bool is_nonempty_diff = this->states.SetDifference(t->states, diff);
@@ -959,7 +958,7 @@ SubsumptionResult TermBaseSet::_IsSubsumedCore(Term *term, int limit, Term** new
             if(diff.size() == this->states.size()) {
                 return E_FALSE;
             } else {
-                *new_term = this->_aut->_factory.CreateBaseSet(std::move(diff), 0, 0);
+                *new_term = this->_aut->_factory.CreateBaseSet(std::move(diff));
                 (*new_term)->SetSameSuccesorAs(this);
                 return E_PARTIALLY;
             }
@@ -1189,15 +1188,15 @@ SubsumptionResult Term::_ProductIsSubsumedBy(FixpointType& fixpoint, WorklistTyp
                 prune_worklist(worklist, item.first);
 #               endif
                 item.second = false;
+#           if (OPT_PARTIAL_PRUNE_FIXPOINTS == true)
             } else if(inner_result == E_PARTIALLY) {
                 assert(new_term != nullptr);
                 assert(new_term->type != TERM_EMPTY);
                 assert(new_term != item.first);
 
-#               if (OPT_PARTIAL_PRUNE_FIXPOINTS == true)
                 switch_in_worklist(worklist, item.first, new_term);
                 item.first = new_term;
-#               endif
+#           endif
             }
         }
     }
@@ -2123,12 +2122,12 @@ bool TermFixpoint::_AggregateResult(bool a, bool b) {
  * @param[in,out] symbols:  list of symbols, that will be transformed
  * @param[in] vars:         list of used vars, that are projected
  */
-void TermFixpoint::_InitializeSymbols(Workshops::SymbolWorkshop* workshop, Gaston::VarList* freeVars, IdentList* vars, Symbol *startingSymbol) {
+void TermFixpoint::_InitializeSymbols(Workshops::SymbolWorkshop* workshop, Gaston::VarList* nonOccuringVars, IdentList* vars, Symbol *startingSymbol) {
     // The input symbol is first trimmed, then if the AllPosition Variable exist, we generate only the trimmed stuff
     // TODO: Maybe for Fixpoint Pre this should be done? But nevertheless this will happen at topmost
     // Reserve symbols for at least 2^|freeVars|
     this->_symList.reserve(2 << vars->size());
-    Symbol* trimmed = workshop->CreateTrimmedSymbol(startingSymbol, freeVars);
+    Symbol* trimmed = workshop->CreateTrimmedSymbol(startingSymbol, nonOccuringVars);
     if (allPosVar != -1) {
         trimmed = workshop->CreateSymbol(trimmed, varMap[allPosVar], '1');
     }

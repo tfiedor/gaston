@@ -40,18 +40,18 @@ namespace Gaston {
     }
 
     size_t hash_value_no_ptr(ZeroSymbol* s) {
-#       if (OPT_SHUFFLE_HASHES == true)
         if(!s->hash) {
+#       if (OPT_SHUFFLE_HASHES == true)
             size_t seed = hash64shift(boost::hash_value(s->_trackMask.count()));
             boost::hash_combine(seed, hash64shift(boost::hash_value(s->_trackMask.find_first())));
             s->hash = hash64shift(seed);
+#       else
+            size_t seed = boost::hash_value(s->_trackMask.count());
+            boost::hash_combine(seed, boost::hash_value(s->_trackMask.find_first()));
+            s->hash = seed;
+#       endif
         }
         return s->hash;
-#       else
-        size_t seed = boost::hash_value(s->_trackMask.count());
-        boost::hash_combine(seed, boost::hash_value(s->_trackMask.find_first()));
-        return seed;
-#       endif
     }
 }
 

@@ -154,8 +154,8 @@ namespace Workshops {
      * @param[in] stateno:      state number for bitmask
      * @return:                 unique pointer for TermBaseSet
      */
-    Term* TermWorkshop::CreateBaseSet(VATA::Util::OrdVector<size_t> && states, unsigned int offset, unsigned int stateno) {
-        #if (OPT_GENERATE_UNIQUE_TERMS == true && UNIQUE_BASE == true)
+    Term* TermWorkshop::CreateBaseSet(VATA::Util::OrdVector<size_t> && states) {
+#       if (OPT_GENERATE_UNIQUE_TERMS == true && UNIQUE_BASE == true)
             assert(this->_bCache != nullptr);
 
             if(states.size() == 0) {
@@ -164,9 +164,9 @@ namespace Workshops {
 
             Term* termPtr = nullptr;
             if(!this->_bCache->retrieveFromCache(states, termPtr)) {
-                #if (DEBUG_WORKSHOPS == true && DEBUG_TERM_CREATION == true)
+#               if (DEBUG_WORKSHOPS == true && DEBUG_TERM_CREATION == true)
                 std::cout << "[*] Creating BaseSet: ";
-                #endif
+#               endif
                 // The object was not created yet, so we create it and store it in cache
 #               if (OPT_USE_BOOST_POOL_FOR_ALLOC == true)
                 termPtr = TermWorkshop::_basePool.construct(this->_aut, states);
@@ -177,9 +177,9 @@ namespace Workshops {
             }
             assert(termPtr != nullptr);
             return termPtr;
-        #else
-            return new TermBaseSet(states, offset, stateno);
-        #endif
+#       else
+            return new TermBaseSet(states;
+#       endif
     }
 
     Term* TermWorkshop::CreateUnionBaseSet(const Term_ptr& lhs, const Term_ptr& rhs) {
@@ -196,7 +196,7 @@ namespace Workshops {
             auto key = std::make_pair(lhs, rhs);
             if(!this->_ubCache->retrieveFromCache(key, result)) {
                 TermBaseSet* llhs = static_cast<TermBaseSet*>(lhs);
-                result = this->CreateBaseSet(llhs->states.Union(static_cast<TermBaseSet*>(rhs)->states), 0, 0);
+                result = this->CreateBaseSet(llhs->states.Union(static_cast<TermBaseSet*>(rhs)->states));
                 this->_ubCache->StoreIn(key, result);
             }
             return result;
@@ -553,14 +553,13 @@ namespace Workshops {
             auto it = varList->begin();
             auto end = varList->end();
             // For each var, if it is not present in the free vars, we project it away
-            for (size_t var = 0; var < varNum; ++var) {
-                if (it != end && var == *it) {
-                    ++it;
-                } else if(!src->IsDontCareAt(var)) {
+            for(; it != end;) {
+                if(!src->IsDontCareAt(*(it++))) {
                     allTrimmed = false;
                     break;
                 }
             }
+
             if(allTrimmed) {
                 return src;
             }
@@ -577,12 +576,8 @@ namespace Workshops {
             auto it = varList->begin();
             auto end = varList->end();
             // For each var, if it is not present in the free vars, we project it away
-            for (size_t var = 0; var < varNum; ++var) {
-                if (it != end && var == *it) {
-                    ++it;
-                } else {
-                    sPtr->ProjectVar(var);
-                }
+            for(; it != end;) {
+                sPtr->ProjectVar(*(it++));
             }
 #           if (OPT_UNIQUE_TRIMMED_SYMBOLS == true)
             for(auto item = this->_trimmedSymbols.begin(); item != this->_trimmedSymbols.end(); ++item) {

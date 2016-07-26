@@ -79,17 +79,19 @@ ZeroSymbol* SymLink::ReMapSymbol(ZeroSymbol* symbol) {
     }
 }
 
-// <<< CONSTRUCTORS >>>
-SymbolicAutomaton::SymbolicAutomaton(Formula_ptr form) :
-        _form(form), _factory(this), _initialStates(nullptr), _finalStates(nullptr), _satExample(nullptr),
-        _unsatExample(nullptr), _refs(0) {
-    type = AutType::SYMBOLIC_BASE;
-
-    // Fixme: isn't allVars the same as formula->allVars?
+/**
+ * @brief Initializes variables that are occuring in the formula corresponding to the automaton
+ *
+ * Takes the union of free and bound variables, and initializes the occuring variable of the
+ * automaton. I.e. those variables that are not don't care
+ */
+void SymbolicAutomaton::_InitializeOccuringVars() {
     IdentList free, bound;
     this->_form->freeVars(&free, &bound);
     IdentList* allVars;
     allVars = ident_union(&free, &bound);
+    size_t varNum = varMap.TrackLength();
+
     if(allVars != nullptr) {
         for(auto it = allVars->begin(); it != allVars->end(); ++it) {
             if(varMap.IsIn(*it))
@@ -98,6 +100,38 @@ SymbolicAutomaton::SymbolicAutomaton(Formula_ptr form) :
 
         delete allVars;
     }
+}
+
+/**
+ * @brief Initializes variables that are NOT occuring in the formula corresponding to the automaton
+ *
+ * Takes the complement of the occuring variables. These variables are further trimmed during the
+ * computation from the symbols.
+ */
+void SymbolicAutomaton::_InitializeNonOccuring() {
+    size_t varNum = varMap.TrackLength();
+    auto it = this->_freeVars.begin();
+    auto end = this->_freeVars.end();
+
+    for(size_t var = 0; var < varNum; ++var) {
+        if(it != end && var == *it) {
+            ++it;
+        } else {
+            this->_nonOccuringVars.insert(var);
+        }
+    }
+}
+
+// <<< CONSTRUCTORS >>>
+SymbolicAutomaton::SymbolicAutomaton(Formula_ptr form) :
+        _form(form), _factory(this), _initialStates(nullptr), _finalStates(nullptr), _satExample(nullptr),
+        _unsatExample(nullptr), _refs(0) {
+    type = AutType::SYMBOLIC_BASE;
+
+    // Fixme: isn't allVars the same as formula->allVars?
+    this->_InitializeOccuringVars();
+    this->_InitializeNonOccuring();
+
 }
 
 SymbolicAutomaton::~SymbolicAutomaton() {
@@ -555,7 +589,7 @@ ResultType SymbolicAutomaton::IntersectNonEmpty(Symbol* symbol, Term* stateAppro
 
     // Trim the variables that are not occuring in the formula away
     if(symbol != nullptr) {
-        symbol = this->symbolFactory.CreateTrimmedSymbol(symbol, &this->_freeVars);
+        symbol = this->symbolFactory.CreateTrimmedSymbol(symbol, &this->_nonOccuringVars);
     }
 
     // If we have continuation, we have to unwind it
@@ -586,11 +620,11 @@ ResultType SymbolicAutomaton::IntersectNonEmpty(Symbol* symbol, Term* stateAppro
     // Look up in cache, if in cache, return the result
     bool inCache = true;
     auto key = std::make_pair(stateApproximation, symbol);
-#       if (OPT_DONT_CACHE_CONT == true)
-        bool dontSearchTheCache = (stateApproximation->type == TERM_PRODUCT && stateApproximation->IsNotComputed());
-        if (!dontSearchTheCache && (inCache = this->_resCache.retrieveFromCache(key, result))) {
+#       if (OPT_DONT_CACHE_CONT == true && OPT_EARLY_EVALUATION == true)
+    bool dontSearchTheCache = (stateApproximation->type == TERM_PRODUCT && stateApproximation->IsNotComputed());
+    if (!dontSearchTheCache && (inCache = this->_resCache.retrieveFromCache(key, result))) {
 #       else
-        if (inCache = this->_resCache.retrieveFromCache(key, result)) {
+    if (inCache = this->_resCache.retrieveFromCache(key, result)) {
 #       endif
         assert(result.first != nullptr);
         this->_lastResult = result.second;
@@ -884,7 +918,7 @@ void BaseAutomaton::_InitializeInitialStates() {
     BaseAutomatonStateSet initialStates;
     initialStates.insert(this->_autWrapper.GetInitialState());
 
-    this->_initialStates = this->_factory.CreateBaseSet(std::move(initialStates), this->_stateOffset, this->_stateSpace);
+    this->_initialStates = this->_factory.CreateBaseSet(std::move(initialStates));
 }
 
 /**
@@ -939,7 +973,7 @@ void BaseAutomaton::_InitializeFinalStates() {
 
     // Push states to new Base Set
     // #TERM_CREATION
-    this->_finalStates = reinterpret_cast<Term*>(this->_factory.CreateBaseSet(std::move(finalStates), this->_stateOffset, this->_stateSpace));
+    this->_finalStates = reinterpret_cast<Term*>(this->_factory.CreateBaseSet(std::move(finalStates)));
 }
 
 /**
@@ -987,7 +1021,7 @@ Term* BaseAutomaton::Pre(Symbol* symbol, Term* finalApproximation, bool underCom
     return accumulatedState;
 #   else
     Term_ptr preState = nullptr;
-    Term_ptr  accumulatedState = nullptr;
+    Term_ptr accumulatedState = nullptr;
 
     #if (DEBUG_PRE == true)
     std::cout << "[!] ";
@@ -1003,7 +1037,7 @@ Term* BaseAutomaton::Pre(Symbol* symbol, Term* finalApproximation, bool underCom
         auto key = std::make_pair(state, symbol);
         if(!this->_preCache.retrieveFromCache(key, preState)) {
             // TODO: there is probably useless copying --^
-            preState = this->_factory.CreateBaseSet(this->_autWrapper.Pre(state, symbol->GetTrackMask()), this->_stateOffset, this->_stateSpace);
+            preState = this->_factory.CreateBaseSet(this->_autWrapper.Pre(state, symbol->GetTrackMask()));
             this->_preCache.StoreIn(key, preState);
         }
         accumulatedState = static_cast<TermBaseSet*>(this->_factory.CreateUnionBaseSet(accumulatedState, preState));

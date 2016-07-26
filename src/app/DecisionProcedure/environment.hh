@@ -382,7 +382,7 @@ public:
 #define OPT_WORKLIST_DRIVEN_BY_RESTRICTIONS true    // < Worklist will be initialized according to the restrictions
 #define OPT_DRIVE_QUANTIFIER_FREE			true	// < Drive the quantifier free fixpoints
 #define OPT_THROW_CLASSIC_FIRST_ORDER_REP	true	// < Will interpret first orders on fixpoints as having only one one
-#define OPT_SHUFFLE_HASHES					true    // < Shuffles the bits in the hashes
+#define OPT_SHUFFLE_HASHES					false   // < Shuffles the bits in the hashes
 #define OPT_ENUMERATED_SUBSUMPTION_TESTING  false   // < Partially enumerates the products
 #define OPT_USE_TERNARY_AUTOMATA			true    // < Will use ternary automata if possible
 #define OPT_USE_NARY_AUTOMATA				true    // < Will use nary automata if possible
@@ -393,7 +393,7 @@ public:
 #define OPT_CACHE_LAST_QUERIES				false	// < Will cache the last entries in the cache and do the quick lookup
 #define OPT_SUBSUMPTION_INTERSECTION		true	// < Will create partial intersections for the products with bases
 #define OPT_PRUNE_BASE_SELFLOOPS_IN_PRE     true    // < Will prune away selfloops in wrapper pre
-#define OPT_PARTIAL_PRUNE_FIXPOINTS         true    // < Will use the partial subsumption on fixpoint members
+#define OPT_PARTIAL_PRUNE_FIXPOINTS         false   // < Will use the partial subsumption on fixpoint members
 
 /* >>> Static Assertions <<< *
  *****************************/

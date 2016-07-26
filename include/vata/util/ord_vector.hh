@@ -439,12 +439,12 @@ public:   // Public methods
 			} else if(*tit > *bit) {
 				++bit;
 			} else {
-				result.insert(*(tit++));
+				result.vec_.push_back(*(tit++));
 			}
 		}
 
 		while(tit != tend) {
-			result.insert(*(tit++));
+			result.vec_.push_back(*(tit++));
 		}
 
 		return result.size() != 0;

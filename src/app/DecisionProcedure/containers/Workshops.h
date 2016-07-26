@@ -227,7 +227,7 @@ namespace Workshops {
         // <<< PUBLIC API >>>
         static TermEmpty* CreateEmpty();
         static TermEmpty* CreateComplementedEmpty();
-        Term* CreateBaseSet(BaseKey && states, unsigned int offset, unsigned int stateno);
+        Term* CreateBaseSet(BaseKey && states);
         Term* CreateUnionBaseSet(Term_ptr const&, Term_ptr const&);
         TermProduct* CreateProduct(Term_ptr const&, Term_ptr const&, ProductType);
         Term* CreateTernaryProduct(Term_ptr const&, Term_ptr const&, Term_ptr const&, ProductType);

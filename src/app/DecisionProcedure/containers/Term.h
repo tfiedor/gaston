@@ -323,12 +323,6 @@ private:
     SubsumptionResult _SubsumesCore(TermEnumerator*);
 };
 
-// Fixme: Can this be merged?
-class TermBaseAtom : public Term {
-public:
-    size_t state;
-};
-
 /**
  * Class that represents the postponed computation of the (non)membership testing
  */

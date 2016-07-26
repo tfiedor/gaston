@@ -68,7 +68,8 @@ public:
 protected:
     // <<< PRIVATE MEMBERS >>>
     ResultCache _resCache;          // Caches (states, symbol) = (fixpoint, bool)
-    VarList _freeVars;
+    VarList _freeVars;              // Fixme: This is not really free variables...
+    VarList _nonOccuringVars;       // Variables that are not occuring in formula, used for trimming
 
 public:
     TermWorkshop _factory;          // Creates terms
@@ -113,6 +114,8 @@ protected:
     bool _lastResult;
 
     // <<< PRIVATE FUNCTIONS >>>
+    void _InitializeOccuringVars();
+    void _InitializeNonOccuring();
     virtual void _InitializeAutomaton() = 0;
     virtual void _InitializeInitialStates() = 0;
     virtual void _InitializeFinalStates() = 0;
@@ -132,6 +135,7 @@ public:
     virtual Term_ptr GetInitialStates();
     virtual Term_ptr GetFinalStates();
     Gaston::VarList* GetFreeVars() { return &this->_freeVars;}
+    Gaston::VarList* GetNonOccuringVars() { return &this->_nonOccuringVars; }
     virtual Term* Pre(Symbol*, Term*, bool) = 0;
     virtual ResultType IntersectNonEmpty(Symbol*, Term*, bool);
     void SetSatisfiableExample(Term*);
