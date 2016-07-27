@@ -18,6 +18,8 @@ void FixpointDetagger::visit(ASTForm_ff *form) {
 
 #   if(OPT_EXTRACT_MORE_AUTOMATA == true && OPT_CREATE_QF_AUTOMATON == true && MONA_FAIR_MODE == false)
     if(form->fixpoint_number <= this->_cFixpointThreshold) {
+#   else
+    if(form->fixpoint_number == 0) {
         if(form->f1->is_restriction) {
             form->tag = 1;
         } else {
@@ -44,11 +46,9 @@ void FixpointDetagger::_visitFixpointComputation(FixpointFormula *form) {
     form->height = form->f->height + 1;
     form->size = form->f->size + 1;
 
-#   if(OPT_EXTRACT_MORE_AUTOMATA == true)
     if(form->fixpoint_number <= this->_cFixpointThreshold) {
         form->tag = 0;
     }
-#   endif
 }
 
 void FixpointDetagger::visit(ASTForm_Ex1 *form) {

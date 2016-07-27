@@ -40,11 +40,9 @@ void InverseFixpointDetagger::_visitFixpointComputation(FixpointFormula *form) {
     form->fixpoints_from_root = form->fixpoints_from_root + 1;
     form->f->fixpoints_from_root = form->fixpoints_from_root;
 
-#   if(OPT_EXTRACT_MORE_AUTOMATA == true)
     if(form->fixpoints_from_root > this->_cFixpointThreshold) {
         form->tag = 0;
     }
-#   endif
 }
 
 void InverseFixpointDetagger::visit(ASTForm_Ex1 *form) {
