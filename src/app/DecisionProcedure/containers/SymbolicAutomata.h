@@ -426,6 +426,12 @@ protected:
 public:
     /// <<< CONSTRUCTORS >>>
     NEVER_INLINE ProjectionAutomaton(SymbolicAutomaton* aut, Formula_ptr form, bool isRoot = false);
+    NEVER_INLINE ProjectionAutomaton(Formula_ptr form, SymbolicAutomaton* aut)
+            : SymbolicAutomaton(form), _isRoot(false), _aut(aut) {
+        type = AutType::PROJECTION;
+        this->_guide = new FixpointGuide();
+    }
+    // FIXME: Some day in future, I will curse myself for this Constructor ---^
 
     // <<< PUBLIC API >>>
     virtual Term* Pre(Symbol*, Term*, bool);
@@ -450,14 +456,24 @@ protected:
  * fixpoints, by testing the satisfiability and unsatisfiability.
  */
 class RootProjectionAutomaton : public ProjectionAutomaton {
-protected:
-    // <<< PRIVATE MEMBERS >>>
 public:
     // <<< CONSTRUCTORS >>>
     NEVER_INLINE RootProjectionAutomaton(SymbolicAutomaton*, Formula_ptr);
 
     // <<< PUBLIC API >>>
     virtual ResultType IntersectNonEmpty(Symbol*, Term*, bool);
+};
+
+class BaseProjectionAutomaton : public ProjectionAutomaton {
+protected:
+    // <<< PRIVATE MEMBERS >>>
+    void _InitializeInitialStates();
+    void _InitializeFinalStates();
+    ResultType _IntersectNonEmptyCore(Symbol*, Term*, bool);
+
+public:
+    // <<< CONSTRUCTORS >>>
+    NEVER_INLINE BaseProjectionAutomaton(SymbolicAutomaton*, Formula_ptr);
 };
 
 /**

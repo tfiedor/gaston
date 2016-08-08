@@ -269,6 +269,7 @@ public:
 #define DEBUG_DONT_HASH_FIXPOINTS		false
 #define DEBUG_DONT_CATCH_SIGSEGV		true
 #define DEBUG_RESTRICTION_DRIVEN_FIX	false
+#define DEBUG_BASE_FIXPOINT_PUMPING     false
 
 #define ALT_SKIP_EMPTY_UNIVERSE			true // < Skip empty example
 #define ALT_ALWAYS_DETERMINISTIC	    true
@@ -278,13 +279,13 @@ public:
 /*
  * >>> Automata stats options
  *****************************/
-#define PRINT_STATS_PROJECTION			true
+#define PRINT_STATS_PROJECTION			false
 #define PRINT_STATS_QF_PROJECTION		false
 #define PRINT_STATS_PRODUCT			    false
 #define PRINT_STATS_TERNARY_PRODUCT		false
 #define PRINT_STATS_NARY_PRODUCT		false
 #define PRINT_STATS_NEGATION			false
-#define PRINT_STATS_BASE				false
+#define PRINT_STATS_BASE				true
 #define PRINT_STATS					    false
 #define PRINT_IN_TIMBUK					true
 #define PRINT_DOT_LIMIT					20
@@ -339,7 +340,7 @@ public:
 
 /* >>> Optimizations <<< *
  *************************/
-#define OPT_USE_DAG							true    // < Instead of using the symbolic automata, will use the DAGified SA, there is probably issue with remapped cache
+#define OPT_USE_DAG							false   // < Instead of using the symbolic automata, will use the DAGified SA, there is probably issue with remapped cache
 #define OPT_SHUFFLE_FORMULA					true    // < Will run ShuffleVisitor before creation of automaton, which should ease the procedure as well
 #define OPT_DONT_CACHE_CONT					true	// < Do not cache terms containing continuations
 #define OPT_DONT_CACHE_UNFULL_FIXPOINTS 	false	// < Do not cache fixpoints that were not fully computed
@@ -391,9 +392,10 @@ public:
 #define OPT_USE_BOOST_POOL_FOR_ALLOC		true    // < (+) Will use boost::object_pool<> for allocation
 #define OPT_USE_SET_PRE						false   // < Will use the set implementation of pre
 #define OPT_CACHE_LAST_QUERIES				false	// < Will cache the last entries in the cache and do the quick lookup
-#define OPT_SUBSUMPTION_INTERSECTION		true	// < Will create partial intersections for the products with bases
+#define OPT_SUBSUMPTION_INTERSECTION		false	// < Will create partial intersections for the products with bases
 #define OPT_PRUNE_BASE_SELFLOOPS_IN_PRE     true    // < Will prune away selfloops in wrapper pre
 #define OPT_PARTIAL_PRUNE_FIXPOINTS         false   // < Will use the partial subsumption on fixpoint members
+#define OPT_USE_BASE_PROJECTION_AUTOMATA    true    // < Will treat base projections differently (as bases not fixpoints)
 
 /* >>> Static Assertions <<< *
  *****************************/

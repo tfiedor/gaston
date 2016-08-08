@@ -313,6 +313,21 @@ ProjectionAutomaton::~ProjectionAutomaton() {
 RootProjectionAutomaton::RootProjectionAutomaton(SymbolicAutomaton* aut, Formula_ptr form)
         : ProjectionAutomaton(aut, form, true) {}
 
+BaseProjectionAutomaton::BaseProjectionAutomaton(SymbolicAutomaton* aut, Formula_ptr form)
+        : ProjectionAutomaton(form, aut) {
+    this->_InitializeAutomaton();
+    aut->IncReferences();
+    this->_aut.InitializeSymLink(reinterpret_cast<ASTForm_q*>(this->_form)->f);
+
+    // Remove bound variables from free and push them to nonoccuring
+    ASTForm_uvf* fixpoint_formula = static_cast<ASTForm_uvf*>(this->_form);
+    for(auto it = fixpoint_formula->vl->begin(); it != fixpoint_formula->vl->end(); ++it) {
+        //Fixme: But freeVars are not really used anywhere, right?
+        assert(varMap.IsIn(*it));
+        this->_nonOccuringVars.insert(varMap[*it]);
+    }
+}
+
 BaseAutomaton::BaseAutomaton(BaseAutomatonType* aut, size_t vars, Formula_ptr form, bool emptyTracks) : SymbolicAutomaton(form), _autWrapper(dfaCopy(aut), emptyTracks, form->is_restriction, vars) {
     type = AutType::BASE;
     this->_InitializeAutomaton();
@@ -911,6 +926,10 @@ void ProjectionAutomaton::_InitializeInitialStates() {
     #endif
 }
 
+void BaseProjectionAutomaton::_InitializeInitialStates() {
+    this->_initialStates = this->_aut.aut->GetInitialStates();
+}
+
 void BaseAutomaton::_InitializeInitialStates() {
     // NOTE: The automaton is constructed backwards, so final states are initial
     assert(this->_initialStates == nullptr);
@@ -961,6 +980,10 @@ void ProjectionAutomaton::_InitializeFinalStates() {
 #   else
     this->_finalStates = this->_factory.CreateList(this->_aut.aut->GetFinalStates(), false);
 #   endif
+}
+
+void BaseProjectionAutomaton::_InitializeFinalStates() {
+    this->_finalStates = this->_aut.aut->GetFinalStates();
 }
 
 void BaseAutomaton::_InitializeFinalStates() {
@@ -1331,6 +1354,18 @@ ResultType ProjectionAutomaton::_IntersectNonEmptyCore(Symbol* symbol, Term* fin
     }
 }
 
+ResultType base_pre_core(SymbolicAutomaton* aut, Symbol* symbol, Term* approximation, bool underComplement) {
+    TermBaseSet *preFinal = reinterpret_cast<TermBaseSet *>(aut->Pre(symbol, approximation, underComplement));
+    TermBaseSet* initial = reinterpret_cast<TermBaseSet*>(aut->GetInitialStates());
+
+    // Return the pre and true if it intersects the initial states
+    if (preFinal->IsEmpty()) {
+        return std::make_pair(Workshops::TermWorkshop::CreateEmpty(), underComplement);
+    } else {
+        return std::make_pair(preFinal, initial->Intersects(preFinal) != underComplement);
+    }
+}
+
 ResultType BaseAutomaton::_IntersectNonEmptyCore(Symbol* symbol, Term* approximation, bool underComplement) {
     // Reinterpret the initial and final states
     TermBaseSet* initial = reinterpret_cast<TermBaseSet*>(this->_initialStates);
@@ -1344,14 +1379,42 @@ ResultType BaseAutomaton::_IntersectNonEmptyCore(Symbol* symbol, Term* approxima
         return std::make_pair(approximation, underComplement);
     } else {
         // First do the pre of the approximation
-        TermBaseSet* preFinal = reinterpret_cast<TermBaseSet*>(this->Pre(symbol, approximation, underComplement));
+        return base_pre_core(this, symbol, approximation, underComplement);
+    }
+}
 
-        // Return the pre and true if it intersects the initial states
-        if(preFinal->IsEmpty()) {
-            return std::make_pair(Workshops::TermWorkshop::CreateEmpty(), underComplement);
-        } else {
-            return std::make_pair(preFinal, initial->Intersects(preFinal) != underComplement);
-        }
+ResultType BaseProjectionAutomaton::_IntersectNonEmptyCore(Symbol* symbol, Term* approximation, bool underComplement) {
+    assert(this->_aut.aut->type == AutType::BASE);
+
+    if(symbol == nullptr) {
+        // We will pump the final states
+        Symbol* zero_symbol = this->symbolFactory.CreateZeroSymbol();
+        zero_symbol = this->symbolFactory.CreateTrimmedSymbol(zero_symbol, &this->_nonOccuringVars);
+        zero_symbol = this->_aut.ReMapSymbol(zero_symbol);
+        Term* pumped_states = approximation;
+        Term* previous_iteration = approximation;
+#       if (DEBUG_BASE_FIXPOINT_PUMPING == true)
+        std::cout << "In: "; this->_form->dump(); std::cout << "Pumping "; pumped_states->dump(); std::cout << " with " << (*zero_symbol) << "\n";
+#       endif
+        do {
+            previous_iteration = pumped_states;
+            pumped_states = this->_aut.aut->_factory.CreateUnionBaseSet(pumped_states, this->_aut.aut->Pre(zero_symbol, pumped_states, underComplement));
+#           if (DEBUG_BASE_FIXPOINT_PUMPING == true)
+            std::cout << "Pumped: "; pumped_states->dump(); std::cout << "\n";
+#           endif
+        } while(pumped_states != previous_iteration);
+
+#       if (DEBUG_BASE_FIXPOINT_PUMPING == true)
+        std::cout << "Resulting states: "; pumped_states->dump(); std::cout << "\n";
+#       endif
+        TermBaseSet* initial = static_cast<TermBaseSet*>(this->_aut.aut->GetInitialStates());
+        return std::make_pair(pumped_states, initial->Intersects(static_cast<TermBaseSet*>(pumped_states)) != underComplement);
+    } else if(approximation->type == TERM_EMPTY) {
+        return std::make_pair(approximation, underComplement);
+    } else {
+        // Do the pre of the approximation
+        ResultType temp = base_pre_core(this->_aut.aut, this->_aut.ReMapSymbol(symbol), approximation, underComplement);
+        return temp;
     }
 }
 

@@ -187,9 +187,9 @@ namespace Workshops {
             return rhs;
         } else if(lhs == rhs) {
             return lhs;
-        } else if(lhs->IsSubsumed(rhs, OPT_PARTIALLY_LIMITED_SUBSUMPTION, nullptr, false)) {
+        } else if(lhs->type == TermType::TERM_EMPTY) {
             return rhs;
-        } else if(rhs->IsSubsumed(lhs, OPT_PARTIALLY_LIMITED_SUBSUMPTION, nullptr, false)) {
+        } else if(rhs->type == TermType::TERM_EMPTY) {
             return lhs;
         } else {
             Term_ptr result;
@@ -545,7 +545,7 @@ namespace Workshops {
         // Fixme: Refactor
         size_t varNum = varMap.TrackLength();
         // There are no symbols to trim, so we avoid the useless copy
-        if(varList->size() == varNum) {
+        if(varList->size() == 0) {
             return src;
         // Check if maybe everything was trimmed?
         } else {

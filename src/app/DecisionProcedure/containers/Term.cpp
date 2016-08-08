@@ -626,6 +626,9 @@ SubsumptionResult Term::IsSubsumed(Term *t, int limit, Term** new_term, bool unf
     }
 #   endif
 
+    if(GET_IN_COMPLEMENT(this) != GET_IN_COMPLEMENT(t)) {
+        this->dump(); std::cout << " vs "; t->dump(); std::cout << "\n";
+    }
     assert(GET_IN_COMPLEMENT(this) == GET_IN_COMPLEMENT(t));
     assert(this->type != TERM_CONTINUATION && t->type != TERM_CONTINUATION);
 

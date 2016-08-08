@@ -50,7 +50,11 @@ SymbolicAutomaton* ASTForm::toSymbolicAutomaton(bool doComplement) {
         if(!cache->retrieveFromCache(key, this->sfa)) {
             // If yes, return the automaton (the mapping will be constructed internally)
 #       endif
+#           if (OPT_USE_BASE_PROJECTION_AUTOMATA == true)
+            if(this->tag == 0 || this->fixpoint_number == 0) {
+#           else
             if(this->tag == 0) {
+#           endif
                 // It was tagged to be constructed by MONA
                 this->sfa = baseToSymbolicAutomaton<GenericBaseAutomaton>(this, doComplement);
             } else {
@@ -212,12 +216,31 @@ SymbolicAutomaton* ASTForm_Not::_toSymbolicAutomatonCore(bool doComplement) {
     }
 #   endif
     SymbolicAutomaton* aut;
+#   if (OPT_USE_BASE_PROJECTION_AUTOMATA == true)
+    if( (this->tag == 0 || this->fixpoint_number == 1) && this->f->kind == aEx2) {
+        SymbolicAutomaton* inner;
+        inner = static_cast<ASTForm_Ex2*>(this->f)->f->toSymbolicAutomaton(!doComplement);
+        return new ComplementAutomaton(new ProjectionAutomaton(inner, this->f), this);
+    } else {
+        aut = this->f->toSymbolicAutomaton(!doComplement);
+    }
+#   else
     aut = this->f->toSymbolicAutomaton(!doComplement);
+#   endif
     return new ComplementAutomaton(aut, this);
 }
 
 SymbolicAutomaton* ASTForm_Ex2::_toSymbolicAutomatonCore(bool doComplement) {
     SymbolicAutomaton* aut;
     aut = this->f->toSymbolicAutomaton(doComplement);
+#   if (OPT_USE_BASE_PROJECTION_AUTOMATA == true)
+    if(this->tag == 0 || this->fixpoint_number == 1) {
+        assert(aut->type == AutType::BASE);
+        return new BaseProjectionAutomaton(aut, this);
+    } else {
+        return new ProjectionAutomaton(aut, this);
+    }
+#   else
     return new ProjectionAutomaton(aut, this);
+#   endif
 }
