@@ -142,6 +142,7 @@ public:
     virtual void dump(unsigned indent = 0);
 protected:
     // <<< PRIVATE FUNCTIONS >>>
+    template<class ProductType>
     SubsumptionResult _ProductIsSubsumedBy(FixpointType&, WorklistType&, Term*&, bool no_prune = false);
 
     virtual unsigned int _MeasureStateSpaceCore() = 0;
@@ -222,7 +223,7 @@ public:
     Term_ptr left;
     Term_ptr middle;
     Term_ptr right;
-    // Fixme: add enumerator
+    TernaryProductEnumerator* enumerator = nullptr;
 
     // See #L29
     TERM_MEASURELIST(DEFINE_STATIC_MEASURE)
@@ -232,7 +233,7 @@ public:
     NEVER_INLINE TermTernaryProduct(Aut_ptr aut, std::tuple<Term_ptr, Term_ptr, Term_ptr> productTripple, ProductType type) :
         TermTernaryProduct(aut, std::get<0>(productTripple), std::get<1>(productTripple), std::get<2>(productTripple), type)
             {}
-    NEVER_INLINE ~TermTernaryProduct() {}
+    NEVER_INLINE ~TermTernaryProduct();
 
     // <<< PUBLIC API >>>
     SubsumptionResult IsSubsumedBy(FixpointType&, WorklistType& worklist, Term*&, bool no_prune = false);
@@ -246,6 +247,7 @@ private:
     // <<< PRIVATE FUNCTIONS >>>
     unsigned int _MeasureStateSpaceCore();
     SubsumptionResult _IsSubsumedCore(Term* t, int limit, Term** new_term = nullptr, bool b = false);
+    SubsumptionResult _SubsumesCore(TermEnumerator*);
 };
 
 class TermNaryProduct : public Term {
@@ -254,7 +256,7 @@ public:
     size_t arity;
     Term_ptr* terms;
     size_t* access_vector;
-    // Fixme: add iterator
+    NaryProductEnumerator* enumerator = nullptr;
 
     // See #L29
     TERM_MEASURELIST(DEFINE_STATIC_MEASURE)
@@ -285,6 +287,7 @@ private:
     // <<< PRIVATE FUNCTIONS >>>
     unsigned int _MeasureStateSpaceCore();
     SubsumptionResult _IsSubsumedCore(Term* t, int limit, Term** new_term = nullptr, bool b = false);
+    SubsumptionResult _SubsumesCore(TermEnumerator*);
 };
 
 /**

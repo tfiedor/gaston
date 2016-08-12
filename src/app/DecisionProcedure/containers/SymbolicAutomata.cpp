@@ -970,7 +970,7 @@ void NaryOpAutomaton::_InitializeFinalStates() {
 
 void ComplementAutomaton::_InitializeFinalStates() {
     this->_finalStates = this->_aut.aut->GetFinalStates();
-    assert(this->_finalStates->type != TERM_EMPTY);
+    //Fixme: Should this assert hold? assert(this->_finalStates->type != TERM_EMPTY);
     this->_finalStates->Complement();
 }
 

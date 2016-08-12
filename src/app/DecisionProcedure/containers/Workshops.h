@@ -238,7 +238,7 @@ namespace Workshops {
         TermFixpoint* CreateFixpoint(Term_ptr const&, Symbol*, bool, bool, WorklistSearchType search = WorklistSearchType::E_DFS);
         TermFixpoint* CreateFixpointPre(Term_ptr const&, Symbol*, bool);
         TermFixpoint* GetUniqueFixpoint(TermFixpoint*&);
-        TermList* CreateList(Term_ptr const&, bool);
+        Term* CreateList(Term_ptr const&, bool);
         Term* CreateContinuation(SymLink*, SymbolicAutomaton*, Term* const&, Symbol*, bool, bool lazy = false);
         std::string ToSimpleStats();
 

@@ -170,12 +170,24 @@ TermTernaryProduct::TermTernaryProduct(Aut_ptr aut, Term_ptr lhs, Term_ptr mhs, 
 
     // Initialization of state space
     this->stateSpaceApprox = this->left->stateSpaceApprox + this->right->stateSpaceApprox + this->middle->stateSpaceApprox + 1;
-    // Fixme: Add enumerator
+#   if (OPT_ENUMERATED_SUBSUMPTION_TESTING == true)
+    this->enumerator = new TernaryProductEnumerator(this);
+#   endif
 
 #   if (DEBUG_TERM_CREATION == true)
     std::cout << "TermTernaryProduct::";
     this->dump();
     std::cout << "\n";
+#   endif
+}
+
+/**
+ * @brief destructs the enumerator of the ternary product
+ */
+TermTernaryProduct::~TermTernaryProduct() {
+#   if (OPT_ENUMERATED_SUBSUMPTION_TESTING == true)
+    if(this->enumerator != nullptr)
+        delete this->enumerator;
 #   endif
 }
 
@@ -209,6 +221,11 @@ void TermNaryProduct::_InitNaryProduct(ProductType pt, size_t arity) {
     std::cout << "TermNaryProduct::";
     this->dump();
     std::cout << "\n";
+#   endif
+
+#   if (OPT_ENUMERATED_SUBSUMPTION_TESTING == true)
+    this->enumerator = new NaryProductEnumerator(this);
+    assert(this->enumerator->type == EnumeratorType::NARY);
 #   endif
 }
 
@@ -284,6 +301,11 @@ TermNaryProduct::TermNaryProduct(Aut_ptr aut, Term_ptr source, Symbol_ptr symbol
 TermNaryProduct::~TermNaryProduct() {
     delete[] this->access_vector;
     delete[] this->terms;
+
+#   if (OPT_ENUMERATED_SUBSUMPTION_TESTING == true)
+    if(this->enumerator != nullptr)
+        delete this->enumerator;
+#   endif
 }
 
 /**
@@ -1128,22 +1150,23 @@ void switch_in_worklist(WorklistType& worklist, Term*& item, Term*& new_item) {
  * @param[in]  no_prune  whether the subsumption should prune the conversely subsumed items in fixpoint
  * @return  the subsumption relation for the term and fixpoint
  */
+template<class ProductType>
 SubsumptionResult Term::_ProductIsSubsumedBy(FixpointType& fixpoint, WorklistType& worklist, Term*& biggerTerm, bool no_prune) {
     assert(this->type == TERM_PRODUCT || this->type == TERM_NARY_PRODUCT || this->type == TERM_TERNARY_PRODUCT);
 
     if(this->IsEmpty()) {
         return E_TRUE;
 #   if (OPT_ENUMERATED_SUBSUMPTION_TESTING == true)
-        } else {
-        bool isEmpty = true;
-        for (auto &item : fixpoint) {
-            if (item.first == nullptr || !item.second)
-                continue;
-            isEmpty = false;
-            break;
-        }
-        if (isEmpty)
-            return E_FALSE;
+    } else {
+    bool isEmpty = true;
+    for (auto &item : fixpoint) {
+        if (item.first == nullptr || !item.second)
+            continue;
+        isEmpty = false;
+        break;
+    }
+    if (isEmpty)
+        return E_FALSE;
 #   endif
     }
 
@@ -1163,14 +1186,13 @@ SubsumptionResult Term::_ProductIsSubsumedBy(FixpointType& fixpoint, WorklistTyp
 
         // Test the subsumption
         SubsumptionResult result;
-        if(valid_members > 1) {
+        if(valid_members > 1 && OPT_SUBSUMPTION_INTERSECTION == true) {
             result = tested_term->IsSubsumed(item.first, OPT_PARTIALLY_LIMITED_SUBSUMPTION, &new_term);
         } else {
             result = tested_term->IsSubsumed(item.first, OPT_PARTIALLY_LIMITED_SUBSUMPTION, nullptr);
         }
 
         if(result == SubsumptionResult::E_TRUE) {
-            //std::cout << "Fully subsumed\n\n";
             return E_TRUE;
         } else if(result == SubsumptionResult::E_PARTIALLY) {
             assert(new_term != tested_term);
@@ -1219,49 +1241,54 @@ SubsumptionResult Term::_ProductIsSubsumedBy(FixpointType& fixpoint, WorklistTyp
 #   endif
 
 #   if (OPT_ENUMERATED_SUBSUMPTION_TESTING == true)
-    this->enumerator->FullReset();
-    while (this->enumerator->IsNull() == false) {
-        bool subsumed = false;
-        for (auto &item : fixpoint) {
-            if (item.first == nullptr || !item.second) continue;
+    TermEnumerator* enumerator = static_cast<ProductType*>(tested_term)->enumerator;
+    enumerator->FullReset();
+    assert(!enumerator->IsNull());
+    if(valid_members > 1) {
+        bool is_subsumed_after_enum = true;
+        while (enumerator->IsNull() == false) {
+            bool subsumed = false;
+            for (auto &item : fixpoint) {
+                if (item.first == nullptr || !item.second) continue;
 
-            if (item.first->Subsumes(this->enumerator) != E_FALSE) {
-                this->enumerator->Next();
-                subsumed = true;
+                if (item.first->Subsumes(enumerator) != E_FALSE) {
+                    enumerator->Next();
+                    subsumed = true;
+                    break;
+                }
+            }
+
+            if (!subsumed) {
+                is_subsumed_after_enum = false;
                 break;
             }
         }
-
-        if (!subsumed) {
-            return E_FALSE;
+        if (is_subsumed_after_enum) {
+            return E_TRUE;
         }
     }
-    return E_TRUE;
-#   else
+#   endif
     if(tested_term == this || no_prune) {
-        //std::cout << "Not subsumed\n\n";
         assert(tested_term->type != TERM_EMPTY);
         return E_FALSE;
     } else {
         assert(tested_term != nullptr);
         assert(!tested_term->IsEmpty());
         biggerTerm = tested_term;
-        //std::cout << "Partially subsumed\n\n";
         return E_PARTIALLY;
     }
-#   endif
 }
 
 SubsumptionResult TermProduct::IsSubsumedBy(FixpointType& fixpoint, WorklistType& worklist, Term*& biggerTerm, bool no_prune) {
-    return this->_ProductIsSubsumedBy(fixpoint, worklist, biggerTerm, no_prune);
+    return this->_ProductIsSubsumedBy<TermProduct>(fixpoint, worklist, biggerTerm, no_prune);
 }
 
 SubsumptionResult TermTernaryProduct::IsSubsumedBy(FixpointType& fixpoint, WorklistType& worklist, Term *& biggerTerm, bool no_prune) {
-    return this->_ProductIsSubsumedBy(fixpoint, worklist, biggerTerm, no_prune);
+    return this->_ProductIsSubsumedBy<TermTernaryProduct>(fixpoint, worklist, biggerTerm, no_prune);
 }
 
 SubsumptionResult TermNaryProduct::IsSubsumedBy(FixpointType& fixpoint, WorklistType& worklist, Term *& biggerTerm, bool no_prune) {
-    return this->_ProductIsSubsumedBy(fixpoint, worklist, biggerTerm, no_prune);
+    return this->_ProductIsSubsumedBy<TermNaryProduct>(fixpoint, worklist, biggerTerm, no_prune);
 }
 
 SubsumptionResult TermBaseSet::IsSubsumedBy(FixpointType& fixpoint, WorklistType& worklist, Term*& biggerTerm, bool no_prune) {
@@ -1393,6 +1420,10 @@ SubsumptionResult TermFixpoint::IsSubsumedBy(FixpointType& fixpoint, WorklistTyp
  * Tests if the single element is subsumed by the term
  */
 SubsumptionResult Term::Subsumes(TermEnumerator* enumerator) {
+    if(this->type == TermType::TERM_EMPTY) {
+        return E_FALSE;
+    }
+
     SubsumptionResult result = E_FALSE;
 #   if (OPT_ENUMERATED_SUBSUMPTION_TESTING == true)
     if(!this->_subsumesCache.retrieveFromCache(enumerator, result)) {
@@ -1405,7 +1436,7 @@ SubsumptionResult Term::Subsumes(TermEnumerator* enumerator) {
 }
 
 SubsumptionResult Term::_SubsumesCore(TermEnumerator* enumerator) {
-    assert(enumerator->type == ENUM_GENERIC);
+    assert(enumerator->type == EnumeratorType::GENERIC);
     GenericEnumerator* genericEnumerator = static_cast<GenericEnumerator*>(enumerator);
     auto result = genericEnumerator->GetItem()->IsSubsumed(this, OPT_PARTIALLY_LIMITED_SUBSUMPTION, nullptr, false);
     return result;
@@ -1413,7 +1444,7 @@ SubsumptionResult Term::_SubsumesCore(TermEnumerator* enumerator) {
 
 SubsumptionResult TermProduct::_SubsumesCore(TermEnumerator* enumerator) {
     // TODO: Missing partial subsumption
-    assert(enumerator->type == ENUM_PRODUCT);
+    assert(enumerator->type == EnumeratorType::PRODUCT);
     ProductEnumerator* productEnumerator = static_cast<ProductEnumerator*>(enumerator);
     if(this->left->stateSpaceApprox <= this->right->stateSpaceApprox) {
         return (this->left->Subsumes(productEnumerator->GetLeft()) != E_FALSE &&
@@ -1425,7 +1456,7 @@ SubsumptionResult TermProduct::_SubsumesCore(TermEnumerator* enumerator) {
 }
 
 SubsumptionResult TermBaseSet::_SubsumesCore(TermEnumerator* enumerator) {
-    assert(enumerator->type == ENUM_BASE);
+    assert(enumerator->type == EnumeratorType::BASE);
     BaseEnumerator* baseEnumerator = static_cast<BaseEnumerator*>(enumerator);
     auto item = baseEnumerator->GetItem();
 
@@ -1438,6 +1469,25 @@ SubsumptionResult TermBaseSet::_SubsumesCore(TermEnumerator* enumerator) {
     }
 
     return E_FALSE;
+}
+
+SubsumptionResult TermTernaryProduct::_SubsumesCore(TermEnumerator* enumerator) {
+    assert(enumerator->type == EnumeratorType::TERNARY);
+    TernaryProductEnumerator* ternaryEnumerator = static_cast<TernaryProductEnumerator*>(enumerator);
+    return (this->left->Subsumes(ternaryEnumerator->GetLeft()) != E_FALSE &&
+            this->middle->Subsumes(ternaryEnumerator->GetMiddle()) != E_FALSE &&
+            this->right->Subsumes(ternaryEnumerator->GetRight()) != E_FALSE) ? E_TRUE : E_FALSE;
+}
+
+SubsumptionResult TermNaryProduct::_SubsumesCore(TermEnumerator* enumerator) {
+    assert(enumerator->type == EnumeratorType::NARY);
+    NaryProductEnumerator* naryEnumerator = static_cast<NaryProductEnumerator*>(enumerator);
+    for(size_t i = 0; i < this->arity; ++i) {
+        if(this->terms[i]->Subsumes(naryEnumerator->GetEnum(i)) == E_FALSE) {
+            return E_FALSE;
+        }
+    }
+    return E_TRUE;
 }
 
 /**

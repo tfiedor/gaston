@@ -11,12 +11,14 @@
 
 class Term;
 class TermProduct;
+class TermTernaryProduct;
+class TermNaryProduct;
 class TermBaseSet;
 class TermFixpoint;
 using BaseVector = std::vector<size_t>;
 using BaseItem = long unsigned int;
 
-enum EnumeratorType {ENUM_GENERIC, ENUM_PRODUCT, ENUM_BASE};
+enum class EnumeratorType {GENERIC, PRODUCT, BASE, TERNARY, NARY};
 
 class TermEnumerator {
 public:
@@ -34,12 +36,13 @@ public:
 
 class GenericEnumerator : public TermEnumerator {
     Term* _term;
+    bool _invalidated = false;
 public:
     GenericEnumerator(Term*);
 
-    void Reset();
+    void Reset() { this->_invalidated = false;};
     void FullReset();
-    void Next();
+    void Next() { this->_invalidated = true;}
     bool IsNull();
     Term* GetItem() const;
 
@@ -61,6 +64,43 @@ public:
     TermEnumerator* GetRight() const {return _rhs_enum;};
 
     friend std::ostream &operator<<(std::ostream &stream, const ProductEnumerator&);
+};
+
+class TernaryProductEnumerator : public TermEnumerator { 
+    TermEnumerator* _lhs_enum = nullptr;
+    TermEnumerator* _mhs_enum = nullptr;
+    TermEnumerator* _rhs_enum = nullptr;
+    
+public:
+    NEVER_INLINE TernaryProductEnumerator(TermTernaryProduct*);
+    NEVER_INLINE ~TernaryProductEnumerator();
+    
+    void Reset();
+    void FullReset();
+    void Next();
+    bool IsNull();
+    TermEnumerator *GetLeft() const { return _lhs_enum;}
+    TermEnumerator *GetMiddle() const { return _mhs_enum;}
+    TermEnumerator *GetRight() const { return _rhs_enum;}
+
+    friend std::ostream &operator<<(std::ostream &stream, const TernaryProductEnumerator&);
+};
+
+class NaryProductEnumerator : public TermEnumerator {
+    size_t _arity;
+    TermEnumerator** _enums = nullptr;
+
+public:
+    NEVER_INLINE NaryProductEnumerator(TermNaryProduct*);
+    NEVER_INLINE ~NaryProductEnumerator();
+
+    void Reset();
+    void FullReset();
+    void Next();
+    bool IsNull();
+    TermEnumerator *GetEnum(size_t i) const { assert(i < this->_arity); return this->_enums[i]; }
+
+    friend std::ostream &operator<<(std::ostream &stream, const NaryProductEnumerator&);
 };
 
 class BaseEnumerator : public TermEnumerator {

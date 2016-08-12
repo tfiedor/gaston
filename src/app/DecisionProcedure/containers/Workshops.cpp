@@ -310,8 +310,10 @@ namespace Workshops {
      * @param[in] inComplement:     whether the list is complemented
      * @return: unique pointer
      */
-    TermList* TermWorkshop::CreateList(Term_ptr const& startTerm, bool inComplement) {
-        assert(startTerm->type != TERM_EMPTY);
+    Term* TermWorkshop::CreateList(Term_ptr const& startTerm, bool inComplement) {
+        if(startTerm->type == TERM_EMPTY) {
+            return startTerm;
+        }
         #if (OPT_GENERATE_UNIQUE_TERMS == true && UNIQUE_LISTS == true)
             assert(this->_lCache != nullptr);
 
