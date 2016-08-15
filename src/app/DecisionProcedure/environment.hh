@@ -143,6 +143,10 @@ namespace Gaston {
 	void dumpSetPreKey(std::pair<VarList, Symbol_ptr> const& s);
 	void dumpPreKey(std::pair<size_t, Symbol_ptr> const& s);
 	void dumpPreData(Term_ptr& s);
+	template<class Node>
+	void dumpKey(std::pair<Node *, Gaston::BitMask> const& s);
+	template<class Data>
+	void dumpData(VATA::Util::OrdVector<Data>& s);
 	void dumpDagKey(Formula_ptr const& s);
 	void dumpDagData(SymbolicAutomaton*& s);
 	void dumpEnumKey(TermEnumerator* const& s);
@@ -175,6 +179,18 @@ namespace Gaston {
 	using SetPreCompare			 = std::equal_to<SetPreKey>;
 	using SetPreCache			 = BinaryCache<SetPreKey, Term_ptr, SetPreHash, SetPreCompare, dumpSetPreKey, dumpPreData>;
 
+}
+
+namespace Gaston {
+	template<class Node>
+	void dumpKey(std::pair<Node *, Gaston::BitMask> const &s) {
+		std::cout << "(" << (*s.first) << ", " << s.second << ")";
+	}
+
+	template<class Data>
+	void dumpData(VATA::Util::OrdVector<Data> &s) {
+		std::cout << s;
+	}
 }
 
 /*************************
@@ -340,7 +356,7 @@ public:
 
 /* >>> Optimizations <<< *
  *************************/
-#define OPT_USE_DAG							false   // < Instead of using the symbolic automata, will use the DAGified SA, there is probably issue with remapped cache
+#define OPT_USE_DAG							true    // < Instead of using the symbolic automata, will use the DAGified SA, there is probably issue with remapped cache
 #define OPT_SHUFFLE_FORMULA					true    // < Will run ShuffleVisitor before creation of automaton, which should ease the procedure as well
 #define OPT_DONT_CACHE_CONT					true	// < Do not cache terms containing continuations
 #define OPT_DONT_CACHE_UNFULL_FIXPOINTS 	false	// < Do not cache fixpoints that were not fully computed
@@ -384,7 +400,7 @@ public:
 #define OPT_DRIVE_QUANTIFIER_FREE			true	// < Drive the quantifier free fixpoints
 #define OPT_THROW_CLASSIC_FIRST_ORDER_REP	true	// < Will interpret first orders on fixpoints as having only one one
 #define OPT_SHUFFLE_HASHES					false   // < Shuffles the bits in the hashes
-#define OPT_ENUMERATED_SUBSUMPTION_TESTING  true    // < Partially enumerates the products
+#define OPT_ENUMERATED_SUBSUMPTION_TESTING  false   // < Partially enumerates the products
 #define OPT_USE_TERNARY_AUTOMATA			true    // < Will use ternary automata if possible
 #define OPT_USE_NARY_AUTOMATA				true    // < Will use nary automata if possible
 #define OPT_PRUNE_WORKLIST					true	// < Will remove stuff from worklist during the pruning
@@ -395,7 +411,8 @@ public:
 #define OPT_SUBSUMPTION_INTERSECTION		true    // < Will create partial intersections for the products with bases
 #define OPT_PRUNE_BASE_SELFLOOPS_IN_PRE     true    // < Will prune away selfloops in wrapper pre
 #define OPT_PARTIAL_PRUNE_FIXPOINTS         false   // < Will use the partial subsumption on fixpoint members
-#define OPT_USE_BASE_PROJECTION_AUTOMATA    false   // < Will treat base projections differently (as bases not fixpoints)
+#define OPT_USE_BASE_PROJECTION_AUTOMATA    true    // < Will treat base projections differently (as bases not fixpoints)
+#define OPT_CACHE_SUBPATHS_IN_WRAPPER       true    // < Will cache the nodes and subpaths during the pre computing in mona wrapper
 
 /* >>> Static Assertions <<< *
  *****************************/

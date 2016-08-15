@@ -2,6 +2,7 @@
 #define MONAWRAPPER_H
 
 #include "../../Frontend/ast.h"
+#include "../containers/SymbolicCache.hh"
 
 #include <vata/util/ord_vector.hh>
 
@@ -15,6 +16,7 @@
 #include <functional>
 #include <assert.h>
 #include <string>
+#include <fstream>
 #include <boost/dynamic_bitset.hpp>
 
 extern VarToTrackMap varMap;
@@ -33,14 +35,54 @@ private:
         {
             ;
         }
+
+        friend std::ostream &operator<<(std::ostream &out, const WrappedNode &rhs) {
+            out << rhs.node_ << "(" << (rhs.var_ & 0x1ffff) << ")";
+            return out;
+        }
     };
 
-    using DataType = Data;
-    using VectorType = VATA::Util::OrdVector<Data>;
-    using WrappedNode = struct WrappedNode;
+    struct HashType
+    {
+        size_t operator()(std::pair<struct WrappedNode *, Gaston::BitMask> const& set) const
+        {
+    #		if (OPT_SHUFFLE_HASHES == true)
+            size_t seedLeft = hash64shift(boost::hash_value(set.first));
+            size_t seedRight = hash64shift(boost::hash_value(set.second.count()));
+            boost::hash_combine(seedRight, hash64shift(boost::hash_value(set.second.find_first())));
+    #		else
+            size_t seedLeft = boost::hash_value(set.first);
+            size_t seedRight = boost::hash_value(set.second.count());
+            boost::hash_combine(seedRight, boost::hash_value(set.second.find_first()));
+    #		endif
+
+            boost::hash_combine(seedLeft, seedRight);
+    #		if (OPT_SHUFFLE_HASHES == true)
+            return hash64shift(seedLeft);
+    #		else
+            return seedLeft;
+    #		endif
+        }
+    };
+
+    template<class Key>
+    struct PairCompare : public std::binary_function<Key, Key, bool>
+    {
+        bool operator()(Key const& lhs, Key const& rhs) const {
+            return (lhs.first == rhs.first) && (lhs.second == rhs.second);
+        }
+    };
+
+    using DataType          = Data;
+    using VectorType        = VATA::Util::OrdVector<Data>;
+    using WrappedNode       = struct WrappedNode;
     using InternalNodesType = std::unordered_map<unsigned, WrappedNode *>;
-    using SetType = std::unordered_set<WrappedNode *>;
-    using CacheType = std::unordered_map<size_t, VectorType>;
+    using SetType           = std::unordered_set<WrappedNode *>;
+    //using CacheType         = std::unordered_map<size_t, VectorType>;
+    //using PreCache  = BinaryCache<PreKey, Term_ptr, PreHashType, PrePairCompare<PreKey>, dumpPreKey, dumpPreData>;
+
+    using KeyType			= std::pair<WrappedNode *, Gaston::BitMask>;
+    using CacheType			= BinaryCache<KeyType, VectorType, HashType, PairCompare<KeyType>, Gaston::dumpKey, Gaston::dumpData>;
 
 protected:
     std::vector<WrappedNode *> roots_;
@@ -49,9 +91,14 @@ protected:
     DFA *dfa_;
     unsigned numVars_;
     size_t initialState_;
-    boost::dynamic_bitset<> symbol_;
+    Gaston::BitMask symbol_;
+    Gaston::BitMask mask_;
+    Gaston::BitMask* masks_;
+    Gaston::BitMask* symbolMasks_;
     unsigned exploredState_;
     bool isRestriction_ = false;
+    CacheType cache_;
+    static int _wrapperCount;
 
 private:
     inline WrappedNode *spawnNode(unsigned addr, WrappedNode &pred, bool edge)
@@ -177,6 +224,11 @@ private:
         }
     }
 
+    inline Gaston::BitMask transformSymbol(const Gaston::BitMask &symbol, int var)
+    {
+        return (symbolMasks_[var] & symbol) | masks_[var];
+    }
+
     void RecPre(WrappedNode *node, VectorType &res)
     {
         //std::cout << "node->var_: " << node->var_ << std::endl;
@@ -188,8 +240,23 @@ private:
 
         int var = GetVar(node->var_);
 
+        // Vytvorit key, ktery bude dvojice (stav, podcesta)
+        // => vytvori se funkce, ktera toto vytvori.
+        // potom, je treba vysledek sjednotit s jiz existujicimi vysledky.
+#       if (OPT_CACHE_SUBPATHS_IN_WRAPPER == true)
+        VectorType tmp;
+        auto key = std::make_pair(node, transformSymbol(symbol_, var));
 
-        if(symbol_[var << 1] && symbol_[(var << 1) + 1])
+        if(cache_.retrieveFromCache(key, tmp))
+        {
+            res.insert(tmp);
+            return;
+        }
+#       endif
+
+        //std::cout << "pokus" << std::endl;
+        VectorType innerRes;
+        if(/*symbol_[var << 1] &&*/ symbol_[(var << 1) + 1])
         {
             for(auto nnode: node->pred_[~symbol_[(var << 1)]])
             {
@@ -197,11 +264,11 @@ private:
                 {
                     if(~symbol_[(var << 1)] == symbol_[(GetVar(nnode->var_ + 1) << 1)] ||
                         symbol_[(GetVar(nnode->var_ + 1) << 1) + 1])
-                        RecPre(nnode, res);
+                        RecPre(nnode, innerRes);
                 }
                 else
                 {
-                    RecPre(nnode, res);
+                    RecPre(nnode, innerRes);
                 }
             }
         }
@@ -211,7 +278,7 @@ private:
                 if(UnequalVars(nnode->var_, var - 1) && nnode->var_ > -2)
                     if((~symbol_[(var << 1)] == symbol_[(GetVar(nnode->var_ + 1) << 1)]) ||
                        symbol_[(GetVar(nnode->var_ + 1) << 1) + 1])
-                        RecPre(nnode, res);
+                        RecPre(nnode, innerRes);
         }
 
         for(auto nnode: node->pred_[symbol_[(var << 1)]])
@@ -220,13 +287,20 @@ private:
             {
                 if(symbol_[(var << 1)] == symbol_[(GetVar(nnode->var_ + 1) << 1)] ||
                    symbol_[(GetVar(nnode->var_ + 1) << 1) + 1])
-                    RecPre(nnode, res);
+                    RecPre(nnode, innerRes);
             }
             else
             {
-                RecPre(nnode, res);
+                RecPre(nnode, innerRes);
             }
         }
+
+        if(innerRes.size() != 0) {
+            res.insert(innerRes);
+        }
+#       if (OPT_CACHE_SUBPATHS_IN_WRAPPER == true)
+        cache_.StoreIn(key, innerRes);
+#       endif
     }
 
     VectorType RecPre(SetType& nodes)
@@ -258,7 +332,7 @@ private:
             }
             else
             {
-                // not don't care.
+                // not "don't care".
                 for(auto node: nodes)
                 {
                     assert(node != nullptr);
@@ -268,7 +342,7 @@ private:
                         GetSuccessors(node->pred_[symbol_[(var << 1)]], res, var - 1, symbol_[(var << 1)]);
                         ResetFlags(node->var_);
                     }
-                    else    // don't care na vytvorenem uzlu.
+                    else    // don't care on(at?) created node.
                     {
                         if(UnequalVars(node->var_, var - 1))
                         {
@@ -299,6 +373,25 @@ public:
         roots_.resize(dfa->ns, nullptr);
         leafNodes_.resize(dfa->ns, nullptr);
 
+        //std::cout << "Velikost mony je " << dfa->ns << std::endl;
+
+        mask_.resize(numVars_ << 1);
+        for(unsigned i = 0; i < numVars_; ++i)
+            mask_[(i << 1) + 1] = true;
+
+        Gaston::BitMask symbolMask;
+        symbolMask.resize(numVars_ << 1);
+        symbolMask.set();
+
+        this->masks_ = new Gaston::BitMask[numVars];
+        this->symbolMasks_ = new Gaston::BitMask[numVars];
+        for(unsigned i = 0; i < numVars_; ++i) {
+            int diff = ((numVars_ - 1) - i) << 1;
+            this->symbolMasks_[i] = (symbolMask >> diff);
+            this->masks_[i] = (mask_ << ((i+1) << 1));
+        }
+
+
         for(size_t i = this->initialState_; i < dfa->ns; i++)
             RecSetPointer(dfa->bddm, dfa->q[i], *spawnNode(dfa->bddm, dfa->q[i], i));
     }
@@ -310,12 +403,14 @@ public:
 
         for(auto leaf: leafNodes_)
             delete leaf;
+        delete[] this->masks_;
+        delete[] this->symbolMasks_;
         dfaFree(this->dfa_);
     }
 
-    void DumpToDot()
+    void DumpToDot(std::string outfile)
     {
-        /*std::ofstream ofs ("bu.gv", std::ofstream::out);
+        std::ofstream ofs (outfile, std::ofstream::out);
 
         ofs << "digraph M {" << std::endl;
 
@@ -327,8 +422,14 @@ public:
 
         ofs << "subgraph cluster1 {" << std::endl;
         ofs << "color=\"#800000\";" << std::endl;
-        for(auto leaf: leafNodes_)
-            ofs << "t" << leaf->node_ << "[label=\"" << leaf->node_ << " (" << GetVar(leaf->var_) << ")\"];" << std::endl;
+        for(auto leaf: leafNodes_) {
+            if(leaf == nullptr) {
+                std::cerr << "[!] Warning: Empty leaf\n";
+                continue;
+            }
+            ofs << "t" << leaf->node_ << "[label=\"" << leaf->node_ << " (" << GetVar(leaf->var_) << ")\"];" <<
+            std::endl;
+        }
         ofs << "}" << std::endl;
 
         for(auto node: internalNodes_)
@@ -356,7 +457,7 @@ public:
             }
         }
 
-        ofs << "}" << std::endl;*/
+        ofs << "}" << std::endl;
     }
 
     void GetAllPathFromMona(std::ostream &os,
@@ -419,16 +520,18 @@ public:
         assert(dfa_ != nullptr);
         assert(roots_.size() > state);
 
+        //std::cout << "===================================================" << std::endl << std::endl << std::endl;
         if(roots_[state] == nullptr)
             return VectorType();
 
         symbol_ = symbol;
-        exploredState_ = state;
+        //exploredState_ = state;
 
-        VectorType res2;
-        RecPre(roots_[state], res2);
+        VectorType res;
+        RecPre(roots_[state], res);
 
-        return res2;
+        //std::cout << std::endl << std::endl << std::endl << "===================================================" << std::endl;
+        return res;
     }
 
     VectorType Pre(VATA::Util::OrdVector<size_t> &states, const boost::dynamic_bitset<> &symbol)
@@ -470,5 +573,7 @@ public:
     }
 };
 
+template<class Data>
+int MonaWrapper<Data>::_wrapperCount = 0;
 
 #endif // MONAWRAPPER_H
