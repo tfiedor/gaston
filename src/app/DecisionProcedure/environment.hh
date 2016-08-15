@@ -356,7 +356,7 @@ public:
 
 /* >>> Optimizations <<< *
  *************************/
-#define OPT_USE_DAG							true    // < Instead of using the symbolic automata, will use the DAGified SA, there is probably issue with remapped cache
+#define OPT_USE_DAG							false   // < Instead of using the symbolic automata, will use the DAGified SA, there is probably issue with remapped cache
 #define OPT_SHUFFLE_FORMULA					true    // < Will run ShuffleVisitor before creation of automaton, which should ease the procedure as well
 #define OPT_DONT_CACHE_CONT					true	// < Do not cache terms containing continuations
 #define OPT_DONT_CACHE_UNFULL_FIXPOINTS 	false	// < Do not cache fixpoints that were not fully computed

@@ -28,6 +28,8 @@
 #include "environment.hh"
 #include "../Frontend/timer.h"
 
+#include "visitors/transformers/Derestricter.h"
+
 #if (OPT_SMARTER_MONA_CONVERSION == true)
 #include "mtbdd/mtbddconverter2.hh"
 #endif
@@ -748,6 +750,9 @@ void constructAutomatonByMona(ASTForm *form, Automaton& v_aut) {
 
 void toMonaAutomaton(ASTForm* form, DFA*& dfa, bool minimize) {
 	assert(form != nullptr);
+
+	Derestricter derestricter;
+	form = static_cast<ASTForm*>(form->accept(derestricter));
 
 #   if (DEBUG_MONA_DFA == true)
     int numVars = varMap.TrackLength();

@@ -971,7 +971,15 @@ void NaryOpAutomaton::_InitializeFinalStates() {
 void ComplementAutomaton::_InitializeFinalStates() {
     this->_finalStates = this->_aut.aut->GetFinalStates();
     //Fixme: Should this assert hold? assert(this->_finalStates->type != TERM_EMPTY);
-    this->_finalStates->Complement();
+    if(this->_finalStates->type == TermType::TERM_EMPTY) {
+        if(this->_finalStates->InComplement()) {
+            this->_finalStates = this->_factory.CreateEmpty();
+        } else {
+            this->_finalStates = this->_factory.CreateComplementedEmpty();
+        }
+    } else {
+        this->_finalStates->Complement();
+    }
 }
 
 void ProjectionAutomaton::_InitializeFinalStates() {
@@ -1038,7 +1046,7 @@ Term* BaseAutomaton::Pre(Symbol* symbol, Term* finalApproximation, bool underCom
     Term_ptr accumulatedState = nullptr;
     auto key = std::make_pair(baseSet->states, symbol);
     if(!this->_setCache.retrieveFromCache(key, accumulatedState)) {
-        accumulatedState = this->_factory.CreateBaseSet(this->_autWrapper.Pre(baseSet->states, symbol->GetTrackMask()), this->_stateOffset, this->_stateSpace);
+        accumulatedState = this->_factory.CreateBaseSet(this->_autWrapper.Pre(baseSet->states, symbol->GetTrackMask()));
         this->_setCache.StoreIn(key, accumulatedState);
     }
     return accumulatedState;
@@ -1065,7 +1073,7 @@ Term* BaseAutomaton::Pre(Symbol* symbol, Term* finalApproximation, bool underCom
         }
         accumulatedState = static_cast<TermBaseSet*>(this->_factory.CreateUnionBaseSet(accumulatedState, preState));
         #if (DEBUG_PRE == true)
-        std::cout << "{" << state << "} \u2212 " << (*symbol) << " = " << preStates << "\n";
+        std::cout << "{" << state << "} \u2212 " << (*symbol) << " = "; preState->dump(); std::cout << "\n";
         #endif
     }
 

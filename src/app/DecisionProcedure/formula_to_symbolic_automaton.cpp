@@ -218,10 +218,10 @@ SymbolicAutomaton* ASTForm_Not::_toSymbolicAutomatonCore(bool doComplement) {
     SymbolicAutomaton* aut;
 #   if (OPT_USE_BASE_PROJECTION_AUTOMATA == true)
     if( (this->tag == 0 || this->fixpoint_number == 1) && this->f->kind == aEx2) {
-        SymbolicAutomaton* inner;
-        inner = static_cast<ASTForm_Ex2*>(this->f)->f->toSymbolicAutomaton(!doComplement);
-        //return baseToSymbolicAutomaton<GenericBaseAutomaton>(this, !doComplement);
-        return new ComplementAutomaton(new ProjectionAutomaton(inner, this->f), this);
+        //SymbolicAutomaton* inner;
+        //inner = static_cast<ASTForm_Ex2*>(this->f)->f->toSymbolicAutomaton(!doComplement);
+        return baseToSymbolicAutomaton<GenericBaseAutomaton>(this, !doComplement);
+        //return new ComplementAutomaton(new ProjectionAutomaton(inner, this->f), this);
     } else {
         aut = this->f->toSymbolicAutomaton(!doComplement);
     }
