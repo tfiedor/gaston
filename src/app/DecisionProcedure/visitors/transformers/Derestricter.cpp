@@ -10,13 +10,7 @@ extern SymbolTable symbolTable;
 
 template<class BinaryForm>
 AST* Derestricter::_visitBinaryForm(BinaryForm* form) {
-    if(form->f1->kind == aFirstOrder) {
-        return form->f2;
-    } else if(form->f2->kind == aFirstOrder) {
-        return form->f1;
-    } else {
-        return form;
-    }
+    return form;
 }
 
 AST* Derestricter::visit(ASTForm_And* form) {
