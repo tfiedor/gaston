@@ -2003,6 +2003,10 @@ void print_stat(std::string statName, double stat) {
     std::cout << "  \u2218 " << statName << " -> " << std::fixed << std::setprecision(2) << stat << "\n";
 }
 
+void print_stat(std::string statName, double stat, std::string unit) {
+    std::cout << "  \u2218 " << statName << " -> " << std::fixed << std::setprecision(2) << stat << unit << "\n";
+}
+
 void BinaryOpAutomaton::DumpComputationStats() {
     if(this->marked) {
         return;
@@ -2222,6 +2226,10 @@ void SymbolicAutomaton::DumpAutomatonMetrics() {
     print_stat("Maximal Fixpoint Nesting", this->stats.max_fixpoint_nesting);
     print_stat("Automaton Height", this->stats.height);
     print_stat("Maximal References", this->stats.max_refs);
+#   if (MEASURE_AUTOMATA_CYCLES == true)
+    print_stat("Cycles on all final states", (MonaWrapper<size_t>::noAllFinalStatesHasCycles / (double) MonaWrapper<size_t>::_wrapperCount)*100, "%");
+    print_stat("Cycles on some final states", (MonaWrapper<size_t>::noSomeFinalStatesHasCycles / (double) MonaWrapper<size_t>::_wrapperCount)*100, "%");
+#   endif
 }
 
 void ProjectionAutomaton::FillStats() {

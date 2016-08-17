@@ -94,6 +94,8 @@ measures = {
             'cont-eval': Measure("evaluated" + whatever_regex + space_regex, space_default, int, False),
             'cont-eval-in-sub': Measure("in subsumption" + whatever_regex + space_regex, space_default, int, False),
             'cont-eval-in-isect': Measure("in isect nonempty" + whatever_regex + space_regex, space_default, int, False),
+            'cycles-all-final': Measure("cycles on all final states" + whatever_regex + double_regex, double_default, float, False),
+            'cycles-some-final': Measure("cycles on some final states" + whatever_regex + double_regex, double_default, float, False),
         },
     'mona': {
             'time': Measure("total time" + whatever_regex + time_regex, time_default, parse_total_time, False),
@@ -116,7 +118,7 @@ measures = {
 }
 
 csv_keys = {
-    'gaston': ['ret', 'time', 'space-all', 'space', 'space-mona', 'space-base', 'aut-height'],
+    'gaston': ['ret', 'time', 'space-all', 'space', 'cycles-all-final', 'cycles-some-final'],
     'mona': ['time', 'space', 'space-min']
 }
 
@@ -461,7 +463,7 @@ def create_gnuplot_script(data, mona_data, benchmark):
     script += '# \n'
     script += '# Plots the graph of state space (in states) and time according to the\n'
     script += '# number of converted fixpoints by MONA.\n'
-    script += 'set term pngcairo dashed\n'
+    script += 'set term pngcairo dashed size 800, 600\n'
     script += 'set output "{}.png"\n'.format(benchmark)
 
     script += 'set multiplot layout 2, 1 title "{0}" font ",14"\n'.format(benchmark)
@@ -568,7 +570,7 @@ if __name__ == '__main__':
 
                 mona_data, mona_ret = run_mona(serialized_benchmark, options.timeout, options.gaston_params)
                 mona_orig_data, mona_orig_ret = run_mona(benchmark, options.timeout, options.gaston_params)
-                assert mona_ret == mona_orig_ret
+                assert mona_ret == mona_orig_ret or mona_ret == -1 or mona_orig_ret == -1
 
                 cf_data = []
                 for cf in range(0, fixpoint_number+1):

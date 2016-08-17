@@ -98,7 +98,15 @@ protected:
     unsigned exploredState_;
     bool isRestriction_ = false;
     CacheType cache_;
+
+public:
     static int _wrapperCount;
+#   if (MEASURE_AUTOMATA_CYCLES == true)
+    static size_t noAllFinalStatesHasCycles;    // < Number of wrapped automata, that satisfy the condition
+    static size_t noSomeFinalStatesHasCycles;   // < Number of wrapped automata that satisfy this condition
+    static size_t noAllStatesHasSomeCycles;     // < Number of wrapped automata that satisfy this condition
+    static size_t someStatesHasSomeCycles;      // < Cumulative awerage that satisfy this condition
+#   endif
 
 private:
     inline WrappedNode *spawnNode(unsigned addr, WrappedNode &pred, bool edge)
@@ -402,6 +410,8 @@ public:
 
         for(size_t i = this->initialState_; i < dfa->ns; i++)
             RecSetPointer(dfa->bddm, dfa->q[i], *spawnNode(dfa->bddm, dfa->q[i], i));
+
+        ++MonaWrapper<Data>::_wrapperCount;
     }
 
     ~MonaWrapper()
@@ -568,12 +578,52 @@ public:
             RecSetPointer(dfa->bddm, dfa->q[i], *spawnNode(dfa->bddm, dfa->q[i], i));
     }
 
+    inline bool is_leaf(WrappedNode& node) {
+        return node.pred_[0].size() == 0 && node.pred_[1].size() == 0;
+    }
+
     void GetFinalStates(VectorType& final) {
+#       if (MEASURE_AUTOMATA_CYCLES == true)
+        size_t universal_cycles_count = 0;
+        size_t partial_cycles_count = 0;
+        size_t final_states_count = 0;
+#       endif
+
         for (size_t i = this->initialState_; i < this->dfa_->ns; ++i) {
             if (this->dfa_->f[i] == 1) {
                 final.insert(i);
+#               if (MEASURE_AUTOMATA_CYCLES == true)
+                bool zero_cycle = false, one_cycle = false;
+                for(auto node : roots_[i]->pred_[0]) {
+                    if(is_leaf(*node) && node->node_ == i) {
+                        zero_cycle = true;
+                    }
+                }
+                for(auto node : roots_[i]->pred_[1]) {
+                    if(is_leaf(*node) && node->node_ == i) {
+                        one_cycle = true;
+                    }
+                }
+
+                if(zero_cycle && one_cycle) {
+                    ++universal_cycles_count;
+                    ++partial_cycles_count;
+                } else if (zero_cycle || one_cycle) {
+                    ++partial_cycles_count;
+                }
+                ++final_states_count;
+#               endif
             }
         }
+
+#       if (MEASURE_AUTOMATA_CYCLES == true)
+        if(universal_cycles_count == final_states_count) {
+            ++MonaWrapper<Data>::noAllFinalStatesHasCycles;
+            ++MonaWrapper<Data>::noSomeFinalStatesHasCycles;
+        } else if(universal_cycles_count > 0) {
+            ++MonaWrapper<Data>::noSomeFinalStatesHasCycles;
+        }
+#       endif
     }
 
     inline size_t GetInitialState() {
@@ -583,5 +633,16 @@ public:
 
 template<class Data>
 int MonaWrapper<Data>::_wrapperCount = 0;
+#   if (MEASURE_AUTOMATA_CYCLES == true)
+template<class Data>
+size_t MonaWrapper<Data>::noAllFinalStatesHasCycles = 0;    // < Number of wrapped automata, that satisfy the condition
+template<class Data>
+size_t MonaWrapper<Data>::noSomeFinalStatesHasCycles = 0;   // < Number of wrapped automata that satisfy this condition
+template<class Data>
+size_t MonaWrapper<Data>::noAllStatesHasSomeCycles = 0;     // < Number of wrapped automata that satisfy this condition
+template<class Data>
+size_t MonaWrapper<Data>::someStatesHasSomeCycles = 0;      // < Cumulative awerage that satisfy this condition
+#   endif
+
 
 #endif // MONAWRAPPER_H

@@ -329,6 +329,7 @@ public:
 #define MEASURE_COMPARISONS				false	// < Measure how many times we sucessfully compared and how
 #define MEASURE_SUBSUMEDBY_HITS			true	// < Measure how many times subsumedBy cache worked
 #define MEASURE_AUTOMATA_METRICS		true	// < Measure stuff like number of nodes and stuff in resulting automaton
+#define MEASURE_AUTOMATA_CYCLES         true    // < Measure how many cycles there are in the base automata
 #define MEASURE_SUBAUTOMATA_TIMING		false   // < Every SA will have a timer that will time how much time the isect does
 
 /* >>> Anti-Prenexing Options <<< *
