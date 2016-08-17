@@ -226,7 +226,11 @@ private:
 
     inline Gaston::BitMask transformSymbol(const Gaston::BitMask &symbol, int var)
     {
-        return (symbolMasks_[var] & symbol) | masks_[var];
+        Gaston::BitMask transformed = symbol;
+        transformed &= symbolMasks_[var];
+        transformed |= masks_[var];
+        return transformed;
+//        return (symbolMasks_[var] & symbol) | masks_[var];
     }
 
     void RecPre(WrappedNode *node, VectorType &res)
@@ -386,9 +390,13 @@ public:
         this->masks_ = new Gaston::BitMask[numVars];
         this->symbolMasks_ = new Gaston::BitMask[numVars];
         for(unsigned i = 0; i < numVars_; ++i) {
-            int diff = ((numVars_ - 1) - i) << 1;
-            this->symbolMasks_[i] = (symbolMask >> diff);
-            this->masks_[i] = (mask_ << ((i+1) << 1));
+            unsigned int diff = ((numVars_ - 1) - i) << 1;
+
+            this->symbolMasks_[i] = symbolMask;
+            this->symbolMasks_[i] >>= diff;
+
+            this->masks_[i] = mask_;
+            this->masks_[i] <<= ((i+1) << 1);
         }
 
 

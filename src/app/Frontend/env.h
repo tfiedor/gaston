@@ -30,18 +30,39 @@ enum TestType {EVERYTHING, VALIDITY, SATISFIABILITY, UNSATISFIABILITY};
 class Options {
 public:
   Options() :
-    noExpnf(true), method(SYMBOLIC), construction(AutomataConstruction::SYMBOLIC_AUT), time(false), whole(false), mode(LINEAR),
-    statistics(false), printProgress(false),
-    analysis(false), separateCompilation(false),
-    dump(false), intermediate(false),
-    treemodeOutput(false), m2l(false), 
-    graphvizDFA(false), graphvizDAG(false),
-    graphvizSatisfyingEx(false), graphvizCounterEx(false), 
-    externalWhole(false), demo(false), 
-    inheritedAcceptance(false), unrestrict(false),
-    monaWalk(false),expandTagged(false),
-    alternativeM2LStr(false), test(EVERYTHING), reorder(HEURISTIC), optimize(0),
-    useMonaDFA(false), serializeMona(false), fixLimit(0), inverseFixLimit(-1) {}
+    noExpnf(true),
+    method(SYMBOLIC),
+    construction(AutomataConstruction::SYMBOLIC_AUT),
+    time(false),
+    whole(false),
+    mode(LINEAR),
+    statistics(false),
+    printProgress(false),
+    analysis(false),
+    separateCompilation(false),
+    dump(false),
+    intermediate(false),
+    treemodeOutput(false),
+    m2l(false),
+    graphvizDFA(false),
+    graphvizDAG(false),
+    graphvizSatisfyingEx(false),
+    graphvizCounterEx(false),
+    externalWhole(false),
+    demo(false),
+    inheritedAcceptance(false),
+    unrestrict(false),
+    monaWalk(false),
+    expandTagged(false),
+    alternativeM2LStr(false),
+    test(EVERYTHING),
+    reorder(HEURISTIC),
+    optimize(0),
+    useMonaDFA(false),
+    serializeMona(false),
+    fixLimit(0),
+    inverseFixLimit(-1),
+    dryRun(false) {}
 
 
   bool useMonaDFA;
@@ -70,14 +91,15 @@ public:
   bool inheritedAcceptance;
   bool unrestrict;
   bool alternativeM2LStr;
-    bool monaWalk;
-    bool expandTagged;
-    TestType test;
+  bool monaWalk;
+  bool expandTagged;
+  TestType test;
   ReorderMode reorder;
   unsigned optimize;
-    bool serializeMona;
-    int fixLimit;
-    int inverseFixLimit;
+  bool serializeMona;
+  int fixLimit;
+  int inverseFixLimit;
+  bool dryRun;
 };
 
 #endif

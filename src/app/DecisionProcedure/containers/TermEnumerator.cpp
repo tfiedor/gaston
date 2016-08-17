@@ -136,19 +136,24 @@ std::ostream &operator<<(std::ostream &out, const NaryProductEnumerator& rhs) {
  *
  * @param[in]  base  base state we are enumerating, i.e. breaking to atomic units
  */
-BaseEnumerator::BaseEnumerator(TermBaseSet* base) : _base(base) {
+BaseEnumerator::BaseEnumerator(TermBaseSet* base)
+        : _base(base),
+          _iteratorPosition(0),
+          _spaceSize(base->states.size()) {
     assert(base->type == TermType::TERM_BASE);
     assert(base->states.size() > 0);
     this->type = EnumeratorType::BASE;
     this->_iterator = this->_base->states.begin();
+    assert(this->_iterator != this->_base->states.end());
 }
 
 /**
  * @brief moves the enumerator by one unit
  */
 void BaseEnumerator::Next() {
-    assert(this->_iterator != this->_base->states.end());
+    assert(this->_iteratorPosition != this->_spaceSize);
     ++this->_iterator;
+    ++this->_iteratorPosition;
 }
 
 /**
@@ -157,7 +162,7 @@ void BaseEnumerator::Next() {
  * @return  item that the enumerator points to
  */
 BaseItem BaseEnumerator::GetItem() const {
-    assert(this->_iterator != this->_base->states.end());
+    assert(this->_iteratorPosition != this->_spaceSize);
     return *this->_iterator;
 }
 
@@ -167,7 +172,7 @@ BaseItem BaseEnumerator::GetItem() const {
  * @return  true if all atomic states of base state were enumerated
  */
 bool BaseEnumerator::IsNull() {
-    return this->_iterator == this->_base->states.end();
+    return this->_iteratorPosition == this->_spaceSize;
 }
 
 /**
@@ -176,6 +181,7 @@ bool BaseEnumerator::IsNull() {
  * Note: this is used for nested enumerators that enumerates the base states multiple time
  */
 void BaseEnumerator::Reset() {
+    this->_iteratorPosition = 0;
     this->_iterator = this->_base->states.begin();
 }
 
@@ -354,7 +360,7 @@ NaryProductEnumerator::~NaryProductEnumerator() {
 void NaryProductEnumerator::Next() {
     size_t i = this->_arity - 1;
     this->_enums[i]->Next();
-    while(i != 1) {
+    while(i != 0) {
         // If we are at the end of this level of enumeration, we reset and progress the left neighbour
         if(this->_enums[i]->IsNull()) {
             this->_enums[i]->Reset();

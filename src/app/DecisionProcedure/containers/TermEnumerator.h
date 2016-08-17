@@ -106,13 +106,15 @@ public:
 class BaseEnumerator : public TermEnumerator {
     TermBaseSet* _base;
     BaseVector::const_iterator _iterator;
+    size_t _iteratorPosition;
+    size_t _spaceSize;
 public:
     BaseEnumerator(TermBaseSet*);
 
     void Reset();
     void FullReset();
     void Next();
-    bool IsNull();
+    inline bool IsNull();
     BaseItem GetItem() const;
 
     friend std::ostream &operator<<(std::ostream &stream, const BaseEnumerator&);

@@ -103,6 +103,7 @@ void PrintUsage() {
 		<< " -ga, --print-aut     Print automaton in graphviz\n"
 		<< " -cfX                 Transform all formulae with lesser than X fixpoints into automaton\n"
 		<< " -icfX                Transform all formulae with greater than X fixpoints from the root\n"
+		<< "      --dry-run       Will not run the analysis, only construct automaton\n"
 		<< "      --no-automaton  Don't dump Automaton\n"
 		<< "      --test          Test specified problem [val, sat, unsat]\n"
 		<< "      --walk-aut      Does the experiment generating the special dot graph\n"
@@ -146,6 +147,8 @@ bool ParseArguments(int argc, char *argv[]) {
 				options.time = true;
 			else if (strcmp(argv[i], "--quiet") == 0)
 				options.printProgress = false;
+			else if (strcmp(argv[i], "--dry-run") == 0)
+				options.dryRun = true;
 			else if (strcmp(argv[i], "-ga") == 0 || strcmp(argv[i], "--print-aut") == 0)
 				options.graphvizDAG = true;
 			else if (strcmp(argv[i], "--walk-aut") == 0) {
@@ -227,7 +230,11 @@ int main(int argc, char *argv[]) {
         return 0;
     } else {
         checker->ConstructAutomaton();
-        checker->Decide();
+		if(!options.dryRun) {
+			checker->Decide();
+		} else {
+			std::cout << "[!] Issued dry run only\n";
+		}
     }
 	timer_gaston.stop();
 	std::cout << "\n[*] Total elapsed time: ";

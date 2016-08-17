@@ -317,7 +317,7 @@ bool SymbolicChecker::Run() {
     std::cout << "[*] Mona State Space: " << (Workshops::TermWorkshop::monaAutomataStates) << "\n";
     std::cout << "[*] Overall State Space: " << (TermProduct::instances + TermBaseSet::instances + TermFixpoint::instances
                                                  + TermList::instances + TermContinuation::instances + TermNaryProduct::instances
-                                                 + TermTernaryProduct::instances) << "\n";
+                                                 + TermTernaryProduct::instances + Workshops::TermWorkshop::monaAutomataStates) << "\n";
     std::cout << "[*] Explored Fixpoint Space: " << (fixpoint != nullptr ? fixpoint->MeasureStateSpace() : 0) << "\n";
 #   endif
 

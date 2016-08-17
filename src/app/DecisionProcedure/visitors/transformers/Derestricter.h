@@ -10,10 +10,16 @@
 #include "../../../Frontend/ident.h"
 
 class Derestricter : public TransformerVisitor {
+private:
+    template<class BinaryForm>
+    AST* _visitBinaryForm(BinaryForm*);
 public:
     Derestricter() : TransformerVisitor(Traverse::PostOrder) {}
 
-    AST* visit(ASTForm_ff*);
+    AST* visit(ASTForm_And*);
+    AST* visit(ASTForm_Or*);
+    AST* visit(ASTForm_Impl*);
+    AST* visit(ASTForm_Biimpl*);
     AST* visit(ASTForm_Ex2*);
 };
 

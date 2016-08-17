@@ -400,7 +400,7 @@ public:
 #define OPT_DRIVE_QUANTIFIER_FREE			true	// < Drive the quantifier free fixpoints
 #define OPT_THROW_CLASSIC_FIRST_ORDER_REP	true	// < Will interpret first orders on fixpoints as having only one one
 #define OPT_SHUFFLE_HASHES					false   // < Shuffles the bits in the hashes
-#define OPT_ENUMERATED_SUBSUMPTION_TESTING  false   // < Partially enumerates the products
+#define OPT_ENUMERATED_SUBSUMPTION_TESTING  false   // < Partially enumerates the products (looks like this is subsumed by intersectioned subsumption)
 #define OPT_USE_TERNARY_AUTOMATA			true    // < Will use ternary automata if possible
 #define OPT_USE_NARY_AUTOMATA				true    // < Will use nary automata if possible
 #define OPT_PRUNE_WORKLIST					true	// < Will remove stuff from worklist during the pruning
@@ -408,7 +408,7 @@ public:
 #define OPT_USE_BOOST_POOL_FOR_ALLOC		true    // < (+) Will use boost::object_pool<> for allocation
 #define OPT_USE_SET_PRE						false   // < Will use the set implementation of pre
 #define OPT_CACHE_LAST_QUERIES				false	// < Will cache the last entries in the cache and do the quick lookup
-#define OPT_SUBSUMPTION_INTERSECTION		true    // < Will create partial intersections for the products with bases
+#define OPT_SUBSUMPTION_INTERSECTION		false   // < Will create partial intersections for the products with bases
 #define OPT_PRUNE_BASE_SELFLOOPS_IN_PRE     true    // < Will prune away selfloops in wrapper pre
 #define OPT_PARTIAL_PRUNE_FIXPOINTS         false   // < Will use the partial subsumption on fixpoint members
 #define OPT_USE_BASE_PROJECTION_AUTOMATA    true    // < Will treat base projections differently (as bases not fixpoints)
