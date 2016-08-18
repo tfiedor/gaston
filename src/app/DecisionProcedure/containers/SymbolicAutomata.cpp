@@ -1908,6 +1908,10 @@ std::string utf8_substr(std::string originalString, int maxLength)
 {
     std::string resultString = originalString;
 
+    if(maxLength == -1) {
+        return originalString;
+    }
+
     int len = 0;
     int byteCount = 0;
 

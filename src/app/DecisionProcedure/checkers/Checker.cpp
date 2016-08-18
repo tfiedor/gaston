@@ -19,6 +19,7 @@
 #include "../visitors/transformers/ExistentialPrenexer.h"
 #include "../visitors/transformers/ShuffleVisitor.h"
 #include "../visitors/transformers/ContinuationSwitcher.h"
+#include "../visitors/transformers/Derestricter.h"
 #include "../visitors/restricters/UniversalQuantifierRemover.h"
 #include "../visitors/restricters/SyntaxRestricter.h"
 #include "../visitors/restricters/SecondOrderRestricter.h"
@@ -302,11 +303,6 @@ void Checker::PreprocessFormula() {
     this->_monaAST->formula = static_cast<ASTForm *>(this->_monaAST->formula->accept(shuffleVisitor));
 #   endif
 
-    if (options.serializeMona) {
-        std::string path(inputFileName);
-        MonaSerializer serializer(path.substr(0, path.find_last_of(".")) + "_serialized.mona", this->_monaAST->formula);
-    }
-
     if (!options.monaWalk) {
         SecondOrderRestricter restricter;
         this->_monaAST->formula = static_cast<ASTForm*>((this->_monaAST->formula)->accept(restricter));
@@ -321,6 +317,15 @@ void Checker::PreprocessFormula() {
         ContinuationSwitcher continuationSwitcher;
         (this->_monaAST->formula)->accept(continuationSwitcher);
 #       endif
+    }
+
+    if (options.serializeMona) {
+        std::string path(inputFileName);
+        ASTForm* forSerializationFormula;
+        Derestricter derestricter;
+        // Fixme: Leak
+        forSerializationFormula = static_cast<ASTForm*>(((this->_monaAST)->formula->clone())->accept(derestricter));
+        MonaSerializer serializer(path.substr(0, path.find_last_of(".")) + "_serialized.mona", forSerializationFormula);
     }
 
     Tagger tagger(tags);

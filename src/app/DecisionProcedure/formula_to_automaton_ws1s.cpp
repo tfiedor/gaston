@@ -770,6 +770,13 @@ void toMonaAutomaton(ASTForm* form, DFA*& dfa, bool minimize) {
 	// Conversion of formula representation from AST to DAG
 	codeTable = new CodeTable;
 	VarCode formulaCode = form->makeCode();
+
+	// Reduce the formula by MONA optimizations
+	// Note that we pass the dummy list as simplification so we can call the
+	//   reduceAll method, instead of setting the reduction phases by ourselves.
+	Deque<VarCode> dummyList;
+	formulaCode.reduceAll(&dummyList);
+
 #   if (DEBUG_MONA_CODE_FORMULA == true)
 	std::cout << "[!] Transformed formula to DAG\n";
 	formulaCode.dump();
