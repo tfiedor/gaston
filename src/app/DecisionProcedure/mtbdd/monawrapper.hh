@@ -594,14 +594,17 @@ public:
                 final.insert(i);
 #               if (MEASURE_AUTOMATA_CYCLES == true)
                 bool zero_cycle = false, one_cycle = false;
-                for(auto node : roots_[i]->pred_[0]) {
-                    if(is_leaf(*node) && node->node_ == i) {
-                        zero_cycle = true;
+                if(roots_[i] != nullptr) {
+                // ^---- i assume that roots_[i] means that there is no pre
+                    for (auto node : roots_[i]->pred_[0]) {
+                        if (is_leaf(*node) && node->node_ == i) {
+                            zero_cycle = true;
+                        }
                     }
-                }
-                for(auto node : roots_[i]->pred_[1]) {
-                    if(is_leaf(*node) && node->node_ == i) {
-                        one_cycle = true;
+                    for (auto node : roots_[i]->pred_[1]) {
+                        if (is_leaf(*node) && node->node_ == i) {
+                            one_cycle = true;
+                        }
                     }
                 }
 
