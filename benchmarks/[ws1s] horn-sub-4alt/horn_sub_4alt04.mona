@@ -1,2 +1,0 @@
-ws1s;
-ex2 X: all2 X1: ex2 X2: all2 X3: ex2  X4: ~(( (X1 sub X & X1 ~= X2) => X2 sub X) & ( (X2 sub X & X2 ~= X3) => X3 sub X) & ( (X3 sub X & X3 ~= X4) => X4 sub X));

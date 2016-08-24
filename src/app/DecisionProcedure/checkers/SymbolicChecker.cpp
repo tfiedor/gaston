@@ -2,6 +2,7 @@
 // Created by Raph on 02/02/2016.
 //
 
+#include <ostream>
 #include <csignal>
 #include "SymbolicChecker.h"
 #include "../containers/Term.h"
@@ -251,8 +252,14 @@ bool SymbolicChecker::Run() {
 
 #   if (DEBUG_FIXPOINT == true)
     std::cout << "[!] Finished deciding WS1S formula with following fixpoint:\n";
-    if(fixpoint != nullptr)
+    if(fixpoint != nullptr) {
         fixpoint->dump();
+#       if (DEBUG_GENERATE_DOT_FIXPOINT == true)
+        std::ofstream os;
+        os.open(std::string("fixpoint.dot"));
+        Term::ToDot(fixpoint, os);
+#       endif
+    }
     std::cout << "\n";
 #   endif
 

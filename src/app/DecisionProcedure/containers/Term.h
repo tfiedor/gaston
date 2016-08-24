@@ -140,6 +140,8 @@ public:
 
     // <<< DUMPING FUNCTIONS >>>
     virtual void dump(unsigned indent = 0);
+    virtual std::string DumpToDot(std::ostream&) = 0;
+    static void ToDot(Term*, std::ostream&);
 protected:
     // <<< PRIVATE FUNCTIONS >>>
     template<class ProductType>
@@ -172,6 +174,7 @@ public:
     bool IsEmpty();
 
     // <<< DUMPING FUNCTIONS >>>
+    std::string DumpToDot(std::ostream&);
 private:
     void _dumpCore(unsigned indent = 0);
     bool _eqCore(const Term&);
@@ -206,6 +209,7 @@ public:
     bool IsEmpty();
 
     // <<< DUMPING FUNCTIONS >>>
+    std::string DumpToDot(std::ostream&);
 private:
     void _dumpCore(unsigned indent = 0);
     bool _eqCore(const Term&);
@@ -240,6 +244,7 @@ public:
     bool IsEmpty();
 
     // <<< DUMPING FUNCTIONS >>>
+    std::string DumpToDot(std::ostream&);
 private:
     void _dumpCore(unsigned indent = 0);
     bool _eqCore(const Term&);
@@ -279,6 +284,7 @@ public:
     Term_ptr operator[](size_t);
 
     // <<< DUMPING FUNCTIONS >>>
+    std::string DumpToDot(std::ostream&);
 private:
     void _InitNaryProduct(ProductType, size_t);
     void _dumpCore(unsigned indent = 0);
@@ -314,7 +320,8 @@ public:
     SubsumedType IsSubsumedBy(FixpointType& fixpoint, WorklistType& worklist, Term*&, bool no_prune = false);
     bool IsEmpty();
 
-    // <<< DUMPING FUNCTIONS >>>
+    // <<< DUMPING FUNCTIONS >>
+    std::string DumpToDot(std::ostream&);
 private:
     void _dumpCore(unsigned indent = 0);
     bool _eqCore(const Term&);
@@ -358,6 +365,7 @@ public:
     Term* GetUnfoldedTerm() {return this->_unfoldedTerm; }
     Term* unfoldContinuation(UnfoldedIn);
 
+    std::string DumpToDot(std::ostream&);
 protected:
     // <<< DUMPING FUNCTIONS >>>
     void _dumpCore(unsigned indent = 0);
@@ -387,6 +395,7 @@ public:
     bool IsEmpty();
 
     // <<< DUMPING FUNCTIONS >>>
+    std::string DumpToDot(std::ostream&);
 private:
     void _dumpCore(unsigned indent = 0);
 
@@ -614,6 +623,7 @@ public:
     iterator* GetIteratorDynamic() { return new iterator(*this); }
 
     // <<< DUMPING FUNCTIONS >>>
+    std::string DumpToDot(std::ostream&);
 protected:
     void _dumpCore(unsigned indent = 0);
     static bool _compareSymbols(const TermFixpoint&, const TermFixpoint&);

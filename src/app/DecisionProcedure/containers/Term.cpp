@@ -15,6 +15,7 @@
 #include "Term.h"
 #include "TermEnumerator.h"
 #include "../environment.hh"
+#include <sstream>
 #include <boost/functional/hash.hpp>
 #include <future>
 #include <algorithm>
@@ -1741,11 +1742,43 @@ void TermNaryProduct::_dumpCore(unsigned int indent) {
     std::cout << "\033[" << product_colour << "}\033[0m";
 }
 
+void base_to_stream(TermBaseSet* base, std::ostream& os) {
+    size_t start = 0, end = 0;
+    bool first = true;
+    for (auto state : base->states) {
+        if(start != 0 && end == state - 1) {
+            end = state;
+            continue;
+        } else if(start != 0) {
+            if(first) {
+                first = false;
+            } else {
+                os << ", ";
+            }
+
+            if (start == end) {
+                os << start;
+            } else {
+                os << start << ".." << end;
+            }
+        }
+        start = state;
+        end = state;
+    }
+
+    if(!first) {
+        os << ", ";
+    }
+    if (start == end) {
+        os << start;
+    } else {
+        os << start << ".." << end;
+    }
+}
+
 void TermBaseSet::_dumpCore(unsigned indent) {
     std::cout << "\033[1;35m{";
-    for (auto state : this->states) {
-        std::cout << (state) << ",";
-    }
+    base_to_stream(this, std::cout);
     std::cout << "}\033[0m";
 }
 
@@ -2624,4 +2657,120 @@ bool TermFixpoint::_compareSymbols(const TermFixpoint& lhs, const TermFixpoint& 
         }
     }
     return true;
+}
+
+/**
+ * Dumping functions to .dot
+ */
+std::string TermEmpty::DumpToDot(std::ostream& dot_out) {
+    static size_t term_no = 0;
+    std::string term_name = std::string("te") + std::to_string(term_no++);
+
+    dot_out << "\t" << term_name << "[label=\"\u2205\"];\n";
+
+    return term_name;
+}
+
+std::string TermProduct::DumpToDot(std::ostream& dot_out) {
+    static size_t term_no = 0;
+    std::string term_name = std::string("tp") + std::to_string(term_no++);
+    dot_out << "\t" << term_name << "[label=\"" << ProductTypeToTermSymbol(GET_PRODUCT_SUBTYPE(this)) << "\"];\n";
+
+    std::string left_mem = this->left->DumpToDot(dot_out);
+    std::string right_mem = this->right->DumpToDot(dot_out);
+
+    dot_out << "\t" << term_name << " -- " << left_mem << " [label=\"lhs\"];\n";
+    dot_out << "\t" << term_name << " -- " << right_mem << " [label=\"rhs\"];\n";
+
+    return term_name;
+}
+
+std::string TermTernaryProduct::DumpToDot(std::ostream& dot_out) {
+    static size_t term_no = 0;
+    std::string term_name = std::string("ttp") + std::to_string(term_no++);
+    dot_out << "\t" << term_name << " [label=\"" << ProductTypeToTermSymbol(GET_PRODUCT_SUBTYPE(this)) << "\"];\n";
+
+    std::string left_mem = this->left->DumpToDot(dot_out);
+    std::string middle_mem = this->middle->DumpToDot(dot_out);
+    std::string right_mem = this->right->DumpToDot(dot_out);
+
+    dot_out << "\t" << term_name << " -- " << left_mem << " [label=\"lhs\"];\n";
+    dot_out << "\t" << term_name << " -- " << middle_mem << " [label=\"mhs\"];\n";
+    dot_out << "\t" << term_name << " -- " << right_mem << " [label=\"rhs\"];\n";
+
+    return term_name;
+}
+
+std::string TermNaryProduct::DumpToDot(std::ostream& dot_out) {
+    static size_t term_no = 0;
+    std::string term_name = std::string("tnp") + std::to_string(term_no++);
+    dot_out << "\t" << term_name << " [label=\"" << ProductTypeToTermSymbol(GET_PRODUCT_SUBTYPE(this)) << "\"];\n";
+
+    for(size_t i = 0; i < this->arity; ++i) {
+        std::string member = this->terms[i]->DumpToDot(dot_out);
+        dot_out << "\t" << term_name << " -- " << member << " [label=\"" << std::to_string(i) << "hs\"];\n";
+    }
+
+    return term_name;
+}
+
+std::string TermBaseSet::DumpToDot(std::ostream& dot_out) {
+    static size_t term_no = 0;
+    std::string term_name = std::string("tbs") + std::to_string(term_no++);
+
+    // Fixme: Better output
+    std::ostringstream oss;
+    base_to_stream(this, oss);
+    dot_out << "\t" << term_name << " [label=\"" << (this->InComplement() ? "~" : "") << "{" << oss.str() << "}\"];\n";
+
+    return term_name;
+}
+
+std::string TermContinuation::DumpToDot(std::ostream& dot_out) {
+    static size_t term_no = 0;
+
+    assert(false && "Missing implementation of 'DumpToDot' for TermContinuation");
+    return std::string("tc") + std::to_string(term_no++);
+}
+
+std::string TermList::DumpToDot(std::ostream& dot_out) {
+    static size_t term_no = 0;
+    std::string term_name = std::string("tl") + std::to_string(term_no++);
+
+    dot_out << "\t" << term_name << " [label=\"" << (this->InComplement() ? "~" : "") << "L\"];\n";
+    for(Term* item : this->list) {
+        std::string member = item->DumpToDot(dot_out);
+        dot_out << "\t" << term_name << " -- " << member << "\n";
+    }
+
+    return term_name;
+}
+
+std::string TermFixpoint::DumpToDot(std::ostream& dot_out) {
+    static size_t term_no = 0;
+    std::string term_name = std::string("tf") + std::to_string(term_no++);
+
+    dot_out << "\t" << term_name << " [label=\"" << (this->InComplement() ? "~" : "") << "F\"];\n";
+    for(auto item : this->_fixpoint) {
+        if(item.first == nullptr || !item.second)
+            continue;
+        std::string member = item.first->DumpToDot(dot_out);
+        dot_out << "\t" << term_name << " -- " << member << "\n";
+    }
+
+#   if (DEBUG_NO_DOT_WORKLIST == false)
+    for(auto item : this->_worklist) {
+        std::string worklisted = item.first->DumpToDot(dot_out);
+        // Fixme: Add symbol output
+        dot_out << "\t" << term_name << " -- " << worklisted << " [style=\"dashed\"];\n";
+    }
+#   endif
+
+    return term_name;
+}
+
+void Term::ToDot(Term* term, std::ostream& stream) {
+    stream << "strict graph aut {\n";
+    term->DumpToDot(stream);
+    stream << "}\n";
 }

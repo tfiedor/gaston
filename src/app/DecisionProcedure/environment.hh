@@ -255,7 +255,7 @@ public:
 #define DEBUG_MONA_DFA					false
 #define DEBUG_MONA_CODE_FORMULA			false
 #define DEBUG_RESTRICTIONS				false
-#define DEBUG_FIXPOINT 				    false
+#define DEBUG_FIXPOINT 				    true
 #define DEBUG_FIXPOINT_WORKLIST		    true
 #define DEBUG_FIXPOINT_SYMBOLS		    false
 #define DEBUG_FIXPOINT_SYMBOLS_INIT     false
@@ -274,6 +274,8 @@ public:
 #define DEBUG_NO_WORKSHOPS				false
 #define DEBUG_PRE					    false
 #define DEBUG_GENERATE_DOT_AUTOMATON	true
+#define DEBUG_GENERATE_DOT_FIXPOINT     true
+#define DEBUG_NO_DOT_WORKLIST           false
 #define DEBUG_COMPUTE_FULL_FIXPOINT 	false
 #define DEBUG_COMPARE_WORKLISTS		    true
 #define DEBUG_VARMAP					false
