@@ -58,25 +58,23 @@ class DagCompare;
 /***********************
  * GLOBAL ENUMERATIONS *
  ***********************/
-enum Decision {SATISFIABLE, UNSATISFIABLE, VALID, INVALID, UNKNOWN};
-enum AutType {SYMBOLIC_BASE, ROOT_PROJECTION, BASE, COMPLEMENT,
+enum class Decision {SATISFIABLE, UNSATISFIABLE, VALID, INVALID, UNKNOWN};
+enum class AutType {BASE, COMPLEMENT,
 	BINARY, TERNARY, NARY,
 	INTERSECTION, TERNARY_INTERSECTION, NARY_INTERSECTION,
 	UNION, TERNARY_UNION, NARY_UNION,
 	IMPLICATION, TERNARY_IMPLICATION, NARY_IMPLICATION,
 	BIIMPLICATION, TERNARY_BIIMPLICATION, NARY_BIIMPLICATION,
-	PROJECTION};
-enum StatesSetType {E_INITIAL, E_FINAL};
-enum TermType {TERM_PRODUCT, TERM_TERNARY_PRODUCT, TERM_NARY_PRODUCT, TERM, TERM_EMPTY, TERM_BASE, TERM_FIXPOINT,
-	TERM_LIST, TERM_CONTINUATION};
-enum FixpointTermSem {E_FIXTERM_FIXPOINT, E_FIXTERM_PRE};
-enum ComparisonType {E_BY_SAME_PTR, E_BY_DIFFERENT_TYPE, E_BY_STRUCTURE};
-enum UnfoldedInType {E_IN_SUBSUMPTION, E_IN_ISECT_NONEMPTY, E_IN_COMPARISON, E_IN_NOWHERE};
-enum SubsumptionResult {E_FALSE, E_TRUE, E_PARTIALLY, E_DISJUNCTIVE, E_TRUE_BUT_WORKLIST};
-enum ExampleType {SATISFYING, UNSATISFYING};
-enum WorklistSearchType {E_BFS, E_DFS, E_UNGROUND_ROOT};
+	PROJECTION, ROOT_PROJECTION};
+enum class TermType {PRODUCT, TERNARY_PRODUCT, NARY_PRODUCT, EMPTY, BASE, FIXPOINT, LIST, CONTINUATION};
+enum class StatesSetType {INITIAL, FINAL};
+enum class FixpointSemanticType {FIXPOINT, PRE};
+enum class UnfoldedIn {SUBSUMPTION, ISECT_NONEMPTY, COMPARISON, NOWHERE};
+enum class SubsumedType {NOT, YES, PARTIALLY};
+enum class ExampleType {SATISFYING, UNSATISFYING};
+enum class WorklistSearchType {BFS, DFS, UNGROUND_ROOT};
+enum class ProductType {INTERSECTION, UNION, IMPLICATION, BIIMPLICATION};
 
-enum class ProductType {E_INTERSECTION, E_UNION, E_IMPLICATION, E_BIIMPLICATION};
 static const char* ProductTypeColours[] = {"1;32m", "1;33m", "1;36m", "1;37m"};
 static const char* ProductTypeAutomataSymbols[] = {"\u2229", "\u222A", "\u2192", "\u2194"};
 static const char* ProductTypeTermSymbols[] = {"\u2293", "\u2294", "\u21FE", "\u21FF"};
@@ -96,13 +94,13 @@ inline const char* ProductTypeToTermSymbol(int type) {
 inline ProductType IntToProductType(int type) {
 	switch(type) {
 		case 0:
-			return ProductType::E_INTERSECTION;
+			return ProductType::INTERSECTION;
 		case 1:
-			return ProductType::E_UNION;
+			return ProductType::UNION;
 		case 2:
-			return ProductType::E_IMPLICATION;
+			return ProductType::IMPLICATION;
 		case 3:
-			return ProductType::E_BIIMPLICATION;
+			return ProductType::BIIMPLICATION;
 	}
 }
 
@@ -138,8 +136,8 @@ namespace Gaston {
 	void dumpResultData(std::pair<Term_ptr, bool>& s);
 	void dumpTermKey(Term_ptr const& s);
 	void dumpSubsumptionKey(std::pair<Term_ptr, Term_ptr> const& s);
-	void dumpSubsumptionData(SubsumptionResult& s);
-	void dumpSubsumptionPairData(std::pair<SubsumptionResult, Term_ptr>&s);
+	void dumpSubsumptionData(SubsumedType& s);
+	void dumpSubsumptionPairData(std::pair<SubsumedType, Term_ptr>&s);
 	void dumpSetPreKey(std::pair<VarList, Symbol_ptr> const& s);
 	void dumpPreKey(std::pair<size_t, Symbol_ptr> const& s);
 	void dumpPreData(Term_ptr& s);
@@ -151,17 +149,17 @@ namespace Gaston {
 	void dumpDagData(SymbolicAutomaton*& s);
 	void dumpEnumKey(TermEnumerator* const& s);
 
-	using TermCache				 = BinaryCache<Term_raw, SubsumptionResult, TermHash, TermCompare, dumpTermKey, dumpSubsumptionData>;
+	using TermCache				 = BinaryCache<Term_raw, SubsumedType, TermHash, TermCompare, dumpTermKey, dumpSubsumptionData>;
 	using ResultKey				 = std::pair<Term_raw, Symbol_ptr>;
 	using ResultCache            = BinaryCache<ResultKey, ResultType, ResultHashType, PairCompare<ResultKey>, dumpResultKey, dumpResultData>;
 	using SubsumptionKey		 = std::pair<Term_raw, Term_raw>;
-	using SubsumptionResultPair  = std::pair<SubsumptionResult, Term_raw>;
+	using SubsumptionResultPair  = std::pair<SubsumedType, Term_raw>;
 	using SubsumptionCache       = BinaryCache<SubsumptionKey, SubsumptionResultPair, SubsumptionHashType, PairCompare<SubsumptionKey>, dumpSubsumptionKey, dumpSubsumptionPairData>;
 	using DagKey				 = Formula_ptr;
 	using DagData				 = SymbolicAutomaton*;
 	using DagNodeCache			 = BinaryCache<DagKey, DagData, DagHashType, DagCompare<DagKey>, dumpDagKey, dumpDagData>;
 	using EnumKey				 = TermEnumerator*;
-	using EnumSubsumesCache		 = BinaryCache<EnumKey, SubsumptionResult, boost::hash<EnumKey>, std::equal_to<EnumKey>, dumpEnumKey, dumpSubsumptionData>;
+	using EnumSubsumesCache		 = BinaryCache<EnumKey, SubsumedType, boost::hash<EnumKey>, std::equal_to<EnumKey>, dumpEnumKey, dumpSubsumptionData>;
 
 	using WorkListTerm           = Term;
 	using WorkListTerm_raw       = Term*;
@@ -364,7 +362,7 @@ public:
 #define OPT_EQ_THROUGH_POINTERS				true    // < Test equality through pointers, not by structure
 #define OPT_GENERATE_UNIQUE_TERMS			true	// < Use Workshops to generate unique pointers
 // ^- NOTE! From v1.0 onwards, disable this will introduce not only leaks, but will fuck everything up!
-#define OPT_USE_CUSTOM_PTR_HASH				false	// < Will use the custom implementation of hash function instead of boost::hash
+#define OPT_USE_CUSTOM_PTR_HASH				false  	// < Will use the custom implementation of hash function instead of boost::hash
 #define OPT_TERM_HASH_BY_APPROX				true	// < Include stateSpaceApprox into hash (i.e. better distribution of cache)
 #define OPT_SYMBOL_HASH_BY_APPROX			true    // < Will hash symbol by pointers
 #define OPT_ANTIPRENEXING					true	// < Transform formula to anti-prenex form (i.e. all of the quantifiers are deepest on leaves)

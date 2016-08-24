@@ -118,9 +118,9 @@ public:
 
 public:
     // <<< PUBLIC API >>>
-    virtual SubsumptionResult IsSubsumedBy(FixpointType& fixpoint, WorklistType& worklist, Term*&, bool no_prune = false) = 0;
-    virtual SubsumptionResult IsSubsumed(Term* t, int limit, Term** new_term = nullptr, bool b = false);
-    virtual SubsumptionResult Subsumes(TermEnumerator*);
+    virtual SubsumedType IsSubsumedBy(FixpointType& fixpoint, WorklistType& worklist, Term*&, bool no_prune = false) = 0;
+    virtual SubsumedType IsSubsumed(Term* t, int limit, Term** new_term = nullptr, bool b = false);
+    virtual SubsumedType Subsumes(TermEnumerator*);
     virtual bool IsEmpty() = 0;
     virtual void Complement();
     virtual bool InComplement() {return GET_IN_COMPLEMENT(this);}
@@ -143,13 +143,13 @@ public:
 protected:
     // <<< PRIVATE FUNCTIONS >>>
     template<class ProductType>
-    SubsumptionResult _ProductIsSubsumedBy(FixpointType&, WorklistType&, Term*&, bool no_prune = false);
+    SubsumedType _ProductIsSubsumedBy(FixpointType&, WorklistType&, Term*&, bool no_prune = false);
 
     virtual unsigned int _MeasureStateSpaceCore() = 0;
-    virtual SubsumptionResult _IsSubsumedCore(Term* t, int limit, Term** new_term = nullptr, bool b = false) = 0;
+    virtual SubsumedType _IsSubsumedCore(Term* t, int limit, Term** new_term = nullptr, bool b = false) = 0;
     virtual void _dumpCore(unsigned indent = 0) = 0;
     virtual bool _eqCore(const Term&) = 0;
-    virtual SubsumptionResult _SubsumesCore(TermEnumerator*);
+    virtual SubsumedType _SubsumesCore(TermEnumerator*);
 
     friend size_t hash_value(Term* s);
     friend std::ostream& operator <<(std::ostream& osObject, Term& z);
@@ -168,7 +168,7 @@ public:
     NEVER_INLINE ~TermEmpty() {}
 
     // <<< PUBLIC API >>>
-    SubsumptionResult IsSubsumedBy(FixpointType& fixpoint, WorklistType& worklist, Term*&, bool no_prune = false);
+    SubsumedType IsSubsumedBy(FixpointType& fixpoint, WorklistType& worklist, Term*&, bool no_prune = false);
     bool IsEmpty();
 
     // <<< DUMPING FUNCTIONS >>>
@@ -178,7 +178,7 @@ private:
 
     // <<< PRIVATE FUNCTIONS >>>
     unsigned int _MeasureStateSpaceCore();
-    SubsumptionResult _IsSubsumedCore(Term* t, int limit, Term** new_term = nullptr, bool b = false);
+    SubsumedType _IsSubsumedCore(Term* t, int limit, Term** new_term = nullptr, bool b = false);
 };
 
 /**
@@ -202,7 +202,7 @@ public:
     NEVER_INLINE ~TermProduct();
 
     // <<< PUBLIC API >>>
-    SubsumptionResult IsSubsumedBy(FixpointType& fixpoint, WorklistType& worklist, Term*&, bool no_prune = false);
+    SubsumedType IsSubsumedBy(FixpointType& fixpoint, WorklistType& worklist, Term*&, bool no_prune = false);
     bool IsEmpty();
 
     // <<< DUMPING FUNCTIONS >>>
@@ -213,8 +213,8 @@ private:
 private:
     // <<< PRIVATE FUNCTIONS >>>
     unsigned int _MeasureStateSpaceCore();
-    SubsumptionResult _IsSubsumedCore(Term* t, int limit, Term** new_term = nullptr, bool b = false);
-    SubsumptionResult _SubsumesCore(TermEnumerator*);
+    SubsumedType _IsSubsumedCore(Term* t, int limit, Term** new_term = nullptr, bool b = false);
+    SubsumedType _SubsumesCore(TermEnumerator*);
 };
 
 class TermTernaryProduct : public Term {
@@ -236,7 +236,7 @@ public:
     NEVER_INLINE ~TermTernaryProduct();
 
     // <<< PUBLIC API >>>
-    SubsumptionResult IsSubsumedBy(FixpointType&, WorklistType& worklist, Term*&, bool no_prune = false);
+    SubsumedType IsSubsumedBy(FixpointType&, WorklistType& worklist, Term*&, bool no_prune = false);
     bool IsEmpty();
 
     // <<< DUMPING FUNCTIONS >>>
@@ -246,8 +246,8 @@ private:
 
     // <<< PRIVATE FUNCTIONS >>>
     unsigned int _MeasureStateSpaceCore();
-    SubsumptionResult _IsSubsumedCore(Term* t, int limit, Term** new_term = nullptr, bool b = false);
-    SubsumptionResult _SubsumesCore(TermEnumerator*);
+    SubsumedType _IsSubsumedCore(Term* t, int limit, Term** new_term = nullptr, bool b = false);
+    SubsumedType _SubsumesCore(TermEnumerator*);
 };
 
 class TermNaryProduct : public Term {
@@ -274,7 +274,7 @@ public:
     NEVER_INLINE ~TermNaryProduct();
 
     // <<< PUBLIC API >>>
-    SubsumptionResult IsSubsumedBy(FixpointType&, WorklistType& worklist, Term*&, bool no_prune = false);
+    SubsumedType IsSubsumedBy(FixpointType&, WorklistType& worklist, Term*&, bool no_prune = false);
     bool IsEmpty();
     Term_ptr operator[](size_t);
 
@@ -286,8 +286,8 @@ private:
 
     // <<< PRIVATE FUNCTIONS >>>
     unsigned int _MeasureStateSpaceCore();
-    SubsumptionResult _IsSubsumedCore(Term* t, int limit, Term** new_term = nullptr, bool b = false);
-    SubsumptionResult _SubsumesCore(TermEnumerator*);
+    SubsumedType _IsSubsumedCore(Term* t, int limit, Term** new_term = nullptr, bool b = false);
+    SubsumedType _SubsumesCore(TermEnumerator*);
 };
 
 /**
@@ -311,7 +311,7 @@ public:
 
     // <<< PUBLIC API >>>
     bool Intersects(TermBaseSet* rhs);
-    SubsumptionResult IsSubsumedBy(FixpointType& fixpoint, WorklistType& worklist, Term*&, bool no_prune = false);
+    SubsumedType IsSubsumedBy(FixpointType& fixpoint, WorklistType& worklist, Term*&, bool no_prune = false);
     bool IsEmpty();
 
     // <<< DUMPING FUNCTIONS >>>
@@ -322,8 +322,8 @@ private:
 private:
     // <<< PRIVATE FUNCTIONS >>>
     unsigned int _MeasureStateSpaceCore();
-    SubsumptionResult _IsSubsumedCore(Term* t, int limit, Term** newTerm = nullptr, bool b = false);
-    SubsumptionResult _SubsumesCore(TermEnumerator*);
+    SubsumedType _IsSubsumedCore(Term* t, int limit, Term** newTerm = nullptr, bool b = false);
+    SubsumedType _SubsumesCore(TermEnumerator*);
 };
 
 /**
@@ -352,11 +352,11 @@ public:
     NEVER_INLINE TermContinuation(Aut_ptr, SymLink*, SymbolicAutomaton*, Term*, SymbolType*, bool, bool lazy = false);
 
     // <<< PUBLIC API >>>
-    SubsumptionResult IsSubsumedBy(FixpointType& fixpoint, WorklistType& worklist, Term*&, bool no_prune = false);
+    SubsumedType IsSubsumedBy(FixpointType& fixpoint, WorklistType& worklist, Term*&, bool no_prune = false);
     bool IsUnfolded() {return this->_unfoldedTerm != nullptr;}
     bool IsEmpty();
     Term* GetUnfoldedTerm() {return this->_unfoldedTerm; }
-    Term* unfoldContinuation(UnfoldedInType);
+    Term* unfoldContinuation(UnfoldedIn);
 
 protected:
     // <<< DUMPING FUNCTIONS >>>
@@ -365,7 +365,7 @@ protected:
     // <<< PRIVATE FUNCTIONS >>>
     unsigned int _MeasureStateSpaceCore();
     bool _eqCore(const Term&);
-    SubsumptionResult _IsSubsumedCore(Term* t, int limit, Term** new_term = nullptr, bool b = false);
+    SubsumedType _IsSubsumedCore(Term* t, int limit, Term** new_term = nullptr, bool b = false);
 };
 
 /**
@@ -383,7 +383,7 @@ public:
     NEVER_INLINE TermList(Aut_ptr, Term_ptr first, bool isCompl);
 
     // <<< PUBLIC API >>>
-    SubsumptionResult IsSubsumedBy(FixpointType& fixpoint, WorklistType& worklist, Term*&, bool no_prune = false);
+    SubsumedType IsSubsumedBy(FixpointType& fixpoint, WorklistType& worklist, Term*&, bool no_prune = false);
     bool IsEmpty();
 
     // <<< DUMPING FUNCTIONS >>>
@@ -393,7 +393,7 @@ private:
 private:
     // <<< PRIVATE FUNCTIONS >>>
     unsigned int _MeasureStateSpaceCore();
-    SubsumptionResult _IsSubsumedCore(Term* t, int limit, Term** new_term = nullptr, bool b = false);
+    SubsumedType _IsSubsumedCore(Term* t, int limit, Term** new_term = nullptr, bool b = false);
     bool _eqCore(const Term&);
 };
 
@@ -441,7 +441,7 @@ public:
 
             } else {
                 // we need to refine the fixpoint
-                if (E_FIXTERM_FIXPOINT == _termFixpoint.GetSemantics()) {
+                if (FixpointSemanticType::FIXPOINT == _termFixpoint.GetSemantics()) {
                     // we need to unfold the fixpoint
                     if (_termFixpoint._worklist.empty()) {
                         // nothing to fold?
@@ -466,7 +466,7 @@ public:
                     }
                 } else {
                     // we need to compute pre of another guy
-                    assert(E_FIXTERM_PRE == _termFixpoint.GetSemantics());
+                    assert(FixpointSemanticType::PRE == _termFixpoint.GetSemantics());
 
                     if (_termFixpoint._worklist.empty()) {
                         Term_ptr term = nullptr;
@@ -594,9 +594,9 @@ public:
     NEVER_INLINE ~TermFixpoint();
 
     // <<< PUBLIC API >>>
-    FixpointTermSem GetSemantics() const;
+    FixpointSemanticType GetSemantics() const;
     bool IsEmpty();
-    SubsumptionResult IsSubsumedBy(FixpointType& fixpoint, WorklistType& worklist, Term*&, bool no_prune = false);
+    SubsumedType IsSubsumedBy(FixpointType& fixpoint, WorklistType& worklist, Term*&, bool no_prune = false);
     bool GetResult();
     ExamplePair GetFixpointExamples();
     bool IsFullyComputed() const;
@@ -627,12 +627,12 @@ protected:
     void _InitializeAggregateFunction(bool inComplement);
     bool _AggregateResult(bool, bool);
     void _InitializeSymbols(Workshops::SymbolWorkshop* form, Gaston::VarList*, IdentList*, Symbol*);
-    SubsumptionResult _IsSubsumedCore(Term* t, int limit, Term** new_term = nullptr, bool b = false);
-    std::pair<SubsumptionResult, Term_ptr> _fixpointTest(Term_ptr const& term);
-    std::pair<SubsumptionResult, Term_ptr> _testIfSubsumes(Term_ptr const& term);
-    std::pair<SubsumptionResult, Term_ptr> _testIfIn(Term_ptr const& term);
-    std::pair<SubsumptionResult, Term_ptr> _testIfBiggerExists(Term_ptr const& term);
-    std::pair<SubsumptionResult, Term_ptr> _testIfSmallerExists(Term_ptr const& term);
+    SubsumedType _IsSubsumedCore(Term* t, int limit, Term** new_term = nullptr, bool b = false);
+    std::pair<SubsumedType , Term_ptr> _fixpointTest(Term_ptr const& term);
+    std::pair<SubsumedType , Term_ptr> _testIfSubsumes(Term_ptr const& term);
+    std::pair<SubsumedType , Term_ptr> _testIfIn(Term_ptr const& term);
+    std::pair<SubsumedType , Term_ptr> _testIfBiggerExists(Term_ptr const& term);
+    std::pair<SubsumedType , Term_ptr> _testIfSmallerExists(Term_ptr const& term);
     bool _eqCore(const Term&);
     unsigned int _MeasureStateSpaceCore();
     WorklistItemType _popFromWorklist();

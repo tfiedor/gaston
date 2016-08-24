@@ -20,13 +20,13 @@
  */
 TermEnumerator* TermEnumerator::ConstructEnumerator(Term* term) {
     switch(term->type) {
-        case TermType::TERM_BASE:
+        case TermType::BASE:
             return new BaseEnumerator(static_cast<TermBaseSet*>(term));
-        case TermType::TERM_PRODUCT:
+        case TermType::PRODUCT:
             return new ProductEnumerator(static_cast<TermProduct*>(term));
-        case TermType::TERM_TERNARY_PRODUCT:
+        case TermType::TERNARY_PRODUCT:
             return new TernaryProductEnumerator(static_cast<TermTernaryProduct*>(term));
-        case TermType::TERM_NARY_PRODUCT:
+        case TermType::NARY_PRODUCT:
             return new NaryProductEnumerator(static_cast<TermNaryProduct*>(term));
         default:
             return new GenericEnumerator(term);
@@ -140,7 +140,7 @@ BaseEnumerator::BaseEnumerator(TermBaseSet* base)
         : _base(base),
           _iteratorPosition(0),
           _spaceSize(base->states.size()) {
-    assert(base->type == TermType::TERM_BASE);
+    assert(base->type == TermType::BASE);
     assert(base->states.size() > 0);
     this->type = EnumeratorType::BASE;
     this->_iterator = this->_base->states.begin();
@@ -327,7 +327,7 @@ void TernaryProductEnumerator::Reset() {
 NaryProductEnumerator::NaryProductEnumerator(TermNaryProduct* nary) : _arity(nary->arity) {
     assert(nary->arity > 0);
     assert(this->_arity > 0);
-    assert(nary->type == TERM_NARY_PRODUCT);
+    assert(nary->type == TermType::NARY_PRODUCT);
     this->type = EnumeratorType::NARY;
 
     this->_enums = new TermEnumerator*[this->_arity];

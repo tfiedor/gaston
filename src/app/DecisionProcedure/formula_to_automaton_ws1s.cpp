@@ -29,6 +29,7 @@
 #include "../Frontend/timer.h"
 
 #include "visitors/transformers/Derestricter.h"
+#include "visitors/transformers/ShuffleVisitor.h"
 
 #if (OPT_SMARTER_MONA_CONVERSION == true)
 #include "mtbdd/mtbddconverter2.hh"
@@ -753,6 +754,8 @@ void toMonaAutomaton(ASTForm* form, DFA*& dfa, bool minimize) {
 
 	Derestricter derestricter;
 	form = static_cast<ASTForm*>(form->accept(derestricter));
+	ShuffleVisitor shuffleVisitor;
+	form = static_cast<ASTForm*>(form->accept(shuffleVisitor));
 
 #   if (DEBUG_MONA_DFA == true)
     int numVars = varMap.TrackLength();

@@ -106,8 +106,9 @@ measures = {
             'time-replace': Measure("replace" + whatever_regex + time_regex, time_default, parse_total_time, False),
             'time-saturate': Measure("right-quotient" + whatever_regex + time_regex, time_default, parse_total_time, False),
             'time-negate': Measure("negate" + whatever_regex + time_regex, time_default, parse_total_time, False),
-            'space': Measure("minimizing" + whatever_regex + pair_regex + whatever_regex + pair_regex, space_default,
-                lambda parsed: sum([int(item[0]) for item in parsed]), True),
+            'space': Measure("total space" + whatever_regex + space_regex, space_default, int, False),
+#            'space': Measure("minimizing" + whatever_regex + pair_regex + whatever_regex + pair_regex, space_default,
+#                lambda parsed: sum([int(item[0]) for item in parsed]), True),
             'space-min': Measure(whatever_regex + "minimizing" + whatever_regex + pair_regex + whatever_regex + pair_regex, space_default,
                 lambda parsed: sum([int(item[2]) for item in parsed]), True),
             'bdd': Measure("minimizing" + whatever_regex + pair_regex + whatever_regex + pair_regex, space_default,
@@ -118,7 +119,7 @@ measures = {
 }
 
 csv_keys = {
-    'gaston': ['ret', 'time', 'space-all', 'space', 'cycles-all-final', 'cycles-some-final'],
+    'gaston': ['ret', 'time', 'space-all', 'space', 'space-mona', 'cycles-all-final', 'cycles-some-final'],
     'mona': ['time', 'space', 'space-min']
 }
 
@@ -161,7 +162,7 @@ def run_mona(test, timeout, params=[]):
     '''
     Runs MONA with following arguments:
     '''
-    args = ['mona', '-s', '-t', '-q', '"{}"'.format(test)]
+    args = ['./mona', '-s', '-t', '-q', '"{}"'.format(test)]
     output, retcode = runProcess(args, timeout)
     if(retcode != 0):
         if(retcode == 124):
@@ -396,18 +397,19 @@ def parse_arguments():
         return parser.parse_args()
 
 
-def get_fixpoint_number_for(benchmark):
+def get_fixpoint_number_for(benchmark, gaston_params):
     """
     Runs the Gaston in '--dry-run' mode and extract the maximal number of fixpoint nesting.
     Note that this is further used for experiment, when we run the formula numerous times
     with various -cfX values.
 
     @param benchmark: benchmark we dry running
+    @param gaston_params: additional gaston parameters
     @return: maximal fixpoint nesting in the @p benchmark
     """
     try:
         assert not benchmark.endswith('_serialized.mona')
-        args = ['./build/gaston', '--dry-run --serialize'] + ['"{}"'.format(benchmark)]
+        args = ['./build/gaston', '--dry-run --serialize'] + gaston_params + ['"{}"'.format(benchmark)]
         output, _ = runProcess(args, "1")
         return int(parse_measure('gaston', 'aut-max-fix-nest', output))
     except Exception as e:
@@ -446,7 +448,7 @@ def create_gnuplot_script(data, mona_data, benchmark):
     max_time = max(cf_data['time'] for cf_data in data)
     max_time = max(max_time, mona_data[0]['time'], mona_data[1]['time'])
     max_space = max(cf_data['space-all'] for cf_data in data)
-    max_space = max(max_space, mona_data[0]['space-min'], mona_data[1]['space-min'])
+    max_space = max(max_space, mona_data[0]['space'], mona_data[1]['space'])
 
     style_sheet = {
         'label': {
@@ -492,14 +494,14 @@ def create_gnuplot_script(data, mona_data, benchmark):
 
     script += 'set xlabel "Fixpoints Converted"\n'
     script += 'set ylabel "State space [states]"\n'
-    script += 'set ytics axis ({}, {}) nomirror\n'.format(mona_data[0]['space-min'], mona_data[1]['space-min'])
+    script += 'set ytics axis ({}, {}) nomirror\n'.format(mona_data[0]['space'], mona_data[1]['space'])
     script += 'set yrange [0:{}]\n'.format(max_space)
     script += 'plot "{0}.dat" using 1:3 title "Gaston all" with linespoints ls 1,\\\n'.format(benchmark)
     script += '     "{0}.dat" using 1:3:(sprintf("%d", $3)) title "" with labels {1[label][offset]} font "Times,12", \\\n'.format(benchmark, style_sheet)
     script += '     "{0}.dat" using 1:4 title "Gaston" with linespoints ls 1,\\\n'.format(benchmark)
     script += '     "{0}.dat" using 1:4:(sprintf("%d", $4)) title "" with labels {1[label][offset]} font "Times,12", \\\n'.format(benchmark, style_sheet)
-    script += '     {0} title "MONA (ser)" ls 2, \\\n'.format(mona_data[0]['space-min'])
-    script += '     {0} title "MONA" ls 3\n'.format(mona_data[1]['space-min'])
+    script += '     {0} title "MONA (ser)" ls 2, \\\n'.format(mona_data[0]['space'])
+    script += '     {0} title "MONA" ls 3\n'.format(mona_data[1]['space'])
     script += 'unset multiplot\n'
 
     # write to .dat file
@@ -561,7 +563,7 @@ if __name__ == '__main__':
                     continue
 
                 # obtain additional information for experiment
-                fixpoint_number = get_fixpoint_number_for(benchmark)
+                fixpoint_number = get_fixpoint_number_for(benchmark, options.gaston_params)
                 serialized_benchmark = get_serialized_benchmark_name(benchmark)
                 assert fixpoint_number > 0
 
@@ -570,7 +572,7 @@ if __name__ == '__main__':
 
                 mona_data, mona_ret = run_mona(serialized_benchmark, options.timeout, options.gaston_params)
                 mona_orig_data, mona_orig_ret = run_mona(benchmark, options.timeout, options.gaston_params)
-                assert mona_ret == mona_orig_ret or mona_ret == -1 or mona_orig_ret == -1
+                #assert mona_ret == mona_orig_ret or mona_ret == -1 or mona_orig_ret == -1
 
                 cf_data = []
                 for cf in range(0, fixpoint_number+1):

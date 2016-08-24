@@ -187,9 +187,9 @@ namespace Workshops {
             return rhs;
         } else if(lhs == rhs) {
             return lhs;
-        } else if(lhs->type == TermType::TERM_EMPTY) {
+        } else if(lhs->type == TermType::EMPTY) {
             return rhs;
-        } else if(rhs->type == TermType::TERM_EMPTY) {
+        } else if(rhs->type == TermType::EMPTY) {
             return lhs;
         } else {
             Term_ptr result;
@@ -311,7 +311,7 @@ namespace Workshops {
      * @return: unique pointer
      */
     Term* TermWorkshop::CreateList(Term_ptr const& startTerm, bool inComplement) {
-        if(startTerm->type == TERM_EMPTY) {
+        if(startTerm->type == TermType::EMPTY) {
             return startTerm;
         }
         #if (OPT_GENERATE_UNIQUE_TERMS == true && UNIQUE_LISTS == true)
@@ -365,7 +365,7 @@ namespace Workshops {
             assert(this->_fppCache != nullptr);
             assert(source != nullptr);
             Term_ptr unique_source = source;
-            if(source->type == TERM_FIXPOINT) {
+            if(source->type == TermType::FIXPOINT) {
                 TermFixpoint* fp = static_cast<TermFixpoint*>(source);
                 unique_source = this->GetUniqueFixpoint(fp);
             }
@@ -437,7 +437,7 @@ namespace Workshops {
                 this->_contCache->StoreIn(contKey, termPtr);
             }
             assert(termPtr != nullptr);
-            assert(termPtr->type == TERM_CONTINUATION);
+            assert(termPtr->type == TermType::CONTINUATION);
             Term* unfoldedPtr = static_cast<TermContinuation*>(termPtr)->GetUnfoldedTerm();
             return (unfoldedPtr == nullptr ? termPtr : unfoldedPtr);
         #else
@@ -503,7 +503,7 @@ namespace Workshops {
     NEVER_INLINE SymbolWorkshop::SymbolWorkshop() {
         this->_symbolCache = new SymbolCache();
         this->_trimmedSymbolCache = new SimpleSymbolCache();
-        this->_remappedSymbolCache = new SymbolCache();
+        this->_remappedSymbolCache = new RemapCache();
     }
 
     NEVER_INLINE SymbolWorkshop::~SymbolWorkshop() {
@@ -637,7 +637,7 @@ namespace Workshops {
     Symbol* SymbolWorkshop::CreateRemappedSymbol(Symbol* str, std::map<unsigned int, unsigned int>*& map, size_t tag) {
         // There should be Map of Ptr -> Ptr
         // Fixme: this could be optimized to something more sufficient, like removing the 'R' part?
-        auto symbolKey = std::make_tuple(str, tag, 'R');
+        auto symbolKey = std::make_pair(str, tag);
         Symbol* symPtr;
         if(!this->_remappedSymbolCache->retrieveFromCache(symbolKey, symPtr)) {
 #           if (OPT_USE_BOOST_POOL_FOR_ALLOC == true)
@@ -677,6 +677,10 @@ namespace Workshops {
     template<class DataType>
     void dumpDefaultData(DataType& data) {
         std::cout << (data);
+    }
+
+    void dumpRemapKey(RemapKey const& s) {
+        std::cout << "(" << (*s.first) << ", " << s.second << ")";
     }
 
     void dumpSymbolKey(SymbolKey const&s) {

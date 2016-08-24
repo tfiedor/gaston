@@ -18,30 +18,32 @@
 #include <string>
 #include <fstream>
 #include <boost/dynamic_bitset.hpp>
+#include <boost/pool/object_pool.hpp>
+
 
 extern VarToTrackMap varMap;
+
+struct WrappedNode
+{
+    std::unordered_set<struct WrappedNode *> pred_[2];
+    unsigned node_;
+    int var_;
+
+    WrappedNode(unsigned addr, int var = 0): node_(addr), var_(var)
+    {
+        ;
+    }
+
+    friend std::ostream &operator<<(std::ostream &out, const WrappedNode &rhs) {
+        out << rhs.node_ << "(" << (rhs.var_ & 0x1ffff) << ")";
+        return out;
+    }
+};
 
 template<class Data>
 class MonaWrapper
 {
 private:
-    struct WrappedNode
-    {
-        std::unordered_set<struct WrappedNode *> pred_[2];
-        unsigned node_;
-        int var_;
-
-        WrappedNode(unsigned addr, int var = 0): node_(addr), var_(var)
-        {
-            ;
-        }
-
-        friend std::ostream &operator<<(std::ostream &out, const WrappedNode &rhs) {
-            out << rhs.node_ << "(" << (rhs.var_ & 0x1ffff) << ")";
-            return out;
-        }
-    };
-
     struct HashType
     {
         size_t operator()(std::pair<struct WrappedNode *, Gaston::BitMask> const& set) const
@@ -98,6 +100,7 @@ protected:
     unsigned exploredState_;
     bool isRestriction_ = false;
     CacheType cache_;
+    static boost::object_pool<WrappedNode> nodePool_;
 
 public:
     static int _wrapperCount;
@@ -120,7 +123,8 @@ private:
         }
         else
         {
-            node = new WrappedNode(addr);
+            node = MonaWrapper<Data>::nodePool_.construct(addr);
+            //node = new WrappedNode(addr);
             internalNodes_.insert(std::make_pair(addr, node));
         }
 
@@ -132,7 +136,8 @@ private:
     {
         unsigned index;
 
-        leafNodes_[state] = new WrappedNode(state, 0xfffffffe);
+        leafNodes_[state] = MonaWrapper<Data>::nodePool_.construct(state,  0xfffffffe);
+        //leafNodes_[state] = new WrappedNode(state, 0xfffffffe);
         LOAD_index(&bddm->node_table[addr], index);
 
         if(index != BDD_LEAF_INDEX && varMap[index] == 0)
@@ -416,11 +421,6 @@ public:
 
     ~MonaWrapper()
     {
-        for(auto node: internalNodes_)
-            delete node.second;
-
-        for(auto leaf: leafNodes_)
-            delete leaf;
         delete[] this->masks_;
         delete[] this->symbolMasks_;
         dfaFree(this->dfa_);
@@ -647,5 +647,7 @@ template<class Data>
 size_t MonaWrapper<Data>::someStatesHasSomeCycles = 0;      // < Cumulative awerage that satisfy this condition
 #   endif
 
+template<class Data>
+boost::object_pool<WrappedNode> MonaWrapper<Data>::nodePool_;
 
 #endif // MONAWRAPPER_H

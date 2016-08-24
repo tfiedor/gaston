@@ -84,7 +84,7 @@ void FixpointGuide::_InitializeVars(ASTForm* form) {
  */
 GuideTip FixpointGuide::GiveTip(Term* term, Symbol* symbol) {
     // Empty terms are not enqueued in worklist
-    if(term->type == TERM_EMPTY) {
+    if(term->type == TermType::EMPTY) {
         return GuideTip::G_THROW;
     // The 0* chains are removed from the queue, so every zero string is not gonna be computed
     } else if(term->link->succ == nullptr && symbol->IsZeroString()) {
@@ -114,17 +114,17 @@ GuideTip FixpointGuide::GiveTip(Term* term, Symbol* symbol) {
  */
 TermBaseSet* get_base_states(Term* term) {
     assert(term != nullptr);
-    if(term->type == TermType::TERM_PRODUCT) {
+    if(term->type == TermType::PRODUCT) {
         TermProduct *tp = static_cast<TermProduct *>(term);
-        assert(tp->left->type == TermType::TERM_BASE);
+        assert(tp->left->type == TermType::BASE);
         return static_cast<TermBaseSet *>(tp->left);
-    } else if(term->type == TermType::TERM_TERNARY_PRODUCT) {
+    } else if(term->type == TermType::TERNARY_PRODUCT) {
         TermTernaryProduct *ttp = static_cast<TermTernaryProduct *>(term);
-        assert(ttp->left->type == TermType::TERM_BASE);
+        assert(ttp->left->type == TermType::BASE);
         return static_cast<TermBaseSet *>(ttp->left);
-    } else if(term->type == TermType::TERM_NARY_PRODUCT) {
+    } else if(term->type == TermType::NARY_PRODUCT) {
         TermNaryProduct *tnp = static_cast<TermNaryProduct *>(term);
-        assert(tnp->terms[0]->type == TermType::TERM_BASE);
+        assert(tnp->terms[0]->type == TermType::BASE);
         return static_cast<TermBaseSet *>(tnp->terms[0]);
     } else {
         assert(false && "We have something different than Product for giving tip");
@@ -140,9 +140,9 @@ TermBaseSet* get_base_states(Term* term) {
  */
 GuideTip FixpointGuide::GiveTip(Term* term) {
     assert(term != nullptr);
-    if(term->type == TermType::TERM_EMPTY) {
+    if(term->type == TermType::EMPTY) {
         return GuideTip::G_THROW;
-    } else if (this->_isQuantifierFree && this->_link != nullptr && this->_link->aut->type == AutType::BASE && term->type != TERM_EMPTY) {
+    } else if (this->_isQuantifierFree && this->_link != nullptr && this->_link->aut->type == AutType::BASE && term->type != TermType::EMPTY) {
         TermBaseSet* initial = static_cast<TermBaseSet*>(this->_link->aut->GetInitialStates());
         if (initial->Intersects(get_base_states(term))) {
             return GuideTip::G_PROJECT_ALL;

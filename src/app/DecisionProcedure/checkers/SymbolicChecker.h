@@ -21,7 +21,7 @@ protected:
     SymbolicAutomaton* _automaton;
 
     // <<< PRIVATE METHODS >>>
-    int _DecideCore(bool);
+    Decision _DecideCore(bool);
 };
 
 

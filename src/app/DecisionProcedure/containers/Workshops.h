@@ -95,6 +95,7 @@ namespace Workshops {
     using WorklistItemType  = std::pair<Term*, Symbol*>;
     using WorklistType      = std::list<WorklistItemType>;
     using ComputationKey    = TermFixpoint*;
+    using RemapKey          = std::pair<Symbol*, size_t>;
 
     void dumpBaseKey(BaseKey const&);
     void dumpProductKey(ProductKey const&);
@@ -110,6 +111,7 @@ namespace Workshops {
     void dumpDefaultKey(Key const&);
     template<class Data>
     void dumpDefaultData(Data&);
+    void dumpRemapKey(RemapKey const&);
 
     struct SimpleSymbolHash {
         size_t operator()(Symbol* const& s) const {
@@ -123,6 +125,20 @@ namespace Workshops {
             boost::hash_combine(seed, hash64shift(boost::hash_value(std::get<1>(set))));
             boost::hash_combine(seed, hash64shift(boost::hash_value(std::get<2>(set))));
             return seed;
+        }
+    };
+
+    struct RemappedSymbolHash {
+        size_t operator()(std::pair<Symbol*, size_t> const& s) const {
+            size_t seed = Gaston::hash_value_no_ptr(s.first);
+            boost::hash_combine(seed, boost::hash_value(s.second));
+            return seed;
+        }
+    };
+
+    struct RemappedKeyCompare : public std::binary_function<RemapKey, RemapKey, bool> {
+        bool operator()(RemapKey const& lhs, RemapKey const& rhs) const {
+            return lhs.first == rhs.first && lhs.second == rhs.second;
         }
     };
 
@@ -177,6 +193,7 @@ namespace Workshops {
 
     using SymbolCache       = BinaryCache<SymbolKey, Symbol*, SymbolKeyHashType, SymbolKeyCompare<SymbolKey>, dumpSymbolKey, dumpSymbolData>;
     using SimpleSymbolCache = BinaryCache<Symbol_ptr, Symbol_ptr, SimpleSymbolHash, SimpleSymbolComp, dumpDefaultKey, dumpDefaultData>;
+    using RemapCache        = BinaryCache<RemapKey, Symbol_ptr, RemappedSymbolHash, RemappedKeyCompare, dumpRemapKey, dumpSymbolData>;
     using BaseCache         = BinaryCache<BaseKey, CacheData, BaseHash, BaseCompare, dumpBaseKey, dumpCacheData>;
     using ProductCache      = BinaryCache<ProductKey, CacheData, ProductHash, ProductCompare, dumpProductKey, dumpCacheData>;
     using TernaryCache      = BinaryCache<TernaryKey, CacheData, TernaryKeyHashType, TernaryKeyCompare<TernaryKey>, dumpTernaryKey, dumpCacheData>;
@@ -235,7 +252,7 @@ namespace Workshops {
         Term* CreateNaryProduct(Term_ptr* const&, size_t, ProductType);
         Term* CreateBaseNaryProduct(SymLink*, size_t, StatesSetType, ProductType);
         Term* CreateUniqueNaryProduct(Term_ptr* const&, size_t, ProductType);
-        TermFixpoint* CreateFixpoint(Term_ptr const&, Symbol*, bool, bool, WorklistSearchType search = WorklistSearchType::E_DFS);
+        TermFixpoint* CreateFixpoint(Term_ptr const&, Symbol*, bool, bool, WorklistSearchType search = WorklistSearchType::DFS);
         TermFixpoint* CreateFixpointPre(Term_ptr const&, Symbol*, bool);
         TermFixpoint* GetUniqueFixpoint(TermFixpoint*&);
         Term* CreateList(Term_ptr const&, bool);
@@ -249,7 +266,7 @@ namespace Workshops {
     private:
         SymbolCache* _symbolCache = nullptr;
         SimpleSymbolCache* _trimmedSymbolCache = nullptr;
-        SymbolCache* _remappedSymbolCache = nullptr;
+        RemapCache* _remappedSymbolCache = nullptr;
         std::list<Symbol*> _trimmedSymbols;
         std::list<Symbol*> _remappedSymbols;
         Symbol* _CreateProjectedSymbol(Symbol*, VarType, ValType);

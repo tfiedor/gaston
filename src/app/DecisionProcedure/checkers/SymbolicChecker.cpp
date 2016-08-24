@@ -68,7 +68,7 @@ void SymbolicChecker::ConstructAutomaton() {
  *
  * @param[in] isValid:  true if the epsilon is in the language of the automaton
  */
-int SymbolicChecker::_DecideCore(bool isValid) {
+Decision SymbolicChecker::_DecideCore(bool isValid) {
     assert(this->_automaton != nullptr);
 
     if (this->_terminatedBySignal) {
