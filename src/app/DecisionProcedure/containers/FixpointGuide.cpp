@@ -27,49 +27,28 @@ std::ostream &operator<<(std::ostream &out, const FixpointGuide &rhs) {
 }
 
 /**
- * Initialize FixpointGuide out of the symlink
+ * @brief Constructs guide of the fixpoints that controls the computation
  *
- * @param[in] link:         SymLink to automaton that is wrapped by fixpoint guide
+ * Note: Currently the guide only throws aways 0* strings out of the computation.
+ * Note: Still this yields a huge gain
+ *
+ * @param[in]  identList  list of identifiers of quantified formula
  */
-FixpointGuide::FixpointGuide(SymLink *link, bool qf) : _link(link), _isQuantifierFree(qf) {
-    this->_InitializeVars(link->aut->_form);
+FixpointGuide::FixpointGuide(IdentList* identList) {
+    this->_InitializeVars(identList);
 }
 
 /**
- * Sets SymLink to the link
+ * @brief Initializes the fixpoint guide out of the list of variables
  *
- * @param[in] link:         Symlink to automaton that is wrapped by fixpoint guide
- */
-void FixpointGuide::SetAutomaton(SymLink* link) {
-    if(this->_link == nullptr) {
-        this->_link = link;
-        this->_InitializeVars(this->_link->aut->_form);
-    } else {
-        assert(false && "Trying to reinitialize Guide\n");
-    }
-}
-
-/**
- * Initilization of the variables from the formulae. The formula is recursively
- * traversed and first order variables are collected that are used to guide
- * the outer fixpoint computation
+ * Initializes the fixpoint with first order variables that are bound by fixpoint
  *
- * @param[in] form:         formula that guides the link
+ * @param[in]  vars  variables used for initialization from quantifier
  */
-void FixpointGuide::_InitializeVars(ASTForm* form) {
-    if(form->kind == aAnd || form->kind == aOr) {
-        ASTForm_ff* ff_form = static_cast<ASTForm_ff*>(form);
-        this->_InitializeVars(ff_form->f1);
-        this->_InitializeVars(ff_form->f2);
-    } else if(form->kind == aEx1 || form->kind == aEx2) {
-        this->_InitializeVars(static_cast<ASTForm_uvf*>(form)->f);
-    } else if(form->kind == aFirstOrder) {
-        ASTForm_FirstOrder* fo_form = static_cast<ASTForm_FirstOrder*>(form);
-        size_t var = static_cast<ASTTerm1_Var1*>(fo_form->t)->n;
-        if(std::find_if(this->_vars.begin(), this->_vars.end(), [&var](size_t& i) {
-                return var == i; }) == this->_vars.end()) {
-            this->_vars.push_back(var);
-        }
+void FixpointGuide::_InitializeVars(IdentList* vars) {
+    for(auto it = vars->begin(); it != vars->end(); ++it) {
+        if(symbolTable.lookupType(*it) == MonaTypeTag::Varname1)
+            this->_vars.push_back(*it);
     }
 }
 
@@ -91,43 +70,17 @@ GuideTip FixpointGuide::GiveTip(Term* term, Symbol* symbol) {
         return GuideTip::G_THROW;
     // This tries to enforce to subtract the '1' so the FirstOrder constraint holds
     } else if(this->_vars.size() > 0 && term->link->succ == nullptr) {
-        symbol = this->_link->ReMapSymbol(symbol);
+        //symbol = this->_link->ReMapSymbol(symbol);
         // Fixme: i think this is maybe fishy, as there is DAG, but further at top, there is remapping
         for(auto var : this->_vars) {
             if (symbol->GetSymbolAt(varMap[var]) != '1') {
                 return GuideTip::G_THROW;
             }
         }
+        return GuideTip::G_FRONT;
     // Guide for first order variables
-    }
-
-    return GuideTip::G_FRONT;
-}
-
-/**
- * @brief Return the base state term from the product
- *
- * According to the type of the product (i.e. Ternary, Nary, Binary),
- * returns the part of the product, that is of BASE type
- *
- * @param[in] term           product term
- */
-TermBaseSet* get_base_states(Term* term) {
-    assert(term != nullptr);
-    if(term->type == TermType::PRODUCT) {
-        TermProduct *tp = static_cast<TermProduct *>(term);
-        assert(tp->left->type == TermType::BASE);
-        return static_cast<TermBaseSet *>(tp->left);
-    } else if(term->type == TermType::TERNARY_PRODUCT) {
-        TermTernaryProduct *ttp = static_cast<TermTernaryProduct *>(term);
-        assert(ttp->left->type == TermType::BASE);
-        return static_cast<TermBaseSet *>(ttp->left);
-    } else if(term->type == TermType::NARY_PRODUCT) {
-        TermNaryProduct *tnp = static_cast<TermNaryProduct *>(term);
-        assert(tnp->terms[0]->type == TermType::BASE);
-        return static_cast<TermBaseSet *>(tnp->terms[0]);
     } else {
-        assert(false && "We have something different than Product for giving tip");
+        return GuideTip::G_FRONT;
     }
 }
 
@@ -142,12 +95,7 @@ GuideTip FixpointGuide::GiveTip(Term* term) {
     assert(term != nullptr);
     if(term->type == TermType::EMPTY) {
         return GuideTip::G_THROW;
-    } else if (this->_isQuantifierFree && this->_link != nullptr && this->_link->aut->type == AutType::BASE && term->type != TermType::EMPTY) {
-        TermBaseSet* initial = static_cast<TermBaseSet*>(this->_link->aut->GetInitialStates());
-        if (initial->Intersects(get_base_states(term))) {
-            return GuideTip::G_PROJECT_ALL;
-        }
+    } else {
+        return GuideTip::G_PROJECT;
     }
-
-    return GuideTip::G_PROJECT;
 }

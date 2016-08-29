@@ -98,7 +98,6 @@ bool VarToTrackMap::IsIn(uint val) {
 }
 
 uint VarToTrackMap::inverseGet(uint key) {
-	assert(false && "Currently disabled functionality");
 	return this->ttvMap[key];
 }
 

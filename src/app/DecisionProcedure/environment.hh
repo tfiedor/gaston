@@ -131,6 +131,7 @@ namespace Gaston {
 	using VarList                = VATA::Util::OrdVector<StateType>;
 	using VarValue			     = char;
 	using TrackType				 = Automaton::SymbolType;
+	using InterpretationType     = std::vector<std::string>;
 
 	void dumpResultKey(std::pair<Term_ptr, Symbol_ptr> const& s);
 	void dumpResultData(std::pair<Term_ptr, bool>& s);
@@ -255,7 +256,7 @@ public:
 #define DEBUG_MONA_DFA					false
 #define DEBUG_MONA_CODE_FORMULA			false
 #define DEBUG_RESTRICTIONS				false
-#define DEBUG_FIXPOINT 				    true
+#define DEBUG_FIXPOINT 				    false
 #define DEBUG_FIXPOINT_WORKLIST		    true
 #define DEBUG_FIXPOINT_SYMBOLS		    false
 #define DEBUG_FIXPOINT_SYMBOLS_INIT     false
@@ -286,6 +287,7 @@ public:
 #define DEBUG_DONT_CATCH_SIGSEGV		true
 #define DEBUG_RESTRICTION_DRIVEN_FIX	false
 #define DEBUG_BASE_FIXPOINT_PUMPING     false
+#define DEBUG_GENERATE_PROOF_FORMULAE   true   // < Will generate proof formulae for unground formulae
 
 #define ALT_SKIP_EMPTY_UNIVERSE			true // < Skip empty example
 #define ALT_ALWAYS_DETERMINISTIC	    true

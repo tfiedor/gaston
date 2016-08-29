@@ -6,10 +6,11 @@
 #include "../Frontend/timer.h"
 #include "../Frontend/offsets.h"
 #include "../Frontend/env.h"
-#include "../DecisionProcedure/containers/SymbolicAutomata.h"
-#include "../DecisionProcedure/environment.hh"
-#include "../DecisionProcedure/automata.hh"
-#include "../DecisionProcedure/visitors/restricters/NegationUnfolder.h"
+#include "containers/SymbolicAutomata.h"
+#include "environment.hh"
+#include "automata.hh"
+#include "visitors/restricters/NegationUnfolder.h"
+#include "visitors/transformers/Derestricter.h"
 #include <memory>
 
 extern Timer timer_base;
@@ -233,6 +234,8 @@ SymbolicAutomaton* ASTForm_Not::_toSymbolicAutomatonCore(bool doComplement) {
 
 SymbolicAutomaton* ASTForm_Ex2::_toSymbolicAutomatonCore(bool doComplement) {
     SymbolicAutomaton* aut;
+    Defirstorderer dfo;
+    this->f = static_cast<ASTForm*>(this->f->accept(dfo));
     aut = this->f->toSymbolicAutomaton(doComplement);
 #   if (OPT_USE_BASE_PROJECTION_AUTOMATA == true)
     if(this->tag == 0 || this->fixpoint_number == 1) {

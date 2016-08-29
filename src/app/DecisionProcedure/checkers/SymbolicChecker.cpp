@@ -3,6 +3,7 @@
 //
 
 #include <ostream>
+#include <iostream>
 #include <csignal>
 #include "SymbolicChecker.h"
 #include "../containers/Term.h"
@@ -10,10 +11,12 @@
 #include "../environment.hh"
 #include "../../Frontend/timer.h"
 #include "../../Frontend/env.h"
+#include "../visitors/transformers/Derestricter.h"
 
 extern Timer timer_conversion, timer_mona, timer_base, timer_automaton, timer_preprocess, timer_closure, timer_parse;
 extern Ident lastPosVar, allPosVar;
 extern Options options;
+extern char *inputFileName;
 
 SymbolicChecker::~SymbolicChecker() {
 
@@ -35,6 +38,7 @@ void SymbolicChecker::ConstructAutomaton() {
     // Formulae with free variable will be decided using the backward search, that is implemented in the RootProjection
     IdentList free, bound;
     this->_monaAST->formula->freeVars(&free, &bound);
+    this->_beforeClosure = this->_monaAST->formula;
     if (!free.empty()) {
         if(this->_rootRestriction != nullptr && this->_rootRestriction->kind != aTrue) {
             this->_monaAST->formula = new ASTForm_And(this->_rootRestriction, this->_monaAST->formula, Pos());
@@ -164,6 +168,16 @@ void SymbolicChecker::Decide() {
             SymbolicAutomaton::AutomatonToDot("automaton.dot", this->_automaton, false);
         }
 #   endif
+
+#       if (DEBUG_GENERATE_PROOF_FORMULAE == true)
+        if(this->_automaton->_satExample != nullptr) {
+            this->GenerateProofFormulaeFor(this->_automaton->_satExample, ExampleType::SATISFYING);
+        }
+        if(this->_automaton->_unsatExample != nullptr) {
+            this->GenerateProofFormulaeFor(this->_automaton->_unsatExample, ExampleType::UNSATISFYING);
+        }
+#       endif
+
         Timer timer_clean_up;
         timer_clean_up.start();
         delete this->_automaton;
@@ -239,13 +253,13 @@ bool SymbolicChecker::Run() {
     // TODO: Better output
     if(this->_automaton->_satExample) {
         std::cout << "[*] Printing \033[1;32msatisfying\033[0m example of least (" << (count_example_len(this->_automaton->_satExample)) << ") length\n";
-        this->_automaton->DumpExample(ExampleType::SATISFYING);
+        this->_automaton->DumpExample(ExampleType::SATISFYING, this->_satInterpretation);
         std::cout << "\n";
     }
 
     if(this->_automaton->_unsatExample) {
         std::cout << "[*] Printing \033[1;31munsatisfying\033[0m example of least (" << (count_example_len(this->_automaton->_unsatExample)) << ") length\n";
-        this->_automaton->DumpExample(ExampleType::UNSATISFYING);
+        this->_automaton->DumpExample(ExampleType::UNSATISFYING, this->_unsatInterpretation);
         std::cout << "\n";
     }
 #   endif
@@ -338,4 +352,64 @@ bool SymbolicChecker::Run() {
 
     // If Initial States does intersect final ones, the formula is valid, else it is unsatisfiable
     return isValid;
+}
+
+void SymbolicChecker::GenerateProofFormulaeFor(Term_ptr example, ExampleType exType) {
+    // Construct the name
+    std::string path(inputFileName);
+    path  = path.substr(0, path.find_last_of("."));
+    path += (exType == ExampleType::SATISFYING ? "_satisfying" : "_unsatisfying");
+    path += ".mona";
+
+    // Construct the formulae
+    ASTForm* toSerialize;
+    Derestricter derestricter;
+    toSerialize = static_cast<ASTForm*>(this->_beforeClosure->accept(derestricter));
+
+    std::string first_orders;
+    std::string second_orders;
+    std::string model;
+    auto it = (exType == ExampleType::SATISFYING ? this->_satInterpretation.begin() : this->_unsatInterpretation.begin());
+    auto end = (exType == ExampleType::SATISFYING ? this->_satInterpretation.end() : this->_unsatInterpretation.end());
+    for(; it != end; ++it) {
+        if(it->find("}") == std::string::npos) {
+            if(first_orders.size() != 0) {
+                first_orders += ", " + it->substr(0, it->find_last_of("="));
+            } else {
+                first_orders += it->substr(0, it->find_last_of("="));
+            }
+        } else {
+            // Second orders
+            if(second_orders.size() != 0) {
+                second_orders += ", " + it->substr(0, it->find_last_of("="));
+            } else {
+                second_orders += it->substr(0, it->find_last_of("="));
+            }
+        }
+
+        model += *it + " & ";
+    }
+
+    std::ofstream proofFile;
+    proofFile.open(path);
+    if(!proofFile.is_open()) {
+        throw std::ios_base::failure("Unable to open proof file");
+    }
+
+    if(allPosVar == -1) {
+        proofFile << "ws1s;\n";
+    } else {
+        proofFile << "m2l-str;\n";
+    }
+
+    if(first_orders.size() != 0) {
+        proofFile << "ex1 " << first_orders << ": ";
+    }
+    if(second_orders.size() != 0) {
+        proofFile << "ex2 " << second_orders << ": ";
+    }
+    proofFile << model;
+    proofFile << (exType == ExampleType::SATISFYING ? "" : "~");
+    proofFile << "(" << toSerialize->ToString(true) << ");\n";
+    proofFile.close();
 }

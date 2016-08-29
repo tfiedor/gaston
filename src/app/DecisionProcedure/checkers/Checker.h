@@ -64,6 +64,7 @@ protected:
     // <<< PRIVATE MEMBERS >>>
     MonaAST* _monaAST = nullptr;
 	ASTForm* _rootRestriction = nullptr;
+	ASTForm* _beforeClosure = nullptr;
 	bool _printProgress = false;
 	bool _isGround = false;
 	bool _terminatedBySignal = false;

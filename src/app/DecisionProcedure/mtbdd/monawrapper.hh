@@ -112,7 +112,7 @@ public:
 #   endif
 
 private:
-    inline WrappedNode *spawnNode(unsigned addr, WrappedNode &pred, bool edge)
+    WrappedNode *spawnNode(unsigned addr, WrappedNode &pred, bool edge)
     {
         WrappedNode *node;
         typename InternalNodesType::iterator itN;
@@ -132,7 +132,7 @@ private:
         return node;
     }
 
-    inline WrappedNode *spawnNode(const bdd_manager *bddm, unsigned addr, size_t state)
+    WrappedNode *spawnNode(const bdd_manager *bddm, unsigned addr, size_t state)
     {
         unsigned index;
 

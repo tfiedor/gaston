@@ -120,7 +120,7 @@ protected:
     virtual void _InitializeInitialStates() = 0;
     virtual void _InitializeFinalStates() = 0;
     virtual ResultType _IntersectNonEmptyCore(Symbol*, Term*, bool) = 0;
-    virtual void _DumpExampleCore(ExampleType) = 0;
+    virtual void _DumpExampleCore(ExampleType, InterpretationType&) = 0;
 
 public:
     // <<< CONSTRUCTORS >>>
@@ -145,7 +145,7 @@ public:
     // <<< DUMPING FUNCTIONS >>>
     void DumpAutomatonMetrics();
     virtual void DumpAutomaton() = 0;
-    virtual void DumpExample(ExampleType);
+    virtual void DumpExample(ExampleType, InterpretationType&);
     virtual void DumpComputationStats() = 0;
     virtual void FillStats() = 0;
     virtual void DumpProductHeader(std::ofstream&, bool, ProductType);
@@ -173,6 +173,12 @@ struct SymLink {
 
     void InitializeSymLink(ASTForm*);
     ZeroSymbol* ReMapSymbol(ZeroSymbol*);
+    unsigned int ReMapVariable(unsigned int var) {
+        if(remap) {
+            assert(this->varRemap != nullptr);
+            return varMap.inverseGet((*this->varRemap)[varMap[var]]);
+        }
+    }
 };
 
 /**
@@ -198,7 +204,7 @@ protected:
     virtual void _InitializeInitialStates();
     virtual void _InitializeFinalStates();
     virtual ResultType _IntersectNonEmptyCore(Symbol*, Term*, bool);
-    virtual void _DumpExampleCore(ExampleType);
+    virtual void _DumpExampleCore(ExampleType, InterpretationType&);
 
 public:
     NEVER_INLINE BinaryOpAutomaton(SymbolicAutomaton_raw lhs, SymbolicAutomaton_raw rhs, Formula_ptr form);
@@ -234,7 +240,7 @@ protected:
     virtual void _InitializeInitialStates();
     virtual void _InitializeFinalStates();
     virtual ResultType _IntersectNonEmptyCore(Symbol*, Term*, bool);
-    virtual void _DumpExampleCore(ExampleType);
+    virtual void _DumpExampleCore(ExampleType, InterpretationType&);
 
 public:
     NEVER_INLINE TernaryOpAutomaton(SymbolicAutomaton_raw lhs, SymbolicAutomaton_raw mhs, SymbolicAutomaton_raw rhs, Formula_ptr form);
@@ -271,7 +277,7 @@ protected:
     virtual void _InitializeInitialStates();
     virtual void _InitializeFinalStates();
     virtual ResultType _IntersectNonEmptyCore(Symbol*, Term*, bool);
-    virtual void _DumpExampleCore(ExampleType);
+    virtual void _DumpExampleCore(ExampleType, InterpretationType&);
 
 public:
     NEVER_INLINE NaryOpAutomaton(Formula_ptr form, bool doComplement);
@@ -377,7 +383,7 @@ protected:
     virtual void _InitializeInitialStates();
     virtual void _InitializeFinalStates();
     virtual ResultType _IntersectNonEmptyCore(Symbol*, Term*, bool);
-    virtual void _DumpExampleCore(ExampleType);
+    virtual void _DumpExampleCore(ExampleType, InterpretationType&);
 
 public:
     // <<< CONSTRUCTORS >>>
@@ -421,7 +427,7 @@ protected:
     virtual void _InitializeInitialStates();
     virtual void _InitializeFinalStates();
     virtual ResultType _IntersectNonEmptyCore(Symbol*, Term*, bool);
-    virtual void _DumpExampleCore(ExampleType);
+    virtual void _DumpExampleCore(ExampleType, InterpretationType&);
 
 public:
     /// <<< CONSTRUCTORS >>>
@@ -497,7 +503,7 @@ protected:
     virtual void _InitializeFinalStates();
     virtual ResultType _IntersectNonEmptyCore(Symbol*, Term*, bool);
     void _RenameStates();
-    virtual void _DumpExampleCore(ExampleType) {}
+    virtual void _DumpExampleCore(ExampleType, InterpretationType&) {}
 public:
     // <<< CONSTRUCTORS >>>
     NEVER_INLINE BaseAutomaton(BaseAutomatonType* aut, size_t vars, Formula_ptr form, bool emptyTracks);

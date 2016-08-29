@@ -7,6 +7,7 @@
 
 #include "../utils/Symbol.h"
 #include "../environment.hh"
+#include "../../Frontend/ident.h"
 
 enum GuideTip {G_FRONT, G_BACK, G_THROW, G_PROJECT, G_PROJECT_ALL};
 
@@ -14,19 +15,16 @@ class SymLink;
 class Term;
 
 class FixpointGuide {
-    SymLink* _link;
     std::vector<size_t> _vars;
-    bool _isQuantifierFree;
 
-    void _InitializeVars(ASTForm*);
+    void _InitializeVars(IdentList*);
 public:
-    NEVER_INLINE FixpointGuide() : _link(nullptr), _isQuantifierFree(false) {}
-    NEVER_INLINE explicit FixpointGuide(SymLink* link, bool is_qf);
+    NEVER_INLINE FixpointGuide() {}
+    NEVER_INLINE explicit FixpointGuide(IdentList*);
 
     GuideTip GiveTip(Term*, Symbol*);
     GuideTip GiveTip(Term*);
 
-    void SetAutomaton(SymLink*);
     friend std::ostream &operator<<(std::ostream &stream, const FixpointGuide &);
 };
 

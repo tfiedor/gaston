@@ -23,5 +23,18 @@ public:
     AST* visit(ASTForm_Ex2*);
 };
 
+class Defirstorderer : public TransformerVisitor {
+private:
+    template<class BinaryForm>
+    AST* _visitBinaryForm(BinaryForm*);
+
+public:
+    Defirstorderer() : TransformerVisitor(Traverse::CustomOrder) {}
+
+    AST* visit(ASTForm_And*);
+    AST* visit(ASTForm_Or*);
+    AST* visit(ASTForm_Impl*);
+    AST* visit(ASTForm_Biimpl*);
+};
 
 #endif //WSKS_DERESTRICTER_H

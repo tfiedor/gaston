@@ -17,8 +17,11 @@ public:
     void ConstructAutomaton();
     void Decide();
     bool Run();
+    void GenerateProofFormulaeFor(Term_ptr example, ExampleType);
 protected:
     SymbolicAutomaton* _automaton;
+    std::vector<std::string> _satInterpretation;
+    std::vector<std::string> _unsatInterpretation;
 
     // <<< PRIVATE METHODS >>>
     Decision _DecideCore(bool);

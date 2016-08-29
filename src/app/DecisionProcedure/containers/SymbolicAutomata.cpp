@@ -276,25 +276,14 @@ ProjectionAutomaton::ProjectionAutomaton(SymbolicAutomaton_raw aut, Formula_ptr 
     // Fixme: Refactor: This is mess!!!
     ASTForm* innerForm = static_cast<ASTForm_q*>(this->_form)->f;
     if(innerForm->kind == aAnd || innerForm->kind == aOr) {
-        ASTForm_ff* ff_form = static_cast<ASTForm_ff*>(innerForm);
-        if(ff_form->f1->is_restriction) {
-            if (aut->type == AutType::TERNARY_INTERSECTION || aut->type == AutType::TERNARY_UNION ||
-                aut->type == AutType::TERNARY_BIIMPLICATION || aut->type == AutType::TERNARY_IMPLICATION) {
-                TernaryOpAutomaton *ternaryOpAutomaton = static_cast<TernaryOpAutomaton *>(aut);
-                this->_guide = new FixpointGuide(ternaryOpAutomaton->GetLeft(), ff_form->f2->fixpoint_number == 0);
-            } else if(aut->type == AutType::NARY_BIIMPLICATION || aut->type == AutType::NARY_IMPLICATION ||
-                      aut->type == AutType::NARY_INTERSECTION  || aut->type == AutType::NARY_UNION) {
-                NaryOpAutomaton *naryOpAutomaton = static_cast<NaryOpAutomaton*>(aut);
-                this->_guide = new FixpointGuide(naryOpAutomaton->GetLeft(), ff_form->f2->fixpoint_number == 0);
-            } else if(aut->type == AutType::BIIMPLICATION || aut->type == AutType::IMPLICATION ||
-                      aut->type == AutType::INTERSECTION  || aut->type == AutType::UNION) {
-                BinaryOpAutomaton *binaryOpAutomaton = static_cast<BinaryOpAutomaton *>(aut);
-                this->_guide = new FixpointGuide(binaryOpAutomaton->GetLeft(), ff_form->f2->fixpoint_number == 0);
+        ASTForm_uvf* uvf_form = static_cast<ASTForm_uvf*>(this->_form);
+        for(auto it = uvf_form->vl->begin(); it != uvf_form->vl->end(); ++it) {
+            if(symbolTable.lookupType(*it) == MonaTypeTag::Varname1) {
+                this->_guide = new FixpointGuide(uvf_form->vl);
             } else {
                 this->_guide = new FixpointGuide();
             }
-        } else {
-            this->_guide = new FixpointGuide();
+            break;
         }
     } else {
         this->_guide = new FixpointGuide();
@@ -1423,16 +1412,16 @@ ResultType BaseProjectionAutomaton::_IntersectNonEmptyCore(Symbol* symbol, Term*
     }
 }
 
-void SymbolicAutomaton::DumpExample(ExampleType e) {
+void SymbolicAutomaton::DumpExample(ExampleType e, InterpretationType& interpretation) {
     switch(e) {
         case ExampleType::SATISFYING:
             if(this->_satExample != nullptr) {
-                this->_DumpExampleCore(e);
+                this->_DumpExampleCore(e, interpretation);
             }
             break;
         case ExampleType::UNSATISFYING:
             if(this->_unsatExample != nullptr) {
-                this->_DumpExampleCore(e);
+                this->_DumpExampleCore(e, interpretation);
             }
             break;
         default:
@@ -1440,19 +1429,19 @@ void SymbolicAutomaton::DumpExample(ExampleType e) {
     }
 }
 
-void BinaryOpAutomaton::_DumpExampleCore(ExampleType e) {
+void BinaryOpAutomaton::_DumpExampleCore(ExampleType e, InterpretationType& interpretation) {
     assert(false && "BinaryOpAutomata cannot have examples yet!");
 }
 
-void TernaryOpAutomaton::_DumpExampleCore(ExampleType) {
+void TernaryOpAutomaton::_DumpExampleCore(ExampleType e, InterpretationType& interpretation) {
     assert(false && "TernaryOpAutomata cannot have examples yet!");
 }
 
-void NaryOpAutomaton::_DumpExampleCore(ExampleType) {
+void NaryOpAutomaton::_DumpExampleCore(ExampleType e, InterpretationType& interpretation) {
     assert(false && "NaryOpAutomata cannot have examples yet!");
 }
 
-void ComplementAutomaton::_DumpExampleCore(ExampleType e) {
+void ComplementAutomaton::_DumpExampleCore(ExampleType e, InterpretationType& interpretation) {
     assert(false && "ComplementAutomata cannot have examples yet!");
 }
 
@@ -1508,7 +1497,7 @@ int max_varname_lenght(IdentList* idents, int varNo) {
     return max;
 }
 
-void ProjectionAutomaton::_DumpExampleCore(ExampleType e) {
+void ProjectionAutomaton::_DumpExampleCore(ExampleType e, InterpretationType& interpretations) {
     Term* example = (e == ExampleType::SATISFYING ? this->_satExample : this->_unsatExample);
 
     // Print the bounded part
@@ -1531,7 +1520,10 @@ void ProjectionAutomaton::_DumpExampleCore(ExampleType e) {
     }
     std::cout << "\n";
     for(size_t i = 0; i < varNo; ++i) {
-        std::cout << (symbolTable.lookupSymbol(this->projectedVars->get(i))) << " = " << interpretModel(examples[i], symbolTable.lookupType(this->projectedVars->get(i))) << "\n";
+        std::string interpretation = (symbolTable.lookupSymbol(this->projectedVars->get(i)));
+        interpretation += " = " + interpretModel(examples[i], symbolTable.lookupType(this->projectedVars->get(i)));
+        interpretations.push_back(interpretation);
+        std::cout << interpretation << "\n";
     }
 
     delete[] examples;
