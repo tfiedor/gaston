@@ -257,6 +257,8 @@ if __name__ == '__main__':
             data[benchmark] = {}
             if not benchmark.endswith('.mona'):
                 continue
+            if benchmark.endswith('_unsatisfying.mona') or benchmark.endswith('_satisfying.mona'):
+                continue
 
             print("[*] Running test bench:"),
             print(colored("'{}'".format(benchmark), "white", attrs=["bold"]))
