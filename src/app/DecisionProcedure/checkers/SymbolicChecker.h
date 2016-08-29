@@ -18,10 +18,13 @@ public:
     void Decide();
     bool Run();
     void GenerateProofFormulaeFor(Term_ptr example, ExampleType);
+    static std::string GetProofFormulaFilename(ExampleType);
 protected:
     SymbolicAutomaton* _automaton;
     std::vector<std::string> _satInterpretation;
     std::vector<std::string> _unsatInterpretation;
+    VerificationResult VerifyProofFormula(std::string);
+    void _ProcessExample(Term_ptr, ExampleType);
 
     // <<< PRIVATE METHODS >>>
     Decision _DecideCore(bool);

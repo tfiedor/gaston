@@ -74,10 +74,21 @@ enum class SubsumedType {NOT, YES, PARTIALLY};
 enum class ExampleType {SATISFYING, UNSATISFYING};
 enum class WorklistSearchType {BFS, DFS, UNGROUND_ROOT};
 enum class ProductType {INTERSECTION, UNION, IMPLICATION, BIIMPLICATION};
+enum class VerificationResult {VERIFIED, UNKNOWN, INCORRECT};
 
 static const char* ProductTypeColours[] = {"1;32m", "1;33m", "1;36m", "1;37m"};
 static const char* ProductTypeAutomataSymbols[] = {"\u2229", "\u222A", "\u2192", "\u2194"};
 static const char* ProductTypeTermSymbols[] = {"\u2293", "\u2294", "\u21FE", "\u21FF"};
+static const char* VerificationResultColours[] = {"1;32m", "1;33m", "1;31m"};
+static const char* VerificationResultStrings[] = {"VERIFIED", "UNKNOWN", "INCORRECT"};
+
+inline const char* VerificationResultToColour(VerificationResult v) {
+	return VerificationResultColours[static_cast<int>(v)];
+}
+
+inline const char* VerificationResultToString(VerificationResult v) {
+	return VerificationResultStrings[static_cast<int>(v)];
+}
 
 inline const char* ProductTypeToColour(int type) {
 	return ProductTypeColours[type];

@@ -1412,16 +1412,16 @@ ResultType BaseProjectionAutomaton::_IntersectNonEmptyCore(Symbol* symbol, Term*
     }
 }
 
-void SymbolicAutomaton::DumpExample(ExampleType e, InterpretationType& interpretation) {
+void SymbolicAutomaton::DumpExample(std::ostream& out, ExampleType e, InterpretationType& interpretation) {
     switch(e) {
         case ExampleType::SATISFYING:
             if(this->_satExample != nullptr) {
-                this->_DumpExampleCore(e, interpretation);
+                this->_DumpExampleCore(out, e, interpretation);
             }
             break;
         case ExampleType::UNSATISFYING:
             if(this->_unsatExample != nullptr) {
-                this->_DumpExampleCore(e, interpretation);
+                this->_DumpExampleCore(out, e, interpretation);
             }
             break;
         default:
@@ -1429,19 +1429,19 @@ void SymbolicAutomaton::DumpExample(ExampleType e, InterpretationType& interpret
     }
 }
 
-void BinaryOpAutomaton::_DumpExampleCore(ExampleType e, InterpretationType& interpretation) {
+void BinaryOpAutomaton::_DumpExampleCore(std::ostream& out, ExampleType e, InterpretationType& interpretation) {
     assert(false && "BinaryOpAutomata cannot have examples yet!");
 }
 
-void TernaryOpAutomaton::_DumpExampleCore(ExampleType e, InterpretationType& interpretation) {
+void TernaryOpAutomaton::_DumpExampleCore(std::ostream& out, ExampleType e, InterpretationType& interpretation) {
     assert(false && "TernaryOpAutomata cannot have examples yet!");
 }
 
-void NaryOpAutomaton::_DumpExampleCore(ExampleType e, InterpretationType& interpretation) {
+void NaryOpAutomaton::_DumpExampleCore(std::ostream& out, ExampleType e, InterpretationType& interpretation) {
     assert(false && "NaryOpAutomata cannot have examples yet!");
 }
 
-void ComplementAutomaton::_DumpExampleCore(ExampleType e, InterpretationType& interpretation) {
+void ComplementAutomaton::_DumpExampleCore(std::ostream& out, ExampleType e, InterpretationType& interpretation) {
     assert(false && "ComplementAutomata cannot have examples yet!");
 }
 
@@ -1497,7 +1497,7 @@ int max_varname_lenght(IdentList* idents, int varNo) {
     return max;
 }
 
-void ProjectionAutomaton::_DumpExampleCore(ExampleType e, InterpretationType& interpretations) {
+void ProjectionAutomaton::_DumpExampleCore(std::ostream& out, ExampleType e, InterpretationType& interpretations) {
     Term* example = (e == ExampleType::SATISFYING ? this->_satExample : this->_unsatExample);
 
     // Print the bounded part
@@ -1516,14 +1516,14 @@ void ProjectionAutomaton::_DumpExampleCore(ExampleType e, InterpretationType& in
 
     for(size_t i = 0; i < varNo; ++i) {
         auto varname = (symbolTable.lookupSymbol(this->projectedVars->get(i)));
-        std::cout << varname << std::string(max_len - strlen(varname) + 1, ' ') << ": " << examples[i] << "\n";
+        out << varname << std::string(max_len - strlen(varname) + 1, ' ') << ": " << examples[i] << "\n";
     }
-    std::cout << "\n";
+    out << "\n";
     for(size_t i = 0; i < varNo; ++i) {
         std::string interpretation = (symbolTable.lookupSymbol(this->projectedVars->get(i)));
         interpretation += " = " + interpretModel(examples[i], symbolTable.lookupType(this->projectedVars->get(i)));
         interpretations.push_back(interpretation);
-        std::cout << interpretation << "\n";
+        out << interpretation << "\n";
     }
 
     delete[] examples;

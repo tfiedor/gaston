@@ -2,8 +2,10 @@
 // Created by Raph on 02/02/2016.
 //
 
+#include <stdio.h>
 #include <ostream>
 #include <iostream>
+#include <sstream>
 #include <csignal>
 #include "SymbolicChecker.h"
 #include "../containers/Term.h"
@@ -169,15 +171,6 @@ void SymbolicChecker::Decide() {
         }
 #   endif
 
-#       if (DEBUG_GENERATE_PROOF_FORMULAE == true)
-        if(this->_automaton->_satExample != nullptr) {
-            this->GenerateProofFormulaeFor(this->_automaton->_satExample, ExampleType::SATISFYING);
-        }
-        if(this->_automaton->_unsatExample != nullptr) {
-            this->GenerateProofFormulaeFor(this->_automaton->_unsatExample, ExampleType::UNSATISFYING);
-        }
-#       endif
-
         Timer timer_clean_up;
         timer_clean_up.start();
         delete this->_automaton;
@@ -209,6 +202,43 @@ void g_new_handler() {
     SymbolicAutomaton::dagNegNodeCache->clear();
     SymbolicAutomaton::dagNodeCache->clear();
     throw GastonOutOfMemory();
+}
+
+/**
+ * @brief Generates proof formula and prints to output the inferred examples
+ *
+ * @param[in]  example  example we are processing
+ * @param[in]  exType  type of the example
+ */
+void SymbolicChecker::_ProcessExample(Term_ptr example, ExampleType exType) {
+    if(example != nullptr) {
+        VerificationResult proofVerification;
+        std::ostringstream sout;
+
+        sout.str(std::string()); // Clear the stream
+        this->_automaton->DumpExample(sout, exType,
+            (exType == ExampleType::SATISFYING ? this->_satInterpretation : this->_unsatInterpretation));
+
+        if(DEBUG_GENERATE_PROOF_FORMULAE == true || options.verifyModels == true) {
+            this->GenerateProofFormulaeFor(example, exType);
+        }
+        if(options.verifyModels) {
+            proofVerification = this->VerifyProofFormula(this->GetProofFormulaFilename(exType));
+        }
+        if(exType == ExampleType::SATISFYING) {
+            std::cout << "[*] Printing \033[1;32msatisfying\033[0m example of (";
+        } else {
+            assert(exType == ExampleType::UNSATISFYING);
+            std::cout << "[*] Printing \033[1;31munsatisfying\033[0m example of (";
+        }
+        std::cout << (count_example_len(example)) << ") length";
+        if(options.verifyModels) {
+            std::cout << " [\033[" << VerificationResultToColour(proofVerification) << VerificationResultToString(proofVerification) << "\033[0m]";
+        }
+        std::cout << "\n";
+        std::cout << sout.str();
+        std::cout << "\n";
+    }
 }
 
 /**
@@ -250,18 +280,8 @@ bool SymbolicChecker::Run() {
     bool isValid = result.second;
 
 #   if (DUMP_EXAMPLES == true)
-    // TODO: Better output
-    if(this->_automaton->_satExample) {
-        std::cout << "[*] Printing \033[1;32msatisfying\033[0m example of least (" << (count_example_len(this->_automaton->_satExample)) << ") length\n";
-        this->_automaton->DumpExample(ExampleType::SATISFYING, this->_satInterpretation);
-        std::cout << "\n";
-    }
-
-    if(this->_automaton->_unsatExample) {
-        std::cout << "[*] Printing \033[1;31munsatisfying\033[0m example of least (" << (count_example_len(this->_automaton->_unsatExample)) << ") length\n";
-        this->_automaton->DumpExample(ExampleType::UNSATISFYING, this->_unsatInterpretation);
-        std::cout << "\n";
-    }
+    this->_ProcessExample(this->_automaton->_satExample, ExampleType::SATISFYING);
+    this->_ProcessExample(this->_automaton->_unsatExample, ExampleType::UNSATISFYING);
 #   endif
 
 #   if (DEBUG_FIXPOINT == true)
@@ -354,12 +374,36 @@ bool SymbolicChecker::Run() {
     return isValid;
 }
 
-void SymbolicChecker::GenerateProofFormulaeFor(Term_ptr example, ExampleType exType) {
-    // Construct the name
+/**
+ * @brief Generates name for the proof formula
+ *
+ * Generates filename for the proof for satisfying/unsatisfying example in form:
+ *   'inputFilename_(un)satisfying.mona'
+ *
+ * @param[in]  exType  type of the example, either satisfying or unsatisfying
+ * @return  filename for the formula
+ */
+std::string SymbolicChecker::GetProofFormulaFilename(ExampleType exType) {
     std::string path(inputFileName);
     path  = path.substr(0, path.find_last_of("."));
     path += (exType == ExampleType::SATISFYING ? "_satisfying" : "_unsatisfying");
     path += ".mona";
+    return path;
+}
+
+/**
+ * @brief Generates formula that serves as proof for @p example
+ *
+ * Generates formula that will server as a proof of validity of satisfying @p example of @p exType.
+ * Ground formula is constructed that restricts the model. The validity of constructed formula
+ * implies validity of inferred (un)satisfying example.
+ *
+ * @param[in]  example  term that represents the inferred example
+ * @param[in]  exType  type of the example
+ */
+void SymbolicChecker::GenerateProofFormulaeFor(Term_ptr example, ExampleType exType) {
+    // Construct the name
+    std::string path = this->GetProofFormulaFilename(exType);
 
     // Construct the formulae
     ASTForm* toSerialize;
@@ -402,6 +446,8 @@ void SymbolicChecker::GenerateProofFormulaeFor(Term_ptr example, ExampleType exT
         proofFile << "m2l-str;\n";
     }
 
+    assert(first_orders.size() > 0 || second_orders.size() > 0);
+
     if(first_orders.size() != 0) {
         proofFile << "ex1 " << first_orders << ": ";
     }
@@ -412,4 +458,44 @@ void SymbolicChecker::GenerateProofFormulaeFor(Term_ptr example, ExampleType exT
     proofFile << (exType == ExampleType::SATISFYING ? "" : "~");
     proofFile << "(" << toSerialize->ToString(true) << ");\n";
     proofFile.close();
+}
+
+/**
+ * @brief Verifies generated proof formula by running the mona and checking the validity of formulae
+ *
+ * Takes the generated proof formula @p filename, opens process and runs MONA on the generated
+ * formula to test the validity of this formula. If the proof formula is valid, then we can say
+ * that the model is correct.
+ *
+ * @param[in]  filename  filename with the proof formula to be verified
+ * @return  UNKNOWN if error occured during verification process or opening of pipe,
+ *          VERIFIED if proof formula is valid
+ *          INCORRECT if proof formula is unsatisfiable
+ */
+VerificationResult SymbolicChecker::VerifyProofFormula(std::string filename) {
+    FILE *fpipe;
+    // Construct command for running mona
+    std::string command("mona");
+    command += " -q ";
+    command += filename;
+    char line[256];
+
+    // Try to open and run mona
+    if(!(fpipe = (FILE*) popen(command.c_str(), "r"))) {
+        return VerificationResult::UNKNOWN;
+    }
+
+    VerificationResult res = VerificationResult::UNKNOWN;
+    while(fgets(line, sizeof(line), fpipe)) {
+        if(!strcmp(line, "Formula is valid\n")) {
+            res = VerificationResult::VERIFIED;
+            break;
+        } else if(!strcmp(line, "Formula is unsatisfiable\n")) {
+            res = VerificationResult::INCORRECT;
+            break;
+        }
+    }
+
+    pclose(fpipe);
+    return res;
 }

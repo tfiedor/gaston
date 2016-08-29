@@ -62,7 +62,8 @@ public:
     serializeMona(false),
     fixLimit(0),
     inverseFixLimit(-1),
-    dryRun(false) {}
+    dryRun(false),
+    verifyModels(false) {}
 
 
   bool useMonaDFA;
@@ -100,6 +101,7 @@ public:
   int fixLimit;
   int inverseFixLimit;
   bool dryRun;
+  bool verifyModels;
 };
 
 #endif

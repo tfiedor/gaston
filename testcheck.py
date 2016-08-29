@@ -54,7 +54,7 @@ def run_gaston(test, timeout, checkonly=False):
     Runs dWiNA with following arguments: --method=backward
     """
     gaston_bin = os.path.join(os.path.dirname(os.path.realpath(__file__)), 'build/gaston')
-    args = (gaston_bin, '"{}"'.format(test))
+    args = (gaston_bin, '--verify', '"{}"'.format(test))
     output, retcode = runProcess(args, timeout)
 
     # Fixme: This should be the issue of segfault
@@ -156,6 +156,10 @@ def parsedWiNAOutput(output, unprunedOutput, checkonly=False):
         if match is not None:
             time = parse_total_time(line)
             break
+    for line in stripped_lines:
+        match = re.search("INCORRECT", line)
+        if match is not None:
+            ret = 'incorrect'
     return time, ret
 
 

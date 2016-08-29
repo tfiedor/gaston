@@ -103,6 +103,7 @@ void PrintUsage() {
 		<< " -ga, --print-aut     Print automaton in graphviz\n"
 		<< " -cfX                 Transform all formulae with lesser than X fixpoints into automaton\n"
 		<< " -icfX                Transform all formulae with greater than X fixpoints from the root\n"
+		<< " -v,  --verify        Will verify the validity of inferred model for unground formulae\n"
 		<< "      --dry-run       Will not run the analysis, only construct automaton\n"
 		<< "      --no-automaton  Don't dump Automaton\n"
 		<< "      --test          Test specified problem [val, sat, unsat]\n"
@@ -131,8 +132,7 @@ bool ParseArguments(int argc, char *argv[]) {
 	// missing file with formula
 	case 1:
 		return false;
-
-	// missing file with formula, some option stated
+// missing file with formula, some option stated
 	case 2:
 		if (argv[1][0] == '-')
 			return false;
@@ -149,6 +149,8 @@ bool ParseArguments(int argc, char *argv[]) {
 				options.printProgress = false;
 			else if (strcmp(argv[i], "--dry-run") == 0)
 				options.dryRun = true;
+			else if (strcmp(argv[i], "--verify") == 0)
+				options.verifyModels = true;
 			else if (strcmp(argv[i], "-ga") == 0 || strcmp(argv[i], "--print-aut") == 0)
 				options.graphvizDAG = true;
 			else if (strcmp(argv[i], "--walk-aut") == 0) {
@@ -190,6 +192,9 @@ bool ParseArguments(int argc, char *argv[]) {
 						break;
 					case 'o':
 						options.optimize = argv[i][2] - '0';
+						break;
+					case 'v':
+						options.verifyModels = true;
 						break;
 					default:
 						return false;
