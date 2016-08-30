@@ -135,6 +135,7 @@ initial one by reducing the size of the formulae and introducing some of the adv
 constructs (e.g. predicates) that enabled faster decision procedure.
 
 \begin{table}
+ \centering
   \caption{}\label{tab:bench-strand}
   \begin{tabular}{l l r r r}
   \hline
@@ -152,6 +153,8 @@ constructs (e.g. predicates) that enabled faster decision procedure.
   \end{tabular}
 \end{table}
 
+\newpage
+
 \section{UABE: Unbounded Arrays Bounded Elements}
 
 This benchmark is provided from the work of the \cite{uabe}. The authors introduced novel theory
@@ -159,7 +162,8 @@ of Unbounded Arrays and Bounded Elements allowing one to reason about array stru
 The proposed logic is shown decidable by reduction to WS1S. The paper provides moderate benchmark
 representing invariants of programs manipulating arrays like e.g. sorts, finding minima, etc.
 
-\begin{table}
+\begin{table}[h!]
+ \centering
   \caption{}{\label{tab:bench-uabe}}
   \begin{tabular}{l l r r r}
   \hline
@@ -170,6 +174,8 @@ representing invariants of programs manipulating arrays like e.g. sorts, finding
   \hline
   \end{tabular}
 \end{table}
+
+\newpage
 
 \section{Veanes Minimization Benchmark}
 This benchmark is selected from the paper~\cite{veanes} that is describing novel minimization
@@ -187,8 +193,9 @@ The family is defined for various $k \geq 2$ as follows:
  \exists x_1,\ldots,x_k. \bigwedge_{1 \leq i \leq k - 1} x_i < x_{i+1}
 \end{equation}
 
-\begin{table}
-  \caption{}{\label{tab:bench-uabe}}
+\begin{table}[h!]
+ \centering
+  \caption{}{\label{tab:bench-veanes}}
   \begin{tabular}{l l r r r}
   \hline
   \textbf{Id} & \textbf{Name} & \textbf{Variables} & \textbf{Atoms} & \textbf{Answer} \\
@@ -212,9 +219,75 @@ that there exists $k$ singleton sons (\ref{eq:dwina-singletons}) or some very ob
 
 \begin{eqnarray}
   \exists X_1,\ldots, X_k. \forall x. \exists y, z. \bigwedge_{1 \leq i \leq k} 
-   (x \in X_i \wedge x \leq y \leq z \wedge z \in X_i) \Leftarrow y \in X_i\\
+   (x \in X_i \wedge x \leq y \leq z \wedge z \in X_i) \Leftarrow y \in X_i\label{eq:dwina-sets}\\
   \exists X_1,\ldots, X_k. \forall X. \bigwedge_{1 \leq i \leq k} (X \subseteq X_i \wedge X \neq X_i)
-    \Leftarrow X_i \not\subseteq X\\
+    \Leftarrow X_i \not\subseteq X\label{eq:obvious}\\
   \exists X_1,\ldots, X_k. \forall x_1, x_2. \bigwedge_{1 \leq i \leq k}
-   (x_1 \in X_i \wedge x_2 \in X_i) \Leftarrow x_1 = x_2
+   (x_1 \in X_i \wedge x_2 \in X_i) \Leftarrow x_1 = x_2\label{eq:dwina-singletons}
 \end{eqnarray}
+
+\begin{table}[h!]
+ \centering
+  \caption{}\label{tab:bench-dwina}
+  \begin{tabular}{l l r r r}
+  \hline
+  \textbf{Id} & \textbf{Name} & \textbf{Variables} & \textbf{Atoms} & \textbf{Answer} \\
+  \hline
+  \hline
+  \multicolumn{5}{c}{\texttt{HORN-TRANS}}\\
+  \hline
+  \input{data/bench-horn-trans}
+  \hline
+  \multicolumn{5}{c}{\texttt{SET-CLOSED}}\\
+  \hline
+  \input{data/bench-set-closed}
+  \hline
+  \multicolumn{5}{c}{\texttt{SET-OBVIOUS}}\\
+  \hline
+  \input{data/bench-set-obvious}
+  \hline
+  \multicolumn{5}{c}{\texttt{SET-SINGLETONS}}\\
+  \hline
+  \input{data/bench-set-singletons}
+  \hline
+  \end{tabular}
+\end{table}
+
+\newpage
+
+\section{MONA Secrets}
+
+This benchmark comes from the~\cite{mona:secrets} paper, that introduced every significant
+optimization that MONA created in order to become efficient.
+
+\begin{table}[h!]
+ \centering
+  \caption{}{\label{tab:bench-secrets}}
+  \begin{tabular}{l l r r r}
+  \hline
+  \textbf{Id} & \textbf{Name} & \textbf{Variables} & \textbf{Atoms} & \textbf{Answer} \\
+  \hline
+  \hline
+  \input{data/bench-secrets}
+  \hline
+  \end{tabular}
+\end{table}
+
+\section{Regsys}
+
+Regsys consists of several benchmarks, that can be further parametrized by several constants
+and model e.g. the optimization problem for production, presburger additions and some
+other stuff.
+
+\begin{table}[h!]
+ \centering
+  \caption{}{\label{tab:bench-regsys}}
+  \begin{tabular}{l l r r r}
+  \hline
+  \textbf{Id} & \textbf{Name} & \textbf{Variables} & \textbf{Atoms} & \textbf{Answer} \\
+  \hline
+  \hline
+  \input{data/bench-regsys}
+  \hline
+  \end{tabular}
+\end{table}
