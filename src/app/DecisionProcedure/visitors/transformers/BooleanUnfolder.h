@@ -36,6 +36,7 @@ public:
     AST* visit(ASTForm_Not* form);
     AST* visit(ASTForm_Impl* form);
     AST* visit(ASTForm_Biimpl* form);
+    AST* visit(ASTForm_uvf* form);
 };
 
 

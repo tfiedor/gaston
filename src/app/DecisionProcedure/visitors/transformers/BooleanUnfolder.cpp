@@ -142,3 +142,23 @@ AST* BooleanUnfolder::visit(ASTForm_Biimpl* form) {
         return form;
     }
 }
+
+/**
+ * @brief Removes variables that are not occuring in the inner form
+ */
+AST* BooleanUnfolder::visit(ASTForm_uvf *form) {
+    IdentList bound, free;
+    form->f->freeVars(&bound, &free);
+    for(auto it = form->vl->begin(); it != form->vl->end(); ++it) {
+        if(bound.exists(*it) || free.exists(*it))
+            continue;
+        else
+            form->vl->remove(*it);
+    }
+
+    if(form->vl->size() == 0) {
+        return form->f;
+    } else {
+        return form;
+    }
+}

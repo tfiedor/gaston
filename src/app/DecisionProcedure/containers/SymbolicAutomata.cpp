@@ -1631,7 +1631,7 @@ void ProjectionAutomaton::DumpAutomaton() {
     std::cout << "\033[1;34m";
     std::cout << "\u2203";
     for(auto it = this->projectedVars->begin(); it != this->projectedVars->end(); ++it) {
-        std::cout << symbolTable.lookupSymbol(*it);
+        std::cout << (*it) << ":" << symbolTable.lookupSymbol(*it);
         if((it + 1) != this->projectedVars->end()) {
             std::cout << ", ";
         }

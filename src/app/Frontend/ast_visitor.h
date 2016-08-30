@@ -29,100 +29,104 @@ public:
     // < Constructors >
     TransformerVisitor(Traverse tD) : ASTVisitor<AST*>(tD) {}
 
+    virtual AST* visit(ASTTerm* term) { return term; }
+    virtual AST* visit(ASTForm* form) { return form; }
+    virtual AST* visit(ASTUniv* univ) { return univ; }
+
     // < ASTTerm1 Derives > //
-    virtual AST* visit(ASTTerm1_n* term) { return term; }
-    virtual AST* visit(ASTTerm1_T* term) { return term; }
-    virtual AST* visit(ASTTerm1_t* term) { return term; }
-    virtual AST* visit(ASTTerm1_tn* term) { return term; }
-    virtual AST* visit(ASTTerm1_tnt* term) { return term; }
+    virtual AST* visit(ASTTerm1_n* term) { return this->visit(static_cast<ASTTerm*>(term)); }
+    virtual AST* visit(ASTTerm1_T* term) { return this->visit(static_cast<ASTTerm*>(term)); }
+    virtual AST* visit(ASTTerm1_t* term) { return this->visit(static_cast<ASTTerm*>(term)); }
+    virtual AST* visit(ASTTerm1_tn* term) { return this->visit(static_cast<ASTTerm*>(term)); }
+    virtual AST* visit(ASTTerm1_tnt* term) { return this->visit(static_cast<ASTTerm*>(term)); }
 
     // < ASTTerm2 Derives > //
-    virtual AST* visit(ASTTerm2_TT* term) { return term; }
-    virtual AST* visit(ASTTerm2_Tn* term) { return term; }
+    virtual AST* visit(ASTTerm2_TT* term) { return this->visit(static_cast<ASTTerm*>(term)); }
+    virtual AST* visit(ASTTerm2_Tn* term) { return this->visit(static_cast<ASTTerm*>(term)); }
 
     // < ASTForm Derives > //
-    virtual AST* visit(ASTForm_tT* form) { return form; }
-    virtual AST* visit(ASTForm_T* form) { return form; }
-    virtual AST* visit(ASTForm_TT* form) { return form; }
-    virtual AST* visit(ASTForm_tt* form) { return form; }
-    virtual AST* visit(ASTForm_nt* form) { return form; }
-    virtual AST* visit(ASTForm_nT* form) { return form; }
-    virtual AST* visit(ASTForm_f* form) { return form; }
-    virtual AST* visit(ASTForm_ff* form) { return form; }
-    virtual AST* visit(ASTForm_vf* form) { return form; }
-    virtual AST* visit(ASTForm_uvf* form) { return form; }
+    virtual AST* visit(ASTForm_tT* form) { return this->visit(static_cast<ASTForm*>(form)); }
+    virtual AST* visit(ASTForm_T* form) { return this->visit(static_cast<ASTForm*>(form)); }
+    virtual AST* visit(ASTForm_TT* form) { return this->visit(static_cast<ASTForm*>(form)); }
+    virtual AST* visit(ASTForm_tt* form) { return this->visit(static_cast<ASTForm*>(form)); }
+    virtual AST* visit(ASTForm_nt* form) { return  this->visit(static_cast<ASTForm*>(form)); }
+    virtual AST* visit(ASTForm_nT* form) { return this->visit(static_cast<ASTForm*>(form)); }
+    virtual AST* visit(ASTForm_f* form) { return this->visit(static_cast<ASTForm*>(form)); }
+    virtual AST* visit(ASTForm_ff* form) { return this->visit(static_cast<ASTForm*>(form)); }
+    virtual AST* visit(ASTForm_vf* form) { return this->visit(static_cast<ASTForm*>(form)); }
+    virtual AST* visit(ASTForm_uvf* form) { return this->visit(static_cast<ASTForm*>(form)); }
 
     // < ASTTerm1 Specific > //
-    virtual AST* visit(ASTTerm1_Var1* term) { return term; }
-    virtual AST* visit(ASTTerm1_Dot* term) { return term; }
-    virtual AST* visit(ASTTerm1_Up* term) { return term; }
-    virtual AST* visit(ASTTerm1_Root* term) { return term; }
-    virtual AST* visit(ASTTerm1_Int* term) { return term; }
-    virtual AST* visit(ASTTerm1_Plus* term) { return term; }
-    virtual AST* visit(ASTTerm1_Minus* term) { return term; }
-    virtual AST* visit(ASTTerm1_PlusModulo* term) { return term; }
-    virtual AST* visit(ASTTerm1_MinusModulo* term) { return term; }
-    virtual AST* visit(ASTTerm1_Min* term) { return term; }
-    virtual AST* visit(ASTTerm1_Max* term) { return term; }
-    virtual AST* visit(ASTTerm1_TreeRoot* term) { return term; }
+    virtual AST* visit(ASTTerm1_Var1* term) { return this->visit(static_cast<ASTTerm1_n*>(term)); }
+    virtual AST* visit(ASTTerm1_Dot* term) { return this->visit(static_cast<ASTTerm1_t*>(term)); }
+    virtual AST* visit(ASTTerm1_Up* term) { return this->visit(static_cast<ASTTerm1_t*>(term)); }
+    virtual AST* visit(ASTTerm1_Root* term) { return this->visit(static_cast<ASTTerm1*>(term)); }
+    virtual AST* visit(ASTTerm1_Int* term) { return this->visit(static_cast<ASTTerm1_n*>(term)); }
+    virtual AST* visit(ASTTerm1_Plus* term) { return this->visit(static_cast<ASTTerm1_tn*>(term)); }
+    virtual AST* visit(ASTTerm1_Minus* term) { return this->visit(static_cast<ASTTerm1_tn*>(term)); }
+    virtual AST* visit(ASTTerm1_PlusModulo* term) { return this->visit(static_cast<ASTTerm1_tnt*>(term)); }
+    virtual AST* visit(ASTTerm1_MinusModulo* term) { return this->visit(static_cast<ASTTerm1_tnt*>(term)); }
+    virtual AST* visit(ASTTerm1_Min* term) { return this->visit(static_cast<ASTTerm1_T*>(term)); }
+    virtual AST* visit(ASTTerm1_Max* term) { return this->visit(static_cast<ASTTerm1_T*>(term)); }
+    virtual AST* visit(ASTTerm1_TreeRoot* term) { return this->visit(static_cast<ASTTerm1_T*>(term)); }
 
     // < ASTTerm2 Specific > //
-    virtual AST* visit(ASTTerm2_Var2* Term) { return Term; }
-    virtual AST* visit(ASTTerm2_VarTree* Term) { return Term; }
-    virtual AST* visit(ASTTerm2_Dot* Term) { return Term; }
-    virtual AST* visit(ASTTerm2_Up* Term) { return Term; }
-    virtual AST* visit(ASTTerm2_Empty* Term) { return Term; }
-    virtual AST* visit(ASTTerm2_Union* Term) { return Term; }
-    virtual AST* visit(ASTTerm2_Inter* Term) { return Term; }
-    virtual AST* visit(ASTTerm2_Setminus* Term) { return Term; }
-    virtual AST* visit(ASTTerm2_Set* Term) { return Term; }
-    virtual AST* visit(ASTTerm2_Plus* Term) { return Term; }
-    virtual AST* visit(ASTTerm2_Minus* Term) { return Term; }
-    virtual AST* visit(ASTTerm2_Interval* Term) { return Term; }
-    virtual AST* visit(ASTTerm2_PresbConst* Term) { return Term; }
-    virtual AST* visit(ASTTerm2_Formula* Term) { return Term; }
+    virtual AST* visit(ASTTerm2_Var2* Term) { return this->visit(static_cast<ASTTerm2*>(Term)); }
+    virtual AST* visit(ASTTerm2_VarTree* Term) { return this->visit(static_cast<ASTTerm2*>(Term)); }
+    virtual AST* visit(ASTTerm2_Dot* Term) { return this->visit(static_cast<ASTTerm2*>(Term)); }
+    virtual AST* visit(ASTTerm2_Up* Term) { return this->visit(static_cast<ASTTerm2*>(Term)); }
+    virtual AST* visit(ASTTerm2_Empty* Term) { return this->visit(static_cast<ASTTerm2*>(Term)); }
+    virtual AST* visit(ASTTerm2_Union* Term) { return this->visit(static_cast<ASTTerm2_TT*>(Term)); }
+    virtual AST* visit(ASTTerm2_Inter* Term) { return this->visit(static_cast<ASTTerm2_TT*>(Term)); }
+    virtual AST* visit(ASTTerm2_Setminus* Term) { return this->visit(static_cast<ASTTerm2_TT*>(Term)); }
+    virtual AST* visit(ASTTerm2_Set* Term) { return this->visit(static_cast<ASTTerm2*>(Term)); }
+    virtual AST* visit(ASTTerm2_Plus* Term) { return this->visit(static_cast<ASTTerm2_Tn*>(Term)); }
+    virtual AST* visit(ASTTerm2_Minus* Term) { return this->visit(static_cast<ASTTerm2_Tn*>(Term)); }
+    virtual AST* visit(ASTTerm2_Interval* Term) { return this->visit(static_cast<ASTTerm2*>(Term)); }
+    virtual AST* visit(ASTTerm2_PresbConst* Term) { return this->visit(static_cast<ASTTerm2*>(Term)); }
+    virtual AST* visit(ASTTerm2_Formula* Term) { return this->visit(static_cast<ASTTerm2*>(Term)); }
 
     // < ASTForm Specific > //
-    virtual AST* visit(ASTForm_Var0* form) { return form; }
-    virtual AST* visit(ASTForm_AllPosVar* form) { return form; }
-    virtual AST* visit(ASTForm_True* form) { return form; }
-    virtual AST* visit(ASTForm_False* form) { return form; }
-    virtual AST* visit(ASTForm_In* form) { return form; }
-    virtual AST* visit(ASTForm_Notin* form) { return form; }
-    virtual AST* visit(ASTForm_RootPred* form) { return form; }
-    virtual AST* visit(ASTForm_EmptyPred* form) { return form; }
-    virtual AST* visit(ASTForm_FirstOrder* form) { return form; }
-    virtual AST* visit(ASTForm_Sub* form) { return form; }
-    virtual AST* visit(ASTForm_Equal1* form) { return form; }
-    virtual AST* visit(ASTForm_Equal2* form) { return form; }
-    virtual AST* visit(ASTForm_NotEqual1* form) { return form; }
-    virtual AST* visit(ASTForm_NotEqual2* form) { return form; }
-    virtual AST* visit(ASTForm_Less* form) { return form; }
-    virtual AST* visit(ASTForm_LessEq* form) { return form; }
-    virtual AST* visit(ASTForm_WellFormedTree* form) { return form; }
-    virtual AST* visit(ASTForm_Impl* form) { return form; }
-    virtual AST* visit(ASTForm_Biimpl* form) { return form; }
-    virtual AST* visit(ASTForm_And* form) { return form; }
-    virtual AST* visit(ASTForm_IdLeft* form) { return form; }
-    virtual AST* visit(ASTForm_Or* form) { return form; }
-    virtual AST* visit(ASTForm_Not* form) { return form; }
-    virtual AST* visit(ASTForm_Ex0* form) { return form; }
-    virtual AST* visit(ASTForm_Ex1* form) { return form; }
-    virtual AST* visit(ASTForm_Ex2* form) { return form; }
-    virtual AST* visit(ASTForm_All0* form) { return form; }
-    virtual AST* visit(ASTForm_All1* form) { return form; }
-    virtual AST* visit(ASTForm_All2* form) { return form; }
-    virtual AST* visit(ASTForm_Let0* form) { return form; }
-    virtual AST* visit(ASTForm_Let1* form) { return form; }
-    virtual AST* visit(ASTForm_Let2* form) { return form; }
-    virtual AST* visit(ASTForm_Call* form) { return form; }
-    virtual AST* visit(ASTForm_Import* form) { return form; }
-    virtual AST* visit(ASTForm_Export* form) { return form; }
-    virtual AST* visit(ASTForm_Prefix* form) { return form; }
-    virtual AST* visit(ASTForm_Restrict* form) { return form; }
-    virtual AST* visit(ASTForm_InStateSpace1* form) { return form; }
-    virtual AST* visit(ASTForm_InStateSpace2* form) { return form; }
-    virtual AST* visit(ASTForm_SomeType* form) { return form;}
+    virtual AST* visit(ASTForm_Var0* form) { return this->visit(static_cast<ASTForm*>(form)); }
+    virtual AST* visit(ASTForm_AllPosVar* form) { return this->visit(static_cast<ASTForm*>(form)); }
+    virtual AST* visit(ASTForm_True* form) { return this->visit(static_cast<ASTForm*>(form)); }
+    virtual AST* visit(ASTForm_False* form) { return this->visit(static_cast<ASTForm*>(form)); }
+    virtual AST* visit(ASTForm_In* form) { return this->visit(static_cast<ASTForm_tT*>(form)); }
+    virtual AST* visit(ASTForm_Notin* form) { return this->visit(static_cast<ASTForm_tT*>(form)); }
+    virtual AST* visit(ASTForm_RootPred* form) { return this->visit(static_cast<ASTForm*>(form)); }
+    virtual AST* visit(ASTForm_EmptyPred* form) { return this->visit(static_cast<ASTForm_T*>(form)); }
+    virtual AST* visit(ASTForm_FirstOrder* form) { return this->visit(static_cast<ASTForm*>(form)); }
+    virtual AST* visit(ASTForm_Sub* form) { return this->visit(static_cast<ASTForm_TT*>(form)); }
+    virtual AST* visit(ASTForm_Equal1* form) { return this->visit(static_cast<ASTForm_tt*>(form)); }
+    virtual AST* visit(ASTForm_Equal2* form) { return this->visit(static_cast<ASTForm_TT*>(form)); }
+    virtual AST* visit(ASTForm_NotEqual1* form) { return this->visit(static_cast<ASTForm_tt*>(form)); }
+    virtual AST* visit(ASTForm_NotEqual2* form) { return this->visit(static_cast<ASTForm_TT*>(form)); }
+    virtual AST* visit(ASTForm_Less* form) { return this->visit(static_cast<ASTForm_tt*>(form)); }
+    virtual AST* visit(ASTForm_LessEq* form) { return this->visit(static_cast<ASTForm_tt*>(form)); }
+    virtual AST* visit(ASTForm_WellFormedTree* form) { return this->visit(static_cast<ASTForm_T*>(form)); }
+    virtual AST* visit(ASTForm_Impl* form) { return this->visit(static_cast<ASTForm_ff*>(form)); }
+    virtual AST* visit(ASTForm_Biimpl* form) { return this->visit(static_cast<ASTForm_ff*>(form)); }
+    virtual AST* visit(ASTForm_And* form) { return this->visit(static_cast<ASTForm_ff*>(form)); }
+    virtual AST* visit(ASTForm_IdLeft* form) { return this->visit(static_cast<ASTForm_ff*>(form)); }
+    virtual AST* visit(ASTForm_Or* form) { return this->visit(static_cast<ASTForm_ff*>(form)); }
+    virtual AST* visit(ASTForm_Not* form) { return this->visit(static_cast<ASTForm*>(form)); }
+    virtual AST* visit(ASTForm_Ex0* form) { return this->visit(static_cast<ASTForm_vf*>(form)); }
+    virtual AST* visit(ASTForm_Ex1* form) { return this->visit(static_cast<ASTForm_uvf*>(form)); }
+    virtual AST* visit(ASTForm_Ex2* form) { return this->visit(static_cast<ASTForm_uvf*>(form)); }
+    virtual AST* visit(ASTForm_All0* form) { return this->visit(static_cast<ASTForm_vf*>(form)); }
+    virtual AST* visit(ASTForm_All1* form) { return this->visit(static_cast<ASTForm_uvf*>(form)); }
+    virtual AST* visit(ASTForm_All2* form) { return this->visit(static_cast<ASTForm_uvf*>(form)); }
+    virtual AST* visit(ASTForm_Let0* form) { return this->visit(static_cast<ASTForm*>(form)); }
+    virtual AST* visit(ASTForm_Let1* form) { return this->visit(static_cast<ASTForm*>(form)); }
+    virtual AST* visit(ASTForm_Let2* form) { return this->visit(static_cast<ASTForm*>(form)); }
+    virtual AST* visit(ASTForm_Call* form) { return this->visit(static_cast<ASTForm*>(form)); }
+    virtual AST* visit(ASTForm_Import* form) { return this->visit(static_cast<ASTForm*>(form)); }
+    virtual AST* visit(ASTForm_Export* form) { return this->visit(static_cast<ASTForm_f*>(form)); }
+    virtual AST* visit(ASTForm_Prefix* form) { return this->visit(static_cast<ASTForm_f*>(form)); }
+    virtual AST* visit(ASTForm_Restrict* form) { return this->visit(static_cast<ASTForm_f*>(form)); }
+    virtual AST* visit(ASTForm_InStateSpace1* form) { return this->visit(static_cast<ASTForm*>(form)); }
+    virtual AST* visit(ASTForm_InStateSpace2* form) { return this->visit(static_cast<ASTForm*>(form)); }
+    virtual AST* visit(ASTForm_SomeType* form) { return this->visit(static_cast<ASTForm*>(form));}
 };
 
 /**
