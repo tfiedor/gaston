@@ -141,15 +141,80 @@ constructs (e.g. predicates) that enabled faster decision procedure.
   \textbf{Id} & \textbf{Name} & \textbf{Variables} & \textbf{Atoms} & \textbf{Answer} \\
   \hline
   \hline
-  \multicolumn{5}{*}{\strandbenchone}\\
+  \multicolumn{5}{c}{\strandbenchone}\\
   \hline
-  \input{data\bench-strand-old}
+  \input{data/bench-strand-old}
   \hline
-  \multicolumn{5}{*}{\strandbenchtwo}\\
+  \multicolumn{5}{c}{\strandbenchtwo}\\
   \hline
-  \input{data\bench-strand-new}
+  \input{data/bench-strand-new}
   \hline
   \end{tabular}
 \end{table}
 
+\section{UABE: Unbounded Arrays Bounded Elements}
 
+This benchmark is provided from the work of the \cite{uabe}. The authors introduced novel theory
+of Unbounded Arrays and Bounded Elements allowing one to reason about array structures and its elements.
+The proposed logic is shown decidable by reduction to WS1S. The paper provides moderate benchmark
+representing invariants of programs manipulating arrays like e.g. sorts, finding minima, etc.
+
+\begin{table}
+  \caption{}{\label{tab:bench-uabe}}
+  \begin{tabular}{l l r r r}
+  \hline
+  \textbf{Id} & \textbf{Name} & \textbf{Variables} & \textbf{Atoms} & \textbf{Answer} \\
+  \hline
+  \hline
+  \input{data/bench-uabe}
+  \hline
+  \end{tabular}
+\end{table}
+
+\section{Veanes Minimization Benchmark}
+This benchmark is selected from the paper~\cite{veanes} that is describing novel minimization
+technique, that is said to outperform the technique implemented by MONA. However, as most of the
+benchmarks are over symbolic formulae that is not supported by our tool, we only selected those
+that are supported by us.
+
+This parametric family of formulae are complex for most of decision procedures, because of
+potentially great number of variables (and thus long tracks and number of symbols) and are in
+prenex normal form, potentially causing a state explosion. However, we show in Section~\ref{opt:full-ap}
+that this can be bypassed by using the technique of anti-prenexing, that greatly reduces the search space.
+
+The family is defined for various $k \geq 2$ as follows:
+\begin{equation}
+ \exists x_1,\ldots,x_k. \bigwedge_{1 \leq i \leq k - 1} x_i < x_{i+1}
+\end{equation}
+
+\begin{table}
+  \caption{}{\label{tab:bench-uabe}}
+  \begin{tabular}{l l r r r}
+  \hline
+  \textbf{Id} & \textbf{Name} & \textbf{Variables} & \textbf{Atoms} & \textbf{Answer} \\
+  \hline
+  \hline
+  \input{data/bench-veanes}
+  \hline
+  \end{tabular}
+\end{table}
+
+\section{dWiNA: Set of Generated Formulae}
+
+These benchmarks are provided from the evaluation of our prototype tool \dwina, that implements the
+backward decision procedure. These formulae represents several parametric families of formulae
+and are in prenex normal form and thus can pose a serious challenge for decision procedures with
+the increasing $k$, as the tracks explode.
+
+There are several sets of benchmarks representing some artificial formulae that represents various
+properties of set, like e.g. that there exists $k$ sets that are prefix size (\ref{eq:dwina-sets}),
+that there exists $k$ singleton sons (\ref{eq:dwina-singletons}) or some very obvious stuff (\ref{eq:obvious}.
+
+\begin{eqnarray}
+  \exists X_1,\ldots, X_k. \forall x. \exists y, z. \bigwedge_{1 \leq i \leq k} 
+   (x \in X_i \wedge x \leq y \leq z \wedge z \in X_i) \Leftarrow y \in X_i\\
+  \exists X_1,\ldots, X_k. \forall X. \bigwedge_{1 \leq i \leq k} (X \subseteq X_i \wedge X \neq X_i)
+    \Leftarrow X_i \not\subseteq X\\
+  \exists X_1,\ldots, X_k. \forall x_1, x_2. \bigwedge_{1 \leq i \leq k}
+   (x_1 \in X_i \wedge x_2 \in X_i) \Leftarrow x_1 = x_2
+\end{eqnarray}
