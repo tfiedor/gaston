@@ -118,7 +118,7 @@ public:
   virtual void freeVars(IdentList*, IdentList*) {};
   virtual void dump() {};
 	virtual void detach() {}
-	virtual std::string ToString(bool no_utf = false) { return std::string("");}
+	virtual std::string ToString(bool no_utf = false) { assert(false && "Unsupported kind for 'ToString' method");}
 	virtual void ConstructMapping(AST*, std::map<unsigned int, unsigned int>&) { this->dump(); std::cout << "\n"; assert(false && "Called ConstructMapping() base function\n");};
 	virtual bool StructuralCompare(AST* f) {return f->kind == this->kind;}
 
@@ -987,6 +987,7 @@ public:
   VarCode makeCode(SubstCode *subst = NULL);
   void dump();
   ASTForm* clone() { return new ASTForm_True(this->pos); }
+  virtual std::string ToString(bool no_utf = false);
 
   // Conversion of AST representation of formula to Automaton
   void toUnaryAutomaton(Automaton &aut, bool doComplement);
@@ -1004,6 +1005,7 @@ public:
   VarCode makeCode(SubstCode *subst = NULL);
   void dump();
   ASTForm* clone() { return new ASTForm_False(this->pos); }
+  virtual std::string ToString(bool no_utf = false);
 
   // Conversion of AST representation of formula to Automaton
   void toUnaryAutomaton(Automaton &aut, bool doComplement);
@@ -1070,6 +1072,7 @@ public:
 
   VarCode makeCode(SubstCode *subst = NULL);
   void dump();
+  virtual std::string ToString(bool no_utf = false);
   ASTForm* clone() { return new ASTForm_EmptyPred(this->T->clone(), this->pos); }
 };
 

@@ -64,6 +64,7 @@ size_t TermFixpoint::preInstances = 0;
 size_t TermFixpoint::isNotShared = 0;
 size_t TermFixpoint::postponedTerms = 0;
 size_t TermFixpoint::postponedProcessed = 0;
+size_t TermFixpoint::fullyComputedFixpoints = 0;
 size_t TermContinuation::continuationUnfolding = 0;
 size_t TermContinuation::unfoldInSubsumption = 0;
 size_t TermContinuation::unfoldInIsectNonempty = 0;
@@ -2060,6 +2061,12 @@ void TermFixpoint::ComputeNextFixpoint() {
     auto fix_result = this->_fixpointTest(result.first);
     if(fix_result.first != SubsumedType::NOT) {
         assert(fix_result.first != SubsumedType::PARTIALLY);
+#       if (MEASURE_PROJECTION == true)
+        if(_worklist.empty() && !this->_fullyComputed) {
+            this->_fullyComputed = true;
+            ++TermFixpoint::fullyComputedFixpoints;
+        }
+#       endif
         return;
     }
     assert(fix_result.second->type != TermType::EMPTY || fix_result.second->InComplement());

@@ -528,6 +528,12 @@ public:
                             return this->GetNext();
                         } else {
                             // we are complete?
+#                           if (MEASURE_PROJECTION == true)
+                            if(!_termFixpoint._fullyComputed) {
+                                _termFixpoint._fullyComputed = true;
+                                ++TermFixpoint::fullyComputedFixpoints;
+                            }
+#                           endif
 #                           if (OPT_EARLY_EVALUATION == true)
                             if(_termFixpoint._postponed.empty()) {
                                 return this->_Invalidate();
@@ -580,6 +586,7 @@ protected:
     bool _bValue;                           // [1B] << Boolean value of the fixpoint testing
     bool _updated = false;                  // [1B] << Flag if the fixpoint was updated during the last unique check
     bool _shortBoolValue;                   // [1B] << Value that leads to early termination fo the fixpoint
+    bool _fullyComputed = false;            // [1B] << Whether the fixpoint is fully computed
 
 public:
     // << STATIC MEASURES >>
@@ -590,6 +597,7 @@ public:
     static size_t isNotShared;
     static size_t postponedTerms;
     static size_t postponedProcessed;
+    static size_t fullyComputedFixpoints;
 
     // <<< CONSTRUCTORS >>>
     NEVER_INLINE TermFixpoint(Aut_ptr aut, Term_ptr startingTerm, Symbol* startingSymbol, bool inComplement, bool initbValue, WorklistSearchType search);

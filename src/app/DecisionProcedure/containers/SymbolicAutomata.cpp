@@ -275,19 +275,8 @@ ProjectionAutomaton::ProjectionAutomaton(SymbolicAutomaton_raw aut, Formula_ptr 
     // Initialize the guide
     // Fixme: Refactor: This is mess!!!
     ASTForm* innerForm = static_cast<ASTForm_q*>(this->_form)->f;
-    if(innerForm->kind == aAnd || innerForm->kind == aOr) {
-        ASTForm_uvf* uvf_form = static_cast<ASTForm_uvf*>(this->_form);
-        for(auto it = uvf_form->vl->begin(); it != uvf_form->vl->end(); ++it) {
-            if(symbolTable.lookupType(*it) == MonaTypeTag::Varname1) {
-                this->_guide = new FixpointGuide(uvf_form->vl);
-            } else {
-                this->_guide = new FixpointGuide();
-            }
-            break;
-        }
-    } else {
-        this->_guide = new FixpointGuide();
-    }
+    ASTForm_uvf* uvf_form = static_cast<ASTForm_uvf*>(this->_form);
+    this->_guide = new FixpointGuide(uvf_form->vl);
 }
 
 ProjectionAutomaton::~ProjectionAutomaton() {
@@ -2217,6 +2206,8 @@ void SymbolicAutomaton::DumpAutomatonMetrics() {
     print_stat("DAG gain", ((double)this->stats.nodes / this->stats.real_nodes));
     print_stat("Fixpoint Computations", this->stats.fixpoint_computations);
     print_stat("Maximal Fixpoint Nesting", this->stats.max_fixpoint_nesting);
+    print_stat("Maximal Fixpoint Width", this->stats.max_fixpoint_width);
+    print_stat("Average Fixpoint Width", this->stats.avg_fixpoint_width);
     print_stat("Automaton Height", this->stats.height);
     print_stat("Maximal References", this->stats.max_refs);
 #   if (MEASURE_AUTOMATA_CYCLES == true)
@@ -2237,6 +2228,8 @@ void ProjectionAutomaton::FillStats() {
     this->stats.real_nodes = 1 + this->_aut.aut->stats.real_nodes;
     this->stats.max_refs = std::max(this->_refs, this->_aut.aut->stats.max_refs);
     this->stats.max_fixpoint_nesting = this->_aut.aut->stats.max_fixpoint_nesting + 1;
+    this->stats.max_fixpoint_width = std::max(this->projectedVars->size(), this->_aut.aut->stats.max_fixpoint_width);
+    this->stats.avg_fixpoint_width = (this->projectedVars->size() + this->_aut.aut->stats.avg_fixpoint_width) / 2.0;
 }
 
 void BinaryOpAutomaton::FillStats() {
@@ -2257,6 +2250,11 @@ void BinaryOpAutomaton::FillStats() {
     this->stats.max_refs = std::max({this->_refs, this->_lhs_aut.aut->stats.max_refs, (this->_rhs_aut.aut != nullptr ? this->_rhs_aut.aut->stats.max_refs : 0)});
     this->stats.max_fixpoint_nesting = std::max(this->_lhs_aut.aut->stats.max_fixpoint_nesting,
         (this->_rhs_aut.aut != nullptr ? this->_rhs_aut.aut->stats.max_fixpoint_nesting : 0));
+    this->stats.max_fixpoint_width =  std::max(this->_lhs_aut.aut->stats.max_fixpoint_width,
+        (this->_rhs_aut.aut != nullptr ? this->_rhs_aut.aut->stats.max_fixpoint_width : this->_lhs_aut.aut->stats.max_fixpoint_width));
+    this->stats.avg_fixpoint_width = (this->_lhs_aut.aut->stats.avg_fixpoint_width +
+        (this->_rhs_aut.aut != nullptr ? this->_rhs_aut.aut->stats.avg_fixpoint_width : this->_lhs_aut.aut->stats.avg_fixpoint_width)) / 2.0;
+
 }
 
 void TernaryOpAutomaton::FillStats() {
@@ -2285,6 +2283,12 @@ void TernaryOpAutomaton::FillStats() {
     this->stats.max_fixpoint_nesting = std::max({this->_lhs_aut.aut->stats.max_fixpoint_nesting,
                                      (this->_mhs_aut.aut != nullptr ? this->_mhs_aut.aut->stats.max_fixpoint_nesting : 0),
                                      (this->_rhs_aut.aut != nullptr ? this->_rhs_aut.aut->stats.max_fixpoint_nesting : 0)});
+    this->stats.max_fixpoint_width = std::max({this->_lhs_aut.aut->stats.max_fixpoint_width,
+                                                 (this->_mhs_aut.aut != nullptr ? this->_mhs_aut.aut->stats.max_fixpoint_width: 0),
+                                                 (this->_rhs_aut.aut != nullptr ? this->_rhs_aut.aut->stats.max_fixpoint_width : 0)});
+    this->stats.max_fixpoint_width = (this->_lhs_aut.aut->stats.max_fixpoint_width +
+                                              (this->_mhs_aut.aut != nullptr ? this->_mhs_aut.aut->stats.max_fixpoint_width: 0) +
+                                              (this->_rhs_aut.aut != nullptr ? this->_rhs_aut.aut->stats.max_fixpoint_width : 0)) / 2.0;
 }
 
 void NaryOpAutomaton::FillStats() {
@@ -2312,6 +2316,8 @@ void NaryOpAutomaton::FillStats() {
             if(this->stats.height < this->_auts[j].aut->stats.height) this->stats.height = this->_auts[j].aut->stats.height;
             if(this->stats.max_refs < this->_auts[j].aut->stats.height) this->stats.max_refs = this->_auts[j].aut->stats.max_refs;
             if(this->stats.max_fixpoint_nesting < this->_auts[j].aut->stats.max_fixpoint_nesting) this->stats.max_fixpoint_nesting = this->_auts[j].aut->stats.max_fixpoint_nesting;
+            if(this->stats.max_fixpoint_width < this->_auts[j].aut->stats.max_fixpoint_width) this->stats.max_fixpoint_width = this->_auts[j].aut->stats.max_fixpoint_width;
+            this->stats.avg_fixpoint_width = (this->stats.avg_fixpoint_width + this->_auts[j].aut->stats.avg_fixpoint_width) / 2.0;
         }
     }
 }
@@ -2323,6 +2329,8 @@ void BaseAutomaton::FillStats() {
     this->stats.real_nodes = 1;
     this->stats.max_refs = this->_refs;
     this->stats.max_fixpoint_nesting = 0;
+    this->stats.max_fixpoint_width = 0;
+    this->stats.avg_fixpoint_width = 0.0;
 }
 
 void ComplementAutomaton::FillStats() {
@@ -2337,6 +2345,8 @@ void ComplementAutomaton::FillStats() {
     this->stats.real_nodes = 1 + this->_aut.aut->stats.real_nodes;
     this->stats.max_refs = std::max(this->_refs, this->_aut.aut->stats.max_refs);
     this->stats.max_fixpoint_nesting = this->_aut.aut->stats.max_fixpoint_nesting;
+    this->stats.max_fixpoint_width = this->_aut.aut->stats.max_fixpoint_width;
+    this->stats.avg_fixpoint_width = this->_aut.aut->stats.avg_fixpoint_width;
 }
 
 bool BinaryOpAutomaton::WasLastExampleValid() {

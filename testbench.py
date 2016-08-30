@@ -89,11 +89,14 @@ measures = {
             'form-atoms': Measure("atoms" + whatever_regex + space_regex, space_default, int, False),
             'aut-fix': Measure("fixpoint computations" + whatever_regex + space_regex, space_default, int, False),
             'aut-max-fix-nest': Measure("maximal fixpoint nesting" + whatever_regex + space_regex, space_default, int, False),
+            'aut-max-fix-width': Measure("maximal fixpoint width" + whatever_regex + space_regex, space_default, int, False),
+            'aut-avg-fix-width': Measure("average fixpoint width" + whatever_regex + double_regex, double_default, float, False),
             'aut-height': Measure("automaton height" + whatever_regex + space_regex, space_default, int, False),
             'aut-max-refs': Measure("maximal references" + whatever_regex + space_regex, space_default, int, False),
             'cont-eval': Measure("evaluated" + whatever_regex + space_regex, space_default, int, False),
             'cont-eval-in-sub': Measure("in subsumption" + whatever_regex + space_regex, space_default, int, False),
             'cont-eval-in-isect': Measure("in isect nonempty" + whatever_regex + space_regex, space_default, int, False),
+            'fixpoint-full-comp': Measure("fully computed" + whatever_regex + double_regex, double_default, float, False),
             'cycles-all-final': Measure("cycles on all final states" + whatever_regex + double_regex, double_default, float, False),
             'cycles-some-final': Measure("cycles on some final states" + whatever_regex + double_regex, double_default, float, False),
         },
@@ -119,7 +122,7 @@ measures = {
 }
 
 csv_keys = {
-    'gaston': ['ret', 'time', 'space-all', 'space', 'space-mona', 'cycles-all-final', 'cycles-some-final'],
+    'gaston': ['ret', 'time', 'space-all', 'space', 'space-mona', 'aut-max-fix-width', 'aut-avg-fix-width', 'fixpoint-full-comp', 'cycles-all-final', 'cycles-some-final'],
     'mona': ['time', 'space', 'space-min']
 }
 
@@ -561,6 +564,8 @@ if __name__ == '__main__':
                     continue
                 if benchmark.endswith('_serialized.mona'):
                     continue
+                if benchmark.endswith('_unsatisfying.mona') or benchmark.endswith('_satisfying.mona'):
+                    continue
 
                 # obtain additional information for experiment
                 fixpoint_number = get_fixpoint_number_for(benchmark, options.gaston_params)
@@ -611,6 +616,11 @@ if __name__ == '__main__':
                 benchmark = os.path.join(root, f)
                 if not benchmark.endswith('.mona'):
                     continue
+                if benchmark.endswith('_serialized.mona'):
+                    continue
+                if benchmark.endswith('_unsatisfying.mona') or benchmark.endswith('_satisfying.mona'):
+                    continue
+
                 data[benchmark] = {}
                 tags = getTagsFromString(benchmark)
                 # skips some benchmarks according to the tag

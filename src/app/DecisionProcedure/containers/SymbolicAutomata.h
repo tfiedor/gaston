@@ -79,6 +79,8 @@ public:
         unsigned int height = 0;
         unsigned int fixpoint_computations = 0;
         unsigned int max_fixpoint_nesting = 0;
+        unsigned int max_fixpoint_width = 0;
+        double avg_fixpoint_width = 0;
         unsigned int nodes = 0;
         unsigned int real_nodes = 0;
         unsigned int max_refs;
@@ -435,7 +437,10 @@ public:
     NEVER_INLINE ProjectionAutomaton(Formula_ptr form, SymbolicAutomaton* aut)
             : SymbolicAutomaton(form), _isRoot(false), _aut(aut) {
         type = AutType::PROJECTION;
-        this->_guide = new FixpointGuide();
+
+        ASTForm* innerForm = static_cast<ASTForm_q*>(this->_form)->f;
+        ASTForm_uvf* uvf_form = static_cast<ASTForm_uvf*>(this->_form);
+        this->_guide = new FixpointGuide(uvf_form->vl);
     }
     // FIXME: Some day in future, I will curse myself for this Constructor ---^
 

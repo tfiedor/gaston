@@ -328,7 +328,10 @@ bool SymbolicChecker::Run() {
 #   if (MEASURE_COMPARISONS == true)
     OUTPUT_MEASURES(TermBaseSet)
 #   endif
-    std::cout << "\t\u2218 Term Fixpoints: " << TermFixpoint::instances << " (" << (TermFixpoint::instances - TermFixpoint::preInstances) << " + " << TermFixpoint::preInstances <<")\n";
+    std::cout << "\t\u2218 Term Fixpoints: " << TermFixpoint::instances;
+    std::cout << " (" << (TermFixpoint::instances - TermFixpoint::preInstances) << " + " << TermFixpoint::preInstances <<")";
+    std::cout << " fully computed: " << std::setprecision(2) << (TermFixpoint::fullyComputedFixpoints / (double) TermFixpoint::instances)*100 << "%";
+    std::cout << "\n";
 #   if (MEASURE_PROJECTION == true)
     std::cout << "\t\t\u2218 is not shared: " << TermFixpoint::isNotShared << "\n";
 #   endif

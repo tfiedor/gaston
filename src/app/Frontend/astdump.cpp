@@ -460,11 +460,19 @@ ASTForm_True::dump()
 {
   cout << "True";
 }
-    
+
+std::string ASTForm_True::ToString(bool no_utf) {
+  return "True";
+}
+
 void 
 ASTForm_False::dump()
 {
   cout << "False";
+}
+
+std::string ASTForm_False::ToString(bool no_utf) {
+  return "False";
 }
     
 void 
@@ -514,6 +522,10 @@ void
 ASTForm_EmptyPred::dump()
 {
   cout << "EmptyPred("; T->dump(); cout << ")";
+}
+
+std::string ASTForm_EmptyPred::ToString(bool no_utf) {
+  return "EmptyPred(" + T->ToString(no_utf) + ")";
 }
     
 void 
