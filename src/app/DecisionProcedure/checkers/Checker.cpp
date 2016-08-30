@@ -247,6 +247,11 @@ void Checker::CloseUngroundFormula() {
                 }
                 BooleanUnfolder booleanUnfolder;
                 this->_rootRestriction = static_cast<ASTForm*>(restrictions->accept(booleanUnfolder));
+                // Fixme: Wonder if this is correct o.O
+#               if (OPT_DEFIRSTORDER_UNGROUND == true)
+                Defirstorderer defirstorderer;
+                this->_rootRestriction = static_cast<ASTForm*>(this->_rootRestriction->accept(defirstorderer));
+#               endif
                 this->_rootRestriction->is_restriction = true;
                 FixpointDetagger detagger(options.fixLimit);
                 this->_rootRestriction->accept(detagger);

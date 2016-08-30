@@ -427,6 +427,7 @@ public:
 #define OPT_PARTIAL_PRUNE_FIXPOINTS         false   // < Will use the partial subsumption on fixpoint members
 #define OPT_USE_BASE_PROJECTION_AUTOMATA    true    // < Will treat base projections differently (as bases not fixpoints)
 #define OPT_CACHE_SUBPATHS_IN_WRAPPER       true    // < Will cache the nodes and subpaths during the pre computing in mona wrapper
+#define OPT_DEFIRSTORDER_UNGROUND           false   // < Will call Defirstorderer on Unground formula restriction (Fixme: maybe incorrect)
 
 /* >>> Static Assertions <<< *
  *****************************/

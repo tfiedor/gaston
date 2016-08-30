@@ -689,7 +689,9 @@ ResultType RootProjectionAutomaton::IntersectNonEmpty(Symbol* symbol, Term* fina
 
     // We are doing the initial step by evaluating the epsilon
     TermList* projectionApproximation = reinterpret_cast<TermList*>(finalApproximation);
-    assert(projectionApproximation->list.size() == 1);
+    if(finalApproximation->type == TermType::EMPTY || projectionApproximation->list.size() == 0) {
+        return std::make_pair(this->_factory.CreateEmpty(), underComplement);
+    }
 
     // Evaluate the initial unfolding of epsilon
     ResultType result = this->_aut.aut->IntersectNonEmpty(this->_aut.ReMapSymbol(symbol), projectionApproximation->list[0], underComplement);
@@ -718,7 +720,6 @@ ResultType RootProjectionAutomaton::IntersectNonEmpty(Symbol* symbol, Term* fina
                 break;
             }
         }
-
         fixpoint->RemoveSubsumed();
 #       if (DEBUG_EXAMPLE_PATHS == true)
         if(fixpointTerm != nullptr && fixpointTerm->link->len > maxPath) {
@@ -777,6 +778,10 @@ ResultType RootProjectionAutomaton::IntersectNonEmpty(Symbol* symbol, Term* fina
 #   if (DEBUG_EXAMPLE_PATHS == true)
     timer_paths.stop();
 #   endif
+
+    ExamplePair examples = fixpoint->GetFixpointExamples();
+    this->_satExample = examples.first;
+    this->_unsatExample = examples.second;
 
     return std::make_pair(fixpoint, fixpoint->GetResult());
 }
@@ -1490,13 +1495,17 @@ void ProjectionAutomaton::_DumpExampleCore(std::ostream& out, ExampleType e, Int
     Term* example = (e == ExampleType::SATISFYING ? this->_satExample : this->_unsatExample);
 
     // Print the bounded part
-    auto varNo = this->projectedVars->size();
+    size_t varNo = this->projectedVars->size();
     std::string* examples = new std::string[varNo];
     this->projectedVars->sort();
     int max_len = max_varname_lenght(this->projectedVars, varNo);
 
+    std::vector<Term_ptr> processed;
     while(example != nullptr && example->link->succ != nullptr && example != example->link->succ) {
     //                                                           ^--- not sure this is right
+        if(std::find_if(processed.begin(), processed.end(), [&example](Term_ptr i) { return example == i; }) != processed.end())
+            break;
+        processed.push_back(example);
         for(size_t i = 0; i < varNo; ++i) {
             examples[i] += example->link->symbol->GetSymbolAt(varMap[this->projectedVars->get(i)]);
         }

@@ -185,8 +185,10 @@ void SymbolicChecker::Decide() {
 
 int count_example_len(Term* t) {
     int len = 0;
-    while(t->link->succ != nullptr && t->link->succ != t) {
+    std::vector<Term_ptr> processed;
+    while(t != nullptr && std::find_if(processed.begin(), processed.end(), [&t](Term_ptr i) { return t == i; }) == processed.end()) {
         ++len;
+        processed.push_back(t);
         t = t->link->succ;
     }
     return len;

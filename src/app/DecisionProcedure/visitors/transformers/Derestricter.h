@@ -35,6 +35,7 @@ public:
     AST* visit(ASTForm_Or*);
     AST* visit(ASTForm_Impl*);
     AST* visit(ASTForm_Biimpl*);
+    AST* visit(ASTForm_FirstOrder*);
 };
 
 #endif //WSKS_DERESTRICTER_H

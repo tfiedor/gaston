@@ -72,3 +72,7 @@ AST* Defirstorderer::visit(ASTForm_Impl* form) {
 AST* Defirstorderer::visit(ASTForm_Or* form) {
     return this->_visitBinaryForm<ASTForm_Or>(form);
 }
+
+AST* Defirstorderer::visit(ASTForm_FirstOrder* form) {
+    return new ASTForm_True(Pos());
+}
