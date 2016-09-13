@@ -1543,6 +1543,55 @@ bool TermFixpoint::IsEmpty() {
 }
 
 /**
+ * @brief Tests if the term is semantically valid
+ *
+ * Checks if the restrictions hold for this term, i.e. it is semantically valid
+ *
+ * @return  true  if the term is semantically valid
+ */
+bool TermEmpty::IsSemanticallyValid() {
+    // Fixme: This stinks, but whatever. I'll do what I want, mom!
+    return true;
+}
+
+bool TermProduct::IsSemanticallyValid() {
+    return this->left->IsSemanticallyValid() && this->right->IsSemanticallyValid();
+}
+
+bool TermTernaryProduct::IsSemanticallyValid() {
+    return this->left->IsSemanticallyValid() && this->middle->IsSemanticallyValid() && this->right->IsSemanticallyValid();
+}
+
+bool TermNaryProduct::IsSemanticallyValid() {
+    for(size_t i = 0; i < this->arity; ++i) {
+        if(!this->terms[i]->IsSemanticallyValid()) {
+            return false;
+        }
+    }
+    return true;
+}
+
+bool TermBaseSet::IsSemanticallyValid() {
+    if(this->_aut->IsRestriction()) {
+        return this->Intersects(static_cast<TermBaseSet*>(this->_aut->GetInitialStates()));
+    } else {
+        return true;
+    }
+}
+
+bool TermContinuation::IsSemanticallyValid() {
+    assert(false && "Unsupported TermType 'CONTINUATION' for IsSemanticallyValid()");
+}
+
+bool TermList::IsSemanticallyValid() {
+    return true;
+}
+
+bool TermFixpoint::IsSemanticallyValid() {
+    return true;
+}
+
+/**
  * Measures the state space as number of states
  */
 unsigned int Term::MeasureStateSpace() {
@@ -1941,15 +1990,16 @@ std::pair<SubsumedType, Term_ptr> TermFixpoint::_fixpointTest(Term_ptr const &te
     if(this->_searchType == WorklistSearchType::UNGROUND_ROOT) {
         // Fixme: Not sure if this is really correct, but somehow I still feel that the Root search is special and
         //   subsumption is maybe not enough? But maybe this simply does not work for fixpoints of negated thing.
-        return this->_testIfIn(term);
+        //return this->_testIfIn(term);
         // ^--- however i still feel that this is wrong and may cause loop.
         if(this->_unsatTerm == nullptr && this->_satTerm == nullptr) {
             return this->_testIfIn(term);
         } else if(this->_satTerm == nullptr) {
-            return (!term->InComplement() ? this->_testIfBiggerExists(term) : this->_testIfSmallerExists(term));
+            return this->_testIfBiggerExists(term);
         } else {
+            assert(this->_satTerm != nullptr);
             assert(this->_unsatTerm == nullptr);
-            return (!term->InComplement() ? this->_testIfSmallerExists(term) : this->_testIfBiggerExists(term));
+            return this->_testIfSmallerExists(term);
         }
     } else {
         return this->_testIfSubsumes(term);
@@ -1957,21 +2007,31 @@ std::pair<SubsumedType, Term_ptr> TermFixpoint::_fixpointTest(Term_ptr const &te
 }
 
 std::pair<SubsumedType, Term_ptr >TermFixpoint::_testIfBiggerExists(Term_ptr const &term) {
-    return (std::find_if(this->_fixpoint.begin(), this->_fixpoint.end(), [&term](FixpointMember const& member) {
-        if(!member.second || member.first == nullptr) {
+    return (std::find_if(this->_fixpoint.begin(), this->_fixpoint.end(), [&term](FixpointMember& member) {
+        if(!member.second || member.first == nullptr || !member.first->IsSemanticallyValid()) {
             return false;
         } else {
-            return term->IsSubsumed(member.first, OPT_PARTIALLY_LIMITED_SUBSUMPTION, nullptr, false) != SubsumedType::NOT;
+            if(member.first != term && member.first->IsSubsumed(term, OPT_PARTIALLY_LIMITED_SUBSUMPTION, nullptr, false) != SubsumedType::NOT) {
+                member.second = false;
+                return false;
+            } else {
+                return term->IsSubsumed(member.first, OPT_PARTIALLY_LIMITED_SUBSUMPTION, nullptr, false) != SubsumedType::NOT;
+            }
         }
     }) == this->_fixpoint.end() ? std::make_pair(SubsumedType::NOT, term) : std::make_pair(SubsumedType::YES, term));
 }
 
 std::pair<SubsumedType, Term_ptr> TermFixpoint::_testIfSmallerExists(Term_ptr const &term) {
-    return (std::find_if(this->_fixpoint.begin(), this->_fixpoint.end(), [&term](FixpointMember const& member) {
-        if(!member.second || member.first == nullptr) {
+    return (std::find_if(this->_fixpoint.begin(), this->_fixpoint.end(), [&term](FixpointMember& member) {
+        if(!member.second || member.first == nullptr || !member.first->IsSemanticallyValid()) {
             return false;
         } else {
-            return member.first->IsSubsumed(term, OPT_PARTIALLY_LIMITED_SUBSUMPTION, nullptr, false) != SubsumedType::NOT;
+            if(member.first != term && term->IsSubsumed(member.first, OPT_PARTIALLY_LIMITED_SUBSUMPTION, nullptr, false) != SubsumedType::NOT) {
+                member.second = false;
+                return false;
+            } else {
+                return member.first->IsSubsumed(term, OPT_PARTIALLY_LIMITED_SUBSUMPTION, nullptr, false) != SubsumedType::NOT;
+            }
         }
     }) == this->_fixpoint.end() ? std::make_pair(SubsumedType::NOT, term) : std::make_pair(SubsumedType::YES, term));
 }
@@ -2055,7 +2115,6 @@ void TermFixpoint::ComputeNextFixpoint() {
 
     // Compute the results
     ResultType result = this->_baseAut->IntersectNonEmpty(item.second, item.first, GET_NON_MEMBERSHIP_TESTING(this));
-    this->_updateExamples(result);
 
     // If it is subsumed by fixpoint, we don't add it
     auto fix_result = this->_fixpointTest(result.first);
@@ -2069,6 +2128,7 @@ void TermFixpoint::ComputeNextFixpoint() {
 #       endif
         return;
     }
+    this->_updateExamples(result);
     assert(fix_result.second->type != TermType::EMPTY || fix_result.second->InComplement());
 
     // Push new term to fixpoint
@@ -2157,7 +2217,6 @@ void TermFixpoint::ComputeNextPre() {
 
     // Compute the results
     ResultType result = this->_baseAut->IntersectNonEmpty(item.second, item.first, GET_NON_MEMBERSHIP_TESTING(this));
-    this->_updateExamples(result);
 
     // If it is subsumed we return
     auto fix_result = this->_fixpointTest(result.first);
@@ -2165,6 +2224,7 @@ void TermFixpoint::ComputeNextPre() {
         assert(fix_result.first != SubsumedType::PARTIALLY);
         return;
     }
+    this->_updateExamples(result);
     //assert(fix_result.second->type != TermType::EMPTY);
 
     // Push the computed thing and aggregate the result

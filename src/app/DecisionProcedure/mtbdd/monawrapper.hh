@@ -140,6 +140,7 @@ private:
         //leafNodes_[state] = new WrappedNode(state, 0xfffffffe);
         LOAD_index(&bddm->node_table[addr], index);
 
+        // Fixme: The fuck is this cock magic?
         if(index != BDD_LEAF_INDEX && varMap[index] == 0)
             return leafNodes_[state];
 
@@ -417,6 +418,9 @@ public:
             RecSetPointer(dfa->bddm, dfa->q[i], *spawnNode(dfa->bddm, dfa->q[i], i));
 
         ++MonaWrapper<Data>::_wrapperCount;
+#       if (DEBUG_MONA_BDD == true)
+        this->DumpToDot(std::string("bdd") + std::to_string(MonaWrapper<Data>::_wrapperCount) + std::string(".dot"));
+#       endif
     }
 
     ~MonaWrapper()
@@ -453,8 +457,11 @@ public:
         for(auto node: internalNodes_)
             ofs << node.first << "[label=\"" << node.first << " (" << GetVar(node.second->var_) << ")\"];" << std::endl;
 
-        for(size_t i = 1; i < roots_.size(); i++)
+        for(size_t i = this->initialState_; i < roots_.size(); i++) {
+            if(roots_[i] == nullptr)
+                continue;
             ofs << "s" << i << " -> " << roots_[i]->node_ << ";" << std::endl;
+        }
 
         for(auto node: internalNodes_)
         {

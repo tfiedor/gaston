@@ -124,6 +124,7 @@ public:
     virtual bool IsEmpty() = 0;
     virtual void Complement();
     virtual bool InComplement() {return GET_IN_COMPLEMENT(this);}
+    virtual bool IsSemanticallyValid() = 0;
     bool operator==(const Term &t);
     bool IsNotComputed();
     void SetSuccessor(Term*, Symbol*);
@@ -172,6 +173,7 @@ public:
     // <<< PUBLIC API >>>
     SubsumedType IsSubsumedBy(FixpointType& fixpoint, WorklistType& worklist, Term*&, bool no_prune = false);
     bool IsEmpty();
+    bool IsSemanticallyValid();
 
     // <<< DUMPING FUNCTIONS >>>
     std::string DumpToDot(std::ostream&);
@@ -207,6 +209,7 @@ public:
     // <<< PUBLIC API >>>
     SubsumedType IsSubsumedBy(FixpointType& fixpoint, WorklistType& worklist, Term*&, bool no_prune = false);
     bool IsEmpty();
+    bool IsSemanticallyValid();
 
     // <<< DUMPING FUNCTIONS >>>
     std::string DumpToDot(std::ostream&);
@@ -242,6 +245,7 @@ public:
     // <<< PUBLIC API >>>
     SubsumedType IsSubsumedBy(FixpointType&, WorklistType& worklist, Term*&, bool no_prune = false);
     bool IsEmpty();
+    bool IsSemanticallyValid();
 
     // <<< DUMPING FUNCTIONS >>>
     std::string DumpToDot(std::ostream&);
@@ -281,6 +285,7 @@ public:
     // <<< PUBLIC API >>>
     SubsumedType IsSubsumedBy(FixpointType&, WorklistType& worklist, Term*&, bool no_prune = false);
     bool IsEmpty();
+    bool IsSemanticallyValid();
     Term_ptr operator[](size_t);
 
     // <<< DUMPING FUNCTIONS >>>
@@ -319,6 +324,7 @@ public:
     bool Intersects(TermBaseSet* rhs);
     SubsumedType IsSubsumedBy(FixpointType& fixpoint, WorklistType& worklist, Term*&, bool no_prune = false);
     bool IsEmpty();
+    bool IsSemanticallyValid();
 
     // <<< DUMPING FUNCTIONS >>
     std::string DumpToDot(std::ostream&);
@@ -362,6 +368,7 @@ public:
     SubsumedType IsSubsumedBy(FixpointType& fixpoint, WorklistType& worklist, Term*&, bool no_prune = false);
     bool IsUnfolded() {return this->_unfoldedTerm != nullptr;}
     bool IsEmpty();
+    bool IsSemanticallyValid();
     Term* GetUnfoldedTerm() {return this->_unfoldedTerm; }
     Term* unfoldContinuation(UnfoldedIn);
 
@@ -393,6 +400,7 @@ public:
     // <<< PUBLIC API >>>
     SubsumedType IsSubsumedBy(FixpointType& fixpoint, WorklistType& worklist, Term*&, bool no_prune = false);
     bool IsEmpty();
+    bool IsSemanticallyValid();
 
     // <<< DUMPING FUNCTIONS >>>
     std::string DumpToDot(std::ostream&);
@@ -613,6 +621,7 @@ public:
     // <<< PUBLIC API >>>
     FixpointSemanticType GetSemantics() const;
     bool IsEmpty();
+    bool IsSemanticallyValid();
     SubsumedType IsSubsumedBy(FixpointType& fixpoint, WorklistType& worklist, Term*&, bool no_prune = false);
     bool GetResult();
     ExamplePair GetFixpointExamples();

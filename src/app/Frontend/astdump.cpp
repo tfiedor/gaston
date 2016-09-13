@@ -775,11 +775,15 @@ ASTForm_Ex1::dump()
 }
 
 std::string quantifier_to_string(IdentList* free, std::string quantifier) {
+  MonaTypeTag tag = (quantifier == "ex1" ? MonaTypeTag::Varname1 : MonaTypeTag::Varname2);
+
   std::string s(quantifier);
   std::string var("");
   s += " ";
   bool first = true;
   for (auto it = free->begin(); it != free->end(); ++it) {
+    if(symbolTable.lookupType(*it) != tag)
+      continue;
     if (first) {
       first = false;
     } else {
@@ -789,7 +793,7 @@ std::string quantifier_to_string(IdentList* free, std::string quantifier) {
     s += (var[0] == '<' ? var.substr(1, var.length()-2) : var);
   }
   s += ": ";
-  return s;
+  return (s.size() > 6 ? s : "");
 }
 std::string ASTForm_Ex1::ToString(bool no_utf) {
   return "(" +  quantifier_to_string(this->vl, "ex1") + this->f->ToString(no_utf) + ")";
@@ -806,7 +810,8 @@ ASTForm_Ex2::dump()
 }
 
 std::string ASTForm_Ex2::ToString(bool no_utf) {
-  return "(" +  quantifier_to_string(this->vl, "ex2") + this->f->ToString(no_utf) + ")";
+  return "(" +  quantifier_to_string(this->vl, "ex2") + quantifier_to_string(this->vl, "ex1") + this->f->ToString(no_utf) + ")";
+  //                                                    ^---- since some of the 2nd order variables can be in reality first order
 }
     
 void 

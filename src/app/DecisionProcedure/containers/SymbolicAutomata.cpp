@@ -685,7 +685,9 @@ ResultType SymbolicAutomaton::IntersectNonEmpty(Symbol* symbol, Term* stateAppro
 }
 
 ResultType RootProjectionAutomaton::IntersectNonEmpty(Symbol* symbol, Term* finalApproximation, bool underComplement) {
-    assert(this->_unsatExample == nullptr && this->_satExample == nullptr);
+    assert(this->_unsatExample == nullptr && this->_satExample == nullptr); // ! Nothing should be found yet
+    assert(symbol == nullptr); // ! The search is "manual"
+    assert(underComplement == false);
 
     // We are doing the initial step by evaluating the epsilon
     TermList* projectionApproximation = reinterpret_cast<TermList*>(finalApproximation);
@@ -698,6 +700,9 @@ ResultType RootProjectionAutomaton::IntersectNonEmpty(Symbol* symbol, Term* fina
     if(result.first->type == TermType::EMPTY) {
         return result;
     }
+#   if (DEBUG_ROOT_AUTOMATON == true || true)
+    std::cout << "Finished computing initial unfolding of epsilon\n";
+#   endif
 
     // Create a new fixpoint term and iterator on it
     TermFixpoint* fixpoint = this->_factory.CreateFixpoint(result.first, SymbolWorkshop::CreateZeroSymbol(), underComplement, result.second, WorklistSearchType::UNGROUND_ROOT);
@@ -710,6 +715,7 @@ ResultType RootProjectionAutomaton::IntersectNonEmpty(Symbol* symbol, Term* fina
     Timer timer_paths;
     timer_paths.start();
 #   endif
+    std::cout << "Start something bitch\n";
     // While the fixpoint is not fully unfolded and while we cannot evaluate early
     while((this->_satExample == nullptr || this->_unsatExample == nullptr) && ((fixpointTerm = it.GetNext()) != nullptr)) {
         if(allPosVar != -1 && options.test != TestType::EVERYTHING) {
