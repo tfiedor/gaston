@@ -80,8 +80,6 @@ private:
     using WrappedNode       = struct WrappedNode;
     using InternalNodesType = std::unordered_map<unsigned, WrappedNode *>;
     using SetType           = std::unordered_set<WrappedNode *>;
-    //using CacheType         = std::unordered_map<size_t, VectorType>;
-    //using PreCache  = BinaryCache<PreKey, Term_ptr, PreHashType, PrePairCompare<PreKey>, dumpPreKey, dumpPreData>;
 
     using KeyType			= std::pair<WrappedNode *, Gaston::BitMask>;
     using CacheType			= BinaryCache<KeyType, VectorType, HashType, PairCompare<KeyType>, Gaston::dumpKey, Gaston::dumpData>;
@@ -112,6 +110,18 @@ public:
 #   endif
 
 private:
+    /**
+     * @brief Creates a wrapper for the node corresponding to the @p addr
+     *
+     * Looks up the node corresponding to the @p addr. If no such node exists,
+     *   new one is spawned. Further an edge is created leading to the @p pred
+     *   of the node.
+     *
+     * @param[in]  addr  address of the node we are spawning
+     * @param[out]   pred  successor of the node, that we are spawning
+     * @param[in]  edge  either 0 or 1 edge in BDD
+     * @return  wrapped DFA node
+     */
     WrappedNode *spawnNode(unsigned addr, WrappedNode &pred, bool edge)
     {
         WrappedNode *node;
@@ -119,31 +129,40 @@ private:
 
         if((itN = internalNodes_.find(addr)) != internalNodes_.end())
         {
+            // Node exists
             node = itN->second;
         }
         else
         {
             node = MonaWrapper<Data>::nodePool_.construct(addr);
-            //node = new WrappedNode(addr);
             internalNodes_.insert(std::make_pair(addr, node));
         }
 
+        // Add new predecessor of the node
         node->pred_[edge].insert(&pred);
         return node;
     }
 
+    /**
+     * @brief Spawns node for the @p state
+     *
+     * @param[in]  bddm  BDD manager of the DFA representation
+     * @param[in]  addr  address of the node we are spawning
+     * @param[in]  state  state for which we are spawning the wrapped node
+     * @return  wrapped DFA node
+     */
     WrappedNode *spawnNode(const bdd_manager *bddm, unsigned addr, size_t state)
     {
         unsigned index;
 
         leafNodes_[state] = MonaWrapper<Data>::nodePool_.construct(state,  0xfffffffe);
-        //leafNodes_[state] = new WrappedNode(state, 0xfffffffe);
         LOAD_index(&bddm->node_table[addr], index);
 
         // Fixme: The fuck is this cock magic?
         if(index != BDD_LEAF_INDEX && varMap[index] == 0)
             return leafNodes_[state];
 
+        // ? If we have self loop on the state, this handles the case I guess?
         WrappedNode *result = spawnNode(addr, *leafNodes_[state], 1);
         result->pred_[0].insert(leafNodes_[state]);
         return result;
@@ -321,6 +340,81 @@ private:
 #       endif
     }
 
+    /**
+     * @brief Ascends by one @p var level simulating the 'X' value
+     *
+     * Ascends by one @p var level through the pre starting from @p source nodes,
+     *   accumulating results to @p dest nodes. This accumulates both the 0 and 1
+     *   predecessors and simulates the 'X' behaviour in symbol
+     *
+     * @param[in]  var  level in the bdd we are ascending by
+     * @param[in]  source  source set of bdd nodes
+     * @param[out]  dest  destination set of bdd nodes
+     */
+    void AscendByLevel(size_t var, SetType& source, SetType& dest) {
+        for(auto node: source) {
+            assert(node != nullptr);
+            if (UnequalVars(node->var_, var)) {
+                // Variables are unequal, we wait to synchronize with the rest
+                assert(node->var_ > var);
+                dest.insert(node);
+            } else {
+                // Ascend by both 0 and 1
+                GetSuccessors(node->pred_[0], dest, var - 1, 0);
+                GetSuccessors(node->pred_[1], dest, var - 1, 1);
+                ResetFlags(node->var_);
+            }
+        }
+    }
+
+    /**
+     * @brief Ascends by one @p var level simulating the '0' or '1' value
+     *
+     * Ascends by one @p var level through the pre starting from @p source nodes,
+     *   accumulating results to @p dest nodes. This ascension is limited to the
+     *   @p val.
+     *
+     * @param[in]  var  level in the bdd we are ascending by
+     * @param[in]  val  value which limits the ascension
+     * @param[in]  source  source set of bdd nodes
+     * @param[out]  dest  destination set of bdd nodes
+     */
+    void AscendByLevelByValue(size_t var, bool val, SetType& source, SetType& dest) {
+        // not "don't care".
+        for(auto node: source) {
+            assert(node != nullptr);
+            if(GetVar(node->var_) == var) {
+                // There could be don't care on the lower level so we include those stuff
+                GetDontCareSucc(node->pred_[~val], dest, var - 1, ~val);
+                // Get the usuall symbol stuff
+                GetSuccessors(node->pred_[val], dest, var - 1, val);
+                ResetFlags(node->var_);
+            } else {  // don't care on(at?) created node.
+                if(UnequalVars(node->var_, var - 1)) {
+                    // We wait to synchronize
+                    dest.insert(node);
+                } else {
+                    // We got here from some higher don't care
+                    if((val && IsPredecessorHigh(node->var_)) ||
+                       (~val && IsPredecessorLow(node->var_)))
+                        dest.insert(node);
+
+                    ResetFlags(node->var_);
+                }
+            }
+        }
+    }
+
+    /**
+     * @brief Recursively traverse the BDD computing the pre in BFS manner
+     *
+     * Traverses the BDD of MONA, that is wrapped by DJPJ's mighty Wrapper.
+     * Works in Breadth First Search manner, i.e. it computes the Pre by
+     *   traversing the levels corresponding to variables.
+     *
+     * @param[in]  nodes  starting nodes of the recursive pre
+     * @return  reached nodes through the symbol
+     */
     VectorType RecPre(SetType& nodes)
     {
         //SetType nodes({root});
@@ -329,55 +423,11 @@ private:
         int var = numVars_ - 1;
         for(; -1 < var; --var)
         {
-            if(/*symbol_[var << 1] &*/ symbol_[(var << 1) + 1])
-            // ^-- this is excessive, since only testing 2n+1 bit is enough to determine if don't care
-            {
-                // don't care.
-                for(auto node: nodes)
-                {
-                    assert(node != nullptr);
-                    if(UnequalVars(node->var_, var))
-                    {
-                        res.insert(node);
-                    }
-                    else
-                    {
-                        GetSuccessors(node->pred_[0], res, var - 1, 0);
-                        GetSuccessors(node->pred_[1], res, var - 1, 1);
-                        ResetFlags(node->var_);
-                    }
-                }
+            if(/*symbol_[var << 1] &*/ symbol_[(var << 1) + 1]) {
+                AscendByLevel(var, nodes, res);
+            } else {
+                AscendByLevelByValue(var, symbol_[(var << 1)], nodes, res);
             }
-            else
-            {
-                // not "don't care".
-                for(auto node: nodes)
-                {
-                    assert(node != nullptr);
-                    if(GetVar(node->var_) == var)
-                    {
-                        GetDontCareSucc(node->pred_[~symbol_[(var << 1)]], res, var - 1, ~symbol_[(var << 1)]);
-                        GetSuccessors(node->pred_[symbol_[(var << 1)]], res, var - 1, symbol_[(var << 1)]);
-                        ResetFlags(node->var_);
-                    }
-                    else    // don't care on(at?) created node.
-                    {
-                        if(UnequalVars(node->var_, var - 1))
-                        {
-                            res.insert(node);
-                        }
-                        else
-                        {
-                            if((symbol_[(var << 1)] && IsPredecessorHigh(node->var_)) ||
-                               (~symbol_[(var << 1)] && IsPredecessorLow(node->var_)))
-                                res.insert(node);
-
-                            ResetFlags(node->var_);
-                        }
-                    }
-                }
-            }
-
             nodes = std::move(res);
         }
 
