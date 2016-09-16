@@ -101,6 +101,7 @@ protected:
     static boost::object_pool<WrappedNode> nodePool_;
 
 public:
+    const int LEAF_VAR_VALUE = 0xfffffffe;
     static int _wrapperCount;
 #   if (MEASURE_AUTOMATA_CYCLES == true)
     static size_t noAllFinalStatesHasCycles;    // < Number of wrapped automata, that satisfy the condition
@@ -155,7 +156,7 @@ private:
     {
         unsigned index;
 
-        leafNodes_[state] = MonaWrapper<Data>::nodePool_.construct(state,  0xfffffffe);
+        leafNodes_[state] = MonaWrapper<Data>::nodePool_.construct(state, this->LEAF_VAR_VALUE);
         LOAD_index(&bddm->node_table[addr], index);
 
         // Fixme: The fuck is this cock magic?
@@ -187,6 +188,18 @@ private:
             RecSetPointer(bddm, l, *spawnNode(l, node, 0));
             RecSetPointer(bddm, r, *spawnNode(r, node, 1));
         }
+    }
+
+    /**
+     * @brief Returns true if the @p var corresponds to LEAF value
+     *
+     * Note: Yeah i know this is stupid cock magic, but whatever
+     *
+     * @param[in]  var  variable we are checking for leaves
+     * @return  true if the @p var is leaf
+     */
+    inline bool IsLeaf(int var) {
+        return GetVar(var) == GetVar(this->LEAF_VAR_VALUE);
     }
 
     inline int GetVar(int var)
@@ -228,8 +241,9 @@ private:
     {
         VectorType vec;
 
-        for(auto node: nodes)
+        for(auto node: nodes) {
             vec.insert(node->node_);
+        }
 
         return vec;
     }
@@ -266,21 +280,29 @@ private:
 //        return (symbolMasks_[var] & symbol) | masks_[var];
     }
 
+    /**
+     * @brief Recursively traverse the BDD, computing the pre of states in DFS manner
+     *
+     * Traverses the BDD of MONA, that is wrapped by DJPJ's mighty Wrapper.
+     * Works in Depth First Search manner, i.e. it computes the Pre by traversing
+     *   each path in the BDD, exploiting the cache for already traversed subpaths.
+     *
+     * @param[in]  node  starting node of the search
+     * @param[out]  res  accumulated results
+     */
     void RecPre(WrappedNode *node, VectorType &res)
     {
-        //std::cout << "node->var_: " << node->var_ << std::endl;
-        if(node->var_ < 0)
-        {
+        // Checks if we are in the leaf level. If yes, add the value of the leaf
+        if(this->IsLeaf(node->var_) || node->var_ < 0) {
+        // Previously: if(node->var_ < 0) {
             res.insert(node->node_);
             return;
         }
 
         int var = GetVar(node->var_);
 
-        // Vytvorit key, ktery bude dvojice (stav, podcesta)
-        // => vytvori se funkce, ktera toto vytvori.
-        // potom, je treba vysledek sjednotit s jiz existujicimi vysledky.
 #       if (OPT_CACHE_SUBPATHS_IN_WRAPPER == true)
+        // Checks if we already explored (node + subpath) in cache
         VectorType tmp;
         auto key = std::make_pair(node, transformSymbol(symbol_, var));
 
@@ -291,13 +313,15 @@ private:
         }
 #       endif
 
-        //std::cout << "pokus" << std::endl;
         VectorType innerRes;
         if(/*symbol_[var << 1] &&*/ symbol_[(var << 1) + 1])
         {
+            // If the value of the symbol on [var] level is 'X', i.e. don't care
             for(auto nnode: node->pred_[~symbol_[(var << 1)]])
+            // Fixme:                   ^--- why the fuck do we complement the whole symbol, to get the inverse shit
+            // Fixme: (-.-)'
             {
-                if(UnequalVars(nnode->var_, var - 1) && nnode->var_ > -2)
+                if(UnequalVars(nnode->var_, var - 1) && !this->IsLeaf(nnode->var_))
                 {
                     if(~symbol_[(var << 1)] == symbol_[(GetVar(nnode->var_ + 1) << 1)] ||
                         symbol_[(GetVar(nnode->var_ + 1) << 1) + 1])
@@ -312,7 +336,7 @@ private:
         else
         {
             for(auto nnode: node->pred_[~symbol_[(var << 1)]])
-                if(UnequalVars(nnode->var_, var - 1) && nnode->var_ > -2)
+                if(UnequalVars(nnode->var_, var - 1) && !this->IsLeaf(nnode->var_))
                     if((~symbol_[(var << 1)] == symbol_[(GetVar(nnode->var_ + 1) << 1)]) ||
                        symbol_[(GetVar(nnode->var_ + 1) << 1) + 1])
                         RecPre(nnode, innerRes);
@@ -320,7 +344,7 @@ private:
 
         for(auto nnode: node->pred_[symbol_[(var << 1)]])
         {
-            if(UnequalVars(nnode->var_, var - 1) && nnode->var_ > -2)
+            if(UnequalVars(nnode->var_, var - 1) && !this->IsLeaf(nnode->var_))
             {
                 if(symbol_[(var << 1)] == symbol_[(GetVar(nnode->var_ + 1) << 1)] ||
                    symbol_[(GetVar(nnode->var_ + 1) << 1) + 1])
@@ -382,13 +406,14 @@ private:
     void AscendByLevelByValue(size_t var, bool val, SetType& source, SetType& dest) {
         // not "don't care".
         for(auto node: source) {
+            std::cout << "Ascending from: " << (*node) << "\n";
             assert(node != nullptr);
             if(GetVar(node->var_) == var) {
                 // There could be don't care on the lower level so we include those stuff
-                GetDontCareSucc(node->pred_[~val], dest, var - 1, ~val);
-                // Get the usuall symbol stuff
+                GetDontCareSucc(node->pred_[!val], dest, var - 1, !val);
+                // Get the usual symbol stuff
                 GetSuccessors(node->pred_[val], dest, var - 1, val);
-                ResetFlags(node->var_);
+                ResetFlags(node->var_); // Fixme: <--- This could pose problems i think
             } else {  // don't care on(at?) created node.
                 if(UnequalVars(node->var_, var - 1)) {
                     // We wait to synchronize
@@ -396,7 +421,7 @@ private:
                 } else {
                     // We got here from some higher don't care
                     if((val && IsPredecessorHigh(node->var_)) ||
-                       (~val && IsPredecessorLow(node->var_)))
+                       (!val && IsPredecessorLow(node->var_)))
                         dest.insert(node);
 
                     ResetFlags(node->var_);
@@ -406,7 +431,7 @@ private:
     }
 
     /**
-     * @brief Recursively traverse the BDD computing the pre in BFS manner
+     * @brief Recursively traverse the BDD, computing the pre of states BFS manner, by variable levels
      *
      * Traverses the BDD of MONA, that is wrapped by DJPJ's mighty Wrapper.
      * Works in Breadth First Search manner, i.e. it computes the Pre by
@@ -626,6 +651,42 @@ public:
 
         symbol_ = symbol;
         return RecPre(nodes);
+    }
+
+    VectorType Pre(VATA::Util::OrdVector<size_t> &states, const boost::dynamic_bitset<> &symbol, size_t var, char val) {
+        assert(var < this->numVars_);
+        assert(dfa_ != nullptr);
+
+        SetType sources, dest;
+        for(auto state : states) {
+            if(state > this->dfa_->ns) {
+                // Add internal node
+                sources.insert(this->internalNodes_[state]);
+            } else {
+                assert(roots_[state] != nullptr);
+                sources.insert(roots_[state]);
+            }
+        }
+
+        if(sources.empty()) {
+            return VectorType();
+        } else {
+            symbol_ = symbol;
+            switch(val) {
+                case 'X':
+                    this->AscendByLevel(var, sources, dest);
+                    break;
+                case '1':
+                    this->AscendByLevelByValue(var, 1, sources, dest);
+                    break;
+                case '0':
+                    this->AscendByLevelByValue(var, 0, sources, dest);
+                    break;
+                default:
+                    assert(false);
+            }
+            return this->CreateResultSet(dest);
+        }
     }
 
     void ProcessDFA(DFA *dfa)
