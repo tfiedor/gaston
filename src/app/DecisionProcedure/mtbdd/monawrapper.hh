@@ -194,6 +194,7 @@ private:
      * @brief Returns true if the @p var corresponds to LEAF value
      *
      * Note: Yeah i know this is stupid cock magic, but whatever
+     * Fixme: This is not exactly true, there
      *
      * @param[in]  var  variable we are checking for leaves
      * @return  true if the @p var is leaf
@@ -242,6 +243,7 @@ private:
         VectorType vec;
 
         for(auto node: nodes) {
+            ResetFlags(node->var_);
             vec.insert(node->node_);
         }
 
@@ -273,6 +275,7 @@ private:
 
     inline Gaston::BitMask transformSymbol(const Gaston::BitMask &symbol, int var)
     {
+        assert(var < this->numVars_);
         Gaston::BitMask transformed = symbol;
         transformed &= symbolMasks_[var];
         transformed |= masks_[var];
@@ -293,7 +296,7 @@ private:
     void RecPre(WrappedNode *node, VectorType &res)
     {
         // Checks if we are in the leaf level. If yes, add the value of the leaf
-        if(this->IsLeaf(node->var_) || node->var_ < 0) {
+        if(this->IsLeaf(node->var_) || this->IsLeaf(node->var_-1) || node->var_ < 0) {
         // Previously: if(node->var_ < 0) {
             res.insert(node->node_);
             return;
@@ -427,6 +430,7 @@ private:
                     ResetFlags(node->var_);
                 }
             }
+            ResetFlags(node->var_);
         }
     }
 
@@ -654,7 +658,7 @@ public:
     }
 
     VectorType Pre(VATA::Util::OrdVector<size_t> &states, const boost::dynamic_bitset<> &symbol, size_t var, char val) {
-        assert(var < this->numVars_);
+        assert(var < this->numVars_ || this->numVars_ == 0);
         assert(dfa_ != nullptr);
 
         SetType sources, dest;
@@ -663,8 +667,9 @@ public:
                 // Add internal node
                 sources.insert(this->internalNodes_[state]);
             } else {
-                assert(roots_[state] != nullptr);
-                sources.insert(roots_[state]);
+                if(roots_[state] != nullptr) {
+                    sources.insert(roots_[state]);
+                }
             }
         }
 
@@ -749,6 +754,10 @@ public:
 
     inline size_t GetInitialState() {
         return this->initialState_;
+    }
+
+    int GetMonaStateSpace() {
+        return this->dfa_->ns;
     }
 };
 
