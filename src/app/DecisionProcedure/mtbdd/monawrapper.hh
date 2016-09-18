@@ -1,12 +1,9 @@
 #ifndef MONAWRAPPER_H
 #define MONAWRAPPER_H
 
+#include "ondriks_mtbdd.hh"
 #include "../../Frontend/ast.h"
 #include "../containers/SymbolicCache.hh"
-
-#include <vata/util/ord_vector.hh>
-
-#include "ondriks_mtbdd.hh"
 #include "../containers/VarToTrackMap.hh"
 #include "../environment.hh"
 
@@ -19,7 +16,7 @@
 #include <fstream>
 #include <boost/dynamic_bitset.hpp>
 #include <boost/pool/object_pool.hpp>
-
+#include <vata/util/ord_vector.hh>
 
 extern VarToTrackMap varMap;
 
@@ -169,6 +166,13 @@ private:
         return result;
     }
 
+    /**
+     * @brief Recursive construction of wrapping over the MONA DFA
+     *
+     * @param[in]  bddm  BDD manager of MONA // Fixme: Isn't this unique through the computation? i.e. in this->dfa_??
+     * @param[in]  p  address of the BDD node in MONA
+     * @param[out]  previously wrapped node
+     */
     void RecSetPointer(const bdd_manager *bddm, unsigned p, WrappedNode &node)
     {
         unsigned l, r, index;
@@ -203,53 +207,131 @@ private:
         return GetVar(var) == GetVar(this->LEAF_VAR_VALUE);
     }
 
+    /**
+     * @brief Retrives from @p var the part that corresonds the variables
+     *
+     * @param[in]  var  stored variable and flags
+     * @return  part of the variable that corresponds to variable
+     */
     inline int GetVar(int var)
     {
         return var & 0x1ffff;
     }
 
+    /**
+     * @brief Checks if var1 equals var2
+     *
+     * @param[in]  var1  lhs of the equality testing
+     * @param[in]  var2  rhs of the equality testing
+     * @return  true if @p var1 equals @p var2
+     */
     inline bool UnequalVars(int var1, int var2)
     {
         return GetVar(var1) ^ GetVar(var2);
     }
 
+    /**
+     * Fixme: Ok seriously what? This sets maybe yo mama!
+     */
     inline int SetVar(unsigned index)
     {
         return (index - 1) | 0x00060000;
     }
 
+    /**
+     * @brief Sets in @p var that previous predecessor was true or false
+     *
+     * @param[out]  var  storage for flags
+     * @param[in]  edge  value of the edge (0 or 1)
+     */
     inline void SetFlag(int &var, bool edge)
     {
         var = var & (0xfffbffff >> edge);
     }
 
+    /**
+     * @brief Returns true if the predecessor of previous computation was high
+     *
+     * During the traversal we skip some nodes by 'X' values. We need to know,
+     *   which edge was taken on higher level though. This does it.
+     *
+     * @param[in]  var  stored flags
+     * @return  true if the predecessor of previous computation was 1
+     */
     inline bool IsPredecessorHigh(int var)
     {
         return (var & 0x00020000) ^ 0x00020000;
     }
 
+    /**
+     * @brief Returns true if the predecessor of previous computation was low
+     *
+     * During the traversal we skip some nodes by 'X' values. We need to know,
+     *   which edge was taken on higher level though. This does it.
+     *
+     * @param[in]  var  stored flags
+     * @return  true if the predecessor of previous computation was 0
+     */
     inline bool IsPredecessorLow(int var)
     {
         return (var & 0x00040000) ^ 0x00040000;
     }
 
+    /**
+     * @brief Resets the flags in @p var.
+     *
+     * Flags on node are stored in 2-bits somewhere in the middle. The concrete
+     *   position was obtained by sacrificing twelve goats during the fool moon
+     *   while chanting the lyrics of Shake It Off by Taylor Swift in Portuguese.
+     *   The minute we went crazy gave us the position.
+     * Note: The Flags are reseted as 11 (not 00, like usual)
+     *
+     * @param[out]  integer that stores the flags
+     */
     inline void ResetFlags(int &var)
     {
         var = var | 0x00060000;
     }
 
-    inline VectorType CreateResultSet(const SetType &nodes)
+    /**
+     * @brief Converses and optionaly serializes @p nodes to vector type
+     *
+     * Takes the nodes from @p nodes, optionally serializes them and adds them to
+     *   the vector.
+     *
+     * @param[in]  nodes  nodes we are flattening to vector
+     * @param[in]  serialize_value  true if the values should be serialized
+     * @return  nodes in vector
+     */
+    inline VectorType CreateResultSet(const SetType &nodes, bool serialize_value = false)
     {
         VectorType vec;
 
         for(auto node: nodes) {
+            if(serialize_value) {
+                vec.insert(this->_SerializeNode(node->node_, node->var_));
+            } else {
+                vec.insert(node->node_);
+            }
             ResetFlags(node->var_);
-            vec.insert(node->node_);
         }
 
         return vec;
     }
 
+    /**
+     * @brief Get all of the Don't Care successors into @p succs
+     * Fixme: What is the difference between this and GetSuccessors? Like really.
+     *
+     * Retrieves all nodes from @p nodes into @p succs, after taking the 'X' edge
+     *   on the @p var level. No idea why the fuck is there @p edge, but i guess
+     *   it is because we processed different level on top of the don't care.
+     *
+     * @param[in]  nodes  nodes we are adding to @p succs
+     * @param[out]  succs  collection of nodes
+     * @param[in]  var  currently processed variable level
+     * @param[in]  edge  edge we took on top
+     */
     inline void GetDontCareSucc(const SetType &nodes, SetType &succs, int var, bool edge)
     {
         for(auto node: nodes)
@@ -262,6 +344,19 @@ private:
         }
     }
 
+    /**
+     * @brief Collect all nodes from @p nodes into @p succs, and sets the flags if we are on different level
+     *
+     * Collects all of the nodes from @p nodes (either pred[0] or pred[1]),
+     *   into the @p succs. If the collected node is on different level, than
+     *   we are currently processing (i.e. @p var), we flag the node which edge
+     *   we took. (This is hackish optimization/solution)
+     *
+     * @param[in]  nodes  nodes we are collecting successors from
+     * @param[out]  succs  container where we collect states
+     * @param[in]  var  variable level we are currently processing
+     * @param[in  edge  edge we took (either 0 = false, or 1 = true)
+     */
     inline void GetSuccessors(const SetType &nodes, SetType &succs, int var, bool edge)
     {
         for(auto node: nodes)
@@ -273,6 +368,16 @@ private:
         }
     }
 
+    /**
+     * @brief transforms the @p symbol into sub path starting from @p var level
+     *
+     * Takes the symbol @p symbol and according to the current level @p var,
+     *   transforms the symbol into subpath, that is used in cache.
+     *
+     * @param[in]  symbol  symbol we are transforming into subpath
+     * @param[in]  var  variable level, where the subpath starts
+     * @return  transformed symbol corresponding to subpath
+     */
     inline Gaston::BitMask transformSymbol(const Gaston::BitMask &symbol, int var)
     {
         assert(var < this->numVars_);
@@ -280,7 +385,6 @@ private:
         transformed &= symbolMasks_[var];
         transformed |= masks_[var];
         return transformed;
-//        return (symbolMasks_[var] & symbol) | masks_[var];
     }
 
     /**
@@ -463,15 +567,105 @@ private:
         return CreateResultSet(nodes);
     }
 
+    /**
+     * @brief Serializes the node into single size_t value
+     *
+     * Takes the internals of the BDD node and serializes in into one size_t value. Serialized value
+     *   consists of node address and 2-bits of flags corresponding to the traversals of the bdd.
+     *
+     * @param[in]  addr  address of serialized node in BDD graph
+     * @param[in]  flags  value containing the flags for the node
+     * @return  serialized node
+     */
+    size_t _SerializeNode(int addr, int flags) {
+        size_t serialized = (addr << 2);
+        if(this->IsPredecessorLow(flags)) {
+            serialized += 1;
+        } else if(this->IsPredecessorHigh(flags)) {
+            serialized += 2;
+        }
+        return serialized;
+    }
+
+    /**
+     * @brief Deserialize the value into WrappedNode object
+     *
+     * Takes the serialized integer value, that was outputed to the TermBaseSet,
+     *   and deserializes it into address and flags.
+     *
+     * @param[in]  serialized  serialized value
+     * @return  WrappedNode corresponding to serialized value with set flags
+     */
+    WrappedNode* _DeserializeValue(size_t serialized) {
+        WrappedNode* node = nullptr;
+
+        // Retrieve flags and address
+        bool is_low = (serialized & 1);
+        bool is_high = (serialized & 2);
+        serialized >>= 2;
+
+        if(serialized > this->dfa_->ns) {
+            node = this->internalNodes_[serialized];
+        } else {
+            node = this->leafNodes_[serialized];
+        }
+        assert(node != nullptr);
+
+        // Restore flags
+        if(is_low) {
+            this->SetFlag(node->var_, false);
+        } else if(is_high) {
+            this->SetFlag(node->var_, true);
+        }
+
+        return node;
+    }
+
+    /**
+     * @brief Looks up the node corresponding to @p state value
+     *
+     * Looks up node for the value of @p state. Either a root node, that is stored
+     *   in roots_, or internal node from internalNodes_. Internal nodes have addresses
+     *   greater than numvar.
+     * Fixme: Could there be a internal node that does fails this assumption?
+     *
+     * @param[in]  state  value for which we are looking the node up
+     * @return  internal or root node corresponding to @p state
+     */
+    WrappedNode* _LookupNode(size_t state) {
+        if(state > this->dfa_->ns) {
+            // Add internal node
+            return this->internalNodes_[state];
+        } else {
+            // Skip the nullptr (unused) states
+            if(roots_[state] != nullptr) {
+                return roots_[state];
+            }
+        }
+
+        return nullptr;
+    }
+
 public:
+    /**
+     * Constructs the MonaWrapper that serves as intermediate layer between
+     *   the logic of Gaston and the internal representation of MONA. Since
+     *   MONA works in post manner, this wrapper transforms the Post on transitions
+     *   to corresponding Pres on transition.
+     *
+     * @param[in]  dfa  deterministic finite automaton, in MONA format
+     * @param[in]  emptyTracks  whether the tracks are fully projected (corresponds to true/false formulae)
+     * @param[in]  is_restriction  true if the DFA is restriction (see restriction semantics)
+     * @param[in]  numVars  number of variables in automaton (corresponds to bdd levels)
+     */
     MonaWrapper(DFA *dfa, bool emptyTracks, bool is_restriction, unsigned numVars = 0)
             : dfa_(dfa), numVars_(numVars), initialState_(emptyTracks ? 0 : 1), isRestriction_(is_restriction)
     {
+        // Resize the roots and leaves
         roots_.resize(dfa->ns, nullptr);
         leafNodes_.resize(dfa->ns, nullptr);
 
-        //std::cout << "Velikost mony je " << dfa->ns << std::endl;
-
+        // Create a mask for the optimized pre
         mask_.resize(numVars_ << 1);
         for(unsigned i = 0; i < numVars_; ++i)
             mask_[(i << 1) + 1] = true;
@@ -480,6 +674,7 @@ public:
         symbolMask.resize(numVars_ << 1);
         symbolMask.set();
 
+        // Additional masks used in TransformSymbol
         this->masks_ = new Gaston::BitMask[numVars];
         this->symbolMasks_ = new Gaston::BitMask[numVars];
         for(unsigned i = 0; i < numVars_; ++i) {
@@ -509,6 +704,11 @@ public:
         dfaFree(this->dfa_);
     }
 
+    /**
+     * @brief Serializes the BDD into .dot file
+     *
+     * @param[in]  outfile  output file for the bdd
+     */
     void DumpToDot(std::string outfile)
     {
         std::ofstream ofs (outfile, std::ofstream::out);
@@ -564,6 +764,21 @@ public:
         ofs << "}" << std::endl;
     }
 
+    /**
+     * @brief Recursively constructs the transitions for the MONA DFA representation
+     * // Fixme: This name is stupid
+     *
+     * Recursively constructs all the paths leading from @p root to the leaf nodes.
+     *   Transitions are stored in @p transition, which is slowly constructed
+     *   according to the informations from the @p bddm manager.
+     *
+     * @param[out]  os  output stream
+     * @param[in]  bddm  bdd manager of the MONA automaton
+     * @param[in]  p  adddress of the bdd node
+     * @param[out]  transition  output for the transition, that is recursively created
+     * @param[in]  root  root of the transition
+     * @praram[in]  varNum  number of variables in bdd // Fixme: This is redundant, right?
+     */
     void GetAllPathFromMona(std::ostream &os,
                             const bdd_manager *bddm,
                             unsigned p,
@@ -577,6 +792,7 @@ public:
 
         if (index == BDD_LEAF_INDEX)
         {
+            // We encountered leaf node -> output the transition
 #           if (PRINT_IN_TIMBUK == true)
             os << transition << "(" << root << ") -> " << l << "\n";
 #           else
@@ -585,6 +801,7 @@ public:
         }
         else
         {
+            // We recursively construct the paths for 0 and 1 symbol values.
             transition[varMap[index]] = '0';
             GetAllPathFromMona(os, bddm, l, transition, root, varNum);
 
@@ -593,6 +810,13 @@ public:
         }
     }
 
+    /**
+     * @brief Outputs all transitions to @p os
+     *
+     * For each state of the DFA constructs all outgoing paths and outputs them to @p os.
+     *
+     * @param[out]  os  output
+     */
     void DumpDFA(std::ostream &os) {
         std::string str(this->numVars_, 'X');
         for(size_t i = this->initialState_; i < this->dfa_->ns; ++i) {
@@ -600,6 +824,11 @@ public:
         }
     }
 
+    /**
+     * @brief Outputs the automaton in timbuk format.
+     *
+     * @param[out]  os  output stream for the dfa automaton
+     */
     void DumpTo(std::ostream &os) {
         os << "Ops\n";
         os << "Automaton anonymous\n";
@@ -619,30 +848,50 @@ public:
         DumpDFA(os);
     }
 
+    /**
+     * @brief Public API for computing pre of the @p state through @p symbol in DFS manner
+     *
+     * Constructs the pre of the @p state through the @p symbol, by iterating the path
+     *   by Depth First Search manner.
+     *
+     * @param[in]  state  state we are traversing from
+     * @param[in]  symbol  symbol through which we are iterating
+     * @return  vector of base states reachable from @p state through @p symbol
+     */
     VectorType Pre(size_t state, const boost::dynamic_bitset<> &symbol)
     {
         assert(dfa_ != nullptr);
         assert(roots_.size() > state);
 
-        //std::cout << "===================================================" << std::endl << std::endl << std::endl;
+        // Null roots reach nothing, John Snow
         if(roots_[state] == nullptr)
             return VectorType();
 
         symbol_ = symbol;
-        //exploredState_ = state;
 
+        // Call internal Recursive Pre computation
         VectorType res;
         RecPre(roots_[state], res);
 
-        //std::cout << std::endl << std::endl << std::endl << "===================================================" << std::endl;
         return res;
     }
 
+    /**
+     * @brief Public API for computing pre of the @p states through @p symbol in BFS manner
+     *
+     * Enqueues all the states from @p states, and by each variable level,
+     *   computes the pre through the @p symbol.
+     *
+     * @param[in]  states  starting set of states
+     * @param[in]  symbol  symbol through which we are iterating
+     * @return  vector of base states reachable from @p states through @p symbol
+     */
     VectorType Pre(VATA::Util::OrdVector<size_t> &states, const boost::dynamic_bitset<> &symbol)
     {
         assert(dfa_ != nullptr);
         SetType nodes;
 
+        // Translate base states to internal nodes
         for(auto state: states)
         {
             assert(roots_.size() > state);
@@ -653,23 +902,40 @@ public:
         if(nodes.empty())
             return VectorType();
 
+        // Call core function
         symbol_ = symbol;
         return RecPre(nodes);
     }
 
+    /**
+     * @brief Public API for computing Pre from @p states through symbol by ascending by @p val on variable level @p var
+     *
+     * Novel super Pre, that only ascends by one @p var level, that can abe limited to @p val,
+     *   which is either 1 or 0.
+     *
+     * @param[in]  states  starting point of the pre
+     * @param[out]  symbol  output path (reconstructed symbol)
+     * @param[in]  var  variable level we are ascending from
+     * @param[in]  val  limitation of the ascension (either 1 or 0)
+     * @return  vector of states reachable from @p states by ascending from @p var level
+     */
     VectorType Pre(VATA::Util::OrdVector<size_t> &states, const boost::dynamic_bitset<> &symbol, size_t var, char val) {
         assert(var < this->numVars_ || this->numVars_ == 0);
         assert(dfa_ != nullptr);
 
         SetType sources, dest;
+        WrappedNode* node;
         for(auto state : states) {
-            if(state > this->dfa_->ns) {
-                // Add internal node
-                sources.insert(this->internalNodes_[state]);
+            // Root level variables are not serialized, so we simply look them up
+            if(var == this->numVars_-1) {
+                node = this->_LookupNode(state);
             } else {
-                if(roots_[state] != nullptr) {
-                    sources.insert(roots_[state]);
-                }
+            // Non-root level variables are serialized, so we have to translate them
+                node = this->_DeserializeValue(state);
+            }
+
+            if(node != nullptr) {
+                sources.insert(node);
             }
         }
 
@@ -690,10 +956,16 @@ public:
                 default:
                     assert(false);
             }
-            return this->CreateResultSet(dest);
+            return this->CreateResultSet(dest, var != 0);
+            //                                 ^--- This limits the serialization of result
         }
     }
 
+    /**
+     * @brief Wraps the MONA DFA nodes with custom layer
+     *
+     * @param[in]  dfa  deterministic finite automaton in MONA format // Fixme: We don't fucking need this, or not?
+     */
     void ProcessDFA(DFA *dfa)
     {
         dfa_ = dfa;
@@ -701,10 +973,25 @@ public:
             RecSetPointer(dfa->bddm, dfa->q[i], *spawnNode(dfa->bddm, dfa->q[i], i));
     }
 
+    /**
+     * @brief Checks if @p node is leaf node, i.e. it has no successors.
+     * Fixme: This name sucks donkey balls
+     *
+     * @param[in]  node  node we check if is leaf.
+     */
     inline bool is_leaf(WrappedNode& node) {
         return node.pred_[0].size() == 0 && node.pred_[1].size() == 0;
     }
 
+    /**
+     * @brief Retrives final states and moreover computes some additional measures
+     *
+     * Retrives the MONA final states. Moreover if MEASURE_AUTOMATA_CYCLES is set,
+     *   the function collectively computes several measurements regarding the cycles
+     *   of the automaton on final states.
+     *
+     * @param[out]  final  set of final states
+     */
     void GetFinalStates(VectorType& final) {
 #       if (MEASURE_AUTOMATA_CYCLES == true)
         size_t universal_cycles_count = 0;
@@ -752,10 +1039,20 @@ public:
 #       endif
     }
 
+    /**
+     * @brief Returns initial state of MONA DFA
+     *
+     * @return initial state of MONA DFA
+     */
     inline size_t GetInitialState() {
         return this->initialState_;
     }
 
+    /**
+     * @brief Returns the number of states in MONA DFA
+     *
+     * @return  number of states in MONA DFA
+     */
     int GetMonaStateSpace() {
         return this->dfa_->ns;
     }
