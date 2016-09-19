@@ -516,7 +516,7 @@ public:
 #                           endif
                         }
                     } else {
-                        _termFixpoint.ComputeNextMember();
+                        _termFixpoint.ComputeNextMember(false);
                         return this->GetNext();
                     }
                 }
