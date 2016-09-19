@@ -547,12 +547,13 @@ NaryBiimplicationAutomaton::NaryBiimplicationAutomaton(Formula_ptr form, bool un
  * @param[in] underComplement:      true, if we are under the complement
  * @return:                         (fixpoint, true if nonemptyintersect)
  */
-ResultType SymbolicAutomaton::IntersectNonEmpty(Symbol* symbol, Term* stateApproximation, bool underComplement) {
+ResultType SymbolicAutomaton::IntersectNonEmpty(Symbol* symbol, Term* stateApproximation, IntersectNonEmptyParams params) {
     assert(stateApproximation != nullptr);
 #   if (MEASURE_SUBAUTOMATA_TIMING == true)
     this->timer.Start();
 #   endif
     ResultType result;
+    bool underComplement = params.underComplement;
 
     // Empty set needs not to be computed
     if(stateApproximation->type == TermType::EMPTY) {
@@ -629,7 +630,7 @@ ResultType SymbolicAutomaton::IntersectNonEmpty(Symbol* symbol, Term* stateAppro
 #   endif
 
     // Call the core function
-    result = this->_IntersectNonEmptyCore(symbol, stateApproximation, underComplement); // TODO: Memory consumption
+    result = this->_IntersectNonEmptyCore(symbol, stateApproximation, params); // TODO: Memory consumption
 #   if (MEASURE_RESULT_HITS == true || MEASURE_ALL == true)
     (result.second ? ++this->_trueCounter : ++this->_falseCounter);
 #   endif
@@ -684,9 +685,11 @@ ResultType SymbolicAutomaton::IntersectNonEmpty(Symbol* symbol, Term* stateAppro
     return result;
 }
 
-ResultType RootProjectionAutomaton::IntersectNonEmpty(Symbol* symbol, Term* finalApproximation, bool underComplement) {
+ResultType RootProjectionAutomaton::IntersectNonEmpty(Symbol* symbol, Term* finalApproximation, IntersectNonEmptyParams params) {
     assert(this->_unsatExample == nullptr && this->_satExample == nullptr); // ! Nothing should be found yet
     assert(symbol == nullptr); // ! The search is "manual"
+
+    bool underComplement = params.underComplement;
     assert(underComplement == false);
 
     // We are doing the initial step by evaluating the epsilon
@@ -696,7 +699,7 @@ ResultType RootProjectionAutomaton::IntersectNonEmpty(Symbol* symbol, Term* fina
     }
 
     // Evaluate the initial unfolding of epsilon
-    ResultType result = this->_aut.aut->IntersectNonEmpty(this->_aut.ReMapSymbol(symbol), projectionApproximation->list[0], underComplement);
+    ResultType result = this->_aut.aut->IntersectNonEmpty(this->_aut.ReMapSymbol(symbol), projectionApproximation->list[0], params);
     if(result.first->type == TermType::EMPTY) {
         return result;
     }
@@ -1081,16 +1084,17 @@ Term* BaseAutomaton::Pre(Symbol* symbol, Term* finalApproximation, bool underCom
  * @param[in] underComplement:      true, if we are computing intersection under complement
  * @return (fixpoint, bool)
  */
-ResultType BinaryOpAutomaton::_IntersectNonEmptyCore(Symbol* symbol, Term* finalApproximation, bool underComplement) {
+ResultType BinaryOpAutomaton::_IntersectNonEmptyCore(Symbol* symbol, Term* finalApproximation, IntersectNonEmptyParams params) {
     // TODO: Add counter of continuations per node
     assert(finalApproximation != nullptr);
     assert(finalApproximation->type == TermType::PRODUCT);
+    bool underComplement = params.underComplement;
 
     // Retype the approximation to TermProduct type
     TermProduct* productStateApproximation = reinterpret_cast<TermProduct*>(finalApproximation);
 
     // Checks if left automaton's initial states intersects the final states
-    ResultType lhs_result = this->_lhs_aut.aut->IntersectNonEmpty(this->_lhs_aut.ReMapSymbol(symbol), productStateApproximation->left, underComplement); // TODO: another memory consumption
+    ResultType lhs_result = this->_lhs_aut.aut->IntersectNonEmpty(this->_lhs_aut.ReMapSymbol(symbol), productStateApproximation->left, params); // TODO: another memory consumption
 
     // We can prune the state if left side was evaluated as Empty term
     // TODO: This is different for Unionmat!
@@ -1143,7 +1147,7 @@ ResultType BinaryOpAutomaton::_IntersectNonEmptyCore(Symbol* symbol, Term* final
         std::tie(temp, productStateApproximation->right) = this->LazyInit(productStateApproximation->right);
     }
 #   endif
-    ResultType rhs_result = this->_rhs_aut.aut->IntersectNonEmpty(this->_rhs_aut.ReMapSymbol(symbol), productStateApproximation->right, underComplement);
+    ResultType rhs_result = this->_rhs_aut.aut->IntersectNonEmpty(this->_rhs_aut.ReMapSymbol(symbol), productStateApproximation->right, params);
     // We can prune the state if right side was evaluated as Empty term
     // TODO: This is different for Unionmat!
 #   if (OPT_PRUNE_EMPTY == true)
@@ -1161,15 +1165,16 @@ ResultType BinaryOpAutomaton::_IntersectNonEmptyCore(Symbol* symbol, Term* final
     return std::make_pair(combined, this->_eval_result(lhs_result.second, rhs_result.second, underComplement));
 }
 
-ResultType TernaryOpAutomaton::_IntersectNonEmptyCore(Symbol* symbol, Term* finalApproximation, bool underComplement) {
+ResultType TernaryOpAutomaton::_IntersectNonEmptyCore(Symbol* symbol, Term* finalApproximation, IntersectNonEmptyParams params) {
     assert(finalApproximation != nullptr);
     assert(finalApproximation->type == TermType::TERNARY_PRODUCT);
+    bool underComplement = params.underComplement;
 
     // Retype the approximation to TermProduct type
     TermTernaryProduct* termTernaryProduct = static_cast<TermTernaryProduct*>(finalApproximation);
 
     // Checks if left automaton's initial states interesct the final states;
-    ResultType lhs_result = this->_lhs_aut.aut->IntersectNonEmpty(this->_lhs_aut.ReMapSymbol(symbol), termTernaryProduct->left, underComplement);
+    ResultType lhs_result = this->_lhs_aut.aut->IntersectNonEmpty(this->_lhs_aut.ReMapSymbol(symbol), termTernaryProduct->left, params);
 #   if (OPT_PRUNE_EMPTY == true)
     if(lhs_result.first->type == TermType::EMPTY && !lhs_result.first->InComplement() && this->_productType == ProductType::INTERSECTION) {
         return std::make_pair(lhs_result.first, underComplement);
@@ -1177,14 +1182,14 @@ ResultType TernaryOpAutomaton::_IntersectNonEmptyCore(Symbol* symbol, Term* fina
 #   endif
     // Fixme: Add early evaluation
 
-    ResultType mhs_result = this->_mhs_aut.aut->IntersectNonEmpty(this->_mhs_aut.ReMapSymbol(symbol), termTernaryProduct->middle, underComplement);
+    ResultType mhs_result = this->_mhs_aut.aut->IntersectNonEmpty(this->_mhs_aut.ReMapSymbol(symbol), termTernaryProduct->middle, params);
 #   if (OPT_PRUNE_EMPTY == true)
     if(mhs_result.first->type == TermType::EMPTY && !mhs_result.first->InComplement() && this->_productType == ProductType::INTERSECTION) {
         return std::make_pair(mhs_result.first, underComplement);
     }
 #   endif
 
-    ResultType rhs_result = this->_rhs_aut.aut->IntersectNonEmpty(this->_rhs_aut.ReMapSymbol(symbol), termTernaryProduct->right, underComplement);
+    ResultType rhs_result = this->_rhs_aut.aut->IntersectNonEmpty(this->_rhs_aut.ReMapSymbol(symbol), termTernaryProduct->right, params);
 #   if (OPT_PRUNE_EMPTY == true)
     if(rhs_result.first->type == TermType::EMPTY && !rhs_result.first->InComplement() && this->_productType == ProductType::INTERSECTION) {
         return std::make_pair(rhs_result.first, underComplement);
@@ -1195,9 +1200,10 @@ ResultType TernaryOpAutomaton::_IntersectNonEmptyCore(Symbol* symbol, Term* fina
     return std::make_pair(combined, this->_eval_result(lhs_result.second, mhs_result.second, rhs_result.second, underComplement));
 }
 
-ResultType NaryOpAutomaton::_IntersectNonEmptyCore(Symbol* symbol, Term* finalApproximation, bool underComplement) {
+ResultType NaryOpAutomaton::_IntersectNonEmptyCore(Symbol* symbol, Term* finalApproximation, IntersectNonEmptyParams params) {
     assert(finalApproximation != nullptr);
     assert(finalApproximation->type == TermType::NARY_PRODUCT);
+    bool underComplement = params.underComplement;
 
     // Retype the approximation
     TermNaryProduct* termNaryProduct = static_cast<TermNaryProduct*>(finalApproximation);
@@ -1208,7 +1214,7 @@ ResultType NaryOpAutomaton::_IntersectNonEmptyCore(Symbol* symbol, Term* finalAp
     bool bool_result = !this->_early_val(underComplement);
     Term_ptr* terms = new Term_ptr[this->_arity];
     for(auto i = 0; i < this->_arity; ++i) {
-        result = this->_auts[i].aut->IntersectNonEmpty(this->_auts[i].ReMapSymbol(symbol), termNaryProduct->terms[i], underComplement);
+        result = this->_auts[i].aut->IntersectNonEmpty(this->_auts[i].ReMapSymbol(symbol), termNaryProduct->terms[i], params);
 #       if (OPT_PRUNE_EMPTY == true)
         if(result.first->type == TermType::EMPTY && !result.first->InComplement() && this->_productType == ProductType::INTERSECTION) {
             delete[] terms;
@@ -1223,9 +1229,11 @@ ResultType NaryOpAutomaton::_IntersectNonEmptyCore(Symbol* symbol, Term* finalAp
     return std::make_pair(combined, bool_result);
 }
 
-ResultType ComplementAutomaton::_IntersectNonEmptyCore(Symbol* symbol, Term* finalApproximaton, bool underComplement) {
+ResultType ComplementAutomaton::_IntersectNonEmptyCore(Symbol* symbol, Term* finalApproximaton, IntersectNonEmptyParams params) {
     // Compute the result of nested automaton with switched complement
-    ResultType result = this->_aut.aut->IntersectNonEmpty(this->_aut.ReMapSymbol(symbol), finalApproximaton, !underComplement);
+    bool underComplement = params.underComplement;
+    params.underComplement = !underComplement;
+    ResultType result = this->_aut.aut->IntersectNonEmpty(this->_aut.ReMapSymbol(symbol), finalApproximaton, params);
     // TODO: fix, because there may be falsely complemented things
     if(finalApproximaton->InComplement() != result.first->InComplement()) {
         if(result.first->type == TermType::EMPTY) {
@@ -1242,10 +1250,11 @@ ResultType ComplementAutomaton::_IntersectNonEmptyCore(Symbol* symbol, Term* fin
     return result;
 }
 
-ResultType ProjectionAutomaton::_IntersectNonEmptyCore(Symbol* symbol, Term* finalApproximation, bool underComplement) {
+ResultType ProjectionAutomaton::_IntersectNonEmptyCore(Symbol* symbol, Term* finalApproximation, IntersectNonEmptyParams params) {
     // TODO: There can be continutation probably
     assert(finalApproximation != nullptr);
     assert(finalApproximation->type == TermType::LIST || finalApproximation->type == TermType::FIXPOINT);
+    bool underComplement = params.underComplement;
 
     if(symbol == nullptr) {
         // We are doing the initial step by evaluating the epsilon
@@ -1253,7 +1262,7 @@ ResultType ProjectionAutomaton::_IntersectNonEmptyCore(Symbol* symbol, Term* fin
         assert(projectionApproximation->list.size() == 1);
 
         // Evaluate the initial unfolding of epsilon
-        ResultType result = this->_aut.aut->IntersectNonEmpty(this->_aut.ReMapSymbol(symbol), projectionApproximation->list[0], underComplement);
+        ResultType result = this->_aut.aut->IntersectNonEmpty(this->_aut.ReMapSymbol(symbol), projectionApproximation->list[0], params);
         if(result.first->type == TermType::EMPTY) {
             // Prune the empty starting term
             return result;
@@ -1360,10 +1369,11 @@ ResultType base_pre_core(SymbolicAutomaton* aut, Symbol* symbol, Term* approxima
     }
 }
 
-ResultType BaseAutomaton::_IntersectNonEmptyCore(Symbol* symbol, Term* approximation, bool underComplement) {
+ResultType BaseAutomaton::_IntersectNonEmptyCore(Symbol* symbol, Term* approximation, IntersectNonEmptyParams params) {
     // Reinterpret the initial and final states
     TermBaseSet* initial = reinterpret_cast<TermBaseSet*>(this->_initialStates);
     TermBaseSet* final = reinterpret_cast<TermBaseSet*>(this->_finalStates);
+    bool underComplement = params.underComplement;
 
     if(symbol == nullptr) {
         // Testing if epsilon is in language, i.e. testing if final states intersect initial ones
@@ -1377,8 +1387,9 @@ ResultType BaseAutomaton::_IntersectNonEmptyCore(Symbol* symbol, Term* approxima
     }
 }
 
-ResultType BaseProjectionAutomaton::_IntersectNonEmptyCore(Symbol* symbol, Term* approximation, bool underComplement) {
+ResultType BaseProjectionAutomaton::_IntersectNonEmptyCore(Symbol* symbol, Term* approximation, IntersectNonEmptyParams params) {
     assert(this->_aut.aut->type == AutType::BASE);
+    bool underComplement = params.underComplement;
 
     if(symbol == nullptr) {
         // We will pump the final states

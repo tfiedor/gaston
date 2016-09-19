@@ -2173,7 +2173,8 @@ void TermFixpoint::ComputeNextMember(bool isBaseFixpoint) {
     WorklistItemType item = this->_popFromWorklist();
 
     // Compute the results
-    ResultType result = this->_baseAut->IntersectNonEmpty(item.second, item.first, GET_NON_MEMBERSHIP_TESTING(this));
+    IntersectNonEmptyParams params(GET_NON_MEMBERSHIP_TESTING(this));
+    ResultType result = this->_baseAut->IntersectNonEmpty(item.second, item.first, params);
 
     // If it is subsumed by fixpoint, we don't add it
     auto fix_result = this->_fixpointTest(result.first);
@@ -2362,7 +2363,7 @@ Term* TermContinuation::unfoldContinuation(UnfoldedIn t) {
         }
 
         this->_unfoldedTerm = (this->aut->aut->IntersectNonEmpty(
-                (this->symbol == nullptr ? nullptr : this->aut->ReMapSymbol(this->symbol)), this->term, this->underComplement)).first;
+                (this->symbol == nullptr ? nullptr : this->aut->ReMapSymbol(this->symbol)), this->term, IntersectNonEmptyParams(underComplement))).first;
         #if (MEASURE_CONTINUATION_EVALUATION == true)
         switch(t){
             case UnfoldedIn::SUBSUMPTION:

@@ -262,7 +262,7 @@ public:
 #define DEBUG_ROOT_AUTOMATON		    false
 #define DEBUG_AUTOMATA_ADDRESSES		false
 #define DEBUG_EXAMPLE_PATHS				false
-#define DEBUG_BASE_AUTOMATA 		    true
+#define DEBUG_BASE_AUTOMATA 		    false
 #define DEBUG_RESTRICTION_AUTOMATA		false
 #define DEBUG_MONA_BDD					false
 #define DEBUG_MONA_DFA					false

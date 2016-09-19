@@ -270,7 +270,7 @@ bool SymbolicChecker::Run() {
     // Checks if Initial States intersect Final states
     std::pair<Term_ptr, bool> result;
     try {
-        result = this->_automaton->IntersectNonEmpty(nullptr, finalStatesApproximation, false);
+        result = this->_automaton->IntersectNonEmpty(nullptr, finalStatesApproximation, IntersectNonEmptyParams(false));
     } catch (const GastonSignalException& exception) {
         std::cout << exception.what() << "\n";
         this->_terminatedBySignal = true;

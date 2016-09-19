@@ -48,6 +48,21 @@ using SymbolWorkshop    = Workshops::SymbolWorkshop;
 class SymbolicChecker;
 struct SymLink;
 
+struct IntersectNonEmptyParams {
+    bool underComplement;
+#   if (OPT_INCREMENTAL_LEVEL_PRE == true)
+    bool limitPre;        // < Whether the Pre should be limited
+    size_t variableLevel; // < On which level we are doing the pre currently
+    char variableValue;   // < Which value we are limiting the Pre to, i.e. '0', '1' or 'X'
+
+    IntersectNonEmptyParams(bool uC) : underComplement(uC), limitPre(false) {}
+    IntersectNonEmptyParams(bool uC, bool lP, size_t level, char value)
+            : underComplement(uC), limitPre(lP), variableLevel(level), variableValue(value) {}
+#   else
+    IntersectNonEmptyParams(bool uC) : underComplement(uC) {}
+#   endif
+};
+
 /**
  * Base class for Symbolic Automata. Each symbolic automaton contains the
  * pointer to the formula it corresponds to (for further informations),
@@ -121,7 +136,7 @@ protected:
     virtual void _InitializeAutomaton() = 0;
     virtual void _InitializeInitialStates() = 0;
     virtual void _InitializeFinalStates() = 0;
-    virtual ResultType _IntersectNonEmptyCore(Symbol*, Term*, bool) = 0;
+    virtual ResultType _IntersectNonEmptyCore(Symbol*, Term*, IntersectNonEmptyParams) = 0;
     virtual void _DumpExampleCore(std::ostream&, ExampleType, InterpretationType&) = 0;
 
 public:
@@ -139,7 +154,7 @@ public:
     Gaston::VarList* GetFreeVars() { return &this->_freeVars;}
     Gaston::VarList* GetNonOccuringVars() { return &this->_nonOccuringVars; }
     virtual Term* Pre(Symbol*, Term*, bool) = 0;
-    virtual ResultType IntersectNonEmpty(Symbol*, Term*, bool);
+    virtual ResultType IntersectNonEmpty(Symbol*, Term*, IntersectNonEmptyParams);
     void SetSatisfiableExample(Term*);
     void SetUnsatisfiableExample(Term*);
     virtual bool WasLastExampleValid() = 0;
@@ -205,7 +220,7 @@ protected:
     virtual void _InitializeAutomaton();
     virtual void _InitializeInitialStates();
     virtual void _InitializeFinalStates();
-    virtual ResultType _IntersectNonEmptyCore(Symbol*, Term*, bool);
+    virtual ResultType _IntersectNonEmptyCore(Symbol*, Term*, IntersectNonEmptyParams);
     virtual void _DumpExampleCore(std::ostream&, ExampleType, InterpretationType&);
 
 public:
@@ -241,7 +256,7 @@ protected:
     virtual void _InitializeAutomaton();
     virtual void _InitializeInitialStates();
     virtual void _InitializeFinalStates();
-    virtual ResultType _IntersectNonEmptyCore(Symbol*, Term*, bool);
+    virtual ResultType _IntersectNonEmptyCore(Symbol*, Term*, IntersectNonEmptyParams);
     virtual void _DumpExampleCore(std::ostream&, ExampleType, InterpretationType&);
 
 public:
@@ -278,7 +293,7 @@ protected:
     virtual void _InitializeAutomaton();
     virtual void _InitializeInitialStates();
     virtual void _InitializeFinalStates();
-    virtual ResultType _IntersectNonEmptyCore(Symbol*, Term*, bool);
+    virtual ResultType _IntersectNonEmptyCore(Symbol*, Term*, IntersectNonEmptyParams);
     virtual void _DumpExampleCore(std::ostream&, ExampleType, InterpretationType&);
 
 public:
@@ -384,7 +399,7 @@ protected:
     virtual void _InitializeAutomaton();
     virtual void _InitializeInitialStates();
     virtual void _InitializeFinalStates();
-    virtual ResultType _IntersectNonEmptyCore(Symbol*, Term*, bool);
+    virtual ResultType _IntersectNonEmptyCore(Symbol*, Term*, IntersectNonEmptyParams);
     virtual void _DumpExampleCore(std::ostream&, ExampleType, InterpretationType&);
 
 public:
@@ -428,7 +443,7 @@ protected:
     virtual void _InitializeAutomaton();
     virtual void _InitializeInitialStates();
     virtual void _InitializeFinalStates();
-    virtual ResultType _IntersectNonEmptyCore(Symbol*, Term*, bool);
+    virtual ResultType _IntersectNonEmptyCore(Symbol*, Term*, IntersectNonEmptyParams);
     virtual void _DumpExampleCore(std::ostream&, ExampleType, InterpretationType&);
 
 public:
@@ -472,7 +487,7 @@ public:
     NEVER_INLINE RootProjectionAutomaton(SymbolicAutomaton*, Formula_ptr);
 
     // <<< PUBLIC API >>>
-    virtual ResultType IntersectNonEmpty(Symbol*, Term*, bool);
+    virtual ResultType IntersectNonEmpty(Symbol*, Term*, IntersectNonEmptyParams);
 };
 
 class BaseProjectionAutomaton : public ProjectionAutomaton {
@@ -480,7 +495,7 @@ protected:
     // <<< PRIVATE MEMBERS >>>
     void _InitializeInitialStates();
     void _InitializeFinalStates();
-    ResultType _IntersectNonEmptyCore(Symbol*, Term*, bool);
+    ResultType _IntersectNonEmptyCore(Symbol*, Term*, IntersectNonEmptyParams);
 
 public:
     // <<< CONSTRUCTORS >>>
@@ -506,7 +521,7 @@ protected:
     virtual void _InitializeAutomaton();
     virtual void _InitializeInitialStates();
     virtual void _InitializeFinalStates();
-    virtual ResultType _IntersectNonEmptyCore(Symbol*, Term*, bool);
+    virtual ResultType _IntersectNonEmptyCore(Symbol*, Term*, IntersectNonEmptyParams);
     void _RenameStates();
     virtual void _DumpExampleCore(std::ostream&, ExampleType, InterpretationType&) {}
 public:
