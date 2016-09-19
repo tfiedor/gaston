@@ -1078,7 +1078,7 @@ Term* BaseAutomaton::Pre(Symbol* symbol, Term* finalApproximation, bool underCom
  *
  * @param[in] symbol:               symbol we are minusing away
  * @param[in] finalApproximation:   approximation of states that were computed above
- * @param[in] underComplement:      true, if we are computing interesction under complement
+ * @param[in] underComplement:      true, if we are computing intersection under complement
  * @return (fixpoint, bool)
  */
 ResultType BinaryOpAutomaton::_IntersectNonEmptyCore(Symbol* symbol, Term* finalApproximation, bool underComplement) {

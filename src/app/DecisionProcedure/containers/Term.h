@@ -478,7 +478,7 @@ public:
                         return this->_Invalidate();
 #                       endif
                     } else {
-                        _termFixpoint.ComputeNextFixpoint();
+                        _termFixpoint.ComputeNextMember();
                         return this->GetNext();
                     }
                 } else {
@@ -491,7 +491,7 @@ public:
                         if ((term = _termFixpoint._sourceIt->GetNext()) != nullptr) {
                             // if more are to be processed
                             _termFixpoint._EnqueueInWorklist(term);
-                            _termFixpoint.ComputeNextPre();
+                            _termFixpoint.ComputeNextMember(false);
                             return this->GetNext();
                         } else {
                             // we are complete?
@@ -516,7 +516,7 @@ public:
 #                           endif
                         }
                     } else {
-                        _termFixpoint.ComputeNextPre();
+                        _termFixpoint.ComputeNextMember();
                         return this->GetNext();
                     }
                 }
@@ -606,8 +606,7 @@ protected:
 
 protected:
     // <<< PRIVATE FUNCTIONS >>>
-    void ComputeNextFixpoint();
-    void ComputeNextPre();
+    void ComputeNextMember(bool isBaseFixpoint = true);
     bool _processOnePostponed();
     void _updateExamples(ResultType&);
     void _InitializeAggregateFunction(bool inComplement);

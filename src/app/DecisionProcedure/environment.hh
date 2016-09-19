@@ -429,6 +429,7 @@ public:
 #define OPT_USE_BASE_PROJECTION_AUTOMATA    true    // < Will treat base projections differently (as bases not fixpoints)
 #define OPT_CACHE_SUBPATHS_IN_WRAPPER       true    // < Will cache the nodes and subpaths during the pre computing in mona wrapper
 #define OPT_DEFIRSTORDER_UNGROUND           false   // < Will call Defirstorderer on Unground formula restriction (Fixme: maybe incorrect)
+#define OPT_INCREMENTAL_LEVEL_PRE			true    // < Will compute the novel pre, that ascends by one level in bdd each step, with subsumption and stuff (THIS IS HEAVEN!)
 
 /* >>> Static Assertions <<< *
  *****************************/

@@ -2157,9 +2157,15 @@ void TermFixpoint::_EnqueueInWorklist(Term_ptr term) {
 }
 
 /**
- * Does the computation of the next fixpoint, i.e. the next iteration.
+ * @brief Computes the next term in fixpoint
+ *
+ * Dequeues an item from worklist and computes its pre with epsilon test.
+ * If the computed term is not subsumed by already computed fixpoint terms,
+ *   we add it to the fixpoint and enuques additional computations.
+ *
+ * @param[in]  isBaseFixpoint  true if the fixpoint is base computation
  */
-void TermFixpoint::ComputeNextFixpoint() {
+void TermFixpoint::ComputeNextMember(bool isBaseFixpoint) {
     if(_worklist.empty())
         return;
 
@@ -2174,15 +2180,17 @@ void TermFixpoint::ComputeNextFixpoint() {
     if(fix_result.first != SubsumedType::NOT) {
         assert(fix_result.first != SubsumedType::PARTIALLY);
 #       if (MEASURE_PROJECTION == true)
-        if(_worklist.empty() && !this->_fullyComputed) {
+        if(isBaseFixpoint && _worklist.empty() && !this->_fullyComputed) {
             this->_fullyComputed = true;
             ++TermFixpoint::fullyComputedFixpoints;
         }
 #       endif
         return;
     }
+
+    // Update examples
     this->_updateExamples(result);
-    assert(fix_result.second->type != TermType::EMPTY || fix_result.second->InComplement());
+    // assert(fix_result.second->type != TermType::EMPTY || fix_result.second->InComplement());
 
     // Push new term to fixpoint
     if(result.second == this->_shortBoolValue && _iteratorNumber == 0) {
@@ -2194,50 +2202,15 @@ void TermFixpoint::ComputeNextFixpoint() {
     _updated = true;
     // Aggregate the result of the fixpoint computation
     _bValue = this->_AggregateResult(_bValue,result.second);
-    // Push new symbols from _symList
-    this->_EnqueueInWorklist(fix_result.second);
+    if(isBaseFixpoint) {
+        // Push new symbols from _symList
+        this->_EnqueueInWorklist(fix_result.second);
+    }
 
+    // Update stats
     if(this->_aut->stats.max_symbol_path_len < fix_result.second->link->len) {
         this->_aut->stats.max_symbol_path_len = fix_result.second->link->len;
     }
-}
-
-/**
- * Computes the pre of the fixpoint, i.e. it does pre on all the things
- * as we had already the fixpoint computed from previous step
- */
-void TermFixpoint::ComputeNextPre() {
-    if(_worklist.empty())
-        return;
-
-    // Pop item from worklist
-    WorklistItemType item = this->_popFromWorklist();
-
-    // Compute the results
-    ResultType result = this->_baseAut->IntersectNonEmpty(item.second, item.first, GET_NON_MEMBERSHIP_TESTING(this));
-
-    // If it is subsumed we return
-    auto fix_result = this->_fixpointTest(result.first);
-    if(fix_result.first != SubsumedType::NOT) {
-        assert(fix_result.first != SubsumedType::PARTIALLY);
-        return;
-    }
-    this->_updateExamples(result);
-    //assert(fix_result.second->type != TermType::EMPTY);
-
-    // Push the computed thing and aggregate the result
-    if(result.second == this->_shortBoolValue && _iteratorNumber == 0) {
-        _fixpoint.push_front(std::make_pair(fix_result.second, true));
-    } else {
-        _fixpoint.push_back(std::make_pair(fix_result.second, true));
-    }
-
-    if(this->_aut->stats.max_symbol_path_len < fix_result.second->link->len) {
-        this->_aut->stats.max_symbol_path_len = fix_result.second->link->len;
-    }
-
-    _updated = true;
-    _bValue = this->_AggregateResult(_bValue,result.second);
 }
 
 /**
