@@ -72,6 +72,9 @@ GuideTip FixpointGuide::GiveTip(Term* term, Symbol* symbol) {
     } else if(this->_vars.size() > 0 && term->link->succ == nullptr) {
         //symbol = this->_link->ReMapSymbol(symbol);
         // Fixme: i think this is maybe fishy, as there is DAG, but further at top, there is remapping
+        // Fixme: This is correct, because simply this is the very first step, and we simply try to
+        // Fixme:   satisfy all of the restrictions at once. Further Pres are able to alter the meaning
+        // Fixme:   of the interpretation. So we do not force the same interpretion for all FO vars.
         for(auto var : this->_vars) {
             if (symbol->GetSymbolAt(varMap[var]) != '1') {
                 return GuideTip::G_THROW;

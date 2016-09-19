@@ -490,48 +490,7 @@ public:
                         assert(_termFixpoint._sourceIt.get() != nullptr);
                         if ((term = _termFixpoint._sourceIt->GetNext()) != nullptr) {
                             // if more are to be processed
-#                           if (DEBUG_RESTRICTION_DRIVEN_FIX == true)
-                            std::cout << "ComputeNextPre()\n";
-#                           endif
-                            for (auto symbol : _termFixpoint._symList) {
-#                               if (OPT_WORKLIST_DRIVEN_BY_RESTRICTIONS == true)
-#                               if (DEBUG_RESTRICTION_DRIVEN_FIX == true)
-                                term->dump(); std::cout << " + " << (*symbol) << " -> ";
-#                               endif
-                                if(_termFixpoint._guide != nullptr) {
-                                    switch(_termFixpoint._guide->GiveTip(term, symbol)) {
-                                        case GuideTip::G_FRONT:
-#                                           if (DEBUG_RESTRICTION_DRIVEN_FIX == true)
-                                            std::cout << "G_FRONT\n";
-#                                           endif
-                                            _termFixpoint._worklist.insert(_termFixpoint._worklist.cbegin(), std::make_pair(term, symbol));
-                                            break;
-                                        case GuideTip::G_BACK:
-#                                           if (DEBUG_RESTRICTION_DRIVEN_FIX == true)
-                                            std::cout << "G_BACK\n";
-#                                           endif
-                                            _termFixpoint._worklist.push_back(std::make_pair(term, symbol));
-                                            break;
-                                        case GuideTip::G_THROW:
-#                                           if (DEBUG_RESTRICTION_DRIVEN_FIX == true)
-                                            std::cout << "G_THROW\n";
-#                                           endif
-                                            break;
-                                        case GuideTip::G_PROJECT:
-                                            _termFixpoint._worklist.insert(_termFixpoint._worklist.cbegin(), std::make_pair(term, symbol));
-                                            break;
-                                        default:
-                                            assert(false && "Unsupported guide tip");
-                                    }
-                                } else {
-                                    _termFixpoint._worklist.insert(_termFixpoint._worklist.cbegin(), std::make_pair(term, symbol));
-                                }
-#                               elif (OPT_FIXPOINT_BFS_SEARCH == true)
-                                _termFixpoint._worklist.push_back(std::make_pair(term, symbol));
-#                               else
-                                _termFixpoint._worklist.insert(_termFixpoint._worklist.cbegin(), std::make_pair(term, symbol));
-#                               endif
-                            }
+                            _termFixpoint._EnqueueInWorklist(term);
                             _termFixpoint.ComputeNextPre();
                             return this->GetNext();
                         } else {
@@ -654,6 +613,7 @@ protected:
     void _InitializeAggregateFunction(bool inComplement);
     bool _AggregateResult(bool, bool);
     void _InitializeSymbols(Workshops::SymbolWorkshop* form, Gaston::VarList*, IdentList*, Symbol*);
+    void _EnqueueInWorklist(Term_ptr);
     SubsumedType _IsSubsumedCore(Term* t, int limit, Term** new_term = nullptr, bool b = false);
     std::pair<SubsumedType , Term_ptr> _fixpointTest(Term_ptr const& term);
     std::pair<SubsumedType , Term_ptr> _testIfSubsumes(Term_ptr const& term);
