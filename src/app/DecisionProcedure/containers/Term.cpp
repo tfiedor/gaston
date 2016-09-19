@@ -2259,9 +2259,9 @@ void TermFixpoint::_InitializeSymbols(Workshops::SymbolWorkshop* workshop, Gasto
     this->_projectedSymbol = startingSymbol;
     for(auto var = vars->begin(); var != vars->end(); ++var) {
         // Pop symbol;
-        this->_projectedSymbol = workshop->CreateSymbol(this->_projectedSymbol, varMap[(*var)], 'X');
         if(*var == allPosVar)
             continue;
+        this->_projectedSymbol = workshop->CreateSymbol(this->_projectedSymbol, varMap[(*var)], 'X');
         int i = 0;
         for(auto it = this->_symList.begin(); i < symNum; ++it, ++i) {
             Symbol* symF = *it;
@@ -2274,6 +2274,32 @@ void TermFixpoint::_InitializeSymbols(Workshops::SymbolWorkshop* workshop, Gasto
     for(auto sym : this->_symList) {
         std::cout << "[*] " << (*sym) << "\n";
     }
+#   endif
+}
+
+/**
+ * @brief Initializes @p startingSymbol for multiple pushing
+ *
+ * @param[in]  workshop  pointer to symbol workshop
+ * @param[in]  nonOccuringVars  list of variables that have no occurence in formula
+ * @param[in]  vars  list of projected vars
+ * @param[in]  startingSymbol  starting symbol we are preparing
+ */
+void TermFixpoint::_InitializeProjectedSymbol(Workshops::SymbolWorkshop* workshop, Gaston::VarList* nonOccuringVars, IdentList* vars, Symbol *startingSymbol) {
+    Symbol* trimmed = workshop->CreateTrimmedSymbol(startingSymbol, nonOccuringVars);
+    if (allPosVar != -1) {
+        trimmed = workshop->CreateSymbol(trimmed, varMap[allPosVar], '1');
+    }
+
+    this->_projectedSymbol = trimmed;
+    for(auto var = vars->begin(); var != vars->end(); ++var) {
+        if(*var == allPosVar)
+            continue;
+        this->_projectedSymbol = workshop->CreateSymbol(this->_projectedSymbol, varMap[(*var)], 'X');
+    }
+
+#   if (DEBUG_FIXPOINT_SYMBOLS_INIT == true)
+    std::cout << "[!] Initialized fixpoint with symbol '" << (*this->_projectedSymbol) << "'\n";
 #   endif
 }
 

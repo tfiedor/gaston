@@ -612,6 +612,7 @@ protected:
     void _InitializeAggregateFunction(bool inComplement);
     bool _AggregateResult(bool, bool);
     void _InitializeSymbols(Workshops::SymbolWorkshop* form, Gaston::VarList*, IdentList*, Symbol*);
+    void _InitializeProjectedSymbol(Workshops::SymbolWorkshop* form, Gaston::VarList*, IdentList*, Symbol*);
     void _EnqueueInWorklist(Term_ptr);
     SubsumedType _IsSubsumedCore(Term* t, int limit, Term** new_term = nullptr, bool b = false);
     std::pair<SubsumedType , Term_ptr> _fixpointTest(Term_ptr const& term);
