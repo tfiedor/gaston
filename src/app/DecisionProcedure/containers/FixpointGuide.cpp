@@ -88,6 +88,56 @@ GuideTip FixpointGuide::GiveTip(Term* term, Symbol* symbol) {
 }
 
 /**
+ * @brief returns true, if the term has ho predecessor.
+ *
+ * Checks if either term has no predecessor at all, or only partial.
+ *
+ * @param[in]  term  term we are checking
+ * @return  true if @p term has no predecessor
+ */
+bool has_no_predecessor(Term* term) {
+    if(term->link->succ == nullptr) {
+        return true;
+    } else {
+        Term* iter = term->link->succ;
+        size_t lookedUpVar = term->link->var;
+        size_t count = 1;
+        // We check whether the whole track was subtracted
+        while(iter != nullptr && iter->link->var != varMap.TrackLength() - 1) {
+            iter = iter->link->succ;
+            ++count;
+        }
+        assert(iter != nullptr || count <= varMap.TrackLength());
+
+        return iter == nullptr;
+    }
+}
+
+/**
+ * @brief Gives tip for incremental Pre for @p term - (@p var, @p val)
+ *
+ * If the term has no successor, and it is first order, we don't subtract it,
+ * as it cannot satisfy the first order restriction. This optimization prunes
+ * the paths -0*
+ *
+ * @param[in]  term  term we want tip for
+ * @param[in]  var  variable we will subtract
+ * @param[in]  val  value at @p var position
+ * @return  guide tip, what to do when subtracting (@p var, @p val) from @p term
+ */
+GuideTip FixpointGuide::GiveTipForIncremental(Term* term, size_t var, char val) {
+    if(val == '0' && has_no_predecessor(term)) {
+        for(auto v : this->_vars) {
+            if(varMap[v] == var) {
+                return GuideTip::G_THROW;
+            }
+        }
+    }
+
+    return GuideTip::G_FRONT;
+}
+
+/**
  * Returns tip what to do with the @p term. If the restriction on the left holds, we don't have to project
  * everything away and simply push everything we can down, so simply project everything we can.
  *

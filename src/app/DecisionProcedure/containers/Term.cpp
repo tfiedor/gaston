@@ -428,7 +428,7 @@ TermList::TermList(Aut_ptr aut, Term_ptr first, bool isCompl) : Term(aut), list{
  */
 TermFixpoint::TermFixpoint(Aut_ptr aut, Term_ptr startingTerm, Symbol* symbol, bool inComplement, bool initbValue, WorklistSearchType search = WorklistSearchType::DFS)
         : Term(aut),
-          _fixpoint{std::make_pair(nullptr, true), std::make_pair(startingTerm, true)},
+          _fixpoint{FixpointMember(nullptr, true, 0), FixpointMember(startingTerm, true, 0)},
           _sourceTerm(nullptr),
           _sourceSymbol(symbol),
           _sourceIt(nullptr),
@@ -460,40 +460,19 @@ TermFixpoint::TermFixpoint(Aut_ptr aut, Term_ptr startingTerm, Symbol* symbol, b
     // Push symbols to worklist
     if (static_cast<ProjectionAutomaton*>(aut)->IsRoot() || allPosVar == -1) {
         // Fixme: Consider extracting this to different function
-        this->_InitializeSymbols(&aut->symbolFactory, aut->GetNonOccuringVars(),
-                                     static_cast<ProjectionAutomaton *>(aut)->projectedVars, symbol);
-#       if (OPT_WORKLIST_DRIVEN_BY_RESTRICTIONS == true)
-        GuideTip tip;
-        if(this->_guide == nullptr || (tip = this->_guide->GiveTip(startingTerm)) == GuideTip::G_PROJECT) {
-#       endif
-            for (auto symbol : this->_symList) {
-#               if (OPT_WORKLIST_DRIVEN_BY_RESTRICTIONS == true)
-                if (this->_guide != nullptr) {
-                    switch (this->_guide->GiveTip(startingTerm, symbol)) {
-                        case GuideTip::G_FRONT:
-                            this->_worklist.insert(this->_worklist.cbegin(), std::make_pair(startingTerm, symbol));
-                            break;
-                        case GuideTip::G_BACK:
-                            this->_worklist.push_back(std::make_pair(startingTerm, symbol));
-                            break;
-                        case GuideTip::G_THROW:
-                            break;
-                        default:
-                            assert(false && "Unsupported guiding tip\n");
-                    }
-                } else {
-                    this->_worklist.insert(this->_worklist.cbegin(), std::make_pair(startingTerm, symbol));
-                }
-#               else
-                this->_worklist.insert(this->_worklist.cbegin(), std::make_pair(startingTerm, symbol));
-#               endif
-            }
-#       if (OPT_WORKLIST_DRIVEN_BY_RESTRICTIONS == true)
+        if(OPT_INCREMENTAL_LEVEL_PRE) {
+            this->_InitializeProjectedSymbol(&aut->symbolFactory, aut->GetNonOccuringVars(), static_cast<ProjectionAutomaton *>(aut)->projectedVars, symbol);
         } else {
-            assert(tip == GuideTip::G_PROJECT_ALL);
-            this->_worklist.insert(this->_worklist.cbegin(), std::make_pair(startingTerm, this->_projectedSymbol));
+            this->_InitializeSymbols(&aut->symbolFactory, aut->GetNonOccuringVars(), static_cast<ProjectionAutomaton *>(aut)->projectedVars, symbol);
         }
+
+        IntersectNonEmptyParams params(inComplement);
+#       if (OPT_INCREMENTAL_LEVEL_PRE == true)
+        params.limitPre = true;
+        params.variableLevel = 0;
 #       endif
+        // DEBUG std::cout << "Creating TermFixpoint: " << this << "\n";
+        this->_EnqueueInWorklist(startingTerm, params);
         assert(this->_worklist.size() > 0 || startingTerm->type == TermType::EMPTY);
     }
 
@@ -518,7 +497,7 @@ TermFixpoint::TermFixpoint(Aut_ptr aut, Term_ptr startingTerm, Symbol* symbol, b
  */
 TermFixpoint::TermFixpoint(Aut_ptr aut, Term_ptr sourceTerm, Symbol* symbol, bool inComplement)
         : Term(aut),
-          _fixpoint{std::make_pair(nullptr, true)},
+          _fixpoint{FixpointMember(nullptr, true, 0)},
           _sourceTerm(sourceTerm),
           _sourceSymbol(symbol),
           _sourceIt(static_cast<TermFixpoint*>(sourceTerm)->GetIteratorDynamic()),
@@ -535,6 +514,9 @@ TermFixpoint::TermFixpoint(Aut_ptr aut, Term_ptr sourceTerm, Symbol* symbol, boo
 
     // Initialize the state space
     this->stateSpaceApprox = sourceTerm->stateSpaceApprox;
+#   if (OPT_INCREMENTAL_LEVEL_PRE == true)
+    this->_symbolParts.reserve(varMap.TrackLength());
+#   endif
 
     // Initialize the aggregate function
     this->_InitializeAggregateFunction(inComplement);
@@ -542,7 +524,14 @@ TermFixpoint::TermFixpoint(Aut_ptr aut, Term_ptr sourceTerm, Symbol* symbol, boo
     SET_VALUE_NON_MEMBERSHIP_TESTING(this, inComplement);
 
     // Push things into worklist
-    this->_InitializeSymbols(&aut->symbolFactory, aut->GetNonOccuringVars(), static_cast<ProjectionAutomaton*>(aut)->projectedVars, symbol);
+    if(OPT_INCREMENTAL_LEVEL_PRE == true) {
+        this->_InitializeProjectedSymbol(&aut->symbolFactory, aut->GetNonOccuringVars(), static_cast<ProjectionAutomaton *>(aut)->projectedVars, symbol);
+    } else {
+        this->_InitializeSymbols(&aut->symbolFactory, aut->GetNonOccuringVars(), static_cast<ProjectionAutomaton *>(aut)->projectedVars, symbol);
+    }
+    // DEBUG std::cout << "With source: " << this->_sourceTerm << "\n";
+    // DEBUG this->_sourceTerm->dump();
+    // DEBUG std::cout << "\n";
 
 #   if (DEBUG_TERM_CREATION == true)
     std::cout << "[" << this << "]";
@@ -584,11 +573,18 @@ void Term::SetSameSuccesorAs(Term* term) {
  * @param[in]  succ  successor of the term
  * @param[in]  symb  symbol we were subtracting from the @p succ
  */
-void Term::SetSuccessor(Term* succ, Symbol* symb) {
+void Term::SetSuccessor(Term* succ, Symbol* symb, IntersectNonEmptyParams& params) {
     if(this->link->succ == nullptr) {
         this->link->succ = succ;
-        this->link->symbol = symb;
-        this->link->len = succ->link->len + 1;
+        if(params.limitPre) {
+            this->link->symbol = nullptr;
+            this->link->len = succ->link->len + 1*(params.variableLevel == 0);
+            this->link->var = params.variableLevel;
+            this->link->val = params.variableValue;
+        } else {
+            this->link->symbol = symb;
+            this->link->len = succ->link->len;
+        }
     }
 }
 
@@ -627,6 +623,7 @@ bool Term::IsNotComputed() {
  * @return:  whether this term is subsumed by @p t and how (full, not, partial, etc.)
  */
 SubsumedType Term::IsSubsumed(Term *t, int limit, Term** new_term, bool unfoldAll) {
+    // Intermediate stuff is not subsumed
     if(this == t) {
         return SubsumedType::YES;
     }
@@ -1038,6 +1035,10 @@ SubsumedType TermList::_IsSubsumedCore(Term *t, int limit, Term** new_term, bool
 SubsumedType TermFixpoint::_IsSubsumedCore(Term *t, int limit, Term** new_term, bool unfoldAll) {
     assert(t->type == TermType::FIXPOINT);
 
+    if(this->_symbolParts.size() != varMap.TrackLength()) {
+        return SubsumedType::NOT;
+    }
+
     // Reinterpret
     TermFixpoint* tt = static_cast<TermFixpoint*>(t);
 
@@ -1059,12 +1060,12 @@ SubsumedType TermFixpoint::_IsSubsumedCore(Term *t, int limit, Term** new_term, 
     // Do the piece-wise comparison
     Term* tptr = nullptr;
     SubsumedType result;
-    for(auto& item : this->_fixpoint) {
+    for(FixpointMember& item : this->_fixpoint) {
         // Skip the nullpt
-        if(item.first == nullptr || !item.second) continue;
+        if(item.term == nullptr || !item.isValid) continue;
 
         //std::cout << "Testing in TermFixpoint::_IsSubsumedCore\n";
-        if( (result = (item.first)->IsSubsumedBy(tt->_fixpoint, tt->_worklist, tptr, true)) == SubsumedType::NOT) {
+        if( (result = (item.term)->IsSubsumedBy(tt->_fixpoint, tt->_worklist, tptr, SubsumedByParams(true, item.level))) == SubsumedType::NOT) {
             return SubsumedType::NOT;
         }
         assert(result == SubsumedType::YES);
@@ -1080,13 +1081,13 @@ SubsumedType TermFixpoint::_IsSubsumedCore(Term *t, int limit, Term** new_term, 
         SubsumedType result;
         while( (tit = this_it.GetNext()) != nullptr && (ttit = tt_it.GetNext()) != nullptr) {
             if(tit != nullptr) {
-                if((result = tit->IsSubsumedBy(tt->_fixpoint, temp, tptr, true)) == SubsumedType::NOT) {
+                if((result = tit->IsSubsumedBy(tt->_fixpoint, temp, tptr, SubsumedByParams(true, item.level))) == SubsumedType::NOT) {
                     return SubsumedType::NOT;
                 }
                 assert(result != SubsumedType::PARTIALLY && "Continuations currently do not work with this optimizations!");
             }
             if(ttit != nullptr) {
-                if((result = ttit->IsSubsumedBy(this->_fixpoint, temp, tptr, true)) == SubsumedType::NOT) {
+                if((result = ttit->IsSubsumedBy(this->_fixpoint, temp, tptr, SubsumedByParams(true, item.level))) == SubsumedType::NOT) {
                     return SubsumedType::NOT;
                 }
                 assert(result != SubsumedType::PARTIALLY && "Continuations currently do not work with this optimizations!");
@@ -1095,6 +1096,7 @@ SubsumedType TermFixpoint::_IsSubsumedCore(Term *t, int limit, Term** new_term, 
         return SubsumedType::YES;
     }
 #   else
+
     return ( (this->_worklist.size() == 0 /*&& tt->_worklist.size() == 0*/) ? SubsumedType::YES : (are_source_symbols_same ? SubsumedType::YES : SubsumedType::NOT));
     // Happy reading ^^                   ^---- Fixme: maybe this is incorrect?
 #   endif
@@ -1105,10 +1107,10 @@ SubsumedType TermFixpoint::_IsSubsumedCore(Term *t, int limit, Term** new_term, 
  *
  * @param[in] fixpoint:     list of terms contained as fixpoint
  */
-SubsumedType TermEmpty::IsSubsumedBy(FixpointType& fixpoint, WorklistType& worklist, Term*& biggerTerm, bool no_prune) {
+SubsumedType TermEmpty::IsSubsumedBy(FixpointType& fixpoint, WorklistType& worklist, Term*& biggerTerm, SubsumedByParams params) {
     // Empty term is subsumed by everything
     // Fixme: Complemented fixpoint should subsume everything right?
-    return ( ( (fixpoint.size() == 1 && fixpoint.front().first == nullptr) || GET_IN_COMPLEMENT(this)) ? SubsumedType::NOT : SubsumedType::YES);
+    return ( ( (fixpoint.size() == 1 && fixpoint.front().term == nullptr) || GET_IN_COMPLEMENT(this)) ? SubsumedType::NOT : SubsumedType::YES);
 }
 
 /*
@@ -1121,7 +1123,7 @@ SubsumedType TermEmpty::IsSubsumedBy(FixpointType& fixpoint, WorklistType& workl
  */
 void prune_worklist(WorklistType& worklist, Term*& item) {
     for(auto it = worklist.begin(); it != worklist.end();) {
-        if(it->first == item) {
+        if(it->term == item) {
             it = worklist.erase(it);
         } else {
             ++it;
@@ -1131,8 +1133,8 @@ void prune_worklist(WorklistType& worklist, Term*& item) {
 
 void switch_in_worklist(WorklistType& worklist, Term*& item, Term*& new_item) {
     for(auto it = worklist.begin(); it != worklist.end(); ++it) {
-        if(it->first == item) {
-            it->first = new_item;
+        if(it->term == item) {
+            it->term = new_item;
         }
     }
 }
@@ -1153,8 +1155,9 @@ void switch_in_worklist(WorklistType& worklist, Term*& item, Term*& new_item) {
  * @return  the subsumption relation for the term and fixpoint
  */
 template<class ProductType>
-SubsumedType Term::_ProductIsSubsumedBy(FixpointType& fixpoint, WorklistType& worklist, Term*& biggerTerm, bool no_prune) {
+SubsumedType Term::_ProductIsSubsumedBy(FixpointType& fixpoint, WorklistType& worklist, Term*& biggerTerm, SubsumedByParams params) {
     assert(this->type == TermType::PRODUCT || this->type == TermType::NARY_PRODUCT || this->type == TermType::TERNARY_PRODUCT);
+    bool no_prune = params.no_prune;
 
     if(this->IsEmpty()) {
         return SubsumedType::YES;
@@ -1176,22 +1179,36 @@ SubsumedType Term::_ProductIsSubsumedBy(FixpointType& fixpoint, WorklistType& wo
     Term* tested_term = this;
     Term* new_term = nullptr;
     size_t valid_members = 0;
-    for(auto &item : fixpoint) {
-        if(item.first == nullptr || !item.second)
+    for(FixpointMember& item : fixpoint) {
+        if(item.term == nullptr || !item.isValid)
             continue;
         valid_members += 1;
     }
 
-    for(auto& item : fixpoint) {
+    for(FixpointMember& item : fixpoint) {
         // Nullptr is skipped
-        if(item.first == nullptr || !item.second) continue;
+        if(false && item.term != nullptr) {
+            this->dump(); std::cout << "@" << params.level << " vs ";
+            item.term->dump(); std::cout << "@" << item.level << "";
+        }
+        if(item.term == nullptr || !item.isValid) {
+            continue;
+        }
+
+        if(item.level > params.level) {
+            SubsumedType inner_result;
+            if( (inner_result = item.term->IsSubsumed(this, OPT_PARTIALLY_LIMITED_SUBSUMPTION, nullptr)) == SubsumedType::YES) {
+                item.isValid = false;
+            }
+            continue;
+        }
 
         // Test the subsumption
         SubsumedType result;
         if(valid_members > 1 && OPT_SUBSUMPTION_INTERSECTION == true) {
-            result = tested_term->IsSubsumed(item.first, OPT_PARTIALLY_LIMITED_SUBSUMPTION, &new_term);
+            result = tested_term->IsSubsumed(item.term, OPT_PARTIALLY_LIMITED_SUBSUMPTION, &new_term);
         } else {
-            result = tested_term->IsSubsumed(item.first, OPT_PARTIALLY_LIMITED_SUBSUMPTION, nullptr);
+            result = tested_term->IsSubsumed(item.term, OPT_PARTIALLY_LIMITED_SUBSUMPTION, nullptr);
         }
 
         if(result == SubsumedType::YES) {
@@ -1206,15 +1223,15 @@ SubsumedType Term::_ProductIsSubsumedBy(FixpointType& fixpoint, WorklistType& wo
             SubsumedType inner_result;
             new_term == nullptr;
 #           if (OPT_PARTIAL_PRUNE_FIXPOINTS == true)
-            if( (inner_result = item.first->IsSubsumed(this, OPT_PARTIALLY_LIMITED_SUBSUMPTION, &new_term)) == SubsumedType::YES) {
+            if( (inner_result = item.term->IsSubsumed(this, OPT_PARTIALLY_LIMITED_SUBSUMPTION, &new_term)) == SubsumedType::YES) {
 #           else
-            if( (inner_result = item.first->IsSubsumed(this, OPT_PARTIALLY_LIMITED_SUBSUMPTION, nullptr)) == SubsumedType::YES) {
+            if( (inner_result = item.term->IsSubsumed(this, OPT_PARTIALLY_LIMITED_SUBSUMPTION, nullptr)) == SubsumedType::YES) {
 #           endif
                 assert(!(valid_members == 1 && result == SubsumedType::PARTIALLY));
 #               if (OPT_PRUNE_WORKLIST == true)
-                prune_worklist(worklist, item.first);
+                prune_worklist(worklist, item.term);
 #               endif
-                item.second = false;
+                item.isValid = false;
 #           if (OPT_PARTIAL_PRUNE_FIXPOINTS == true)
             } else if(inner_result == SubsumedType::PARTIALLY) {
                 assert(new_term != nullptr);
@@ -1281,19 +1298,21 @@ SubsumedType Term::_ProductIsSubsumedBy(FixpointType& fixpoint, WorklistType& wo
     }
 }
 
-SubsumedType TermProduct::IsSubsumedBy(FixpointType& fixpoint, WorklistType& worklist, Term*& biggerTerm, bool no_prune) {
-    return this->_ProductIsSubsumedBy<TermProduct>(fixpoint, worklist, biggerTerm, no_prune);
+SubsumedType TermProduct::IsSubsumedBy(FixpointType& fixpoint, WorklistType& worklist, Term*& biggerTerm, SubsumedByParams params) {
+    return this->_ProductIsSubsumedBy<TermProduct>(fixpoint, worklist, biggerTerm, params);
 }
 
-SubsumedType TermTernaryProduct::IsSubsumedBy(FixpointType& fixpoint, WorklistType& worklist, Term *& biggerTerm, bool no_prune) {
-    return this->_ProductIsSubsumedBy<TermTernaryProduct>(fixpoint, worklist, biggerTerm, no_prune);
+SubsumedType TermTernaryProduct::IsSubsumedBy(FixpointType& fixpoint, WorklistType& worklist, Term *& biggerTerm, SubsumedByParams params) {
+    return this->_ProductIsSubsumedBy<TermTernaryProduct>(fixpoint, worklist, biggerTerm, params);
 }
 
-SubsumedType TermNaryProduct::IsSubsumedBy(FixpointType& fixpoint, WorklistType& worklist, Term *& biggerTerm, bool no_prune) {
-    return this->_ProductIsSubsumedBy<TermNaryProduct>(fixpoint, worklist, biggerTerm, no_prune);
+SubsumedType TermNaryProduct::IsSubsumedBy(FixpointType& fixpoint, WorklistType& worklist, Term *& biggerTerm, SubsumedByParams params) {
+    return this->_ProductIsSubsumedBy<TermNaryProduct>(fixpoint, worklist, biggerTerm, params);
 }
 
-SubsumedType TermBaseSet::IsSubsumedBy(FixpointType& fixpoint, WorklistType& worklist, Term*& biggerTerm, bool no_prune) {
+SubsumedType TermBaseSet::IsSubsumedBy(FixpointType& fixpoint, WorklistType& worklist, Term*& biggerTerm, SubsumedByParams params) {
+    bool no_prune = params.no_prune;
+
     if(this->IsEmpty()) {
         return SubsumedType::YES;
     }
@@ -1301,22 +1320,22 @@ SubsumedType TermBaseSet::IsSubsumedBy(FixpointType& fixpoint, WorklistType& wor
     Term* tested_term = this;
     Term* new_term = nullptr;
     size_t valid_members = 0;
-    for(auto &item : fixpoint) {
-        if(item.first == nullptr || !item.second)
+    for(FixpointMember& item : fixpoint) {
+        if(item.term == nullptr || !item.isValid)
             continue;
         valid_members += 1;
     }
 
-    for(auto& item : fixpoint) {
+    for(FixpointMember& item : fixpoint) {
         // Nullptr is skipped
-        if(item.first == nullptr || !item.second) continue;
+        if(item.term == nullptr || !item.isValid || item.level > params.level) continue;
 
         // Test the subsumption
         SubsumedType result;
         if(!no_prune && valid_members > 1) {
-            result = tested_term->IsSubsumed(item.first, OPT_PARTIALLY_LIMITED_SUBSUMPTION, &new_term);
+            result = tested_term->IsSubsumed(item.term, OPT_PARTIALLY_LIMITED_SUBSUMPTION, &new_term);
         } else {
-            result = tested_term->IsSubsumed(item.first, OPT_PARTIALLY_LIMITED_SUBSUMPTION, nullptr);
+            result = tested_term->IsSubsumed(item.term, OPT_PARTIALLY_LIMITED_SUBSUMPTION, nullptr);
         }
         switch(result) {
             case SubsumedType::YES:
@@ -1333,11 +1352,11 @@ SubsumedType TermBaseSet::IsSubsumedBy(FixpointType& fixpoint, WorklistType& wor
         }
 
         if(!no_prune) {
-            if (item.first->IsSubsumed(tested_term, OPT_PARTIALLY_LIMITED_SUBSUMPTION) == SubsumedType::YES) {
+            if (item.term->IsSubsumed(tested_term, OPT_PARTIALLY_LIMITED_SUBSUMPTION) == SubsumedType::YES) {
 #               if (OPT_PRUNE_WORKLIST == true)
-                prune_worklist(worklist, item.first);
+                prune_worklist(worklist, item.term);
 #               endif
-                item.second = false;
+                item.isValid = false;
             }
         }
     }
@@ -1352,29 +1371,31 @@ SubsumedType TermBaseSet::IsSubsumedBy(FixpointType& fixpoint, WorklistType& wor
     }
 }
 
-SubsumedType TermContinuation::IsSubsumedBy(FixpointType& fixpoint, WorklistType& worklist, Term*& biggerTerm, bool no_prune) {
+SubsumedType TermContinuation::IsSubsumedBy(FixpointType& fixpoint, WorklistType& worklist, Term*& biggerTerm, SubsumedByParams params) {
     assert(false && "TermContSubset.IsSubsumedBy() is impossible to happen~!");
 }
 
-SubsumedType TermList::IsSubsumedBy(FixpointType& fixpoint, WorklistType& worklist, Term*& biggerTerm, bool no_prune) {
+SubsumedType TermList::IsSubsumedBy(FixpointType& fixpoint, WorklistType& worklist, Term*& biggerTerm, SubsumedByParams params) {
+    bool no_prune = params.no_prune;
+
     if(this->IsEmpty()) {
         return SubsumedType::YES;
     }
     // For each item in fixpoint
-    for(auto& item : fixpoint) {
+    for(FixpointMember& item : fixpoint) {
         // Nullptr is skipped
-        if(item.first == nullptr || !item.second) continue;
+        if(item.term == nullptr || !item.isValid || item.level > params.level) continue;
 
-        if (this->IsSubsumed(item.first, OPT_PARTIALLY_LIMITED_SUBSUMPTION) == SubsumedType::YES) {
+        if (this->IsSubsumed(item.term, OPT_PARTIALLY_LIMITED_SUBSUMPTION) == SubsumedType::YES) {
             return SubsumedType::YES;
         }
 
         if(!no_prune) {
-            if (item.first->IsSubsumed(this, OPT_PARTIALLY_LIMITED_SUBSUMPTION) == SubsumedType::YES) {
+            if (item.term->IsSubsumed(this, OPT_PARTIALLY_LIMITED_SUBSUMPTION) == SubsumedType::YES) {
 #               if (OPT_PRUNE_WORKLIST == true)
-                prune_worklist(worklist, item.first);
+                prune_worklist(worklist, item.term);
 #               endif
-                item.second = false;
+                item.isValid = false;
             }
         }
     }
@@ -1382,23 +1403,52 @@ SubsumedType TermList::IsSubsumedBy(FixpointType& fixpoint, WorklistType& workli
     return SubsumedType::NOT;
 }
 
-SubsumedType TermFixpoint::IsSubsumedBy(FixpointType& fixpoint, WorklistType& worklist, Term*& biggerTerm, bool no_prune) {
+SubsumedType TermFixpoint::IsSubsumedBy(FixpointType& fixpoint, WorklistType& worklist, Term*& biggerTerm, SubsumedByParams params) {
     auto result = SubsumedType::NOT;
+    bool no_prune = params.no_prune;
     // Component-wise comparison
-    for(auto& item : fixpoint) {
-        if(item.first == nullptr || !item.second) continue;
+    for(FixpointMember& item : fixpoint) {
+        if(false && item.term != nullptr) {
+            this->dump();
+            std::cout << "[";
+            for(auto c : this->_symbolParts) {
+                std::cout << c << ", ";
+            }
+            std::cout << "]";
+            std::cout << " vs ";
+            item.term->dump();
+            std::cout << "[";
+            for(auto c : static_cast<TermFixpoint*>(item.term)->_symbolParts) {
+                std::cout << c << ", ";
+            }
+            std::cout << "]";
+            std::cout << "\n";
+        }
 
-        if (this->IsSubsumed(item.first, OPT_PARTIALLY_LIMITED_SUBSUMPTION) == SubsumedType::YES) {
+        if(item.term == nullptr || !item.isValid) {
+            continue;
+        }
+
+        if(item.level > params.level) {
+            SubsumedType inner_result;
+            if( (inner_result = item.term->IsSubsumed(this, OPT_PARTIALLY_LIMITED_SUBSUMPTION, nullptr)) == SubsumedType::YES) {
+                item.isValid = false;
+            }
+            continue;
+        }
+
+        if (this->IsSubsumed(item.term, OPT_PARTIALLY_LIMITED_SUBSUMPTION) == SubsumedType::YES) {
             result = SubsumedType::YES;
+            std::cout << " is subsumed \n";
             break;
         }
 
         if(!no_prune) {
-            if (item.first->IsSubsumed(this, OPT_PARTIALLY_LIMITED_SUBSUMPTION) == SubsumedType::YES) {
+            if (item.term->IsSubsumed(this, OPT_PARTIALLY_LIMITED_SUBSUMPTION) == SubsumedType::YES) {
 #               if (OPT_PRUNE_WORKLIST == true)
-                prune_worklist(worklist, item.first);
+                prune_worklist(worklist, item.term);
 #               endif
-                item.second = false;
+                item.isValid = false;
             }
         }
 
@@ -1638,11 +1688,11 @@ unsigned int TermList::_MeasureStateSpaceCore() {
 
 unsigned int TermFixpoint::_MeasureStateSpaceCore() {
     unsigned count = 1;
-    for(auto& item : this->_fixpoint) {
-        if(item.first == nullptr || !item.second) {
+    for(FixpointMember& item : this->_fixpoint) {
+        if(item.term == nullptr || !item.isValid) {
             continue;
         }
-        count += (item.first)->MeasureStateSpace();
+        count += (item.term)->MeasureStateSpace();
     }
 
     return count;
@@ -1748,6 +1798,9 @@ void Term::dump(unsigned indent) {
     if(GET_IN_COMPLEMENT(this)) {
         std::cout << "\033[1;31m}\033[0m";
     }
+    if(this->IsIntermediate()) {
+        std::cout << "'";
+    }
 }
 
 void TermEmpty::_dumpCore(unsigned indent) {
@@ -1792,6 +1845,22 @@ void TermNaryProduct::_dumpCore(unsigned int indent) {
     std::cout << "\033[" << product_colour << "}\033[0m";
 }
 
+size_t base_state_to_stream(TermBaseSet* base, size_t state) {
+    if(base->IsIntermediate()) {
+        return state >> 3;
+    } else {
+        return state;
+    }
+}
+
+std::string intermediate_to_stream(TermBaseSet* base, size_t state) {
+    if(base->IsIntermediate()) {
+        return std::string("[") + std::to_string(state) + std::string("]");
+    } else {
+        return "";
+    }
+}
+
 void base_to_stream(TermBaseSet* base, std::ostream& os) {
     size_t start = 0, end = 0;
     bool first = true;
@@ -1807,9 +1876,9 @@ void base_to_stream(TermBaseSet* base, std::ostream& os) {
             }
 
             if (start == end) {
-                os << start;
+                os << base_state_to_stream(base, start) << intermediate_to_stream(base, start);
             } else {
-                os << start << ".." << end;
+                os << base_state_to_stream(base, start) << intermediate_to_stream(base, start) << ".." << base_state_to_stream(base, end) << intermediate_to_stream(base, end);
             }
         }
         start = state;
@@ -1820,9 +1889,9 @@ void base_to_stream(TermBaseSet* base, std::ostream& os) {
         os << ", ";
     }
     if (start == end) {
-        os << start;
+        os << base_state_to_stream(base, start) << intermediate_to_stream(base, start);
     } else {
-        os << start << ".." << end;
+        os << base_state_to_stream(base, start) << intermediate_to_stream(base, start) << ".." << base_state_to_stream(base, end) << intermediate_to_stream(base, end);
     }
 }
 
@@ -1862,12 +1931,20 @@ void TermList::_dumpCore(unsigned indent) {
 void TermFixpoint::_dumpCore(unsigned indent) {
     std::cout << "[" << this << "]";
     std::cout << "\033[1;34m{\033[0m" << "\n";
-    for(auto& item : this->_fixpoint) {
-        if(item.first == nullptr || !(item.second)) {
+    for(FixpointMember& item : this->_fixpoint) {
+        if(item.term == nullptr) {
+            std::cout << std::string(indent+2, ' ');
+            std::cout << "NULL";
+            std::cout << "@" << item.level;
+            std::cout << "\033[1;34m,\033[0m";
+            std::cout << "\n";
+        }
+        if(item.term == nullptr || !(item.isValid)) {
             continue;
         }
         std::cout << std::string(indent+2, ' ');
-        item.first->dump(indent + 2);
+        item.term->dump(indent + 2);
+        std::cout << "@" << item.level;
         std::cout << "\033[1;34m,\033[0m";
         std::cout << "\n";
     }
@@ -1881,8 +1958,8 @@ void TermFixpoint::_dumpCore(unsigned indent) {
 #   if (DEBUG_FIXPOINT_WORKLIST == true)
     std::cout << std::string(indent, ' ');
     std::cout << "\033[1;37m[";
-    for(auto& workItem : this->_worklist) {
-        std::cout << (*workItem.first) << " + " << (*workItem.second) << ", ";
+    for(WorklistItem& workItem : this->_worklist) {
+        std::cout << *(workItem.term) << " + " << *(workItem.symbol) << ", ";
     }
     std::cout << "\033[1;37m]\033[0m\n";
 #   endif
@@ -1970,7 +2047,8 @@ bool TermFixpoint::_processOnePostponed() {
         // Push new symbols from _symList, if we are in Fixpoint semantics
         if (this->GetSemantics() == E_FIXTERM_FIXPOINT) {
             for (auto &symbol : this->_symList) {
-                this->_worklist.insert(this->_worklist.cbegin(), std::make_pair(postponedTerm, symbol));
+                assert(!OPT_INCREMENTAL_LEVEL_PRE && "This does not work with IncrementalPre");
+                this->_worklist.emplace_front(postponedTerm, symbol, 0, 'X');
             }
         }
         #if (MEASURE_POSTPONED == TRUE)
@@ -1986,60 +2064,64 @@ bool TermFixpoint::_processOnePostponed() {
 #   endif
 }
 
-std::pair<SubsumedType, Term_ptr> TermFixpoint::_fixpointTest(Term_ptr const &term) {
+std::pair<SubsumedType, Term_ptr> TermFixpoint::_fixpointTest(Term_ptr const &term, SubsumedByParams params) {
     if(this->_searchType == WorklistSearchType::UNGROUND_ROOT) {
         // Fixme: Not sure if this is really correct, but somehow I still feel that the Root search is special and
         //   subsumption is maybe not enough? But maybe this simply does not work for fixpoints of negated thing.
         //return this->_testIfIn(term);
         // ^--- however i still feel that this is wrong and may cause loop.
         if(this->_unsatTerm == nullptr && this->_satTerm == nullptr) {
-            return this->_testIfIn(term);
+            // DEBUG std::cout << "-> testing if in\n";
+            return this->_testIfIn(term, params);
         } else if(this->_satTerm == nullptr) {
-            return this->_testIfBiggerExists(term);
+            // DEBUG std::cout << "-> testing if bigger exists\n";
+            return this->_testIfBiggerExists(term, params);
         } else {
             assert(this->_satTerm != nullptr);
             assert(this->_unsatTerm == nullptr);
-            return this->_testIfSmallerExists(term);
+            // DEBUG std::cout << "-> testing if smaller exists\n";
+            return this->_testIfSmallerExists(term, params);
         }
     } else {
-        return this->_testIfSubsumes(term);
+        // DEBUG std::cout << "-> testing if subsumes\n";
+        return this->_testIfSubsumes(term, params);
     }
 }
 
-std::pair<SubsumedType, Term_ptr >TermFixpoint::_testIfBiggerExists(Term_ptr const &term) {
-    return (std::find_if(this->_fixpoint.begin(), this->_fixpoint.end(), [&term](FixpointMember& member) {
-        if(!member.second || member.first == nullptr || !member.first->IsSemanticallyValid()) {
+std::pair<SubsumedType, Term_ptr >TermFixpoint::_testIfBiggerExists(Term_ptr const &term, SubsumedByParams params) {
+    return (std::find_if(this->_fixpoint.begin(), this->_fixpoint.end(), [&term, &params](FixpointMember& member) {
+        if(!member.isValid || member.term == nullptr || !member.term->IsSemanticallyValid() || member.level > params.level) {
             return false;
         } else {
-            if(member.first != term && member.first->IsSubsumed(term, OPT_PARTIALLY_LIMITED_SUBSUMPTION, nullptr, false) != SubsumedType::NOT) {
-                member.second = false;
+            if(member.term != term && member.term->IsSubsumed(term, OPT_PARTIALLY_LIMITED_SUBSUMPTION, nullptr, false) != SubsumedType::NOT) {
+                member.isValid = false;
                 return false;
             } else {
-                return term->IsSubsumed(member.first, OPT_PARTIALLY_LIMITED_SUBSUMPTION, nullptr, false) != SubsumedType::NOT;
+                return term->IsSubsumed(member.term, OPT_PARTIALLY_LIMITED_SUBSUMPTION, nullptr, false) != SubsumedType::NOT;
             }
         }
     }) == this->_fixpoint.end() ? std::make_pair(SubsumedType::NOT, term) : std::make_pair(SubsumedType::YES, term));
 }
 
-std::pair<SubsumedType, Term_ptr> TermFixpoint::_testIfSmallerExists(Term_ptr const &term) {
-    return (std::find_if(this->_fixpoint.begin(), this->_fixpoint.end(), [&term](FixpointMember& member) {
-        if(!member.second || member.first == nullptr || !member.first->IsSemanticallyValid()) {
+std::pair<SubsumedType, Term_ptr> TermFixpoint::_testIfSmallerExists(Term_ptr const &term, SubsumedByParams params) {
+    return (std::find_if(this->_fixpoint.begin(), this->_fixpoint.end(), [&term, &params](FixpointMember& member) {
+        if(!member.isValid || member.term == nullptr || !member.term->IsSemanticallyValid() || member.level > params.level) {
             return false;
         } else {
-            if(member.first != term && term->IsSubsumed(member.first, OPT_PARTIALLY_LIMITED_SUBSUMPTION, nullptr, false) != SubsumedType::NOT) {
-                member.second = false;
+            if(member.term!= term && term->IsSubsumed(member.term, OPT_PARTIALLY_LIMITED_SUBSUMPTION, nullptr, false) != SubsumedType::NOT) {
+                member.isValid = false;
                 return false;
             } else {
-                return member.first->IsSubsumed(term, OPT_PARTIALLY_LIMITED_SUBSUMPTION, nullptr, false) != SubsumedType::NOT;
+                return member.term->IsSubsumed(term, OPT_PARTIALLY_LIMITED_SUBSUMPTION, nullptr, false) != SubsumedType::NOT;
             }
         }
     }) == this->_fixpoint.end() ? std::make_pair(SubsumedType::NOT, term) : std::make_pair(SubsumedType::YES, term));
 }
 
-std::pair<SubsumedType, Term_ptr> TermFixpoint::_testIfIn(Term_ptr const &term) {
-    return (std::find_if(this->_fixpoint.begin(), this->_fixpoint.end(), [&term](FixpointMember const& member){
-        if(member.second) {
-            return member.first == term;
+std::pair<SubsumedType, Term_ptr> TermFixpoint::_testIfIn(Term_ptr const &term, SubsumedByParams params) {
+    return (std::find_if(this->_fixpoint.begin(), this->_fixpoint.end(), [&term, &params](FixpointMember const& member){
+        if(member.isValid && member.level <= params.level) {
+            return member.term == term;
         } else {
             return false;
         }
@@ -2054,13 +2136,15 @@ std::pair<SubsumedType, Term_ptr> TermFixpoint::_testIfIn(Term_ptr const &term) 
  * @param[in] term:     term we are testing subsumption for
  * @return:             true if term is subsumed by fixpoint
  */
-std::pair<SubsumedType, Term_ptr> TermFixpoint::_testIfSubsumes(Term_ptr const& term) {
+std::pair<SubsumedType, Term_ptr> TermFixpoint::_testIfSubsumes(Term_ptr const& term, SubsumedByParams params) {
+    Term* subsumedByTerm = nullptr;
     #if (OPT_CACHE_SUBSUMED_BY == true)
     SubsumedType result;
-    Term* key = term, *subsumedByTerm = nullptr;
-    if(!this->_subsumedByCache.retrieveFromCache(key, result)) {
+    Term* key = term;
+    // Fixme: There should be something different
+    if(term->IsIntermediate() || !this->_subsumedByCache.retrieveFromCache(key, result)) {
         // True/Partial results are stored in cache
-        if((result = term->IsSubsumedBy(this->_fixpoint, this->_worklist, subsumedByTerm)) != SubsumedType::NOT) {
+        if((result = term->IsSubsumedBy(this->_fixpoint, this->_worklist, subsumedByTerm, params)) != SubsumedType::NOT && !term->IsIntermediate()) {
             // SubsumedType::PARTIALLY is considered as SubsumedType::YES, as it was partitioned already
             this->_subsumedByCache.StoreIn(key, SubsumedType::YES);
         }
@@ -2086,7 +2170,7 @@ std::pair<SubsumedType, Term_ptr> TermFixpoint::_testIfSubsumes(Term_ptr const& 
     //assert(!(term->type == TermType::EMPTY && result != SubsumedType::YES));
     return std::make_pair(result, term);
     #else
-    return std::make_pair(term->IsSubsumedBy(this->_fixpoint, this->_worklist, subsumedByTerm), term);
+    return std::make_pair(term->IsSubsumedBy(this->_fixpoint, this->_worklist, subsumedByTerm, params), term);
     #endif
 }
 
@@ -2114,11 +2198,13 @@ WorklistItemType TermFixpoint::_popFromWorklist() {
  * Enqueues @p term in worklist, according to the the fixpoint guide, and various heuristics.
  *
  * @param[in]  term  enqued term
+ * @param[in]  params  params for the enqueued term
+ * @param[in]  enqueueNext  true if next war should be computed
  */
-void TermFixpoint::_EnqueueInWorklist(Term_ptr term) {
+void TermFixpoint::_EnqueueInWorklist(Term_ptr term, IntersectNonEmptyParams& params, bool enqueueNext) {
 #   if (OPT_WORKLIST_DRIVEN_BY_RESTRICTIONS == true)
     GuideTip tip;
-    if (this->_guide == nullptr || (tip = this->_guide->GiveTip(term)) == GuideTip::G_PROJECT) {
+    if (!OPT_INCREMENTAL_LEVEL_PRE && (this->_guide == nullptr || (tip = this->_guide->GiveTip(term)) == GuideTip::G_PROJECT)) {
 #   endif
         for (auto &symbol : _symList) {
 #           if (OPT_WORKLIST_DRIVEN_BY_RESTRICTIONS == true)
@@ -2126,34 +2212,193 @@ void TermFixpoint::_EnqueueInWorklist(Term_ptr term) {
                 bool break_from_for = false;
                 switch (this->_guide->GiveTip(term, symbol)) {
                     case GuideTip::G_FRONT:
-                        _worklist.insert(_worklist.cbegin(), std::make_pair(term, symbol));
+                        _worklist.emplace_front(term, symbol, 0, 'X');
                         break;
                     case GuideTip::G_BACK:
-                        _worklist.push_back(std::make_pair(term, symbol));
+                        _worklist.emplace_back(term, symbol, 0, 'X');
                         break;
                     case GuideTip::G_THROW:
                         break;
                     case GuideTip::G_PROJECT:
-                        _worklist.insert(_worklist.cbegin(), std::make_pair(term, symbol));
+                        _worklist.emplace_front(term, symbol, 0, 'X');
                         break;
                     default:
                         assert(false && "Unsupported guide tip");
                 }
             } else {
-                _worklist.insert(_worklist.cbegin(), std::make_pair(term, symbol));
+                _worklist.emplace_front(term, symbol, 0, 'X');
             }
 #           elif (OPT_FIXPOINT_BFS_SEARCH == true)
-            _worklist.push_back(std::make_pair(term, symbol));
-#          else
-            _worklist.insert(_worklist.cbegin(), std::make_pair(term, symbol));
+            _worklist.emplace_back(term, symbol, 0, 'X');
+#           else
+            _worklist.emplace_back(term, symbol, 0, 'X');
 #           endif
         }
 #   if (OPT_WORKLIST_DRIVEN_BY_RESTRICTIONS == true)
+    } else if(params.limitPre) {
+        size_t nextVar = enqueueNext ? ((varMap.TrackLength() - 1 + params.variableLevel) % varMap.TrackLength()) : params.variableLevel;
+        assert(!(term->IsIntermediate() && nextVar == varMap.TrackLength() - 1));
+        char value;
+
+        if (this->GetSemantics() == FixpointSemanticType::FIXPOINT) {
+            value = this->_projectedSymbol->GetSymbolAt(nextVar);
+        } else {
+            assert(this->GetSemantics() == FixpointSemanticType::PRE);
+            size_t index = varMap.TrackLength() - nextVar - 1;
+            assert(this->_symbolParts.size() > index);
+            value = this->_symbolParts[index];
+        }
+
+        switch(value) {
+            case '1':
+            case '0':
+                // Queue single shit
+                if(this->_guide->GiveTipForIncremental(term, nextVar, value) != GuideTip::G_THROW) {
+                    _worklist.emplace_front(term, this->_projectedSymbol, nextVar, value);
+                    // DEBUG std::cout << "Enqueuing: ";
+                    // DEBUG term->dump();
+                    // DEBUG std::cout << " -" << value << "(" << nextVar << ")\n";
+                }
+                break;
+            case 'X':
+                // Queue multiple shits
+                if(this->_guide->GiveTipForIncremental(term, nextVar, '0') != GuideTip::G_THROW) {
+                    _worklist.emplace_front(term, this->_projectedSymbol, nextVar, '0');
+                    // DEBUG std::cout << "Enqueuing: ";
+                    // DEBUG  term->dump();
+                    // DEBUG std::cout << " -" << '0' << "(" << nextVar << ")\n";
+                }
+                if(this->_guide->GiveTipForIncremental(term, nextVar, '1') != GuideTip::G_THROW) {
+                    _worklist.emplace_front(term, this->_projectedSymbol, nextVar, '1');
+                    // DEBUG std::cout << "Enqueuing: ";
+                    // DEBUG term->dump();
+                    // DEBUG std::cout << " -" << '1' << "(" << nextVar << ")\n";
+                }
+                break;
+            default:
+                assert(false && "Unsupported stuff");
+                break;
+        }
     } else {
-        assert(tip == GuideTip::G_PROJECT_ALL);
-        _worklist.insert(_worklist.cbegin(), std::make_pair(term, this->_projectedSymbol));
+        // FIXME: TODO: Enqueueing of stuff
+        _worklist.emplace_front(term, this->_projectedSymbol, 0, 'X');
     }
 #   endif
+}
+
+void TermFixpoint::_ProcessComputedResult(std::pair<Term_ptr, bool>& result, bool isBaseFixpoint, IntersectNonEmptyParams& params) {
+    // If it is subsumed by fixpoint, we don't add it
+    auto fix_result = this->_fixpointTest(result.first, SubsumedByParams(false, params.variableLevel));
+    char c;
+    if(fix_result.first != SubsumedType::NOT) {
+        assert(fix_result.first != SubsumedType::PARTIALLY);
+        // DEBUG std::cout << "Is subsumed by: "; this->dump(); std::cout << " on level " << params.variableLevel << "\n";
+        /*if(params.variableLevel == 0)
+            std::cin >> c;*/
+#       if (MEASURE_PROJECTION == true)
+        if(isBaseFixpoint && _worklist.empty() && !this->_fullyComputed) {
+            this->_fullyComputed = true;
+            ++TermFixpoint::fullyComputedFixpoints;
+        }
+#       endif
+        return;
+    } else {
+        // DEBUG std::cout << "Is not subsumed by: "; this->dump(); std::cout << " on level " << params.variableLevel << "\n";
+        /*if(params.variableLevel == 0)
+            std::cin >> c;*/
+    }
+
+    // Update examples
+    this->_updateExamples(result);
+    // assert(fix_result.second->type != TermType::EMPTY || fix_result.second->InComplement());
+
+    // Push new term to fixpoint
+    _fixpoint.emplace_back(fix_result.second, true, params.variableLevel);
+
+    _updated = true;
+    // Aggregate the result of the fixpoint computation
+    _bValue = this->_AggregateResult(_bValue,result.second);
+    if(isBaseFixpoint) {
+        // Push new symbols from _symList
+        this->_EnqueueInWorklist(fix_result.second, params);
+    } else if(fix_result.second->IsIntermediate() && this->_symbolParts.size() == varMap.TrackLength()) {
+        this->_EnqueueInWorklist(fix_result.second, params);
+    }
+
+    // Update stats
+    if(this->_aut->stats.max_symbol_path_len < fix_result.second->link->len) {
+        this->_aut->stats.max_symbol_path_len = fix_result.second->link->len;
+    }
+}
+
+/**
+ * @brief Projects (if needed) the value of the symbol that we are currently subtracting
+ *
+ * If we are currently subbing the variable corresponding to this level, we have
+ * to project the symbol first.
+ *
+ * @param[in]  params  params with (var, val) we are subbing
+ * @return  value that we will subtract
+ */
+char TermFixpoint::_ProjectSymbol(IntersectNonEmptyParams& params) {
+    IdentList* idents = static_cast<ProjectionAutomaton*>(this->_aut)->projectedVars;
+    for(auto ident = idents->begin(); ident != idents->end(); ++ident) {
+        if(params.variableLevel == varMap[*ident]) {
+            return 'X';
+        }
+    }
+
+    return params.variableValue;
+}
+
+/**
+ * @brief Ascends the fixpoint by one level, and push the subtracted value to the pattern list
+ *
+ * Pushes the currently subtracted (var+value) to the list of patterns. Then every
+ * term from fixpoint is enqued, the fixpoint is reduced in sized and then, the
+ * whole level of variables is processed.
+ */
+void TermFixpoint::PushAndCompute(IntersectNonEmptyParams& params) {
+    params.variableValue = this->_ProjectSymbol(params);
+    this->_symbolParts.push_back(params.variableValue);
+    static int j = 0;
+    int i = j++;
+    // DEBUG std::cout << "\n[" << i << "]" << "Push and Compute: " << params.limitPre << " - '";
+    // DEBUG std::cout << params.variableValue << "'(" << params.variableLevel << ")\n";
+    if(i == 10) {
+        //assert(false);
+    }
+    // Enqueue everything from fixpoint
+    if(params.variableLevel == varMap.TrackLength() - 1) {
+        Term_ptr startingTerm = nullptr;
+        // DEBUG std::cout << "[" << i << "]" <<  "Enqueuing shit for starting term\n";
+        // DEBUG this->_sourceTerm->dump(); std::cout << " -> is source\n";
+        if( (startingTerm = this->_sourceIt->GetNext()) != nullptr) {
+            assert(!startingTerm->IsIntermediate());
+            this->_EnqueueInWorklist(startingTerm, params, false);
+        } else {
+            // DEBUG std::cout << "For some reasons this is nullptr";
+            assert(false);
+        }
+    } else {
+        // DEBUG std::cout << "[" << i << "]" <<  "Enqueuing everything from fixpoint\n";
+        for (FixpointMember& item : this->_fixpoint) {
+            if (item.term == nullptr || item.isValid == false || item.level != params.variableLevel + 1) {
+                continue;
+            }
+
+            this->_EnqueueInWorklist(item.term, params, false);
+        }
+    }
+
+    // Remove invalid stuff if possible
+    this->RemoveSubsumed();
+
+    // Process all the stuff we just enqueued
+    while(!_worklist.empty()) {
+        // DEBUG std::cout << "[" << i << "]" <<  "Computing stuff from _worklist\n";
+        this->ComputeNextMember(false);
+    }
 }
 
 /**
@@ -2171,47 +2416,23 @@ void TermFixpoint::ComputeNextMember(bool isBaseFixpoint) {
 
     // Pop the front item from worklist
     WorklistItemType item = this->_popFromWorklist();
-
+    // DEBUG std::cout << "\nPoping: "; item.term->dump(); std::cout << ", "; std::cout << item.level << ", ";
+    // DEBUG std::cout << item.value << "\n";
     // Compute the results
     IntersectNonEmptyParams params(GET_NON_MEMBERSHIP_TESTING(this));
-    ResultType result = this->_baseAut->IntersectNonEmpty(item.second, item.first, params);
+    ResultType result;
 
-    // If it is subsumed by fixpoint, we don't add it
-    auto fix_result = this->_fixpointTest(result.first);
-    if(fix_result.first != SubsumedType::NOT) {
-        assert(fix_result.first != SubsumedType::PARTIALLY);
-#       if (MEASURE_PROJECTION == true)
-        if(isBaseFixpoint && _worklist.empty() && !this->_fullyComputed) {
-            this->_fullyComputed = true;
-            ++TermFixpoint::fullyComputedFixpoints;
-        }
-#       endif
-        return;
-    }
-
-    // Update examples
-    this->_updateExamples(result);
-    // assert(fix_result.second->type != TermType::EMPTY || fix_result.second->InComplement());
-
-    // Push new term to fixpoint
-    if(result.second == this->_shortBoolValue && _iteratorNumber == 0) {
-        _fixpoint.push_front(std::make_pair(fix_result.second, true));
-    } else {
-        _fixpoint.push_back(std::make_pair(fix_result.second, true));
-    }
-
-    _updated = true;
-    // Aggregate the result of the fixpoint computation
-    _bValue = this->_AggregateResult(_bValue,result.second);
-    if(isBaseFixpoint) {
-        // Push new symbols from _symList
-        this->_EnqueueInWorklist(fix_result.second);
-    }
-
-    // Update stats
-    if(this->_aut->stats.max_symbol_path_len < fix_result.second->link->len) {
-        this->_aut->stats.max_symbol_path_len = fix_result.second->link->len;
-    }
+#   if (OPT_INCREMENTAL_LEVEL_PRE == true)
+    params.limitPre = true;
+    params.variableLevel = item.level;
+    params.variableValue = item.value;
+    result = this->_baseAut->IntersectNonEmpty(item.symbol, item.term, params);
+    // DEBUG std::cout << "Processing: "; result.first->dump(); std::cout << "on level " << item.level << "\n";
+    this->_ProcessComputedResult(result, isBaseFixpoint, params);
+#   else
+    result = this->_baseAut->IntersectNonEmpty(item.symbol, item.term, params);
+    this->_ProcessComputedResult(result, isBaseFixpoint, params);
+#   endif
 }
 
 /**
@@ -2312,12 +2533,15 @@ bool TermFixpoint::GetResult() {
 
 void TermFixpoint::_updateExamples(ResultType& result) {
     if(this->_searchType == WorklistSearchType::UNGROUND_ROOT) {
+        if (result.first->IsIntermediate()) {
+            return;
+        }
 #   if (ALT_SKIP_EMPTY_UNIVERSE == true)
         if (result.first->link->symbol == nullptr)
             return;
 #   endif
         if (result.second) {
-            if (this->_satTerm == nullptr) {
+            if (this->_satTerm == nullptr && this->_baseAut->WasLastExampleValid()) {
                 this->_satTerm = result.first;
             }
         } else {
@@ -2354,11 +2578,11 @@ void TermFixpoint::RemoveSubsumed() {
         assert(this->_iteratorNumber == 0);
         auto end = this->_fixpoint.end();
         for (auto it = this->_fixpoint.begin(); it != end;) {
-            if ((*it).first == nullptr) {
+            if ((*it).term == nullptr) {
                 ++it;
                 continue;
             }
-            if (!(*it).second) {
+            if (!(*it).isValid) {
                 it = this->_fixpoint.erase(it);
                 continue;
             }
@@ -2671,8 +2895,8 @@ bool TermList::_eqCore(const Term &t) {
 
 unsigned int TermFixpoint::ValidMemberSize() const {
     unsigned int members = 0;
-    for(auto& item : this->_fixpoint) {
-        members += (item.second && item.first != nullptr);
+    for(const FixpointMember& item : this->_fixpoint) {
+        members += (item.isValid && item.term != nullptr);
     }
     return members;
 }
@@ -2696,13 +2920,13 @@ bool TermFixpoint::_eqCore(const Term &t) {
     }
 
     for(auto it = this->_fixpoint.begin(); it != this->_fixpoint.end(); ++it) {
-        if((*it).first == nullptr || !(*it).second)
+        if((*it).term == nullptr || !(*it).isValid)
             continue;
         bool found = false;
         for(auto tit = tFix._fixpoint.begin(); tit != tFix._fixpoint.end(); ++tit) {
-            if((*tit).first == nullptr || !(*tit).second)
+            if((*tit).term == nullptr || !(*tit).isValid)
                 continue;
-            if(*(*it).first == *(*tit).first) {
+            if(*(*it).term == *(*tit).term) {
                 found = true;
                 break;
             }
@@ -2716,11 +2940,31 @@ bool TermFixpoint::_eqCore(const Term &t) {
 }
 
 bool TermFixpoint::_compareSymbols(const TermFixpoint& lhs, const TermFixpoint& rhs) {
+    if(lhs._projectedSymbol != rhs._projectedSymbol) {
+        return false;
+    }
+
     for(auto symbol : lhs._symList) {
         if(std::find_if(rhs._symList.begin(), rhs._symList.end(), [&symbol](Symbol_ptr s) { return s == symbol;}) == rhs._symList.end()) {
             return false;
         }
     }
+
+    if(lhs._symbolParts.size() != rhs._symbolParts.size()) {
+        return false;
+    } else {
+        auto lit = lhs._symbolParts.begin();
+        auto rit = rhs._symbolParts.begin();
+        auto lend = lhs._symbolParts.end();
+        auto rend = rhs._symbolParts.end();
+
+        for(;lit != lend && rit != rend; ++lit, ++rit) {
+            if(*lit != *rit) {
+                return false;
+            }
+        }
+    }
+
     return true;
 }
 
@@ -2816,16 +3060,16 @@ std::string TermFixpoint::DumpToDot(std::ostream& dot_out) {
     std::string term_name = std::string("tf") + std::to_string(term_no++);
 
     dot_out << "\t" << term_name << " [label=\"" << (this->InComplement() ? "~" : "") << "F\"];\n";
-    for(auto item : this->_fixpoint) {
-        if(item.first == nullptr || !item.second)
+    for(FixpointMember& item : this->_fixpoint) {
+        if(item.term == nullptr || !item.isValid)
             continue;
-        std::string member = item.first->DumpToDot(dot_out);
+        std::string member = item.term->DumpToDot(dot_out);
         dot_out << "\t" << term_name << " -- " << member << "\n";
     }
 
 #   if (DEBUG_NO_DOT_WORKLIST == false)
-    for(auto item : this->_worklist) {
-        std::string worklisted = item.first->DumpToDot(dot_out);
+    for(WorklistItem& item : this->_worklist) {
+        std::string worklisted = item.term->DumpToDot(dot_out);
         // Fixme: Add symbol output
         dot_out << "\t" << term_name << " -- " << worklisted << " [style=\"dashed\"];\n";
     }

@@ -50,7 +50,6 @@ struct SymLink;
 
 struct IntersectNonEmptyParams {
     bool underComplement;
-#   if (OPT_INCREMENTAL_LEVEL_PRE == true)
     bool limitPre;        // < Whether the Pre should be limited
     size_t variableLevel; // < On which level we are doing the pre currently
     char variableValue;   // < Which value we are limiting the Pre to, i.e. '0', '1' or 'X'
@@ -58,9 +57,6 @@ struct IntersectNonEmptyParams {
     IntersectNonEmptyParams(bool uC) : underComplement(uC), limitPre(false) {}
     IntersectNonEmptyParams(bool uC, bool lP, size_t level, char value)
             : underComplement(uC), limitPre(lP), variableLevel(level), variableValue(value) {}
-#   else
-    IntersectNonEmptyParams(bool uC) : underComplement(uC) {}
-#   endif
 };
 
 /**
@@ -153,7 +149,7 @@ public:
     virtual Term_ptr GetFinalStates();
     Gaston::VarList* GetFreeVars() { return &this->_freeVars;}
     Gaston::VarList* GetNonOccuringVars() { return &this->_nonOccuringVars; }
-    virtual Term* Pre(Symbol*, Term*, bool) = 0;
+    virtual Term* Pre(Symbol*, Term*, IntersectNonEmptyParams) = 0;
     virtual ResultType IntersectNonEmpty(Symbol*, Term*, IntersectNonEmptyParams);
     void SetSatisfiableExample(Term*);
     void SetUnsatisfiableExample(Term*);
@@ -228,7 +224,7 @@ public:
 
     // <<< PUBLIC API >>>
     SymLink* GetLeft() { return &this->_lhs_aut;}
-    virtual Term* Pre(Symbol*, Term*, bool);
+    virtual Term* Pre(Symbol*, Term*, IntersectNonEmptyParams);
     virtual bool WasLastExampleValid();
     std::pair<SymLink*, Term_ptr> LazyInit(Term_ptr);
 
@@ -264,7 +260,7 @@ public:
 
     // <<< PUBLIC API >>>
     SymLink* GetLeft() { return &this->_lhs_aut; }
-    virtual Term* Pre(Symbol*, Term*, bool);
+    virtual Term* Pre(Symbol*, Term*, IntersectNonEmptyParams);
     virtual bool WasLastExampleValid();
     std::pair<SymLink*, Term_ptr> LazyInit(Term_ptr); // Fixme: This maybe will need change of implementation
 
@@ -301,7 +297,7 @@ public:
 
     // <<< PUBLIC API >>>
     SymLink* GetLeft() { return &this->_auts[0]; }
-    virtual Term* Pre(Symbol*, Term*, bool);
+    virtual Term* Pre(Symbol*, Term*, IntersectNonEmptyParams);
     virtual bool WasLastExampleValid();
     // Fixme: Lazy init?
 
@@ -407,7 +403,7 @@ public:
     NEVER_INLINE ComplementAutomaton(SymbolicAutomaton *aut, Formula_ptr form);
 
     // <<< PUBLIC API >>>
-    virtual Term* Pre(Symbol*, Term*, bool);
+    virtual Term* Pre(Symbol*, Term*, IntersectNonEmptyParams);
     virtual bool WasLastExampleValid();
 
     // <<< DUMPING FUNCTIONS >>>
@@ -460,7 +456,7 @@ public:
     // FIXME: Some day in future, I will curse myself for this Constructor ---^
 
     // <<< PUBLIC API >>>
-    virtual Term* Pre(Symbol*, Term*, bool);
+    virtual Term* Pre(Symbol*, Term*, IntersectNonEmptyParams);
     SymbolicAutomaton* GetBase() { return this->_aut.aut;}
     bool IsRoot() { return this-> _isRoot; }
     FixpointGuide* GetGuide() { return this->_guide; }
@@ -529,7 +525,7 @@ public:
     NEVER_INLINE BaseAutomaton(BaseAutomatonType* aut, size_t vars, Formula_ptr form, bool emptyTracks);
 
     // <<< PUBLIC API >>>
-    virtual Term* Pre(Symbol*, Term*, bool);
+    virtual Term* Pre(Symbol*, Term*, IntersectNonEmptyParams);
     virtual bool WasLastExampleValid();
 
     // <<< DUMPING FUNCTIONS >>>

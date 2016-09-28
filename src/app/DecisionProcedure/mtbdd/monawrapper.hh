@@ -33,7 +33,21 @@ struct WrappedNode
 
     friend std::ostream &operator<<(std::ostream &out, const WrappedNode &rhs) {
         out << rhs.node_ << "(" << (rhs.var_ & 0x1ffff) << ")";
+        if((rhs.var_ & 0x00040000) ^ 0x00040000)
+            std::cout << "L";
+        if((rhs.var_ & 0x00020000) ^ 0x00020000)
+            std::cout << "H";
         return out;
+    }
+
+    /**
+     * If the variable is lesser than zero, then it should be leaf.
+     * Fixme: I'm not sure with all the cock magic, if this is valid
+     *
+     * @return  true if the node corresponds to leaf
+     */
+    bool IsLeaf() {
+        return this->var_ < 0;
     }
 };
 
@@ -307,14 +321,17 @@ private:
     {
         VectorType vec;
 
+        // DEBUG std::cout << "{";
         for(auto node: nodes) {
+            // DEBUG std::cout << (*node) << ", ";
             if(serialize_value) {
-                vec.insert(this->_SerializeNode(node->node_, node->var_));
+                vec.insert(this->_SerializeNode(node));
             } else {
                 vec.insert(node->node_);
             }
             ResetFlags(node->var_);
         }
+        // DEBUG std::cout << "}\n";
 
         return vec;
     }
@@ -487,7 +504,6 @@ private:
             assert(node != nullptr);
             if (UnequalVars(node->var_, var)) {
                 // Variables are unequal, we wait to synchronize with the rest
-                assert(node->var_ > var);
                 dest.insert(node);
             } else {
                 // Ascend by both 0 and 1
@@ -513,7 +529,6 @@ private:
     void AscendByLevelByValue(size_t var, bool val, SetType& source, SetType& dest) {
         // not "don't care".
         for(auto node: source) {
-            std::cout << "Ascending from: " << (*node) << "\n";
             assert(node != nullptr);
             if(GetVar(node->var_) == var) {
                 // There could be don't care on the lower level so we include those stuff
@@ -530,11 +545,9 @@ private:
                     if((val && IsPredecessorHigh(node->var_)) ||
                        (!val && IsPredecessorLow(node->var_)))
                         dest.insert(node);
-
                     ResetFlags(node->var_);
                 }
             }
-            ResetFlags(node->var_);
         }
     }
 
@@ -573,16 +586,22 @@ private:
      * Takes the internals of the BDD node and serializes in into one size_t value. Serialized value
      *   consists of node address and 2-bits of flags corresponding to the traversals of the bdd.
      *
-     * @param[in]  addr  address of serialized node in BDD graph
-     * @param[in]  flags  value containing the flags for the node
+     * @param[in]  node  node we are serializing
      * @return  serialized node
      */
-    size_t _SerializeNode(int addr, int flags) {
-        size_t serialized = (addr << 2);
+    size_t _SerializeNode(WrappedNode* node) {
+        int addr = node->node_;
+        int flags = node->var_;
+
+        size_t serialized = (addr << 3);
         if(this->IsPredecessorLow(flags)) {
             serialized += 1;
-        } else if(this->IsPredecessorHigh(flags)) {
+        }
+        if(this->IsPredecessorHigh(flags)) {
             serialized += 2;
+        }
+        if(this->IsLeaf(node->var_) || this->IsLeaf(node->var_-1) || node->IsLeaf()) {
+            serialized += 4;
         }
         return serialized;
     }
@@ -598,24 +617,30 @@ private:
      */
     WrappedNode* _DeserializeValue(size_t serialized) {
         WrappedNode* node = nullptr;
+        // I'm not sure, if these 3 bits could not pose a problem
 
         // Retrieve flags and address
         bool is_low = (serialized & 1);
         bool is_high = (serialized & 2);
-        serialized >>= 2;
+        bool is_leaf = (serialized & 4);
+        serialized >>= 3;
 
-        if(serialized > this->dfa_->ns) {
-            node = this->internalNodes_[serialized];
-        } else {
+        if(is_leaf) {
             node = this->leafNodes_[serialized];
+        } else {
+            node = this->internalNodes_[serialized];
         }
         assert(node != nullptr);
 
+        this->ResetFlags(node->var_);
         // Restore flags
         if(is_low) {
             this->SetFlag(node->var_, false);
-        } else if(is_high) {
+            assert(this->IsPredecessorLow(node->var_));
+        }
+        if(is_high) {
             this->SetFlag(node->var_, true);
+            assert(this->IsPredecessorHigh(node->var_));
         }
 
         return node;
@@ -925,6 +950,7 @@ public:
 
         SetType sources, dest;
         WrappedNode* node;
+        // DEBUG std::cout << "{";
         for(auto state : states) {
             // Root level variables are not serialized, so we simply look them up
             if(var == this->numVars_-1) {
@@ -935,11 +961,14 @@ public:
             }
 
             if(node != nullptr) {
+                // DEBUG std::cout << (*node) << ", ";
                 sources.insert(node);
             }
         }
+        // DEBUG std::cout << "} - " << val << "(" << var << ") = ";
 
         if(sources.empty()) {
+            // DEBUG std::cout << "{}\n";
             return VectorType();
         } else {
             symbol_ = symbol;
@@ -956,7 +985,8 @@ public:
                 default:
                     assert(false);
             }
-            return this->CreateResultSet(dest, var != 0);
+            VectorType result = this->CreateResultSet(dest, var != 0);
+            return result;
             //                                 ^--- This limits the serialization of result
         }
     }

@@ -2,6 +2,8 @@
 #include "Term.h"
 #include "VarToTrackMap.hh"
 #include <stdint.h>
+#include <algorithm>    // std::copy
+#include <iterator>
 
 extern VarToTrackMap varMap;
 
@@ -391,6 +393,66 @@ namespace Workshops {
         #else
             return new TermFixpoint(this->_aut, source, symbol, inCompl);
         #endif
+    }
+
+    /**
+     * @brief Clones the @p fixpoint up to the level given by params
+     *
+     * Takes the fixpoint @p fixpoint, and clones it to brand new fixpoint, that has the
+     * same source, same symbol parts, fixpoint members and worklist items up to the @p params.level.
+     *
+     * @param[in]  fixpoint  fixpoint we are cloning
+     * @param[in]  params  parameters we are currently subtracting
+     * @return  cloned fixpoint
+     */
+    TermFixpoint* TermWorkshop::CreateClonedFixpoint(TermFixpoint* const& fixpoint, IntersectNonEmptyParams& params) {
+        assert(fixpoint->type == TermType::FIXPOINT);
+
+        // DEBUG std::cout << "Cloning: ";
+        // DEBUG fixpoint->dump();
+        // DEBUG std::cout << "\n";
+        // DEBUG std::cout << "With symbol parts: {";
+        for (auto &symPart : fixpoint->_symbolParts) {
+            // DEBUG std::cout << symPart << ", ";
+        }
+        // DEBUG std::cout << "}\n";
+
+        TermFixpoint* clonedFixpoint = TermWorkshop::_fixpointPool.construct(this->_aut,
+            std::make_pair(fixpoint->_sourceTerm, fixpoint->_sourceSymbol), GET_NON_MEMBERSHIP_TESTING(fixpoint));
+
+        // Clone only those worklisted items that have level greater than @p params.variableLevel
+        for(WorklistItem& item : fixpoint->_worklist) {
+            if(item.level > params.variableLevel) {
+                clonedFixpoint->_worklist.emplace_back(item.term, item.symbol, item.level, item.value);
+            }
+        }
+
+        // Clone only the part of the symbol parts
+        int copy_number = varMap.TrackLength() - 1 - params.variableLevel;
+        // DEBUG std::cout << "Copying: " << copy_number << "\n";
+        // DEBUG std::cout << "Before: " << clonedFixpoint->_symbolParts.size() << "\n";
+        std::copy_n(fixpoint->_symbolParts.begin(), copy_number, std::back_inserter(clonedFixpoint->_symbolParts));
+        // DEBUG std::cout << "After : " << clonedFixpoint->_symbolParts.size() << "\n";
+
+        // Only terms from variable level greater than the @p params.variableLevel are included
+        for(FixpointMember& member : fixpoint->_fixpoint) {
+            if(!member.isValid || member.term == nullptr || member.level <= params.variableLevel) {
+                continue;
+            }
+
+            // Add to fixpoint
+            clonedFixpoint->_fixpoint.emplace_back(member.term, member.isValid, member.level);
+        }
+
+        clonedFixpoint->_bValue = fixpoint->_bValue;
+
+        // DEBUG std::cout << "Cloned: "; clonedFixpoint->dump(); std::cout << "\n";
+        // DEBUG std::cout << "With symbol parts: {";
+        for(auto &symPart : clonedFixpoint->_symbolParts) {
+            // DEBUG std::cout << symPart << ", ";
+        }
+        // DEBUG std::cout << "}\n";
+        return clonedFixpoint;
     }
 
     /**

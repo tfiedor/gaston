@@ -65,14 +65,43 @@ using ResultType        = std::pair<Term_ptr, bool>;
 using ExamplePair       = std::pair<Term_ptr, Term_ptr>;
 using SymbolType        = ZeroSymbol;
 
-using FixpointMember = std::pair<Term_ptr, bool>;
+struct FixpointMember {
+    Term_ptr term;
+    bool isValid;
+    size_t level;
+
+    FixpointMember(Term_ptr t, bool i, size_t l) : term(t), isValid(i), level(l) {}
+};
+
+//using FixpointMember = std::pair<Term_ptr, bool>;
 using FixpointType = std::list<FixpointMember>;
 using TermListType = std::list<std::pair<Term_ptr, Term_ptr>>;
 using Aut_ptr = SymbolicAutomaton*;
 
-using WorklistItemType = std::pair<Term_ptr, SymbolType*>;
+// Fixme: Refactor this, it is shit
+
+struct WorklistItem {
+    Term_ptr term;
+    SymbolType* symbol;
+    size_t level;
+    char value;
+
+    WorklistItem(Term_ptr t, SymbolType* s, size_t l, char c) : term(t), symbol(s), level(l), value(c) {}
+};
+
+struct SubsumedByParams {
+    bool no_prune;
+    size_t level;
+
+    SubsumedByParams(size_t l) : no_prune(false), level(l) {}
+    SubsumedByParams(bool np, size_t l) : no_prune(np), level(l) {}
+};
+
+using WorklistItemType = WorklistItem;
+//using WorklistItemType = std::pair<Term_ptr, SymbolType*>;
 using WorklistType = std::list<WorklistItemType>;
 using Symbols = std::vector<SymbolType*>;
+using SymbolParts = std::vector<char>;
 
 // <<< MACROS FOR ACCESS OF FLAGS >>>
 #   define GET_IN_COMPLEMENT(term) (term->_flags & (1 << 1))
@@ -84,6 +113,9 @@ using Symbols = std::vector<SymbolType*>;
 #   define FLIP_NON_MEMBERSHIP_TESTING(term) (term->_flags ^= 1)
 #   define GET_PRODUCT_SUBTYPE(term) ( (term->_flags & (0b11 << 2)) >> 2)
 #   define SET_PRODUCT_SUBTYPE(term, pt) (term->_flags |= (static_cast<int>(pt)) << 2) // Note that we assign only once, so this should be ok
+#   define GET_IS_INTERMEDIATE(term)  (term->_flags & (1 << 4))
+#   define SET_IS_INTERMEDIATE(term)  (term->_flags |= (1 << 4))
+#   define RESET_IS_INTERMEDIATE(term)  (term->_flags &= 0xEF)
 
 class Term {
     friend class Workshops::TermWorkshop;
@@ -100,6 +132,10 @@ public:
         Symbol* symbol;
         size_t len;
 
+        // For little pre
+        size_t var;
+        char val;
+
         link_t(Term* s, Symbol* sym, size_t l) : succ(s), symbol(sym), len(l) {}
     };
 
@@ -107,7 +143,7 @@ public:
     size_t stateSpaceApprox = 0;    // [4-8B] << Approximation of the state space, used for heuristics
     TermType type;                  // [4B] << Type of the term
 protected:
-    char _flags = 0;                // [1B] << Flags with 0: nonMembership, 1: inComplement, 2-3: subtype
+    char _flags = 0;                // [1B] << Flags with 0: nonMembership, 1: inComplement, 2-3: subtype. 4: is intermediate
 public:
     NEVER_INLINE Term(Aut_ptr);
     virtual NEVER_INLINE ~Term();
@@ -118,16 +154,19 @@ public:
 
 public:
     // <<< PUBLIC API >>>
-    virtual SubsumedType IsSubsumedBy(FixpointType& fixpoint, WorklistType& worklist, Term*&, bool no_prune = false) = 0;
+    virtual SubsumedType IsSubsumedBy(FixpointType& fixpoint, WorklistType& worklist, Term*&, SubsumedByParams) = 0;
     virtual SubsumedType IsSubsumed(Term* t, int limit, Term** new_term = nullptr, bool b = false);
     virtual SubsumedType Subsumes(TermEnumerator*);
     virtual bool IsEmpty() = 0;
     virtual void Complement();
     virtual bool InComplement() {return GET_IN_COMPLEMENT(this);}
+    bool IsIntermediate() { return GET_IS_INTERMEDIATE(this);}
+    void SetIsIntermediate() { SET_IS_INTERMEDIATE(this);}
+    void ResetIsIntermediate() { RESET_IS_INTERMEDIATE(this); }
     virtual bool IsSemanticallyValid() = 0;
     bool operator==(const Term &t);
     bool IsNotComputed();
-    void SetSuccessor(Term*, Symbol*);
+    void SetSuccessor(Term*, Symbol*, IntersectNonEmptyParams&);
     void SetSameSuccesorAs(Term*);
 
     // <<< MEASURING FUNCTIONS >>>
@@ -146,7 +185,7 @@ public:
 protected:
     // <<< PRIVATE FUNCTIONS >>>
     template<class ProductType>
-    SubsumedType _ProductIsSubsumedBy(FixpointType&, WorklistType&, Term*&, bool no_prune = false);
+    SubsumedType _ProductIsSubsumedBy(FixpointType&, WorklistType&, Term*&, SubsumedByParams);
 
     virtual unsigned int _MeasureStateSpaceCore() = 0;
     virtual SubsumedType _IsSubsumedCore(Term* t, int limit, Term** new_term = nullptr, bool b = false) = 0;
@@ -171,7 +210,7 @@ public:
     NEVER_INLINE ~TermEmpty() {}
 
     // <<< PUBLIC API >>>
-    SubsumedType IsSubsumedBy(FixpointType& fixpoint, WorklistType& worklist, Term*&, bool no_prune = false);
+    SubsumedType IsSubsumedBy(FixpointType& fixpoint, WorklistType& worklist, Term*&, SubsumedByParams);
     bool IsEmpty();
     bool IsSemanticallyValid();
 
@@ -207,7 +246,7 @@ public:
     NEVER_INLINE ~TermProduct();
 
     // <<< PUBLIC API >>>
-    SubsumedType IsSubsumedBy(FixpointType& fixpoint, WorklistType& worklist, Term*&, bool no_prune = false);
+    SubsumedType IsSubsumedBy(FixpointType& fixpoint, WorklistType& worklist, Term*&, SubsumedByParams);
     bool IsEmpty();
     bool IsSemanticallyValid();
 
@@ -243,7 +282,7 @@ public:
     NEVER_INLINE ~TermTernaryProduct();
 
     // <<< PUBLIC API >>>
-    SubsumedType IsSubsumedBy(FixpointType&, WorklistType& worklist, Term*&, bool no_prune = false);
+    SubsumedType IsSubsumedBy(FixpointType&, WorklistType& worklist, Term*&, SubsumedByParams);
     bool IsEmpty();
     bool IsSemanticallyValid();
 
@@ -283,7 +322,7 @@ public:
     NEVER_INLINE ~TermNaryProduct();
 
     // <<< PUBLIC API >>>
-    SubsumedType IsSubsumedBy(FixpointType&, WorklistType& worklist, Term*&, bool no_prune = false);
+    SubsumedType IsSubsumedBy(FixpointType&, WorklistType& worklist, Term*&, SubsumedByParams);
     bool IsEmpty();
     bool IsSemanticallyValid();
     Term_ptr operator[](size_t);
@@ -322,7 +361,7 @@ public:
 
     // <<< PUBLIC API >>>
     bool Intersects(TermBaseSet* rhs);
-    SubsumedType IsSubsumedBy(FixpointType& fixpoint, WorklistType& worklist, Term*&, bool no_prune = false);
+    SubsumedType IsSubsumedBy(FixpointType& fixpoint, WorklistType& worklist, Term*&, SubsumedByParams);
     bool IsEmpty();
     bool IsSemanticallyValid();
 
@@ -365,7 +404,7 @@ public:
     NEVER_INLINE TermContinuation(Aut_ptr, SymLink*, SymbolicAutomaton*, Term*, SymbolType*, bool, bool lazy = false);
 
     // <<< PUBLIC API >>>
-    SubsumedType IsSubsumedBy(FixpointType& fixpoint, WorklistType& worklist, Term*&, bool no_prune = false);
+    SubsumedType IsSubsumedBy(FixpointType& fixpoint, WorklistType& worklist, Term*&, SubsumedByParams);
     bool IsUnfolded() {return this->_unfoldedTerm != nullptr;}
     bool IsEmpty();
     bool IsSemanticallyValid();
@@ -398,7 +437,7 @@ public:
     NEVER_INLINE TermList(Aut_ptr, Term_ptr first, bool isCompl);
 
     // <<< PUBLIC API >>>
-    SubsumedType IsSubsumedBy(FixpointType& fixpoint, WorklistType& worklist, Term*&, bool no_prune = false);
+    SubsumedType IsSubsumedBy(FixpointType& fixpoint, WorklistType& worklist, Term*&, SubsumedByParams);
     bool IsEmpty();
     bool IsSemanticallyValid();
 
@@ -448,9 +487,9 @@ public:
 
             if (_termFixpoint._fixpoint.cend() != succIt) {
                 // if we can traverse
-                if((*succIt).second) {
+                if((*succIt).isValid && ((*succIt).term != nullptr && !(*succIt).term->IsIntermediate())) {
                     // fixpoint member is valid
-                    return (*++_it).first;
+                    return (*++_it).term;
                 }  else {
                     ++_it;
                     return this->GetNext();
@@ -488,9 +527,15 @@ public:
                     if (_termFixpoint._worklist.empty()) {
                         Term_ptr term = nullptr;
                         assert(_termFixpoint._sourceIt.get() != nullptr);
+                        // Fixme: ADD: if(!_intermediate.empty()) { for all i: add to wl; CNI; GetNext() }
                         if ((term = _termFixpoint._sourceIt->GetNext()) != nullptr) {
                             // if more are to be processed
-                            _termFixpoint._EnqueueInWorklist(term);
+                            // Fixme: TODO: Enqueue stuff
+                            assert(!term->IsIntermediate());
+                            IntersectNonEmptyParams params(false); // FIXME: FOR NOW
+                            params.limitPre = true;
+                            params.variableLevel = 0;
+                            _termFixpoint._EnqueueInWorklist(term, params);
                             _termFixpoint.ComputeNextMember(false);
                             return this->GetNext();
                         } else {
@@ -516,6 +561,7 @@ public:
 #                           endif
                         }
                     } else {
+                        // Fixme: ADD: _termFixpont.ComputeNextIntermediate()
                         _termFixpoint.ComputeNextMember(false);
                         return this->GetNext();
                     }
@@ -541,6 +587,7 @@ protected:
 #   endif
     WorklistType _worklist;                 // [8B] << Worklist of the fixpoint
     Symbols _symList;                       // [8B] << List of symbols
+    SymbolParts _symbolParts;               // [8B] << Parts of pres
     size_t _iteratorNumber = 0;             // [4-8B] << How many iterators are pointing to fixpoint
     Symbol_ptr _projectedSymbol;            // [4B] << Source symbol with projected vars
     Aut_ptr _baseAut;
@@ -581,14 +628,16 @@ public:
     FixpointSemanticType GetSemantics() const;
     bool IsEmpty();
     bool IsSemanticallyValid();
-    SubsumedType IsSubsumedBy(FixpointType& fixpoint, WorklistType& worklist, Term*&, bool no_prune = false);
+    SubsumedType IsSubsumedBy(FixpointType& fixpoint, WorklistType& worklist, Term*&, SubsumedByParams);
     bool GetResult();
+    size_t GetPatternLength() { return this->_symbolParts.size(); }
     ExamplePair GetFixpointExamples();
     bool IsFullyComputed() const;
     bool IsShared();
     unsigned int ValidMemberSize() const;
     bool HasEmptyWorklist() { return this->_worklist.empty();}
     void RemoveSubsumed();
+    void PushAndCompute(IntersectNonEmptyParams&);
     bool TestAndSetUpdate() {
         bool updated = this->_updated;
         this->_updated = false;
@@ -607,19 +656,21 @@ protected:
 protected:
     // <<< PRIVATE FUNCTIONS >>>
     void ComputeNextMember(bool isBaseFixpoint = true);
+    void _ProcessComputedResult(std::pair<Term_ptr, bool>& result, bool, IntersectNonEmptyParams& params);
     bool _processOnePostponed();
     void _updateExamples(ResultType&);
     void _InitializeAggregateFunction(bool inComplement);
     bool _AggregateResult(bool, bool);
+    char _ProjectSymbol(IntersectNonEmptyParams&);
     void _InitializeSymbols(Workshops::SymbolWorkshop* form, Gaston::VarList*, IdentList*, Symbol*);
     void _InitializeProjectedSymbol(Workshops::SymbolWorkshop* form, Gaston::VarList*, IdentList*, Symbol*);
-    void _EnqueueInWorklist(Term_ptr);
+    void _EnqueueInWorklist(Term_ptr, IntersectNonEmptyParams&, bool enqueueNext = true);
     SubsumedType _IsSubsumedCore(Term* t, int limit, Term** new_term = nullptr, bool b = false);
-    std::pair<SubsumedType , Term_ptr> _fixpointTest(Term_ptr const& term);
-    std::pair<SubsumedType , Term_ptr> _testIfSubsumes(Term_ptr const& term);
-    std::pair<SubsumedType , Term_ptr> _testIfIn(Term_ptr const& term);
-    std::pair<SubsumedType , Term_ptr> _testIfBiggerExists(Term_ptr const& term);
-    std::pair<SubsumedType , Term_ptr> _testIfSmallerExists(Term_ptr const& term);
+    std::pair<SubsumedType, Term_ptr> _fixpointTest(Term_ptr const& term, SubsumedByParams);
+    std::pair<SubsumedType, Term_ptr> _testIfSubsumes(Term_ptr const& term, SubsumedByParams);
+    std::pair<SubsumedType, Term_ptr> _testIfIn(Term_ptr const& term, SubsumedByParams);
+    std::pair<SubsumedType, Term_ptr> _testIfBiggerExists(Term_ptr const& term, SubsumedByParams);
+    std::pair<SubsumedType, Term_ptr> _testIfSmallerExists(Term_ptr const& term, SubsumedByParams);
     bool _eqCore(const Term&);
     unsigned int _MeasureStateSpaceCore();
     WorklistItemType _popFromWorklist();

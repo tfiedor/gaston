@@ -187,11 +187,13 @@ int count_example_len(Term* t) {
     int len = 0;
     std::vector<Term_ptr> processed;
     while(t != nullptr && std::find_if(processed.begin(), processed.end(), [&t](Term_ptr i) { return t == i; }) == processed.end()) {
-        ++len;
+        if(t->link->symbol == nullptr && t->link->var == 0 || t->link->symbol != nullptr)
+            ++len;
         processed.push_back(t);
         t = t->link->succ;
     }
-    return len;
+    return len - 1;
+    // Fixme:    ^-- i wonder why we need to sub -1 o.O
 }
 
 void sig_handler(int signum) {

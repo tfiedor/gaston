@@ -58,6 +58,7 @@ class TermList;
 class TermContinuation;
 class SymbolicAutomaton;
 struct SymLink;
+struct IntersectNonEmptyParams;
 
 namespace Workshops {
     struct ComputationHash;
@@ -254,6 +255,7 @@ namespace Workshops {
         Term* CreateUniqueNaryProduct(Term_ptr* const&, size_t, ProductType);
         TermFixpoint* CreateFixpoint(Term_ptr const&, Symbol*, bool, bool, WorklistSearchType search = WorklistSearchType::DFS);
         TermFixpoint* CreateFixpointPre(Term_ptr const&, Symbol*, bool);
+        TermFixpoint* CreateClonedFixpoint(TermFixpoint* const&, IntersectNonEmptyParams&);
         TermFixpoint* GetUniqueFixpoint(TermFixpoint*&);
         Term* CreateList(Term_ptr const&, bool);
         Term* CreateContinuation(SymLink*, SymbolicAutomaton*, Term* const&, Symbol*, bool, bool lazy = false);

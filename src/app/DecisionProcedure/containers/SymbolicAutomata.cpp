@@ -623,8 +623,9 @@ ResultType SymbolicAutomaton::IntersectNonEmpty(Symbol* symbol, Term* stateAppro
         this->timer.Stop();
 #       endif
         if(symbol != nullptr) {
-            result.first->SetSuccessor(stateApproximation, symbol);
+            result.first->SetSuccessor(stateApproximation, symbol, params);
         }
+        // Fixme: There could be some problems with novel pre
         return result;
     }
 #   endif
@@ -673,7 +674,7 @@ ResultType SymbolicAutomaton::IntersectNonEmpty(Symbol* symbol, Term* stateAppro
 #   endif
 
     if(symbol != nullptr) {
-        result.first->SetSuccessor(stateApproximation, symbol);
+        result.first->SetSuccessor(stateApproximation, symbol, params);
     }
 
     // Return results
@@ -682,6 +683,11 @@ ResultType SymbolicAutomaton::IntersectNonEmpty(Symbol* symbol, Term* stateAppro
 #   if (MEASURE_SUBAUTOMATA_TIMING == true)
     this->timer.Stop();
 #   endif
+    if(params.limitPre && params.variableLevel != 0) {
+        result.first->SetIsIntermediate();
+    } else {
+        result.first->ResetIsIntermediate();
+    }
     return result;
 }
 
@@ -729,6 +735,10 @@ ResultType RootProjectionAutomaton::IntersectNonEmpty(Symbol* symbol, Term* fina
                 break;
             }
         }
+        // DEBUG std::cout << "Computed: "; fixpointTerm->dump(); std::cout << "\n";
+        /*char c;
+        std::cin >> c;*/
+
         fixpoint->RemoveSubsumed();
 #       if (DEBUG_EXAMPLE_PATHS == true)
         if(fixpointTerm != nullptr && fixpointTerm->link->len > maxPath) {
@@ -772,15 +782,19 @@ ResultType RootProjectionAutomaton::IntersectNonEmpty(Symbol* symbol, Term* fina
         std::cout << "\n";
 #       endif
         if(this->_satExample == nullptr && examples.first != nullptr) {
-#           if (DEBUG_ROOT_AUTOMATON == true)
+#           if (DEBUG_ROOT_AUTOMATON == true || true)
             std::cout << "[*] Found satisfying example\n";
+            examples.first->dump(); std::cout << "\n";
 #           endif
+            assert(!examples.first->IsIntermediate());
             this->_satExample = examples.first;
         }
         if(this->_unsatExample == nullptr && examples.second != nullptr) {
-#           if (DEBUG_ROOT_AUTOMATON == true)
+#           if (DEBUG_ROOT_AUTOMATON == true || true)
             std::cout << "[*] Found unsatisfying counter-example\n";
+            examples.second->dump(); std::cout << "\n";
 #           endif
+            assert(!examples.second->IsIntermediate());
             this->_unsatExample = examples.second;
         }
     }
@@ -790,7 +804,9 @@ ResultType RootProjectionAutomaton::IntersectNonEmpty(Symbol* symbol, Term* fina
 
     ExamplePair examples = fixpoint->GetFixpointExamples();
     this->_satExample = examples.first;
+    assert(examples.first == nullptr || !examples.first->IsIntermediate());
     this->_unsatExample = examples.second;
+    assert(examples.second == nullptr || !examples.second->IsIntermediate());
 
     return std::make_pair(fixpoint, fixpoint->GetResult());
 }
@@ -1005,32 +1021,38 @@ void BaseAutomaton::_InitializeFinalStates() {
  * @param[in] finalApproximation:   approximation of states that we are computing Pre for
  * @param[in] underComplement:      true, if we are under complement
  */
-Term* BinaryOpAutomaton::Pre(Symbol* symbol, Term* finalApproximation, bool underComplement) {
+Term* BinaryOpAutomaton::Pre(Symbol* symbol, Term* finalApproximation, IntersectNonEmptyParams params) {
     assert(false && "Doing Pre on BinaryOp Automaton!");
 }
 
-Term* TernaryOpAutomaton::Pre(Symbol* symbol, Term* finalApproximation, bool underComplement) {
+Term* TernaryOpAutomaton::Pre(Symbol* symbol, Term* finalApproximation, IntersectNonEmptyParams params) {
     assert(false && "Doing Pre on TernaryOp Automaton!");
 }
 
-Term* NaryOpAutomaton::Pre(Symbol* symbol, Term* finalApproximation, bool underComplement) {
+Term* NaryOpAutomaton::Pre(Symbol* symbol, Term* finalApproximation, IntersectNonEmptyParams params) {
     assert(false && "Doing Pre on NaryOpAutomaton!");
 }
 
-Term* ComplementAutomaton::Pre(Symbol* symbol, Term* finalApproximation, bool underComplement) {
+Term* ComplementAutomaton::Pre(Symbol* symbol, Term* finalApproximation, IntersectNonEmptyParams params) {
     assert(false && "Doing Pre on Complement Automaton!");
 }
 
-Term* ProjectionAutomaton::Pre(Symbol* symbol, Term* finalApproximation, bool underComplement) {
+Term* ProjectionAutomaton::Pre(Symbol* symbol, Term* finalApproximation, IntersectNonEmptyParams params) {
     assert(false && "Doing Pre on Projection Automaton!");
 }
 
-Term* BaseAutomaton::Pre(Symbol* symbol, Term* finalApproximation, bool underComplement) {
+Term* BaseAutomaton::Pre(Symbol* symbol, Term* finalApproximation, IntersectNonEmptyParams params) {
     assert(symbol != nullptr);
-    // TODO: Implement the -minus
-
+    bool underComplement = params.underComplement;
     // Reinterpret the approximation as base states
     TermBaseSet* baseSet = reinterpret_cast<TermBaseSet*>(finalApproximation);
+    // TODO: Implement the -minus
+
+    if(params.limitPre) {
+        // DEBUG std::cout << "(limited pre - '" << params.variableValue << "'[" << params.variableLevel<< "])\n";
+        return this->_factory.CreateBaseSet(this->_autWrapper.Pre(baseSet->states, symbol->GetTrackMask(), params.variableLevel, params.variableValue));
+    }
+
 #   if (OPT_USE_SET_PRE == true)
     Term_ptr accumulatedState = nullptr;
     auto key = std::make_pair(baseSet->states, symbol);
@@ -1304,7 +1326,7 @@ ResultType ProjectionAutomaton::_IntersectNonEmptyCore(Symbol* symbol, Term* fin
         }
 
         // While the fixpoint is not fully unfolded and while we cannot evaluate early
-        while( ((fixpointTerm = it.GetNext()) != nullptr) && (underComplement == fixpoint->GetResult())) {
+        while( ((fixpointTerm = it.GetNext()) != nullptr) && (fixpointTerm->IsIntermediate() || underComplement == fixpoint->GetResult())) {
             //                                                ^--- is this right?
             #if (MEASURE_PROJECTION == true)
             ++this->fixpointNext;
@@ -1317,6 +1339,45 @@ ResultType ProjectionAutomaton::_IntersectNonEmptyCore(Symbol* symbol, Term* fin
         fixpoint->RemoveSubsumed();
         #endif
         return std::make_pair(fixpoint, fixpoint->GetResult());
+    } else if(params.limitPre) {
+        // DEBUG std::cout << params.variableLevel << " -> " << (*symbol) << "\n";
+        if(params.variableLevel == varMap.TrackLength() - 1) {
+            // Fixme: Create new fixpoint
+            // DEBUG std::cout << "Creating fixpoint_pre\n";
+            finalApproximation = this->_factory.CreateFixpointPre(finalApproximation, symbol, underComplement);
+        }
+
+        assert(finalApproximation->type == TermType::FIXPOINT);
+        TermFixpoint* fixpoint = reinterpret_cast<TermFixpoint*>(finalApproximation);
+        assert(fixpoint->GetSemantics() == FixpointSemanticType::PRE);
+
+        if(fixpoint->GetPatternLength() != varMap.TrackLength() - params.variableLevel - 1) {
+            // Fixme: Fixpoint needs to be cloned
+            // We should have some layers in the fixpoint, and we will copy only the part that we wanted to process
+            // Now the sources
+            fixpoint = this->_factory.CreateClonedFixpoint(fixpoint, params);
+        }
+
+        Term_ptr fixpointTerm;
+        fixpoint->PushAndCompute(params);
+
+        if(params.variableLevel == 0) {
+            TermFixpoint::iterator it = fixpoint->GetIterator();
+            while( ((fixpointTerm = it.GetNext()) != nullptr) && (fixpointTerm->IsIntermediate() || underComplement == fixpoint->GetResult())) {
+#               if (MEASURE_PROJECTION == true)
+                ++this->fixpointPreNext;
+#               endif
+            }
+            fixpoint->RemoveSubsumed();
+            if(fixpoint->InComplement() != finalApproximation->InComplement()) {
+                fixpoint->Complement();
+            }
+            fixpoint = this->_factory.GetUniqueFixpoint(fixpoint);
+            return std::make_pair(fixpoint, fixpoint->GetResult());
+        } else {
+            // Fixme: TODO: We push the info and compute some level
+            return std::make_pair(fixpoint, underComplement);
+        }
     } else {
         // Create a new fixpoint term and iterator on it
         #if (DEBUG_NO_WORKSHOPS == true)
@@ -1335,7 +1396,7 @@ ResultType ProjectionAutomaton::_IntersectNonEmptyCore(Symbol* symbol, Term* fin
                 #endif
             };
         #else
-            while( ((fixpointTerm = it.GetNext()) != nullptr) && (underComplement == fixpoint->GetResult())) {
+            while( ((fixpointTerm = it.GetNext()) != nullptr) && (fixpointTerm->IsIntermediate() || underComplement == fixpoint->GetResult())) {
                 #if (MEASURE_PROJECTION == true)
                 ++this->fixpointPreNext;
                 #endif
@@ -1357,8 +1418,12 @@ ResultType ProjectionAutomaton::_IntersectNonEmptyCore(Symbol* symbol, Term* fin
     }
 }
 
-ResultType base_pre_core(SymbolicAutomaton* aut, Symbol* symbol, Term* approximation, bool underComplement) {
-    TermBaseSet *preFinal = reinterpret_cast<TermBaseSet *>(aut->Pre(symbol, approximation, underComplement));
+ResultType base_pre_core(SymbolicAutomaton* aut, Symbol* symbol, Term* approximation, IntersectNonEmptyParams& params) {
+    // DEBUG std::cout << "Computing: "; approximation->dump(); std::cout << " - " << (*symbol);
+    // DEBUG std::cout << "|'" << params.variableValue << "'(" << params.variableLevel << ")\n";
+    bool underComplement = params.underComplement;
+    TermBaseSet *preFinal;
+    preFinal = reinterpret_cast<TermBaseSet*>(aut->Pre(symbol, approximation, params));
     TermBaseSet* initial = reinterpret_cast<TermBaseSet*>(aut->GetInitialStates());
 
     // Return the pre and true if it intersects the initial states
@@ -1383,7 +1448,7 @@ ResultType BaseAutomaton::_IntersectNonEmptyCore(Symbol* symbol, Term* approxima
         return std::make_pair(approximation, underComplement);
     } else {
         // First do the pre of the approximation
-        return base_pre_core(this, symbol, approximation, underComplement);
+        return base_pre_core(this, symbol, approximation, params);
     }
 }
 
@@ -1418,7 +1483,20 @@ ResultType BaseProjectionAutomaton::_IntersectNonEmptyCore(Symbol* symbol, Term*
         return std::make_pair(approximation, underComplement);
     } else {
         // Do the pre of the approximation
-        ResultType temp = base_pre_core(this->_aut.aut, this->_aut.ReMapSymbol(symbol), approximation, underComplement);
+        // DEBUG std::cout << "Calling the " << params.limitPre << ", " << this->projectedVars->size() << "\n";
+        if(params.limitPre) {
+            for (auto it = this->projectedVars->begin(); it != this->projectedVars->end(); ++it) {
+                // DEBUG std::cout << (*it) << " -> " << params.variableLevel;
+                if (varMap[*it] == params.variableLevel) {
+                    params.variableValue = 'X';
+                    // DEBUG std::cout << " -> " << params.variableValue << "\n";
+                    break;
+                } else {
+                    // DEBUG std::cout << "\n";
+                }
+            }
+        }
+        ResultType temp = base_pre_core(this->_aut.aut, this->_aut.ReMapSymbol(symbol), approximation, params);
         return temp;
     }
 }
@@ -1524,7 +1602,13 @@ void ProjectionAutomaton::_DumpExampleCore(std::ostream& out, ExampleType e, Int
             break;
         processed.push_back(example);
         for(size_t i = 0; i < varNo; ++i) {
-            examples[i] += example->link->symbol->GetSymbolAt(varMap[this->projectedVars->get(i)]);
+            if(example->link->symbol != nullptr) {
+                examples[i] += example->link->symbol->GetSymbolAt(varMap[this->projectedVars->get(i)]);
+            } else {
+                if (this->projectedVars->get(i) == example->link->var) {
+                    examples[i] += example->link->val;
+                }
+            }
         }
         example = example->link->succ;
     }
