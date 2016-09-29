@@ -976,6 +976,7 @@ inline int compare_integers (int a, int b) {
 SubsumedType TermBaseSet::_IsSubsumedCore(Term *term, int limit, Term** new_term, bool unfoldAll) {
     assert(term->type == TermType::BASE);
     TermBaseSet *t = static_cast<TermBaseSet*>(term);
+    assert(term->IsIntermediate() == this->IsIntermediate());
 
 #   if (OPT_SUBSUMPTION_INTERSECTION == true)
     if(new_term != nullptr) {
@@ -1006,7 +1007,42 @@ SubsumedType TermBaseSet::_IsSubsumedCore(Term *term, int limit, Term** new_term
     if(t->stateSpaceApprox < this->stateSpaceApprox) {
         return SubsumedType::NOT;
     } else {
-        return this->states.IsSubsetOf(t->states) ? SubsumedType::YES : SubsumedType::NOT;
+        if(OPT_INCREMENTAL_LEVEL_PRE && this->IsIntermediate()) {
+            auto lit = this->states.begin();
+            auto lend = this->states.end();
+            auto rit = t->states.begin();
+            auto rend = t->states.end();
+
+            while (lit != lend && rit != rend) {
+                size_t lval = *lit;
+                size_t rval = *rit;
+                if (lval == rval) {
+                    ++lit;
+                    ++rit;
+                    continue;
+                } else if (this->IsIntermediate() && (lval >> 2) == (rval >> 2)) {
+                    size_t lflags = (lval) & 3;
+                    size_t rflags = (rval) & 3;
+
+                    if (lflags == rflags || rflags == 3 || lflags == 0) {
+                        ++lit;
+                        ++rit;
+                        continue;
+                    }
+                }
+
+                if (lval < rval) {
+                    return SubsumedType::NOT;
+                } else {
+                    assert(lval > rval);
+                    ++rit;
+                };
+            }
+
+            return (lit == lend) ? SubsumedType::YES : SubsumedType::NOT;
+        } else {
+            return this->states.IsSubsetOf(t->states) ? SubsumedType::YES : SubsumedType::NOT;
+        }
     }
 #   endif
 }
@@ -1988,6 +2024,8 @@ bool TermBaseSet::Intersects(TermBaseSet* rhs) {
         return true;
     }
 
+    // Fixme: THE FUCK IS THIS SHIT YOU MOTHERFUCKING SHITFACE
+
     for (auto lhs_state : this->states) {
         for(auto& rhs_state : rhs->states) {
             if(lhs_state == rhs_state) {
@@ -2101,7 +2139,7 @@ std::pair<SubsumedType, Term_ptr >TermFixpoint::_testIfBiggerExists(Term_ptr con
     return (std::find_if(this->_fixpoint.begin(), this->_fixpoint.end(), [this, &term, &params](FixpointMember& member) {
         if (member.isValid && term == member.term && member.level <= params.level) {
             return true;
-        } else if(!member.isValid || member.term == nullptr || !member.term->IsSemanticallyValid() || member.level > params.level) {
+        } else if(!member.isValid || member.term == nullptr || member.level > params.level || (member.level == 0 && !member.term->IsSemanticallyValid())) {
             return false;
         } else {
             if(member.term != term && member.term->IsSubsumed(term, OPT_PARTIALLY_LIMITED_SUBSUMPTION, nullptr, false) != SubsumedType::NOT) {
@@ -2121,7 +2159,7 @@ std::pair<SubsumedType, Term_ptr> TermFixpoint::_testIfSmallerExists(Term_ptr co
     return (std::find_if(this->_fixpoint.begin(), this->_fixpoint.end(), [this, &term, &params](FixpointMember& member) {
         if (member.isValid && term == member.term && member.level <= params.level) {
             return true;
-        } else if(!member.isValid || member.term == nullptr || !member.term->IsSemanticallyValid() || member.level > params.level) {
+        } else if(!member.isValid || member.term == nullptr || member.level > params.level || (member.level == 0 && !member.term->IsSemanticallyValid())) {
             return false;
         } else {
             if(member.term != term && term->IsSubsumed(member.term, OPT_PARTIALLY_LIMITED_SUBSUMPTION, nullptr, false) != SubsumedType::NOT) {
