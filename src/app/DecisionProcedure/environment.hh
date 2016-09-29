@@ -47,7 +47,11 @@ template<class A>
 class PrePairCompare;
 class TermCompare;
 class TermHash;
+class ResultLevelCompare;
 
+struct TermAtCompare;
+struct TermAtHash;
+struct ResultLevelHashType;
 struct ResultHashType;
 struct SubsumptionHashType;
 struct PreHashType;
@@ -144,7 +148,9 @@ namespace Gaston {
 	using TrackType				 = Automaton::SymbolType;
 	using InterpretationType     = std::vector<std::string>;
 
+	void dumpTermAtLevelKey(std::pair<Term_ptr, size_t> const& s);
 	void dumpResultKey(std::pair<Term_ptr, Symbol_ptr> const& s);
+	void dumpResultLevelKey(std::tuple<Term_ptr, Symbol_ptr, size_t, char> const& s);
 	void dumpResultData(std::pair<Term_ptr, bool>& s);
 	void dumpTermKey(Term_ptr const& s);
 	void dumpSubsumptionKey(std::pair<Term_ptr, Term_ptr> const& s);
@@ -162,8 +168,12 @@ namespace Gaston {
 	void dumpEnumKey(TermEnumerator* const& s);
 
 	using TermCache				 = BinaryCache<Term_raw, SubsumedType, TermHash, TermCompare, dumpTermKey, dumpSubsumptionData>;
+	using TermAtKey              = std::pair<Term_ptr, size_t>;
+	using TermAtCache            = BinaryCache<TermAtKey, SubsumedType, TermAtHash, TermAtCompare, dumpTermAtLevelKey, dumpSubsumptionData>;
 	using ResultKey				 = std::pair<Term_raw, Symbol_ptr>;
+	using ResultLevelKey         = std::tuple<Term_ptr, Symbol_ptr, size_t, char>;
 	using ResultCache            = BinaryCache<ResultKey, ResultType, ResultHashType, PairCompare<ResultKey>, dumpResultKey, dumpResultData>;
+	using ResultLevelCache       = BinaryCache<ResultLevelKey, ResultType, ResultLevelHashType, ResultLevelCompare, dumpResultLevelKey, dumpResultData>;
 	using SubsumptionKey		 = std::pair<Term_raw, Term_raw>;
 	using SubsumptionResultPair  = std::pair<SubsumedType, Term_raw>;
 	using SubsumptionCache       = BinaryCache<SubsumptionKey, SubsumptionResultPair, SubsumptionHashType, PairCompare<SubsumptionKey>, dumpSubsumptionKey, dumpSubsumptionPairData>;
@@ -429,7 +439,7 @@ public:
 #define OPT_USE_BASE_PROJECTION_AUTOMATA    true    // < Will treat base projections differently (as bases not fixpoints)
 #define OPT_CACHE_SUBPATHS_IN_WRAPPER       true    // < Will cache the nodes and subpaths during the pre computing in mona wrapper
 #define OPT_DEFIRSTORDER_UNGROUND           false   // < Will call Defirstorderer on Unground formula restriction (Fixme: maybe incorrect)
-#define OPT_INCREMENTAL_LEVEL_PRE			false   // < Will compute the novel pre, that ascends by one level in bdd each step, with subsumption and stuff (THIS IS HEAVEN!)
+#define OPT_INCREMENTAL_LEVEL_PRE			true    // < Will compute the novel pre, that ascends by one level in bdd each step, with subsumption and stuff (THIS IS HEAVEN!)
 
 /* >>> Static Assertions <<< *
  *****************************/

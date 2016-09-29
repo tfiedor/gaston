@@ -79,6 +79,7 @@ public:
 protected:
     // <<< PRIVATE MEMBERS >>>
     ResultCache _resCache;          // Caches (states, symbol) = (fixpoint, bool)
+    ResultLevelCache _resLevelCache;// Caches (states, level, char) = (fixpoint, bool)
     VarList _freeVars;              // Fixme: This is not really free variables...
     VarList _nonOccuringVars;       // Variables that are not occuring in formula, used for trimming
 

@@ -514,6 +514,7 @@ public:
                             }
                         }
 #                       else
+                        _termFixpoint.RemoveIntermediate();
                         return this->_Invalidate();
 #                       endif
                     } else {
@@ -557,6 +558,7 @@ public:
                                 }
                             }
 #                           else
+                            _termFixpoint.RemoveIntermediate();
                             return this->_Invalidate();
 #                           endif
                         }
@@ -637,6 +639,7 @@ public:
     unsigned int ValidMemberSize() const;
     bool HasEmptyWorklist() { return this->_worklist.empty();}
     void RemoveSubsumed();
+    void RemoveIntermediate();
     void PushAndCompute(IntersectNonEmptyParams&);
     bool TestAndSetUpdate() {
         bool updated = this->_updated;

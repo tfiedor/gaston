@@ -611,12 +611,14 @@ ResultType SymbolicAutomaton::IntersectNonEmpty(Symbol* symbol, Term* stateAppro
     // Look up in cache, if in cache, return the result
     bool inCache = true;
     auto key = std::make_pair(stateApproximation, symbol);
-#       if (OPT_DONT_CACHE_CONT == true && OPT_EARLY_EVALUATION == true)
-    bool dontSearchTheCache = (stateApproximation->type == TermType::PRODUCT && stateApproximation->IsNotComputed());
-    if (!dontSearchTheCache && (inCache = this->_resCache.retrieveFromCache(key, result))) {
-#       else
-    if (inCache = this->_resCache.retrieveFromCache(key, result)) {
-#       endif
+    auto key_level = std::make_tuple(stateApproximation, symbol, params.variableLevel, params.variableValue);
+
+    if(params.limitPre) {
+        inCache = this->_resLevelCache.retrieveFromCache(key_level, result);
+    } else {
+        inCache = this->_resCache.retrieveFromCache(key, result);
+    }
+    if (inCache) {
         assert(result.first != nullptr);
         this->_lastResult = result.second;
 #       if (MEASURE_SUBAUTOMATA_TIMING == true)
@@ -624,6 +626,13 @@ ResultType SymbolicAutomaton::IntersectNonEmpty(Symbol* symbol, Term* stateAppro
 #       endif
         if(symbol != nullptr) {
             result.first->SetSuccessor(stateApproximation, symbol, params);
+        }
+
+        // Fixme: I wonder if this is corre
+        if(params.limitPre && params.variableLevel != 0) {
+            result.first->SetIsIntermediate();
+        } else {
+            result.first->ResetIsIntermediate();
         }
         // Fixme: There could be some problems with novel pre
         return result;
@@ -638,22 +647,12 @@ ResultType SymbolicAutomaton::IntersectNonEmpty(Symbol* symbol, Term* stateAppro
 
     // Cache Results
 #   if (OPT_CACHE_RESULTS == true)
-#       if (OPT_DONT_CACHE_CONT == true && OPT_EARLY_EVALUATION == true)
-        if(stateApproximation->type == TermType::PRODUCT) {
-            // If either side is not fully computed, we do not cache it
-            TermProduct* tProduct = reinterpret_cast<TermProduct*>(stateApproximation);
-            inCache = tProduct->left->IsNotComputed() || tProduct->right == nullptr || tProduct->right->IsNotComputed();
-        }
-#       endif
-#       if (OPT_DONT_CACHE_UNFULL_FIXPOINTS == true)
-        if(result.first->type == TermType::FIXPOINT) {
-            // If it is not fully computed, we do not cache it
-            TermFixpoint* tFix = reinterpret_cast<TermFixpoint*>(stateApproximation);
-            inCache |= !tFix->IsFullyComputed();
-        }
-#       endif
     if(!inCache) {
-        this->_resCache.StoreIn(key, result);
+        if(params.limitPre) {
+            this->_resLevelCache.StoreIn(key_level, result);
+        } else {
+            this->_resCache.StoreIn(key, result);
+        }
     }
 #   endif
 
@@ -735,10 +734,11 @@ ResultType RootProjectionAutomaton::IntersectNonEmpty(Symbol* symbol, Term* fina
                 break;
             }
         }
-        // DEBUG std::cout << "Computed: "; fixpointTerm->dump(); std::cout << "\n";
-        /*char c;
+        /*std::cout << "Computed: "; fixpointTerm->dump(); std::cout << "\n";
+        char c;
         std::cin >> c;*/
 
+        fixpoint->RemoveIntermediate();
         fixpoint->RemoveSubsumed();
 #       if (DEBUG_EXAMPLE_PATHS == true)
         if(fixpointTerm != nullptr && fixpointTerm->link->len > maxPath) {
@@ -1320,6 +1320,7 @@ ResultType ProjectionAutomaton::_IntersectNonEmptyCore(Symbol* symbol, Term* fin
         // Early evaluation of fixpoint
         if(result.second == !underComplement) {
             #if (OPT_REDUCE_FULL_FIXPOINT == true)
+            fixpoint->RemoveIntermediate();
             fixpoint->RemoveSubsumed();
             #endif
             return std::make_pair(fixpoint, result.second);
@@ -1336,6 +1337,7 @@ ResultType ProjectionAutomaton::_IntersectNonEmptyCore(Symbol* symbol, Term* fin
 
         // Return (fixpoint, bool)
         #if (OPT_REDUCE_FULL_FIXPOINT == true)
+        fixpoint->RemoveIntermediate();
         fixpoint->RemoveSubsumed();
         #endif
         return std::make_pair(fixpoint, fixpoint->GetResult());
@@ -1368,6 +1370,7 @@ ResultType ProjectionAutomaton::_IntersectNonEmptyCore(Symbol* symbol, Term* fin
                 ++this->fixpointPreNext;
 #               endif
             }
+            fixpoint->RemoveIntermediate();
             fixpoint->RemoveSubsumed();
             if(fixpoint->InComplement() != finalApproximation->InComplement()) {
                 fixpoint->Complement();
@@ -1602,7 +1605,7 @@ void ProjectionAutomaton::_DumpExampleCore(std::ostream& out, ExampleType e, Int
             break;
         processed.push_back(example);
         for(size_t i = 0; i < varNo; ++i) {
-            if(example->link->symbol != nullptr) {
+            if(example->link->val == '2') {
                 examples[i] += example->link->symbol->GetSymbolAt(varMap[this->projectedVars->get(i)]);
             } else {
                 if (this->projectedVars->get(i) == example->link->var) {

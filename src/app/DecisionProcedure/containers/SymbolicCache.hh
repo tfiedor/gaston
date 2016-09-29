@@ -93,6 +93,16 @@ struct ResultHashType {
 	}
 };
 
+struct ResultLevelHashType {
+	size_t operator()(std::tuple<Term*, ZeroSymbol*, size_t, char> const& set) const {
+		size_t seed = Gaston::hash_value(std::get<0>(set));
+		boost::hash_combine(seed, Gaston::hash_value(std::get<1>(set)));
+		boost::hash_combine(seed, boost::hash_value(std::get<2>(set)));
+		boost::hash_combine(seed, boost::hash_value(std::get<3>(set)));
+		return seed;
+	}
+};
+
 struct SubsumptionHashType {
 	size_t operator()(std::pair<Term*, Term*> const& set) const {
 #		if (OPT_SHUFFLE_HASHES == true)
@@ -150,6 +160,31 @@ struct TermHash {
 struct TermCompare : public std::binary_function<Gaston::Term_raw, Gaston::Term_raw, bool> {
 	bool operator()(Gaston::Term_raw const& lhs, Gaston::Term_raw const& rhs) const {
 		return (lhs == rhs);
+	}
+};
+
+using TermAt_Key = std::pair<Gaston::Term_ptr, size_t>;
+struct TermAtHash {
+	size_t operator()(TermAt_Key const& k) const {
+		size_t seed = Gaston::hash_value(k.first);
+		boost::hash_combine(seed, boost::hash_value(k.second));
+		return seed;
+	}
+};
+
+struct TermAtCompare : public std::binary_function<TermAt_Key, TermAt_Key, bool> {
+	bool operator()(TermAt_Key const& lhs, TermAt_Key const& rhs) const {
+		return (lhs.first == rhs.first) && (lhs.second == rhs.second);
+	}
+};
+
+using RLC_key = std::tuple<Gaston::Term_ptr, Gaston::Symbol_ptr, size_t, char>;
+struct ResultLevelCompare : public std::binary_function<RLC_key, RLC_key, bool> {
+	bool operator()(RLC_key const& lhs, RLC_key const& rhs) const {
+		return std::get<0>(lhs) == std::get<0>(rhs) &&
+			   std::get<1>(lhs) == std::get<1>(rhs) &&
+			   std::get<2>(lhs) == std::get<2>(rhs) &&
+			   std::get<3>(lhs) == std::get<3>(rhs);
 	}
 };
 

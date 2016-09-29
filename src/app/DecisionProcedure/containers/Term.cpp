@@ -562,6 +562,8 @@ void Term::SetSameSuccesorAs(Term* term) {
     if(this->link->succ == nullptr) {
         this->link->succ = term->link->succ;
         this->link->symbol = term->link->symbol;
+        this->link->val = term->link->val;
+        this->link->var = term->link->var;
         this->link->len = term->link->len;
     }
 }
@@ -576,14 +578,14 @@ void Term::SetSameSuccesorAs(Term* term) {
 void Term::SetSuccessor(Term* succ, Symbol* symb, IntersectNonEmptyParams& params) {
     if(this->link->succ == nullptr) {
         this->link->succ = succ;
+        this->link->symbol = symb;
         if(params.limitPre) {
-            this->link->symbol = nullptr;
             this->link->len = succ->link->len + 1*(params.variableLevel == 0);
             this->link->var = params.variableLevel;
             this->link->val = params.variableValue;
         } else {
-            this->link->symbol = symb;
             this->link->len = succ->link->len;
+            this->link->val = '2'; // Fixme: this could be better...
         }
     }
 }
@@ -626,6 +628,8 @@ SubsumedType Term::IsSubsumed(Term *t, int limit, Term** new_term, bool unfoldAl
     // Intermediate stuff is not subsumed
     if(this == t) {
         return SubsumedType::YES;
+    } if( (t->IsIntermediate() && !this->IsIntermediate()) || (!t->IsIntermediate() && this->IsIntermediate())) {
+        return SubsumedType::NOT;
     }
 
 #   if (OPT_PARTIALLY_LIMITED_SUBSUMPTION >= 0)
@@ -1439,7 +1443,6 @@ SubsumedType TermFixpoint::IsSubsumedBy(FixpointType& fixpoint, WorklistType& wo
 
         if (this->IsSubsumed(item.term, OPT_PARTIALLY_LIMITED_SUBSUMPTION) == SubsumedType::YES) {
             result = SubsumedType::YES;
-            std::cout << " is subsumed \n";
             break;
         }
 
@@ -1727,6 +1730,12 @@ namespace Gaston {
             boost::hash_combine(seed, seed2);
             std::cout << " {" << seed << "}";
         }
+    }
+
+    void dumpResultLevelKey(std::tuple<Term_ptr, Symbol_ptr, size_t, char> const&s) {
+        assert(std::get<0>(s) != nullptr);
+        std::cout << "<" << (*std::get<0>(s)) << ", " << (*std::get<1>(s)) << ", " << std::get<2>(s);
+        std::cout << std::get<3>(s) << ">";
     }
 
     void dumpResultData(std::pair<Term_ptr, bool> &s) {
@@ -2089,12 +2098,17 @@ std::pair<SubsumedType, Term_ptr> TermFixpoint::_fixpointTest(Term_ptr const &te
 }
 
 std::pair<SubsumedType, Term_ptr >TermFixpoint::_testIfBiggerExists(Term_ptr const &term, SubsumedByParams params) {
-    return (std::find_if(this->_fixpoint.begin(), this->_fixpoint.end(), [&term, &params](FixpointMember& member) {
-        if(!member.isValid || member.term == nullptr || !member.term->IsSemanticallyValid() || member.level > params.level) {
+    return (std::find_if(this->_fixpoint.begin(), this->_fixpoint.end(), [this, &term, &params](FixpointMember& member) {
+        if (member.isValid && term == member.term && member.level <= params.level) {
+            return true;
+        } else if(!member.isValid || member.term == nullptr || !member.term->IsSemanticallyValid() || member.level > params.level) {
             return false;
         } else {
             if(member.term != term && member.term->IsSubsumed(term, OPT_PARTIALLY_LIMITED_SUBSUMPTION, nullptr, false) != SubsumedType::NOT) {
                 member.isValid = false;
+#               if (OPT_PRUNE_WORKLIST == true)
+                prune_worklist(this->_worklist, member.term);
+#               endif
                 return false;
             } else {
                 return term->IsSubsumed(member.term, OPT_PARTIALLY_LIMITED_SUBSUMPTION, nullptr, false) != SubsumedType::NOT;
@@ -2104,12 +2118,17 @@ std::pair<SubsumedType, Term_ptr >TermFixpoint::_testIfBiggerExists(Term_ptr con
 }
 
 std::pair<SubsumedType, Term_ptr> TermFixpoint::_testIfSmallerExists(Term_ptr const &term, SubsumedByParams params) {
-    return (std::find_if(this->_fixpoint.begin(), this->_fixpoint.end(), [&term, &params](FixpointMember& member) {
-        if(!member.isValid || member.term == nullptr || !member.term->IsSemanticallyValid() || member.level > params.level) {
+    return (std::find_if(this->_fixpoint.begin(), this->_fixpoint.end(), [this, &term, &params](FixpointMember& member) {
+        if (member.isValid && term == member.term && member.level <= params.level) {
+            return true;
+        } else if(!member.isValid || member.term == nullptr || !member.term->IsSemanticallyValid() || member.level > params.level) {
             return false;
         } else {
-            if(member.term!= term && term->IsSubsumed(member.term, OPT_PARTIALLY_LIMITED_SUBSUMPTION, nullptr, false) != SubsumedType::NOT) {
+            if(member.term != term && term->IsSubsumed(member.term, OPT_PARTIALLY_LIMITED_SUBSUMPTION, nullptr, false) != SubsumedType::NOT) {
                 member.isValid = false;
+#               if (OPT_PRUNE_WORKLIST == true)
+                prune_worklist(this->_worklist, member.term);
+#               endif
                 return false;
             } else {
                 return member.term->IsSubsumed(term, OPT_PARTIALLY_LIMITED_SUBSUMPTION, nullptr, false) != SubsumedType::NOT;
@@ -2289,11 +2308,13 @@ void TermFixpoint::_EnqueueInWorklist(Term_ptr term, IntersectNonEmptyParams& pa
 void TermFixpoint::_ProcessComputedResult(std::pair<Term_ptr, bool>& result, bool isBaseFixpoint, IntersectNonEmptyParams& params) {
     // If it is subsumed by fixpoint, we don't add it
     auto fix_result = this->_fixpointTest(result.first, SubsumedByParams(false, params.variableLevel));
-    char c;
+    /*char c;
+    std::cout << "\n\n";
+    result.first->dump();*/
     if(fix_result.first != SubsumedType::NOT) {
         assert(fix_result.first != SubsumedType::PARTIALLY);
-        // DEBUG std::cout << "Is subsumed by: "; this->dump(); std::cout << " on level " << params.variableLevel << "\n";
-        /*if(params.variableLevel == 0)
+        /*std::cout << " is subsumed by: "; this->dump(); std::cout << " on level " << params.variableLevel << "\n";
+        if(params.variableLevel == 0)
             std::cin >> c;*/
 #       if (MEASURE_PROJECTION == true)
         if(isBaseFixpoint && _worklist.empty() && !this->_fullyComputed) {
@@ -2303,8 +2324,8 @@ void TermFixpoint::_ProcessComputedResult(std::pair<Term_ptr, bool>& result, boo
 #       endif
         return;
     } else {
-        // DEBUG std::cout << "Is not subsumed by: "; this->dump(); std::cout << " on level " << params.variableLevel << "\n";
-        /*if(params.variableLevel == 0)
+        /*std::cout << " is not subsumed by: "; this->dump(); std::cout << " on level " << params.variableLevel << "\n";
+        if(params.variableLevel == 0)
             std::cin >> c;*/
     }
 
@@ -2365,9 +2386,7 @@ void TermFixpoint::PushAndCompute(IntersectNonEmptyParams& params) {
     int i = j++;
     // DEBUG std::cout << "\n[" << i << "]" << "Push and Compute: " << params.limitPre << " - '";
     // DEBUG std::cout << params.variableValue << "'(" << params.variableLevel << ")\n";
-    if(i == 10) {
-        //assert(false);
-    }
+
     // Enqueue everything from fixpoint
     if(params.variableLevel == varMap.TrackLength() - 1) {
         Term_ptr startingTerm = nullptr;
@@ -2376,9 +2395,6 @@ void TermFixpoint::PushAndCompute(IntersectNonEmptyParams& params) {
         if( (startingTerm = this->_sourceIt->GetNext()) != nullptr) {
             assert(!startingTerm->IsIntermediate());
             this->_EnqueueInWorklist(startingTerm, params, false);
-        } else {
-            // DEBUG std::cout << "For some reasons this is nullptr";
-            assert(false);
         }
     } else {
         // DEBUG std::cout << "[" << i << "]" <<  "Enqueuing everything from fixpoint\n";
@@ -2588,6 +2604,13 @@ void TermFixpoint::RemoveSubsumed() {
             }
             ++it;
         }
+    }
+}
+
+void TermFixpoint::RemoveIntermediate() {
+    for(FixpointMember& member : this->_fixpoint) {
+        if(member.level != 0)
+            member.isValid = false;
     }
 }
 
