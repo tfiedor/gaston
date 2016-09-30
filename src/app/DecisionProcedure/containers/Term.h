@@ -134,15 +134,15 @@ public:
 
         // For little pre
         size_t var;
-        char val;
+        std::string val;
 
-        link_t(Term* s, Symbol* sym, size_t l) : succ(s), symbol(sym), len(l) {}
+        link_t(Term* s, Symbol* sym, size_t l) : succ(s), symbol(sym), len(l), val("") {}
 
         friend std::ostream &operator<<(std::ostream &out, const link_t &rhs) {
-            if(rhs.val == '2') {
+            if(rhs.val == "") {
                 out << " -[" << (*rhs.symbol) << "]-> " << rhs.succ;
             } else {
-                out << " -['" << rhs.val << "'(" << rhs.var << ")]-> " << rhs.succ;
+                out << " -['" << rhs.val << "'(" << rhs.var << "-)]-> " << rhs.succ;
             }
         }
     };

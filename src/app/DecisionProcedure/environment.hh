@@ -433,13 +433,14 @@ public:
 #define OPT_USE_BOOST_POOL_FOR_ALLOC		true    // < (+) Will use boost::object_pool<> for allocation
 #define OPT_USE_SET_PRE						false   // < Will use the set implementation of pre
 #define OPT_CACHE_LAST_QUERIES				false	// < Will cache the last entries in the cache and do the quick lookup
-#define OPT_SUBSUMPTION_INTERSECTION		false   // < Will create partial intersections for the products with bases
+#define OPT_SUBSUMPTION_INTERSECTION		true    // < Will create partial intersections for the products with bases
 #define OPT_PRUNE_BASE_SELFLOOPS_IN_PRE     true    // < Will prune away selfloops in wrapper pre
 #define OPT_PARTIAL_PRUNE_FIXPOINTS         false   // < Will use the partial subsumption on fixpoint members
 #define OPT_USE_BASE_PROJECTION_AUTOMATA    true    // < Will treat base projections differently (as bases not fixpoints)
 #define OPT_CACHE_SUBPATHS_IN_WRAPPER       true    // < Will cache the nodes and subpaths during the pre computing in mona wrapper
 #define OPT_DEFIRSTORDER_UNGROUND           false   // < Will call Defirstorderer on Unground formula restriction (Fixme: maybe incorrect)
 #define OPT_INCREMENTAL_LEVEL_PRE			true    // < Will compute the novel pre, that ascends by one level in bdd each step, with subsumption and stuff (THIS IS HEAVEN!)
+#define OPT_FORCE_INTERMEDIATE_COMPUTATION  false   // < Will compute the rest of the intermediate stuff in worklist
 
 /* >>> Static Assertions <<< *
  *****************************/

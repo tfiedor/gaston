@@ -723,7 +723,6 @@ ResultType RootProjectionAutomaton::IntersectNonEmpty(Symbol* symbol, Term* fina
     Timer timer_paths;
     timer_paths.start();
 #   endif
-    std::cout << "Start something bitch\n";
     // While the fixpoint is not fully unfolded and while we cannot evaluate early
     while((this->_satExample == nullptr || this->_unsatExample == nullptr) && ((fixpointTerm = it.GetNext()) != nullptr)) {
         if(allPosVar != -1 && options.test != TestType::EVERYTHING) {
@@ -734,10 +733,10 @@ ResultType RootProjectionAutomaton::IntersectNonEmpty(Symbol* symbol, Term* fina
                 break;
             }
         }
-        /*std::cout << "Computed: "; fixpointTerm->dump(); std::cout << "\n";
-        char c;
-        std::cin >> c;*/
 
+#       if (OPT_FORCE_INTERMEDIATE_COMPUTATION == true)
+        fixpoint->ForcefullyComputeIntermediate(true);
+#       endif
         fixpoint->RemoveIntermediate();
         fixpoint->RemoveSubsumed();
 #       if (DEBUG_EXAMPLE_PATHS == true)
@@ -1335,6 +1334,10 @@ ResultType ProjectionAutomaton::_IntersectNonEmptyCore(Symbol* symbol, Term* fin
         }
         #endif
 
+#       if (OPT_FORCE_INTERMEDIATE_COMPUTATION == true)
+        fixpoint->ForcefullyComputeIntermediate(true);
+#       endif
+
         // Return (fixpoint, bool)
         #if (OPT_REDUCE_FULL_FIXPOINT == true)
         fixpoint->RemoveIntermediate();
@@ -1342,10 +1345,8 @@ ResultType ProjectionAutomaton::_IntersectNonEmptyCore(Symbol* symbol, Term* fin
         #endif
         return std::make_pair(fixpoint, fixpoint->GetResult());
     } else if(params.limitPre) {
-        // DEBUG std::cout << params.variableLevel << " -> " << (*symbol) << "\n";
         if(params.variableLevel == varMap.TrackLength() - 1) {
             // Fixme: Create new fixpoint
-            // DEBUG std::cout << "Creating fixpoint_pre\n";
             finalApproximation = this->_factory.CreateFixpointPre(finalApproximation, symbol, underComplement);
         }
 
@@ -1422,8 +1423,6 @@ ResultType ProjectionAutomaton::_IntersectNonEmptyCore(Symbol* symbol, Term* fin
 }
 
 ResultType base_pre_core(SymbolicAutomaton* aut, Symbol* symbol, Term* approximation, IntersectNonEmptyParams& params) {
-    // DEBUG std::cout << "Computing: "; approximation->dump(); std::cout << " - " << (*symbol);
-    // DEBUG std::cout << "|'" << params.variableValue << "'(" << params.variableLevel << ")\n";
     bool underComplement = params.underComplement;
     TermBaseSet *preFinal;
     preFinal = reinterpret_cast<TermBaseSet*>(aut->Pre(symbol, approximation, params));
@@ -1486,16 +1485,11 @@ ResultType BaseProjectionAutomaton::_IntersectNonEmptyCore(Symbol* symbol, Term*
         return std::make_pair(approximation, underComplement);
     } else {
         // Do the pre of the approximation
-        // DEBUG std::cout << "Calling the " << params.limitPre << ", " << this->projectedVars->size() << "\n";
         if(params.limitPre) {
             for (auto it = this->projectedVars->begin(); it != this->projectedVars->end(); ++it) {
-                // DEBUG std::cout << (*it) << " -> " << params.variableLevel;
                 if (varMap[*it] == params.variableLevel) {
                     params.variableValue = 'X';
-                    // DEBUG std::cout << " -> " << params.variableValue << "\n";
                     break;
-                } else {
-                    // DEBUG std::cout << "\n";
                 }
             }
         }
@@ -1599,7 +1593,6 @@ void ProjectionAutomaton::_DumpExampleCore(std::ostream& out, ExampleType e, Int
     int max_len = max_varname_lenght(this->projectedVars, varNo);
 
     std::vector<Term_ptr> processed;
-    std::cout << example;
     bool are_examples_fixpoints = example->type == TermType::FIXPOINT;
     int prev = -1;
     while(example != nullptr && example->link->succ != nullptr && example != example->link->succ) {
@@ -1607,24 +1600,33 @@ void ProjectionAutomaton::_DumpExampleCore(std::ostream& out, ExampleType e, Int
         if(std::find_if(processed.begin(), processed.end(), [&example](Term_ptr i) { return example == i; }) != processed.end())
             break;
         processed.push_back(example);
-        std::cout << (*example->link);
         for(size_t i = 0; i < varNo; ++i) {
-            if(example->link->val == '2') {
+            if(example->link->val == "") {
                 examples[i] += example->link->symbol->GetSymbolAt(varMap[this->projectedVars->get(i)]);
             } else if(are_examples_fixpoints) {
                 size_t left_slice = prev + 1, right_slice = example->link->var;
-                    TermFixpoint* fixpoint = static_cast<TermFixpoint*>(example);
+                TermFixpoint* fixpoint = static_cast<TermFixpoint*>(example);
                 for(; left_slice != right_slice + 1; ++left_slice) {
                     if(varMap[this->projectedVars->get(i)] == left_slice) {
                         examples[i] += fixpoint->GetCharFromPatternAt(left_slice);
                     }
                 }
             } else {
-                if (varMap[this->projectedVars->get(i)] == example->link->var) {
-                    examples[i] += example->link->val;
+                assert(example->link->val != "");
+                int var = example->link->var;
+                for(char val : example->link->val) {
+                    assert(var >= 0);
+                    if(var == prev)
+                        break;
+                    if (varMap[this->projectedVars->get(i)] == var) {
+                        examples[i] += val;
+                    }
+                    --var;
                 }
+
             }
         }
+        prev = example->link->var == varMap.TrackLength() - 1 ? -1 : example->link->var;
         example = example->link->succ;
     }
     std::cout << "\n";

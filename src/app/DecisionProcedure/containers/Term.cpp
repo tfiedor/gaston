@@ -529,9 +529,6 @@ TermFixpoint::TermFixpoint(Aut_ptr aut, Term_ptr sourceTerm, Symbol* symbol, boo
     } else {
         this->_InitializeSymbols(&aut->symbolFactory, aut->GetNonOccuringVars(), static_cast<ProjectionAutomaton *>(aut)->projectedVars, symbol);
     }
-    // DEBUG std::cout << "With source: " << this->_sourceTerm << "\n";
-    // DEBUG this->_sourceTerm->dump();
-    // DEBUG std::cout << "\n";
 
 #   if (DEBUG_TERM_CREATION == true)
     std::cout << "[" << this << "]";
@@ -582,10 +579,17 @@ void Term::SetSuccessor(Term* succ, Symbol* symb, IntersectNonEmptyParams& param
         if(params.limitPre) {
             this->link->len = succ->link->len + 1*(params.variableLevel == 0);
             this->link->var = params.variableLevel;
-            this->link->val = params.variableValue;
+            this->link->val += params.variableValue;
         } else {
             this->link->len = succ->link->len;
-            this->link->val = '2'; // Fixme: this could be better...
+            assert(this->link->val == "");
+        }
+    } else if(succ == this && params.limitPre) {
+        // Looping
+        assert(this->link->val != "");
+        int nextVar = this->link->var - this->link->val.size();
+        if(nextVar >= 0 && nextVar == params.variableLevel) {
+            this->link->val += params.variableValue;
         }
     }
 }
@@ -994,14 +998,8 @@ SubsumedType TermBaseSet::_IsSubsumedCore(Term *term, int limit, Term** new_term
         } else {
             return SubsumedType::YES;
         }
-    } else {
-        if(t->stateSpaceApprox < this->stateSpaceApprox) {
-            return SubsumedType::NOT;
-        } else {
-            return this->states.IsSubsetOf(t->states) ? SubsumedType::YES : SubsumedType::NOT;
-        }
     }
-#   else
+#   endif
     // Test component-wise, not very efficient though
     // TODO: Change to bit-vectors if possible
     if(t->stateSpaceApprox < this->stateSpaceApprox) {
@@ -1043,7 +1041,6 @@ SubsumedType TermBaseSet::_IsSubsumedCore(Term *term, int limit, Term** new_term
             return this->states.IsSubsetOf(t->states) ? SubsumedType::YES : SubsumedType::NOT;
         }
     }
-#   endif
 }
 
 SubsumedType TermContinuation::_IsSubsumedCore(Term *t, int limit, Term** new_term, bool unfoldAll) {
@@ -2114,10 +2111,7 @@ std::pair<SubsumedType, Term_ptr> TermFixpoint::_fixpointTest(Term_ptr const &te
     if(this->_searchType == WorklistSearchType::UNGROUND_ROOT) {
         // Fixme: Not sure if this is really correct, but somehow I still feel that the Root search is special and
         //   subsumption is maybe not enough? But maybe this simply does not work for fixpoints of negated thing.
-        //return this->_testIfIn(term);
-        // ^--- however i still feel that this is wrong and may cause loop.
         if(this->_unsatTerm == nullptr && this->_satTerm == nullptr) {
-            // DEBUG std::cout << "-> testing if in\n";
             return this->_testIfIn(term, params);
         }
 
@@ -2129,12 +2123,10 @@ std::pair<SubsumedType, Term_ptr> TermFixpoint::_fixpointTest(Term_ptr const &te
         }
         std::pair<SubsumedType, Term_ptr> inner_results;
         if(this->_satTerm == nullptr) {
-            // DEBUG std::cout << "-> testing if bigger exists\n";
             inner_results = this->_testIfBiggerExists(term, params);
         } else {
             assert(this->_satTerm != nullptr);
             assert(this->_unsatTerm == nullptr);
-            // DEBUG std::cout << "-> testing if smaller exists\n";
             inner_results = this->_testIfSmallerExists(term, params);
         }
 
@@ -2144,7 +2136,6 @@ std::pair<SubsumedType, Term_ptr> TermFixpoint::_fixpointTest(Term_ptr const &te
 
         return inner_results;
     } else {
-        // DEBUG std::cout << "-> testing if subsumes\n";
         return this->_testIfSubsumes(term, params);
     }
 }
@@ -2326,24 +2317,15 @@ void TermFixpoint::_EnqueueInWorklist(Term_ptr term, IntersectNonEmptyParams& pa
                 // Queue single shit
                 if(this->_guide->GiveTipForIncremental(term, nextVar, value) != GuideTip::G_THROW) {
                     _worklist.emplace_front(term, this->_projectedSymbol, nextVar, value);
-                    // DEBUG std::cout << "Enqueuing: ";
-                    // DEBUG term->dump();
-                    // DEBUG std::cout << " -" << value << "(" << nextVar << ")\n";
                 }
                 break;
             case 'X':
                 // Queue multiple shits
                 if(this->_guide->GiveTipForIncremental(term, nextVar, '0') != GuideTip::G_THROW) {
                     _worklist.emplace_front(term, this->_projectedSymbol, nextVar, '0');
-                    // DEBUG std::cout << "Enqueuing: ";
-                    // DEBUG  term->dump();
-                    // DEBUG std::cout << " -" << '0' << "(" << nextVar << ")\n";
                 }
                 if(this->_guide->GiveTipForIncremental(term, nextVar, '1') != GuideTip::G_THROW) {
                     _worklist.emplace_front(term, this->_projectedSymbol, nextVar, '1');
-                    // DEBUG std::cout << "Enqueuing: ";
-                    // DEBUG term->dump();
-                    // DEBUG std::cout << " -" << '1' << "(" << nextVar << ")\n";
                 }
                 break;
             default:
@@ -2436,20 +2418,15 @@ void TermFixpoint::PushAndCompute(IntersectNonEmptyParams& params) {
     this->_symbolParts.push_back(params.variableValue);
     static int j = 0;
     int i = j++;
-    // DEBUG std::cout << "\n[" << i << "]" << "Push and Compute: " << params.limitPre << " - '";
-    // DEBUG std::cout << params.variableValue << "'(" << params.variableLevel << ")\n";
 
     // Enqueue everything from fixpoint
     if(params.variableLevel == varMap.TrackLength() - 1) {
         Term_ptr startingTerm = nullptr;
-        // DEBUG std::cout << "[" << i << "]" <<  "Enqueuing shit for starting term\n";
-        // DEBUG this->_sourceTerm->dump(); std::cout << " -> is source\n";
         if( (startingTerm = this->_sourceIt->GetNext()) != nullptr) {
             assert(!startingTerm->IsIntermediate());
             this->_EnqueueInWorklist(startingTerm, params, false);
         }
     } else {
-        // DEBUG std::cout << "[" << i << "]" <<  "Enqueuing everything from fixpoint\n";
         for (FixpointMember& item : this->_fixpoint) {
             if (item.term == nullptr || item.isValid == false || item.level != params.variableLevel + 1) {
                 continue;
@@ -2464,7 +2441,6 @@ void TermFixpoint::PushAndCompute(IntersectNonEmptyParams& params) {
 
     // Process all the stuff we just enqueued
     while(!_worklist.empty()) {
-        // DEBUG std::cout << "[" << i << "]" <<  "Computing stuff from _worklist\n";
         this->ComputeNextMember(false);
     }
 }
@@ -2484,8 +2460,6 @@ void TermFixpoint::ComputeNextMember(bool isBaseFixpoint) {
 
     // Pop the front item from worklist
     WorklistItemType item = this->_popFromWorklist();
-    // DEBUG std::cout << "\nPoping: "; item.term->dump(); std::cout << ", "; std::cout << item.level << ", ";
-    // DEBUG std::cout << item.value << "\n";
     // Compute the results
     IntersectNonEmptyParams params(GET_NON_MEMBERSHIP_TESTING(this));
     ResultType result;
@@ -2495,7 +2469,6 @@ void TermFixpoint::ComputeNextMember(bool isBaseFixpoint) {
     params.variableLevel = item.level;
     params.variableValue = item.value;
     result = this->_baseAut->IntersectNonEmpty(item.symbol, item.term, params);
-    // DEBUG std::cout << "Processing: "; result.first->dump(); std::cout << "on level " << item.level << "\n";
     this->_ProcessComputedResult(result, isBaseFixpoint, params);
 #   else
     result = this->_baseAut->IntersectNonEmpty(item.symbol, item.term, params);
@@ -2511,7 +2484,37 @@ void TermFixpoint::ComputeNextMember(bool isBaseFixpoint) {
  * @param[in]  isBaseFixpoint  true if the computation is base or not
  */
 void TermFixpoint::ForcefullyComputeIntermediate(bool isBaseFixpoint) {
+    assert(OPT_INCREMENTAL_LEVEL_PRE);
+    if(_worklist.empty())
+        return;
 
+    auto it = this->_worklist.begin();
+    auto end = this->_worklist.end();
+    IntersectNonEmptyParams params(GET_NON_MEMBERSHIP_TESTING(this));
+    params.limitPre = true;
+    ResultType result;
+
+    while(it != end) {
+        WorklistItem item = *it;
+        if (item.level != 0) {
+            it = this->_worklist.erase(it);
+        } else {
+            ++it;
+            continue;
+        }
+
+        params.variableLevel = item.level;
+        params.variableValue = item.value;
+        result = this->_baseAut->IntersectNonEmpty(item.symbol, item.term, params);
+        size_t size_before = _worklist.size();
+        this->_ProcessComputedResult(result, isBaseFixpoint, params);
+        if (size_before != _worklist.size()) {
+            // We added something to worklist, so we have to go from start
+            it = this->_worklist.begin();
+        }
+    }
+
+    this->RemoveIntermediate();
 }
 
 /**
