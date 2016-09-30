@@ -479,6 +479,10 @@ public:   // Public methods
 		return true;
 	}
 
+	bool IsIn(Key& lhs) const {
+		return std::find(vec_.begin(), vec_.end(), lhs) != vec_.end();
+	}
+
 	template <typename T>
 	friend size_t hash_value(const OrdVector<T>& ordVec);
 };

@@ -1034,7 +1034,6 @@ SubsumedType TermBaseSet::_IsSubsumedCore(Term *term, int limit, Term** new_term
                 if (lval < rval) {
                     return SubsumedType::NOT;
                 } else {
-                    assert(lval > rval);
                     ++rit;
                 };
             }
@@ -2120,15 +2119,30 @@ std::pair<SubsumedType, Term_ptr> TermFixpoint::_fixpointTest(Term_ptr const &te
         if(this->_unsatTerm == nullptr && this->_satTerm == nullptr) {
             // DEBUG std::cout << "-> testing if in\n";
             return this->_testIfIn(term, params);
-        } else if(this->_satTerm == nullptr) {
+        }
+
+        auto key = term;
+        SubsumedType result;
+        if(this->_subsumedByCache.retrieveFromCache(key, result)) {
+            assert(result == SubsumedType::YES);
+            return std::make_pair(result, term);
+        }
+        std::pair<SubsumedType, Term_ptr> inner_results;
+        if(this->_satTerm == nullptr) {
             // DEBUG std::cout << "-> testing if bigger exists\n";
-            return this->_testIfBiggerExists(term, params);
+            inner_results = this->_testIfBiggerExists(term, params);
         } else {
             assert(this->_satTerm != nullptr);
             assert(this->_unsatTerm == nullptr);
             // DEBUG std::cout << "-> testing if smaller exists\n";
-            return this->_testIfSmallerExists(term, params);
+            inner_results = this->_testIfSmallerExists(term, params);
         }
+
+        if(inner_results.first == SubsumedType::YES) {
+            this->_subsumedByCache.StoreIn(key, SubsumedType::YES);
+        }
+
+        return inner_results;
     } else {
         // DEBUG std::cout << "-> testing if subsumes\n";
         return this->_testIfSubsumes(term, params);
@@ -2487,6 +2501,17 @@ void TermFixpoint::ComputeNextMember(bool isBaseFixpoint) {
     result = this->_baseAut->IntersectNonEmpty(item.symbol, item.term, params);
     this->_ProcessComputedResult(result, isBaseFixpoint, params);
 #   endif
+}
+
+/**
+ * @brief Forcefully takes all the intermediate stuff from worklist, and computes them
+ *
+ * Dequeues all items from worklist, that are intermediate, computes them and put into fixpoint.
+ *
+ * @param[in]  isBaseFixpoint  true if the computation is base or not
+ */
+void TermFixpoint::ForcefullyComputeIntermediate(bool isBaseFixpoint) {
+
 }
 
 /**

@@ -29,7 +29,7 @@ TimeType MonaAutomataDotWalker::_constructAutomaton(ASTForm* form) {
             pm_file += "_" + std::to_string(this->_counter) + "__" + std::to_string(monaStates) + "states.dfa";
             pre_minimization.open(pm_file);
             pre_minimization << "(*" << form->ToString(true) << "*)\n";
-            MonaWrapper<size_t> wrapper(monaAutomaton, true, varMap.TrackLength());
+            MonaWrapper<size_t> wrapper(monaAutomaton, true, nullptr, varMap.TrackLength());
             wrapper.DumpTo(pre_minimization);
 
         }
@@ -45,7 +45,7 @@ TimeType MonaAutomataDotWalker::_constructAutomaton(ASTForm* form) {
             am_file += "_" + std::to_string(this->_counter++) + "__" + std::to_string(minimizedStates) + "states.mdfa";
             post_minimization.open(am_file);
             post_minimization << "(*" << form->ToString(true) << "*)\n";
-            MonaWrapper<size_t> wrapper(temp, true, varMap.TrackLength());
+            MonaWrapper<size_t> wrapper(temp, true, nullptr, varMap.TrackLength());
             wrapper.DumpTo(post_minimization);
         }
 

@@ -137,6 +137,14 @@ public:
         char val;
 
         link_t(Term* s, Symbol* sym, size_t l) : succ(s), symbol(sym), len(l) {}
+
+        friend std::ostream &operator<<(std::ostream &out, const link_t &rhs) {
+            if(rhs.val == '2') {
+                out << " -[" << (*rhs.symbol) << "]-> " << rhs.succ;
+            } else {
+                out << " -['" << rhs.val << "'(" << rhs.var << ")]-> " << rhs.succ;
+            }
+        }
     };
 
     link_t* link;
@@ -633,6 +641,11 @@ public:
     SubsumedType IsSubsumedBy(FixpointType& fixpoint, WorklistType& worklist, Term*&, SubsumedByParams);
     bool GetResult();
     size_t GetPatternLength() { return this->_symbolParts.size(); }
+    char GetCharFromPatternAt(size_t var) {
+        var = varMap.TrackLength() - 1 - var;
+        assert(var < this->_symbolParts.size());
+        return this->_symbolParts[var];
+    }
     ExamplePair GetFixpointExamples();
     bool IsFullyComputed() const;
     bool IsShared();
@@ -641,6 +654,7 @@ public:
     void RemoveSubsumed();
     void RemoveIntermediate();
     void PushAndCompute(IntersectNonEmptyParams&);
+    void ForcefullyComputeIntermediate(bool isBaseFixpoint);
     bool TestAndSetUpdate() {
         bool updated = this->_updated;
         this->_updated = false;

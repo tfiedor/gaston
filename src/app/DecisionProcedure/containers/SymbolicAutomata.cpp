@@ -304,7 +304,7 @@ BaseProjectionAutomaton::BaseProjectionAutomaton(SymbolicAutomaton* aut, Formula
     }
 }
 
-BaseAutomaton::BaseAutomaton(BaseAutomatonType* aut, size_t vars, Formula_ptr form, bool emptyTracks) : SymbolicAutomaton(form), _autWrapper(dfaCopy(aut), emptyTracks, form->is_restriction, vars) {
+BaseAutomaton::BaseAutomaton(BaseAutomatonType* aut, size_t vars, Formula_ptr form, bool emptyTracks) : SymbolicAutomaton(form), _autWrapper(dfaCopy(aut), emptyTracks, &this->_nonOccuringVars, vars) {
     type = AutType::BASE;
     this->_InitializeAutomaton();
     this->_stateSpace = vars;
@@ -782,7 +782,7 @@ ResultType RootProjectionAutomaton::IntersectNonEmpty(Symbol* symbol, Term* fina
         std::cout << "\n";
 #       endif
         if(this->_satExample == nullptr && examples.first != nullptr) {
-#           if (DEBUG_ROOT_AUTOMATON == true || true)
+#           if (DEBUG_ROOT_AUTOMATON == true)
             std::cout << "[*] Found satisfying example\n";
             examples.first->dump(); std::cout << "\n";
 #           endif
@@ -790,7 +790,7 @@ ResultType RootProjectionAutomaton::IntersectNonEmpty(Symbol* symbol, Term* fina
             this->_satExample = examples.first;
         }
         if(this->_unsatExample == nullptr && examples.second != nullptr) {
-#           if (DEBUG_ROOT_AUTOMATON == true || true)
+#           if (DEBUG_ROOT_AUTOMATON == true)
             std::cout << "[*] Found unsatisfying counter-example\n";
             examples.second->dump(); std::cout << "\n";
 #           endif
@@ -1599,22 +1599,35 @@ void ProjectionAutomaton::_DumpExampleCore(std::ostream& out, ExampleType e, Int
     int max_len = max_varname_lenght(this->projectedVars, varNo);
 
     std::vector<Term_ptr> processed;
+    std::cout << example;
+    bool are_examples_fixpoints = example->type == TermType::FIXPOINT;
+    int prev = -1;
     while(example != nullptr && example->link->succ != nullptr && example != example->link->succ) {
     //                                                           ^--- not sure this is right
         if(std::find_if(processed.begin(), processed.end(), [&example](Term_ptr i) { return example == i; }) != processed.end())
             break;
         processed.push_back(example);
+        std::cout << (*example->link);
         for(size_t i = 0; i < varNo; ++i) {
             if(example->link->val == '2') {
                 examples[i] += example->link->symbol->GetSymbolAt(varMap[this->projectedVars->get(i)]);
+            } else if(are_examples_fixpoints) {
+                size_t left_slice = prev + 1, right_slice = example->link->var;
+                    TermFixpoint* fixpoint = static_cast<TermFixpoint*>(example);
+                for(; left_slice != right_slice + 1; ++left_slice) {
+                    if(varMap[this->projectedVars->get(i)] == left_slice) {
+                        examples[i] += fixpoint->GetCharFromPatternAt(left_slice);
+                    }
+                }
             } else {
-                if (this->projectedVars->get(i) == example->link->var) {
+                if (varMap[this->projectedVars->get(i)] == example->link->var) {
                     examples[i] += example->link->val;
                 }
             }
         }
         example = example->link->succ;
     }
+    std::cout << "\n";
 
     for(size_t i = 0; i < varNo; ++i) {
         auto varname = (symbolTable.lookupSymbol(this->projectedVars->get(i)));

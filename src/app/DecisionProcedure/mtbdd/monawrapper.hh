@@ -1,3 +1,22 @@
+/*****************************************************************************
+ *  gaston - We pay homage to Gaston, an Africa-born brown fur seal who
+ *    escaped the Prague Zoo during the floods in 2002 and made a heroic
+ *    journey for freedom of over 300km all the way to Dresden. There he
+ *    was caught and subsequently died due to exhaustion and infection.
+ *    Rest In Piece, brave soldier.
+ *
+ *  Copyright (c) 2016  Tomas Fiedor <ifiedortom@fit.vutbr.cz>
+ *      Notable mentions:   Ondrej Lengal <ondra.lengal@gmail.com>
+ *                              (author of VATA)
+ *                          Petr Janku <ijanku@fit.vutbr.cz>
+ *                              (MTBDD and automata optimizations)
+ *
+ *  Description:
+ *     Custom wrapper over the Deterministic Finite Automata of MONA,
+ *       that converts the Post transitions to Pre transitions with
+ *       several optimizations and enhancements.
+ *****************************************************************************/
+
 #ifndef MONAWRAPPER_H
 #define MONAWRAPPER_H
 
@@ -91,7 +110,7 @@ private:
     using WrappedNode       = struct WrappedNode;
     using InternalNodesType = std::unordered_map<unsigned, WrappedNode *>;
     using SetType           = std::unordered_set<WrappedNode *>;
-
+    using VarList           = VectorType;
     using KeyType			= std::pair<WrappedNode *, Gaston::BitMask>;
     using CacheType			= BinaryCache<KeyType, VectorType, HashType, PairCompare<KeyType>, Gaston::dumpKey, Gaston::dumpData>;
 
@@ -106,8 +125,7 @@ protected:
     Gaston::BitMask mask_;
     Gaston::BitMask* masks_;
     Gaston::BitMask* symbolMasks_;
-    unsigned exploredState_;
-    bool isRestriction_ = false;
+    VarList* nonOccuringVars_;
     CacheType cache_;
     static boost::object_pool<WrappedNode> nodePool_;
 
@@ -321,9 +339,7 @@ private:
     {
         VectorType vec;
 
-        // DEBUG std::cout << "{";
         for(auto node: nodes) {
-            // DEBUG std::cout << (*node) << ", ";
             if(serialize_value) {
                 vec.insert(this->_SerializeNode(node));
             } else {
@@ -331,7 +347,6 @@ private:
             }
             ResetFlags(node->var_);
         }
-        // DEBUG std::cout << "}\n";
 
         return vec;
     }
@@ -683,8 +698,8 @@ public:
      * @param[in]  is_restriction  true if the DFA is restriction (see restriction semantics)
      * @param[in]  numVars  number of variables in automaton (corresponds to bdd levels)
      */
-    MonaWrapper(DFA *dfa, bool emptyTracks, bool is_restriction, unsigned numVars = 0)
-            : dfa_(dfa), numVars_(numVars), initialState_(emptyTracks ? 0 : 1), isRestriction_(is_restriction)
+    MonaWrapper(DFA *dfa, bool emptyTracks, VarList* vars, unsigned numVars = 0)
+            : dfa_(dfa), numVars_(numVars), initialState_(emptyTracks ? 0 : 1), nonOccuringVars_(vars)
     {
         // Resize the roots and leaves
         roots_.resize(dfa->ns, nullptr);
@@ -950,7 +965,6 @@ public:
 
         SetType sources, dest;
         WrappedNode* node;
-        // DEBUG std::cout << "{";
         for(auto state : states) {
             // Root level variables are not serialized, so we simply look them up
             if(var == this->numVars_-1) {
@@ -961,14 +975,11 @@ public:
             }
 
             if(node != nullptr) {
-                // DEBUG std::cout << (*node) << ", ";
                 sources.insert(node);
             }
         }
-        // DEBUG std::cout << "} - " << val << "(" << var << ") = ";
 
         if(sources.empty()) {
-            // DEBUG std::cout << "{}\n";
             return VectorType();
         } else {
             symbol_ = symbol;
