@@ -91,6 +91,9 @@ namespace Workshops {
     using FixpointKey       = std::pair<Term*, Symbol*>;
     using FixpointHash      = boost::hash<FixpointKey>;
     using FixpointCompare   = PairCompare<FixpointKey>;
+    using FixpointLevelKey  = std::tuple<Term*, size_t, char>;
+    using FixpointLevelHash = boost::hash<FixpointLevelKey>;
+    using FixpointLevelComp = std::equal_to<FixpointLevelKey>;
     using Term_ptr          = Term*;
     using FixpointType      = std::list<std::pair<Term*,bool>>;
     using WorklistItemType  = std::pair<Term*, Symbol*>;
@@ -103,6 +106,7 @@ namespace Workshops {
     void dumpTernaryKey(TernaryKey const&);
     void dumpListKey(ListKey const&);
     void dumpFixpointKey(FixpointKey const&);
+    void dumpFixpointLevelKey(FixpointLevelKey const&);
     void dumpComputationKey(ComputationKey const&);
     void dumpCacheData(CacheData &);
     void dumpSymbolKey(SymbolKey const&);
@@ -200,6 +204,7 @@ namespace Workshops {
     using TernaryCache      = BinaryCache<TernaryKey, CacheData, TernaryKeyHashType, TernaryKeyCompare<TernaryKey>, dumpTernaryKey, dumpCacheData>;
     using ListCache         = BinaryCache<ListKey, CacheData, ListHash, ListCompare, dumpListKey, dumpCacheData>;
     using FixpointCache     = BinaryCache<FixpointKey, CacheData, FixpointHash, FixpointCompare, dumpFixpointKey, dumpCacheData>;
+    using FixpointLevelCache= BinaryCache<FixpointLevelKey, CacheData, FixpointLevelHash, FixpointLevelComp, dumpFixpointLevelKey, dumpCacheData>;
     using ComputationCache  = BinaryCache<ComputationKey, CacheData, ComputationHash, ComputationCompare, dumpComputationKey, dumpCacheData>;
     using NaryCache         = BinaryCache<NaryKey, CacheData, NaryKeyHashType, NaryKeyCompare<NaryKey>, dumpNaryKey, dumpCacheData>;
 
@@ -215,6 +220,7 @@ namespace Workshops {
         ListCache* _fpCache;
         FixpointCache* _fppCache;
         FixpointCache* _contCache;
+        FixpointLevelCache* _fplCache;
         ComputationCache* _compCache;
 
         static TermEmpty *_empty;
@@ -255,6 +261,7 @@ namespace Workshops {
         Term* CreateUniqueNaryProduct(Term_ptr* const&, size_t, ProductType);
         TermFixpoint* CreateFixpoint(Term_ptr const&, Symbol*, bool, bool, WorklistSearchType search = WorklistSearchType::DFS);
         TermFixpoint* CreateFixpointPre(Term_ptr const&, Symbol*, bool);
+        TermFixpoint* CreateFixpointPreLevel(Term_ptr const&, Symbol*, size_t, char, bool);
         TermFixpoint* CreateClonedFixpoint(TermFixpoint* const&, IntersectNonEmptyParams&);
         TermFixpoint* GetUniqueFixpoint(TermFixpoint*&);
         Term* CreateList(Term_ptr const&, bool);
