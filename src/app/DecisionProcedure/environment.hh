@@ -433,7 +433,7 @@ public:
 #define OPT_USE_BOOST_POOL_FOR_ALLOC		true    // < (+) Will use boost::object_pool<> for allocation
 #define OPT_USE_SET_PRE						false   // < Will use the set implementation of pre
 #define OPT_CACHE_LAST_QUERIES				false	// < Will cache the last entries in the cache and do the quick lookup
-#define OPT_SUBSUMPTION_INTERSECTION		true    // < Will create partial intersections for the products with bases
+#define OPT_SUBSUMPTION_INTERSECTION		false   // < Will create partial intersections for the products with bases
 #define OPT_PRUNE_BASE_SELFLOOPS_IN_PRE     true    // < Will prune away selfloops in wrapper pre
 #define OPT_PARTIAL_PRUNE_FIXPOINTS         false   // < Will use the partial subsumption on fixpoint members
 #define OPT_USE_BASE_PROJECTION_AUTOMATA    true    // < Will treat base projections differently (as bases not fixpoints)

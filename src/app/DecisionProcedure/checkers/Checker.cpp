@@ -311,10 +311,19 @@ void Checker::PreprocessFormula() {
     if (!options.monaWalk) {
         SecondOrderRestricter restricter;
         this->_monaAST->formula = static_cast<ASTForm*>((this->_monaAST->formula)->accept(restricter));
+        if(options.dump) {
+            G_DEBUG_FORMULA_AFTER_PHASE("SecondOrderRestricter");
+            (this->_monaAST->formula)->dump();
+            std::cout << "\n";
+        }
 
         QuantificationMerger quantificationMerger;
         this->_monaAST->formula = static_cast<ASTForm*>((this->_monaAST->formula)->accept(quantificationMerger));
-
+        if(options.dump) {
+            G_DEBUG_FORMULA_AFTER_PHASE("QuantificationMerger");
+            (this->_monaAST->formula)->dump();
+            std::cout << "\n";
+        }
 #       if (OPT_EARLY_EVALUATION == true)
         UnderComplementDecorator underComplementDecorator;
         (this->_monaAST->formula)->accept(underComplementDecorator);

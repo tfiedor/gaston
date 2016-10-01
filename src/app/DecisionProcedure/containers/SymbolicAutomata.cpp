@@ -629,7 +629,7 @@ ResultType SymbolicAutomaton::IntersectNonEmpty(Symbol* symbol, Term* stateAppro
         }
 
         // Fixme: I wonder if this is corre
-        if(params.limitPre && params.variableLevel != 0) {
+        if(result.first->type != TermType::EMPTY && params.limitPre && params.variableLevel != 0) {
             result.first->SetIsIntermediate();
         } else {
             result.first->ResetIsIntermediate();
@@ -682,7 +682,7 @@ ResultType SymbolicAutomaton::IntersectNonEmpty(Symbol* symbol, Term* stateAppro
 #   if (MEASURE_SUBAUTOMATA_TIMING == true)
     this->timer.Stop();
 #   endif
-    if(params.limitPre && params.variableLevel != 0) {
+    if(result.first->type != TermType::EMPTY && params.limitPre && params.variableLevel != 0) {
         result.first->SetIsIntermediate();
     } else {
         result.first->ResetIsIntermediate();
@@ -737,7 +737,6 @@ ResultType RootProjectionAutomaton::IntersectNonEmpty(Symbol* symbol, Term* fina
 #       if (OPT_FORCE_INTERMEDIATE_COMPUTATION == true)
         fixpoint->ForcefullyComputeIntermediate(true);
 #       endif
-        fixpoint->RemoveIntermediate();
         fixpoint->RemoveSubsumed();
 #       if (DEBUG_EXAMPLE_PATHS == true)
         if(fixpointTerm != nullptr && fixpointTerm->link->len > maxPath) {
@@ -1319,7 +1318,6 @@ ResultType ProjectionAutomaton::_IntersectNonEmptyCore(Symbol* symbol, Term* fin
         // Early evaluation of fixpoint
         if(result.second == !underComplement) {
             #if (OPT_REDUCE_FULL_FIXPOINT == true)
-            fixpoint->RemoveIntermediate();
             fixpoint->RemoveSubsumed();
             #endif
             return std::make_pair(fixpoint, result.second);
@@ -1340,48 +1338,36 @@ ResultType ProjectionAutomaton::_IntersectNonEmptyCore(Symbol* symbol, Term* fin
 
         // Return (fixpoint, bool)
         #if (OPT_REDUCE_FULL_FIXPOINT == true)
-        fixpoint->RemoveIntermediate();
         fixpoint->RemoveSubsumed();
         #endif
         return std::make_pair(fixpoint, fixpoint->GetResult());
     } else if(params.limitPre) {
-        if(params.variableLevel == varMap.TrackLength() - 1) {
-            // Fixme: Create new fixpoint
-            finalApproximation = this->_factory.CreateFixpointPre(finalApproximation, symbol, underComplement);
-        }
-
-        assert(finalApproximation->type == TermType::FIXPOINT);
-        TermFixpoint* fixpoint = reinterpret_cast<TermFixpoint*>(finalApproximation);
-        assert(fixpoint->GetSemantics() == FixpointSemanticType::PRE);
-
-        if(fixpoint->GetPatternLength() != varMap.TrackLength() - params.variableLevel - 1) {
-            // Fixme: Fixpoint needs to be cloned
-            // We should have some layers in the fixpoint, and we will copy only the part that we wanted to process
-            // Now the sources
-            fixpoint = this->_factory.CreateClonedFixpoint(fixpoint, params);
-        }
-
+        TermFixpoint* fixpoint = this->_factory.CreateFixpointPreLevel(finalApproximation, symbol, params.variableLevel, params.variableValue, underComplement);
+        TermFixpoint::iterator it = fixpoint->GetIterator();
         Term_ptr fixpointTerm;
-        fixpoint->PushAndCompute(params);
 
         if(params.variableLevel == 0) {
-            TermFixpoint::iterator it = fixpoint->GetIterator();
-            while( ((fixpointTerm = it.GetNext()) != nullptr) && (fixpointTerm->IsIntermediate() || underComplement == fixpoint->GetResult())) {
+            // Compute as many things as possible, until lazyness hits
+            while( ((fixpointTerm = it.GetNext()) != nullptr) && (underComplement == fixpoint->GetResult())) {
+                assert(!fixpointTerm->IsIntermediate());
 #               if (MEASURE_PROJECTION == true)
                 ++this->fixpointPreNext;
 #               endif
             }
-            fixpoint->RemoveIntermediate();
             fixpoint->RemoveSubsumed();
             if(fixpoint->InComplement() != finalApproximation->InComplement()) {
+                assert(fixpoint->type != TermType::EMPTY);
                 fixpoint->Complement();
             }
             fixpoint = this->_factory.GetUniqueFixpoint(fixpoint);
             return std::make_pair(fixpoint, fixpoint->GetResult());
         } else {
-            // Fixme: TODO: We push the info and compute some level
+            // We compute at least something
+            while( ((fixpointTerm = it.GetNext()) != nullptr) && (underComplement == fixpoint->GetResult())) {}
             return std::make_pair(fixpoint, underComplement);
+            // Fixme:                       ^-- Will this pose some problem?
         }
+
     } else {
         // Create a new fixpoint term and iterator on it
         #if (DEBUG_NO_WORKSHOPS == true)
@@ -1603,14 +1589,6 @@ void ProjectionAutomaton::_DumpExampleCore(std::ostream& out, ExampleType e, Int
         for(size_t i = 0; i < varNo; ++i) {
             if(example->link->val == "") {
                 examples[i] += example->link->symbol->GetSymbolAt(varMap[this->projectedVars->get(i)]);
-            } else if(are_examples_fixpoints) {
-                size_t left_slice = prev + 1, right_slice = example->link->var;
-                TermFixpoint* fixpoint = static_cast<TermFixpoint*>(example);
-                for(; left_slice != right_slice + 1; ++left_slice) {
-                    if(varMap[this->projectedVars->get(i)] == left_slice) {
-                        examples[i] += fixpoint->GetCharFromPatternAt(left_slice);
-                    }
-                }
             } else {
                 assert(example->link->val != "");
                 int var = example->link->var;

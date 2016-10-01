@@ -101,7 +101,7 @@ using WorklistItemType = WorklistItem;
 //using WorklistItemType = std::pair<Term_ptr, SymbolType*>;
 using WorklistType = std::list<WorklistItemType>;
 using Symbols = std::vector<SymbolType*>;
-using SymbolParts = std::vector<char>;
+using SymbolParts = std::unordered_map<size_t, char>;
 
 // <<< MACROS FOR ACCESS OF FLAGS >>>
 #   define GET_IN_COMPLEMENT(term) (term->_flags & (1 << 1))
@@ -495,7 +495,7 @@ public:
 
             if (_termFixpoint._fixpoint.cend() != succIt) {
                 // if we can traverse
-                if((*succIt).isValid && ((*succIt).term != nullptr && !(*succIt).term->IsIntermediate())) {
+                if((*succIt).isValid && (*succIt).term != nullptr) {
                     // fixpoint member is valid
                     return (*++_it).term;
                 }  else {
@@ -522,7 +522,6 @@ public:
                             }
                         }
 #                       else
-                        _termFixpoint.RemoveIntermediate();
                         return this->_Invalidate();
 #                       endif
                     } else {
@@ -536,15 +535,15 @@ public:
                     if (_termFixpoint._worklist.empty()) {
                         Term_ptr term = nullptr;
                         assert(_termFixpoint._sourceIt.get() != nullptr);
-                        // Fixme: ADD: if(!_intermediate.empty()) { for all i: add to wl; CNI; GetNext() }
                         if ((term = _termFixpoint._sourceIt->GetNext()) != nullptr) {
                             // if more are to be processed
-                            // Fixme: TODO: Enqueue stuff
-                            assert(!term->IsIntermediate());
-                            IntersectNonEmptyParams params(false); // FIXME: FOR NOW
-                            params.limitPre = true;
-                            params.variableLevel = 0;
-                            _termFixpoint._EnqueueInWorklist(term, params);
+                            IntersectNonEmptyParams params(_termFixpoint.InComplement());
+                            params.limitPre = OPT_INCREMENTAL_LEVEL_PRE;
+#                           if (OPT_INCREMENTAL_LEVEL_PRE == true)
+                            params.variableLevel = _termFixpoint._symbolPart.level;
+                            params.variableValue = _termFixpoint._symbolPart.value;
+#                           endif
+                            _termFixpoint._EnqueueInWorklist(term, params, false);
                             _termFixpoint.ComputeNextMember(false);
                             return this->GetNext();
                         } else {
@@ -566,12 +565,10 @@ public:
                                 }
                             }
 #                           else
-                            _termFixpoint.RemoveIntermediate();
                             return this->_Invalidate();
 #                           endif
                         }
                     } else {
-                        // Fixme: ADD: _termFixpont.ComputeNextIntermediate()
                         _termFixpoint.ComputeNextMember(false);
                         return this->GetNext();
                     }
@@ -597,12 +594,15 @@ protected:
 #   endif
     WorklistType _worklist;                 // [8B] << Worklist of the fixpoint
     Symbols _symList;                       // [8B] << List of symbols
-    SymbolParts _symbolParts;               // [8B] << Parts of pres
     size_t _iteratorNumber = 0;             // [4-8B] << How many iterators are pointing to fixpoint
     Symbol_ptr _projectedSymbol;            // [4B] << Source symbol with projected vars
     Aut_ptr _baseAut;
     Term_ptr _sourceTerm;                   // [4B] << Source term of the fixpoint
     Symbol_ptr _sourceSymbol;               // [4B] << Source symbol before breaking to little symboiles
+    struct {
+        size_t level = 0;
+        char value = 'I';
+    } _symbolPart;
     Term_ptr _satTerm = nullptr;            // [4B] << Satisfiable term of the fixpoint computation
     Term_ptr _unsatTerm = nullptr;          // [4B] << Unsatisfiable term of the fixpoint computation
     FixpointGuide* _guide = nullptr;        // [4B] << Guide for fixpoints
@@ -626,9 +626,17 @@ public:
     // <<< CONSTRUCTORS >>>
     NEVER_INLINE TermFixpoint(Aut_ptr aut, Term_ptr startingTerm, Symbol* startingSymbol, bool inComplement, bool initbValue, WorklistSearchType search);
     NEVER_INLINE TermFixpoint(Aut_ptr aut, Term_ptr sourceTerm, Symbol* startingSymbol, bool inComplement);
+    // Fixme: Change to (size_t, value)?
+    NEVER_INLINE TermFixpoint(Aut_ptr aut, Term_ptr sourceTerm, Symbol* startingSymbol, size_t level, char value, bool inComplement) :
+        TermFixpoint(aut, sourceTerm, startingSymbol, inComplement) {
+        this->_symbolPart.level = level;
+        this->_symbolPart.value = this->_ProjectSymbol(level, value);
+    }
 
     NEVER_INLINE TermFixpoint(Aut_ptr aut, std::pair<Term_ptr, Symbol*> startingPair, bool inComplement) :
         TermFixpoint(aut, startingPair.first, startingPair.second, inComplement) {}
+    NEVER_INLINE TermFixpoint(Aut_ptr aut, std::tuple<Term_ptr, Symbol*, size_t, char> startingTuple, bool inComplement) :
+        TermFixpoint(aut, std::get<0>(startingTuple), std::get<1>(startingTuple), std::get<2>(startingTuple), std::get<3>(startingTuple), inComplement) {}
     NEVER_INLINE TermFixpoint(Aut_ptr aut, std::tuple<Term_ptr, Symbol*, bool, bool, WorklistSearchType> initTuple) :
         TermFixpoint(aut, std::get<0>(initTuple), std::get<1>(initTuple), std::get<2>(initTuple), std::get<3>(initTuple),
             std::get<4>(initTuple)) {}
@@ -640,12 +648,6 @@ public:
     bool IsSemanticallyValid();
     SubsumedType IsSubsumedBy(FixpointType& fixpoint, WorklistType& worklist, Term*&, SubsumedByParams);
     bool GetResult();
-    size_t GetPatternLength() { return this->_symbolParts.size(); }
-    char GetCharFromPatternAt(size_t var) {
-        var = varMap.TrackLength() - 1 - var;
-        assert(var < this->_symbolParts.size());
-        return this->_symbolParts[var];
-    }
     ExamplePair GetFixpointExamples();
     bool IsFullyComputed() const;
     bool IsShared();
@@ -678,10 +680,11 @@ protected:
     void _updateExamples(ResultType&);
     void _InitializeAggregateFunction(bool inComplement);
     bool _AggregateResult(bool, bool);
-    char _ProjectSymbol(IntersectNonEmptyParams&);
+    char _ProjectSymbol(size_t, char);
     void _InitializeSymbols(Workshops::SymbolWorkshop* form, Gaston::VarList*, IdentList*, Symbol*);
     void _InitializeProjectedSymbol(Workshops::SymbolWorkshop* form, Gaston::VarList*, IdentList*, Symbol*);
     void _EnqueueInWorklist(Term_ptr, IntersectNonEmptyParams&, bool enqueueNext = true);
+    void _EnqueueSingleLevelInWorklist(Term_ptr, size_t, char);
     SubsumedType _IsSubsumedCore(Term* t, int limit, Term** new_term = nullptr, bool b = false);
     std::pair<SubsumedType, Term_ptr> _fixpointTest(Term_ptr const& term, SubsumedByParams);
     std::pair<SubsumedType, Term_ptr> _testIfSubsumes(Term_ptr const& term, SubsumedByParams);

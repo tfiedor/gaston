@@ -10,7 +10,7 @@ extern VarToTrackMap varMap;
 namespace Workshops {
     NEVER_INLINE TermWorkshop::TermWorkshop(SymbolicAutomaton* aut) :
             _bCache(nullptr), _ubCache(nullptr), _pCache(nullptr), _tpCache(nullptr), _npCache(nullptr), _lCache(nullptr),
-            _fpCache(nullptr), _fppCache(nullptr), _contCache(nullptr),_compCache(nullptr), _aut(aut) { }
+            _fpCache(nullptr), _fppCache(nullptr), _fplCache(nullptr), _contCache(nullptr),_compCache(nullptr), _aut(aut) { }
 
     template<class A, class B, class C, class D, void (*E)(const A&), void (*F)(B&)>
     BinaryCache<A, B, C, D, E, F>* TermWorkshop::_cleanCache(BinaryCache<A, B, C, D, E, F>* cache, bool noMemberDelete) {
@@ -31,6 +31,7 @@ namespace Workshops {
         this->_ubCache = TermWorkshop::_cleanCache(this->_ubCache, true);
         this->_fpCache = TermWorkshop::_cleanCache(this->_fpCache, OPT_USE_BOOST_POOL_FOR_ALLOC);
         this->_fppCache = TermWorkshop::_cleanCache(this->_fppCache, OPT_USE_BOOST_POOL_FOR_ALLOC);
+        this->_fplCache = TermWorkshop::_cleanCache(this->_fplCache, OPT_USE_BOOST_POOL_FOR_ALLOC);
         this->_pCache = TermWorkshop::_cleanCache(this->_pCache, OPT_USE_BOOST_POOL_FOR_ALLOC);
         this->_tpCache = TermWorkshop::_cleanCache(this->_tpCache, OPT_USE_BOOST_POOL_FOR_ALLOC);
         this->_npCache = TermWorkshop::_cleanCache(this->_npCache, OPT_USE_BOOST_POOL_FOR_ALLOC);
@@ -112,6 +113,7 @@ namespace Workshops {
                 this->_lCache = new ListCache();
                 this->_fpCache = new ListCache();
                 this->_fppCache = new FixpointCache();
+                this->_fplCache = new FixpointLevelCache();
                 this->_compCache = new ComputationCache();
                 break;
             default:
@@ -396,6 +398,42 @@ namespace Workshops {
     }
 
     /**
+     * @brief Creates a unique TermFixpoint for leveled pre (i.e. for one track)
+     *
+     * Creates a TermFixpoint with Pre semantics limited to @p level and @p value.
+     *
+     * @param[in]  source  source term of the pre fixpoint
+     * @param[in]  symbol  source symbol (for various purposes)
+     * @param[in]  level  level, where we are currently subtracting
+     * @param[in]  value  value that we are currently subtracting
+     * @param[in]  inComplement  whether the term is in complement
+     * @return  unique term fixpoint
+     */
+    TermFixpoint* TermWorkshop::CreateFixpointPreLevel(Term_ptr const& source, Symbol* symbol, size_t level, char value, bool inCompl) {
+        assert(OPT_GENERATE_UNIQUE_TERMS == true && UNIQUE_FIXPOINTS == true);
+        assert(this->_fplCache != nullptr);
+
+        // Obtain a unique source
+        Term_ptr unique_source = source;
+        if(source->type == TermType::FIXPOINT) {
+            TermFixpoint* fp = static_cast<TermFixpoint*>(source);
+            unique_source = this->GetUniqueFixpoint(fp);
+        }
+
+        Term* termPtr = nullptr;
+        auto fixpointKey = std::make_tuple(unique_source, level, value);
+        if(!this->_fplCache->retrieveFromCache(fixpointKey, termPtr)) {
+#           if (OPT_USE_BOOST_POOL_FOR_ALLOC == true)
+            termPtr = TermWorkshop::_fixpointPool.construct(this->_aut, std::make_tuple(unique_source, symbol, level, value), inCompl);
+#           else
+            termPtr = new TermFixpoint(this->_aut, source, symbol, level, value, inCompl);
+#           endif
+        }
+        assert(termPtr != nullptr);
+        return static_cast<TermFixpoint*>(termPtr);
+    }
+
+    /**
      * @brief Clones the @p fixpoint up to the level given by params
      *
      * Takes the fixpoint @p fixpoint, and clones it to brand new fixpoint, that has the
@@ -407,15 +445,6 @@ namespace Workshops {
      */
     TermFixpoint* TermWorkshop::CreateClonedFixpoint(TermFixpoint* const& fixpoint, IntersectNonEmptyParams& params) {
         assert(fixpoint->type == TermType::FIXPOINT);
-
-        // DEBUG std::cout << "Cloning: ";
-        // DEBUG fixpoint->dump();
-        // DEBUG std::cout << "\n";
-        // DEBUG std::cout << "With symbol parts: {";
-        for (auto &symPart : fixpoint->_symbolParts) {
-            // DEBUG std::cout << symPart << ", ";
-        }
-        // DEBUG std::cout << "}\n";
 
         TermFixpoint* clonedFixpoint = TermWorkshop::_fixpointPool.construct(this->_aut,
             std::make_pair(fixpoint->_sourceTerm, fixpoint->_sourceSymbol), GET_NON_MEMBERSHIP_TESTING(fixpoint));
@@ -429,10 +458,8 @@ namespace Workshops {
 
         // Clone only the part of the symbol parts
         int copy_number = varMap.TrackLength() - 1 - params.variableLevel;
-        // DEBUG std::cout << "Copying: " << copy_number << "\n";
-        // DEBUG std::cout << "Before: " << clonedFixpoint->_symbolParts.size() << "\n";
-        std::copy_n(fixpoint->_symbolParts.begin(), copy_number, std::back_inserter(clonedFixpoint->_symbolParts));
-        // DEBUG std::cout << "After : " << clonedFixpoint->_symbolParts.size() << "\n";
+        assert(false && "Unsupported right now");
+        //std::copy_n(fixpoint->_symbolParts.begin(), copy_number, std::back_inserter(clonedFixpoint->_symbolParts));
 
         // Only terms from variable level greater than the @p params.variableLevel are included
         for(FixpointMember& member : fixpoint->_fixpoint) {
@@ -446,12 +473,6 @@ namespace Workshops {
 
         clonedFixpoint->_bValue = fixpoint->_bValue;
 
-        // DEBUG std::cout << "Cloned: "; clonedFixpoint->dump(); std::cout << "\n";
-        // DEBUG std::cout << "With symbol parts: {";
-        for(auto &symPart : clonedFixpoint->_symbolParts) {
-            // DEBUG std::cout << symPart << ", ";
-        }
-        // DEBUG std::cout << "}\n";
         return clonedFixpoint;
     }
 
@@ -467,10 +488,7 @@ namespace Workshops {
         assert(this->_compCache != nullptr);
         Term* termPtr = nullptr;
 
-        //std::cout << "Getting unique fixpoint for: "; fixpoint->dump(); std::cout << "\n";
-
         if(!fixpoint->TestAndSetUpdate()) {
-            //std::cout << "Fixpoint was not updated\n";
             return fixpoint;
         }
 
@@ -480,7 +498,6 @@ namespace Workshops {
             this->_compCache->StoreIn(compKey, termPtr);
         }
         assert(termPtr != nullptr);
-        //std::cout << "Returning: "; termPtr->dump(); std::cout << "\n";
         return reinterpret_cast<TermFixpoint*>(termPtr);
     }
 
@@ -543,6 +560,10 @@ namespace Workshops {
             std::cout << "  \u2218 FixpointCachePre stats -> ";
             this->_fppCache->dumpStats();
         }
+        if(this->_fplCache != nullptr) {
+            std::cout << "  \u2218 FixpointLevelCachePre stats -> ";
+            this->_fplCache->dumpStats();
+        }
         if(this->_compCache != nullptr) {
             std::cout << "  \u2218 UniqueFixpointCache stats -> ";
             this->_compCache->dumpStats();
@@ -559,6 +580,7 @@ namespace Workshops {
         out += (this->_contCache != nullptr ? std::to_string(this->_contCache->GetSize()) + "c, " : "");
         out += (this->_fpCache != nullptr ? std::to_string(this->_fpCache->GetSize()) + "fp, " : "");
         out += (this->_fppCache != nullptr ? std::to_string(this->_fppCache->GetSize()) + "fpp, " : "");
+        out += (this->_fplCache != nullptr ? std::to_string(this->_fplCache->GetSize()) + "fpl, " : "");
         return out;
     }
 
@@ -785,6 +807,10 @@ namespace Workshops {
         } else {
             std::cout << "<[" << (s.first) << "]" << (*s.first) << ", \u0437>";
         }
+    }
+
+    void dumpFixpointLevelKey(FixpointLevelKey const&s) {
+        std::cout << "<" << (*std::get<0>(s)) << ", " << std::get<1>(s) << ", " << std::get<2>(s) << ">";
     }
 
     void dumpComputationKey(ComputationKey const&s) {

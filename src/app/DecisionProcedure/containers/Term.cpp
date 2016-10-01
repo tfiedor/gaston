@@ -471,7 +471,6 @@ TermFixpoint::TermFixpoint(Aut_ptr aut, Term_ptr startingTerm, Symbol* symbol, b
         params.limitPre = true;
         params.variableLevel = 0;
 #       endif
-        // DEBUG std::cout << "Creating TermFixpoint: " << this << "\n";
         this->_EnqueueInWorklist(startingTerm, params);
         assert(this->_worklist.size() > 0 || startingTerm->type == TermType::EMPTY);
     }
@@ -514,9 +513,6 @@ TermFixpoint::TermFixpoint(Aut_ptr aut, Term_ptr sourceTerm, Symbol* symbol, boo
 
     // Initialize the state space
     this->stateSpaceApprox = sourceTerm->stateSpaceApprox;
-#   if (OPT_INCREMENTAL_LEVEL_PRE == true)
-    this->_symbolParts.reserve(varMap.TrackLength());
-#   endif
 
     // Initialize the aggregate function
     this->_InitializeAggregateFunction(inComplement);
@@ -1005,7 +1001,7 @@ SubsumedType TermBaseSet::_IsSubsumedCore(Term *term, int limit, Term** new_term
     if(t->stateSpaceApprox < this->stateSpaceApprox) {
         return SubsumedType::NOT;
     } else {
-        if(OPT_INCREMENTAL_LEVEL_PRE && this->IsIntermediate()) {
+        if(false && OPT_INCREMENTAL_LEVEL_PRE && this->IsIntermediate()) {
             auto lit = this->states.begin();
             auto lend = this->states.end();
             auto rit = t->states.begin();
@@ -1071,10 +1067,6 @@ SubsumedType TermList::_IsSubsumedCore(Term *t, int limit, Term** new_term, bool
 SubsumedType TermFixpoint::_IsSubsumedCore(Term *t, int limit, Term** new_term, bool unfoldAll) {
     assert(t->type == TermType::FIXPOINT);
 
-    if(this->_symbolParts.size() != varMap.TrackLength()) {
-        return SubsumedType::NOT;
-    }
-
     // Reinterpret
     TermFixpoint* tt = static_cast<TermFixpoint*>(t);
 
@@ -1100,7 +1092,6 @@ SubsumedType TermFixpoint::_IsSubsumedCore(Term *t, int limit, Term** new_term, 
         // Skip the nullpt
         if(item.term == nullptr || !item.isValid) continue;
 
-        //std::cout << "Testing in TermFixpoint::_IsSubsumedCore\n";
         if( (result = (item.term)->IsSubsumedBy(tt->_fixpoint, tt->_worklist, tptr, SubsumedByParams(true, item.level))) == SubsumedType::NOT) {
             return SubsumedType::NOT;
         }
@@ -1223,10 +1214,6 @@ SubsumedType Term::_ProductIsSubsumedBy(FixpointType& fixpoint, WorklistType& wo
 
     for(FixpointMember& item : fixpoint) {
         // Nullptr is skipped
-        if(false && item.term != nullptr) {
-            this->dump(); std::cout << "@" << params.level << " vs ";
-            item.term->dump(); std::cout << "@" << item.level << "";
-        }
         if(item.term == nullptr || !item.isValid) {
             continue;
         }
@@ -1444,23 +1431,6 @@ SubsumedType TermFixpoint::IsSubsumedBy(FixpointType& fixpoint, WorklistType& wo
     bool no_prune = params.no_prune;
     // Component-wise comparison
     for(FixpointMember& item : fixpoint) {
-        if(false && item.term != nullptr) {
-            this->dump();
-            std::cout << "[";
-            for(auto c : this->_symbolParts) {
-                std::cout << c << ", ";
-            }
-            std::cout << "]";
-            std::cout << " vs ";
-            item.term->dump();
-            std::cout << "[";
-            for(auto c : static_cast<TermFixpoint*>(item.term)->_symbolParts) {
-                std::cout << c << ", ";
-            }
-            std::cout << "]";
-            std::cout << "\n";
-        }
-
         if(item.term == nullptr || !item.isValid) {
             continue;
         }
@@ -2255,6 +2225,22 @@ WorklistItemType TermFixpoint::_popFromWorklist() {
 }
 
 /**
+ * @brief Enqueues tripple (term, var, value) if the fixpoint guide allows us to do so
+ *
+ * Asks the Fixpoint Guide what to do for the tripple (@p term, @p var, @p value). If we
+ * should not throw it away, it is enqueued in the front of the worklist.
+ *
+ * @param[in]  term  enqueued term
+ * @param[in]  var  variable level we are subtracting
+ * @param[in]  value  value we are subtracting on level @p var
+ */
+void TermFixpoint::_EnqueueSingleLevelInWorklist(Term_ptr term, size_t var, char value) {
+    if(this->_guide->GiveTipForIncremental(term, var, value) != GuideTip::G_THROW) {
+        _worklist.emplace_front(term, this->_projectedSymbol, var, value);
+    }
+}
+
+/**
  * @brief Enqueues @p term in fixpoint, driven by fixpoint guide
  *
  * Enqueues @p term in worklist, according to the the fixpoint guide, and various heuristics.
@@ -2299,34 +2285,22 @@ void TermFixpoint::_EnqueueInWorklist(Term_ptr term, IntersectNonEmptyParams& pa
 #   if (OPT_WORKLIST_DRIVEN_BY_RESTRICTIONS == true)
     } else if(params.limitPre) {
         size_t nextVar = enqueueNext ? ((varMap.TrackLength() - 1 + params.variableLevel) % varMap.TrackLength()) : params.variableLevel;
-        assert(!(term->IsIntermediate() && nextVar == varMap.TrackLength() - 1));
         char value;
-
-        if (this->GetSemantics() == FixpointSemanticType::FIXPOINT) {
+        if(this->GetSemantics() == FixpointSemanticType::FIXPOINT) {
             value = this->_projectedSymbol->GetSymbolAt(nextVar);
         } else {
-            assert(this->GetSemantics() == FixpointSemanticType::PRE);
-            size_t index = varMap.TrackLength() - nextVar - 1;
-            assert(this->_symbolParts.size() > index);
-            value = this->_symbolParts[index];
+            value = params.variableValue;
         }
-
         switch(value) {
             case '1':
             case '0':
                 // Queue single shit
-                if(this->_guide->GiveTipForIncremental(term, nextVar, value) != GuideTip::G_THROW) {
-                    _worklist.emplace_front(term, this->_projectedSymbol, nextVar, value);
-                }
+                this->_EnqueueSingleLevelInWorklist(term, nextVar, value);
                 break;
             case 'X':
                 // Queue multiple shits
-                if(this->_guide->GiveTipForIncremental(term, nextVar, '0') != GuideTip::G_THROW) {
-                    _worklist.emplace_front(term, this->_projectedSymbol, nextVar, '0');
-                }
-                if(this->_guide->GiveTipForIncremental(term, nextVar, '1') != GuideTip::G_THROW) {
-                    _worklist.emplace_front(term, this->_projectedSymbol, nextVar, '1');
-                }
+                this->_EnqueueSingleLevelInWorklist(term, nextVar, '0');
+                this->_EnqueueSingleLevelInWorklist(term, nextVar, '1');
                 break;
             default:
                 assert(false && "Unsupported stuff");
@@ -2342,14 +2316,8 @@ void TermFixpoint::_EnqueueInWorklist(Term_ptr term, IntersectNonEmptyParams& pa
 void TermFixpoint::_ProcessComputedResult(std::pair<Term_ptr, bool>& result, bool isBaseFixpoint, IntersectNonEmptyParams& params) {
     // If it is subsumed by fixpoint, we don't add it
     auto fix_result = this->_fixpointTest(result.first, SubsumedByParams(false, params.variableLevel));
-    /*char c;
-    std::cout << "\n\n";
-    result.first->dump();*/
     if(fix_result.first != SubsumedType::NOT) {
         assert(fix_result.first != SubsumedType::PARTIALLY);
-        /*std::cout << " is subsumed by: "; this->dump(); std::cout << " on level " << params.variableLevel << "\n";
-        if(params.variableLevel == 0)
-            std::cin >> c;*/
 #       if (MEASURE_PROJECTION == true)
         if(isBaseFixpoint && _worklist.empty() && !this->_fullyComputed) {
             this->_fullyComputed = true;
@@ -2357,15 +2325,10 @@ void TermFixpoint::_ProcessComputedResult(std::pair<Term_ptr, bool>& result, boo
         }
 #       endif
         return;
-    } else {
-        /*std::cout << " is not subsumed by: "; this->dump(); std::cout << " on level " << params.variableLevel << "\n";
-        if(params.variableLevel == 0)
-            std::cin >> c;*/
     }
 
     // Update examples
     this->_updateExamples(result);
-    // assert(fix_result.second->type != TermType::EMPTY || fix_result.second->InComplement());
 
     // Push new term to fixpoint
     _fixpoint.emplace_back(fix_result.second, true, params.variableLevel);
@@ -2375,8 +2338,6 @@ void TermFixpoint::_ProcessComputedResult(std::pair<Term_ptr, bool>& result, boo
     _bValue = this->_AggregateResult(_bValue,result.second);
     if(isBaseFixpoint) {
         // Push new symbols from _symList
-        this->_EnqueueInWorklist(fix_result.second, params);
-    } else if(fix_result.second->IsIntermediate() && this->_symbolParts.size() == varMap.TrackLength()) {
         this->_EnqueueInWorklist(fix_result.second, params);
     }
 
@@ -2392,18 +2353,19 @@ void TermFixpoint::_ProcessComputedResult(std::pair<Term_ptr, bool>& result, boo
  * If we are currently subbing the variable corresponding to this level, we have
  * to project the symbol first.
  *
- * @param[in]  params  params with (var, val) we are subbing
+ * @param[in]  level  level where we are subtracting
+ * @param[in]  value  value that we are subtracting
  * @return  value that we will subtract
  */
-char TermFixpoint::_ProjectSymbol(IntersectNonEmptyParams& params) {
+char TermFixpoint::_ProjectSymbol(size_t level, char value) {
     IdentList* idents = static_cast<ProjectionAutomaton*>(this->_aut)->projectedVars;
     for(auto ident = idents->begin(); ident != idents->end(); ++ident) {
-        if(params.variableLevel == varMap[*ident]) {
+        if(level == varMap[*ident]) {
             return 'X';
         }
     }
 
-    return params.variableValue;
+    return value;
 }
 
 /**
@@ -2414,8 +2376,7 @@ char TermFixpoint::_ProjectSymbol(IntersectNonEmptyParams& params) {
  * whole level of variables is processed.
  */
 void TermFixpoint::PushAndCompute(IntersectNonEmptyParams& params) {
-    params.variableValue = this->_ProjectSymbol(params);
-    this->_symbolParts.push_back(params.variableValue);
+    assert(false && "[[Deprecated function]]");
     static int j = 0;
     int i = j++;
 
@@ -2424,7 +2385,7 @@ void TermFixpoint::PushAndCompute(IntersectNonEmptyParams& params) {
         Term_ptr startingTerm = nullptr;
         if( (startingTerm = this->_sourceIt->GetNext()) != nullptr) {
             assert(!startingTerm->IsIntermediate());
-            this->_EnqueueInWorklist(startingTerm, params, false);
+            //this->_EnqueueInWorklist(startingTerm, params, false);
         }
     } else {
         for (FixpointMember& item : this->_fixpoint) {
@@ -2432,7 +2393,7 @@ void TermFixpoint::PushAndCompute(IntersectNonEmptyParams& params) {
                 continue;
             }
 
-            this->_EnqueueInWorklist(item.term, params, false);
+            //this->_EnqueueInWorklist(item.term, params, false);
         }
     }
 
@@ -2485,6 +2446,7 @@ void TermFixpoint::ComputeNextMember(bool isBaseFixpoint) {
  */
 void TermFixpoint::ForcefullyComputeIntermediate(bool isBaseFixpoint) {
     assert(OPT_INCREMENTAL_LEVEL_PRE);
+    assert(false && "[[Deprecated functioin]]");
     if(_worklist.empty())
         return;
 
@@ -3039,19 +3001,8 @@ bool TermFixpoint::_compareSymbols(const TermFixpoint& lhs, const TermFixpoint& 
         }
     }
 
-    if(lhs._symbolParts.size() != rhs._symbolParts.size()) {
+    if(lhs._symbolPart.value != rhs._symbolPart.value || lhs._symbolPart.level != rhs._symbolPart.value) {
         return false;
-    } else {
-        auto lit = lhs._symbolParts.begin();
-        auto rit = rhs._symbolParts.begin();
-        auto lend = lhs._symbolParts.end();
-        auto rend = rhs._symbolParts.end();
-
-        for(;lit != lend && rit != rend; ++lit, ++rit) {
-            if(*lit != *rit) {
-                return false;
-            }
-        }
     }
 
     return true;
