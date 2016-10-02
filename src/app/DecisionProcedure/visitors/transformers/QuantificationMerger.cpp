@@ -3,6 +3,7 @@
 //
 
 #include "QuantificationMerger.h"
+#include "../../environment.hh"
 #include "../../../Frontend/ast.h"
 #include "../../../Frontend/ident.h"
 
@@ -40,6 +41,17 @@ AST* mergeExistential(ExistClass* form) {
         delete innerQuantifier->vl;
         innerQuantifier->detach();
         delete innerQuantifier;
+#   if (OPT_MERGE_FIRST_ORDER_QUANTIFIERS == true)
+    } else if(form->f->kind == aAnd) {
+        ASTForm_ff* ff_form = static_cast<ASTForm_ff*>(form->f);
+        if(ff_form->f1->kind == aFirstOrder && (ff_form->f2->kind == aEx1 || ff_form->f2->kind == aEx2)) {
+            ASTForm_uvf* innerQuantifier = reinterpret_cast<ASTForm_uvf*>(ff_form->f2);
+            ff_form->f2 = innerQuantifier->f;
+            innerQuantifier->f = ff_form;
+            form->f = innerQuantifier;
+            return mergeExistential<ExistClass>(form);
+        }
+#   endif
     }
     return form;
 }

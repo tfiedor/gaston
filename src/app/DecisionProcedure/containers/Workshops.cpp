@@ -415,10 +415,10 @@ namespace Workshops {
 
         // Obtain a unique source
         Term_ptr unique_source = source;
-        if(source->type == TermType::FIXPOINT) {
+        /*if(source->type == TermType::FIXPOINT) {
             TermFixpoint* fp = static_cast<TermFixpoint*>(source);
             unique_source = this->GetUniqueFixpoint(fp);
-        }
+        }*/
 
         Term* termPtr = nullptr;
         auto fixpointKey = std::make_tuple(unique_source, level, value);

@@ -1318,6 +1318,7 @@ ResultType ProjectionAutomaton::_IntersectNonEmptyCore(Symbol* symbol, Term* fin
         // Early evaluation of fixpoint
         if(result.second == !underComplement) {
             #if (OPT_REDUCE_FULL_FIXPOINT == true)
+            //fixpoint->RemoveIntermediate();
             fixpoint->RemoveSubsumed();
             #endif
             return std::make_pair(fixpoint, result.second);
@@ -1338,10 +1339,12 @@ ResultType ProjectionAutomaton::_IntersectNonEmptyCore(Symbol* symbol, Term* fin
 
         // Return (fixpoint, bool)
         #if (OPT_REDUCE_FULL_FIXPOINT == true)
+        //fixpoint->RemoveIntermediate();
         fixpoint->RemoveSubsumed();
         #endif
         return std::make_pair(fixpoint, fixpoint->GetResult());
     } else if(params.limitPre) {
+        params.variableValue = this->ProjectSymbol(params.variableLevel, params.variableValue);
         TermFixpoint* fixpoint = this->_factory.CreateFixpointPreLevel(finalApproximation, symbol, params.variableLevel, params.variableValue, underComplement);
         TermFixpoint::iterator it = fixpoint->GetIterator();
         Term_ptr fixpointTerm;
@@ -1418,7 +1421,7 @@ ResultType base_pre_core(SymbolicAutomaton* aut, Symbol* symbol, Term* approxima
     if (preFinal->IsEmpty()) {
         return std::make_pair(Workshops::TermWorkshop::CreateEmpty(), underComplement);
     } else {
-        return std::make_pair(preFinal, initial->Intersects(preFinal) != underComplement);
+        return std::make_pair(preFinal, preFinal->IsAccepting() != underComplement);
     }
 }
 
@@ -1430,7 +1433,7 @@ ResultType BaseAutomaton::_IntersectNonEmptyCore(Symbol* symbol, Term* approxima
 
     if(symbol == nullptr) {
         // Testing if epsilon is in language, i.e. testing if final states intersect initial ones
-        return std::make_pair(this->_finalStates, initial->Intersects(final) != underComplement);
+        return std::make_pair(this->_finalStates, final->IsAccepting() != underComplement);
     } else if(approximation->type == TermType::EMPTY) {
         // Empty set has no Pre
         return std::make_pair(approximation, underComplement);
@@ -1466,7 +1469,7 @@ ResultType BaseProjectionAutomaton::_IntersectNonEmptyCore(Symbol* symbol, Term*
         std::cout << "Resulting states: "; pumped_states->dump(); std::cout << "\n";
 #       endif
         TermBaseSet* initial = static_cast<TermBaseSet*>(this->_aut.aut->GetInitialStates());
-        return std::make_pair(pumped_states, initial->Intersects(static_cast<TermBaseSet*>(pumped_states)) != underComplement);
+        return std::make_pair(pumped_states, static_cast<TermBaseSet*>(pumped_states)->IsAccepting() != underComplement);
     } else if(approximation->type == TermType::EMPTY) {
         return std::make_pair(approximation, underComplement);
     } else {
@@ -2517,4 +2520,24 @@ std::pair<SymLink*, Term_ptr> BinaryOpAutomaton::LazyInit(Term_ptr term) {
     } else {
         return std::make_pair(&this->_rhs_aut, term);
     }
+}
+
+/**
+ * @brief Projects (if needed) the value of the symbol that we are currently subtracting
+ *
+ * If we are currently subbing the variable corresponding to this level, we have
+ * to project the symbol first.
+ *
+ * @param[in]  level  level where we are subtracting
+ * @param[in]  value  value that we are subtracting
+ * @return  value that we will subtract
+ */
+char ProjectionAutomaton::ProjectSymbol(size_t level, char value) {
+    for(auto ident = this->projectedVars->begin(); ident != this->projectedVars->end(); ++ident) {
+        if(level == varMap[*ident]) {
+            return 'X';
+        }
+    }
+
+    return value;
 }

@@ -462,6 +462,7 @@ public:
     bool IsRoot() { return this-> _isRoot; }
     FixpointGuide* GetGuide() { return this->_guide; }
     virtual bool WasLastExampleValid();
+    char ProjectSymbol(size_t, char);
 
     // <<< DUMPING FUNCTIONS >>>
     virtual void DumpAutomaton();

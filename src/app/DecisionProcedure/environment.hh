@@ -441,9 +441,11 @@ public:
 #define OPT_DEFIRSTORDER_UNGROUND           false   // < Will call Defirstorderer on Unground formula restriction (Fixme: maybe incorrect)
 #define OPT_INCREMENTAL_LEVEL_PRE			true    // < Will compute the novel pre, that ascends by one level in bdd each step, with subsumption and stuff (THIS IS HEAVEN!)
 #define OPT_FORCE_INTERMEDIATE_COMPUTATION  false   // < Will compute the rest of the intermediate stuff in worklist
+#define OPT_MERGE_FIRST_ORDER_QUANTIFIERS   false   // < Will merge the first order quantifiers
 
 /* >>> Static Assertions <<< *
  *****************************/
+static_assert(!(OPT_INCREMENTAL_LEVEL_PRE == true && OPT_USE_DAG == true), "We cannot do the pre per level and use dag at the same time");
 static_assert(!(MONA_FAIR_MODE == true && MIGHTY_GASTON == true), "Gaston cannot be might and fair at the same time!");
 static_assert(sizeof(size_t) == 8, "Shuffling of hashes require 64bit architecture");
 #endif

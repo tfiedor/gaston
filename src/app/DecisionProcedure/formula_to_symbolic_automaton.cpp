@@ -11,6 +11,7 @@
 #include "automata.hh"
 #include "visitors/restricters/NegationUnfolder.h"
 #include "visitors/transformers/Derestricter.h"
+#include "visitors/transformers/QuantificationMerger.h"
 #include <memory>
 
 extern Timer timer_base;

@@ -1628,7 +1628,7 @@ bool TermNaryProduct::IsSemanticallyValid() {
 
 bool TermBaseSet::IsSemanticallyValid() {
     if(this->_aut->IsRestriction()) {
-        return this->Intersects(static_cast<TermBaseSet*>(this->_aut->GetInitialStates()));
+        return this->IsAccepting();
     } else {
         return true;
     }
@@ -1985,18 +1985,25 @@ void TermFixpoint::_dumpCore(unsigned indent) {
 
 // <<< ADDITIONAL TERMBASESET FUNCTIONS >>>
 
-bool TermBaseSet::Intersects(TermBaseSet* rhs) {
-    if(this == rhs) {
-        return true;
-    }
-
-    // Fixme: THE FUCK IS THIS SHIT YOU MOTHERFUCKING SHITFACE
+/**
+ * @brief Checks if this set intersect the initial states of the automaton
+ *
+ * Checks if this states is accepting, i.e. it intersects the initial states
+ * of the _aut.
+ *
+ * @return  true if the set is accepting
+ */
+bool TermBaseSet::IsAccepting() {
+    // Fixme: This could be further micro-optimized
+    TermBaseSet* initialStates = static_cast<TermBaseSet*>(this->_aut->GetInitialStates());
+    assert(initialStates->states.size() == 1 && "We assume there is only one initial states");
+    size_t initialState = initialStates->states.ToVector().front();
 
     for (auto lhs_state : this->states) {
-        for(auto& rhs_state : rhs->states) {
-            if(lhs_state == rhs_state) {
-                return true;
-            }
+        if(lhs_state == initialState) {
+            return true;
+        } else if(lhs_state > initialState) {
+            break;
         }
     }
     return false;
@@ -2345,27 +2352,6 @@ void TermFixpoint::_ProcessComputedResult(std::pair<Term_ptr, bool>& result, boo
     if(this->_aut->stats.max_symbol_path_len < fix_result.second->link->len) {
         this->_aut->stats.max_symbol_path_len = fix_result.second->link->len;
     }
-}
-
-/**
- * @brief Projects (if needed) the value of the symbol that we are currently subtracting
- *
- * If we are currently subbing the variable corresponding to this level, we have
- * to project the symbol first.
- *
- * @param[in]  level  level where we are subtracting
- * @param[in]  value  value that we are subtracting
- * @return  value that we will subtract
- */
-char TermFixpoint::_ProjectSymbol(size_t level, char value) {
-    IdentList* idents = static_cast<ProjectionAutomaton*>(this->_aut)->projectedVars;
-    for(auto ident = idents->begin(); ident != idents->end(); ++ident) {
-        if(level == varMap[*ident]) {
-            return 'X';
-        }
-    }
-
-    return value;
 }
 
 /**

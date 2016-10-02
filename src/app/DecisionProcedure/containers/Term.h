@@ -368,7 +368,7 @@ public:
     NEVER_INLINE ~TermBaseSet();
 
     // <<< PUBLIC API >>>
-    bool Intersects(TermBaseSet* rhs);
+    bool IsAccepting();
     SubsumedType IsSubsumedBy(FixpointType& fixpoint, WorklistType& worklist, Term*&, SubsumedByParams);
     bool IsEmpty();
     bool IsSemanticallyValid();
@@ -630,7 +630,7 @@ public:
     NEVER_INLINE TermFixpoint(Aut_ptr aut, Term_ptr sourceTerm, Symbol* startingSymbol, size_t level, char value, bool inComplement) :
         TermFixpoint(aut, sourceTerm, startingSymbol, inComplement) {
         this->_symbolPart.level = level;
-        this->_symbolPart.value = this->_ProjectSymbol(level, value);
+        this->_symbolPart.value = value;
     }
 
     NEVER_INLINE TermFixpoint(Aut_ptr aut, std::pair<Term_ptr, Symbol*> startingPair, bool inComplement) :
@@ -680,7 +680,6 @@ protected:
     void _updateExamples(ResultType&);
     void _InitializeAggregateFunction(bool inComplement);
     bool _AggregateResult(bool, bool);
-    char _ProjectSymbol(size_t, char);
     void _InitializeSymbols(Workshops::SymbolWorkshop* form, Gaston::VarList*, IdentList*, Symbol*);
     void _InitializeProjectedSymbol(Workshops::SymbolWorkshop* form, Gaston::VarList*, IdentList*, Symbol*);
     void _EnqueueInWorklist(Term_ptr, IntersectNonEmptyParams&, bool enqueueNext = true);
