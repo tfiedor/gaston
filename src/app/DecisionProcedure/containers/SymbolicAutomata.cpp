@@ -1358,11 +1358,12 @@ ResultType ProjectionAutomaton::_IntersectNonEmptyCore(Symbol* symbol, Term* fin
                 assert(fixpoint->type != TermType::EMPTY);
                 fixpoint->Complement();
             }
-            fixpoint = this->_factory.GetUniqueFixpoint(fixpoint);
+            fixpoint = this->_factory.GetUniqueFixpoint(fixpoint, params.variableLevel);
             return std::make_pair(fixpoint, fixpoint->GetResult());
         } else {
             // We compute at least something
             while( ((fixpointTerm = it.GetNext()) != nullptr) && (underComplement == fixpoint->GetResult())) {}
+            //fixpoint = this->_factory.GetUniqueFixpoint(fixpoint, params.variableLevel);
             return std::make_pair(fixpoint, underComplement);
             // Fixme:                       ^-- Will this pose some problem?
         }
@@ -1401,7 +1402,7 @@ ResultType ProjectionAutomaton::_IntersectNonEmptyCore(Symbol* symbol, Term* fin
             assert(fixpoint->type != TermType::EMPTY);
             fixpoint->Complement();
         }
-        fixpoint = this->_factory.GetUniqueFixpoint(fixpoint);
+        fixpoint = this->_factory.GetUniqueFixpoint(fixpoint, 0);
         #endif
         return std::make_pair(fixpoint, fixpoint->GetResult());
     }

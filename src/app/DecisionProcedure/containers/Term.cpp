@@ -1214,7 +1214,7 @@ SubsumedType Term::_ProductIsSubsumedBy(FixpointType& fixpoint, WorklistType& wo
 
     for(FixpointMember& item : fixpoint) {
         // Nullptr is skipped
-        if(item.term == nullptr || !item.isValid) {
+        if(item.term == nullptr || !item.isValid || item.level != params.level) {
             continue;
         }
 
@@ -1351,7 +1351,7 @@ SubsumedType TermBaseSet::IsSubsumedBy(FixpointType& fixpoint, WorklistType& wor
 
     for(FixpointMember& item : fixpoint) {
         // Nullptr is skipped
-        if(item.term == nullptr || !item.isValid || item.level > params.level) continue;
+        if(item.term == nullptr || !item.isValid || item.level != params.level) continue;
 
         // Test the subsumption
         SubsumedType result;
@@ -1407,7 +1407,7 @@ SubsumedType TermList::IsSubsumedBy(FixpointType& fixpoint, WorklistType& workli
     // For each item in fixpoint
     for(FixpointMember& item : fixpoint) {
         // Nullptr is skipped
-        if(item.term == nullptr || !item.isValid || item.level > params.level) continue;
+        if(item.term == nullptr || !item.isValid || item.level != params.level) continue;
 
         if (this->IsSubsumed(item.term, OPT_PARTIALLY_LIMITED_SUBSUMPTION) == SubsumedType::YES) {
             return SubsumedType::YES;
@@ -1431,7 +1431,7 @@ SubsumedType TermFixpoint::IsSubsumedBy(FixpointType& fixpoint, WorklistType& wo
     bool no_prune = params.no_prune;
     // Component-wise comparison
     for(FixpointMember& item : fixpoint) {
-        if(item.term == nullptr || !item.isValid) {
+        if(item.term == nullptr || !item.isValid || item.level != params.level) {
             continue;
         }
 
@@ -2122,9 +2122,9 @@ std::pair<SubsumedType, Term_ptr> TermFixpoint::_fixpointTest(Term_ptr const &te
 
 std::pair<SubsumedType, Term_ptr >TermFixpoint::_testIfBiggerExists(Term_ptr const &term, SubsumedByParams params) {
     return (std::find_if(this->_fixpoint.begin(), this->_fixpoint.end(), [this, &term, &params](FixpointMember& member) {
-        if (member.isValid && term == member.term && member.level <= params.level) {
+        if (member.isValid && term == member.term && member.level == params.level) {
             return true;
-        } else if(!member.isValid || member.term == nullptr || member.level > params.level || (member.level == 0 && !member.term->IsSemanticallyValid())) {
+        } else if(!member.isValid || member.term == nullptr || member.level != params.level || (member.level == 0 && !member.term->IsSemanticallyValid())) {
             return false;
         } else {
             if(member.term != term && member.term->IsSubsumed(term, OPT_PARTIALLY_LIMITED_SUBSUMPTION, nullptr, false) != SubsumedType::NOT) {
@@ -2142,9 +2142,9 @@ std::pair<SubsumedType, Term_ptr >TermFixpoint::_testIfBiggerExists(Term_ptr con
 
 std::pair<SubsumedType, Term_ptr> TermFixpoint::_testIfSmallerExists(Term_ptr const &term, SubsumedByParams params) {
     return (std::find_if(this->_fixpoint.begin(), this->_fixpoint.end(), [this, &term, &params](FixpointMember& member) {
-        if (member.isValid && term == member.term && member.level <= params.level) {
+        if (member.isValid && term == member.term && member.level == params.level) {
             return true;
-        } else if(!member.isValid || member.term == nullptr || member.level > params.level || (member.level == 0 && !member.term->IsSemanticallyValid())) {
+        } else if(!member.isValid || member.term == nullptr || member.level != params.level || (member.level == 0 && !member.term->IsSemanticallyValid())) {
             return false;
         } else {
             if(member.term != term && term->IsSubsumed(member.term, OPT_PARTIALLY_LIMITED_SUBSUMPTION, nullptr, false) != SubsumedType::NOT) {
@@ -2162,7 +2162,7 @@ std::pair<SubsumedType, Term_ptr> TermFixpoint::_testIfSmallerExists(Term_ptr co
 
 std::pair<SubsumedType, Term_ptr> TermFixpoint::_testIfIn(Term_ptr const &term, SubsumedByParams params) {
     return (std::find_if(this->_fixpoint.begin(), this->_fixpoint.end(), [&term, &params](FixpointMember const& member){
-        if(member.isValid && member.level <= params.level) {
+        if(member.isValid && member.level == params.level) {
             return member.term == term;
         } else {
             return false;

@@ -61,7 +61,7 @@ namespace Workshops {
 #           if (OPT_UNIQUE_FIXPOINTS_BY_SUB == true)
             bool result = lhs->IsSubsumed(rhs, true) == E_TRUE;
 #           else
-            bool result = *lhs == *rhs;
+            bool result = lhs.first == rhs.first && *(lhs.second) == *(rhs.second);
 #           endif
             return result;
         }
@@ -69,9 +69,9 @@ namespace Workshops {
 
     struct ComputationHash {
         size_t operator()(ComputationKey const& set) const {
-            size_t seed = boost::hash_value(set->stateSpaceApprox);
-#           if (OPT_UNIQUE_FIXPOINTS_BY_SUB == false)
-            boost::hash_combine(seed, boost::hash_value(set->MeasureStateSpace()));
+            size_t seed = boost::hash_value(set.first);
+#           if (OPT_UNIQUE_FIXPOINTS_BY_SUB == false && false)
+            boost::hash_combine(seed, boost::hash_value(set.second->MeasureStateSpace()));
 #           endif
             return seed;
         }
@@ -371,7 +371,7 @@ namespace Workshops {
             Term_ptr unique_source = source;
             if(source->type == TermType::FIXPOINT) {
                 TermFixpoint* fp = static_cast<TermFixpoint*>(source);
-                unique_source = this->GetUniqueFixpoint(fp);
+                unique_source = this->GetUniqueFixpoint(fp, 0);
             }
 
             Term* termPtr = nullptr;
@@ -415,10 +415,11 @@ namespace Workshops {
 
         // Obtain a unique source
         Term_ptr unique_source = source;
-        /*if(source->type == TermType::FIXPOINT) {
+        if(source->type == TermType::FIXPOINT) {
             TermFixpoint* fp = static_cast<TermFixpoint*>(source);
-            unique_source = this->GetUniqueFixpoint(fp);
-        }*/
+            size_t prev_level = (level + 1) % varMap.TrackLength();
+            unique_source = this->GetUniqueFixpoint(fp, prev_level);
+        }
 
         Term* termPtr = nullptr;
         auto fixpointKey = std::make_tuple(unique_source, level, value);
@@ -481,10 +482,10 @@ namespace Workshops {
      * with the same parameters. Otherwise it stores it in the cache
      *
      * @param[in] fixpoint:         list of terms (fixpoint representation)
-     * @param[in] worklist:         list of pairs (term, symbol)
+     * @param[in]  level  level of the unique fixpoint
      * @return:                     pointer to unique fixpoint
      */
-    TermFixpoint* TermWorkshop::GetUniqueFixpoint(TermFixpoint* &fixpoint) {
+    TermFixpoint* TermWorkshop::GetUniqueFixpoint(TermFixpoint* &fixpoint, size_t level) {
         assert(this->_compCache != nullptr);
         Term* termPtr = nullptr;
 
@@ -492,7 +493,7 @@ namespace Workshops {
             return fixpoint;
         }
 
-        auto compKey = fixpoint;
+        auto compKey = std::make_pair(level, fixpoint);
         if(!this->_compCache->retrieveFromCache(compKey, termPtr)) {
             termPtr = fixpoint;
             this->_compCache->StoreIn(compKey, termPtr);
@@ -814,7 +815,7 @@ namespace Workshops {
     }
 
     void dumpComputationKey(ComputationKey const&s) {
-        std::cout << "<" << (s) << ">";
+        std::cout << "<" << (s.first) << ", " << s.second << ">";
     }
 
     void dumpCacheData(Term *&s) {

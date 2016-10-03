@@ -98,7 +98,7 @@ namespace Workshops {
     using FixpointType      = std::list<std::pair<Term*,bool>>;
     using WorklistItemType  = std::pair<Term*, Symbol*>;
     using WorklistType      = std::list<WorklistItemType>;
-    using ComputationKey    = TermFixpoint*;
+    using ComputationKey    = std::pair<size_t, TermFixpoint*>;
     using RemapKey          = std::pair<Symbol*, size_t>;
 
     void dumpBaseKey(BaseKey const&);
@@ -263,7 +263,7 @@ namespace Workshops {
         TermFixpoint* CreateFixpointPre(Term_ptr const&, Symbol*, bool);
         TermFixpoint* CreateFixpointPreLevel(Term_ptr const&, Symbol*, size_t, char, bool);
         TermFixpoint* CreateClonedFixpoint(TermFixpoint* const&, IntersectNonEmptyParams&);
-        TermFixpoint* GetUniqueFixpoint(TermFixpoint*&);
+        TermFixpoint* GetUniqueFixpoint(TermFixpoint*&, size_t);
         Term* CreateList(Term_ptr const&, bool);
         Term* CreateContinuation(SymLink*, SymbolicAutomaton*, Term* const&, Symbol*, bool, bool lazy = false);
         std::string ToSimpleStats();
