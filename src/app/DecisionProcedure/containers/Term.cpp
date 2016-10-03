@@ -1812,6 +1812,9 @@ void Term::dump(unsigned indent) {
     if(this->IsIntermediate()) {
         std::cout << "'";
     }
+    if(!this->IsSemanticallyValid()) {
+        std::cout << "!";
+    }
 }
 
 void TermEmpty::_dumpCore(unsigned indent) {
@@ -2363,33 +2366,6 @@ void TermFixpoint::_ProcessComputedResult(std::pair<Term_ptr, bool>& result, boo
  */
 void TermFixpoint::PushAndCompute(IntersectNonEmptyParams& params) {
     assert(false && "[[Deprecated function]]");
-    static int j = 0;
-    int i = j++;
-
-    // Enqueue everything from fixpoint
-    if(params.variableLevel == varMap.TrackLength() - 1) {
-        Term_ptr startingTerm = nullptr;
-        if( (startingTerm = this->_sourceIt->GetNext()) != nullptr) {
-            assert(!startingTerm->IsIntermediate());
-            //this->_EnqueueInWorklist(startingTerm, params, false);
-        }
-    } else {
-        for (FixpointMember& item : this->_fixpoint) {
-            if (item.term == nullptr || item.isValid == false || item.level != params.variableLevel + 1) {
-                continue;
-            }
-
-            //this->_EnqueueInWorklist(item.term, params, false);
-        }
-    }
-
-    // Remove invalid stuff if possible
-    this->RemoveSubsumed();
-
-    // Process all the stuff we just enqueued
-    while(!_worklist.empty()) {
-        this->ComputeNextMember(false);
-    }
 }
 
 /**
@@ -3108,4 +3084,8 @@ void Term::ToDot(Term* term, std::ostream& stream) {
     stream << "strict graph aut {\n";
     term->DumpToDot(stream);
     stream << "}\n";
+}
+
+std::ostream &operator<<(std::ostream &out, const FixpointMember &rhs) {
+    out << (*rhs.term) << (rhs.isValid ? "" : "!") << "@" << rhs.level;
 }

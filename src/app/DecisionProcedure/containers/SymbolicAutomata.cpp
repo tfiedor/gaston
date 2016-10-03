@@ -1333,10 +1333,6 @@ ResultType ProjectionAutomaton::_IntersectNonEmptyCore(Symbol* symbol, Term* fin
         }
         #endif
 
-#       if (OPT_FORCE_INTERMEDIATE_COMPUTATION == true)
-        fixpoint->ForcefullyComputeIntermediate(true);
-#       endif
-
         // Return (fixpoint, bool)
         #if (OPT_REDUCE_FULL_FIXPOINT == true)
         //fixpoint->RemoveIntermediate();

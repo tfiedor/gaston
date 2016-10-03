@@ -101,15 +101,23 @@ bool has_no_predecessor(Term* term) {
     } else {
         Term* iter = term->link->succ;
         size_t lookedUpVar = term->link->var;
+        int prev = lookedUpVar - term->link->val.size();
         size_t count = 1;
-        // We check whether the whole track was subtracted
-        while(iter != nullptr && iter->link->var != varMap.TrackLength() - 1) {
-            iter = iter->link->succ;
-            ++count;
-        }
-        assert(iter != nullptr || count <= varMap.TrackLength());
 
-        return iter == nullptr;
+        // We check whether the whole track was subtracted
+        while(iter != nullptr && iter->link->succ != nullptr && iter != iter->link->succ) {
+            if(prev >= iter->link->var) {
+                break;
+            }
+            count += (iter->link->var - prev);
+            prev = iter->link->var;
+            iter = iter->link->succ;
+            if(count >= varMap.TrackLength()) {
+                break;
+            }
+        }
+
+        return iter == nullptr || iter->link->succ == nullptr;
     }
 }
 

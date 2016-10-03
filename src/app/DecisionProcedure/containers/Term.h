@@ -71,6 +71,8 @@ struct FixpointMember {
     size_t level;
 
     FixpointMember(Term_ptr t, bool i, size_t l) : term(t), isValid(i), level(l) {}
+
+    friend std::ostream &operator<<(std::ostream &stream, const FixpointMember&);
 };
 
 //using FixpointMember = std::pair<Term_ptr, bool>;
@@ -139,7 +141,9 @@ public:
         link_t(Term* s, Symbol* sym, size_t l) : succ(s), symbol(sym), len(l), val("") {}
 
         friend std::ostream &operator<<(std::ostream &out, const link_t &rhs) {
-            if(rhs.val == "") {
+            if (rhs.succ == nullptr) {
+                out << " -|";
+            } else if(rhs.val == "") {
                 out << " -[" << (*rhs.symbol) << "]-> " << rhs.succ;
             } else {
                 out << " -['" << rhs.val << "'(" << rhs.var << "-)]-> " << rhs.succ;
@@ -496,8 +500,15 @@ public:
             if (_termFixpoint._fixpoint.cend() != succIt) {
                 // if we can traverse
                 if((*succIt).isValid && (*succIt).term != nullptr) {
+                    // Fixme: Fuck this fucking stinks, if this is base fixpoint, we should not
+                    // Fixme: return the intermediate stuff!
                     // fixpoint member is valid
-                    return (*++_it).term;
+                    if(_termFixpoint.GetSemantics() == FixpointSemanticType::FIXPOINT && (*succIt).level != 0) {
+                        ++_it;
+                        return this->GetNext();
+                    } else {
+                        return (*++_it).term;
+                    }
                 }  else {
                     ++_it;
                     return this->GetNext();
@@ -541,6 +552,7 @@ public:
                             params.limitPre = OPT_INCREMENTAL_LEVEL_PRE;
 #                           if (OPT_INCREMENTAL_LEVEL_PRE == true)
                             params.variableLevel = _termFixpoint._symbolPart.level;
+                            assert(params.variableLevel != varMap.TrackLength() - 1 || !term->IsIntermediate());
                             params.variableValue = _termFixpoint._symbolPart.value;
 #                           endif
                             _termFixpoint._EnqueueInWorklist(term, params, false);
