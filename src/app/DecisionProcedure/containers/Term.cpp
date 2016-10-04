@@ -630,9 +630,8 @@ SubsumedType Term::IsSubsumed(Term *t, Term** new_term, SubsumptionTestParams pa
     // Intermediate stuff is not subsumed
     if(this == t) {
         return SubsumedType::YES;
-    } if( (t->IsIntermediate() && !this->IsIntermediate()) || (!t->IsIntermediate() && this->IsIntermediate())) {
-        return SubsumedType::NOT;
     }
+    assert(t->IsIntermediate() == this->IsIntermediate());
 
 #   if (OPT_PARTIALLY_LIMITED_SUBSUMPTION >= 0)
     if(!params.limit) {
@@ -653,9 +652,6 @@ SubsumedType Term::IsSubsumed(Term *t, Term** new_term, SubsumptionTestParams pa
     }
 #   endif
 
-    if(GET_IN_COMPLEMENT(this) != GET_IN_COMPLEMENT(t)) {
-        this->dump(); std::cout << " vs "; t->dump(); std::cout << "\n";
-    }
     assert(GET_IN_COMPLEMENT(this) == GET_IN_COMPLEMENT(t));
     assert(this->type != TermType::CONTINUATION && t->type != TermType::CONTINUATION);
 
@@ -2803,18 +2799,7 @@ bool TermProduct::_eqCore(const Term &t) {
 
     #if (OPT_EQ_THROUGH_POINTERS == true)
     assert(this != &t);
-    const TermProduct &tProduct = static_cast<const TermProduct&>(t);
-    // TODO: We should consider that continuation can be on left side, if we chose the different computation strategy
-    if(!this->right->IsNotComputed() && !tProduct.right->IsNotComputed()) {
-        // If something was continuation we try the structural compare, as there could be something unfolded
-        if(this->left->stateSpaceApprox < this->right->stateSpaceApprox) {
-            return (*tProduct.left == *this->left) && (*tProduct.right == *this->right);
-        } else {
-            return (*tProduct.right == *this->right) && (*tProduct.left == *this->left);
-        }
-    } else {
-        return false;
-    }
+    return false;
     #else
     const TermProduct &tProduct = static_cast<const TermProduct&>(t);
     if(this->left->stateSpaceApprox < this->right->stateSpaceApprox) {
@@ -2943,19 +2928,19 @@ bool TermFixpoint::_eqCore(const Term &t) {
 }
 
 bool TermFixpoint::_compareSymbols(const TermFixpoint& lhs, const TermFixpoint& rhs) {
-    if(lhs._projectedSymbol != rhs._projectedSymbol) {
+    if(lhs._symbolPart.value != rhs._symbolPart.value || lhs._symbolPart.level != rhs._symbolPart.value) {
         return false;
     }
 
+#   if (OPT_INCREMENTAL_LEVEL_PRE == false)
     for(auto symbol : lhs._symList) {
         if(std::find_if(rhs._symList.begin(), rhs._symList.end(), [&symbol](Symbol_ptr s) { return s == symbol;}) == rhs._symList.end()) {
             return false;
         }
     }
-
-    if(lhs._symbolPart.value != rhs._symbolPart.value || lhs._symbolPart.level != rhs._symbolPart.value) {
-        return false;
-    }
+#   else
+    assert(lhs._symList.size() == 0 && rhs._symList.size() == 0);
+#   endif
 
     return true;
 }
