@@ -664,7 +664,7 @@ SubsumedType Term::IsSubsumed(Term *t, Term** new_term, SubsumptionTestParams pa
     // Else if it is not continuation we first look into cache and then recompute if needed
     std::pair<SubsumedType, Term_ptr> result;
 #   if (OPT_CACHE_SUBSUMES == true)
-    auto key = std::make_tuple(params.level, static_cast<Term_ptr>(this), t);
+    auto key = std::make_pair(static_cast<Term_ptr>(this), t);
     if(this->type == TermType::EMPTY || !this->_aut->_subCache.retrieveFromCache(key, result)) {
 #   endif
         if (GET_IN_COMPLEMENT(this)) {
@@ -1745,12 +1745,11 @@ namespace Gaston {
         std::cout << "<" << (*s.first) << ", " << (s.second ? "True" : "False") << ">";
     }
 
-    void dumpSubsumptionKey(std::tuple<size_t, Term_ptr, Term_ptr> const& s) {
-        assert(std::get<1>(s) != nullptr);
-        assert(std::get<2>(s) != nullptr);
+    void dumpSubsumptionKey(std::pair<Term_ptr, Term_ptr> const& s) {
+        assert(s.first != nullptr);
+        assert(s.second != nullptr);
 
-        std::cout << "<" << (*std::get<1>(s)) << ", " << (*std::get<2>(s));
-        std::cout << "@" << std::get<0>(s) << ">";
+        std::cout << "<" << (*s.first) << ", " << (*s.second) << ">";
     }
 
     void dumpSubsumptionPairData(std::pair<SubsumedType, Term_ptr> &s) {
