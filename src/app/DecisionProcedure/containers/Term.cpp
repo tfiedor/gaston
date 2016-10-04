@@ -543,6 +543,7 @@ TermFixpoint::~TermFixpoint() {
 }
 
 void Term::Complement() {
+    assert(!this->IsIntermediate());
     FLIP_IN_COMPLEMENT(this);
 }
 
@@ -2100,6 +2101,10 @@ std::pair<SubsumedType, Term_ptr> TermFixpoint::_fixpointTest(Term_ptr const &te
         if(this->_subsumedByCache.retrieveFromCache(key, result)) {
             assert(result == SubsumedType::YES);
             return std::make_pair(result, term);
+#       if (MEASURE_SUBSUMEDBY_HITS == true)
+        } else {
+            ++TermFixpoint::subsumedByHits;
+#       endif
         }
         std::pair<SubsumedType, Term_ptr> inner_results;
         if(this->_satTerm == nullptr) {

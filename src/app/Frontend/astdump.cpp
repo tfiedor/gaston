@@ -525,7 +525,7 @@ ASTForm_EmptyPred::dump()
 }
 
 std::string ASTForm_EmptyPred::ToString(bool no_utf) {
-  return "EmptyPred(" + T->ToString(no_utf) + ")";
+  return "empty(" + T->ToString(no_utf) + ")";
 }
     
 void 

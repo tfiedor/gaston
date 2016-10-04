@@ -734,9 +734,6 @@ ResultType RootProjectionAutomaton::IntersectNonEmpty(Symbol* symbol, Term* fina
             }
         }
 
-#       if (OPT_FORCE_INTERMEDIATE_COMPUTATION == true)
-        fixpoint->ForcefullyComputeIntermediate(true);
-#       endif
         fixpoint->RemoveSubsumed();
 #       if (DEBUG_EXAMPLE_PATHS == true)
         if(fixpointTerm != nullptr && fixpointTerm->link->len > maxPath) {
@@ -1363,7 +1360,11 @@ ResultType ProjectionAutomaton::_IntersectNonEmptyCore(Symbol* symbol, Term* fin
         } else {
             // We compute at least something
             while( ((fixpointTerm = it.GetNext()) != nullptr) && (underComplement == fixpoint->GetResult())) {}
-            //fixpoint = this->_factory.GetUniqueFixpoint(fixpoint, params.variableLevel);
+            if(fixpoint->InComplement() != finalApproximation->InComplement()) {
+                assert(fixpoint->type != TermType::EMPTY);
+                fixpoint->Complement();
+            }
+            fixpoint = this->_factory.GetUniqueFixpoint(fixpoint, params.variableLevel);
             return std::make_pair(fixpoint, underComplement);
             // Fixme:                       ^-- Will this pose some problem?
         }
