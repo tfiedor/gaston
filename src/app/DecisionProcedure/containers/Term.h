@@ -41,6 +41,7 @@
 
 #define TERM_MEASURELIST(code) \
     code(instances)             \
+    code(intermediateInstances) \
     code(comparisonsBySamePtr)  \
     code(comparisonsByDiffType) \
     code(comparisonsByStructureTrue) \
@@ -52,6 +53,7 @@
 
 // <<< FORWARD CLASS DECLARATION >>>
 class SymbolicAutomaton;
+class TermFixpoint;
 struct SymLink;
 
 // TODO: Move away the usings
@@ -178,15 +180,25 @@ public:
 
 public:
     // <<< PUBLIC API >>>
-    virtual SubsumedType IsSubsumedBy(FixpointType& fixpoint, WorklistType& worklist, Term*&, SubsumedByParams) = 0;
+    virtual SubsumedType IsSubsumedBy(TermFixpoint*, Term*&, SubsumedByParams) = 0;
     virtual SubsumedType IsSubsumed(Term* t, Term** new_term, SubsumptionTestParams params);
     virtual SubsumedType Subsumes(TermEnumerator*);
     virtual bool IsEmpty() = 0;
     virtual void Complement();
     virtual bool InComplement() {return GET_IN_COMPLEMENT(this);}
     bool IsIntermediate() { return GET_IS_INTERMEDIATE(this);}
-    void SetIsIntermediate() { SET_IS_INTERMEDIATE(this);}
-    void ResetIsIntermediate() { RESET_IS_INTERMEDIATE(this); }
+    void SetIsIntermediate() {
+#       if (MEASURE_STATE_SPACE == true)
+        this->_IncreaseIntermediateInstances();
+#       endif
+        SET_IS_INTERMEDIATE(this);
+    }
+    void ResetIsIntermediate() {
+#       if (MEASURE_STATE_SPACE == true)
+        this->_DecreaseIntermediateInstances();
+#       endif
+        RESET_IS_INTERMEDIATE(this);
+    }
     virtual bool IsSemanticallyValid() = 0;
     bool operator==(const Term &t);
     bool IsNotComputed();
@@ -209,7 +221,10 @@ public:
 protected:
     // <<< PRIVATE FUNCTIONS >>>
     template<class ProductType>
-    SubsumedType _ProductIsSubsumedBy(FixpointType&, WorklistType&, Term*&, SubsumedByParams);
+    SubsumedType _ProductIsSubsumedBy(TermFixpoint*, Term*&, SubsumedByParams);
+
+    void _IncreaseIntermediateInstances();
+    void _DecreaseIntermediateInstances();
 
     virtual unsigned int _MeasureStateSpaceCore() = 0;
     virtual SubsumedType _IsSubsumedCore(Term* t, Term** new_term, SubsumptionTestParams params) = 0;
@@ -234,7 +249,7 @@ public:
     NEVER_INLINE ~TermEmpty() {}
 
     // <<< PUBLIC API >>>
-    SubsumedType IsSubsumedBy(FixpointType& fixpoint, WorklistType& worklist, Term*&, SubsumedByParams);
+    SubsumedType IsSubsumedBy(TermFixpoint*, Term*&, SubsumedByParams);
     bool IsEmpty();
     bool IsSemanticallyValid();
 
@@ -270,7 +285,7 @@ public:
     NEVER_INLINE ~TermProduct();
 
     // <<< PUBLIC API >>>
-    SubsumedType IsSubsumedBy(FixpointType& fixpoint, WorklistType& worklist, Term*&, SubsumedByParams);
+    SubsumedType IsSubsumedBy(TermFixpoint*, Term*&, SubsumedByParams);
     bool IsEmpty();
     bool IsSemanticallyValid();
 
@@ -306,7 +321,7 @@ public:
     NEVER_INLINE ~TermTernaryProduct();
 
     // <<< PUBLIC API >>>
-    SubsumedType IsSubsumedBy(FixpointType&, WorklistType& worklist, Term*&, SubsumedByParams);
+    SubsumedType IsSubsumedBy(TermFixpoint*, Term*&, SubsumedByParams);
     bool IsEmpty();
     bool IsSemanticallyValid();
 
@@ -346,7 +361,7 @@ public:
     NEVER_INLINE ~TermNaryProduct();
 
     // <<< PUBLIC API >>>
-    SubsumedType IsSubsumedBy(FixpointType&, WorklistType& worklist, Term*&, SubsumedByParams);
+    SubsumedType IsSubsumedBy(TermFixpoint*, Term*&, SubsumedByParams);
     bool IsEmpty();
     bool IsSemanticallyValid();
     Term_ptr operator[](size_t);
@@ -385,7 +400,7 @@ public:
 
     // <<< PUBLIC API >>>
     bool IsAccepting();
-    SubsumedType IsSubsumedBy(FixpointType& fixpoint, WorklistType& worklist, Term*&, SubsumedByParams);
+    SubsumedType IsSubsumedBy(TermFixpoint*, Term*&, SubsumedByParams);
     bool IsEmpty();
     bool IsSemanticallyValid();
 
@@ -428,7 +443,7 @@ public:
     NEVER_INLINE TermContinuation(Aut_ptr, SymLink*, SymbolicAutomaton*, Term*, SymbolType*, bool, bool lazy = false);
 
     // <<< PUBLIC API >>>
-    SubsumedType IsSubsumedBy(FixpointType& fixpoint, WorklistType& worklist, Term*&, SubsumedByParams);
+    SubsumedType IsSubsumedBy(TermFixpoint*, Term*&, SubsumedByParams);
     bool IsUnfolded() {return this->_unfoldedTerm != nullptr;}
     bool IsEmpty();
     bool IsSemanticallyValid();
@@ -461,7 +476,7 @@ public:
     NEVER_INLINE TermList(Aut_ptr, Term_ptr first, bool isCompl);
 
     // <<< PUBLIC API >>>
-    SubsumedType IsSubsumedBy(FixpointType& fixpoint, WorklistType& worklist, Term*&, SubsumedByParams);
+    SubsumedType IsSubsumedBy(TermFixpoint*, Term*&, SubsumedByParams);
     bool IsEmpty();
     bool IsSemanticallyValid();
 
@@ -482,6 +497,13 @@ private:
  */
 class TermFixpoint : public Term {
     friend class Workshops::TermWorkshop;
+    friend class TermEmpty;
+    friend class Term;
+    friend class TermProduct;
+    friend class TermTernaryProduct;
+    friend class TermNaryProduct;
+    friend class TermBaseSet;
+    friend class TermList;
     // <<< MEMBERS >>>
 public:
     struct iterator {
@@ -631,6 +653,7 @@ protected:
     Term_ptr _unsatTerm = nullptr;          // [4B] << Unsatisfiable term of the fixpoint computation
     FixpointGuide* _guide = nullptr;        // [4B] << Guide for fixpoints
     WorklistSearchType _searchType;         // [4B] << Search type for Worklist
+    size_t _validCount = 0;                 // [4-8B] << How many valid members do the fixpoint have
     bool _bValue;                           // [1B] << Boolean value of the fixpoint testing
     bool _updated = false;                  // [1B] << Flag if the fixpoint was updated during the last unique check
     bool _shortBoolValue;                   // [1B] << Value that leads to early termination fo the fixpoint
@@ -670,7 +693,7 @@ public:
     FixpointSemanticType GetSemantics() const;
     bool IsEmpty();
     bool IsSemanticallyValid();
-    SubsumedType IsSubsumedBy(FixpointType& fixpoint, WorklistType& worklist, Term*&, SubsumedByParams);
+    SubsumedType IsSubsumedBy(TermFixpoint*, Term*&, SubsumedByParams);
     bool GetResult();
     ExamplePair GetFixpointExamples();
     bool IsFullyComputed() const;

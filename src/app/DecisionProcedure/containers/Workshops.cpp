@@ -470,6 +470,7 @@ namespace Workshops {
 
             // Add to fixpoint
             clonedFixpoint->_fixpoint.emplace_back(member.term, member.isValid, member.level);
+            ++clonedFixpoint->_validCount;
         }
 
         clonedFixpoint->_bValue = fixpoint->_bValue;
