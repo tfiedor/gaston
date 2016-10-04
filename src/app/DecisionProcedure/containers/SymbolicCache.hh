@@ -103,17 +103,27 @@ struct ResultLevelHashType {
 	}
 };
 
+using SubsumptionKey = std::tuple<size_t, Term*, Term*>;
+struct SubsumptionKeyCompare {
+	bool operator()(SubsumptionKey const& lhs, SubsumptionKey const& rhs) const {
+		return std::get<0>(lhs) == std::get<0>(rhs) &&
+			   std::get<1>(lhs) == std::get<1>(rhs) &&
+			   std::get<2>(lhs) == std::get<2>(rhs);
+	}
+};
+
 struct SubsumptionHashType {
-	size_t operator()(std::pair<Term*, Term*> const& set) const {
+	size_t operator()(std::tuple<size_t, Term*, Term*> const& set) const {
 #		if (OPT_SHUFFLE_HASHES == true)
         size_t seed = hash64shift(Gaston::hash_value(set.first));
 #		else
-		size_t seed = Gaston::hash_value(set.first);
+		size_t seed = Gaston::hash_value(std::get<1>(set));
 #		endif
-		boost::hash_combine(seed, Gaston::hash_value(set.second));
+		boost::hash_combine(seed, Gaston::hash_value(std::get<2>(set)));
 #		if (OPT_SHUFFLE_HASHES == true)
         return hash64shift(seed);
 #		else
+		boost::hash_combine(seed, boost::hash_value(std::get<0>(set)));
 		return seed;
 #		endif
 	}

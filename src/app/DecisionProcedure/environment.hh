@@ -53,6 +53,7 @@ struct TermAtCompare;
 struct TermAtHash;
 struct ResultLevelHashType;
 struct ResultHashType;
+struct SubsumptionKeyCompare;
 struct SubsumptionHashType;
 struct PreHashType;
 struct DagHashType;
@@ -153,7 +154,7 @@ namespace Gaston {
 	void dumpResultLevelKey(std::tuple<Term_ptr, Symbol_ptr, size_t, char> const& s);
 	void dumpResultData(std::pair<Term_ptr, bool>& s);
 	void dumpTermKey(Term_ptr const& s);
-	void dumpSubsumptionKey(std::pair<Term_ptr, Term_ptr> const& s);
+	void dumpSubsumptionKey(std::tuple<size_t, Term_ptr, Term_ptr> const& s);
 	void dumpSubsumptionData(SubsumedType& s);
 	void dumpSubsumptionPairData(std::pair<SubsumedType, Term_ptr>&s);
 	void dumpSetPreKey(std::pair<VarList, Symbol_ptr> const& s);
@@ -174,9 +175,9 @@ namespace Gaston {
 	using ResultLevelKey         = std::tuple<Term_ptr, Symbol_ptr, size_t, char>;
 	using ResultCache            = BinaryCache<ResultKey, ResultType, ResultHashType, PairCompare<ResultKey>, dumpResultKey, dumpResultData>;
 	using ResultLevelCache       = BinaryCache<ResultLevelKey, ResultType, ResultLevelHashType, ResultLevelCompare, dumpResultLevelKey, dumpResultData>;
-	using SubsumptionKey		 = std::pair<Term_raw, Term_raw>;
+	using SubsumptionKey		 = std::tuple<size_t, Term_raw, Term_raw>;
 	using SubsumptionResultPair  = std::pair<SubsumedType, Term_raw>;
-	using SubsumptionCache       = BinaryCache<SubsumptionKey, SubsumptionResultPair, SubsumptionHashType, PairCompare<SubsumptionKey>, dumpSubsumptionKey, dumpSubsumptionPairData>;
+	using SubsumptionCache       = BinaryCache<SubsumptionKey, SubsumptionResultPair, SubsumptionHashType, SubsumptionKeyCompare, dumpSubsumptionKey, dumpSubsumptionPairData>;
 	using DagKey				 = Formula_ptr;
 	using DagData				 = SymbolicAutomaton*;
 	using DagNodeCache			 = BinaryCache<DagKey, DagData, DagHashType, DagCompare<DagKey>, dumpDagKey, dumpDagData>;
