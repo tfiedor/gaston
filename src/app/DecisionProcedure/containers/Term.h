@@ -99,6 +99,18 @@ struct SubsumedByParams {
     SubsumedByParams(bool np, size_t l) : no_prune(np), level(l) {}
 };
 
+/**
+ * Encapsulation of parameters for subsumption testing
+ */
+struct SubsumptionTestParams {
+    int limit;               // < How much of a depth should we test subsumption until switching to equality
+    size_t level;            // < On which level does the subsumption takes place
+    bool unfoldAll;          // < Whether we should unfold the continuations
+
+    SubsumptionTestParams(int lt, size_t lv, bool uA) : limit(lt), level(lv), unfoldAll(uA) {}
+    SubsumptionTestParams(int lt, size_t lv) : limit(lt), level(lv), unfoldAll(false) {}
+};
+
 using WorklistItemType = WorklistItem;
 //using WorklistItemType = std::pair<Term_ptr, SymbolType*>;
 using WorklistType = std::list<WorklistItemType>;
@@ -167,7 +179,7 @@ public:
 public:
     // <<< PUBLIC API >>>
     virtual SubsumedType IsSubsumedBy(FixpointType& fixpoint, WorklistType& worklist, Term*&, SubsumedByParams) = 0;
-    virtual SubsumedType IsSubsumed(Term* t, int limit, Term** new_term = nullptr, bool b = false);
+    virtual SubsumedType IsSubsumed(Term* t, Term** new_term, SubsumptionTestParams params);
     virtual SubsumedType Subsumes(TermEnumerator*);
     virtual bool IsEmpty() = 0;
     virtual void Complement();
@@ -200,7 +212,7 @@ protected:
     SubsumedType _ProductIsSubsumedBy(FixpointType&, WorklistType&, Term*&, SubsumedByParams);
 
     virtual unsigned int _MeasureStateSpaceCore() = 0;
-    virtual SubsumedType _IsSubsumedCore(Term* t, int limit, Term** new_term = nullptr, bool b = false) = 0;
+    virtual SubsumedType _IsSubsumedCore(Term* t, Term** new_term, SubsumptionTestParams params) = 0;
     virtual void _dumpCore(unsigned indent = 0) = 0;
     virtual bool _eqCore(const Term&) = 0;
     virtual SubsumedType _SubsumesCore(TermEnumerator*);
@@ -234,7 +246,7 @@ private:
 
     // <<< PRIVATE FUNCTIONS >>>
     unsigned int _MeasureStateSpaceCore();
-    SubsumedType _IsSubsumedCore(Term* t, int limit, Term** new_term = nullptr, bool b = false);
+    SubsumedType _IsSubsumedCore(Term* t, Term** new_term, SubsumptionTestParams params);
 };
 
 /**
@@ -271,7 +283,7 @@ private:
 private:
     // <<< PRIVATE FUNCTIONS >>>
     unsigned int _MeasureStateSpaceCore();
-    SubsumedType _IsSubsumedCore(Term* t, int limit, Term** new_term = nullptr, bool b = false);
+    SubsumedType _IsSubsumedCore(Term* t, Term** new_term, SubsumptionTestParams params);
     SubsumedType _SubsumesCore(TermEnumerator*);
 };
 
@@ -306,7 +318,7 @@ private:
 
     // <<< PRIVATE FUNCTIONS >>>
     unsigned int _MeasureStateSpaceCore();
-    SubsumedType _IsSubsumedCore(Term* t, int limit, Term** new_term = nullptr, bool b = false);
+    SubsumedType _IsSubsumedCore(Term* t, Term** new_term, SubsumptionTestParams params);
     SubsumedType _SubsumesCore(TermEnumerator*);
 };
 
@@ -348,7 +360,7 @@ private:
 
     // <<< PRIVATE FUNCTIONS >>>
     unsigned int _MeasureStateSpaceCore();
-    SubsumedType _IsSubsumedCore(Term* t, int limit, Term** new_term = nullptr, bool b = false);
+    SubsumedType _IsSubsumedCore(Term* t, Term** new_term, SubsumptionTestParams params);
     SubsumedType _SubsumesCore(TermEnumerator*);
 };
 
@@ -386,7 +398,7 @@ private:
 private:
     // <<< PRIVATE FUNCTIONS >>>
     unsigned int _MeasureStateSpaceCore();
-    SubsumedType _IsSubsumedCore(Term* t, int limit, Term** newTerm = nullptr, bool b = false);
+    SubsumedType _IsSubsumedCore(Term* t, Term** newTerm, SubsumptionTestParams params);
     SubsumedType _SubsumesCore(TermEnumerator*);
 };
 
@@ -431,7 +443,7 @@ protected:
     // <<< PRIVATE FUNCTIONS >>>
     unsigned int _MeasureStateSpaceCore();
     bool _eqCore(const Term&);
-    SubsumedType _IsSubsumedCore(Term* t, int limit, Term** new_term = nullptr, bool b = false);
+    SubsumedType _IsSubsumedCore(Term* t, Term** new_term, SubsumptionTestParams params);
 };
 
 /**
@@ -461,7 +473,7 @@ private:
 private:
     // <<< PRIVATE FUNCTIONS >>>
     unsigned int _MeasureStateSpaceCore();
-    SubsumedType _IsSubsumedCore(Term* t, int limit, Term** new_term = nullptr, bool b = false);
+    SubsumedType _IsSubsumedCore(Term* t, Term** new_term, SubsumptionTestParams params);
     bool _eqCore(const Term&);
 };
 
@@ -696,7 +708,7 @@ protected:
     void _InitializeProjectedSymbol(Workshops::SymbolWorkshop* form, Gaston::VarList*, IdentList*, Symbol*);
     void _EnqueueInWorklist(Term_ptr, IntersectNonEmptyParams&, bool enqueueNext = true);
     void _EnqueueSingleLevelInWorklist(Term_ptr, size_t, char);
-    SubsumedType _IsSubsumedCore(Term* t, int limit, Term** new_term = nullptr, bool b = false);
+    SubsumedType _IsSubsumedCore(Term* t, Term** new_term, SubsumptionTestParams params);
     std::pair<SubsumedType, Term_ptr> _fixpointTest(Term_ptr const& term, SubsumedByParams);
     std::pair<SubsumedType, Term_ptr> _testIfSubsumes(Term_ptr const& term, SubsumedByParams);
     std::pair<SubsumedType, Term_ptr> _testIfIn(Term_ptr const& term, SubsumedByParams);

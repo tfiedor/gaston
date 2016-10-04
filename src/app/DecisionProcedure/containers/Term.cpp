@@ -619,13 +619,12 @@ bool Term::IsNotComputed() {
  * term through the @p new_term.
  *
  * @param[in]  t  term we are testing subsumption from
- * @param[in]  limit  limitation of the subsumption nesting
  * @param[in]  new_term  returned different term, e.g. for partial subsumption with set difference
  *   logic (for base sets)
- * @param[in]  unfoldAll  whether everything should be unfolded as we go
+ * @param[in]  params  parameters of subsumption testing (see Term.h)
  * @return:  whether this term is subsumed by @p t and how (full, not, partial, etc.)
  */
-SubsumedType Term::IsSubsumed(Term *t, int limit, Term** new_term, bool unfoldAll) {
+SubsumedType Term::IsSubsumed(Term *t, Term** new_term, SubsumptionTestParams params) {
     // Intermediate stuff is not subsumed
     if(this == t) {
         return SubsumedType::YES;
@@ -634,7 +633,7 @@ SubsumedType Term::IsSubsumed(Term *t, int limit, Term** new_term, bool unfoldAl
     }
 
 #   if (OPT_PARTIALLY_LIMITED_SUBSUMPTION >= 0)
-    if(!limit) {
+    if(!params.limit) {
         return (this == t ? SubsumedType::YES : SubsumedType::NOT);
     }
 #   endif
@@ -644,11 +643,11 @@ SubsumedType Term::IsSubsumed(Term *t, int limit, Term** new_term, bool unfoldAl
     if(t->type == TermType::CONTINUATION) {
         TermContinuation *continuation = static_cast<TermContinuation *>(t);
         Term* unfoldedContinuation = continuation->unfoldContinuation(UnfoldedIn::SUBSUMPTION);
-        return this->IsSubsumed(unfoldedContinuation, limit, unfoldAll);
+        return this->IsSubsumed(unfoldedContinuation, params.limit, params.unfoldAll);
     } else if(this->type == TermType::CONTINUATION) {
         TermContinuation *continuation = static_cast<TermContinuation *>(this);
         Term* unfoldedContinuation = continuation->unfoldContinuation(UnfoldedIn::SUBSUMPTION);
-        return unfoldedContinuation->IsSubsumed(t, limit, unfoldAll);
+        return unfoldedContinuation->IsSubsumed(t, params.limit, params.unfoldAll);
     }
 #   endif
 
@@ -659,7 +658,7 @@ SubsumedType Term::IsSubsumed(Term *t, int limit, Term** new_term, bool unfoldAl
     assert(this->type != TermType::CONTINUATION && t->type != TermType::CONTINUATION);
 
 #   if (OPT_PARTIALLY_LIMITED_SUBSUMPTION > 0)
-    --limit;
+    --params.limit;
 #   endif
 
     // Else if it is not continuation we first look into cache and then recompute if needed
@@ -672,13 +671,13 @@ SubsumedType Term::IsSubsumed(Term *t, int limit, Term** new_term, bool unfoldAl
             if(this->type == TermType::EMPTY) {
                 result.first = (t->type == TermType::EMPTY ? SubsumedType::YES : SubsumedType::NOT);
             } else {
-                result.first = t->_IsSubsumedCore(this, limit, new_term, unfoldAll);
+                result.first = t->_IsSubsumedCore(this, new_term, params);
             }
         } else {
             if(t->type == TermType::EMPTY) {
                 result.first = (this->type == TermType::EMPTY ? SubsumedType::YES : SubsumedType::NOT);
             } else {
-                result.first = this->_IsSubsumedCore(t, limit, new_term, unfoldAll);
+                result.first = this->_IsSubsumedCore(t, new_term, params);
             }
         }
 #   if (OPT_CACHE_SUBSUMES == true)
@@ -701,7 +700,7 @@ SubsumedType Term::IsSubsumed(Term *t, int limit, Term** new_term, bool unfoldAl
         }
     }
 #   endif
-    assert(!unfoldAll || result.first != SubsumedType::PARTIALLY);
+    assert(!params.unfoldAll || result.first != SubsumedType::PARTIALLY);
 #   if (DEBUG_TERM_SUBSUMPTION == true)
     this->dump();
     std::cout << (result.first == SubsumedType::YES ? " \u2291 " : " \u22E2 ");
@@ -712,12 +711,12 @@ SubsumedType Term::IsSubsumed(Term *t, int limit, Term** new_term, bool unfoldAl
     return result.first;
 }
 
-SubsumedType TermEmpty::_IsSubsumedCore(Term *t, int limit, Term** new_term, bool unfoldAll) {
+SubsumedType TermEmpty::_IsSubsumedCore(Term* t, Term** new_term, SubsumptionTestParams params) {
     // Empty term is subsumed by everything (probably)
     return (GET_IN_COMPLEMENT(this)) ? (t->type == TermType::EMPTY ? SubsumedType::YES : SubsumedType::NOT) : SubsumedType::YES;
 }
 
-SubsumedType TermProduct::_IsSubsumedCore(Term *t, int limit, Term** new_term, bool unfoldAll) {
+SubsumedType TermProduct::_IsSubsumedCore(Term* t, Term** new_term, SubsumptionTestParams params) {
     assert(t->type == TermType::PRODUCT);
 
     // Retype and test the subsumption component-wise
@@ -734,7 +733,7 @@ SubsumedType TermProduct::_IsSubsumedCore(Term *t, int limit, Term** new_term, b
         SubsumedType result;
 
         // First test the left operands
-        if((result = lhsl->IsSubsumed(rhsl, limit, &inner_new_term, unfoldAll)) == SubsumedType::NOT) {
+        if((result = lhsl->IsSubsumed(rhsl, &inner_new_term, params)) == SubsumedType::NOT) {
             // Left is false, everything is false
             return SubsumedType::NOT;
         } else if(result == SubsumedType::YES) {
@@ -747,7 +746,7 @@ SubsumedType TermProduct::_IsSubsumedCore(Term *t, int limit, Term** new_term, b
         }
 
         // Test the right operand
-        SubsumedType base_result = lhsr->IsSubsumed(rhsr, limit, new_term, unfoldAll);
+        SubsumedType base_result = lhsr->IsSubsumed(rhsr, new_term, params);
         if(base_result == SubsumedType::PARTIALLY) {
             // Partially subsumed, return new partial product and set the successors as the same, so we keep the link
             assert(new_term != nullptr);
@@ -775,47 +774,47 @@ SubsumedType TermProduct::_IsSubsumedCore(Term *t, int limit, Term** new_term, b
     }
 #   endif
 
-    if(OPT_EARLY_EVALUATION && !unfoldAll && (lhsr->IsNotComputed() && rhsr->IsNotComputed())) {
+    if(OPT_EARLY_EVALUATION && !params.unfoldAll && (lhsr->IsNotComputed() && rhsr->IsNotComputed())) {
 #       if (OPT_EARLY_PARTIAL_SUB == true)
         if(lhsr->type == TermType::CONTINUATION && rhsr->type == TermType::CONTINUATION) {
-            return (lhsl->IsSubsumed(rhsl, limit, nullptr, unfoldAll) == SubsumedType::NOT ? SubsumedType::NOT : SubsumedType::PARTIALLY);
+            return (lhsl->IsSubsumed(rhsl, nullptr, params) == SubsumedType::NOT ? SubsumedType::NOT : SubsumedType::PARTIALLY);
         } else {
-            SubsumedType leftIsSubsumed = lhsl->IsSubsumed(rhsl, limit, nullptr, unfoldAll);
+            SubsumedType leftIsSubsumed = lhsl->IsSubsumed(rhsl, nullptr, params);
             if(leftIsSubsumed == SubsumedType::YES) {
-                return lhsr->IsSubsumed(rhsr, limit, nullptr, unfoldAll);
+                return lhsr->IsSubsumed(rhsr, nullptr, params);
             } else {
                 return leftIsSubsumed;
             }
         }
 #       else
-        return (lhsl->IsSubsumed(rhsl, limit) != SubsumedType::NOT && lhsr->IsSubsumed(rhsr, limit) != SubsumedType::NOT) ? SubsumedType::YES : SubsumedType::NOT;
+        return (lhsl->IsSubsumed(rhsl, SubsumptionTestParams(params.limit, params.level)) != SubsumedType::NOT && lhsr->IsSubsumed(rhsr, SubsumptionTestParams(params.limit, params.level)) != SubsumedType::NOT) ? SubsumedType::YES : SubsumedType::NOT;
 #       endif
-    } if(!unfoldAll && lhsl == rhsl) {
-        return lhsr->IsSubsumed(rhsr, limit, nullptr, unfoldAll);
-    } else if(!unfoldAll && lhsr == rhsr) {
-        return lhsl->IsSubsumed(rhsl, limit, nullptr, unfoldAll);
+    } if(!params.unfoldAll && lhsl == rhsl) {
+        return lhsr->IsSubsumed(rhsr, nullptr, params);
+    } else if(!params.unfoldAll && lhsr == rhsr) {
+        return lhsl->IsSubsumed(rhsl, nullptr, params);
     } else {
-        if(lhsl->stateSpaceApprox < lhsr->stateSpaceApprox || unfoldAll) {
-            return (lhsl->IsSubsumed(rhsl, limit, nullptr, unfoldAll) != SubsumedType::NOT && lhsr->IsSubsumed(rhsr, limit, nullptr, unfoldAll) != SubsumedType::NOT) ? SubsumedType::YES : SubsumedType::NOT;
+        if(lhsl->stateSpaceApprox < lhsr->stateSpaceApprox || params.unfoldAll) {
+            return (lhsl->IsSubsumed(rhsl, nullptr, params) != SubsumedType::NOT && lhsr->IsSubsumed(rhsr, nullptr, params) != SubsumedType::NOT) ? SubsumedType::YES : SubsumedType::NOT;
         } else {
-            return (lhsr->IsSubsumed(rhsr, limit, nullptr, unfoldAll) != SubsumedType::NOT && lhsl->IsSubsumed(rhsl, limit, nullptr, unfoldAll) != SubsumedType::NOT) ? SubsumedType::YES : SubsumedType::NOT;
+            return (lhsr->IsSubsumed(rhsr, nullptr, params) != SubsumedType::NOT && lhsl->IsSubsumed(rhsl, nullptr, params) != SubsumedType::NOT) ? SubsumedType::YES : SubsumedType::NOT;
         }
     }
 }
 
-SubsumedType _ternary_subsumption_test(Term* f1, Term* f2, Term* s1, Term* s2, Term* l1, Term* l2, size_t approx_max, int limit, bool unfoldAll) {
-    if(f1->IsSubsumed(f2, limit, nullptr, unfoldAll) != SubsumedType::NOT) {
+SubsumedType _ternary_subsumption_test(Term* f1, Term* f2, Term* s1, Term* s2, Term* l1, Term* l2, size_t approx_max, SubsumptionTestParams params) {
+    if(f1->IsSubsumed(f2, nullptr, params) != SubsumedType::NOT) {
         if(s1->stateSpaceApprox == approx_max) {
-            return (l1->IsSubsumed(l2, limit, nullptr, unfoldAll) != SubsumedType::NOT && s1->IsSubsumed(s2, limit, nullptr, unfoldAll) != SubsumedType::NOT) ? SubsumedType::YES : SubsumedType::NOT;
+            return (l1->IsSubsumed(l2, nullptr, params) != SubsumedType::NOT && s1->IsSubsumed(s2, nullptr, params) != SubsumedType::NOT) ? SubsumedType::YES : SubsumedType::NOT;
         } else {
-            return (s1->IsSubsumed(s2, limit, nullptr, unfoldAll) != SubsumedType::NOT && l1->IsSubsumed(l2, limit, nullptr, unfoldAll) != SubsumedType::NOT) ? SubsumedType::YES : SubsumedType::NOT;
+            return (s1->IsSubsumed(s2, nullptr, params) != SubsumedType::NOT && l1->IsSubsumed(l2, nullptr, params) != SubsumedType::NOT) ? SubsumedType::YES : SubsumedType::NOT;
         }
     } else {
         return SubsumedType::NOT;
     }
 }
 
-SubsumedType TermTernaryProduct::_IsSubsumedCore(Term *t, int limit, Term** new_term, bool unfoldAll) {
+SubsumedType TermTernaryProduct::_IsSubsumedCore(Term* t, Term** new_term, SubsumptionTestParams params) {
     assert(t->type == TermType::TERNARY_PRODUCT);
 
     // Retype and test the subsumption component-wise
@@ -832,7 +831,7 @@ SubsumedType TermTernaryProduct::_IsSubsumedCore(Term *t, int limit, Term** new_
         // First test the left operands for subsumption
         Term* left_new_term = nullptr;
         SubsumedType left_result;
-        if((left_result = lhsl->IsSubsumed(rhsl, limit, &left_new_term, unfoldAll)) == SubsumedType::NOT) {
+        if((left_result = lhsl->IsSubsumed(rhsl, &left_new_term, params)) == SubsumedType::NOT) {
             // Left operand is not subsumed, everything is not subsumed
             return SubsumedType::NOT;
         } else if(left_result == SubsumedType::YES) {
@@ -846,7 +845,7 @@ SubsumedType TermTernaryProduct::_IsSubsumedCore(Term *t, int limit, Term** new_
         // Test the middle operands for subsumption
         Term* middle_new_term = nullptr;
         SubsumedType middle_result = SubsumedType::YES;
-        if((middle_result = lhsm->IsSubsumed(rhsm, limit, &middle_new_term, unfoldAll)) == SubsumedType::NOT) {
+        if((middle_result = lhsm->IsSubsumed(rhsm, &middle_new_term, params)) == SubsumedType::NOT) {
             // Middle operand is not subsumed, everything is not subsumed
             return SubsumedType::NOT;
         } else if(middle_result == SubsumedType::YES) {
@@ -860,7 +859,7 @@ SubsumedType TermTernaryProduct::_IsSubsumedCore(Term *t, int limit, Term** new_
         // Test the rightmost operands for subsumption
         Term* right_new_term = nullptr;
         SubsumedType right_result;
-        if((right_result = lhsr->IsSubsumed(rhsr, limit, &right_new_term, unfoldAll)) == SubsumedType::NOT) {
+        if((right_result = lhsr->IsSubsumed(rhsr, &right_new_term, params)) == SubsumedType::NOT) {
             return SubsumedType::NOT;
         } else if(right_result == SubsumedType::YES) {
             assert(right_new_term == nullptr);
@@ -889,15 +888,15 @@ SubsumedType TermTernaryProduct::_IsSubsumedCore(Term *t, int limit, Term** new_
     size_t approx_max = std::max({lhsl->stateSpaceApprox, lhsm->stateSpaceApprox, lhsr->stateSpaceApprox});
     size_t approx_min = std::min({lhsl->stateSpaceApprox, lhsm->stateSpaceApprox, lhsr->stateSpaceApprox});
     if(lhsl->stateSpaceApprox == approx_min) {
-        return _ternary_subsumption_test(lhsl, rhsl, lhsm, rhsm, lhsr, rhsr, approx_max, limit, unfoldAll);
+        return _ternary_subsumption_test(lhsl, rhsl, lhsm, rhsm, lhsr, rhsr, approx_max, params);
     } else if(lhsr->stateSpaceApprox == approx_min) {
-        return _ternary_subsumption_test(lhsr, rhsr, lhsl, rhsl, lhsm, rhsm, approx_max, limit, unfoldAll);
+        return _ternary_subsumption_test(lhsr, rhsr, lhsl, rhsl, lhsm, rhsm, approx_max, params);
     } else {
-        return _ternary_subsumption_test(lhsm, rhsm, lhsr, rhsr, lhsl, rhsl, approx_max, limit, unfoldAll);
+        return _ternary_subsumption_test(lhsm, rhsm, lhsr, rhsr, lhsl, rhsl, approx_max, params);
     }
 }
 
-SubsumedType TermNaryProduct::_IsSubsumedCore(Term *t, int limit, Term** new_term, bool unfoldAll) {
+SubsumedType TermNaryProduct::_IsSubsumedCore(Term* t, Term** new_term, SubsumptionTestParams params) {
     assert(t->type == TermType::NARY_PRODUCT);
     TermNaryProduct *rhs = static_cast<TermNaryProduct*>(t);
     assert(this->arity == rhs->arity);
@@ -913,7 +912,7 @@ SubsumedType TermNaryProduct::_IsSubsumedCore(Term *t, int limit, Term** new_ter
             if(this->terms[i] == rhs->terms[i]) {
                 result = SubsumedType::YES;
             } else {
-                result = this->terms[i]->IsSubsumed(rhs->terms[i], limit, &inner_term, unfoldAll);
+                result = this->terms[i]->IsSubsumed(rhs->terms[i], &inner_term, params);
             }
             if(result == SubsumedType::NOT) {
                 delete[] new_terms;
@@ -944,7 +943,7 @@ SubsumedType TermNaryProduct::_IsSubsumedCore(Term *t, int limit, Term** new_ter
     // Retype and test the subsumption component-wise
     for (int i = 0; i < this->arity; ++i) {
         assert(this->access_vector[i] < this->arity);
-        if(this->terms[this->access_vector[i]]->IsSubsumed(rhs->terms[this->access_vector[i]], limit, nullptr, unfoldAll) == SubsumedType::NOT) {
+        if(this->terms[this->access_vector[i]]->IsSubsumed(rhs->terms[this->access_vector[i]], nullptr, params) == SubsumedType::NOT) {
             if(i != 0) {
                 // Propagate the values towards 0 index
                 this->access_vector[i] ^= this->access_vector[0];
@@ -974,7 +973,7 @@ inline int compare_integers (int a, int b) {
     return a;
 }
 
-SubsumedType TermBaseSet::_IsSubsumedCore(Term *term, int limit, Term** new_term, bool unfoldAll) {
+SubsumedType TermBaseSet::_IsSubsumedCore(Term *term, Term** new_term, SubsumptionTestParams params) {
     assert(term->type == TermType::BASE);
     TermBaseSet *t = static_cast<TermBaseSet*>(term);
     assert(term->IsIntermediate() == this->IsIntermediate());
@@ -1040,12 +1039,12 @@ SubsumedType TermBaseSet::_IsSubsumedCore(Term *term, int limit, Term** new_term
     }
 }
 
-SubsumedType TermContinuation::_IsSubsumedCore(Term *t, int limit, Term** new_term, bool unfoldAll) {
+SubsumedType TermContinuation::_IsSubsumedCore(Term* t, Term** new_term, SubsumptionTestParams params) {
     assert(false);
     return SubsumedType::NOT;
 }
 
-SubsumedType TermList::_IsSubsumedCore(Term *t, int limit, Term** new_term, bool unfoldAll) {
+SubsumedType TermList::_IsSubsumedCore(Term* t, Term** new_term, SubsumptionTestParams params) {
     assert(t->type == TermType::LIST);
 
     // Reinterpret
@@ -1054,7 +1053,7 @@ SubsumedType TermList::_IsSubsumedCore(Term *t, int limit, Term** new_term, bool
     for(auto& item : this->list) {
         bool subsumes = false;
         for(auto& tt_item : tt->list) {
-            if(item->IsSubsumed(tt_item, limit, nullptr, unfoldAll) == SubsumedType::YES) {
+            if(item->IsSubsumed(tt_item, nullptr, params) == SubsumedType::YES) {
                 subsumes = true;
                 break;
             }
@@ -1065,7 +1064,7 @@ SubsumedType TermList::_IsSubsumedCore(Term *t, int limit, Term** new_term, bool
     return SubsumedType::YES;
 }
 
-SubsumedType TermFixpoint::_IsSubsumedCore(Term *t, int limit, Term** new_term, bool unfoldAll) {
+SubsumedType TermFixpoint::_IsSubsumedCore(Term* t, Term** new_term, SubsumptionTestParams params) {
     assert(t->type == TermType::FIXPOINT);
 
     // Reinterpret
@@ -1082,7 +1081,7 @@ SubsumedType TermFixpoint::_IsSubsumedCore(Term *t, int limit, Term** new_term, 
 #   if (OPT_SHORTTEST_FIXPOINT_SUB == true)
     // Will tests only generators and symbols
     if(are_source_symbols_same && this->_sourceTerm != nullptr && tt->_sourceTerm != nullptr) {
-        return this->_sourceTerm->IsSubsumed(tt->_sourceTerm, limit, nullptr, unfoldAll);
+        return this->_sourceTerm->IsSubsumed(tt->_sourceTerm, nullptr, params);
     }
 #   endif
 
@@ -1221,7 +1220,7 @@ SubsumedType Term::_ProductIsSubsumedBy(FixpointType& fixpoint, WorklistType& wo
 
         if(item.level > params.level) {
             SubsumedType inner_result;
-            if( (inner_result = item.term->IsSubsumed(this, OPT_PARTIALLY_LIMITED_SUBSUMPTION, nullptr)) == SubsumedType::YES) {
+            if( (inner_result = item.term->IsSubsumed(this, nullptr, SubsumptionTestParams(OPT_PARTIALLY_LIMITED_SUBSUMPTION, params.level))) == SubsumedType::YES) {
                 item.isValid = false;
             }
             continue;
@@ -1230,9 +1229,9 @@ SubsumedType Term::_ProductIsSubsumedBy(FixpointType& fixpoint, WorklistType& wo
         // Test the subsumption
         SubsumedType result;
         if(valid_members > 1 && OPT_SUBSUMPTION_INTERSECTION == true) {
-            result = tested_term->IsSubsumed(item.term, OPT_PARTIALLY_LIMITED_SUBSUMPTION, &new_term);
+            result = tested_term->IsSubsumed(item.term, &new_term, SubsumptionTestParams(OPT_PARTIALLY_LIMITED_SUBSUMPTION, params.level));
         } else {
-            result = tested_term->IsSubsumed(item.term, OPT_PARTIALLY_LIMITED_SUBSUMPTION, nullptr);
+            result = tested_term->IsSubsumed(item.term, nullptr, SubsumptionTestParams(OPT_PARTIALLY_LIMITED_SUBSUMPTION, params.level));
         }
 
         if(result == SubsumedType::YES) {
@@ -1247,9 +1246,9 @@ SubsumedType Term::_ProductIsSubsumedBy(FixpointType& fixpoint, WorklistType& wo
             SubsumedType inner_result;
             new_term == nullptr;
 #           if (OPT_PARTIAL_PRUNE_FIXPOINTS == true)
-            if( (inner_result = item.term->IsSubsumed(this, OPT_PARTIALLY_LIMITED_SUBSUMPTION, &new_term)) == SubsumedType::YES) {
+            if( (inner_result = item.term->IsSubsumed(this, &new_term, SubsumptionTestParams(OPT_PARTIALLY_LIMITED_SUBSUMPTION, params.level))) == SubsumedType::YES) {
 #           else
-            if( (inner_result = item.term->IsSubsumed(this, OPT_PARTIALLY_LIMITED_SUBSUMPTION, nullptr)) == SubsumedType::YES) {
+            if( (inner_result = item.term->IsSubsumed(this, nullptr, SubsumptionTestParams(OPT_PARTIALLY_LIMITED_SUBSUMPTION, params.level))) == SubsumedType::YES) {
 #           endif
                 assert(!(valid_members == 1 && result == SubsumedType::PARTIALLY));
 #               if (OPT_PRUNE_WORKLIST == true)
@@ -1357,9 +1356,9 @@ SubsumedType TermBaseSet::IsSubsumedBy(FixpointType& fixpoint, WorklistType& wor
         // Test the subsumption
         SubsumedType result;
         if(!no_prune && valid_members > 1) {
-            result = tested_term->IsSubsumed(item.term, OPT_PARTIALLY_LIMITED_SUBSUMPTION, &new_term);
+            result = tested_term->IsSubsumed(item.term, &new_term, SubsumptionTestParams(OPT_PARTIALLY_LIMITED_SUBSUMPTION, params.level));
         } else {
-            result = tested_term->IsSubsumed(item.term, OPT_PARTIALLY_LIMITED_SUBSUMPTION, nullptr);
+            result = tested_term->IsSubsumed(item.term, nullptr, SubsumptionTestParams(OPT_PARTIALLY_LIMITED_SUBSUMPTION, params.level));
         }
         switch(result) {
             case SubsumedType::YES:
@@ -1376,7 +1375,7 @@ SubsumedType TermBaseSet::IsSubsumedBy(FixpointType& fixpoint, WorklistType& wor
         }
 
         if(!no_prune) {
-            if (item.term->IsSubsumed(tested_term, OPT_PARTIALLY_LIMITED_SUBSUMPTION) == SubsumedType::YES) {
+            if (item.term->IsSubsumed(tested_term, nullptr, SubsumptionTestParams(OPT_PARTIALLY_LIMITED_SUBSUMPTION, params.level)) == SubsumedType::YES) {
 #               if (OPT_PRUNE_WORKLIST == true)
                 prune_worklist(worklist, item.term);
 #               endif
@@ -1410,12 +1409,12 @@ SubsumedType TermList::IsSubsumedBy(FixpointType& fixpoint, WorklistType& workli
         // Nullptr is skipped
         if(item.term == nullptr || !item.isValid || item.level != params.level) continue;
 
-        if (this->IsSubsumed(item.term, OPT_PARTIALLY_LIMITED_SUBSUMPTION) == SubsumedType::YES) {
+        if (this->IsSubsumed(item.term, nullptr, SubsumptionTestParams(OPT_PARTIALLY_LIMITED_SUBSUMPTION, params.level)) == SubsumedType::YES) {
             return SubsumedType::YES;
         }
 
         if(!no_prune) {
-            if (item.term->IsSubsumed(this, OPT_PARTIALLY_LIMITED_SUBSUMPTION) == SubsumedType::YES) {
+            if (item.term->IsSubsumed(this, nullptr, SubsumptionTestParams(OPT_PARTIALLY_LIMITED_SUBSUMPTION, params.level)) == SubsumedType::YES) {
 #               if (OPT_PRUNE_WORKLIST == true)
                 prune_worklist(worklist, item.term);
 #               endif
@@ -1438,19 +1437,19 @@ SubsumedType TermFixpoint::IsSubsumedBy(FixpointType& fixpoint, WorklistType& wo
 
         if(item.level > params.level) {
             SubsumedType inner_result;
-            if( (inner_result = item.term->IsSubsumed(this, OPT_PARTIALLY_LIMITED_SUBSUMPTION, nullptr)) == SubsumedType::YES) {
+            if( (inner_result = item.term->IsSubsumed(this, nullptr, SubsumptionTestParams(OPT_PARTIALLY_LIMITED_SUBSUMPTION, params.level))) == SubsumedType::YES) {
                 item.isValid = false;
             }
             continue;
         }
 
-        if (this->IsSubsumed(item.term, OPT_PARTIALLY_LIMITED_SUBSUMPTION) == SubsumedType::YES) {
+        if (this->IsSubsumed(item.term, nullptr, SubsumptionTestParams(OPT_PARTIALLY_LIMITED_SUBSUMPTION, params.level)) == SubsumedType::YES) {
             result = SubsumedType::YES;
             break;
         }
 
         if(!no_prune) {
-            if (item.term->IsSubsumed(this, OPT_PARTIALLY_LIMITED_SUBSUMPTION) == SubsumedType::YES) {
+            if (item.term->IsSubsumed(this, nullptr, SubsumptionTestParams(OPT_PARTIALLY_LIMITED_SUBSUMPTION, params.level)) == SubsumedType::YES) {
 #               if (OPT_PRUNE_WORKLIST == true)
                 prune_worklist(worklist, item.term);
 #               endif
@@ -1496,7 +1495,8 @@ SubsumedType Term::Subsumes(TermEnumerator* enumerator) {
 SubsumedType Term::_SubsumesCore(TermEnumerator* enumerator) {
     assert(enumerator->type == EnumeratorType::GENERIC);
     GenericEnumerator* genericEnumerator = static_cast<GenericEnumerator*>(enumerator);
-    auto result = genericEnumerator->GetItem()->IsSubsumed(this, OPT_PARTIALLY_LIMITED_SUBSUMPTION, nullptr, false);
+    // Fixme: There's missing level info
+    auto result = genericEnumerator->GetItem()->IsSubsumed(this, nullptr, SubsumptionTestParams(OPT_PARTIALLY_LIMITED_SUBSUMPTION, 0));
     return result;
 }
 
@@ -2055,13 +2055,14 @@ bool TermFixpoint::_processOnePostponed() {
     // Test the subsumption
     SubsumedType result;
     // Todo: this could be softened to iterators
-    if( (result = postponedTerm->IsSubsumed(postponedFixTerm, OPT_PARTIALLY_LIMITED_SUBSUMPTION, true)) == SubsumedType::NOT) {
+    // Fixme: There's missing info about level
+    if( (result = postponedTerm->IsSubsumed(postponedFixTerm, nullptr, SubsumptionTestParams(OPT_PARTIALLY_LIMITED_SUBSUMPTION, 0, true))) == SubsumedType::NOT) {
         // Push new term to fixpoint
         // Fixme: But there is probably something other that could subsume this crap
         for(auto item : this->_fixpoint) {
             if(item.first == nullptr)
                 continue;
-            if((result = postponedTerm->IsSubsumed(item.first, OPT_PARTIALLY_LIMITED_SUBSUMPTION, true)) != SubsumedType::NOT) {
+            if((result = postponedTerm->IsSubsumed(item.first, SubsumptionTestParams(OPT_PARTIALLY_LIMITED_SUBSUMPTION, 0, true))) != SubsumedType::NOT) {
                 assert(result != SubsumedType::PARTIALLY);
                 return false;
             }
@@ -2132,14 +2133,14 @@ std::pair<SubsumedType, Term_ptr >TermFixpoint::_testIfBiggerExists(Term_ptr con
         } else if(!member.isValid || member.term == nullptr || member.level != params.level || (member.level == 0 && !member.term->IsSemanticallyValid())) {
             return false;
         } else {
-            if(member.term != term && member.term->IsSubsumed(term, OPT_PARTIALLY_LIMITED_SUBSUMPTION, nullptr, false) != SubsumedType::NOT) {
+            if(member.term != term && member.term->IsSubsumed(term, nullptr, SubsumptionTestParams(OPT_PARTIALLY_LIMITED_SUBSUMPTION, params.level)) != SubsumedType::NOT) {
                 member.isValid = false;
 #               if (OPT_PRUNE_WORKLIST == true)
                 prune_worklist(this->_worklist, member.term);
 #               endif
                 return false;
             } else {
-                return term->IsSubsumed(member.term, OPT_PARTIALLY_LIMITED_SUBSUMPTION, nullptr, false) != SubsumedType::NOT;
+                return term->IsSubsumed(member.term, nullptr, SubsumptionTestParams(OPT_PARTIALLY_LIMITED_SUBSUMPTION, params.level)) != SubsumedType::NOT;
             }
         }
     }) == this->_fixpoint.end() ? std::make_pair(SubsumedType::NOT, term) : std::make_pair(SubsumedType::YES, term));
@@ -2152,14 +2153,14 @@ std::pair<SubsumedType, Term_ptr> TermFixpoint::_testIfSmallerExists(Term_ptr co
         } else if(!member.isValid || member.term == nullptr || member.level != params.level || (member.level == 0 && !member.term->IsSemanticallyValid())) {
             return false;
         } else {
-            if(member.term != term && term->IsSubsumed(member.term, OPT_PARTIALLY_LIMITED_SUBSUMPTION, nullptr, false) != SubsumedType::NOT) {
+            if(member.term != term && term->IsSubsumed(member.term, nullptr, SubsumptionTestParams(OPT_PARTIALLY_LIMITED_SUBSUMPTION, params.level)) != SubsumedType::NOT) {
                 member.isValid = false;
 #               if (OPT_PRUNE_WORKLIST == true)
                 prune_worklist(this->_worklist, member.term);
 #               endif
                 return false;
             } else {
-                return member.term->IsSubsumed(term, OPT_PARTIALLY_LIMITED_SUBSUMPTION, nullptr, false) != SubsumedType::NOT;
+                return member.term->IsSubsumed(term, nullptr, SubsumptionTestParams(OPT_PARTIALLY_LIMITED_SUBSUMPTION, params.level)) != SubsumedType::NOT;
             }
         }
     }) == this->_fixpoint.end() ? std::make_pair(SubsumedType::NOT, term) : std::make_pair(SubsumedType::YES, term));
