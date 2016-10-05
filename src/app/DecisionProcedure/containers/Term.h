@@ -69,8 +69,8 @@ using SymbolType        = ZeroSymbol;
 
 struct FixpointMember {
     Term_ptr term;
-    bool isValid;
     size_t level;
+    bool isValid;
 
     FixpointMember(Term_ptr t, bool i, size_t l) : term(t), isValid(i), level(l) {}
 
@@ -94,8 +94,8 @@ struct WorklistItem {
 };
 
 struct SubsumedByParams {
-    bool no_prune;
     size_t level;
+    bool no_prune;
 
     SubsumedByParams(size_t l) : no_prune(false), level(l) {}
     SubsumedByParams(bool np, size_t l) : no_prune(np), level(l) {}
@@ -105,8 +105,8 @@ struct SubsumedByParams {
  * Encapsulation of parameters for subsumption testing
  */
 struct SubsumptionTestParams {
-    int limit;               // < How much of a depth should we test subsumption until switching to equality
     size_t level;            // < On which level does the subsumption takes place
+    int limit;               // < How much of a depth should we test subsumption until switching to equality
     bool unfoldAll;          // < Whether we should unfold the continuations
 
     SubsumptionTestParams(int lt, size_t lv, bool uA) : limit(lt), level(lv), unfoldAll(uA) {}
@@ -232,7 +232,8 @@ protected:
     virtual bool _eqCore(const Term&) = 0;
     virtual SubsumedType _SubsumesCore(TermEnumerator*);
 
-    friend size_t hash_value(Term* s);
+    friend size_t hash_value(Term*);
+    friend size_t hash_value_no_ptr(Term*);
     friend std::ostream& operator <<(std::ostream& osObject, Term& z);
 };
 
@@ -641,6 +642,7 @@ protected:
     WorklistType _worklist;                 // [8B] << Worklist of the fixpoint
     Symbols _symList;                       // [8B] << List of symbols
     size_t _iteratorNumber = 0;             // [4-8B] << How many iterators are pointing to fixpoint
+    size_t _validCount = 0;                 // [4-8B] << How many valid members do the fixpoint have
     Symbol_ptr _projectedSymbol;            // [4B] << Source symbol with projected vars
     Aut_ptr _baseAut;
     Term_ptr _sourceTerm;                   // [4B] << Source term of the fixpoint
@@ -653,7 +655,6 @@ protected:
     Term_ptr _unsatTerm = nullptr;          // [4B] << Unsatisfiable term of the fixpoint computation
     FixpointGuide* _guide = nullptr;        // [4B] << Guide for fixpoints
     WorklistSearchType _searchType;         // [4B] << Search type for Worklist
-    size_t _validCount = 0;                 // [4-8B] << How many valid members do the fixpoint have
     bool _bValue;                           // [1B] << Boolean value of the fixpoint testing
     bool _updated = false;                  // [1B] << Flag if the fixpoint was updated during the last unique check
     bool _shortBoolValue;                   // [1B] << Value that leads to early termination fo the fixpoint

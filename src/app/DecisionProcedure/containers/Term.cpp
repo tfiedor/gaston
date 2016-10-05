@@ -46,6 +46,13 @@ namespace Gaston {
         return boost::hash_value(s->MeasureStateSpace());
 #       endif
     }
+
+    size_t hash_value_no_ptr(Term* s) {
+        size_t seed = boost::hash_value(s->stateSpaceApprox);
+        boost::hash_combine(seed, boost::hash_value(s));
+        //boost::hash_combine(seed, boost::hash_value(s->MeasureStateSpace()));
+        return seed;
+    }
 }
 
 // <<< STATIC MEMBER INITIALIZATION >>>
@@ -631,7 +638,7 @@ SubsumedType Term::IsSubsumed(Term *t, Term** new_term, SubsumptionTestParams pa
     if(this == t) {
         return SubsumedType::YES;
     }
-    assert(t->IsIntermediate() == this->IsIntermediate());
+    assert(t->type == TermType::EMPTY || this->type == TermType::EMPTY || t->IsIntermediate() == this->IsIntermediate());
 
 #   if (OPT_PARTIALLY_LIMITED_SUBSUMPTION >= 0)
     if(!params.limit) {
@@ -1186,6 +1193,9 @@ SubsumedType Term::_ProductIsSubsumedBy(TermFixpoint* fixpoint, Term*& biggerTer
         if(item.level > params.level) {
             SubsumedType inner_result;
             if( (inner_result = item.term->IsSubsumed(this, nullptr, SubsumptionTestParams(OPT_PARTIALLY_LIMITED_SUBSUMPTION, params.level))) == SubsumedType::YES) {
+#               if (OPT_PRUNE_WORKLIST == true)
+                prune_worklist(fixpoint->_worklist, item.term);
+#               endif
                 item.isValid = false;
                 assert(fixpoint->_validCount);
                 --fixpoint->_validCount;
@@ -1405,6 +1415,9 @@ SubsumedType TermFixpoint::IsSubsumedBy(TermFixpoint* fixpoint, Term*& biggerTer
         if(item.level > params.level) {
             SubsumedType inner_result;
             if( (inner_result = item.term->IsSubsumed(this, nullptr, SubsumptionTestParams(OPT_PARTIALLY_LIMITED_SUBSUMPTION, params.level))) == SubsumedType::YES) {
+#               if (OPT_PRUNE_WORKLIST == true)
+                prune_worklist(fixpoint->_worklist, item.term);
+#               endif
                 item.isValid = false;
                 assert(fixpoint->_validCount);
                 --fixpoint->_validCount;
@@ -2583,6 +2596,9 @@ void TermFixpoint::RemoveIntermediate() {
     for(FixpointMember& member : this->_fixpoint) {
         if(member.level != 0) {
             member.isValid = false;
+#           if (OPT_PRUNE_WORKLIST == true)
+            prune_worklist(this->_worklist, member.term);
+#           endif
             assert(this->_validCount);
             --this->_validCount;
         }

@@ -2111,6 +2111,8 @@ void BinaryOpAutomaton::DumpComputationStats() {
     std::cout << "  \u2218 Cache stats -> ";
 #       if (MEASURE_CACHE_HITS == true)
         this->_resCache.dumpStats();
+    std::cout << "  \u2218 SubCache stats -> ";
+        this->_subCache.dumpStats();
 #       endif
 #       if (DEBUG_WORKSHOPS == true)
         this->_factory.Dump();
@@ -2145,6 +2147,8 @@ void TernaryOpAutomaton::DumpComputationStats() {
     std::cout << "  \u2218 Cache stats -> ";
 #       if (MEASURE_CACHE_HITS == true)
     this->_resCache.dumpStats();
+    std::cout << "  \u2218 SubCache stats -> ";
+        this->_subCache.dumpStats();
 #       endif
 #       if (DEBUG_WORKSHOPS == true)
     this->_factory.Dump();
@@ -2182,6 +2186,8 @@ void NaryOpAutomaton::DumpComputationStats() {
     std::cout << "  \u2218 Cache stats -> ";
 #       if (MEASURE_CACHE_HITS == true)
     this->_resCache.dumpStats();
+    std::cout << "  \u2218 SubCache stats -> ";
+        this->_subCache.dumpStats();
 #       endif
 #       if (DEBUG_WORKSHOPS == true)
     this->_factory.Dump();
@@ -2220,6 +2226,8 @@ void ProjectionAutomaton::DumpComputationStats() {
                 std::cout << "  \u2218 Cache stats -> ";
 #           if (MEASURE_CACHE_HITS == true)
                 this->_resCache.dumpStats();
+            std::cout << "  \u2218 SubCache stats -> ";
+            this->_subCache.dumpStats();
 #           endif
 #           if (DEBUG_WORKSHOPS)
                 this->_factory.Dump();
@@ -2289,6 +2297,8 @@ void BaseAutomaton::DumpComputationStats() {
     std::cout << "  \u2218 Cache stats -> ";
 #       if (MEASURE_CACHE_HITS == true)
         this->_resCache.dumpStats();
+    std::cout << "  \u2218 SubCache stats -> ";
+        this->_subCache.dumpStats();
 #       endif
 #       if (DEBUG_WORKSHOPS)
         this->_factory.Dump();
