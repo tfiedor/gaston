@@ -49,6 +49,7 @@ add_executable(gaston
 	src/app/DecisionProcedure/formula_to_symbolic_automaton.cpp
 	src/app/DecisionProcedure/checkers/Checker.cpp
 	src/app/DecisionProcedure/checkers/SymbolicChecker.cpp
+	src/app/DecisionProcedure/containers/TransitiveCache.cpp
 	src/app/DecisionProcedure/containers/VarToTrackMap.cpp
 	src/app/DecisionProcedure/containers/SymbolicAutomata.cpp
 	src/app/DecisionProcedure/containers/Term.cpp
