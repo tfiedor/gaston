@@ -55,6 +55,7 @@
 class SymbolicAutomaton;
 class TermFixpoint;
 struct SymLink;
+struct Node;
 
 // TODO: Move away the usings
 using Term_ptr          = Term*;
@@ -166,6 +167,7 @@ public:
     };
 
     link_t* link;
+    Node* node = nullptr;
     size_t stateSpaceApprox = 0;    // [4-8B] << Approximation of the state space, used for heuristics
     TermType type;                  // [4B] << Type of the term
 protected:

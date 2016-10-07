@@ -11,44 +11,60 @@ Node::Node(Term* term, TransitiveCache* transitiveCache) : _term(term), _cache(t
 #   endif
 }
 
-bool TransitiveCache::LookUp(RelationKey const& key, Gaston::SubsumptionResultPair& data) {
-    if(this->_cache.retrieveFromCache(key, data)) {
-        return true;
+void Node::ClassifyRegions(Node* from, Node* to) {
+    assert(from != nullptr);
+    assert(to != nullptr);
+
+    bool from_is_null = from->_region == nullptr;
+    bool to_is_null = to->_region == nullptr;
+    if(from_is_null && to_is_null) {
+        from->_region = Node::regionPool.construct();
+        *from->_region = Node::regionNumber++;
+        to->_region = from->_region;
+    } else if(from_is_null) {
+        // Align by to->region
+        from->_region = to->_region;
     } else {
-        // Check the graph
-        Node* from = this->_LookUpNode(key.second);
-        Node* to = this->_LookUpNode(key.first);
+        // Align by from->region
+        to->_region = from->_region;
+    }
 
-        bool isIn;
-        if(from->_succs.size() > to->_preds.size()) {
-            isIn = std::find_if(from->_succs.begin(), from->_succs.end(), [&to](Node* i) { return to == i; }) != from->_succs.end();
-        } else {
-            isIn = std::find_if(to->_preds.begin(), to->_preds.end(), [&from](Node* i) { return from == i; }) != to->_preds.end();
-        }
+}
 
-        if(isIn) {
-            data.first = SubsumedType::YES;
-            data.second = nullptr;
-        }
-
-        return isIn;
+bool TransitiveCache::LookUp(RelationKey const& key, Gaston::SubsumptionResultPair& data) {
+    if(key.first->node == nullptr || key.second->node == nullptr) {
+        return false;
+    } else if(key.first->node->_region != key.second->node->_region) {
+        assert(key.first->node->_region != nullptr);
+        return false;
+    } else if(key.first != key.second) {
+        return this->_cache.retrieveFromCache(key, data);
+    } else {
+        data.first = SubsumedType::YES;
+        data.second = nullptr;
+        return true;
     }
 }
 
 void TransitiveCache::StoreIn(RelationKey const& key, Gaston::SubsumptionResultPair& data) {
     assert(data.first == SubsumedType::YES);
-    // Assert that it is not in graph already
-    this->_cache.StoreIn(key, data);
-    this->_AddEdgeWithTransitiveClosure(key.second, key.first);
+    if(key.first != key.second) {
+        // Assert that it is not in graph already
+        this->_cache.StoreIn(key, data);
+        this->_AddEdgeWithTransitiveClosure(key.second, key.first);
+    }
 }
 
 void TransitiveCache::_AddEdgeWithTransitiveClosure(Term* from, Term* to) {
+    assert(from != to);
     Node* from_node = this->_LookUpNode(from);
     Node* to_node = this->_LookUpNode(to);
+    Node::ClassifyRegions(from_node, to_node);
     this->_AddEdgeWithTransitiveClosure(from_node, to_node);
 }
 
 void TransitiveCache::_AddEdge(Node* from, Node* to) {
+    assert(from != to);
     from->_succs.insert(to);
     to->_preds.insert(from);
 }
@@ -65,6 +81,8 @@ void TransitiveCache::_AddEdgeWithTransitiveClosure(Node* from, Node* to) {
     auto data = std::make_pair(SubsumedType::YES, ptr);
     for(Node* pred : from->_preds) {
         for(Node* succ : to->_succs) {
+            if(pred == succ)
+                continue;
             this->_AddEdge(pred, succ);
             this->_cache.StoreIn(std::make_pair(pred->_term, succ->_term), data);
         }
@@ -72,16 +90,14 @@ void TransitiveCache::_AddEdgeWithTransitiveClosure(Node* from, Node* to) {
 }
 
 Node* TransitiveCache::_LookUpNode(Term* const& key) {
-    auto it = this->_keyToNodeMap.find(key);
-    Node* node;
-    if(it != this->_keyToNodeMap.end()) {
-        node = it->second;
-    } else {
-        node = TransitiveCache::_nodePool.construct(key, static_cast<TransitiveCache*>(this));
-        this->_keyToNodeMap.emplace(key, node);
+    if(key->node == nullptr) {
+        key->node = TransitiveCache::_nodePool.construct(key, static_cast<TransitiveCache*>(this));
     }
-    return node;
+
+    return key->node;
 }
 
 boost::object_pool<Node> TransitiveCache::_nodePool;
+boost::object_pool<size_t> Node::regionPool;
 size_t TransitiveCache::cacheCount = 0;
+size_t Node::regionNumber = 0;

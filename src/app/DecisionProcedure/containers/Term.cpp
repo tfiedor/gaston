@@ -670,7 +670,8 @@ SubsumedType Term::IsSubsumed(Term *t, Term** new_term, SubsumptionTestParams pa
     std::pair<SubsumedType, Term_ptr> result;
 #   if (OPT_CACHE_SUBSUMES == true)
     auto key = std::make_pair(static_cast<Term_ptr>(this), t);
-    if(this->type == TermType::EMPTY || !this->_aut->_subCache.retrieveFromCache(key, result)) {
+    //if(this->type == TermType::EMPTY || !this->_aut->_subCache.retrieveFromCache(key, result)) {
+    if(this->type == TermType::EMPTY || !this->_aut->_subCache.LookUp(key, result)) {
 #   endif
         if (GET_IN_COMPLEMENT(this)) {
             if(this->type == TermType::EMPTY) {

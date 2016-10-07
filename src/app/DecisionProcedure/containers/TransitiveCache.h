@@ -25,12 +25,16 @@ struct Node {
     Term* _term;
     std::unordered_set<struct Node*> _preds;
     std::unordered_set<struct Node*> _succs;
+    size_t* _region = nullptr;
     TransitiveCache* _cache;
 #   if (DEBUG_TRANSITIVE_CACHE == true)
     std::string _bddStr;
 #   endif
+    static boost::object_pool<size_t> regionPool;
+    static size_t regionNumber;
 
     Node(Term* term, TransitiveCache* transitiveCache);
+    static void ClassifyRegions(Node*, Node*);
 };
 
 
@@ -42,8 +46,8 @@ struct RelationKeyCompare : public std::binary_function<RelationKey, RelationKey
 
 struct RelationKeyHash {
     size_t operator()(RelationKey const& key) const {
-        size_t seed = Gaston::hash_value(key.first);
-        boost::hash_combine(seed, Gaston::hash_value(key.second));
+        size_t seed = boost::hash_value(key.first);
+        boost::hash_combine(seed, boost::hash_value(key.second));
         return seed;
     }
 };
@@ -73,7 +77,6 @@ private:
     using Term_ptr = Term*;
     using TermHash = boost::hash<Term_ptr>;
     using TermCompare = std::equal_to<Term_ptr>;
-    std::unordered_map<Term*, struct Node*, TermHash, TermCompare> _keyToNodeMap;
     static boost::object_pool<Node> _nodePool;
 
     Node* _LookUpNode(Term* const&);

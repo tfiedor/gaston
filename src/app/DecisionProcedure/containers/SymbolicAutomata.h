@@ -28,6 +28,7 @@
 #include "../containers/VarToTrackMap.hh"
 #include "../containers/Workshops.h"
 #include "../containers/FixpointGuide.h"
+#include "../containers/TransitiveCache.h"
 #include "../../Frontend/ident.h"
 #include "../../Frontend/ast.h"
 #include "../environment.hh"
@@ -85,7 +86,7 @@ protected:
 
 public:
     TermWorkshop _factory;          // Creates terms
-    SubsumptionCache _subCache;     // Caches (term, term) = bool
+    TransitiveCache _subCache;     // Caches (term, term) = bool
     SymbolWorkshop symbolFactory;
     struct SymbolicAutomatonStats {
         unsigned int height = 0;
