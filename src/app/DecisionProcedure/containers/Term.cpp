@@ -2103,6 +2103,9 @@ std::pair<SubsumedType, Term_ptr> TermFixpoint::_fixpointTest(Term_ptr const &te
 
         if(inner_results.first == SubsumedType::YES) {
             this->_subsumedByCache.StoreIn(key, SubsumedType::YES);
+#           if (OPT_PUMP_SUBSUMED_BY_CACHE == true)
+            this->_PumpSubsumedByCache(key);
+#           endif
         }
 
         return inner_results;
@@ -2184,6 +2187,9 @@ std::pair<SubsumedType, Term_ptr> TermFixpoint::_testIfSubsumes(Term_ptr const& 
         if((result = term->IsSubsumedBy(static_cast<TermFixpoint*>(this), subsumedByTerm, params)) != SubsumedType::NOT && !term->IsIntermediate()) {
             // SubsumedType::PARTIALLY is considered as SubsumedType::YES, as it was partitioned already
             this->_subsumedByCache.StoreIn(key, SubsumedType::YES);
+#           if (OPT_PUMP_SUBSUMED_BY_CACHE == true)
+            this->_PumpSubsumedByCache(key);
+#           endif
         }
 
         if(result == SubsumedType::PARTIALLY) {
@@ -3128,6 +3134,21 @@ void Term::_DecreaseIntermediateInstances() {
             case TermType::LIST:
                 --TermList::intermediateInstances;
                 break;
+        }
+    }
+}
+
+/**
+ * @brief Pumps the subsumed by cache by transitive closure
+ *
+ * Takes all "smaller" terms from subsumed, transitive aware cache and pumps them to subsumed by cache.
+ *
+ * @param[in]  term  pumping term
+ */
+void TermFixpoint::_PumpSubsumedByCache(Term_ptr term) {
+    if (term->node != nullptr) {
+        for (Node *succ : term->node->_succs) {
+            this->_subsumedByCache.StoreIn(succ->_term, SubsumedType::YES);
         }
     }
 }

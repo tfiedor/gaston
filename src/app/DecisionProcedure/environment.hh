@@ -290,8 +290,8 @@ public:
 #define DEBUG_TERM_SUBSUMED_BY 			false
 #define DEBUG_TERM_CACHE_COMPARISON		false
 #define DEBUG_SYMBOL_CREATION			true
-#define DEBUG_CACHE_MEMBERS			    false
-#define DEBUG_CACHE_BUCKETS				false
+#define DEBUG_CACHE_MEMBERS			    true
+#define DEBUG_CACHE_BUCKETS				true
 #define DEBUG_CACHE_MEMBERS_HASH		true
 #define DEBUG_CONTINUATIONS 			false
 #define DEBUG_NO_WORKSHOPS				false
@@ -320,7 +320,7 @@ public:
  * >>> Automata stats options
  *****************************/
 #define PRINT_STATS_PROJECTION			false
-#define PRINT_STATS_QF_PROJECTION		false
+#define PRINT_STATS_QF_PROJECTION		true
 #define PRINT_STATS_PRODUCT			    false
 #define PRINT_STATS_TERNARY_PRODUCT		false
 #define PRINT_STATS_NARY_PRODUCT		false
@@ -442,6 +442,7 @@ public:
 #define OPT_INCREMENTAL_LEVEL_PRE			true    // < Will compute the novel pre, that ascends by one level in bdd each step, with subsumption and stuff (THIS IS HEAVEN!)
 #define OPT_FORCE_INTERMEDIATE_COMPUTATION  false   // < Will compute the rest of the intermediate stuff in worklist
 #define OPT_MERGE_FIRST_ORDER_QUANTIFIERS   false   // < Will merge the first order quantifiers
+#define OPT_PUMP_SUBSUMED_BY_CACHE          true    // < Will pump the subsumedby cache by transitive closure
 
 /* >>> Static Assertions <<< *
  *****************************/

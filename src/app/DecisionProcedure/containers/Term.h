@@ -734,6 +734,7 @@ protected:
     void _InitializeProjectedSymbol(Workshops::SymbolWorkshop* form, Gaston::VarList*, IdentList*, Symbol*);
     void _EnqueueInWorklist(Term_ptr, IntersectNonEmptyParams&, bool enqueueNext = true);
     void _EnqueueSingleLevelInWorklist(Term_ptr, size_t, char);
+    void _PumpSubsumedByCache(Term_ptr);
     SubsumedType _IsSubsumedCore(Term* t, Term** new_term, SubsumptionTestParams params);
     std::pair<SubsumedType, Term_ptr> _fixpointTest(Term_ptr const& term, SubsumedByParams);
     std::pair<SubsumedType, Term_ptr> _testIfSubsumes(Term_ptr const& term, SubsumedByParams);
