@@ -7,7 +7,20 @@
 
 Node::Node(Term* term, TransitiveCache* transitiveCache) : _term(term), _cache(transitiveCache) {
 #   if (DEBUG_TRANSITIVE_CACHE == true)
-    this->_bddStr = term->DumpToDot(_cache->dotOut);
+    if(!term->IsIntermediate()) {
+        this->_bddStr = term->DumpToDot(_cache->dotOut);
+        if (term->link != nullptr && !term->IsIntermediate()) {
+            Term_ptr iter = term->link->succ;
+            while (iter != nullptr && iter->link->succ != nullptr && iter->IsIntermediate()) {
+                iter = iter->link->succ;
+            }
+
+            if (iter != nullptr) {
+                Node *pre = _cache->_LookUpNode(iter);
+                _cache->dotOut << pre->_bddStr << " -> " << this->_bddStr << " [style=\"dashed\"]\n";
+            }
+        }
+    }
 #   endif
 }
 
@@ -35,7 +48,6 @@ bool TransitiveCache::LookUp(RelationKey const& key, Gaston::SubsumptionResultPa
     if(key.first->node == nullptr || key.second->node == nullptr) {
         return false;
     } else if(key.first->node->_region != key.second->node->_region) {
-        assert(key.first->node->_region != nullptr);
         return false;
     } else if(key.first != key.second) {
         return this->_cache.retrieveFromCache(key, data);
@@ -73,7 +85,9 @@ void TransitiveCache::_AddEdgeWithTransitiveClosure(Node* from, Node* to) {
     // Create link between @p from and @p to
     this->_AddEdge(from, to);
 #   if (DEBUG_TRANSITIVE_CACHE == true)
-    this->dotOut << "\t" << from->_bddStr << " -> " << to->_bddStr << "\n";
+    if(!from->_term->IsIntermediate()) {
+        this->dotOut << "\t" << from->_bddStr << " -> " << to->_bddStr << "\n";
+    }
 #   endif
 
     // Create links to achieve transitivity

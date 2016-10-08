@@ -14,7 +14,7 @@
 #include <fstream>
 #include <sstream>
 
-#define DEBUG_TRANSITIVE_CACHE false
+#define DEBUG_TRANSITIVE_CACHE true
 
 struct Term;
 class TransitiveCache;
@@ -53,6 +53,7 @@ struct RelationKeyHash {
 };
 
 class TransitiveCache {
+    friend struct Node;
 public:
     TransitiveCache() {
         ++TransitiveCache::cacheCount;
