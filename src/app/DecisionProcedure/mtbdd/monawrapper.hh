@@ -110,6 +110,7 @@ private:
     using WrappedNode       = struct WrappedNode;
     using InternalNodesType = std::unordered_map<unsigned, WrappedNode *>;
     using SetType           = std::unordered_set<WrappedNode *>;
+    using VarSetType        = std::unordered_set<unsigned int>;
     using VarList           = VectorType;
     using KeyType			= std::pair<WrappedNode *, Gaston::BitMask>;
     using CacheType			= BinaryCache<KeyType, VectorType, HashType, PairCompare<KeyType>, Gaston::dumpKey, Gaston::dumpData>;
@@ -125,7 +126,7 @@ protected:
     Gaston::BitMask mask_;
     Gaston::BitMask* masks_;
     Gaston::BitMask* symbolMasks_;
-    VarList* nonOccuringVars_;
+    VarSetType occuringVars_;
     CacheType cache_;
     static boost::object_pool<WrappedNode> nodePool_;
 
@@ -221,6 +222,7 @@ private:
         else
         {
             node.var_ = SetVar(varMap[index]);
+            this->occuringVars_.insert(varMap[index]-1);
             RecSetPointer(bddm, l, *spawnNode(l, node, 0));
             RecSetPointer(bddm, r, *spawnNode(r, node, 1));
         }
@@ -699,11 +701,15 @@ public:
      * @param[in]  numVars  number of variables in automaton (corresponds to bdd levels)
      */
     MonaWrapper(DFA *dfa, bool emptyTracks, VarList* vars, unsigned numVars = 0)
-            : dfa_(dfa), numVars_(numVars), initialState_(emptyTracks ? 0 : 1), nonOccuringVars_(vars)
+            : dfa_(dfa), numVars_(numVars), initialState_(emptyTracks ? 0 : 1)
     {
         // Resize the roots and leaves
         roots_.resize(dfa->ns, nullptr);
         leafNodes_.resize(dfa->ns, nullptr);
+
+        for(auto var = vars->begin(); var != vars->end(); ++var) {
+            this->occuringVars_.insert(*var);
+        }
 
         // Create a mask for the optimized pre
         mask_.resize(numVars_ << 1);
@@ -962,6 +968,10 @@ public:
     VectorType Pre(VATA::Util::OrdVector<size_t> &states, const boost::dynamic_bitset<> &symbol, size_t var, char val) {
         assert(var < this->numVars_ || this->numVars_ == 0);
         assert(dfa_ != nullptr);
+
+        if(var != 0 && var != varMap.TrackLength() - 1 && this->occuringVars_.find(var) == this->occuringVars_.end()) {
+            return states;
+        }
 
         SetType sources, dest;
         WrappedNode* node;

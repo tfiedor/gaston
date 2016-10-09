@@ -14,7 +14,7 @@
 #include <fstream>
 #include <sstream>
 
-#define DEBUG_TRANSITIVE_CACHE true
+#define DEBUG_TRANSITIVE_CACHE false
 
 struct Term;
 class TransitiveCache;

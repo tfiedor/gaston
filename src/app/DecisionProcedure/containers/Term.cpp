@@ -2324,6 +2324,23 @@ void TermFixpoint::_EnqueueInWorklist(Term_ptr term, IntersectNonEmptyParams& pa
 #   endif
 }
 
+bool is_skippable(size_t looked_up_var, VarList* vars) {
+    for(auto var = vars->begin(); var != vars->end(); ++var) {
+        if(*var == looked_up_var) {
+            ++var;
+            if(*var == looked_up_var + 1) {
+                return true;
+            } else {
+                return false;
+            }
+        } else if(*var > looked_up_var) {
+            break;
+        }
+    }
+
+    return false;
+}
+
 void TermFixpoint::_ProcessComputedResult(std::pair<Term_ptr, bool>& result, bool isBaseFixpoint, IntersectNonEmptyParams& params) {
     // If it is subsumed by fixpoint, we don't add it
     auto fix_result = this->_fixpointTest(result.first, SubsumedByParams(false, params.variableLevel));
