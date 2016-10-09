@@ -557,6 +557,7 @@ void Term::Complement() {
 }
 
 /**
+ * //Fixme: Rename this shit
  * Sets the same link as for the @p term. If there is already some link formed, we let it be.
  *
  * @param[in]  term  term we are aliasing link with
@@ -568,6 +569,11 @@ void Term::SetSameSuccesorAs(Term* term) {
         this->link->val = term->link->val;
         this->link->var = term->link->var;
         this->link->len = term->link->len;
+    }
+    if(term->IsIntermediate()) {
+        this->SetIsIntermediate();
+    } else {
+        this->ResetIsIntermediate();
     }
 }
 

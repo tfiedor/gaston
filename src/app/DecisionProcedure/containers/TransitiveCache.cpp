@@ -59,11 +59,13 @@ bool TransitiveCache::LookUp(RelationKey const& key, Gaston::SubsumptionResultPa
 }
 
 void TransitiveCache::StoreIn(RelationKey const& key, Gaston::SubsumptionResultPair& data) {
-    assert(data.first == SubsumedType::YES);
+    assert(data.first != SubsumedType::NOT);
     if(key.first != key.second) {
         // Assert that it is not in graph already
         this->_cache.StoreIn(key, data);
-        this->_AddEdgeWithTransitiveClosure(key.second, key.first);
+        if(data.first == SubsumedType::YES) {
+            this->_AddEdgeWithTransitiveClosure(key.second, key.first);
+        }
     }
 }
 
