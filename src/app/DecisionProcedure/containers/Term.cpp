@@ -457,6 +457,16 @@ TermFixpoint::TermFixpoint(Aut_ptr aut, Term_ptr startingTerm, Symbol* symbol, b
     }
 #   endif
 
+    auto it = this->_fixpoint.begin();
+    ++it;
+    if(initbValue == inComplement || this->_guide == nullptr || this->_guide->CanEarlyTerminate()) {
+        it->isValid = true;
+    } else {
+        it->isValid = false;
+        --this->_validCount;
+        this->_bValue = inComplement;
+    }
+
     // Initialize the aggregate function
     this->_InitializeAggregateFunction(inComplement);
     SET_VALUE_NON_MEMBERSHIP_TESTING(this, inComplement);
@@ -1092,7 +1102,7 @@ SubsumedType TermFixpoint::_IsSubsumedCore(Term* t, Term** new_term, Subsumption
 
 #   if (OPT_SHORTTEST_FIXPOINT_SUB == true)
     // Will tests only generators and symbols
-    if(are_source_symbols_same && this->_sourceTerm != nullptr && tt->_sourceTerm != nullptr) {
+    if(are_source_symbols_same && this->_sourceTerm != nullptr && tt->_sourceTerm != nullptr &&  this->_sourceTerm == tt->_sourceTerm) {
         return this->_sourceTerm->IsSubsumed(tt->_sourceTerm, nullptr, params);
     }
 #   endif
@@ -1110,8 +1120,12 @@ SubsumedType TermFixpoint::_IsSubsumedCore(Term* t, Term** new_term, Subsumption
         assert(result == SubsumedType::YES);
     }
 
+#   if (OPT_MORE_CONSERVATIVE_SUB_TEST == true)
     return ( (this->_worklist.size() == 0 /*&& tt->_worklist.size() == 0*/) ? SubsumedType::YES : (are_source_symbols_same ? SubsumedType::YES : SubsumedType::NOT));
     // Happy reading ^^                   ^---- Fixme: maybe this is incorrect?
+#   else
+    return SubsumedType::YES;
+#   endif
 }
 
 /**
@@ -2370,7 +2384,8 @@ void TermFixpoint::_ProcessComputedResult(std::pair<Term_ptr, bool>& result, boo
 
     _updated = true;
     // Aggregate the result of the fixpoint computation
-    _bValue = this->_AggregateResult(_bValue,result.second);
+    if(!fix_result.second->IsIntermediate())
+        _bValue = this->_AggregateResult(_bValue,result.second);
     if(isBaseFixpoint) {
         // Push new symbols from _symList
         this->_EnqueueInWorklist(fix_result.second, params);

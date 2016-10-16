@@ -26,14 +26,18 @@ struct Node {
     std::unordered_set<struct Node*> _preds;
     std::unordered_set<struct Node*> _succs;
     size_t* _region = nullptr;
-    TransitiveCache* _cache;
 #   if (DEBUG_TRANSITIVE_CACHE == true)
+    TransitiveCache* _cache;
     std::string _bddStr;
 #   endif
     static boost::object_pool<size_t> regionPool;
     static size_t regionNumber;
 
+#   if (DEBUG_TRANSITIVE_CACHE == true)
     Node(Term* term, TransitiveCache* transitiveCache);
+#   else
+    Node(Term* term);
+#   endif
     static void ClassifyRegions(Node*, Node*);
 };
 

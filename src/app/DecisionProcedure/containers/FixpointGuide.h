@@ -25,6 +25,7 @@ public:
     GuideTip GiveTip(Term*, Symbol*);
     GuideTip GiveTip(Term*);
     GuideTip GiveTipForIncremental(Term*, size_t, char);
+    bool CanEarlyTerminate();
 
     friend std::ostream &operator<<(std::ostream &stream, const FixpointGuide &);
 };

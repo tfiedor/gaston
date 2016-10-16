@@ -157,6 +157,17 @@ GuideTip FixpointGuide::GiveTip(Term* term) {
     if(term->type == TermType::EMPTY) {
         return GuideTip::G_THROW;
     } else {
-        return GuideTip::G_PROJECT;
+        return GuideTip::G_FRONT;
     }
+}
+
+/**
+ * @brief Returns true if the fixpoint can early terminate
+ *
+ * If there are no first order variables bound to this fixpoint, we can early terminate.
+ *
+ * @return:  true if the fixpoint can early terminate, i.e. if epsilon is in base
+ */
+bool FixpointGuide::CanEarlyTerminate() {
+    return this->_vars.size() == 0;
 }

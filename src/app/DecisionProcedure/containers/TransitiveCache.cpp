@@ -5,8 +5,8 @@
 #include "TransitiveCache.h"
 #include "Term.h"
 
-Node::Node(Term* term, TransitiveCache* transitiveCache) : _term(term), _cache(transitiveCache) {
 #   if (DEBUG_TRANSITIVE_CACHE == true)
+Node::Node(Term* term, TransitiveCache* transitiveCache) : _term(term), _cache(transitiveCache) {
     if(!term->IsIntermediate()) {
         this->_bddStr = term->DumpToDot(_cache->dotOut);
         if (term->link != nullptr && !term->IsIntermediate()) {
@@ -21,8 +21,12 @@ Node::Node(Term* term, TransitiveCache* transitiveCache) : _term(term), _cache(t
             }
         }
     }
-#   endif
 }
+#   else
+Node::Node(Term *term) : _term(term) {
+
+}
+#   endif
 
 void Node::ClassifyRegions(Node* from, Node* to) {
     assert(from != nullptr);
@@ -107,7 +111,11 @@ void TransitiveCache::_AddEdgeWithTransitiveClosure(Node* from, Node* to) {
 
 Node* TransitiveCache::_LookUpNode(Term* const& key) {
     if(key->node == nullptr) {
+#       if (DEBUG_TRANSITIVE_CACHE == true)
         key->node = TransitiveCache::_nodePool.construct(key, static_cast<TransitiveCache*>(this));
+#       else
+        key->node = TransitiveCache::_nodePool.construct(key);
+#       endif
     }
 
     return key->node;

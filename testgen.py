@@ -208,9 +208,26 @@ def generate_veanes(n, alt):
     return string
 
 
+def generate_veanes_ml(n, alt):
+    if n < alt or n < 3:
+        print("[*] Skipping n = {}".format(n))
+        return None;
+    string = ""
+    string += "".join("(Ex (FO, ".format() for i in range(1, n - alt + 1))
+    string += "".join("(Not (Ex (FO, ".format() for i in range(n-alt+1, n+1))
+    base = "And(Less ({0}, {1}), Less({1}, {2}))".format(n-3, n-2, n-1)
+    i = n - 4
+    while i >= 0:
+        base = "And(Less ({0}, {1}), ".format(i, i+1) + base + ")"
+        i -= 1
+    string += base
+    string += ")"*( (n - alt)*2 + alt*3)
+    return string
+
+
 def generate_formulae(options, benchmark_name, up_to, alts, generator, zeroFill):
     for i in range(1, up_to + 1):
-        if alts == 0 and benchmark_name != "veanes":
+        if alts == 0 and benchmark_name != "veanes" and benchmark_name != "veanes_ml":
             formula = generator(i)
         else:
             formula = generator(i, alts)
@@ -237,7 +254,7 @@ if __name__ == '__main__':
     alts = 0 if not generate_alternating else int(options.generate_alt[2])
 
     try:
-        if generate_alternating and benchmark_name != "veanes":
+        if generate_alternating and benchmark_name != "veanes" and benchmark_name != "veanes_ml":
             method_name = "generate_" + benchmark_name + "_"
             if alts % 2 == 0:
                 method_name += "even_alts"

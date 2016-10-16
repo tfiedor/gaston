@@ -278,7 +278,7 @@ public:
 #define DEBUG_MONA_DFA					false
 #define DEBUG_MONA_CODE_FORMULA			false
 #define DEBUG_RESTRICTIONS				false
-#define DEBUG_FIXPOINT 				    false
+#define DEBUG_FIXPOINT 				    true
 #define DEBUG_FIXPOINT_WORKLIST		    true
 #define DEBUG_FIXPOINT_SYMBOLS		    false
 #define DEBUG_FIXPOINT_SYMBOLS_INIT     false
@@ -443,6 +443,7 @@ public:
 #define OPT_FORCE_INTERMEDIATE_COMPUTATION  false   // < Will compute the rest of the intermediate stuff in worklist
 #define OPT_MERGE_FIRST_ORDER_QUANTIFIERS   false   // < Will merge the first order quantifiers
 #define OPT_PUMP_SUBSUMED_BY_CACHE          true    // < Will pump the subsumedby cache by transitive closure
+#define OPT_MORE_CONSERVATIVE_SUB_TEST      false   // < The test for fixpoint subsumption will be more conservative (more correct? :> )
 
 /* >>> Static Assertions <<< *
  *****************************/

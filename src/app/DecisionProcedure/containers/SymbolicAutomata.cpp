@@ -1313,11 +1313,11 @@ ResultType ProjectionAutomaton::_IntersectNonEmptyCore(Symbol* symbol, Term* fin
 #       endif
 
         // Early evaluation of fixpoint
-        if(result.second == !underComplement) {
-            #if (OPT_REDUCE_FULL_FIXPOINT == true)
-            //fixpoint->RemoveIntermediate();
+        if(result.second == !underComplement && (this->_guide == nullptr || this->_guide->CanEarlyTerminate())) {
+#           if (OPT_REDUCE_FULL_FIXPOINT == true)
+            fixpoint->RemoveIntermediate();
             fixpoint->RemoveSubsumed();
-            #endif
+#           endif
             return std::make_pair(fixpoint, result.second);
         }
 
@@ -1332,7 +1332,7 @@ ResultType ProjectionAutomaton::_IntersectNonEmptyCore(Symbol* symbol, Term* fin
 
         // Return (fixpoint, bool)
         #if (OPT_REDUCE_FULL_FIXPOINT == true)
-        //fixpoint->RemoveIntermediate();
+        fixpoint->RemoveIntermediate();
         fixpoint->RemoveSubsumed();
         #endif
         return std::make_pair(fixpoint, fixpoint->GetResult());
