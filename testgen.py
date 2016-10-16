@@ -164,6 +164,18 @@ def generate_horn_trans(n):
     return string
 
 
+def generate_toss(n):
+    if n < 2:
+        print("[*] Skipping n = {}".format(n))
+        return None
+
+    string = "ws1s;\n" + "ex2 X: all1 "
+    string += ", ".join(["x" + str(i) for i in range(1, n+1)]) + ": ("
+    string += " & ".join(["(x{0} in X => x{1} in X)".format(i, i+1) for i in range(1, n)])
+    string += ");"
+    return string
+
+
 def generate_horn_sub_odd_alts(n, alt):
     if n < alt+1:
         print("[*] Skipping n = {}".format(n))

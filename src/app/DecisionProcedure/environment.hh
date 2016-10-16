@@ -278,7 +278,7 @@ public:
 #define DEBUG_MONA_DFA					false
 #define DEBUG_MONA_CODE_FORMULA			false
 #define DEBUG_RESTRICTIONS				false
-#define DEBUG_FIXPOINT 				    true
+#define DEBUG_FIXPOINT 				    false
 #define DEBUG_FIXPOINT_WORKLIST		    true
 #define DEBUG_FIXPOINT_SYMBOLS		    false
 #define DEBUG_FIXPOINT_SYMBOLS_INIT     false
@@ -419,7 +419,6 @@ public:
 #define OPT_NO_SATURATION_FOR_M2L			true    // < Will not saturate the final states for M2L(str) logic
 #define OPT_SHORTTEST_FIXPOINT_SUB			false   // (-) < Will check the generators instead of of whole fixpoints
 #define OPT_UNIQUE_FIXPOINTS_BY_SUB			false   // < Fixpoints will not be unique by equality but by subsumption (Fixme: This is most likely incorrect)
-#define OPT_UNFOLD_FIX_DURING_SUB			false   // (0) < During the fixpoint testing if there are things in fixpoint, unfold maybe?
 #define OPT_PARTIALLY_LIMITED_SUBSUMPTION	-1		// < Will limited the subsumption testing to certain depth (-1 = unlimited)
 #define OPT_WORKLIST_DRIVEN_BY_RESTRICTIONS true    // < Worklist will be initialized according to the restrictions
 #define OPT_DRIVE_QUANTIFIER_FREE			true	// < Drive the quantifier free fixpoints
@@ -443,7 +442,8 @@ public:
 #define OPT_FORCE_INTERMEDIATE_COMPUTATION  false   // < Will compute the rest of the intermediate stuff in worklist
 #define OPT_MERGE_FIRST_ORDER_QUANTIFIERS   false   // < Will merge the first order quantifiers
 #define OPT_PUMP_SUBSUMED_BY_CACHE          true    // < Will pump the subsumedby cache by transitive closure
-#define OPT_MORE_CONSERVATIVE_SUB_TEST      false   // < The test for fixpoint subsumption will be more conservative (more correct? :> )
+#define OPT_MORE_CONSERVATIVE_SUB_TEST      true    // < The test for fixpoint subsumption will be more conservative (more correct? :> )
+#define OPT_UNFOLD_FIX_DURING_SUB			true    // < During the fixpoint testing if there are things in fixpoint, unfold maybe?
 
 /* >>> Static Assertions <<< *
  *****************************/

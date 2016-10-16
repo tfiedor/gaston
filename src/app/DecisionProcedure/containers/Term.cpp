@@ -1092,7 +1092,7 @@ SubsumedType TermFixpoint::_IsSubsumedCore(Term* t, Term** new_term, Subsumption
     // Reinterpret
     TermFixpoint* tt = static_cast<TermFixpoint*>(t);
 
-#   if (OPT_UNFOLD_FIX_DURING_SUB == false)
+#   if (OPT_MORE_CONSERVATIVE_SUB_TEST == true)
     bool are_source_symbols_same = TermFixpoint::_compareSymbols(*this, *tt);
     // Worklists surely differ
     if(!are_source_symbols_same && (this->_worklist.size() != 0) ) {
@@ -1100,16 +1100,24 @@ SubsumedType TermFixpoint::_IsSubsumedCore(Term* t, Term** new_term, Subsumption
     }
 #   endif
 
-#   if (OPT_SHORTTEST_FIXPOINT_SUB == true)
-    // Will tests only generators and symbols
-    if(are_source_symbols_same && this->_sourceTerm != nullptr && tt->_sourceTerm != nullptr &&  this->_sourceTerm == tt->_sourceTerm) {
-        return this->_sourceTerm->IsSubsumed(tt->_sourceTerm, nullptr, params);
-    }
-#   endif
-
-    // Do the piece-wise comparison
     Term* tptr = nullptr;
+
     SubsumedType result;
+#   if (OPT_UNFOLD_FIX_DURING_SUB == true)
+    Term_ptr fixpointMember;
+    auto it = this->GetIterator();
+    size_t term_level = (this->GetSemantics() == FixpointSemanticType::FIXPOINT ? 0 : this->_symbolPart.level);
+    while( (fixpointMember = it.GetNext()) != nullptr) {
+        if( (result = fixpointMember->IsSubsumedBy(tt, tptr, SubsumedByParams(true, term_level))) == SubsumedType::NOT) {
+            --this->_iteratorNumber;
+            return SubsumedType::NOT;
+        }
+        assert(result == SubsumedType::YES);
+    }
+
+    return SubsumedType::YES;
+#   else
+    // Do the piece-wise comparison
     for(FixpointMember& item : this->_fixpoint) {
         // Skip the nullpt
         if(item.term == nullptr || !item.isValid) continue;
@@ -1125,6 +1133,7 @@ SubsumedType TermFixpoint::_IsSubsumedCore(Term* t, Term** new_term, Subsumption
     // Happy reading ^^                   ^---- Fixme: maybe this is incorrect?
 #   else
     return SubsumedType::YES;
+#   endif
 #   endif
 }
 

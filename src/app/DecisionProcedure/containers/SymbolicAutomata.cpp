@@ -1315,14 +1315,14 @@ ResultType ProjectionAutomaton::_IntersectNonEmptyCore(Symbol* symbol, Term* fin
         // Early evaluation of fixpoint
         if(result.second == !underComplement && (this->_guide == nullptr || this->_guide->CanEarlyTerminate())) {
 #           if (OPT_REDUCE_FULL_FIXPOINT == true)
-            fixpoint->RemoveIntermediate();
+            //fixpoint->RemoveIntermediate();
             fixpoint->RemoveSubsumed();
 #           endif
             return std::make_pair(fixpoint, result.second);
         }
 
         // While the fixpoint is not fully unfolded and while we cannot evaluate early
-        while( ((fixpointTerm = it.GetNext()) != nullptr) && (fixpointTerm->IsIntermediate() || underComplement == fixpoint->GetResult())) {
+        while( ((fixpointTerm = it.GetNext()) != nullptr)/* && (fixpointTerm->IsIntermediate() || underComplement == fixpoint->GetResult())*/) {
             //                                                ^--- is this right?
             #if (MEASURE_PROJECTION == true)
             ++this->fixpointNext;
@@ -1332,7 +1332,7 @@ ResultType ProjectionAutomaton::_IntersectNonEmptyCore(Symbol* symbol, Term* fin
 
         // Return (fixpoint, bool)
         #if (OPT_REDUCE_FULL_FIXPOINT == true)
-        fixpoint->RemoveIntermediate();
+        //fixpoint->RemoveIntermediate();
         fixpoint->RemoveSubsumed();
         #endif
         return std::make_pair(fixpoint, fixpoint->GetResult());
@@ -1344,7 +1344,7 @@ ResultType ProjectionAutomaton::_IntersectNonEmptyCore(Symbol* symbol, Term* fin
 
         if(params.variableLevel == 0) {
             // Compute as many things as possible, until lazyness hits
-            while( ((fixpointTerm = it.GetNext()) != nullptr) && (underComplement == fixpoint->GetResult())) {
+            while( ((fixpointTerm = it.GetNext()) != nullptr)/* && (underComplement == fixpoint->GetResult())*/) {
                 assert(!fixpointTerm->IsIntermediate());
 #               if (MEASURE_PROJECTION == true)
                 ++this->fixpointPreNext;
@@ -1359,7 +1359,7 @@ ResultType ProjectionAutomaton::_IntersectNonEmptyCore(Symbol* symbol, Term* fin
             return std::make_pair(fixpoint, fixpoint->GetResult());
         } else {
             // We compute at least something
-            while( ((fixpointTerm = it.GetNext()) != nullptr) && (underComplement == fixpoint->GetResult())) {}
+            while( ((fixpointTerm = it.GetNext()) != nullptr)/* && (underComplement == fixpoint->GetResult())*/) {}
             if(fixpoint->InComplement() != finalApproximation->InComplement()) {
                 assert(fixpoint->type != TermType::EMPTY);
                 fixpoint->Complement();
