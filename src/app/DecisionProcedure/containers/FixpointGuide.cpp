@@ -157,7 +157,7 @@ GuideTip FixpointGuide::GiveTip(Term* term) {
     if(term->type == TermType::EMPTY) {
         return GuideTip::G_THROW;
     } else {
-        return GuideTip::G_FRONT;
+        return GuideTip::G_PROJECT;
     }
 }
 

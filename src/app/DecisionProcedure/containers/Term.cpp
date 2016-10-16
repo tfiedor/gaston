@@ -85,6 +85,7 @@ extern Ident lastPosVar, allPosVar;
 // <<< TERM CONSTRUCTORS AND DESTRUCTORS >>>
 Term::Term(Aut_ptr aut) : _aut(aut) {
     this->link = new link_t(nullptr, nullptr, 0);
+    this->ResetIsIntermediate();
 }
 Term::~Term() {
     delete this->link;
@@ -2393,8 +2394,10 @@ void TermFixpoint::_ProcessComputedResult(std::pair<Term_ptr, bool>& result, boo
 
     _updated = true;
     // Aggregate the result of the fixpoint computation
-    if(!fix_result.second->IsIntermediate())
-        _bValue = this->_AggregateResult(_bValue,result.second);
+    assert(!(fix_result.second->IsIntermediate() && OPT_INCREMENTAL_LEVEL_PRE == false));
+    if(!fix_result.second->IsIntermediate()) {
+        _bValue = this->_AggregateResult(_bValue, result.second);
+    }
     if(isBaseFixpoint) {
         // Push new symbols from _symList
         this->_EnqueueInWorklist(fix_result.second, params);
@@ -2998,10 +3001,6 @@ bool TermFixpoint::_eqCore(const Term &t) {
 }
 
 bool TermFixpoint::_compareSymbols(const TermFixpoint& lhs, const TermFixpoint& rhs) {
-    if(lhs._symbolPart.value != rhs._symbolPart.value || lhs._symbolPart.level != rhs._symbolPart.value) {
-        return false;
-    }
-
 #   if (OPT_INCREMENTAL_LEVEL_PRE == false)
     for(auto symbol : lhs._symList) {
         if(std::find_if(rhs._symList.begin(), rhs._symList.end(), [&symbol](Symbol_ptr s) { return s == symbol;}) == rhs._symList.end()) {
@@ -3009,6 +3008,9 @@ bool TermFixpoint::_compareSymbols(const TermFixpoint& lhs, const TermFixpoint& 
         }
     }
 #   else
+    if(lhs._symbolPart.value != rhs._symbolPart.value || lhs._symbolPart.level != rhs._symbolPart.value) {
+        return false;
+    }
     assert(lhs._symList.size() == 0 && rhs._symList.size() == 0);
 #   endif
 

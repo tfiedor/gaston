@@ -55,7 +55,7 @@ struct IntersectNonEmptyParams {
     size_t variableLevel; // < On which level we are doing the pre currently
     char variableValue;   // < Which value we are limiting the Pre to, i.e. '0', '1' or 'X'
 
-    IntersectNonEmptyParams(bool uC) : underComplement(uC), limitPre(false) {}
+    IntersectNonEmptyParams(bool uC) : underComplement(uC), limitPre(false), variableLevel(0) {}
     IntersectNonEmptyParams(bool uC, bool lP, size_t level, char value)
             : underComplement(uC), limitPre(lP), variableLevel(level), variableValue(value) {}
 };
