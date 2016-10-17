@@ -919,6 +919,7 @@ public:
   ASTTermCode *makeCode(SubstCode *subst = NULL);
   void dump();
 	virtual std::string ToString(bool no_utf = false);
+	virtual ASTTerm2* clone() { return new ASTTerm2_PresbConst(this->value, Pos());}
 
 protected:
   int value;

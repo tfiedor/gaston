@@ -400,7 +400,11 @@ ASTForm* ASTForm_Var0::unfoldMacro(IdentList* fParams, ASTList* rParams) {
 	}
 }
 
-ASTForm* ASTForm_Call::unfoldMacro(IdentList *, ASTList *) {
-	assert(false);
-	return nullptr;
+/**
+ * Dear past me, you are big focker for not implementing this.
+ *
+ * Yours angry future me.
+ */
+ASTForm* ASTForm_Call::unfoldMacro(IdentList* fParams, ASTList* rParams) {
+	return unfoldCall(this, fParams, rParams);
 }

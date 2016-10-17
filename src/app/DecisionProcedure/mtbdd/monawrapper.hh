@@ -734,7 +734,7 @@ public:
         }
 
 
-        for(size_t i = this->initialState_; i < dfa->ns; i++)
+        for(size_t i = 0; i < dfa->ns; i++)
             RecSetPointer(dfa->bddm, dfa->q[i], *spawnNode(dfa->bddm, dfa->q[i], i));
 
         ++MonaWrapper<Data>::_wrapperCount;
@@ -782,7 +782,7 @@ public:
         for(auto node: internalNodes_)
             ofs << node.first << "[label=\"" << node.first << " (" << GetVar(node.second->var_) << ")\"];" << std::endl;
 
-        for(size_t i = this->initialState_; i < roots_.size(); i++) {
+        for(size_t i = 0; i < roots_.size(); i++) {
             if(roots_[i] == nullptr)
                 continue;
             ofs << "s" << i << " -> " << roots_[i]->node_ << ";" << std::endl;
@@ -865,7 +865,7 @@ public:
      */
     void DumpDFA(std::ostream &os) {
         std::string str(this->numVars_, 'X');
-        for(size_t i = this->initialState_; i < this->dfa_->ns; ++i) {
+        for(size_t i = 0; i < this->dfa_->ns; ++i) {
             GetAllPathFromMona(os, this->dfa_->bddm, this->dfa_->q[i], str, i, this->numVars_);
         }
     }
@@ -879,12 +879,12 @@ public:
         os << "Ops\n";
         os << "Automaton anonymous\n";
         os << "States";
-        for(size_t i = this->initialState_; i < this->dfa_->ns; ++i) {
+        for(size_t i = 0; i < this->dfa_->ns; ++i) {
             os << " " << i;
         }
         os << "\n";
         os << "Final States";
-        for(size_t i = this->initialState_; i < this->dfa_->ns; ++i) {
+        for(size_t i = 0; i < this->dfa_->ns; ++i) {
             if(this->dfa_->f[i] == 1) {
                 os << " " << i;
             }
@@ -1020,7 +1020,7 @@ public:
     void ProcessDFA(DFA *dfa)
     {
         dfa_ = dfa;
-        for(size_t i = this->initialState_; i < dfa->ns; i++)
+        for(size_t i = 0; i < dfa->ns; i++)
             RecSetPointer(dfa->bddm, dfa->q[i], *spawnNode(dfa->bddm, dfa->q[i], i));
     }
 
@@ -1096,7 +1096,14 @@ public:
      * @return initial state of MONA DFA
      */
     inline size_t GetInitialState() {
-        return this->initialState_;
+        if(this->initialState_ != 0) {
+            unsigned l, r, index;
+            LOAD_lri(&this->dfa_->bddm->node_table[this->dfa_->q[0]], l, r, index);
+            assert (index == BDD_LEAF_INDEX);
+            return l;
+        } else {
+            return this->initialState_;
+        }
     }
 
     /**

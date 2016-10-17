@@ -655,7 +655,9 @@ SubsumedType Term::IsSubsumed(Term *t, Term** new_term, SubsumptionTestParams pa
     if(this == t) {
         return SubsumedType::YES;
     }
-    assert(t->type == TermType::EMPTY || this->type == TermType::EMPTY || t->IsIntermediate() == this->IsIntermediate());
+    if(t->IsIntermediate() != this->IsIntermediate()) {
+        return SubsumedType::NOT;
+    }
 
 #   if (OPT_PARTIALLY_LIMITED_SUBSUMPTION >= 0)
     if(!params.limit) {
@@ -1093,7 +1095,7 @@ SubsumedType TermFixpoint::_IsSubsumedCore(Term* t, Term** new_term, Subsumption
     // Reinterpret
     TermFixpoint* tt = static_cast<TermFixpoint*>(t);
 
-#   if (OPT_MORE_CONSERVATIVE_SUB_TEST == true)
+#   if (OPT_MORE_CONSERVATIVE_SUB_TEST == true && OPT_UNFOLD_FIX_DURING_SUB == false)
     bool are_source_symbols_same = TermFixpoint::_compareSymbols(*this, *tt);
     // Worklists surely differ
     if(!are_source_symbols_same && (this->_worklist.size() != 0) ) {
@@ -2438,7 +2440,6 @@ void TermFixpoint::ComputeNextMember(bool isBaseFixpoint) {
     // Compute the results
     IntersectNonEmptyParams params(GET_NON_MEMBERSHIP_TESTING(this));
     ResultType result;
-
 #   if (OPT_INCREMENTAL_LEVEL_PRE == true)
     params.limitPre = true;
     params.variableLevel = item.level;
