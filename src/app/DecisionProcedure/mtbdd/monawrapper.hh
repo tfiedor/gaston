@@ -734,7 +734,7 @@ public:
         }
 
 
-        for(size_t i = 0; i < dfa->ns; i++)
+        for(size_t i = this->initialState_; i < dfa->ns; i++)
             RecSetPointer(dfa->bddm, dfa->q[i], *spawnNode(dfa->bddm, dfa->q[i], i));
 
         ++MonaWrapper<Data>::_wrapperCount;

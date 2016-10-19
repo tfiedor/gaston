@@ -1476,7 +1476,7 @@ public:
   VarCode makeCode(SubstCode *subst = NULL);
   void dump();
 	void detach() {this->args = nullptr; }
-  ASTForm* clone() { return new ASTForm_Call(this->n, this->args, this->pos); }
+  ASTForm* clone() { assert(this->args != nullptr); return new ASTForm_Call(this->n, this->args, this->pos); }
   ASTForm* unfoldMacro(IdentList*, ASTList*);
 
   ASTList *args;

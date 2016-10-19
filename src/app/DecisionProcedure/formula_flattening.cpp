@@ -52,6 +52,7 @@ ASTForm* unfoldCall(ASTForm* form, IdentList* fParams, ASTList* rParams) {
 	ASTForm_Call* callForm = static_cast<ASTForm_Call*>(form);
 
 	PredLibEntry* called = predicateLib.lookup(callForm->n);
+	assert(callForm->args != nullptr);
 	ASTList* realParams = static_cast<ASTList*>(callForm->args->copy());
 
 	for(AST** ast = realParams->begin(); ast != realParams->end(); ++ast) {
@@ -62,7 +63,7 @@ ASTForm* unfoldCall(ASTForm* form, IdentList* fParams, ASTList* rParams) {
 	ASTForm* unfoldedFormula = _unfoldCore(clonnedFormula, called->formals, realParams);
 	// Fixme: this is segfaulting something i guess? 
 	//delete realParams;
-	callForm->detach();
+	//callForm->detach();
 	//delete callForm;
 
 	return unfoldedFormula;
@@ -216,8 +217,8 @@ ASTForm* ASTForm_uvf::unfoldMacro(IdentList* fParams, ASTList* rParams) {
 	}
 	while(!rrParams->empty())
 		rrParams->pop_back();
-	delete rrParams;
-	delete ffParams;
+	//delete rrParams;
+	//delete ffParams;
 	return this;
 }
 
@@ -250,8 +251,8 @@ ASTForm* ASTForm_vf::unfoldMacro(IdentList* fParams, ASTList* rParams) {
 	}
 	while(!rrParams->empty())
 		rrParams->pop_back();
-	delete rrParams;
-	delete ffParams;
+	//delete rrParams;
+	//delete ffParams;
 
 	return this;
 }
