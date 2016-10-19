@@ -450,6 +450,11 @@ ASTForm_Var0::dump()
   cout << "Var0 " << symbolTable.lookupSymbol(n);
 }
 
+std::string ASTForm_Var0::ToString(bool no_utf) {
+  std::string var0("Var0");
+  return var0 + symbolTable.lookupSymbol(this->n);
+}
+
 void
 ASTForm_AllPosVar::dump() {
   cout << "AllPos($)";
@@ -753,26 +758,7 @@ std::string ASTForm_Not::ToString(bool no_utf) {
     return ("(\u00AC " + f->ToString(no_utf) + ")");
   }
 }
-    
-void 
-ASTForm_Ex0::dump()
-{
-  #if (PRINT_PRETTY == true)
-  cout << "\u22030("; vl->dump(); cout << ","; f->dump(); cout << ")";
-  #else
-  cout << "Ex0("; vl->dump(); cout << ","; f->dump(); cout << ")";
-  #endif
-}
-    
-void 
-ASTForm_Ex1::dump()
-{
-  #if (PRINT_PRETTY == true)
-  cout << "\u22031("; vl->dump(); cout << ","; f->dump(); cout << ")";
-  #else
-  cout << "Ex1("; vl->dump(); cout << ","; f->dump(); cout << ")";
-  #endif
-}
+
 
 std::string quantifier_to_string(IdentList* free, std::string quantifier) {
   MonaTypeTag tag = (quantifier == "ex1" ? MonaTypeTag::Varname1 : MonaTypeTag::Varname2);
@@ -795,6 +781,31 @@ std::string quantifier_to_string(IdentList* free, std::string quantifier) {
   s += ": ";
   return (s.size() > 6 ? s : "");
 }
+
+void 
+ASTForm_Ex0::dump()
+{
+  #if (PRINT_PRETTY == true)
+  cout << "\u22030("; vl->dump(); cout << ","; f->dump(); cout << ")";
+  #else
+  cout << "Ex0("; vl->dump(); cout << ","; f->dump(); cout << ")";
+  #endif
+}
+
+std::string ASTForm_Ex0::ToString(bool no_utf) {
+  return "(" + quantifier_to_string(this->vl, "ex0") + this->f->ToString(no_utf) + ")";
+}
+
+void 
+ASTForm_Ex1::dump()
+{
+  #if (PRINT_PRETTY == true)
+  cout << "\u22031("; vl->dump(); cout << ","; f->dump(); cout << ")";
+  #else
+  cout << "Ex1("; vl->dump(); cout << ","; f->dump(); cout << ")";
+  #endif
+}
+
 std::string ASTForm_Ex1::ToString(bool no_utf) {
   return "(" +  quantifier_to_string(this->vl, "ex1") + this->f->ToString(no_utf) + ")";
 }
@@ -822,6 +833,10 @@ ASTForm_All0::dump()
   #else
   cout << "All0("; vl->dump(); cout << ","; f->dump(); cout << ")";
   #endif
+}
+
+std::string ASTForm_All0::ToString(bool no_utf) {
+  return "(" + quantifier_to_string(this->vl, "all0") + this->f->ToString(no_utf) + ")";
 }
     
 void 

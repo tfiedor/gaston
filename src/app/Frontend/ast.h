@@ -957,6 +957,7 @@ public:
   ASTForm* clone() { return new ASTForm_Var0(this->n, this->pos); }
   ASTForm* unfoldMacro(IdentList*, ASTList*);
 	int GetVar() { return n;}
+	virtual std::string ToString(bool no_utf = false);
 
   int n;
 };
@@ -1334,6 +1335,7 @@ public:
   VarCode makeCode(SubstCode *subst = NULL);
   void dump();
 	void detach() {this->vl = nullptr; this->f = nullptr;}
+	virtual std::string ToString(bool no_utf = false);
   ASTForm* clone() { return new ASTForm_Ex0(this->vl->copy(), this->f->clone(), this->pos); }
 };
 
@@ -1376,6 +1378,7 @@ public:
   VarCode makeCode(SubstCode *subst = NULL);
   void dump();
 	void detach() {this->vl = nullptr; this->f = nullptr;}
+	virtual std::string ToString(bool no_utf = false);
   ASTForm* clone() { return new ASTForm_All0(this->vl->copy(), this->f->clone(), this->pos); }
 };
 
