@@ -1,0 +1,2 @@
+ws1s;
+ex2 X1, X2, X3, X4, X5, X6, X7, X8, X9: all1 x: ex1 y, z: ~(( (x in X1 & x <= y & y <= z & z in X1) => y in X1 ) & ( (x in X2 & x <= y & y <= z & z in X2) => y in X2 ) & ( (x in X3 & x <= y & y <= z & z in X3) => y in X3 ) & ( (x in X4 & x <= y & y <= z & z in X4) => y in X4 ) & ( (x in X5 & x <= y & y <= z & z in X5) => y in X5 ) & ( (x in X6 & x <= y & y <= z & z in X6) => y in X6 ) & ( (x in X7 & x <= y & y <= z & z in X7) => y in X7 ) & ( (x in X8 & x <= y & y <= z & z in X8) => y in X8 ) & ( (x in X9 & x <= y & y <= z & z in X9) => y in X9 ));

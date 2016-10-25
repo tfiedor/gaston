@@ -1,0 +1,48 @@
+# Automatically generated code
+# Translator Version: v0.1
+# Data: XXXX
+
+# Definition of the constant array variable: 'beta'
+# declaration:
+var1 len_const_beta;
+var2 const_beta_0;
+var2 const_beta_1;
+
+# definition:
+pred def_beta() = (len_const_beta = 4) & 
+	const_beta_0 = {1, 3} & 
+	const_beta_1 = {2, 3};
+
+pred Pxoreq(var0 r, var0 x, var0 y, var0 z) = (r <=> ~(~(x <=> y) <=> z));
+
+pred Pgt2(var0 x, var0 y, var0 z) = (x & y) | (y & z) | (z & x);
+
+pred Peq(var0 x1, var0 x0, var0 y1, var0 y0) = (x0 <=> y0) & (x1 <=> y1);
+
+pred Ple(var0 x1, var0 x0, var0 y1, var0 y0) = (~x1 & y1) | (x1 <=> y1) & ((~x0 & y0) | (x0 <=> y0));
+
+pred Plt(var0 x1, var0 x0, var0 y1, var0 y0) = (~x1 & y1) | (x1 <=> y1) & ((~x0 & y0));
+
+pred Peqplus(var0 x1, var0 x0, var0 y1, var0 y0, var0 z1, var0 z0) = ex2 c: (~(0 in c) & ~(2 in c) & 
+((1 in c) <=> Pgt2(0 in c, y0, z0)) &
+((2 in c) <=> Pgt2(1 in c, y1, z1)) &
+Pxoreq(x0, y0, z0, 0 in c) &
+Pxoreq(x1, y1, z1, 1 in c)
+);
+
+# global variable declaration:
+var2 a_1;
+var2 a_0;
+var1 len_a;
+var2 b_1;
+var2 b_0;
+var1 len_b;
+
+def_beta => 
+((Peq(((0) in a_1), ((0) in a_0), false, false)) & ((0) < (len_a))) & 
+((Peq(((1) in a_1), ((1) in a_0), false, false)) & ((1) < (len_a))) & 
+((Peq(((2) in a_1), ((2) in a_0), true, false)) & ((2) < (len_a))) & 
+((Peq(((3) in a_1), ((3) in a_0), true, false)) & ((3) < (len_a))) & 
+((len_a) = (4)) & 
+((len_b) = (4)) & 
+(all1 i: ((((i) < (4)) & ((Plt(false, false, ((i) in b_1), ((i) in b_0))) & ((i) < (len_b)))) <=> (ex1 j: (ex2 e_2: (((Peq(((j) in a_1), ((j) in a_0), ((1) in e_2), ((0) in e_2))) & ((j) < (len_a))) & ((Peq(((1) in e_2), ((0) in e_2), ((i) in const_beta_1), ((i) in const_beta_0))) & ((i) < (len_const_beta))))))));

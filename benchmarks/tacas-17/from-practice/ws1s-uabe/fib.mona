@@ -1,0 +1,42 @@
+# Automatically generated code
+# Translator Version: v0.1
+# Data: XXXX
+
+pred Pxoreq(var0 r, var0 x, var0 y, var0 z) = (r <=> ~(~(x <=> y) <=> z));
+
+pred Pgt2(var0 x, var0 y, var0 z) = (x & y) | (y & z) | (z & x);
+
+pred Peq(var0 x5, var0 x4, var0 x3, var0 x2, var0 x1, var0 x0, var0 y5, var0 y4, var0 y3, var0 y2, var0 y1, var0 y0) = (x0 <=> y0) & (x1 <=> y1) & (x2 <=> y2) & (x3 <=> y3) & (x4 <=> y4) & (x5 <=> y5);
+
+pred Ple(var0 x5, var0 x4, var0 x3, var0 x2, var0 x1, var0 x0, var0 y5, var0 y4, var0 y3, var0 y2, var0 y1, var0 y0) = (~x5 & y5) | (x5 <=> y5) & ((~x4 & y4) | (x4 <=> y4) & ((~x3 & y3) | (x3 <=> y3) & ((~x2 & y2) | (x2 <=> y2) & ((~x1 & y1) | (x1 <=> y1) & ((~x0 & y0) | (x0 <=> y0))))));
+
+pred Plt(var0 x5, var0 x4, var0 x3, var0 x2, var0 x1, var0 x0, var0 y5, var0 y4, var0 y3, var0 y2, var0 y1, var0 y0) = (~x5 & y5) | (x5 <=> y5) & ((~x4 & y4) | (x4 <=> y4) & ((~x3 & y3) | (x3 <=> y3) & ((~x2 & y2) | (x2 <=> y2) & ((~x1 & y1) | (x1 <=> y1) & ((~x0 & y0))))));
+
+pred Peqplus(var0 x5, var0 x4, var0 x3, var0 x2, var0 x1, var0 x0, var0 y5, var0 y4, var0 y3, var0 y2, var0 y1, var0 y0, var0 z5, var0 z4, var0 z3, var0 z2, var0 z1, var0 z0) = ex2 c: (~(0 in c) & ~(6 in c) & 
+((1 in c) <=> Pgt2(0 in c, y0, z0)) &
+((2 in c) <=> Pgt2(1 in c, y1, z1)) &
+((3 in c) <=> Pgt2(2 in c, y2, z2)) &
+((4 in c) <=> Pgt2(3 in c, y3, z3)) &
+((5 in c) <=> Pgt2(4 in c, y4, z4)) &
+((6 in c) <=> Pgt2(5 in c, y5, z5)) &
+Pxoreq(x0, y0, z0, 0 in c) &
+Pxoreq(x1, y1, z1, 1 in c) &
+Pxoreq(x2, y2, z2, 2 in c) &
+Pxoreq(x3, y3, z3, 3 in c) &
+Pxoreq(x4, y4, z4, 4 in c) &
+Pxoreq(x5, y5, z5, 5 in c)
+);
+
+# global variable declaration:
+var2 f_5;
+var2 f_4;
+var2 f_3;
+var2 f_2;
+var2 f_1;
+var2 f_0;
+var1 len_f;
+
+((6) <= (len_f)) & 
+((Peq(((0) in f_5), ((0) in f_4), ((0) in f_3), ((0) in f_2), ((0) in f_1), ((0) in f_0), false, false, false, false, false, true)) & ((0) < (len_f))) & 
+((Peq(((1) in f_5), ((1) in f_4), ((1) in f_3), ((1) in f_2), ((1) in f_1), ((1) in f_0), false, false, false, false, false, true)) & ((1) < (len_f))) & 
+(all1 i: (((i + 2) < (len_f)) => ((Peqplus(((i + 2) in f_5), ((i + 2) in f_4), ((i + 2) in f_3), ((i + 2) in f_2), ((i + 2) in f_1), ((i + 2) in f_0), ((i + 1) in f_5), ((i + 1) in f_4), ((i + 1) in f_3), ((i + 1) in f_2), ((i + 1) in f_1), ((i + 1) in f_0), ((i) in f_5), ((i) in f_4), ((i) in f_3), ((i) in f_2), ((i) in f_1), ((i) in f_0))) & ((i + 2) < (len_f)) & ((i + 1) < (len_f)) & ((i) < (len_f)))));

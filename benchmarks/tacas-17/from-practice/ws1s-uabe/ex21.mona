@@ -1,0 +1,57 @@
+# Automatically generated code
+# Translator Version: v0.1
+# Data: XXXX
+
+pred Pxoreq(var0 r, var0 x, var0 y, var0 z) = (r <=> ~(~(x <=> y) <=> z));
+
+pred Pgt2(var0 x, var0 y, var0 z) = (x & y) | (y & z) | (z & x);
+
+pred Peq(var0 x7, var0 x6, var0 x5, var0 x4, var0 x3, var0 x2, var0 x1, var0 x0, var0 y7, var0 y6, var0 y5, var0 y4, var0 y3, var0 y2, var0 y1, var0 y0) = (x0 <=> y0) & (x1 <=> y1) & (x2 <=> y2) & (x3 <=> y3) & (x4 <=> y4) & (x5 <=> y5) & (x6 <=> y6) & (x7 <=> y7);
+
+pred Ple(var0 x7, var0 x6, var0 x5, var0 x4, var0 x3, var0 x2, var0 x1, var0 x0, var0 y7, var0 y6, var0 y5, var0 y4, var0 y3, var0 y2, var0 y1, var0 y0) = (~x7 & y7) | (x7 <=> y7) & ((~x6 & y6) | (x6 <=> y6) & ((~x5 & y5) | (x5 <=> y5) & ((~x4 & y4) | (x4 <=> y4) & ((~x3 & y3) | (x3 <=> y3) & ((~x2 & y2) | (x2 <=> y2) & ((~x1 & y1) | (x1 <=> y1) & ((~x0 & y0) | (x0 <=> y0))))))));
+
+pred Plt(var0 x7, var0 x6, var0 x5, var0 x4, var0 x3, var0 x2, var0 x1, var0 x0, var0 y7, var0 y6, var0 y5, var0 y4, var0 y3, var0 y2, var0 y1, var0 y0) = (~x7 & y7) | (x7 <=> y7) & ((~x6 & y6) | (x6 <=> y6) & ((~x5 & y5) | (x5 <=> y5) & ((~x4 & y4) | (x4 <=> y4) & ((~x3 & y3) | (x3 <=> y3) & ((~x2 & y2) | (x2 <=> y2) & ((~x1 & y1) | (x1 <=> y1) & ((~x0 & y0))))))));
+
+pred Peqplus(var0 x7, var0 x6, var0 x5, var0 x4, var0 x3, var0 x2, var0 x1, var0 x0, var0 y7, var0 y6, var0 y5, var0 y4, var0 y3, var0 y2, var0 y1, var0 y0, var0 z7, var0 z6, var0 z5, var0 z4, var0 z3, var0 z2, var0 z1, var0 z0) = ex2 c: (~(0 in c) & ~(8 in c) & 
+((1 in c) <=> Pgt2(0 in c, y0, z0)) &
+((2 in c) <=> Pgt2(1 in c, y1, z1)) &
+((3 in c) <=> Pgt2(2 in c, y2, z2)) &
+((4 in c) <=> Pgt2(3 in c, y3, z3)) &
+((5 in c) <=> Pgt2(4 in c, y4, z4)) &
+((6 in c) <=> Pgt2(5 in c, y5, z5)) &
+((7 in c) <=> Pgt2(6 in c, y6, z6)) &
+((8 in c) <=> Pgt2(7 in c, y7, z7)) &
+Pxoreq(x0, y0, z0, 0 in c) &
+Pxoreq(x1, y1, z1, 1 in c) &
+Pxoreq(x2, y2, z2, 2 in c) &
+Pxoreq(x3, y3, z3, 3 in c) &
+Pxoreq(x4, y4, z4, 4 in c) &
+Pxoreq(x5, y5, z5, 5 in c) &
+Pxoreq(x6, y6, z6, 6 in c) &
+Pxoreq(x7, y7, z7, 7 in c)
+);
+
+# global variable declaration:
+var1 i;
+var1 j;
+var2 x;
+var2 a_7;
+var2 a_6;
+var2 a_5;
+var2 a_4;
+var2 a_3;
+var2 a_2;
+var2 a_1;
+var2 a_0;
+var1 len_a;
+var2 b_7;
+var2 b_6;
+var2 b_5;
+var2 b_4;
+var2 b_3;
+var2 b_2;
+var2 b_1;
+var2 b_0;
+var1 len_b;
+
+((((0) <= (i)) & ((i) < (len_a)) & ((0) <= (j)) & ((j) < (len_a)) & (((len_b) = (len_a)) & ((i) < (len_a)) & (Peq(((i) in b_7), ((i) in b_6), ((i) in b_5), ((i) in b_4), ((i) in b_3), ((i) in b_2), ((i) in b_1), ((i) in b_0), ((7) in x), ((6) in x), ((5) in x), ((4) in x), ((3) in x), ((2) in x), ((1) in x), ((0) in x))) & (all1 nat_0: (((~((nat_0) = (i))) & ((nat_0) < (len_a))) => (Peq(((nat_0) in b_7), ((nat_0) in b_6), ((nat_0) in b_5), ((nat_0) in b_4), ((nat_0) in b_3), ((nat_0) in b_2), ((nat_0) in b_1), ((nat_0) in b_0), ((nat_0) in a_7), ((nat_0) in a_6), ((nat_0) in a_5), ((nat_0) in a_4), ((nat_0) in a_3), ((nat_0) in a_2), ((nat_0) in a_1), ((nat_0) in a_0))))))) => ((((i) = (j)) => ((Peq(((j) in b_7), ((j) in b_6), ((j) in b_5), ((j) in b_4), ((j) in b_3), ((j) in b_2), ((j) in b_1), ((j) in b_0), ((7) in x), ((6) in x), ((5) in x), ((4) in x), ((3) in x), ((2) in x), ((1) in x), ((0) in x))) & ((j) < (len_b)))) & ((~((i) = (j))) => ((Peq(((j) in b_7), ((j) in b_6), ((j) in b_5), ((j) in b_4), ((j) in b_3), ((j) in b_2), ((j) in b_1), ((j) in b_0), ((j) in a_7), ((j) in a_6), ((j) in a_5), ((j) in a_4), ((j) in a_3), ((j) in a_2), ((j) in a_1), ((j) in a_0))) & ((j) < (len_b)) & ((j) < (len_a))))));
