@@ -30,6 +30,7 @@ char charToAsgn(char c) {
 		return 0x03;
 	default:
 		assert(false);
+		abort();
 	}
 }
 

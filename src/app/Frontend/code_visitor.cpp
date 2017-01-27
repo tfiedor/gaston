@@ -23,6 +23,7 @@ void void_traverse_c(Code* code, VoidCodeVisitor &v) {
             break;
         default:
             assert(false && "Traversing Code_c not implemented yet");
+            abort();
     }
 }
 
@@ -53,6 +54,7 @@ void void_traverse_cc(Code* code, VoidCodeVisitor &v) {
             break;
         default:
             assert(false && "Traversing Code_cc not implemented yet");
+            abort();
     }
 }
 
@@ -297,6 +299,7 @@ RetCode traverse_c(Code* code, TransformerCodeVisitor &v) {
             return v.visit(code);
         default:
             assert(false && "Traversing Code_c not implemented yet");
+            abort();
     }
 }
 
@@ -328,6 +331,7 @@ RetCode traverse_cc(Code* code, TransformerCodeVisitor &v) {
             return temp;
         default:
             assert(false && "Traversing Code_cc not implemented yet");
+            abort();
     }
 }
 

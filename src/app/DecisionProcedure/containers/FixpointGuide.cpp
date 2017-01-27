@@ -106,7 +106,7 @@ bool has_no_predecessor(Term* term) {
 
         // We check whether the whole track was subtracted
         while(iter != nullptr && iter->link->succ != nullptr && iter != iter->link->succ) {
-            if(prev >= iter->link->var) {
+            if(prev >= 0 && static_cast<unsigned int>(prev) >= iter->link->var) {
                 break;
             }
             count += (iter->link->var - prev);

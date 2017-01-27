@@ -11,7 +11,7 @@
 class SymbolicChecker : public Checker {
 public:
     // <<< PUBLIC CONSTRUCTORS >>>
-    SymbolicChecker() : _automaton(nullptr), Checker() {}
+    SymbolicChecker() : Checker(), _automaton(nullptr) {}
     ~SymbolicChecker();
 
     void ConstructAutomaton();

@@ -17,7 +17,7 @@
 #include "../../../Frontend/symboltable.h"
 #include "../../environment.hh"
 
-class [[deprecated]] Flattener : public TransformerVisitor {
+class Flattener : public TransformerVisitor {
 public:
     Flattener() : TransformerVisitor(Traverse::PostOrder) {}
 

@@ -857,7 +857,7 @@ void convertMonaToVataAutomaton(Automaton& v_aut, DFA* m_aut, IdentList* vars, i
 	char* transition = new char[varNum+1];
 	int usedVarNum = vars->size();
 
-	paths state_paths, pp;
+	paths pp;
 	trace_descr tp;
 
 	// add initial transition
@@ -869,7 +869,8 @@ void convertMonaToVataAutomaton(Automaton& v_aut, DFA* m_aut, IdentList* vars, i
 		}
 	#endif
 
-	for (unsigned int i = 1; i < m_aut->ns; ++i) {
+	assert(m_aut->ns >= 0);
+	for (unsigned int i = 1; i < static_cast<unsigned int>(m_aut->ns); ++i) {
 	//                ^--- my assumption why this is correct:
 	// MONA has one additional transition 0 -(X*)-> 1 for zeroth order variables
 	// since we are not using this, we can skip it
@@ -878,7 +879,7 @@ void convertMonaToVataAutomaton(Automaton& v_aut, DFA* m_aut, IdentList* vars, i
 			setFinalState(v_aut, false, i);
 		}
 
-		state_paths = pp = make_paths(m_aut->bddm, m_aut->q[i]);
+		pp = make_paths(m_aut->bddm, m_aut->q[i]);
 
 		while(pp) {
 			// construct the transition

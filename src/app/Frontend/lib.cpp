@@ -163,7 +163,10 @@ AutLib::Dir::Dir(char *name, char *src, Deque<char*> *dependencies)
 		dirname, 
 		(options.mode == TREE) ? ".gta" : ".dfa",
 		dirname);
-	system(t);
+	int retval = system(t);
+    if(retval) {
+      std::cerr << "system(t) returned with error\n";
+    }
 	break;
       }
     }

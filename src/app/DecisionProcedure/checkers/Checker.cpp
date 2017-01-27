@@ -147,7 +147,7 @@ void Checker::_startTimer(Timer &t) {
  * @param[in] t:                    timer we are stopping
  * @param[in] additionalMessage:    additional stuff we are outing
  */
-void Checker::_stopTimer(Timer &t, char* additionalMessage) {
+void Checker::_stopTimer(Timer &t, std::string additionalMessage) {
     t.stop();
     if(this->_printProgress) {
         std::cout << "[*] " << additionalMessage;

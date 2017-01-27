@@ -10,7 +10,7 @@ extern VarToTrackMap varMap;
 namespace Workshops {
     NEVER_INLINE TermWorkshop::TermWorkshop(SymbolicAutomaton* aut) :
             _bCache(nullptr), _ubCache(nullptr), _pCache(nullptr), _tpCache(nullptr), _npCache(nullptr), _lCache(nullptr),
-            _fpCache(nullptr), _fppCache(nullptr), _fplCache(nullptr), _contCache(nullptr),_compCache(nullptr), _aut(aut) { }
+            _fpCache(nullptr), _fppCache(nullptr), _contCache(nullptr), _fplCache(nullptr),_compCache(nullptr), _aut(aut) { }
 
     template<class A, class B, class C, class D, void (*E)(const A&), void (*F)(B&)>
     BinaryCache<A, B, C, D, E, F>* TermWorkshop::_cleanCache(BinaryCache<A, B, C, D, E, F>* cache, bool noMemberDelete) {
@@ -458,7 +458,7 @@ namespace Workshops {
         }
 
         // Clone only the part of the symbol parts
-        int copy_number = varMap.TrackLength() - 1 - params.variableLevel;
+        //int copy_number = varMap.TrackLength() - 1 - params.variableLevel;
         assert(false && "Unsupported right now");
         //std::copy_n(fixpoint->_symbolParts.begin(), copy_number, std::back_inserter(clonedFixpoint->_symbolParts));
 
@@ -631,7 +631,6 @@ namespace Workshops {
 
     Symbol* SymbolWorkshop::CreateTrimmedSymbol(Symbol* src, Gaston::VarList* varList) {
         // Fixme: Refactor
-        size_t varNum = varMap.TrackLength();
         // There are no symbols to trim, so we avoid the useless copy
         if(varList->size() == 0) {
             return src;
@@ -779,7 +778,7 @@ namespace Workshops {
 
     void dumpNaryKey(NaryKey const& s) {
         std::cout << "<";
-        for(auto i = 0; i < s.second; ++i) {
+        for(unsigned int i = 0; i < s.second; ++i) {
             if(i)
                 std::cout << ", ";
             std::cout << (*s.first[i]);

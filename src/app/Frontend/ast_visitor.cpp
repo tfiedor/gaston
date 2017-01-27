@@ -1,4 +1,5 @@
 #include "ast_visitor.h"
+#include <cstdlib>
 
 /**
  * NOTE: Yes, this is exhausting, but this way we should achieve maximum efficiency
@@ -35,6 +36,7 @@ RetNode traverse_T(Node* node, TransformerVisitor &v) {
             return v.visit(node);
         default:
             assert(false && "Traversing AST_T not implemented yet");
+            abort();
     }
 }
 
@@ -61,6 +63,7 @@ RetNode traverse_t(Node* node, TransformerVisitor &v) {
             return v.visit(node);
         default:
             assert(false && "Traversing AST_t not implemented yet");
+            abort();
     }
 }
 
@@ -94,6 +97,7 @@ RetNode traverse_tt(Node* node, TransformerVisitor &v) {
             return v.visit(node);
         default:
             assert(false && "Traversing AST_tt not implemented yet");
+            abort();
     }
 }
 
@@ -127,6 +131,7 @@ RetNode traverse_TT(Node* node, TransformerVisitor &v) {
             return v.visit(node);
         default:
             assert(false && "Traversing AST_TT not implemented yet");
+            abort();
     }
 }
 
@@ -160,6 +165,7 @@ RetNode traverse_tT(Node* node, TransformerVisitor &v) {
             return v.visit(node);
         default:
             assert(false && "Traversing AST_tT not implemented yet");
+            abort();
     }
 }
 
@@ -186,6 +192,7 @@ RetNode traverse_f(Node* node, TransformerVisitor &v) {
             return v.visit(node);
         default:
             assert(false && "Traversing AST_t not implemented yet");
+            abort();
     }
 }
 
@@ -219,6 +226,7 @@ RetNode traverse_ff(Node* node, TransformerVisitor &v) {
             return v.visit(node);
         default:
             assert(false && "Traversing AST_tT not implemented yet");
+            abort();
     }
 }
 
@@ -594,6 +602,7 @@ void void_traverse_T(Node* node, VoidVisitor &v) {
             break;
         default:
             assert(false && "Traversing AST_T not implemented yet");
+            abort();
     }
 }
 
@@ -616,6 +625,7 @@ void void_traverse_t(Node* node, VoidVisitor &v) {
             break;
         default:
             assert(false && "Traversing AST_t not implemented yet");
+            abort();
     }
 }
 
@@ -646,6 +656,7 @@ void void_traverse_tt(Node* node, VoidVisitor &v) {
             break;
         default:
             assert(false && "Traversing AST_tt not implemented yet");
+            abort();
     }
 }
 
@@ -676,6 +687,7 @@ void void_traverse_TT(Node* node, VoidVisitor &v) {
             break;
         default:
             assert(false && "Traversing AST_TT not implemented yet");
+            abort();
     }
 }
 
@@ -706,6 +718,7 @@ void void_traverse_tT(Node* node, VoidVisitor &v) {
             break;
         default:
             assert(false && "Traversing AST_tT not implemented yet");
+            abort();
     }
 }
 
@@ -728,6 +741,7 @@ void void_traverse_f(Node* node, VoidVisitor &v) {
             break;
         default:
             assert(false && "Traversing AST_t not implemented yet");
+            abort();
     }
 }
 
@@ -758,6 +772,7 @@ void void_traverse_ff(Node* node, VoidVisitor &v) {
             break;
         default:
             assert(false && "Traversing AST_tT not implemented yet");
+            abort();
     }
 }
 

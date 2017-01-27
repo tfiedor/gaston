@@ -127,6 +127,7 @@ std::ostream &operator<<(std::ostream &out, const NaryProductEnumerator& rhs) {
         out << (*rhs.GetEnum(i));
     }
     out << ")";
+    return out;
 }
 
 /**

@@ -133,7 +133,7 @@ bool ZeroSymbol::IsZeroString() const {
     if(this->_trackMask.none()) {
         return true;
     } else {
-        for(int i = 0; i < this->_trackMask.size(); i += 2) {
+        for(unsigned int i = 0; i < this->_trackMask.size(); i += 2) {
             if(this->_trackMask.test(i) && !this->_trackMask.test(i+1)) {
                 return false;
             }
@@ -164,7 +164,7 @@ void ZeroSymbol::_SetValueAt(VarType var, VarValue val) {
 
 std::string ZeroSymbol::ToString() const {
     std::string s("");
-    for(int i = 0; i < this->_trackMask.size()/2; ++i) {
+    for(unsigned int i = 0; i < this->_trackMask.size()/2; ++i) {
         s += this->GetSymbolAt(i);
     }
 
@@ -206,6 +206,7 @@ char ZeroSymbol::charToAsgn(char c) {
             return 0x03;
         default:
             assert(false);
+            return 0x0; // unreachable dead code, only to remove warning
     }
 }
 

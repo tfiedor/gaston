@@ -24,7 +24,6 @@ SymbolicAutomaton* baseToSymbolicAutomaton(ASTForm* form, bool doComplement) {
 #   if (AUT_CONSTRUCT_BY_MONA == true)
     assert(form != nullptr);
     DFA *dfa = nullptr;
-    int numVars = varMap.TrackLength();
 
     IdentList free, bound;
     form->freeVars(&free, &bound);
@@ -37,6 +36,7 @@ SymbolicAutomaton* baseToSymbolicAutomaton(ASTForm* form, bool doComplement) {
     return new TemplatedAutomaton(dfa, varMap.TrackLength(), form, hasEmptyTracks);
 #   else
     assert(false);
+    return nullptr; // dead unreachable code, only to remove warnings
 #   endif
 }
 
@@ -82,6 +82,7 @@ SymbolicAutomaton* ASTForm::_toSymbolicAutomatonCore(bool doComplement) {
 #   else
     this->dump();
     assert(false && "Missing automaton for this automaton");
+    return nullptr; // unreachable dead code, only to remove warning
 #   endif
 }
 

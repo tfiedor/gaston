@@ -2,6 +2,7 @@
 #define WSKS_CODE_VISITOR_H
 
 #include "code.h"
+#include <cstdlib>
 
 template<typename R = void>
 class CodeVisitor {
@@ -15,7 +16,7 @@ public:
     // < Constructors >
     CodeVisitor(CodeVisitor::Traverse td) : traverseDirection(td) {}
 
-    virtual ReturnType visit(Code* c) { };
+    virtual ReturnType visit(Code* c) { assert(false && "Not Implemented yet"); abort();};
 };
 
 // < Void Visitor >

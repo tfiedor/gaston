@@ -90,7 +90,6 @@ void SymbolicAutomaton::_InitializeOccuringVars() {
     this->_form->freeVars(&free, &bound);
     IdentList* allVars;
     allVars = ident_union(&free, &bound);
-    size_t varNum = varMap.TrackLength();
 
     if(allVars != nullptr) {
         for(auto it = allVars->begin(); it != allVars->end(); ++it) {
@@ -124,8 +123,8 @@ void SymbolicAutomaton::_InitializeNonOccuring() {
 
 // <<< CONSTRUCTORS >>>
 SymbolicAutomaton::SymbolicAutomaton(Formula_ptr form) :
-        _form(form), _factory(this), _initialStates(nullptr), _finalStates(nullptr), _satExample(nullptr),
-        _unsatExample(nullptr), _refs(0) {
+        _factory(this), _form(form), _satExample(nullptr),
+        _unsatExample(nullptr), _initialStates(nullptr), _finalStates(nullptr), _refs(0) {
     // Fixme: isn't allVars the same as formula->allVars?
     this->_InitializeOccuringVars();
     this->_InitializeNonOccuring();
@@ -229,7 +228,7 @@ NaryOpAutomaton::NaryOpAutomaton(Formula_ptr form, bool doComplement) : Symbolic
     collect_leaves(form->kind, form, this->_leaves, qf_free);
     this->_arity = this->_leaves.size() + (qf_free == nullptr ? 0 : 1);
     this->_auts = new SymLink[this->_arity];
-    for (int i = (qf_free == nullptr ? 0 : 1); i < this->_arity; ++i) {
+    for (unsigned int i = (qf_free == nullptr ? 0 : 1); i < this->_arity; ++i) {
         this->_auts[i].aut = this->_leaves[i - (qf_free == nullptr ? 0 : 1)]->toSymbolicAutomaton(doComplement);
         assert(this->_auts[i].aut != nullptr);
         this->_auts[i].aut->IncReferences();
@@ -244,7 +243,7 @@ NaryOpAutomaton::NaryOpAutomaton(Formula_ptr form, bool doComplement) : Symbolic
 }
 
 NaryOpAutomaton::~NaryOpAutomaton() {
-    for (int i = 0; i < this->_arity; ++i) {
+    for (unsigned int i = 0; i < this->_arity; ++i) {
         if(this->_auts[i].aut != nullptr) {
             this->_auts[i].aut->DecReferences();
         }
@@ -274,7 +273,6 @@ ProjectionAutomaton::ProjectionAutomaton(SymbolicAutomaton_raw aut, Formula_ptr 
 
     // Initialize the guide
     // Fixme: Refactor: This is mess!!!
-    ASTForm* innerForm = static_cast<ASTForm_q*>(this->_form)->f;
     ASTForm_uvf* uvf_form = static_cast<ASTForm_uvf*>(this->_form);
     this->_guide = new FixpointGuide(uvf_form->vl);
 }
@@ -451,7 +449,7 @@ NaryUnionAutomaton::NaryUnionAutomaton(Formula_ptr form, bool doComplement) : Na
 // Derives of Implication
 ImplicationAutomaton::ImplicationAutomaton(SymbolicAutomaton_raw lhs, SymbolicAutomaton_raw rhs, Formula_ptr form)
         : BinaryOpAutomaton(lhs, rhs, form) {
-    this->type == AutType::IMPLICATION;
+    this->type = AutType::IMPLICATION;
     this->_productType = ProductType::IMPLICATION;
     this->_eval_result = [](bool a, bool b, bool underC) {
         // e in ~A cup B == e in A => e in B
@@ -506,8 +504,8 @@ TernaryBiimplicationAutomaton::TernaryBiimplicationAutomaton(SymbolicAutomaton_r
     this->_productType = ProductType::BIIMPLICATION;
     this->_eval_result = [](bool l, bool m, bool r, bool underC) {
         // Fixme: I'm still little bit concerned whether this is true
-        if(!underC) { return l == m == r; }
-        else {return (l == (!m) == (!r)); }
+        if(!underC) { return (l == m) == r; }
+        else {return (l == (!m)) == (!r); }
     };
     this->_eval_early = [](bool l, bool m, bool underC) {
         assert(false && "Biimplication cannot be short circuited");
@@ -523,7 +521,7 @@ TernaryBiimplicationAutomaton::TernaryBiimplicationAutomaton(SymbolicAutomaton_r
 
 NaryBiimplicationAutomaton::NaryBiimplicationAutomaton(Formula_ptr form, bool underC)
         : NaryOpAutomaton(form, underC) {
-    this->type == AutType::NARY_BIIMPLICATION;
+    this->type = AutType::NARY_BIIMPLICATION;
     this->_productType = ProductType::BIIMPLICATION;
     this->_eval_result = [](bool a, bool b, bool underC) {
         if(!underC) { return a == b;}
@@ -1018,27 +1016,31 @@ void BaseAutomaton::_InitializeFinalStates() {
  */
 Term* BinaryOpAutomaton::Pre(Symbol* symbol, Term* finalApproximation, IntersectNonEmptyParams params) {
     assert(false && "Doing Pre on BinaryOp Automaton!");
+    return nullptr; // Unreachable code, only to remove warning
 }
 
 Term* TernaryOpAutomaton::Pre(Symbol* symbol, Term* finalApproximation, IntersectNonEmptyParams params) {
     assert(false && "Doing Pre on TernaryOp Automaton!");
+    return nullptr; // Unreachable code, only to remove warning
 }
 
 Term* NaryOpAutomaton::Pre(Symbol* symbol, Term* finalApproximation, IntersectNonEmptyParams params) {
     assert(false && "Doing Pre on NaryOpAutomaton!");
+    return nullptr; // Unreachable code, only to remove warning
 }
 
 Term* ComplementAutomaton::Pre(Symbol* symbol, Term* finalApproximation, IntersectNonEmptyParams params) {
     assert(false && "Doing Pre on Complement Automaton!");
+    return nullptr; // Unreachable code, only to remove warning
 }
 
 Term* ProjectionAutomaton::Pre(Symbol* symbol, Term* finalApproximation, IntersectNonEmptyParams params) {
     assert(false && "Doing Pre on Projection Automaton!");
+    return nullptr; // Unreachable code, only to remove warning
 }
 
 Term* BaseAutomaton::Pre(Symbol* symbol, Term* finalApproximation, IntersectNonEmptyParams params) {
     assert(symbol != nullptr);
-    bool underComplement = params.underComplement;
     // Reinterpret the approximation as base states
     TermBaseSet* baseSet = reinterpret_cast<TermBaseSet*>(finalApproximation);
     // TODO: Implement the -minus
@@ -1230,7 +1232,7 @@ ResultType NaryOpAutomaton::_IntersectNonEmptyCore(Symbol* symbol, Term* finalAp
     ResultType result;
     bool bool_result = !this->_early_val(underComplement);
     Term_ptr* terms = new Term_ptr[this->_arity];
-    for(auto i = 0; i < this->_arity; ++i) {
+    for(unsigned int i = 0; i < this->_arity; ++i) {
         result = this->_auts[i].aut->IntersectNonEmpty(this->_auts[i].ReMapSymbol(symbol), termNaryProduct->terms[i], params);
 #       if (OPT_PRUNE_EMPTY == true)
         if(result.first->type == TermType::EMPTY && !result.first->InComplement() && this->_productType == ProductType::INTERSECTION) {
@@ -1413,7 +1415,6 @@ ResultType base_pre_core(SymbolicAutomaton* aut, Symbol* symbol, Term* approxima
     bool underComplement = params.underComplement;
     TermBaseSet *preFinal;
     preFinal = reinterpret_cast<TermBaseSet*>(aut->Pre(symbol, approximation, params));
-    TermBaseSet* initial = reinterpret_cast<TermBaseSet*>(aut->GetInitialStates());
 
     // Return the pre and true if it intersects the initial states
     if (preFinal->IsEmpty()) {
@@ -1425,7 +1426,6 @@ ResultType base_pre_core(SymbolicAutomaton* aut, Symbol* symbol, Term* approxima
 
 ResultType BaseAutomaton::_IntersectNonEmptyCore(Symbol* symbol, Term* approximation, IntersectNonEmptyParams params) {
     // Reinterpret the initial and final states
-    TermBaseSet* initial = reinterpret_cast<TermBaseSet*>(this->_initialStates);
     TermBaseSet* final = reinterpret_cast<TermBaseSet*>(this->_finalStates);
     bool underComplement = params.underComplement;
 
@@ -1466,7 +1466,6 @@ ResultType BaseProjectionAutomaton::_IntersectNonEmptyCore(Symbol* symbol, Term*
 #       if (DEBUG_BASE_FIXPOINT_PUMPING == true)
         std::cout << "Resulting states: "; pumped_states->dump(); std::cout << "\n";
 #       endif
-        TermBaseSet* initial = static_cast<TermBaseSet*>(this->_aut.aut->GetInitialStates());
         return std::make_pair(pumped_states, static_cast<TermBaseSet*>(pumped_states)->IsAccepting() != underComplement);
     } else if(approximation->type == TermType::EMPTY) {
         return std::make_pair(approximation, underComplement);
@@ -1559,7 +1558,7 @@ std::string interpretModel(std::string& str, MonaTypeTag order) {
     }
 }
 
-int max_varname_lenght(IdentList* idents, int varNo) {
+int max_varname_lenght(IdentList* idents, unsigned int varNo) {
     int max = 0, varlen;
     for(size_t i = 0; i < varNo; ++i) {
         varlen = strlen(symbolTable.lookupSymbol(idents->get(i)));
@@ -1580,7 +1579,6 @@ void ProjectionAutomaton::_DumpExampleCore(std::ostream& out, ExampleType e, Int
     int max_len = max_varname_lenght(this->projectedVars, varNo);
 
     std::vector<Term_ptr> processed;
-    bool are_examples_fixpoints = example->type == TermType::FIXPOINT;
     int prev = -1;
     while(example != nullptr && example->link->succ != nullptr && example != example->link->succ) {
     //                                                           ^--- not sure this is right
@@ -1597,7 +1595,7 @@ void ProjectionAutomaton::_DumpExampleCore(std::ostream& out, ExampleType e, Int
                     assert(var >= 0);
                     if(var == prev)
                         break;
-                    if (varMap[this->projectedVars->get(i)] == var) {
+                    if (varMap[this->projectedVars->get(i)] == static_cast<unsigned int>(var)) {
                         examples[i] += val;
                     }
                     --var;
@@ -1687,7 +1685,7 @@ void NaryOpAutomaton::DumpAutomaton() {
         std::cout << "\033[1;35m[\033[0m";
     }
     std::cout << "\033[" << product_colour << "(\033[0m";
-    for (int i = 0; i < this->_arity; ++i) {
+    for (unsigned int i = 0; i < this->_arity; ++i) {
         if(i != 0) {
             std::cout << "\033[" << product_colour << " " << product_symbol << "\u207F \033[0m";
         }
@@ -1943,10 +1941,10 @@ void TernaryOpAutomaton::DumpToDot(std::ofstream &os, bool inComplement) {
 
 void NaryOpAutomaton::DumpToDot(std::ofstream &os, bool inComplement) {
     this->DumpProductHeader(os, inComplement, this->_productType);
-    for (int i = 0; i < this->_arity; ++i) {
+    for (unsigned int i = 0; i < this->_arity; ++i) {
         os << "\t" << (uintptr_t) &*this << " -- " << (uintptr_t) (this->_auts[i].aut) << " [label=\"" << (i) << "hs\"];\n";
     }
-    for (int i = 0; i < this->_arity; ++i) {
+    for (unsigned int i = 0; i < this->_arity; ++i) {
         if(this->_auts[i].aut != nullptr) {
             this->_auts[i].aut->DumpToDot(os, inComplement);
         }
@@ -2201,7 +2199,7 @@ void NaryOpAutomaton::DumpComputationStats() {
     print_stat("Continuation Evaluation", this->_contUnfoldingCounter);
     std::cout << "\n";
 #   endif
-    for (int i = 0; i < this->_arity; ++i) {
+    for (unsigned int i = 0; i < this->_arity; ++i) {
         if(this->_auts[i].aut != nullptr) {
             this->_auts[i].aut->DumpComputationStats();
         }
@@ -2410,7 +2408,7 @@ void TernaryOpAutomaton::FillStats() {
 
 void NaryOpAutomaton::FillStats() {
     volatile bool count;
-    for (int i = 0; i < this->_arity; ++i) {
+    for (unsigned int i = 0; i < this->_arity; ++i) {
         count = !this->_auts[i].remap && this->_auts[i].aut != nullptr;
         if(count) this->_auts[i].aut->FillStats();
     }
@@ -2422,7 +2420,7 @@ void NaryOpAutomaton::FillStats() {
     this->stats.max_refs = this->_refs;
     this->stats.max_fixpoint_nesting = 0;
 
-    for (int j = 0; j < this->_arity; ++j) {
+    for (unsigned int j = 0; j < this->_arity; ++j) {
         count = !this->_auts[j].remap && this->_auts[j].aut != nullptr;
         if(count) {
             this->stats.fixpoint_computations += this->_auts[j].aut->stats.fixpoint_computations;
@@ -2487,7 +2485,7 @@ bool NaryOpAutomaton::WasLastExampleValid() {
     if(this->_isRestriction && this->_lastResult == false) {
         return false;
     } else {
-        for (int i = 0; i < this->_arity; ++i) {
+        for (unsigned int i = 0; i < this->_arity; ++i) {
             if(this->_auts[i].aut != nullptr && !this->_auts[i].aut->WasLastExampleValid()) {
                 return false;
             }

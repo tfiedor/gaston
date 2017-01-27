@@ -42,8 +42,8 @@ using TimerType = Timer;
 	code(SyntaxRestricter)				/* Restrict unsupported formula constructs to supported subset*/ \
 	code(BooleanUnfolder)				/* Simplify formula through various boolean laws*/ \
 	code(UniversalQuantifierRemover)	/* Remove universal quantifier from formula*/ \
-	/*code(NegationUnfolder)				/* Push negations deeply*/\
-	/*code(BaseAutomataMerger)			/* Merge some of the base automata*/
+	code(NegationUnfolder)				/* Push negations deeply*/\
+	code(BaseAutomataMerger)			/* Merge some of the base automata*/
 #endif
 
 class Checker {
@@ -71,7 +71,7 @@ protected:
 
 	// <<< PRIVATE METHODS >>>
 	void _startTimer(Timer& t);
-	void _stopTimer(Timer& t, char* s);
+	void _stopTimer(Timer& t, std::string s);
 	template<class ZeroOrderQuantifier, class FirstOrderQuantifier, class SecondOrderQuantifier>
 	ASTForm* _ClosePrefix(IdentList* freeVars, ASTForm* formula);
 };

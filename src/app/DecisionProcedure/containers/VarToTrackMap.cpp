@@ -34,9 +34,9 @@ void VarToTrackMap::addIdentifiers(IdentList* identifiers) {
 	size_t idx = 0;
 	Ident formal;
 	ASTForm* restriction = nullptr;
-	for (int i = 0; i < identSize; ++i) {
+	for (unsigned int i = 0; i < identSize; ++i) {
 		// Fixme: there should be some shit with restrictions
-		uint val = identifiers->pop_front();
+		int val = identifiers->pop_front();
 		if(symbolTable.lookupType(val) == MonaTypeTag::Varname1) {
 			restriction = symbolTable.getDefault1Restriction(&formal);
 		} else if (symbolTable.lookupType(val) == MonaTypeTag::Varname2) {

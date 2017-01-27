@@ -30,12 +30,19 @@ enum TestType {EVERYTHING, VALIDITY, SATISFIABILITY, UNSATISFIABILITY};
 class Options {
 public:
   Options() :
-    noExpnf(true),
+    optimize(0),
+    fixLimit(0),
+    inverseFixLimit(-1),
+
     method(SYMBOLIC),
     construction(AutomataConstruction::SYMBOLIC_AUT),
+    mode(LINEAR),
+    test(EVERYTHING),
+    reorder(HEURISTIC),
+
+    noExpnf(true),
     time(false),
     whole(false),
-    mode(LINEAR),
     statistics(false),
     printProgress(false),
     analysis(false),
@@ -52,28 +59,28 @@ public:
     demo(false),
     inheritedAcceptance(false),
     unrestrict(false),
+    alternativeM2LStr(false),
     monaWalk(false),
     expandTagged(false),
-    alternativeM2LStr(false),
-    test(EVERYTHING),
-    reorder(HEURISTIC),
-    optimize(0),
     useMonaDFA(false),
     serializeMona(false),
-    fixLimit(0),
-    inverseFixLimit(-1),
     dryRun(false),
     verifyModels(false) {}
 
 
-  bool useMonaDFA;
-  bool noExpnf;
+  unsigned optimize;
+  int fixLimit;
+  int inverseFixLimit;
+
   Method method;
   AutomataConstruction construction;
+  Mode mode;
+  TestType test;
+  ReorderMode reorder;
 
+  bool noExpnf;
   bool time;
   bool whole;
-  Mode mode;
   bool statistics;
   bool printProgress;
   bool analysis;
@@ -94,12 +101,8 @@ public:
   bool alternativeM2LStr;
   bool monaWalk;
   bool expandTagged;
-  TestType test;
-  ReorderMode reorder;
-  unsigned optimize;
+  bool useMonaDFA;
   bool serializeMona;
-  int fixLimit;
-  int inverseFixLimit;
   bool dryRun;
   bool verifyModels;
 };

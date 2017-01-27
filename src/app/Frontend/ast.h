@@ -26,6 +26,7 @@
 #include "printline.h"
 #include <vata/bdd_bu_tree_aut.hh>
 #include <cstring>
+#include <cstdlib>
 #include <unordered_map>
 
 using Automaton = VATA::BDDBottomUpTreeAut;
@@ -118,7 +119,10 @@ public:
   virtual void freeVars(IdentList*, IdentList*) {};
   virtual void dump() {};
 	virtual void detach() {}
-	virtual std::string ToString(bool no_utf = false) { assert(false && "Unsupported kind for 'ToString' method");}
+	virtual std::string ToString(bool no_utf = false) {
+		assert(false && "Unsupported kind for 'ToString' method");
+		return std::string(""); // unreachable dead code, only to remove warning
+	}
 	virtual void ConstructMapping(AST*, std::map<unsigned int, unsigned int>&) { this->dump(); std::cout << "\n"; assert(false && "Called ConstructMapping() base function\n");};
 	virtual bool StructuralCompare(AST* f) {return f->kind == this->kind;}
 
@@ -969,14 +973,20 @@ public:
 	VISITABLE();
 
 	ASTForm* clone() { return new ASTForm_AllPosVar(this->pos);}
-	VarCode makeCode(SubstCode *subst = NULL) {assert(false);}
+	VarCode makeCode(SubstCode *subst = NULL) {
+		assert(false);
+		abort();
+	}
 	void freeVars(IdentList*, IdentList*) {}
 	void dump();
 
 	// Conversion of AST representation of formula to Automaton
 	void toUnaryAutomaton(Automaton &aut, bool doComplement) {assert(false);}
 	void toBinaryAutomaton(Automaton &aut, bool doComplement){assert(false);}
-	SymbolicAutomaton* _toSymbolicAutomatonCore(bool doComplement){assert(false);}
+	SymbolicAutomaton* _toSymbolicAutomatonCore(bool doComplement){
+		assert(false);
+		return nullptr; // unreachable dead code, only to remove warning
+	}
 };
 
 class ASTForm_True: public ASTForm {

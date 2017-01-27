@@ -91,7 +91,6 @@ ASTForm* FullAntiPrenexer::distributiveRule(QuantifierClass *qForm, bool onlyByO
     // Ex . f1 op f2 -> (Ex X. f1) op (Ex X. f2)
 
     BinopClass *binopForm = static_cast<BinopClass*>(qForm->f);
-    ASTForm* tempResult;
 
     IdentList *bound = qForm->vl;
     IdentList left, right, middle;
@@ -142,7 +141,6 @@ ASTForm* FullAntiPrenexer::nonDistributiveRule(QuantifierClass *qForm, bool only
     // Ex . f1 op f2 -> (Ex X. f1) op f2
     // Ex . f2 op f2 -> f1 op (Ex X. f2)
     BinopClass *binopForm = static_cast<BinopClass*>(qForm->f);
-    ASTForm *tempResult;
 
     IdentList *bound = qForm->vl;
     IdentList left, right, middle;
@@ -345,7 +343,6 @@ ASTForm* FullAntiPrenexer::existentialAntiPrenex(ASTForm *form, bool onlyByOne) 
     static_assert(std::is_base_of<ASTForm_q, ExistClass>::value, "ExistClass is not derived from 'ASTForm_q' class");
 
     ExistClass* exForm = static_cast<ExistClass*>(form);
-    ASTForm* temp;
     switch(exForm->f->kind) {
         case aOr:
             // Process Or Rule

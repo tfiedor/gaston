@@ -15,9 +15,9 @@ public:
 
     typedef R ReturnType;
 
-    virtual ReturnType visit(ASTForm *e) { };
-    virtual ReturnType visit(ASTTerm *e) { };
-    virtual ReturnType visit(ASTUniv *e) { };
+    virtual ReturnType visit(ASTForm *e) = 0;
+    virtual ReturnType visit(ASTTerm *e) = 0;
+    virtual ReturnType visit(ASTUniv *e) = 0;
 };
 
 /**

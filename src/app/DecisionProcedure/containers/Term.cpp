@@ -278,7 +278,7 @@ TermNaryProduct::TermNaryProduct(Aut_ptr aut, SymLink* auts, StatesSetType st, P
 
     // Fixme: add link to auts
     this->terms = new Term_ptr[arity];
-    for(auto i = 0; i < arity; ++i) {
+    for(unsigned int i = 0; i < arity; ++i) {
         if(st == StatesSetType::INITIAL)
             this->terms[i] = auts[i].aut->GetInitialStates();
         else
@@ -436,13 +436,13 @@ TermList::TermList(Aut_ptr aut, Term_ptr first, bool isCompl) : Term(aut), list{
  */
 TermFixpoint::TermFixpoint(Aut_ptr aut, Term_ptr startingTerm, Symbol* symbol, bool inComplement, bool initbValue, WorklistSearchType search = WorklistSearchType::DFS)
         : Term(aut),
+          _sourceIt(nullptr),
           _fixpoint{FixpointMember(nullptr, true, 0), FixpointMember(startingTerm, true, 0)},
+          _validCount(1),
+          _baseAut(static_cast<ProjectionAutomaton*>(aut)->GetBase()),
           _sourceTerm(nullptr),
           _sourceSymbol(symbol),
-          _sourceIt(nullptr),
-          _baseAut(static_cast<ProjectionAutomaton*>(aut)->GetBase()),
           _guide(static_cast<ProjectionAutomaton*>(aut)->GetGuide()),
-          _validCount(1),
           _searchType(search),
           _bValue(initbValue) {
 #   if (MEASURE_STATE_SPACE == true)
@@ -515,14 +515,14 @@ TermFixpoint::TermFixpoint(Aut_ptr aut, Term_ptr startingTerm, Symbol* symbol, b
  */
 TermFixpoint::TermFixpoint(Aut_ptr aut, Term_ptr sourceTerm, Symbol* symbol, bool inComplement)
         : Term(aut),
-          _fixpoint{FixpointMember(nullptr, true, 0)},
-          _sourceTerm(sourceTerm),
-          _sourceSymbol(symbol),
           _sourceIt(static_cast<TermFixpoint*>(sourceTerm)->GetIteratorDynamic()),
-          _guide(static_cast<ProjectionAutomaton*>(aut)->GetGuide()),
-          _baseAut(static_cast<ProjectionAutomaton*>(aut)->GetBase()),
+          _fixpoint{FixpointMember(nullptr, true, 0)},
           _worklist(),
           _validCount(0),
+          _baseAut(static_cast<ProjectionAutomaton*>(aut)->GetBase()),
+          _sourceTerm(sourceTerm),
+          _sourceSymbol(symbol),
+          _guide(static_cast<ProjectionAutomaton*>(aut)->GetGuide()),
           _searchType(WorklistSearchType::DFS),
           _bValue(inComplement) {
 #   if (MEASURE_STATE_SPACE == true)
@@ -611,7 +611,8 @@ void Term::SetSuccessor(Term* succ, Symbol* symb, IntersectNonEmptyParams& param
         // Looping
         assert(this->link->val != "");
         int nextVar = this->link->var - this->link->val.size();
-        if(nextVar >= 0 && nextVar == params.variableLevel) {
+        if(nextVar >= 0 && static_cast<unsigned int>(nextVar) == params.variableLevel) {
+            //             ^--- the previous assert shows this is safe
             this->link->val += params.variableValue;
         }
     }
@@ -933,7 +934,7 @@ SubsumedType TermNaryProduct::_IsSubsumedCore(Term* t, Term** new_term, Subsumpt
         bool terms_were_partitioned = false;
         SubsumedType result;
 
-        for (int i = 0; i < this->arity; ++i) {
+        for (unsigned int i = 0; i < this->arity; ++i) {
             if(this->terms[i] == rhs->terms[i]) {
                 result = SubsumedType::YES;
             } else {
@@ -966,7 +967,7 @@ SubsumedType TermNaryProduct::_IsSubsumedCore(Term* t, Term** new_term, Subsumpt
 #   endif
 
     // Retype and test the subsumption component-wise
-    for (int i = 0; i < this->arity; ++i) {
+    for (unsigned int i = 0; i < this->arity; ++i) {
         assert(this->access_vector[i] < this->arity);
         if(this->terms[this->access_vector[i]]->IsSubsumed(rhs->terms[this->access_vector[i]], nullptr, params) == SubsumedType::NOT) {
             if(i != 0) {
@@ -1254,7 +1255,8 @@ SubsumedType Term::_ProductIsSubsumedBy(TermFixpoint* fixpoint, Term*& biggerTer
 
         if(!no_prune && result != SubsumedType::PARTIALLY) {
             SubsumedType inner_result;
-            new_term == nullptr;
+            // Fixme: This was previously (==) there is very slight chance it was assert
+            new_term = nullptr;
 #           if (OPT_PARTIAL_PRUNE_FIXPOINTS == true)
             if( (inner_result = item.term->IsSubsumed(this, &new_term, SubsumptionTestParams(OPT_PARTIALLY_LIMITED_SUBSUMPTION, params.level))) == SubsumedType::YES) {
 #           else
@@ -1581,7 +1583,7 @@ bool TermTernaryProduct::IsEmpty() {
 }
 
 bool TermNaryProduct::IsEmpty() {
-    for (int i = 0; i < this->arity; ++i) {
+    for (unsigned int i = 0; i < this->arity; ++i) {
         if(!this->terms[i]->IsEmpty()) {
             return false;
         }
@@ -1685,7 +1687,7 @@ unsigned int TermTernaryProduct::_MeasureStateSpaceCore() {
 
 unsigned int TermNaryProduct::_MeasureStateSpaceCore() {
     size_t state_space = 0;
-    for (int i = 0; i < this->arity; ++i) {
+    for (unsigned int i = 0; i < this->arity; ++i) {
         state_space += this->terms[i]->MeasureStateSpace();
     }
     return state_space + 1;
@@ -1868,7 +1870,7 @@ void TermNaryProduct::_dumpCore(unsigned int indent) {
     const char* product_symbol = ProductTypeToTermSymbol(GET_PRODUCT_SUBTYPE(this));
 
     std::cout << "\033[" << product_colour << "{\033[0m";
-    for (int i = 0; i < this->arity; ++i) {
+    for (unsigned int i = 0; i < this->arity; ++i) {
         if(i != 0) {
             std::cout << "\033[" << product_colour << " " << product_symbol << "\u207F \033[0m";
         }
@@ -2300,7 +2302,6 @@ void TermFixpoint::_EnqueueInWorklist(Term_ptr term, IntersectNonEmptyParams& pa
         for (auto &symbol : _symList) {
 #           if (OPT_WORKLIST_DRIVEN_BY_RESTRICTIONS == true)
             if (this->_guide != nullptr) {
-                bool break_from_for = false;
                 switch (this->_guide->GiveTip(term, symbol)) {
                     case GuideTip::G_FRONT:
                         _worklist.emplace_front(term, symbol, 0, 'X');
@@ -2542,7 +2543,7 @@ void TermFixpoint::_InitializeSymbols(Workshops::SymbolWorkshop* workshop, Gasto
         if(*var == allPosVar)
             continue;
         this->_projectedSymbol = workshop->CreateSymbol(this->_projectedSymbol, varMap[(*var)], 'X');
-        int i = 0;
+        unsigned int i = 0;
         for(auto it = this->_symList.begin(); i < symNum; ++it, ++i) {
             Symbol* symF = *it;
             // #SYMBOL_CREATION
@@ -2904,7 +2905,7 @@ bool TermNaryProduct::_eqCore(const Term &t) {
     return false;
 #   else
     const TermNaryProduct &tProduct = static_cast<const TermNaryProduct&>(t);
-    for (int i = 0; i < this->arity; ++i) {
+    for (unsigned int i = 0; i < this->arity; ++i) {
         if(!(*tProduct.terms[i] == *this->terms[i])) {
             return false;
         }
@@ -3009,7 +3010,7 @@ bool TermFixpoint::_compareSymbols(const TermFixpoint& lhs, const TermFixpoint& 
         }
     }
 #   else
-    if(lhs._symbolPart.value != rhs._symbolPart.value || lhs._symbolPart.level != rhs._symbolPart.value) {
+    if(lhs._symbolPart.value != rhs._symbolPart.value || lhs._symbolPart.level != rhs._symbolPart.level) {
         return false;
     }
     assert(lhs._symList.size() == 0 && rhs._symList.size() == 0);
@@ -3136,6 +3137,7 @@ void Term::ToDot(Term* term, std::ostream& stream) {
 
 std::ostream &operator<<(std::ostream &out, const FixpointMember &rhs) {
     out << (*rhs.term) << (rhs.isValid ? "" : "!") << "@" << rhs.level;
+    return out;
 }
 
 void Term::_IncreaseIntermediateInstances() {
@@ -3158,6 +3160,8 @@ void Term::_IncreaseIntermediateInstances() {
                 break;
             case TermType::LIST:
                 ++TermList::intermediateInstances;
+                break;
+            default:
                 break;
         }
     }
@@ -3183,6 +3187,8 @@ void Term::_DecreaseIntermediateInstances() {
                 break;
             case TermType::LIST:
                 --TermList::intermediateInstances;
+                break;
+            default:
                 break;
         }
     }

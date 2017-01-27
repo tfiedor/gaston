@@ -434,8 +434,8 @@ public:
 protected:
     // <<< PRIVATE MEMBERS >>>
     SymLink _aut;
-    bool _isRoot;
     FixpointGuide* _guide = nullptr;
+    bool _isRoot;
 
     // <<< PRIVATE FUNCTIONS >>>
     virtual void _InitializeAutomaton();
@@ -448,10 +448,9 @@ public:
     /// <<< CONSTRUCTORS >>>
     NEVER_INLINE ProjectionAutomaton(SymbolicAutomaton* aut, Formula_ptr form, bool isRoot = false);
     NEVER_INLINE ProjectionAutomaton(Formula_ptr form, SymbolicAutomaton* aut)
-            : SymbolicAutomaton(form), _isRoot(false), _aut(aut) {
+            : SymbolicAutomaton(form), _aut(aut), _isRoot(false) {
         type = AutType::PROJECTION;
 
-        ASTForm* innerForm = static_cast<ASTForm_q*>(this->_form)->f;
         ASTForm_uvf* uvf_form = static_cast<ASTForm_uvf*>(this->_form);
         this->_guide = new FixpointGuide(uvf_form->vl);
     }

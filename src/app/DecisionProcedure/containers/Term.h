@@ -73,7 +73,7 @@ struct FixpointMember {
     size_t level;
     bool isValid;
 
-    FixpointMember(Term_ptr t, bool i, size_t l) : term(t), isValid(i), level(l) {}
+    FixpointMember(Term_ptr t, bool i, size_t l) : term(t), level(l), isValid(i) {}
 
     friend std::ostream &operator<<(std::ostream &stream, const FixpointMember&);
 };
@@ -98,8 +98,8 @@ struct SubsumedByParams {
     size_t level;
     bool no_prune;
 
-    SubsumedByParams(size_t l) : no_prune(false), level(l) {}
-    SubsumedByParams(bool np, size_t l) : no_prune(np), level(l) {}
+    SubsumedByParams(size_t l) : level(l), no_prune(false) {}
+    SubsumedByParams(bool np, size_t l) : level(l), no_prune(np){}
 };
 
 /**
@@ -110,8 +110,8 @@ struct SubsumptionTestParams {
     int limit;               // < How much of a depth should we test subsumption until switching to equality
     bool unfoldAll;          // < Whether we should unfold the continuations
 
-    SubsumptionTestParams(int lt, size_t lv, bool uA) : limit(lt), level(lv), unfoldAll(uA) {}
-    SubsumptionTestParams(int lt, size_t lv) : limit(lt), level(lv), unfoldAll(false) {}
+    SubsumptionTestParams(int lt, size_t lv, bool uA) : level(lv), limit(lt), unfoldAll(uA) {}
+    SubsumptionTestParams(int lt, size_t lv) : level(lv), limit(lt), unfoldAll(false) {}
 };
 
 using WorklistItemType = WorklistItem;
@@ -163,6 +163,7 @@ public:
             } else {
                 out << " -['" << rhs.val << "'(" << rhs.var << "-)]-> " << rhs.succ;
             }
+            return out;
         }
     };
 
@@ -432,8 +433,8 @@ public:
     SymbolicAutomaton* initAut;         // [4B] << Automaton for lazy initialization
     Term* term;                         // [4B] << Term we postponed the evaluation on
     SymbolType* symbol;                 // [4B] << Symbol we were subtracting from the term
-    bool lazyEval = false;              // [1B] << The automaton will be lazily constructed
     bool underComplement;               // [1B] << Whether we were doing the membership or nonmembership
+    bool lazyEval = false;              // [1B] << The automaton will be lazily constructed
     // TODO: ^-- This is maybe redundant with _nonmembershipTesting??
 
     // See #L29

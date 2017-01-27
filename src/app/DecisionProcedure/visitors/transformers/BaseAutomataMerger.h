@@ -8,7 +8,7 @@
 #include "../../../Frontend/ast.h"
 #include "../../../Frontend/ast_visitor.h"
 
-class [[deprecated("ShuffleVisitor is suggested instead")]] BaseAutomataMerger : public TransformerVisitor {
+class BaseAutomataMerger : public TransformerVisitor {
 public:
     BaseAutomataMerger() : TransformerVisitor(Traverse::PreOrder) {}
 

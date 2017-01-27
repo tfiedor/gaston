@@ -176,7 +176,7 @@ namespace Workshops {
     struct NaryKeyHashType {
         size_t operator()(std::pair<Term_ptr*, size_t> const& set) const {
             size_t seed = 0;
-            for(auto i = 0; i < set.second; ++i) {
+            for(unsigned int i = 0; i < set.second; ++i) {
                 boost::hash_combine(seed, Gaston::hash_value(set.first[i]));
             }
             return seed;
@@ -187,7 +187,7 @@ namespace Workshops {
     struct NaryKeyCompare : public std::binary_function<Key, Key, bool> {
         bool operator()(Key const& lhs, Key const& rhs) const {
             assert(lhs.second == rhs.second);
-            for(auto i = 0; i < lhs.second; ++i) {
+            for(unsigned int i = 0; i < lhs.second; ++i) {
                 if(*lhs.first != *rhs.first) {
                     return false;
                 }
