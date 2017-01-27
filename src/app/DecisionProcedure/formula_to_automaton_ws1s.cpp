@@ -626,12 +626,10 @@ void ASTForm_Equal1::toUnaryAutomaton(Automaton &aut, bool doComplement) {
 		setFinalState(aut, doComplement, 1);
 		setNonFinalState(aut, doComplement, 2);	// < SINK >
 	} else if(this->t1->kind == aVar1 && this->t2->kind == aInt) {
+        assert(false && "Not supported currently");
 		ASTTerm1_Var1 *xVar = reinterpret_cast<ASTTerm1_Var1*>(this->t1);
 		unsigned int x = (unsigned int) xVar->n;
-		ASTTerm1_Int *cVar = reinterpret_cast<ASTTerm1_Int*>(this->t2);
-		unsigned int c = cVar->n;
-
-		assert(c == 0 && "Constants > 0 are not supported");
+		//ASTTerm1_Int *cVar = reinterpret_cast<ASTTerm1_Int*>(this->t2);
 
 		setInitialState(aut, 0);
 

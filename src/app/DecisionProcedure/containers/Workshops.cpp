@@ -715,7 +715,7 @@ namespace Workshops {
                 return this->_CreateProjectedSymbol(src, var, val);
             default:
                 assert(false && "Projecting unknown value");
-                break;
+                return nullptr;
         }
     }
 

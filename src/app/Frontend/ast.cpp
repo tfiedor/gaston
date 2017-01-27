@@ -2126,7 +2126,7 @@ bool ASTForm_q::StructuralCompare(AST* form) {
 
 template<class VarClass>
 bool check_mapping(VarClass* lhs, VarClass* rhs) {
-    assert(lhs->n < AST::temporalMapping.size());
+    assert(lhs->n >= 0 && static_cast<unsigned>(lhs->n) < AST::temporalMapping.size());
     Ident mapped = AST::temporalMapping[lhs->n];
     if(mapped) {
         assert(mapped > 0);

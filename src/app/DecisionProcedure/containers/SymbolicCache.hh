@@ -417,7 +417,7 @@ public:
         if(size) {
 #           if (DEBUG_CACHE_BUCKETS == true)
 			std::cout << "{\n";
-			for(int i = 0; i < this->_cache.bucket_count(); ++i) {
+			for(unsigned int i = 0; i < this->_cache.bucket_count(); ++i) {
 				if(this->_cache.bucket_size(i)) {
 					std::cout << "\tbucket " << i << "{\n";
 					for(auto it = this->_cache.begin(i); it != this->_cache.end(i); ++it) {

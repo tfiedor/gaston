@@ -1406,6 +1406,7 @@ SubsumedType TermBaseSet::IsSubsumedBy(TermFixpoint* fixpoint, Term*& biggerTerm
 
 SubsumedType TermContinuation::IsSubsumedBy(TermFixpoint* fixpoint, Term*& biggerTerm, SubsumedByParams params) {
     assert(false && "TermContSubset.IsSubsumedBy() is impossible to happen~!");
+    return SubsumedType::NOT; // unreachable code
 }
 
 SubsumedType TermList::IsSubsumedBy(TermFixpoint* fixpoint, Term*& biggerTerm, SubsumedByParams params) {
@@ -1656,6 +1657,7 @@ bool TermBaseSet::IsSemanticallyValid() {
 
 bool TermContinuation::IsSemanticallyValid() {
     assert(false && "Unsupported TermType 'CONTINUATION' for IsSemanticallyValid()");
+    return false; // unreachable code
 }
 
 bool TermList::IsSemanticallyValid() {
@@ -2953,6 +2955,7 @@ bool TermContinuation::_eqCore(const Term &t) {
 bool TermList::_eqCore(const Term &t) {
     assert(t.type == TermType::LIST && "Testing equality of different term types");
     G_NOT_IMPLEMENTED_YET("TermList::_eqCore");
+    return false;
 }
 
 unsigned int TermFixpoint::ValidMemberSize() const {

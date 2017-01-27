@@ -121,6 +121,7 @@ protected:
     InternalNodesType internalNodes_;
     DFA *dfa_;
     unsigned numVars_;
+    unsigned monaNumberOfStates_;
     size_t initialState_;
     Gaston::BitMask symbol_;
     Gaston::BitMask mask_;
@@ -414,7 +415,7 @@ private:
      */
     inline Gaston::BitMask transformSymbol(const Gaston::BitMask &symbol, int var)
     {
-        assert(var < this->numVars_);
+        assert(var >= 0 && static_cast<unsigned>(var) < this->numVars_);
         Gaston::BitMask transformed = symbol;
         transformed &= symbolMasks_[var];
         transformed |= masks_[var];
@@ -547,7 +548,9 @@ private:
         // not "don't care".
         for(auto node: source) {
             assert(node != nullptr);
-            if(GetVar(node->var_) == var) {
+            int node_var = GetVar(node->var_);
+            assert(node_var >= 0);
+            if(static_cast<unsigned int>(node_var) == var) {
                 // There could be don't care on the lower level so we include those stuff
                 GetDontCareSucc(node->pred_[!val], dest, var - 1, !val);
                 // Get the usual symbol stuff
@@ -675,7 +678,7 @@ private:
      * @return  internal or root node corresponding to @p state
      */
     WrappedNode* _LookupNode(size_t state) {
-        if(state > this->dfa_->ns) {
+        if(state > this->monaNumberOfStates_) {
             // Add internal node
             return this->internalNodes_[state];
         } else {
@@ -701,8 +704,10 @@ public:
      * @param[in]  numVars  number of variables in automaton (corresponds to bdd levels)
      */
     MonaWrapper(DFA *dfa, bool emptyTracks, VarList* vars, unsigned numVars = 0)
-            : dfa_(dfa), numVars_(numVars), initialState_(emptyTracks ? 0 : 1)
+            : dfa_(dfa), numVars_(numVars), monaNumberOfStates_(static_cast<unsigned>(dfa->ns)),
+              initialState_(emptyTracks ? 0 : 1)
     {
+        assert(dfa->ns >= 0);
         // Resize the roots and leaves
         roots_.resize(dfa->ns, nullptr);
         leafNodes_.resize(dfa->ns, nullptr);
@@ -734,7 +739,7 @@ public:
         }
 
 
-        for(size_t i = this->initialState_; i < dfa->ns; i++)
+        for(size_t i = this->initialState_; i < this->monaNumberOfStates_; i++)
             RecSetPointer(dfa->bddm, dfa->q[i], *spawnNode(dfa->bddm, dfa->q[i], i));
 
         ++MonaWrapper<Data>::_wrapperCount;
@@ -865,7 +870,7 @@ public:
      */
     void DumpDFA(std::ostream &os) {
         std::string str(this->numVars_, 'X');
-        for(size_t i = 0; i < this->dfa_->ns; ++i) {
+        for(size_t i = 0; i < this->monaNumberOfStates_; ++i) {
             GetAllPathFromMona(os, this->dfa_->bddm, this->dfa_->q[i], str, i, this->numVars_);
         }
     }
@@ -879,12 +884,12 @@ public:
         os << "Ops\n";
         os << "Automaton anonymous\n";
         os << "States";
-        for(size_t i = 0; i < this->dfa_->ns; ++i) {
+        for(size_t i = 0; i < this->monaNumberOfStates_; ++i) {
             os << " " << i;
         }
         os << "\n";
         os << "Final States";
-        for(size_t i = 0; i < this->dfa_->ns; ++i) {
+        for(size_t i = 0; i < this->monaNumberOfStates_; ++i) {
             if(this->dfa_->f[i] == 1) {
                 os << " " << i;
             }
@@ -1050,7 +1055,7 @@ public:
         size_t final_states_count = 0;
 #       endif
 
-        for (size_t i = this->initialState_; i < this->dfa_->ns; ++i) {
+        for (size_t i = this->initialState_; i < this->monaNumberOfStates_; ++i) {
             if (this->dfa_->f[i] == 1) {
                 final.insert(i);
 #               if (MEASURE_AUTOMATA_CYCLES == true)
