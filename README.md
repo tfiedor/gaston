@@ -38,14 +38,10 @@
  In order to prepare the tool for compilation and commiting a background check for
  prerequisite package issue the following command in the root directory of the tool:
  
-```
-   $ cmake CMakeLists.txt
-```   
-   
- To further compile the source files to runable binary issue the following command:
+ To compile the source files to runable binary issue the following command:
  
 ```
-   $ make
+   $ make release
 ```
 ## Input file syntax
 
