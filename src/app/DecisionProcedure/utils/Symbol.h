@@ -61,7 +61,6 @@ public:
     bool IsZeroString() const;
 
     // <<< STATIC METHODS >>>
-    static TrackType constructUniversalTrack();
     static char charToAsgn(char c);
 
     // <<< FRIENDS >>>

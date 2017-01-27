@@ -210,17 +210,6 @@ char ZeroSymbol::charToAsgn(char c) {
     }
 }
 
-/**
- * Static member that constructs the universal track X*
- */
-TrackType ZeroSymbol::constructUniversalTrack() {
-    assert(false);
-    unsigned int trackLen = varMap.TrackLength() - 1;
-    Automaton::SymbolType transitionTrack;
-    transitionTrack.AddVariablesUpTo(trackLen);
-    return transitionTrack;
-}
-
 // <<< PUBLIC API >>>
 /**
  * Project the variable away, by setting it to don't care X
