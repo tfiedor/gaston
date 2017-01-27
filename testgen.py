@@ -22,10 +22,16 @@ def createArgumentParser():
     Creates Argument Parser object
     '''
     parser = argparse.ArgumentParser("WSkS Test Gen")
-    parser.add_argument('--dir', '-d', default=(os.path.join(os.curdir, "benchmarks")), help="directory with benchmarks")
-    parser.add_argument('--generate', '-g', default=None, nargs=2, help='generates parametrized benchmark up to N')
-    parser.add_argument('--generate-alt', '-a', default=None, nargs=3, help='generates parametrized benchmarks up to N with ALT alternation')
+    parser.add_argument('--dir', '-d', default=(os.path.join(os.curdir, "benchmarks")),
+                        help="directory with benchmarks")
+    parser.add_argument('--generate', '-g', default=None, nargs=2,
+                        help='generates parametrized benchmark up to N')
+    parser.add_argument('--generate-alt', '-a', default=None, nargs=3,
+                        help='generates parametrized benchmarks up to N with ALT alternation')
+    parser.add_argument('--generate-from-template', '-t', default=None, nargs=2,
+                        help="generates parametrized benchmarks from FILE template up to N")
     return parser
+
 
 def parse_arguments():
     '''
@@ -37,8 +43,6 @@ def parse_arguments():
         quit()
     else:
         return parser.parse_args()
-
-# methods for generating
 
 
 def generate_horn_sub(n):
@@ -249,36 +253,62 @@ def generate_formulae(options, benchmark_name, up_to, alts, generator, zeroFill)
             with open(output_path, 'w') as file:
                 file.write(formula)
 
+
+def generate_formulae_from_template(options, benchmark_name, up_to, zeroFill):
+    with open(benchmark_name, 'r') as template_file:
+        template = "".join(template_file.readlines())
+
+    for i in range(1, up_to + 1):
+        formula = template.format(i)
+        output_name = benchmark_name + str(i).zfill(zeroFill) + ".mona"
+        output_path = os.path.join(options.dir, output_name)
+        with open(output_path, 'w') as file:
+            file.write(formula)
+
+
 if __name__ == '__main__':
     print("[*] WSkS Test&Benchmark Generator")
     print("[c] Tomas Fiedor, ifiedortom@fit.vutbr.cz")
 
     options = parse_arguments()
 
+    if [options.generate is not None, options.generate_alt is not None, options.generate_from_template is not None].count(True) > 1:
+        print("[!] Conflicting testbench.py arguments")
+        exit(0)
+
     # we will generate stuff
     generate_alternating = options.generate_alt is not None
-    if not generate_alternating:
+    if options.generate_from_template is not None:
+        print("[*] Generating benchmarks up to parameter n = {} from template '{}'".format(
+            options.generate_from_template[0], options.generate_from_template[1]))
+    elif options.generate:
         print("[*] Generating benchmarks '{}' up to parameter n = {}".format(options.generate[0], options.generate[1]))
     else:
         print("[*] Generating benchmarks '{}' up to parameter n = {} with {} alternations".format(options.generate_alt[0], options.generate_alt[1], options.generate_alt[2]))
-    benchmark_name = options.generate[0] if not generate_alternating else options.generate_alt[0]
-    up_to = int(options.generate[1]) if not generate_alternating else int(options.generate_alt[1])
+    benchmark_name = (options.generate[0] if options.generate is not None else options.generate_from_template[0]
+                      ) if not generate_alternating else options.generate_alt[0]
+    up_to = (int(options.generate[1]) if options.generate is not None else int(options.generate_from_template[1])) \
+        if not generate_alternating else int(options.generate_alt[1])
     alts = 0 if not generate_alternating else int(options.generate_alt[2])
 
-    try:
-        if generate_alternating and benchmark_name != "veanes" and benchmark_name != "veanes_ml":
-            method_name = "generate_" + benchmark_name + "_"
-            if alts % 2 == 0:
-                method_name += "even_alts"
+    if not options.generate_from_template:
+        try:
+            if generate_alternating and benchmark_name != "veanes" and benchmark_name != "veanes_ml":
+                method_name = "generate_" + benchmark_name + "_"
+                if alts % 2 == 0:
+                    method_name += "even_alts"
+                else:
+                    method_name += "odd_alts"
             else:
-                method_name += "odd_alts"
-        else:
-            method_name = "generate_" + benchmark_name
-        generator = getattr(sys.modules[__name__], method_name)
-    except AttributeError:
-        print("[!] No benchmark template for '{}'".format(benchmark_name))
-        quit()
+                method_name = "generate_" + benchmark_name
+            generator = getattr(sys.modules[__name__], method_name)
+        except AttributeError:
+            print("[!] No benchmark template for '{}'".format(benchmark_name))
+            quit()
     zeroFill = len(str(up_to))
     zeroFill = 2 if zeroFill < 2 else zeroFill
 
-    generate_formulae(options, benchmark_name, up_to, alts, generator, zeroFill)
+    if options.generate_from_template:
+        generate_formulae_from_template(options, benchmark_name, up_to, zeroFill)
+    else:
+        generate_formulae(options, benchmark_name, up_to, alts, generator, zeroFill)
