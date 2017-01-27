@@ -8,7 +8,7 @@ set(REQUIRED_G++_VERSION 4.8.0)
 # forcing 4.8 compilers
 set(CMAKE_C_COMPILER "gcc")
 set(GCC_ALTERNATIVES g++ g++-4.8)
-set(CMAKE_CXX_COMPILER "g++-4.8")
+set(CMAKE_CXX_COMPILER "g++-4.9")
 
 include_directories(src)
 include_directories(src/app)
