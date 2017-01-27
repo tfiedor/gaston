@@ -44,8 +44,6 @@ add_executable(gaston
 	src/app/DecisionProcedure/automata.cpp
 	src/app/DecisionProcedure/formula_existential_form_conversion.cpp
 	src/app/DecisionProcedure/formula_flattening.cpp
-	src/app/DecisionProcedure/formula_to_automaton_ws1s.cpp
-	src/app/DecisionProcedure/formula_to_automaton_ws2s.cpp
 	src/app/DecisionProcedure/formula_to_symbolic_automaton.cpp
 	src/app/DecisionProcedure/checkers/Checker.cpp
 	src/app/DecisionProcedure/checkers/SymbolicChecker.cpp
@@ -90,7 +88,7 @@ target_link_libraries(gaston ${CMAKE_SOURCE_DIR}/src/libs/libmonabdd.so)
 target_link_libraries(gaston ${CMAKE_SOURCE_DIR}/src/libs/libmonadfa.so)
 target_link_libraries(gaston ${CMAKE_SOURCE_DIR}/src/libs/libmonagta.so)
 target_link_libraries(gaston ${CMAKE_SOURCE_DIR}/src/libs/libmonamem.so)
-target_link_libraries(gaston ${CMAKE_SOURCE_DIR}/src/libs/libvata.a)
+# target_link_libraries(gaston ${CMAKE_SOURCE_DIR}/src/libs/libvata.a)
 #cotire(gaston)
 
 if (UNIX)

@@ -208,8 +208,6 @@ public:
   ASTForm* restrictFormula();
 
   // Conversion of AST representation of formula to Automaton
-  virtual void toUnaryAutomaton(Automaton &aut, bool doComplement) { std::cerr << "Missing automaton for this formula\n"; this->dump();}
-  virtual void toBinaryAutomaton(Automaton &aut, bool doComplement) { std::cerr << "Missing automaton for this formula\n"; this->dump(); }
 	virtual SymbolicAutomaton* toSymbolicAutomaton(bool doComplement);
 	virtual SymbolicAutomaton* _toSymbolicAutomatonCore(bool doComplement);
 };
@@ -981,8 +979,6 @@ public:
 	void dump();
 
 	// Conversion of AST representation of formula to Automaton
-	void toUnaryAutomaton(Automaton &aut, bool doComplement) {assert(false);}
-	void toBinaryAutomaton(Automaton &aut, bool doComplement){assert(false);}
 	SymbolicAutomaton* _toSymbolicAutomatonCore(bool doComplement){
 		assert(false);
 		return nullptr; // unreachable dead code, only to remove warning
@@ -1002,8 +998,6 @@ public:
   virtual std::string ToString(bool no_utf = false);
 
   // Conversion of AST representation of formula to Automaton
-  void toUnaryAutomaton(Automaton &aut, bool doComplement);
-  void toBinaryAutomaton(Automaton &aut, bool doComplement);
   SymbolicAutomaton* _toSymbolicAutomatonCore(bool doComplement);
 };
 
@@ -1020,8 +1014,6 @@ public:
   virtual std::string ToString(bool no_utf = false);
 
   // Conversion of AST representation of formula to Automaton
-  void toUnaryAutomaton(Automaton &aut, bool doComplement);
-  void toBinaryAutomaton(Automaton &aut, bool doComplement);
   SymbolicAutomaton* _toSymbolicAutomatonCore(bool doComplement);
 };
 
@@ -1038,7 +1030,6 @@ public:
   ASTForm* clone() { return new ASTForm_In(this->t1->clone(), this->T2->clone(), this->pos); }
 	void detach() {this->t1 = nullptr; this->T2 = nullptr; }
   // Conversion of AST representation of formula to Automaton
-  void toUnaryAutomaton(Automaton &aut, bool doComplement);
   SymbolicAutomaton* _toSymbolicAutomatonCore(bool doComplement);
 };
 
@@ -1105,8 +1096,6 @@ public:
   ASTForm* clone() { return new ASTForm_FirstOrder(this->t->clone(), this->pos); }
 
   // Conversion of AST representation of formula to Automaton
-  void toUnaryAutomaton(Automaton &aut, bool doComplement);
-  void toBinaryAutomaton(Automaton &aut, bool doComplement);
   SymbolicAutomaton* _toSymbolicAutomatonCore(bool doComplement);
 
   ASTTerm1 *t;
@@ -1125,8 +1114,6 @@ public:
   ASTForm* clone() { return new ASTForm_Sub(this->T1->clone(), this->T2->clone(), this->pos); }
 
   // Conversion of AST representation of formula to Automaton
-  void toUnaryAutomaton(Automaton &aut, bool doComplement);
-  void toBinaryAutomaton(Automaton &aut, bool doComplement);
   SymbolicAutomaton* _toSymbolicAutomatonCore(bool doComplement);
 };
 
@@ -1143,7 +1130,6 @@ public:
   ASTForm* clone() { return new ASTForm_Equal1(this->t1->clone(), this->t2->clone(), this->pos); }
 
   // Conversion of AST representation of formula to Automaton
-  void toUnaryAutomaton(Automaton &aut, bool doComplement);
   SymbolicAutomaton* _toSymbolicAutomatonCore(bool doComplement);
 };
 
@@ -1160,8 +1146,6 @@ public:
   ASTForm* clone() { return new ASTForm_Equal2(this->T1->clone(), this->T2->clone(), this->pos); }
 
   // Conversion of AST representation of formula to Automaton
-  void toUnaryAutomaton(Automaton &aut, bool doComplement);
-  void toBinaryAutomaton(Automaton &aut, bool doComplement);
   SymbolicAutomaton* _toSymbolicAutomatonCore(bool doComplement);
 };
 
@@ -1201,7 +1185,6 @@ public:
   VarCode makeCode(SubstCode *subst = NULL);
   void dump();
 	virtual std::string ToString(bool no_utf = false);
-  void toUnaryAutomaton(Automaton &aut, bool doComplement);
   SymbolicAutomaton* _toSymbolicAutomatonCore(bool doComplement);
   ASTForm* clone() { return new ASTForm_Less(this->t1->clone(), this->t2->clone(), this->pos); }
 };
@@ -1216,7 +1199,6 @@ public:
   VarCode makeCode(SubstCode *subst = NULL);
   void dump();
 	virtual std::string ToString(bool no_utf = false);
-  void toUnaryAutomaton(Automaton &aut, bool doComplement);
   SymbolicAutomaton* _toSymbolicAutomatonCore(bool doComplement);
   ASTForm* clone() { return new ASTForm_LessEq(this->t1->clone(), this->t2->clone(), this->pos); }
 };
@@ -1275,8 +1257,6 @@ public:
 	virtual std::string ToString(bool no_utf = false);
   ASTForm* clone() { return new ASTForm_And(this->f1->clone(), this->f2->clone(), this->pos); }
 
-  void toUnaryAutomaton(Automaton &aut, bool doComplement);
-  void toBinaryAutomaton(Automaton &aut, bool doComplement);
   SymbolicAutomaton* _toSymbolicAutomatonCore(bool doComplement);
 };
 
@@ -1305,8 +1285,6 @@ public:
 	virtual std::string ToString(bool no_utf = false);
   ASTForm* clone() { return new ASTForm_Or(this->f1->clone(), this->f2->clone(), this->pos); }
 
-  void toUnaryAutomaton(Automaton &aut, bool doComplement);
-  void toBinaryAutomaton(Automaton &aut, bool doComplement);
   SymbolicAutomaton* _toSymbolicAutomatonCore(bool doComplement);
 };
 
@@ -1328,8 +1306,6 @@ public:
 	virtual bool StructuralCompare(AST*);
 	virtual void ConstructMapping(AST*, std::map<unsigned int, unsigned int>&);
 
-  void toUnaryAutomaton(Automaton &aut, bool doComplement);
-  void toBinaryAutomaton(Automaton &aut, bool doComplement);
   SymbolicAutomaton* _toSymbolicAutomatonCore(bool doComplement);
 
   ASTForm *f;

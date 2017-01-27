@@ -19,6 +19,94 @@ extern VarToTrackMap varMap;
 extern Offsets offsets;
 extern Options options;
 
+void toMonaAutomaton(ASTForm* form, DFA*& dfa, bool minimize) {
+    assert(form != nullptr);
+
+    Derestricter derestricter;
+    form = static_cast<ASTForm*>(form->accept(derestricter));
+    ShuffleVisitor shuffleVisitor;
+    form = static_cast<ASTForm*>(form->accept(shuffleVisitor));
+
+#   if (DEBUG_MONA_DFA == true)
+    int numVars = varMap.TrackLength();
+	unsigned *offs = new unsigned[numVars];
+	char** varnames = new char*[numVars];
+	for(int i = 0; i < numVars; i++) {
+		varnames[i] = "";
+	}
+	IdentList *vars = nullptr;
+
+	vars = initializeVars(form);
+	initializeOffsets(offs, vars);
+#   endif
+
+    // Conversion of formula representation from AST to DAG
+    codeTable = new CodeTable;
+    VarCode formulaCode = form->makeCode();
+
+    // Reduce the formula by MONA optimizations
+    // Note that we pass the dummy list as simplification so we can call the
+    //   reduceAll method, instead of setting the reduction phases by ourselves.
+    Deque<VarCode> dummyList;
+    formulaCode.reduceAll(&dummyList);
+
+#   if (DEBUG_MONA_CODE_FORMULA == true)
+    std::cout << "[!] Transformed formula to DAG\n";
+	formulaCode.dump();
+	std::cout << "\n";
+#   endif
+
+    dfa = nullptr;
+
+    // Initialization of BDD
+    bdd_init();
+    codeTable->init_print_progress();
+
+    // Translation to DFA
+    dfa = formulaCode.DFATranslate();
+    formulaCode.remove();
+
+    // Unrestriction of MONA automaton
+    // Note: This is optimization of MONA
+    if(minimize) {
+        DFA *temp = dfaCopy(dfa);
+        dfaUnrestrict(temp);
+        dfa = dfaMinimize(temp);
+
+        // Clean up
+        dfaFree(temp);
+    }
+
+#   if (DEBUG_MONA_DFA == true)
+    dfaPrint(dfa, numVars, varnames, offs);
+    delete varnames;
+    delete[] offs;
+#   endif
+    delete codeTable;
+}
+
+IdentList* initializeVars(ASTForm *form) {
+    assert(form != nullptr);
+
+    IdentList free, bounded;
+    form->freeVars(&free, &bounded);
+    return ident_union(&free, &bounded);
+}
+
+void initializeOffsets(unsigned *offs, IdentList *vars) {
+    assert(offs != nullptr);
+    assert(vars != nullptr);
+
+    // some freaking crappy initializations
+    IdentList::iterator id;
+    int ix = 0;
+
+    // iterate through all variables
+    for (id = vars->begin(); id != vars->end(); ++id, ++ix) {
+        offs[ix] = offsets.off(*id);
+    }
+}
+
 template<class TemplatedAutomaton>
 SymbolicAutomaton* baseToSymbolicAutomaton(ASTForm* form, bool doComplement) {
 #   if (AUT_CONSTRUCT_BY_MONA == true)

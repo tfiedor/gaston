@@ -221,15 +221,6 @@ TrackType ZeroSymbol::constructUniversalTrack() {
     return transitionTrack;
 }
 
-/**
- * Static member, that constructs the zero track 0*
- */
-TrackType ZeroSymbol::constructZeroTrack() {
-    unsigned int trackLen = varMap.TrackLength();
-    std::string track(trackLen, '0');
-    return TrackType(track.c_str());
-}
-
 // <<< PUBLIC API >>>
 /**
  * Project the variable away, by setting it to don't care X

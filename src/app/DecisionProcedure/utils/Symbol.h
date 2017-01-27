@@ -62,7 +62,6 @@ public:
 
     // <<< STATIC METHODS >>>
     static TrackType constructUniversalTrack();
-    static TrackType constructZeroTrack();
     static char charToAsgn(char c);
 
     // <<< FRIENDS >>>
