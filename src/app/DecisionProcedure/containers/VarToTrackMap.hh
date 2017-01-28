@@ -19,8 +19,7 @@
 class VarToTrackMap {
 private:
 	// < Typedefs >
-	typedef unsigned int uint;
-	typedef std::map<uint, uint> varMap;
+	typedef std::map<unsigned int, unsigned int> varMap;
 
 	// < Private Members >
 	varMap vttMap;
@@ -31,11 +30,11 @@ private:
 
 public:
 	// < Public Methods >
-	uint TrackLength();
-	uint operator[](uint);
-	uint inverseGet(uint);
+	unsigned int TrackLength();
+	unsigned int operator[](unsigned int);
+	unsigned int inverseGet(unsigned int);
 	void dumpMap();
-	bool IsIn(uint);
+	bool IsIn(unsigned int);
 
 	VarToTrackMap() : vttMap() {};
 

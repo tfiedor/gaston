@@ -28,7 +28,7 @@ extern Ident allPosVar;
  * @param identifiers: list of variables
  */
 void VarToTrackMap::addIdentifiers(IdentList* identifiers) {
-	uint identSize = identifiers->size();
+	unsigned int identSize = identifiers->size();
 	identifiers->sort();
 
 	size_t idx = 0;
@@ -80,7 +80,7 @@ void VarToTrackMap::addIdentifiers(IdentList* identifiers) {
 /**
  * @return: Lenght of the track
  */
-uint VarToTrackMap::TrackLength() {
+unsigned int VarToTrackMap::TrackLength() {
 	return this->vttMap.size();
 }
 
@@ -88,16 +88,16 @@ uint VarToTrackMap::TrackLength() {
  * @param[in] val: value of the variable we are looking up
  * @return: track number associanted to variable val
  */
-uint VarToTrackMap::operator[](uint val) {
+unsigned int VarToTrackMap::operator[](unsigned int val) {
 	assert(this->IsIn(val));
 	return this->vttMap[val];
 }
 
-bool VarToTrackMap::IsIn(uint val) {
+bool VarToTrackMap::IsIn(unsigned int val) {
 	return this->vttMap.find(val) != this->vttMap.end();
 }
 
-uint VarToTrackMap::inverseGet(uint key) {
+unsigned int VarToTrackMap::inverseGet(unsigned int key) {
 	return this->ttvMap[key];
 }
 
