@@ -92,7 +92,6 @@ namespace Workshops {
     using FixpointHash      = boost::hash<FixpointKey>;
     using FixpointCompare   = PairCompare<FixpointKey>;
     using FixpointLevelKey  = std::tuple<Term*, size_t, char>;
-    using FixpointLevelHash = boost::hash<FixpointLevelKey>;
     using FixpointLevelComp = std::equal_to<FixpointLevelKey>;
     using Term_ptr          = Term*;
     using FixpointType      = std::list<std::pair<Term*,bool>>;
@@ -152,6 +151,15 @@ namespace Workshops {
         bool operator()(Key const& lhs, Key const& rhs) const {
             return std::get<1>(lhs) == std::get<1>(rhs) && std::get<2>(lhs) == std::get<2>(rhs) &&
                     *(std::get<0>(lhs)) == *(std::get<0>(rhs));
+        }
+    };
+
+    struct FixpointLevelHash {
+        size_t operator()(FixpointLevelKey const& set) const {
+            size_t seed = Gaston::hash_value(std::get<0>(set));
+            boost::hash_combine(seed, boost::hash_value(std::get<1>(set)));
+            boost::hash_combine(seed, boost::hash_value(std::get<2>(set)));
+            return seed;
         }
     };
 
