@@ -16,7 +16,7 @@
 
 #define DEBUG_TRANSITIVE_CACHE false
 
-struct Term;
+class Term;
 class TransitiveCache;
 
 using RelationKey = std::pair<Term*, Term*>;

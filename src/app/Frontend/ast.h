@@ -1315,6 +1315,9 @@ class ASTForm_Ex0: public ASTForm_vf {
 public:
   ASTForm_Ex0(IdentList *vl, ASTForm *f, Pos p) :
 		  ASTForm_vf(aEx0, vl, f, p) {}
+  // Constructor added only for the sake of templates (to unify the constructors with Ex1 and Ex2)
+  ASTForm_Ex0(IdentList *ul, IdentList *vl, ASTForm *f, Pos p) :
+	ASTForm_vf(aEx0, vl, f, p) {}
 
   VISITABLE();
 
@@ -1358,6 +1361,9 @@ class ASTForm_All0: public ASTForm_vf {
 public:
   ASTForm_All0(IdentList *vl, ASTForm *f, Pos p) :
 		  ASTForm_vf(aAll0, vl, f, p) {}
+  // Constructor added only for the sake of templates (to unify the constructors with Ex1 and Ex2)
+  ASTForm_All0(IdentList *ul, IdentList *vl, ASTForm *f, Pos p) :
+	ASTForm_vf(aAll0, vl, f, p) {}
 
   VISITABLE();
 

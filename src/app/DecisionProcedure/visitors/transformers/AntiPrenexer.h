@@ -58,8 +58,10 @@ public:
     ASTForm* universalAntiPrenex(ASTForm* form, bool onlyByOne = false);
 
     // Works in preorder
+    virtual AST* visit(ASTForm_Ex0* form);
     virtual AST* visit(ASTForm_Ex1* form);
     virtual AST* visit(ASTForm_Ex2* form);
+    virtual AST* visit(ASTForm_All0* form);
     virtual AST* visit(ASTForm_All1* form);
     virtual AST* visit(ASTForm_All2* form);
 

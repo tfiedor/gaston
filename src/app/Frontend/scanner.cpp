@@ -1,3 +1,8 @@
+// Removing the register as it is useless
+// Courtesy of Stack Overflow
+#if __cplusplus > 199711L
+#define register      // Deprecated in C++11.
+#endif  // #if __cplusplus > 199711L
 
 #line 3 "scanner.cpp"
 
@@ -1056,7 +1061,11 @@ yy_match:
 yy_find_action:
 		yy_current_state = *--(yy_state_ptr);
 		(yy_lp) = yy_accept[yy_current_state];
+// TsF: I Found it safer to ignore this result instead of commenting it out
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Wunused-label"
 find_rule: /* we branch to this label when backing up */
+#pragma clang diagnostic pop
 		for ( ; ; ) /* until we find what rule we matched */
 			{
 			if ( (yy_lp) && (yy_lp) < yy_accept[yy_current_state + 1] )
@@ -1869,7 +1878,10 @@ static int yy_get_next_buffer (void)
 
 #ifndef YY_NO_INPUT
 #ifdef __cplusplus
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Wunneeded-internal-declaration"
     static int yyinput (void)
+#pragma clang diagnostic pop
 #else
     static int input  (void)
 #endif
@@ -2477,8 +2489,11 @@ static void yy_flex_strncpy (char* s1, yyconst char * s2, int n )
 #endif
 
 #ifdef YY_NEED_STRLEN
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Wunused-function"
 static int yy_flex_strlen (yyconst char * s )
 {
+#pragma clang diagnostic pop
 	register int n;
 	for ( n = 0; s[n]; ++n )
 		;

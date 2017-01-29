@@ -192,6 +192,8 @@ struct SymLink {
         if(remap) {
             assert(this->varRemap != nullptr);
             return varMap.inverseGet((*this->varRemap)[varMap[var]]);
+        } else {
+            return var;
         }
     }
 };

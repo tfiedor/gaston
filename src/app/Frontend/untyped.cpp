@@ -1655,9 +1655,14 @@ Predicate_Macro_Declaration::genAST(MonaAST &)
       parKind = ParnameU;
       break;
     case pPar:
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Wtautological-constant-out-of-range-compare"
       if (parKind == -1)
-	TypeError("Parameter type missing in declaration of '" 
-		  + String(name->str) + "'", (*d)->pos);
+#pragma clang diagnostic pop
+        {
+          TypeError("Parameter type missing in declaration of '"
+                    + String(name->str) + "'", (*d)->pos);
+        }
       break;
     }
 

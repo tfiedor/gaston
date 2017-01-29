@@ -373,6 +373,10 @@ ASTForm* FullAntiPrenexer::existentialAntiPrenex(ASTForm *form, bool onlyByOne) 
     }
 }
 
+AST* FullAntiPrenexer::visit(ASTForm_Ex0 *form) {
+    return existentialAntiPrenex<ASTForm_Ex0>(form, false);
+}
+
 AST* FullAntiPrenexer::visit(ASTForm_Ex1 *form) {
     return existentialAntiPrenex<ASTForm_Ex1>(form, false);
 }
@@ -420,6 +424,10 @@ ASTForm* FullAntiPrenexer::universalAntiPrenex(ASTForm *form, bool onlyByOne) {
         default:
             return allForm;
     }
+}
+
+AST* FullAntiPrenexer::visit(ASTForm_All0 *form) {
+    return universalAntiPrenex<ASTForm_All0>(form, false);
 }
 
 AST* FullAntiPrenexer::visit(ASTForm_All1 *form) {

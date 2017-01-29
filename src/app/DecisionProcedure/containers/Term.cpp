@@ -2825,10 +2825,6 @@ void Term::comparedByStructure(TermType t, bool res) {
  * @param[in] t:        tested term
  */
 bool Term::operator==(const Term &t) {
-    if(&t == nullptr) {
-        return false;
-    }
-
     Term* tt = const_cast<Term*>(&t);
     Term* tthis = this;
 #   if (OPT_EARLY_EVALUATION == true)

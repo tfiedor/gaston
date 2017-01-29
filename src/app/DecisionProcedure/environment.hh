@@ -24,6 +24,7 @@
 #include <memory>
 #include <list>
 #include <typeinfo>
+#include <cstdlib>
 #include <vata/bdd_bu_tree_aut.hh>
 #include <vata/parsing/timbuk_parser.hh>
 #include <vata/serialization/timbuk_serializer.hh>
@@ -42,12 +43,12 @@ class ASTForm;
 template<class A, class B, class C, class D, void (*E)(A const&),void (*F)(B&)>
 class BinaryCache;
 template<class A>
-class PairCompare;
+struct PairCompare;
 template<class A>
-class PrePairCompare;
-class TermCompare;
-class TermHash;
-class ResultLevelCompare;
+struct PrePairCompare;
+struct TermCompare;
+struct TermHash;
+struct ResultLevelCompare;
 
 struct TermAtCompare;
 struct TermAtHash;
@@ -57,7 +58,7 @@ struct SubsumptionHashType;
 struct PreHashType;
 struct DagHashType;
 template<class Key>
-class DagCompare;
+struct DagCompare;
 
 /***********************
  * GLOBAL ENUMERATIONS *
@@ -116,6 +117,9 @@ inline ProductType IntToProductType(int type) {
             return ProductType::IMPLICATION;
         case 3:
             return ProductType::BIIMPLICATION;
+        default:
+            assert(false && "Missing switch for type");
+            abort();
     }
 }
 

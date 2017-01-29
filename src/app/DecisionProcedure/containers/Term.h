@@ -627,7 +627,6 @@ public:
         }
 
         explicit iterator(TermFixpoint &termFixpoint) : _termFixpoint(termFixpoint), _it(_termFixpoint._fixpoint.begin()) {
-            assert(nullptr != &termFixpoint);
             assert(!_termFixpoint._fixpoint.empty());
 
             ++_termFixpoint._iteratorNumber;

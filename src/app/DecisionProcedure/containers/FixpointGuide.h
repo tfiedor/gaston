@@ -11,7 +11,7 @@
 
 enum GuideTip {G_FRONT, G_BACK, G_THROW, G_PROJECT, G_PROJECT_ALL};
 
-class SymLink;
+struct SymLink;
 class Term;
 
 class FixpointGuide {
