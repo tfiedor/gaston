@@ -17,6 +17,8 @@ before_install:
   - if [[ "$TRAVIS_OS_NAME" == "osx" ]]; then brew install wget; fi
   - if [[ "$TRAVIS_OS_NAME" == "osx" ]]; then wget http://www.brics.dk/mona/download/mona-1.4-17.tar.gz; fi
   - if [[ "$TRAVIS_OS_NAME" == "oxs" ]]; then brew install http://www.brics.dk/mona/download/mona-1.4-17.tar.gz; fi
+  - if [[ "$TRAVIS_OS_NAME" == "oxs" ]]; then cd /usr/local; fi
+  - if [[ "$TRAVIS_OS_NAME" == "oxs" ]]; then find mona; fi
 
 script:
   - make debug
