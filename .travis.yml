@@ -12,6 +12,12 @@ compiler:
 
 sudo: false
 
+before_install:
+  - if [[ "$TRAVIS_OS_NAME" == "osx" ]]; then brew update; fi
+  - if [[ "$TRAVIS_OS_NAME" == "osx" ]]; then brew install wget; fi
+  - if [[ "$TRAVIS_OS_NAME" == "osx" ]]; then brew create http://www.brics.dk/mona/download/mona-1.4-17.tar.gz; fi
+  - if [[ "$TRAVIS_OS_NAME" == "oxs" ]]; then brew install mona; fi
+
 script:
   - make debug
   - make test
