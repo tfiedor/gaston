@@ -92,10 +92,30 @@ first-order-term ::= varname | (first-order-term)
 second-order-term ::= varname | (second-order-term)
                    |  second-order-term + int
 ```
+
+## Reproducing TACAS'17 results
+
+ Having trouble reproducing results of our paper published at TACAS'17?
+ The following commit represents the exact version we used for our experiments:
+
+```
+  $ git checkout abf9ec1465f9e65b392bfa090e92d0b175d29ac8
+```
+
+ After the submission, we polished the compilation process, removed some of the warnings,
+ and moreover enabled support for clang compilation. We advise you to use this versions,
+ the timings should not change or differ to much:
+
+```
+  $ git checkout 0a926aa2b524762c6e6ee120c91f9ea2e97a8e53
+```
+
+ More detailed experimental results and more thorough description of used benchmarks
+ can be found at [our site](http://www.fit.vutbr.cz/research/groups/verifit/tools/gaston/).
  
 ## Contact 
  
- If you have any questions, do not hesitate to contact the tool/method authors:
+ If you have any questions, have found some issue or have trouble building Gaston do not hesitate to contact the tool/method authors:
  
   * Tomas Fiedor <ifiedortom@fit.vutbr.cz> (corresponding author of Gaston)
   * Lukas Holik <holik@fit.vutbr.cz>
@@ -104,5 +124,5 @@ second-order-term ::= varname | (second-order-term)
   * Tomas Vojnar <vojnar@fit.vutbr.cz>
 
  ---
- Copyright (c) 2015  Tomas Fiedor <ifiedortom@fit.vutbr.cz>
+ Copyright (c) 2015-2017  Tomas Fiedor <ifiedortom@fit.vutbr.cz>
  
